@@ -1,0 +1,148 @@
+{
+  "resourceType": "ValueSet",
+  "id": "probability-distribution-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eProbabilityDistributionType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes specifying the type of probability distribution.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-ProbabilityDistributionType\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-B\"\u003eB\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebeta\u003c/td\u003e\u003ctd\u003eThe beta-distribution is used for data that is bounded on both sides and might or might not be skewed (e.g., occurs when probabilities are estimated.) Two parameters a and b are available to adjust the curve. The mean m and variance s2 relate as follows: m \u003d a/ (a + b) and s2 \u003d ab/((a + b)2 (a + b + 1)).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-E\"\u003eE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eexponential\u003c/td\u003e\u003ctd\u003eUsed for data that describes extinction. The exponential distribution is a special form of g-distribution where a \u003d 1, hence, the relationship to mean m and variance s2 are m \u003d b and s2 \u003d b2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-F\"\u003eF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eF\u003c/td\u003e\u003ctd\u003eUsed to describe the quotient of two c2 random variables. The F-distribution has two parameters n1 and n2, which are the numbers of degrees of freedom of the numerator and denominator variable respectively. The relationship to mean m and variance s2 are: m \u003d n2 / (n2 - 2) and s2 \u003d (2 n2 (n2 + n1 - 2)) / (n1 (n2 - 2)2 (n2 - 4)).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-G\"\u003eG\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e(gamma)\u003c/td\u003e\u003ctd\u003eThe gamma-distribution used for data that is skewed and bounded to the right, i.e. where the maximum of the distribution curve is located near the origin. The g-distribution has a two parameters a and b. The relationship to mean m and variance s2 is m \u003d a b and s2 \u003d a b2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-LN\"\u003eLN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003elog-normal\u003c/td\u003e\u003ctd\u003eThe logarithmic normal distribution is used to transform skewed random variable X into a normally distributed random variable U \u003d log X. The log-normal distribution can be specified with the properties mean m and standard deviation s. Note however that mean m and standard deviation s are the parameters of the raw value distribution, not the transformed parameters of the lognormal distribution that are conventionally referred to by the same letters. Those log-normal parameters mlog and slog relate to the mean m and standard deviation s of the data value through slog2 \u003d log (s2/m2 + 1) and mlog \u003d log m - slog2/2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-N\"\u003eN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003enormal (Gaussian)\u003c/td\u003e\u003ctd\u003eThis is the well-known bell-shaped normal distribution. Because of the central limit theorem, the normal distribution is the distribution of choice for an unbounded random variable that is an outcome of a combination of many stochastic processes. Even for values bounded on a single side (i.e. greater than 0) the normal distribution may be accurate enough if the mean is \u0026quot;far away\u0026quot; from the bound of the scale measured in terms of standard deviations.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-T\"\u003eT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eT\u003c/td\u003e\u003ctd\u003eUsed to describe the quotient of a normal random variable and the square root of a c2 random variable. The t-distribution has one parameter n, the number of degrees of freedom. The relationship to mean m and variance s2 are: m \u003d 0 and s2 \u003d n / (n - 2)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-U\"\u003eU\u003c/a\u003e\u003c/td\u003e\u003ctd\u003euniform\u003c/td\u003e\u003ctd\u003eThe uniform distribution assigns a constant probability over the entire interval of possible outcomes, while all outcomes outside this interval are assumed to have zero probability. The width of this interval is 2s sqrt(3). Thus, the uniform distribution assigns the probability densities f(x) \u003d sqrt(2 s sqrt(3)) to values m - s sqrt(3) \u0026gt;\u003d x \u0026lt;\u003d m + s sqrt(3) and f(x) \u003d 0 otherwise.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ProbabilityDistributionType/cs.html#v3-ProbabilityDistributionType-X2\"\u003eX2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003echi square\u003c/td\u003e\u003ctd\u003eUsed to describe the sum of squares of random variables which occurs when a variance is estimated (rather than presumed) from the sample. The only parameter of the c2-distribution is n, so called the number of degrees of freedom (which is the number of independent parts in the sum). The c2-distribution is a special type of g-distribution with parameter a \u003d n /2 and b \u003d 2. Hence, m \u003d n and s2 \u003d 2 n.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/probability-distribution-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.907"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ProbabilityDistributionType",
+  "title": "ProbabilityDistributionType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes specifying the type of probability distribution.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ProbabilityDistributionType",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The beta-distribution is used for data that is bounded on both sides and might or might not be skewed (e.g., occurs when probabilities are estimated.) Two parameters a and b are available to adjust the curve. The mean m and variance s2 relate as follows: m \u003d a/ (a + b) and s2 \u003d ab/((a + b)2 (a + b + 1))."
+              }
+            ],
+            "code": "B",
+            "display": "beta"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Used for data that describes extinction. The exponential distribution is a special form of g-distribution where a \u003d 1, hence, the relationship to mean m and variance s2 are m \u003d b and s2 \u003d b2."
+              }
+            ],
+            "code": "E",
+            "display": "exponential"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Used to describe the quotient of two c2 random variables. The F-distribution has two parameters n1 and n2, which are the numbers of degrees of freedom of the numerator and denominator variable respectively. The relationship to mean m and variance s2 are: m \u003d n2 / (n2 - 2) and s2 \u003d (2 n2 (n2 + n1 - 2)) / (n1 (n2 - 2)2 (n2 - 4))."
+              }
+            ],
+            "code": "F",
+            "display": "F"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The gamma-distribution used for data that is skewed and bounded to the right, i.e. where the maximum of the distribution curve is located near the origin. The g-distribution has a two parameters a and b. The relationship to mean m and variance s2 is m \u003d a b and s2 \u003d a b2."
+              }
+            ],
+            "code": "G",
+            "display": "(gamma)"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The logarithmic normal distribution is used to transform skewed random variable X into a normally distributed random variable U \u003d log X. The log-normal distribution can be specified with the properties mean m and standard deviation s. Note however that mean m and standard deviation s are the parameters of the raw value distribution, not the transformed parameters of the lognormal distribution that are conventionally referred to by the same letters. Those log-normal parameters mlog and slog relate to the mean m and standard deviation s of the data value through slog2 \u003d log (s2/m2 + 1) and mlog \u003d log m - slog2/2."
+              }
+            ],
+            "code": "LN",
+            "display": "log-normal"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "This is the well-known bell-shaped normal distribution. Because of the central limit theorem, the normal distribution is the distribution of choice for an unbounded random variable that is an outcome of a combination of many stochastic processes. Even for values bounded on a single side (i.e. greater than 0) the normal distribution may be accurate enough if the mean is \"far away\" from the bound of the scale measured in terms of standard deviations."
+              }
+            ],
+            "code": "N",
+            "display": "normal (Gaussian)"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Used to describe the quotient of a normal random variable and the square root of a c2 random variable. The t-distribution has one parameter n, the number of degrees of freedom. The relationship to mean m and variance s2 are: m \u003d 0 and s2 \u003d n / (n - 2)"
+              }
+            ],
+            "code": "T",
+            "display": "T"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The uniform distribution assigns a constant probability over the entire interval of possible outcomes, while all outcomes outside this interval are assumed to have zero probability. The width of this interval is 2s sqrt(3). Thus, the uniform distribution assigns the probability densities f(x) \u003d sqrt(2 s sqrt(3)) to values m - s sqrt(3) \u003e\u003d x \u003c\u003d m + s sqrt(3) and f(x) \u003d 0 otherwise."
+              }
+            ],
+            "code": "U",
+            "display": "uniform"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Used to describe the sum of squares of random variables which occurs when a variance is estimated (rather than presumed) from the sample. The only parameter of the c2-distribution is n, so called the number of degrees of freedom (which is the number of independent parts in the sum). The c2-distribution is a special type of g-distribution with parameter a \u003d n /2 and b \u003d 2. Hence, m \u003d n and s2 \u003d 2 n."
+              }
+            ],
+            "code": "X2",
+            "display": "chi square"
+          }
+        ]
+      }
+    ]
+  }
+}

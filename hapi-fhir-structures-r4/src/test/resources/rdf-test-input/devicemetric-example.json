@@ -1,0 +1,64 @@
+{
+  "resourceType": "DeviceMetric",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 345675\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: MDC_PULS_OXIM_SAT_O2 \u003cspan\u003e(Details : {urn:iso:std:iso:11073:10101 code \u0027150456\u0027 \u003d \u0027150456\u0027, given as \u0027MDC_PULS_OXIM_SAT_O2\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eunit\u003c/b\u003e: MDC_DIM_PERCENT \u003cspan\u003e(Details : {urn:iso:std:iso:11073:10101 code \u0027262688\u0027 \u003d \u0027262688\u0027, given as \u0027MDC_DIM_PERCENT\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esource\u003c/b\u003e: \u003ca\u003eDevice/dev1\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eparent\u003c/b\u003e: \u003ca\u003eDeviceDefinition/dc102\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eoperationalStatus\u003c/b\u003e: on\u003c/p\u003e\u003cp\u003e\u003cb\u003ecolor\u003c/b\u003e: blue\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: measurement\u003c/p\u003e\u003cp\u003e\u003cb\u003emeasurementPeriod\u003c/b\u003e: Do Once per 1 seconds\u003c/p\u003e\u003ch3\u003eCalibrations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eState\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTime\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etwo-point\u003c/td\u003e\u003ctd\u003ecalibrated\u003c/td\u003e\u003ctd\u003e28/12/2016 9:03:04 AM\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://goodcare.org/devicemetric/id",
+      "value": "345675"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "urn:iso:std:iso:11073:10101",
+        "code": "150456",
+        "display": "MDC_PULS_OXIM_SAT_O2"
+      }
+    ]
+  },
+  "unit": {
+    "coding": [
+      {
+        "system": "urn:iso:std:iso:11073:10101",
+        "code": "262688",
+        "display": "MDC_DIM_PERCENT"
+      }
+    ]
+  },
+  "source": {
+    "reference": "Device/dev1"
+  },
+  "parent": {
+    "reference": "DeviceDefinition/dc102"
+  },
+  "operationalStatus": "on",
+  "color": "blue",
+  "category": "measurement",
+  "measurementPeriod": {
+    "repeat": {
+      "frequency": 1,
+      "period": 1,
+      "periodUnit": "s"
+    }
+  },
+  "calibration": [
+    {
+      "type": "two-point",
+      "state": "calibrated",
+      "time": "2016-12-28T09:03:04-05:00"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

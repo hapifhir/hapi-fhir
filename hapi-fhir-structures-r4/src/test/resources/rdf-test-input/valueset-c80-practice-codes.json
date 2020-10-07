@@ -1,0 +1,535 @@
+{
+  "resourceType": "ValueSet",
+  "id": "c80-practice-codes",
+  "meta": {
+    "lastUpdated": "2019-10-31T22:29:23.356+00:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePractice Setting Code Value Set\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis is the code representing the clinical specialty of the clinician or provider who interacted with, treated, or provided a service to/for the patient. The value set used for clinical specialty has been limited by HITSP to the value set reproduced from HITSP C80 Table 2-149 Clinical Specialty Value Set Definition.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408467006\"\u003e408467006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult mental illness\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394577000\"\u003e394577000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAnesthetics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394578005\"\u003e394578005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAudiological medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d421661004\"\u003e421661004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBlood banking and transfusion medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408462000\"\u003e408462000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBurns care\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394579002\"\u003e394579002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCardiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394804000\"\u003e394804000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical cytogenetics and molecular genetics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394580004\"\u003e394580004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical genetics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394803006\"\u003e394803006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical hematology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408480009\"\u003e408480009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical immunology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408454008\"\u003e408454008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical microbiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394809005\"\u003e394809005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical neuro-physiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394592004\"\u003e394592004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394600006\"\u003e394600006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical pharmacology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394601005\"\u003e394601005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical physiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394581000\"\u003e394581000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunity medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408478003\"\u003e408478003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCritical care medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394812008\"\u003e394812008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental medicine specialties\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408444009\"\u003e408444009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental-General dental practice\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394582007\"\u003e394582007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDermatology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408475000\"\u003e408475000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiabetic medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d410005002\"\u003e410005002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDive medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394583002\"\u003e394583002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEndocrinology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419772000\"\u003e419772000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFamily practice\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394584008\"\u003e394584008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGastroenterology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408443003\"\u003e408443003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeneral medical practice\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394802001\"\u003e394802001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeneral medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394915009\"\u003e394915009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeneral pathology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394814009\"\u003e394814009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeneral practice\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394808002\"\u003e394808002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGenito-urinary medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394811001\"\u003e394811001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeriatric medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408446006\"\u003e408446006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGynecological oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394586005\"\u003e394586005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGynecology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394916005\"\u003e394916005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHematopathology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408472002\"\u003e408472002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHepatology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394597005\"\u003e394597005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistopathology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394598000\"\u003e394598000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImmunopathology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394807007\"\u003e394807007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInfectious diseases\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419192003\"\u003e419192003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInternal medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408468001\"\u003e408468001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLearning disability\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394593009\"\u003e394593009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394813003\"\u003e394813003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical ophthalmology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d410001006\"\u003e410001006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMilitary medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394589003\"\u003e394589003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNephrology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394591006\"\u003e394591006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeurology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394599008\"\u003e394599008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeuropathology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394649004\"\u003e394649004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNuclear medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408470005\"\u003e408470005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eObstetrics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394585009\"\u003e394585009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eObstetrics and gynecology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394821009\"\u003e394821009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOccupational medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d422191005\"\u003e422191005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOphthalmic surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394594003\"\u003e394594003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOphthalmology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d416304004\"\u003e416304004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOsteopathic manipulative medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418960008\"\u003e418960008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOtolaryngology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394882004\"\u003e394882004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePain management\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394806003\"\u003e394806003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePalliative medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394588006\"\u003e394588006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric (Child and adolescent) psychiatry\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408459003\"\u003e408459003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric cardiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394607009\"\u003e394607009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric dentistry\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419610006\"\u003e419610006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric endocrinology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418058008\"\u003e418058008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric gastroenterology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d420208008\"\u003e420208008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric genetics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418652005\"\u003e418652005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric hematology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418535003\"\u003e418535003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric immunology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418862001\"\u003e418862001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric infectious diseases\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419365004\"\u003e419365004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric nephrology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418002000\"\u003e418002000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419983000\"\u003e419983000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric ophthalmology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419170002\"\u003e419170002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric pulmonology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419472004\"\u003e419472004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric rheumatology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394539006\"\u003e394539006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d420112009\"\u003e420112009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric surgery-bone marrow transplantation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d409968004\"\u003e409968004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePreventive medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394587001\"\u003e394587001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePsychiatry\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394913002\"\u003e394913002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePsychotherapy\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408440000\"\u003e408440000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePublic health medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418112009\"\u003e418112009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePulmonary medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419815003\"\u003e419815003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiation oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394914008\"\u003e394914008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408455009\"\u003e408455009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiology-Interventional radiology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394602003\"\u003e394602003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRehabilitation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408447002\"\u003e408447002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRespite care\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394810000\"\u003e394810000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRheumatology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408450004\"\u003e408450004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSleep studies\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408476004\"\u003e408476004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Bone and marrow transplantation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408469009\"\u003e408469009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Breast surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408466002\"\u003e408466002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Cardiac surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408471009\"\u003e408471009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Cardiothoracic transplantation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408464004\"\u003e408464004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Colorectal surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408441001\"\u003e408441001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-Endodontics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408465003\"\u003e408465003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-Oral and maxillofacial surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394605001\"\u003e394605001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-Oral surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394608004\"\u003e394608004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-Orthodontics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408461007\"\u003e408461007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-Periodontal surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408460008\"\u003e408460008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-Prosthetic dentistry (Prosthodontics)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408460008\"\u003e408460008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dental-surgical-Prosthodontics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394606000\"\u003e394606000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dentistry-Restorative dentistry\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408449004\"\u003e408449004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dentistry--surgical\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394608004\"\u003e394608004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dentistry-surgical-Orthodontics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418018006\"\u003e418018006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Dermatologic surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394604002\"\u003e394604002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Ear, nose and throat surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394609007\"\u003e394609007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-general\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408474001\"\u003e408474001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Hepatobiliary and pancreatic surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394610002\"\u003e394610002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Neurosurgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394611003\"\u003e394611003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Plastic surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408477008\"\u003e408477008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Transplantation surgery\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394801008\"\u003e394801008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Trauma and orthopedics\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408463005\"\u003e408463005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery-Vascular\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419321007\"\u003e419321007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394576009\"\u003e394576009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical-Accident \u0026amp; emergency\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394590007\"\u003e394590007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eThoracic medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d409967009\"\u003e409967009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eToxicology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d408448007\"\u003e408448007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTropical medicine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419043006\"\u003e419043006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUrological oncology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394612005\"\u003e394612005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUrology\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394733009\"\u003e394733009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical specialty--OTHER--NOT LISTED\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394732004\"\u003e394732004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical specialty--OTHER-NOT LISTED\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/c80-practice-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.88.12.80.72"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PracticeSettingCodeValueSet",
+  "title": "Practice Setting Code Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HITSP",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This is the code representing the clinical specialty of the clinician or provider who interacted with, treated, or provided a service to/for the patient. The value set used for clinical specialty has been limited by HITSP to the value set reproduced from HITSP C80 Table 2-149 Clinical Specialty Value Set Definition.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "408467006",
+            "display": "Adult mental illness"
+          },
+          {
+            "code": "394577000",
+            "display": "Anesthetics"
+          },
+          {
+            "code": "394578005",
+            "display": "Audiological medicine"
+          },
+          {
+            "code": "421661004",
+            "display": "Blood banking and transfusion medicine"
+          },
+          {
+            "code": "408462000",
+            "display": "Burns care"
+          },
+          {
+            "code": "394579002",
+            "display": "Cardiology"
+          },
+          {
+            "code": "394804000",
+            "display": "Clinical cytogenetics and molecular genetics"
+          },
+          {
+            "code": "394580004",
+            "display": "Clinical genetics"
+          },
+          {
+            "code": "394803006",
+            "display": "Clinical hematology"
+          },
+          {
+            "code": "408480009",
+            "display": "Clinical immunology"
+          },
+          {
+            "code": "408454008",
+            "display": "Clinical microbiology"
+          },
+          {
+            "code": "394809005",
+            "display": "Clinical neuro-physiology"
+          },
+          {
+            "code": "394592004",
+            "display": "Clinical oncology"
+          },
+          {
+            "code": "394600006",
+            "display": "Clinical pharmacology"
+          },
+          {
+            "code": "394601005",
+            "display": "Clinical physiology"
+          },
+          {
+            "code": "394581000",
+            "display": "Community medicine"
+          },
+          {
+            "code": "408478003",
+            "display": "Critical care medicine"
+          },
+          {
+            "code": "394812008",
+            "display": "Dental medicine specialties"
+          },
+          {
+            "code": "408444009",
+            "display": "Dental-General dental practice"
+          },
+          {
+            "code": "394582007",
+            "display": "Dermatology"
+          },
+          {
+            "code": "408475000",
+            "display": "Diabetic medicine"
+          },
+          {
+            "code": "410005002",
+            "display": "Dive medicine"
+          },
+          {
+            "code": "394583002",
+            "display": "Endocrinology"
+          },
+          {
+            "code": "419772000",
+            "display": "Family practice"
+          },
+          {
+            "code": "394584008",
+            "display": "Gastroenterology"
+          },
+          {
+            "code": "408443003",
+            "display": "General medical practice"
+          },
+          {
+            "code": "394802001",
+            "display": "General medicine"
+          },
+          {
+            "code": "394915009",
+            "display": "General pathology"
+          },
+          {
+            "code": "394814009",
+            "display": "General practice"
+          },
+          {
+            "code": "394808002",
+            "display": "Genito-urinary medicine"
+          },
+          {
+            "code": "394811001",
+            "display": "Geriatric medicine"
+          },
+          {
+            "code": "408446006",
+            "display": "Gynecological oncology"
+          },
+          {
+            "code": "394586005",
+            "display": "Gynecology"
+          },
+          {
+            "code": "394916005",
+            "display": "Hematopathology"
+          },
+          {
+            "code": "408472002",
+            "display": "Hepatology"
+          },
+          {
+            "code": "394597005",
+            "display": "Histopathology"
+          },
+          {
+            "code": "394598000",
+            "display": "Immunopathology"
+          },
+          {
+            "code": "394807007",
+            "display": "Infectious diseases"
+          },
+          {
+            "code": "419192003",
+            "display": "Internal medicine"
+          },
+          {
+            "code": "408468001",
+            "display": "Learning disability"
+          },
+          {
+            "code": "394593009",
+            "display": "Medical oncology"
+          },
+          {
+            "code": "394813003",
+            "display": "Medical ophthalmology"
+          },
+          {
+            "code": "410001006",
+            "display": "Military medicine"
+          },
+          {
+            "code": "394589003",
+            "display": "Nephrology"
+          },
+          {
+            "code": "394591006",
+            "display": "Neurology"
+          },
+          {
+            "code": "394599008",
+            "display": "Neuropathology"
+          },
+          {
+            "code": "394649004",
+            "display": "Nuclear medicine"
+          },
+          {
+            "code": "408470005",
+            "display": "Obstetrics"
+          },
+          {
+            "code": "394585009",
+            "display": "Obstetrics and gynecology"
+          },
+          {
+            "code": "394821009",
+            "display": "Occupational medicine"
+          },
+          {
+            "code": "422191005",
+            "display": "Ophthalmic surgery"
+          },
+          {
+            "code": "394594003",
+            "display": "Ophthalmology"
+          },
+          {
+            "code": "416304004",
+            "display": "Osteopathic manipulative medicine"
+          },
+          {
+            "code": "418960008",
+            "display": "Otolaryngology"
+          },
+          {
+            "code": "394882004",
+            "display": "Pain management"
+          },
+          {
+            "code": "394806003",
+            "display": "Palliative medicine"
+          },
+          {
+            "code": "394588006",
+            "display": "Pediatric (Child and adolescent) psychiatry"
+          },
+          {
+            "code": "408459003",
+            "display": "Pediatric cardiology"
+          },
+          {
+            "code": "394607009",
+            "display": "Pediatric dentistry"
+          },
+          {
+            "code": "419610006",
+            "display": "Pediatric endocrinology"
+          },
+          {
+            "code": "418058008",
+            "display": "Pediatric gastroenterology"
+          },
+          {
+            "code": "420208008",
+            "display": "Pediatric genetics"
+          },
+          {
+            "code": "418652005",
+            "display": "Pediatric hematology"
+          },
+          {
+            "code": "418535003",
+            "display": "Pediatric immunology"
+          },
+          {
+            "code": "418862001",
+            "display": "Pediatric infectious diseases"
+          },
+          {
+            "code": "419365004",
+            "display": "Pediatric nephrology"
+          },
+          {
+            "code": "418002000",
+            "display": "Pediatric oncology"
+          },
+          {
+            "code": "419983000",
+            "display": "Pediatric ophthalmology"
+          },
+          {
+            "code": "419170002",
+            "display": "Pediatric pulmonology"
+          },
+          {
+            "code": "419472004",
+            "display": "Pediatric rheumatology"
+          },
+          {
+            "code": "394539006",
+            "display": "Pediatric surgery"
+          },
+          {
+            "code": "420112009",
+            "display": "Pediatric surgery-bone marrow transplantation"
+          },
+          {
+            "code": "409968004",
+            "display": "Preventive medicine"
+          },
+          {
+            "code": "394587001",
+            "display": "Psychiatry"
+          },
+          {
+            "code": "394913002",
+            "display": "Psychotherapy"
+          },
+          {
+            "code": "408440000",
+            "display": "Public health medicine"
+          },
+          {
+            "code": "418112009",
+            "display": "Pulmonary medicine"
+          },
+          {
+            "code": "419815003",
+            "display": "Radiation oncology"
+          },
+          {
+            "code": "394914008",
+            "display": "Radiology"
+          },
+          {
+            "code": "408455009",
+            "display": "Radiology-Interventional radiology"
+          },
+          {
+            "code": "394602003",
+            "display": "Rehabilitation"
+          },
+          {
+            "code": "408447002",
+            "display": "Respite care"
+          },
+          {
+            "code": "394810000",
+            "display": "Rheumatology"
+          },
+          {
+            "code": "408450004",
+            "display": "Sleep studies"
+          },
+          {
+            "code": "408476004",
+            "display": "Surgery-Bone and marrow transplantation"
+          },
+          {
+            "code": "408469009",
+            "display": "Surgery-Breast surgery"
+          },
+          {
+            "code": "408466002",
+            "display": "Surgery-Cardiac surgery"
+          },
+          {
+            "code": "408471009",
+            "display": "Surgery-Cardiothoracic transplantation"
+          },
+          {
+            "code": "408464004",
+            "display": "Surgery-Colorectal surgery"
+          },
+          {
+            "code": "408441001",
+            "display": "Surgery-Dental-Endodontics"
+          },
+          {
+            "code": "408465003",
+            "display": "Surgery-Dental-Oral and maxillofacial surgery"
+          },
+          {
+            "code": "394605001",
+            "display": "Surgery-Dental-Oral surgery"
+          },
+          {
+            "code": "394608004",
+            "display": "Surgery-Dental-Orthodontics"
+          },
+          {
+            "code": "408461007",
+            "display": "Surgery-Dental-Periodontal surgery"
+          },
+          {
+            "code": "408460008",
+            "display": "Surgery-Dental-Prosthetic dentistry (Prosthodontics)"
+          },
+          {
+            "code": "408460008",
+            "display": "Surgery-Dental-surgical-Prosthodontics"
+          },
+          {
+            "code": "394606000",
+            "display": "Surgery-Dentistry-Restorative dentistry"
+          },
+          {
+            "code": "408449004",
+            "display": "Surgery-Dentistry--surgical"
+          },
+          {
+            "code": "394608004",
+            "display": "Surgery-Dentistry-surgical-Orthodontics"
+          },
+          {
+            "code": "418018006",
+            "display": "Surgery-Dermatologic surgery"
+          },
+          {
+            "code": "394604002",
+            "display": "Surgery-Ear, nose and throat surgery"
+          },
+          {
+            "code": "394609007",
+            "display": "Surgery-general"
+          },
+          {
+            "code": "408474001",
+            "display": "Surgery-Hepatobiliary and pancreatic surgery"
+          },
+          {
+            "code": "394610002",
+            "display": "Surgery-Neurosurgery"
+          },
+          {
+            "code": "394611003",
+            "display": "Surgery-Plastic surgery"
+          },
+          {
+            "code": "408477008",
+            "display": "Surgery-Transplantation surgery"
+          },
+          {
+            "code": "394801008",
+            "display": "Surgery-Trauma and orthopedics"
+          },
+          {
+            "code": "408463005",
+            "display": "Surgery-Vascular"
+          },
+          {
+            "code": "419321007",
+            "display": "Surgical oncology"
+          },
+          {
+            "code": "394576009",
+            "display": "Surgical-Accident \u0026 emergency"
+          },
+          {
+            "code": "394590007",
+            "display": "Thoracic medicine"
+          },
+          {
+            "code": "409967009",
+            "display": "Toxicology"
+          },
+          {
+            "code": "408448007",
+            "display": "Tropical medicine"
+          },
+          {
+            "code": "419043006",
+            "display": "Urological oncology"
+          },
+          {
+            "code": "394612005",
+            "display": "Urology"
+          },
+          {
+            "code": "394733009",
+            "display": "Medical specialty--OTHER--NOT LISTED"
+          },
+          {
+            "code": "394732004",
+            "display": "Surgical specialty--OTHER-NOT LISTED"
+          }
+        ]
+      }
+    ]
+  }
+}

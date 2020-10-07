@@ -1,0 +1,63 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "ultrasound",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: ultrasound\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Radiology \u003cspan\u003e(Details : {SNOMED CT code \u0027394914008\u0027 \u003d \u0027Radiology - speciality\u0027, given as \u0027Radiology\u0027}; {http://terminology.hl7.org/CodeSystem/v2-0074 code \u0027RAD\u0027 \u003d \u0027Radiology)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Abdominal Ultrasound \u003cspan\u003e(Details : {SNOMED CT code \u002745036003\u0027 \u003d \u0027Ultrasonography of abdomen\u0027, given as \u0027Ultrasonography of abdomen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 01/12/2012 12:00:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 01/12/2012 12:00:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003ePractitioner/example\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eMedia\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eComment\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLink\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eA comment about the image\u003c/td\u003e\u003ctd\u003e\u003ca\u003eWADO example image\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003econclusion\u003c/b\u003e: Unremarkable study\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "394914008",
+          "display": "Radiology"
+        },
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+          "code": "RAD"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "45036003",
+        "display": "Ultrasonography of abdomen"
+      }
+    ],
+    "text": "Abdominal Ultrasound"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "effectiveDateTime": "2012-12-01T12:00:00+01:00",
+  "issued": "2012-12-01T12:00:00+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/example"
+    }
+  ],
+  "media": [
+    {
+      "comment": "A comment about the image",
+      "link": {
+        "reference": "Media/1.2.840.11361907579238403408700.3.1.04.19970327150033",
+        "display": "WADO example image"
+      }
+    }
+  ],
+  "conclusion": "Unremarkable study",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

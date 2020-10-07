@@ -1,0 +1,50 @@
+{
+  "resourceType": "Patient",
+  "id": "infant-mom",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: infant-mom\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Leia Solo (OFFICIAL), Leia Organa (MAIDEN)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: female\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 12/10/1995\u003c/p\u003e\u003cp\u003e\u003cb\u003emaritalStatus\u003c/b\u003e: Married \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-MaritalStatus code \u0027M\u0027 \u003d \u0027Married\u0027, given as \u0027Married\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003egeneralPractitioner\u003c/b\u003e: \u003ca\u003eToo-Onebee\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "name": [
+    {
+      "use": "official",
+      "family": "Solo",
+      "given": [
+        "Leia"
+      ]
+    },
+    {
+      "use": "maiden",
+      "family": "Organa",
+      "given": [
+        "Leia"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1995-10-12",
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "M",
+        "display": "Married"
+      }
+    ]
+  },
+  "generalPractitioner": [
+    {
+      "reference": "Practitioner/21B",
+      "display": "Too-Onebee"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "resourceType": "ValueSet",
+  "id": "formatcodes",
+  "meta": {
+    "lastUpdated": "2019-10-31T22:29:23.356+00:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDocumentReference Format Code Set\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe value set is defined to be the set of format codes defined by the IHE Technical Framework, and also including additional format codes defined by the    HL7. The value set is listed in HITSP C80 Table 2-153 Format Code Value Set Definition,    with additions published later by IHE as published    at http://wiki.ihe.net/index.php?title\u003dIHE_Format_Codes   and with additions published later by HL7 as published at https://confluence.hl7.org/display/SD/Format+Codes+for+IHE+XDS.   This is the code specifying the technical format of the document. Along with the typeCode,    it should provide sufficient information to allow any potential document consumer to know    if it will be able to process the document. The code shall be sufficiently specific to    ensure processing/display by identifying a document encoding, structure and template. The actual list of codes here is incomplete\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eSome content from IHE® Copyright © 2015 IHE International, Inc.    This content is from the IHE Technical Frameworks and Supplements,    available for free download and use at http://www.ihe.net/Technical_Frameworks/\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"ftp://ftp.ihe.net/TF_Implementation_Material/fhir/CodeSystem/IHE.formatcode.codesystem.xml\"\u003e\u003ccode\u003ehttp://ihe.net/fhir/ValueSet/IHE.FormatCode.codesystem\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/formatcodes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:1.3.6.1.4.1.19376.1.2.7.1"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DocumentReferenceFormatCodeSet",
+  "title": "DocumentReference Format Code Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "IHE",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The value set is defined to be the set of format codes defined by the IHE Technical Framework, and also including additional format codes defined by the    HL7. The value set is listed in HITSP C80 Table 2-153 Format Code Value Set Definition,    with additions published later by IHE as published    at http://wiki.ihe.net/index.php?title\u003dIHE_Format_Codes   and with additions published later by HL7 as published at https://confluence.hl7.org/display/SD/Format+Codes+for+IHE+XDS.   This is the code specifying the technical format of the document. Along with the typeCode,    it should provide sufficient information to allow any potential document consumer to know    if it will be able to process the document. The code shall be sufficiently specific to    ensure processing/display by identifying a document encoding, structure and template. The actual list of codes here is incomplete",
+  "copyright": "Some content from IHE® Copyright © 2015 IHE International, Inc.    This content is from the IHE Technical Frameworks and Supplements,    available for free download and use at http://www.ihe.net/Technical_Frameworks/",
+  "compose": {
+    "include": [
+      {
+        "system": "http://ihe.net/fhir/ValueSet/IHE.FormatCode.codesystem"
+      }
+    ]
+  }
+}

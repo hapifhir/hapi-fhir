@@ -1,0 +1,107 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "link-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eLinkType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of link between this patient resource and another patient resource.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/link-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereplaced-by\u003ca name\u003d\"link-type-replaced-by\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReplaced-by\u003c/td\u003e\u003ctd\u003eThe patient resource containing this link must no longer be used. The link points forward to another patient resource that must be used in lieu of the patient resource that contains this link.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereplaces\u003ca name\u003d\"link-type-replaces\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReplaces\u003c/td\u003e\u003ctd\u003eThe patient resource containing this link is the current active patient record. The link points back to an inactive patient resource that has been merged into this resource, and should be consulted to retrieve additional referenced information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erefer\u003ca name\u003d\"link-type-refer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRefer\u003c/td\u003e\u003ctd\u003eThe patient resource containing this link is in use and valid but not considered the main source of information about a patient. The link points forward to another patient resource that should be consulted to retrieve additional patient information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eseealso\u003ca name\u003d\"link-type-seealso\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSee also\u003c/td\u003e\u003ctd\u003eThe patient resource containing this link is in use and valid, but points to another patient resource that is known to contain data about the same person. Data in this resource might overlap or contradict information found in the other patient resource. This link does not indicate any relative importance of the resources concerned, and both should be regarded as equally valid.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/link-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.424"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "LinkType",
+  "title": "LinkType",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of link between this patient resource and another patient resource.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/link-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "replaced-by",
+      "display": "Replaced-by",
+      "definition": "The patient resource containing this link must no longer be used. The link points forward to another patient resource that must be used in lieu of the patient resource that contains this link.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "Vervangen door"
+        }
+      ]
+    },
+    {
+      "code": "replaces",
+      "display": "Replaces",
+      "definition": "The patient resource containing this link is the current active patient record. The link points back to an inactive patient resource that has been merged into this resource, and should be consulted to retrieve additional referenced information.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "Vervangt"
+        }
+      ]
+    },
+    {
+      "code": "refer",
+      "display": "Refer",
+      "definition": "The patient resource containing this link is in use and valid but not considered the main source of information about a patient. The link points forward to another patient resource that should be consulted to retrieve additional patient information.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "Verwijzing"
+        }
+      ]
+    },
+    {
+      "code": "seealso",
+      "display": "See also",
+      "definition": "The patient resource containing this link is in use and valid, but points to another patient resource that is known to contain data about the same person. Data in this resource might overlap or contradict information found in the other patient resource. This link does not indicate any relative importance of the resources concerned, and both should be regarded as equally valid.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "Zie ook"
+        }
+      ]
+    }
+  ]
+}

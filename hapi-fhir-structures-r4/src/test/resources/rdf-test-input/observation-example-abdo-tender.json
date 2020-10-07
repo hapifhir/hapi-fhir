@@ -1,0 +1,62 @@
+{
+  "resourceType": "Observation",
+  "id": "abdo-tender",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: abdo-tender\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Exam \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027exam\u0027 \u003d \u0027Exam\u0027, given as \u0027Exam\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Abdominal tenderness \u003cspan\u003e(Details : {SNOMED CT code \u002743478001\u0027 \u003d \u0027Abdominal tenderness\u0027, given as \u0027Abdominal tenderness (finding)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eEncounter/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 02/04/2018 10:30:10 AM --\u0026gt; (ongoing)\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2018 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Abnormal \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027A\u0027 \u003d \u0027Abnormal\u0027, given as \u0027Abnormal\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "exam",
+          "display": "Exam"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "43478001",
+        "display": "Abdominal tenderness (finding)"
+      }
+    ],
+    "text": "Abdominal tenderness"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "encounter": {
+    "reference": "Encounter/example"
+  },
+  "effectivePeriod": {
+    "start": "2018-04-02T10:30:10+01:00"
+  },
+  "issued": "2018-04-03T15:30:10+01:00",
+  "valueBoolean": true,
+  "interpretation": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+          "code": "A",
+          "display": "Abnormal"
+        }
+      ],
+      "text": "Abnormal"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

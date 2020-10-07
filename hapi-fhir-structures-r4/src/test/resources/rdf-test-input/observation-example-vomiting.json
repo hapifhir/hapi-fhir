@@ -1,0 +1,50 @@
+{
+  "resourceType": "Observation",
+  "id": "vomiting",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: vomiting\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Signs and Symptoms \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Vomiting [Minimum Data Set] \u003cspan\u003e(Details : {LOINC code \u002745708-5\u0027 \u003d \u0027Vomiting [Minimum Data Set]\u0027, given as \u0027Vomiting [Minimum Data Set]\u0027}; {SNOMED CT code \u0027249497008\u0027 \u003d \u0027Vomiting symptom\u0027, given as \u0027Vomiting symptom (finding)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/infant\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 18/05/2016 10:33:22 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Absent (qualifier value) \u003cspan\u003e(Details : {SNOMED CT code \u00272667000\u0027 \u003d \u0027Absent\u0027, given as \u0027Absent (qualifier value)\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "text": "Signs and Symptoms"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "45708-5",
+        "display": "Vomiting [Minimum Data Set]"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "249497008",
+        "display": "Vomiting symptom (finding)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/infant"
+  },
+  "effectiveDateTime": "2016-05-18T22:33:22Z",
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "2667000",
+        "display": "Absent (qualifier value)"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

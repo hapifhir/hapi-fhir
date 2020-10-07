@@ -1,0 +1,239 @@
+{
+  "resourceType": "ValueSet",
+  "id": "nhin-purposeofuse",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eNHIN PurposeOfUse\u003c/h2\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eThis value set is suitable for use with the provenance resource. It is derived from, but not compatible with, the HL7 v3 Purpose of use Code system.\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\n      \u003cul\u003e\n        \u003cli\u003eInclude all codes defined in \n          \u003ca href\u003d\"codesystem-nhin-purposeofuse.html\"\u003e\n            \u003ccode\u003ehttp://healthit.gov/nhin/purposeofuse\u003c/code\u003e\n          \u003c/a\u003e\n        \u003c/li\u003e\n      \u003c/ul\u003e\n    \u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "ConceptMap",
+      "id": "map",
+      "name": "NHIN / V3 Mapping",
+      "status": "draft",
+      "sourceCanonical": "http://hl7.org/fhir/ValueSet/nhin-purposeofuse",
+      "targetCanonical": "http://terminology.hl7.org/ValueSet/v3-PurposeOfUse",
+      "group": [
+        {
+          "source": "http://healthit.gov/nhin/purposeofuse",
+          "target": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+          "element": [
+            {
+              "code": "TREATMENT",
+              "target": [
+                {
+                  "code": "TREAT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "PAYMENT",
+              "target": [
+                {
+                  "code": "HPAYMT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "OPERATIONS",
+              "target": [
+                {
+                  "code": "HOPERAT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "SYSADMIN",
+              "target": [
+                {
+                  "code": "SYSADMIN",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "FRAUD",
+              "target": [
+                {
+                  "code": "FRAUD",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "PSYCHOTHERAPY",
+              "target": [
+                {
+                  "code": "PSYCHOTHERAPY",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "TRAINING",
+              "target": [
+                {
+                  "code": "TRAINING",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "LEGAL",
+              "target": [
+                {
+                  "code": "HLEGAL",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "MARKETING",
+              "target": [
+                {
+                  "code": "HMARKT",
+                  "equivalence": "narrower",
+                  "comment": "Not clear how much difference there is between \u0027marketing\u0027 and \u0027healthcare marketing\u0027"
+                }
+              ]
+            },
+            {
+              "code": "DIRECTORY",
+              "target": [
+                {
+                  "code": "HDIRECT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "DISASTER",
+              "target": [
+                {
+                  "code": "DISASTER",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "PUBLICHEALTH",
+              "target": [
+                {
+                  "code": "PUBHLTH",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "JUDICIAL",
+              "target": [
+                {
+                  "code": "HLEGAL",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "LAW",
+              "target": [
+                {
+                  "code": "HLEGAL",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "DONATION",
+              "target": [
+                {
+                  "code": "DONAT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "RESEARCH",
+              "target": [
+                {
+                  "code": "HRESCH",
+                  "equivalence": "narrower",
+                  "comment": "Not clear how much difference there is between \u0027research\u0027 and \u0027healthcare research\u0027"
+                }
+              ]
+            },
+            {
+              "code": "THREAT",
+              "target": [
+                {
+                  "code": "THREAT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "GOVERNMENT",
+              "target": [
+                {
+                  "code": "GOV",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "COVERAGE",
+              "target": [
+                {
+                  "code": "OVAUTH",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "code": "REQUEST",
+              "target": [
+                {
+                  "code": "PATRQT",
+                  "equivalence": "equivalent"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-map",
+      "valueCanonical": "#map"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/nhin-purposeofuse",
+  "version": "4.0.1",
+  "name": "NHIN PurposeOfUse",
+  "status": "active",
+  "experimental": false,
+  "date": "2010-01-29",
+  "publisher": "Nationwide Health Information Network (NHIN)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.healthit.gov/sites/default/files/nhin-authorization-framework-production-specification-v2.0-1.pdf"
+        }
+      ]
+    }
+  ],
+  "description": "This value set is suitable for use with the provenance resource. It is derived from, but not compatible with, the HL7 v3 Purpose of use Code system.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://healthit.gov/nhin/purposeofuse"
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "reaction-event-severity",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAllergyIntoleranceSeverity\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eClinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/reaction-event-severity defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emild\u003ca name\u003d\"reaction-event-severity-mild\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMild\u003c/td\u003e\u003ctd\u003eCauses mild physiological effects.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emoderate\u003ca name\u003d\"reaction-event-severity-moderate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eModerate\u003c/td\u003e\u003ctd\u003eCauses moderate physiological effects.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esevere\u003ca name\u003d\"reaction-event-severity-severe\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSevere\u003c/td\u003e\u003ctd\u003eCauses severe physiological effects.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/reaction-event-severity",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.136"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AllergyIntoleranceSeverity",
+  "title": "AllergyIntoleranceSeverity",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Clinical assessment of the severity of a reaction event as a whole, potentially considering multiple different manifestations.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/reaction-event-severity",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "mild",
+      "display": "Mild",
+      "definition": "Causes mild physiological effects."
+    },
+    {
+      "code": "moderate",
+      "display": "Moderate",
+      "definition": "Causes moderate physiological effects."
+    },
+    {
+      "code": "severe",
+      "display": "Severe",
+      "definition": "Causes severe physiological effects."
+    }
+  ]
+}

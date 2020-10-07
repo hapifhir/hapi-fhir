@@ -1,0 +1,64 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "example-supplement",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eA supplement pack for \u003ccode\u003ehttp://hl7.org/fhir/CodeSystem/example\u003c/code\u003e that defines the administrative property \u0027legacy\u0027 for whether the test is currently performed \u003c/p\u003e\n      \u003ctable class\u003d\"grid\"\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eLegacy\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echol-mmol\u003c/td\u003e\n          \u003ctd\u003efalse\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echol-mass\u003c/td\u003e\n          \u003ctd\u003etrue\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echol\u003c/td\u003e\n          \u003ctd\u003etrue\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/CodeSystem/example-supplement",
+  "version": "201801103",
+  "name": "CholCodeLegacyStatus",
+  "status": "draft",
+  "experimental": true,
+  "date": "2016-01-28",
+  "publisher": "ACME Co",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "content": "supplement",
+  "supplements": "http://hl7.org/fhir/CodeSystem/example",
+  "property": [
+    {
+      "code": "legacy",
+      "description": "hether the test is currently performed",
+      "type": "boolean"
+    }
+  ],
+  "concept": [
+    {
+      "code": "chol-mmol",
+      "property": [
+        {
+          "code": "legacy",
+          "valueBoolean": false
+        }
+      ]
+    },
+    {
+      "code": "chol-mass",
+      "property": [
+        {
+          "code": "legacy",
+          "valueBoolean": true
+        }
+      ]
+    },
+    {
+      "code": "chol",
+      "property": [
+        {
+          "code": "legacy",
+          "valueBoolean": true
+        }
+      ]
+    }
+  ]
+}

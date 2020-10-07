@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "observation-genetic-Observation-dna-variant",
+  "url": "http://hl7.org/fhir/SearchParameter/observation-genetic-Observation-dna-variant",
+  "version": "4.0.1",
+  "name": "dna-variant",
+  "status": "draft",
+  "experimental": true,
+  "description": "HGVS DNA variant",
+  "code": "dna-variant",
+  "base": [
+    "Observation"
+  ],
+  "type": "string",
+  "expression": "Observation.extension(\u0027http://hl7.org/fhir/StructureDefinition/observation-geneticsDnaVariant\u0027)",
+  "xpathUsage": "normal"
+}

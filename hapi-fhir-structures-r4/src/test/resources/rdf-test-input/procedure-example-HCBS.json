@@ -1,0 +1,55 @@
+{
+  "resourceType": "Procedure",
+  "id": "HCBS",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Personal care services provided at person\u0027s home\u003c/b\u003e\n\t\t\t\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Based On\u003c/b\u003e : Peter\u0027s Long Term Services and Supports (LTSS) care plan\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Status\u003c/b\u003e : completed\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Beneficiary\u003c/b\u003e : Peter James\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Service Name/Code\u003c/b\u003e : Personal care services \u003cspan\u003e (Details : {HCPCS code \u0027T1019\u0027 \u003d \u0027Personal care services, per 15 minutes\u0027})\u003c/span\u003e\n\t\t\t\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Service Date\u003c/b\u003e : Apr 5, 2018\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Service Provider\u003c/b\u003e : Adam Careful\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Service Delivery Address\u003c/b\u003e : Peter\u0027s home\u003c/p\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Service Comment\u003c/b\u003e : Assisted with bathing and dressing, doing laundry, and meal preparation\u003c/p\u003e\n\t\t\u003c/div\u003e"
+  },
+  "basedOn": [
+    {
+      "display": "Peter\u0027s Long Term Service and Supports (LTSS) Care Plan"
+    }
+  ],
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets/Alpha-Numeric-HCPCS.html",
+        "code": "T1019",
+        "display": "Personal care services, per 15 minutes, not for an inpatient or resident of a hospital, nursing facility, icf/mr or imd, part of the individualized plan of treatment."
+      }
+    ],
+    "text": "Personal care services"
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Peter James"
+  },
+  "performedDateTime": "2018-04-05",
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/example",
+        "display": "Adam Careful"
+      }
+    }
+  ],
+  "location": {
+    "reference": "Location/ph",
+    "display": "Peter\u0027s Home"
+  },
+  "note": [
+    {
+      "text": "Assisted with bathing and dressing, doing laundry, and meal preparation"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

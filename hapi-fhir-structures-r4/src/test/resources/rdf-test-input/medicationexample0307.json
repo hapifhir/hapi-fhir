@@ -1,0 +1,74 @@
+{
+  "resourceType": "Medication",
+  "id": "med0307",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: med0307\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Novolog 100u/ml \u003cspan\u003e(Details : {http://hl7.org/fhir/sid/ndc code \u00270169-7501-11\u0027 \u003d \u0027n/a\u0027, given as \u0027Novolog 100u/ml\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emanufacturer\u003c/b\u003e: id: org3; name: Novo Nordisk\u003c/p\u003e\u003cp\u003e\u003cb\u003eform\u003c/b\u003e: Injection solution (qualifier value) \u003cspan\u003e(Details : {SNOMED CT code \u0027385219001\u0027 \u003d \u0027Injection solution\u0027, given as \u0027Injection solution (qualifier value)\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eIngredients\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eItem[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrength\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eInsulin Aspart (substance) \u003cspan\u003e(Details : {SNOMED CT code \u0027325072002\u0027 \u003d \u0027Insulin aspart\u0027, given as \u0027Insulin Aspart (substance)\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e100 U\u003cspan\u003e (Details: UCUM code U \u003d \u0027U\u0027)\u003c/span\u003e/1 mL\u003cspan\u003e (Details: UCUM code mL \u003d \u0027mL\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eBatches\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLotNumber\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpirationDate\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e12345\u003c/td\u003e\u003ctd\u003e31/10/2019\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Organization",
+      "id": "org3",
+      "name": "Novo Nordisk"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/sid/ndc",
+        "code": "0169-7501-11",
+        "display": "Novolog 100u/ml"
+      }
+    ]
+  },
+  "manufacturer": {
+    "reference": "#org3"
+  },
+  "form": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "385219001",
+        "display": "Injection solution (qualifier value)"
+      }
+    ]
+  },
+  "ingredient": [
+    {
+      "itemCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "325072002",
+            "display": "Insulin Aspart (substance)"
+          }
+        ]
+      },
+      "strength": {
+        "numerator": {
+          "value": 100,
+          "system": "http://unitsofmeasure.org",
+          "code": "U"
+        },
+        "denominator": {
+          "value": 1,
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      }
+    }
+  ],
+  "batch": {
+    "lotNumber": "12345",
+    "expirationDate": "2019-10-31"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

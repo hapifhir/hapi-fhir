@@ -1,0 +1,57 @@
+{
+  "resourceType": "RiskAssessment",
+  "id": "breastcancer-risk",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ctable\u003e\n        \u003ctr\u003e\n          \u003ctd colspan\u003d\"2\"\u003e\n            \u003ch1\u003eInformation about your risk score:\u003c/h1\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eBirthdate:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e1981-01-01\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eGender:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003efemale\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eEthnicity:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eUnknown / Not Reported\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://example.org",
+      "value": "risk-assessment-breastcancer1"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://browser.ihtsdotools.org/",
+        "code": "709510001",
+        "display": "Assessment of risk for disease (procedure)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "performer": {
+    "reference": "Practitioner/example"
+  },
+  "basis": [
+    {
+      "reference": "Observation/example-genetics-brcapat"
+    }
+  ],
+  "prediction": [
+    {
+      "outcome": {
+        "text": "Unknown risk of developing breast cancer"
+      }
+    }
+  ],
+  "note": [
+    {
+      "text": "This risk assessment is based on BRCA1 and BRCA2 genetic mutation test"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

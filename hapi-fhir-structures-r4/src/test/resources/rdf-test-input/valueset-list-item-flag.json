@@ -1,0 +1,62 @@
+{
+  "resourceType": "ValueSet",
+  "id": "list-item-flag",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePatient Medicine Change Types\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eExample Item Flags for the List Resource. In this case, these are the kind of flags that would be used on a medication list at the end of a consultation.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eCopyright © 2012-2013 National E-Health Transition Authority Ltd : This document contains information which is protected by copyright. All Rights Reserved. No part of this work may be reproduced or used in any form or by any means--graphic, electronic, or mechanical, including photocopying,  recording, taping, or information storage and retrieval systems--without the permission of NEHTA. All copies of this  document must include the copyright and other information contained on this page.  Revision 1  Telephone: 1300 901 001 or email: servicedesk@nehta.gov.au  Disclaimer: The National E-Health Transition Authority Ltd (NEHTA) makes the information and other material (\u0027Information\u0027) in  this document available in good faith but without any representation or warranty as to its accuracy or completeness.  NEHTA cannot accept any responsibility for the consequences of any use of the Information. As the Information is of a  general nature only, it is up to any person using or relying on the Information to ensure that it is accurate, complete  and suitable for the circumstances of its use.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"codesystem-list-item-flag.html\"\u003e\u003ccode\u003eurn:oid:1.2.36.1.2001.1001.101.104.16592\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/list-item-flag",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.320"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PatientMedicineChangeTypes",
+  "title": "Patient Medicine Change Types",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "National E-Health Transition Authority Ltd (NEHTA)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.nehta.gov.au"
+        }
+      ]
+    }
+  ],
+  "description": "Example Item Flags for the List Resource. In this case, these are the kind of flags that would be used on a medication list at the end of a consultation.",
+  "immutable": true,
+  "copyright": " Copyright © 2012-2013 National E-Health Transition Authority Ltd : This document contains information which is protected by copyright. All Rights Reserved. No part of this work may be reproduced or used in any form or by any means--graphic, electronic, or mechanical, including photocopying,  recording, taping, or information storage and retrieval systems--without the permission of NEHTA. All copies of this  document must include the copyright and other information contained on this page.  Revision 1  Telephone: 1300 901 001 or email: servicedesk@nehta.gov.au  Disclaimer: The National E-Health Transition Authority Ltd (NEHTA) makes the information and other material (\u0027Information\u0027) in  this document available in good faith but without any representation or warranty as to its accuracy or completeness.  NEHTA cannot accept any responsibility for the consequences of any use of the Information. As the Information is of a  general nature only, it is up to any person using or relying on the Information to ensure that it is accurate, complete  and suitable for the circumstances of its use.",
+  "compose": {
+    "include": [
+      {
+        "system": "urn:oid:1.2.36.1.2001.1001.101.104.16592"
+      }
+    ]
+  }
+}

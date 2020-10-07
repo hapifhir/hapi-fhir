@@ -1,0 +1,103 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "consent-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConsent Category Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample Consent Directive Type codes, including several consent directive related LOINC codes; HL7 VALUE SET: ActConsentType(2.16.840.1.113883.1.11.19897); examples of US realm consent directive legal descriptions and references to online and/or downloadable forms such as the SSA-827 Authorization to Disclose Information to the Social Security Administration; and other anticipated consent directives related to participation in a clinical trial, medical procedures, reproductive procedures; health care directive (Living Will); advance directive, do not resuscitate (DNR); Physician Orders for Life-Sustaining Treatment (POLST)\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes content from LOINC® which is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/consentcategorycodes defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eacd\u003ca name\u003d\"consent-category-acd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdvance Directive\u003c/td\u003e\u003ctd\u003eAny instructions, written or given verbally by a patient to a health care provider in anticipation of potential need for medical treatment. [2005 Honor My Wishes]\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ednr\u003ca name\u003d\"consent-category-dnr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDo Not Resuscitate\u003c/td\u003e\u003ctd\u003eA legal document, signed by both the patient and their provider, stating a desire not to have CPR initiated in case of a cardiac event. Note: This form was replaced in 2003 with the Physician Orders for Life-Sustaining Treatment [POLST].\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eemrgonly\u003ca name\u003d\"consent-category-emrgonly\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEmergency Only\u003c/td\u003e\u003ctd\u003eOpt-in to disclosure of health information for emergency only consent directive. Comment: This general consent directive specifically limits disclosure of health information for purpose of emergency treatment. Additional parameters may further limit the disclosure to specific users, roles, duration, types of information, and impose uses obligations. [ActConsentDirective (2.16.840.1.113883.1.11.20425)]\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehcd\u003ca name\u003d\"consent-category-hcd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth Care Directive\u003c/td\u003e\u003ctd\u003ePatient\u0027s document telling patient\u0027s health care provider what the patient wants or does not want if the patient is diagnosed as being terminally ill and in a persistent vegetative state or in a permanently unconscious condition.[2005 Honor My Wishes]\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enpp\u003ca name\u003d\"consent-category-npp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNotice of Privacy Practices\u003c/td\u003e\u003ctd\u003eAcknowledgement of custodian notice of privacy practices. Usage Notes: This type of consent directive acknowledges a custodian\u0027s notice of privacy practices including its permitted collection, access, use and disclosure of health information to users and for purposes of use specified. [ActConsentDirective (2.16.840.1.113883.1.11.20425)]\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epolst\u003ca name\u003d\"consent-category-polst\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePOLST\u003c/td\u003e\u003ctd\u003eThe Physician Order for Life-Sustaining Treatment form records a person\u0027s health care wishes for end of life emergency treatment and translates them into an order by the physician. It must be reviewed and signed by both the patient and the physician, Advanced Registered Nurse Practitioner or Physician Assistant. [2005 Honor My Wishes] Comment: Opt-in Consent Directive with restrictions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresearch\u003ca name\u003d\"consent-category-research\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResearch Information Access\u003c/td\u003e\u003ctd\u003eConsent to have healthcare information in an electronic health record accessed for research purposes. [VALUE SET: ActConsentType (2.16.840.1.113883.1.11.19897)]\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ersdid\u003ca name\u003d\"consent-category-rsdid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDe-identified Information Access\u003c/td\u003e\u003ctd\u003eConsent to have de-identified healthcare information in an electronic health record that is accessed for research purposes, but without consent to re-identify the information under any circumstance. [VALUE SET: ActConsentType (2.16.840.1.113883.1.11.19897)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ersreid\u003ca name\u003d\"consent-category-rsreid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRe-identifiable Information Access\u003c/td\u003e\u003ctd\u003eConsent to have de-identified healthcare information in an electronic health record that is accessed for research purposes re-identified under specific circumstances outlined in the consent. [VALUE SET: ActConsentType (2.16.840.1.113883.1.11.19897)]\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cbcc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/consentcategorycodes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1226"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ConsentCategoryCodes",
+  "title": "Consent Category Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project (CBCC)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sample Consent Directive Type codes, including several consent directive related LOINC codes; HL7 VALUE SET: ActConsentType(2.16.840.1.113883.1.11.19897); examples of US realm consent directive legal descriptions and references to online and/or downloadable forms such as the SSA-827 Authorization to Disclose Information to the Social Security Administration; and other anticipated consent directives related to participation in a clinical trial, medical procedures, reproductive procedures; health care directive (Living Will); advance directive, do not resuscitate (DNR); Physician Orders for Life-Sustaining Treatment (POLST)",
+  "copyright": "This value set includes content from LOINC® which is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use",
+  "caseSensitive": true,
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "acd",
+      "display": "Advance Directive",
+      "definition": "Any instructions, written or given verbally by a patient to a health care provider in anticipation of potential need for medical treatment. [2005 Honor My Wishes]"
+    },
+    {
+      "code": "dnr",
+      "display": "Do Not Resuscitate",
+      "definition": "A legal document, signed by both the patient and their provider, stating a desire not to have CPR initiated in case of a cardiac event. Note: This form was replaced in 2003 with the Physician Orders for Life-Sustaining Treatment [POLST]."
+    },
+    {
+      "code": "emrgonly",
+      "display": "Emergency Only",
+      "definition": "Opt-in to disclosure of health information for emergency only consent directive. Comment: This general consent directive specifically limits disclosure of health information for purpose of emergency treatment. Additional parameters may further limit the disclosure to specific users, roles, duration, types of information, and impose uses obligations. [ActConsentDirective (2.16.840.1.113883.1.11.20425)]"
+    },
+    {
+      "code": "hcd",
+      "display": "Health Care Directive",
+      "definition": "Patient\u0027s document telling patient\u0027s health care provider what the patient wants or does not want if the patient is diagnosed as being terminally ill and in a persistent vegetative state or in a permanently unconscious condition.[2005 Honor My Wishes]"
+    },
+    {
+      "code": "npp",
+      "display": "Notice of Privacy Practices",
+      "definition": "Acknowledgement of custodian notice of privacy practices. Usage Notes: This type of consent directive acknowledges a custodian\u0027s notice of privacy practices including its permitted collection, access, use and disclosure of health information to users and for purposes of use specified. [ActConsentDirective (2.16.840.1.113883.1.11.20425)]"
+    },
+    {
+      "code": "polst",
+      "display": "POLST",
+      "definition": "The Physician Order for Life-Sustaining Treatment form records a person\u0027s health care wishes for end of life emergency treatment and translates them into an order by the physician. It must be reviewed and signed by both the patient and the physician, Advanced Registered Nurse Practitioner or Physician Assistant. [2005 Honor My Wishes] Comment: Opt-in Consent Directive with restrictions."
+    },
+    {
+      "code": "research",
+      "display": "Research Information Access",
+      "definition": "Consent to have healthcare information in an electronic health record accessed for research purposes. [VALUE SET: ActConsentType (2.16.840.1.113883.1.11.19897)]"
+    },
+    {
+      "code": "rsdid",
+      "display": "De-identified Information Access",
+      "definition": "Consent to have de-identified healthcare information in an electronic health record that is accessed for research purposes, but without consent to re-identify the information under any circumstance. [VALUE SET: ActConsentType (2.16.840.1.113883.1.11.19897)"
+    },
+    {
+      "code": "rsreid",
+      "display": "Re-identifiable Information Access",
+      "definition": "Consent to have de-identified healthcare information in an electronic health record that is accessed for research purposes re-identified under specific circumstances outlined in the consent. [VALUE SET: ActConsentType (2.16.840.1.113883.1.11.19897)]"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "Group-everything",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFetch a group of Patient Records\u003c/h2\u003e\u003cp\u003eOPERATION: Fetch a group of Patient Records\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/Group-everything\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eThis operation is used to return all the information related to one or more patients that are part of the group on which this operation is invoked. The response is a bundle of type \u0026quot;searchset\u0026quot;. At a minimum, the patient resource(s) itself is returned, along with any other resources that the server has that are related to the patient(s), and that are available for the given user. The server also returns whatever resources are needed to support the records - e.g. linked practitioners, medications, locations, organizations etc.   The intended use for this operation is for a provider or other user to perform a bulk data download.  The server SHOULD return at least all resources that it has that are in the patient compartment for the identified patient(s), and any resource referenced from those, including binaries and attachments. In the US Realm, at a mimimum, the resources returned SHALL include all the data covered by the meaningful use common data elements as defined in \u003ca href\u003d\"http://hl7.org/fhir/us/coref\"\u003eUS-Core\u003c/a\u003e. Other applicable implementation guides may make additional rules about how much information that is returned.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/Group/[id]/$everything\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003estart\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#date\"\u003edate\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe date range relates to care dates, not record currency dates - e.g. all records relating to care provided in a certain date range. If no start date is provided, all records prior to the end date are in scope.\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eend\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#date\"\u003edate\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe date range relates to care dates, not record currency dates - e.g. all records relating to care provided in a certain date range. If no end date is provided, all records subsequent to the start date are in scope.\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003e_since\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#instant\"\u003einstant\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eResources updated after this period will be included in the response. The intent of this parameter is to allow a client to request only records that have changed since the last request, based on either the return header time, or or (for asynchronous use), the transaction time\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003e_type\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eOne or more parameters, each containing one or more comma-delimited FHIR resource types to include in the return resources. In the absense of any specified types, the server returns all resource types\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003e_count\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eSee discussion below on the utility of paging through the results of the $everything operation\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ereturn\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe bundle type is \u0026quot;searchset\u0026quot;\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eThe key differences between this operation and simply searching the group\u0027s patients compartment are:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eunless the client requests otherwise, the server returns the entire result set in a single bundle (rather than using paging)\u003c/li\u003e\n\u003cli\u003ethe server is responsible for determining what resources to return as included resources (rather than the client specifying which ones).\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThis frees the client from needing to determine what it could or should ask for, particularly with regard to included resources.\u003c/p\u003e\n\u003cp\u003eIt is assumed that the server has identified and secured the context appropriately, and can either associate the authorization context with a particular group, or determine whether the context has the rights to the nominated group, if there is one, or can determine an appropriate list of groups to provide data for from the context of the request.   If there is no nominated group (GET /Group/$everything) and the context is not associated with a single group record, the actual list of groups is all groups that the user associated with the request has access to. In such cases, the server may choose to return an error rather than all the records (and is likely to do so, but not required to).  Specifying the relationship between the context, a user and groups is outside the scope of this specification (though see \u003ca href\u003d\"http://hl7.org/fhir/smart-app-launch\"\u003eThe Smart App Launch Implementation Guide\u003c/a\u003e.\u003c/p\u003e\n\u003cp\u003eThe return bundle from this operation is usually rather a lot of data; servers typically choose to require that such requests are made \u003ca href\u003d\"async.html\"\u003easynchronously\u003c/a\u003e, and associated with \u003ca href\u003d\"formats.html#bulk\"\u003ebulk data formats\u003c/a\u003e. Alternatively, clients may choose to page through the result set (or servers may require this). Paging through the results is done the same as for \u003ca href\u003d\"http.html#paging\"\u003eSearching\u003c/a\u003e, using the \u003ca href\u003d\"search.html#count\"\u003e_count\u003c/a\u003e parameter, and Bundle links. Implementers should note that paging will be slower than simply returning all the results at once (more network traffic, multiple latency delays) but may be required in order not to exhaust available memory reading or writing the whole response in a single package. Unlike searching, there is no inherent user-display order for the $everything operation. Servers might consider sorting the returned resources in descending order of last record update, but are not required to do so.\u003c/p\u003e\n\u003cp\u003eThe _since parameter is provided to support periodic queries to get additional information that has changed about the group since the last query. This means that the _since parameter is based on record time. The value of the _since parameter should be set to the time from the server. If using direct response, this is the timestamp in the response header. If using the async interface, this is the transaction timestamp in the json response. Servers should ensure that the timestamps a managed such that the client does not miss any changes. Clients should be able to handle getting the same response more than once in the case that the transaction falls on a time boundary. Clients should ensure that the other query parameters are constant to ensure a coherent set of records when doing periodic queries.\u003c/p\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/Group-everything",
+  "version": "4.0.1",
+  "name": "Fetch a group of Patient Records",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This operation is used to return all the information related to one or more patients that are part of the group on which this operation is invoked. The response is a bundle of type \"searchset\". At a minimum, the patient resource(s) itself is returned, along with any other resources that the server has that are related to the patient(s), and that are available for the given user. The server also returns whatever resources are needed to support the records - e.g. linked practitioners, medications, locations, organizations etc.   The intended use for this operation is for a provider or other user to perform a bulk data download.  The server SHOULD return at least all resources that it has that are in the patient compartment for the identified patient(s), and any resource referenced from those, including binaries and attachments. In the US Realm, at a mimimum, the resources returned SHALL include all the data covered by the meaningful use common data elements as defined in [US-Core](http://hl7.org/fhir/us/coref). Other applicable implementation guides may make additional rules about how much information that is returned.",
+  "code": "everything",
+  "comment": "The key differences between this operation and simply searching the group\u0027s patients compartment are:    \n\n* unless the client requests otherwise, the server returns the entire result set in a single bundle (rather than using paging)  \n* the server is responsible for determining what resources to return as included resources (rather than the client specifying which ones). \n\nThis frees the client from needing to determine what it could or should ask for, particularly with regard to included resources.  \n\nIt is assumed that the server has identified and secured the context appropriately, and can either associate the authorization context with a particular group, or determine whether the context has the rights to the nominated group, if there is one, or can determine an appropriate list of groups to provide data for from the context of the request.   If there is no nominated group (GET /Group/$everything) and the context is not associated with a single group record, the actual list of groups is all groups that the user associated with the request has access to. In such cases, the server may choose to return an error rather than all the records (and is likely to do so, but not required to).  Specifying the relationship between the context, a user and groups is outside the scope of this specification (though see [The Smart App Launch Implementation Guide](http://hl7.org/fhir/smart-app-launch). \n\nThe return bundle from this operation is usually rather a lot of data; servers typically choose to require that such requests are made [asynchronously](async.html), and associated with [bulk data formats](formats.html#bulk). Alternatively, clients may choose to page through the result set (or servers may require this). Paging through the results is done the same as for [Searching](http.html#paging), using the [_count](search.html#count) parameter, and Bundle links. Implementers should note that paging will be slower than simply returning all the results at once (more network traffic, multiple latency delays) but may be required in order not to exhaust available memory reading or writing the whole response in a single package. Unlike searching, there is no inherent user-display order for the $everything operation. Servers might consider sorting the returned resources in descending order of last record update, but are not required to do so.\n\nThe _since parameter is provided to support periodic queries to get additional information that has changed about the group since the last query. This means that the _since parameter is based on record time. The value of the _since parameter should be set to the time from the server. If using direct response, this is the timestamp in the response header. If using the async interface, this is the transaction timestamp in the json response. Servers should ensure that the timestamps a managed such that the client does not miss any changes. Clients should be able to handle getting the same response more than once in the case that the transaction falls on a time boundary. Clients should ensure that the other query parameters are constant to ensure a coherent set of records when doing periodic queries.",
+  "resource": [
+    "Group"
+  ],
+  "system": false,
+  "type": false,
+  "instance": true,
+  "parameter": [
+    {
+      "name": "start",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The date range relates to care dates, not record currency dates - e.g. all records relating to care provided in a certain date range. If no start date is provided, all records prior to the end date are in scope.",
+      "type": "date"
+    },
+    {
+      "name": "end",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The date range relates to care dates, not record currency dates - e.g. all records relating to care provided in a certain date range. If no end date is provided, all records subsequent to the start date are in scope.",
+      "type": "date"
+    },
+    {
+      "name": "_since",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "Resources updated after this period will be included in the response. The intent of this parameter is to allow a client to request only records that have changed since the last request, based on either the return header time, or or (for asynchronous use), the transaction time",
+      "type": "instant"
+    },
+    {
+      "name": "_type",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "One or more parameters, each containing one or more comma-delimited FHIR resource types to include in the return resources. In the absense of any specified types, the server returns all resource types",
+      "type": "code"
+    },
+    {
+      "name": "_count",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "See discussion below on the utility of paging through the results of the $everything operation",
+      "type": "integer"
+    },
+    {
+      "name": "return",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "The bundle type is \"searchset\"",
+      "type": "Bundle"
+    }
+  ]
+}

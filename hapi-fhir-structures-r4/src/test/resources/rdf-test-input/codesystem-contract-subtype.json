@@ -1,0 +1,68 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "contract-subtype",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eContract Subtype Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample Contract Subtype codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/contractsubtypecodes defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisclosure-ca\u003ca name\u003d\"contract-subtype-disclosure-ca\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisclosure-CA\u003c/td\u003e\u003ctd\u003eCanadian health information disclosure policy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisclosure-us\u003ca name\u003d\"contract-subtype-disclosure-us\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisclosure-US\u003c/td\u003e\u003ctd\u003eUnited States health information disclosure policy.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/contractsubtypecodes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1198"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ContractSubtypeCodes",
+  "title": "Contract Subtype Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sample Contract Subtype codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/contract-subtype",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "disclosure-ca",
+      "display": "Disclosure-CA",
+      "definition": "Canadian health information disclosure policy."
+    },
+    {
+      "code": "disclosure-us",
+      "display": "Disclosure-US",
+      "definition": "United States health information disclosure policy."
+    }
+  ]
+}

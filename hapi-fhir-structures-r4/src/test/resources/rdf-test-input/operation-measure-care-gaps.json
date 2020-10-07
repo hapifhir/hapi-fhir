@@ -1,0 +1,91 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "Measure-care-gaps",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCare Gaps\u003c/h2\u003e\u003cp\u003eOPERATION: Care Gaps\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/Measure-care-gaps\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eThe care-gaps operation is used to determine gaps-in-care based on the results of quality measures\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/Measure/$care-gaps\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eperiodStart\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#date\"\u003edate\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe start of the measurement period. In keeping with the semantics of the date parameter used in the FHIR search operation, the period will start at the beginning of the period implied by the supplied timestamp. E.g. a value of 2014 would set the period s\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eperiodEnd\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#date\"\u003edate\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe end of the measurement period. The period will end at the end of the period implied by the supplied timestamp. E.g. a value of 2014 would set the period end to be 2014-12-31T23:59:59 inclusive\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003etopic\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe topic to be used to determine which measures are considered for the care gaps report. Any measure with the given topic will be included in the report\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003esubject\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003cbr/\u003e(\u003ca href\u003d\"search.html#reference\"\u003ereference\u003c/a\u003e)\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eSubject for which the care gaps report will be produced\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ereturn\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe result of the care gaps report will be returned as a document bundle with a MeasureReport entry for each included measure\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eThe effect of invoking this operation is to calculate a set of measures for a particular topic (e.g. Preventive Care and Screening) and return a document describing the results of each measure for the given subject. Note that it is up to the server to determine whether or not the generated care gaps report is persisted. If the server does not persist the results, the operation does not affect state and can be invoked with a GET\u003c/p\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/Measure-care-gaps",
+  "version": "4.0.1",
+  "name": "Care Gaps",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The care-gaps operation is used to determine gaps-in-care based on the results of quality measures",
+  "code": "care-gaps",
+  "comment": "The effect of invoking this operation is to calculate a set of measures for a particular topic (e.g. Preventive Care and Screening) and return a document describing the results of each measure for the given subject. Note that it is up to the server to determine whether or not the generated care gaps report is persisted. If the server does not persist the results, the operation does not affect state and can be invoked with a GET",
+  "resource": [
+    "Measure"
+  ],
+  "system": false,
+  "type": true,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "periodStart",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The start of the measurement period. In keeping with the semantics of the date parameter used in the FHIR search operation, the period will start at the beginning of the period implied by the supplied timestamp. E.g. a value of 2014 would set the period s",
+      "type": "date"
+    },
+    {
+      "name": "periodEnd",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The end of the measurement period. The period will end at the end of the period implied by the supplied timestamp. E.g. a value of 2014 would set the period end to be 2014-12-31T23:59:59 inclusive",
+      "type": "date"
+    },
+    {
+      "name": "topic",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The topic to be used to determine which measures are considered for the care gaps report. Any measure with the given topic will be included in the report",
+      "type": "string"
+    },
+    {
+      "name": "subject",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "Subject for which the care gaps report will be produced",
+      "type": "string",
+      "searchType": "reference"
+    },
+    {
+      "name": "return",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "The result of the care gaps report will be returned as a document bundle with a MeasureReport entry for each included measure",
+      "type": "Bundle"
+    }
+  ]
+}

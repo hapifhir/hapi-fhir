@@ -1,0 +1,65 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "unknown-content-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eUnknownContentCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA code that indicates whether an application accepts unknown elements or extensions when reading resources.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/unknown-content-code defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eno\u003ca name\u003d\"unknown-content-code-no\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeither Elements or Extensions\u003c/td\u003e\u003ctd\u003eThe application does not accept either unknown elements or extensions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eextensions\u003ca name\u003d\"unknown-content-code-extensions\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown Extensions\u003c/td\u003e\u003ctd\u003eThe application accepts unknown extensions, but not unknown elements.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eelements\u003ca name\u003d\"unknown-content-code-elements\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown Elements\u003c/td\u003e\u003ctd\u003eThe application accepts unknown elements, but not unknown extensions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eboth\u003ca name\u003d\"unknown-content-code-both\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown Elements and Extensions\u003c/td\u003e\u003ctd\u003eThe application accepts unknown elements and extensions.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/unknown-content-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.197"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "UnknownContentCode",
+  "title": "UnknownContentCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A code that indicates whether an application accepts unknown elements or extensions when reading resources.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/unknown-content-code",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "no",
+      "display": "Neither Elements or Extensions",
+      "definition": "The application does not accept either unknown elements or extensions."
+    },
+    {
+      "code": "extensions",
+      "display": "Unknown Extensions",
+      "definition": "The application accepts unknown extensions, but not unknown elements."
+    },
+    {
+      "code": "elements",
+      "display": "Unknown Elements",
+      "definition": "The application accepts unknown elements, but not unknown extensions."
+    },
+    {
+      "code": "both",
+      "display": "Unknown Elements and Extensions",
+      "definition": "The application accepts unknown elements and extensions."
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "goal-achievement",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGoal achievement status\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDescribes the progression, or lack thereof, towards the goal against the target.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/goal-achievement defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein-progress\u003ca name\u003d\"goal-achievement-in-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Progress\u003c/td\u003e\u003ctd\u003eThe goal is being sought but has not yet been reached. (Also applies if the goal was reached in the past but there has been regression and the goal is again being sought).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  improving\u003ca name\u003d\"goal-achievement-improving\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImproving\u003c/td\u003e\u003ctd\u003eThe goal is being sought, and is progressing.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  worsening\u003ca name\u003d\"goal-achievement-worsening\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWorsening\u003c/td\u003e\u003ctd\u003eThe goal is being sought, but is regressing.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  no-change\u003ca name\u003d\"goal-achievement-no-change\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNo Change\u003c/td\u003e\u003ctd\u003eThe goal is being sought, but the trend is flat.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eachieved\u003ca name\u003d\"goal-achievement-achieved\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAchieved\u003c/td\u003e\u003ctd\u003eThe goal has been met.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  sustaining\u003ca name\u003d\"goal-achievement-sustaining\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSustaining\u003c/td\u003e\u003ctd\u003eThe goal has been met, but ongoing activity is needed to sustain the goal objective.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-achieved\u003ca name\u003d\"goal-achievement-not-achieved\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Achieved\u003c/td\u003e\u003ctd\u003eThe goal has not been met and there might or might not have been progress towards target.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  no-progress\u003ca name\u003d\"goal-achievement-no-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNo Progress\u003c/td\u003e\u003ctd\u003eThe goal has not been met and little to no progress towards target.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  not-attainable\u003ca name\u003d\"goal-achievement-not-attainable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Attainable\u003c/td\u003e\u003ctd\u003eThe goal is not possible to be met.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/goal-achievement",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1375"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GoalAchievementStatus",
+  "title": "Goal achievement status",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 International - Patient Care WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/patientcare/"
+        }
+      ]
+    }
+  ],
+  "description": "Describes the progression, or lack thereof, towards the goal against the target.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/goal-achievement",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "in-progress",
+      "display": "In Progress",
+      "definition": "The goal is being sought but has not yet been reached. (Also applies if the goal was reached in the past but there has been regression and the goal is again being sought).",
+      "concept": [
+        {
+          "code": "improving",
+          "display": "Improving",
+          "definition": "The goal is being sought, and is progressing."
+        },
+        {
+          "code": "worsening",
+          "display": "Worsening",
+          "definition": "The goal is being sought, but is regressing."
+        },
+        {
+          "code": "no-change",
+          "display": "No Change",
+          "definition": "The goal is being sought, but the trend is flat."
+        }
+      ]
+    },
+    {
+      "code": "achieved",
+      "display": "Achieved",
+      "definition": "The goal has been met.",
+      "concept": [
+        {
+          "code": "sustaining",
+          "display": "Sustaining",
+          "definition": "The goal has been met, but ongoing activity is needed to sustain the goal objective."
+        }
+      ]
+    },
+    {
+      "code": "not-achieved",
+      "display": "Not Achieved",
+      "definition": "The goal has not been met and there might or might not have been progress towards target.",
+      "concept": [
+        {
+          "code": "no-progress",
+          "display": "No Progress",
+          "definition": "The goal has not been met and little to no progress towards target."
+        },
+        {
+          "code": "not-attainable",
+          "display": "Not Attainable",
+          "definition": "The goal is not possible to be met."
+        }
+      ]
+    }
+  ]
+}

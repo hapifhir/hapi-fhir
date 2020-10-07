@@ -1,0 +1,69 @@
+{
+  "resourceType": "ValueSet",
+  "id": "ucum-bodytemp",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eBody Temperature Units\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eUCUM units for recording Body Temperature\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eUCUM is Copyright © 1999-2013 Regenstrief Institute, Inc. and The UCUM Organization, Indianapolis, IN. All rights reserved. See http://unitsofmeasure.org/trac//wiki/TermsOfUse for details\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://unitsofmeasure.org\"\u003e\u003ccode\u003ehttp://unitsofmeasure.org\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCel\u003c/td\u003e\u003ctd\u003eCel\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e[degF]\u003c/td\u003e\u003ctd\u003edegF\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-extensible",
+      "valueBoolean": false
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/ucum-bodytemp",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.957"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "BodyTemperatureUnits",
+  "title": "Body Temperature Units",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "UCUM units for recording Body Temperature",
+  "copyright": "UCUM is Copyright © 1999-2013 Regenstrief Institute, Inc. and The UCUM Organization, Indianapolis, IN. All rights reserved. See http://unitsofmeasure.org/trac//wiki/TermsOfUse for details",
+  "compose": {
+    "include": [
+      {
+        "system": "http://unitsofmeasure.org",
+        "concept": [
+          {
+            "code": "Cel"
+          },
+          {
+            "code": "[degF]"
+          }
+        ]
+      }
+    ]
+  }
+}

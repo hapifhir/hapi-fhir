@@ -1,0 +1,92 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "administrative-gender",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAdministrativeGender\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe gender of a person used for administrative purposes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/administrative-gender defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eComments\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emale\u003ca name\u003d\"administrative-gender-male\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMale\u003c/td\u003e\u003ctd\u003eMale.\u003c/td\u003e\u003ctd\u003eMale\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efemale\u003ca name\u003d\"administrative-gender-female\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFemale\u003c/td\u003e\u003ctd\u003eFemale.\u003c/td\u003e\u003ctd\u003eFemale\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"administrative-gender-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eOther.\u003c/td\u003e\u003ctd\u003eThe administrative gender is a value other than male/female/unknown. Where this value is selected, systems may often choose to include an extension with the localized more specific value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"administrative-gender-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eUnknown.\u003c/td\u003e\u003ctd\u003eA proper value is applicable, but not known.  Usage Notes: This means the actual value is not known. If the only thing that is unknown is how to properly express the value in the necessary constraints (value set, datatype, etc.), then the OTH or UNC flavor should be used. No properties should be included for a datatype with this property unless:  Those properties themselves directly translate to a semantic of \u0026quot;unknown\u0026quot;. (E.g. a local code sent as a translation that conveys \u0027unknown\u0027) Those properties further qualify the nature of what is unknown. (E.g. specifying a use code of \u0026quot;H\u0026quot; and a URL prefix of \u0026quot;tel:\u0026quot; to convey that it is the home phone number that is unknown.)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    }
+  ],
+  "url": "http://hl7.org/fhir/administrative-gender",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.2"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AdministrativeGender",
+  "title": "AdministrativeGender",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "The gender of a person used for administrative purposes.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/administrative-gender",
+  "content": "complete",
+  "concept": [
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "Male"
+        }
+      ],
+      "code": "male",
+      "display": "Male",
+      "definition": "Male."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "Female"
+        }
+      ],
+      "code": "female",
+      "display": "Female",
+      "definition": "Female."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "The administrative gender is a value other than male/female/unknown. Where this value is selected, systems may often choose to include an extension with the localized more specific value."
+        }
+      ],
+      "code": "other",
+      "display": "Other",
+      "definition": "Other."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "A proper value is applicable, but not known.  Usage Notes: This means the actual value is not known. If the only thing that is unknown is how to properly express the value in the necessary constraints (value set, datatype, etc.), then the OTH or UNC flavor should be used. No properties should be included for a datatype with this property unless:  Those properties themselves directly translate to a semantic of \"unknown\". (E.g. a local code sent as a translation that conveys \u0027unknown\u0027) Those properties further qualify the nature of what is unknown. (E.g. specifying a use code of \"H\" and a URL prefix of \"tel:\" to convey that it is the home phone number that is unknown.)"
+        }
+      ],
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "Unknown."
+    }
+  ]
+}

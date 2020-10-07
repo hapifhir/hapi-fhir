@@ -1,0 +1,493 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "snomedct",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eSNOMED CT (all versions)\u003c/h2\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eSNOMED CT is the most comprehensive and precise clinical health terminology product in the world, owned and distributed around the world by The International Health Terminology Standards Development Organisation (IHTSDO).\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003cp\u003e\n        \u003cb\u003eCopyright Statement:\u003c/b\u003e\n      \u003c/p\u003e\n      \u003cdiv\u003e\n        \u003cp\u003e© 2002-2016 International Health Terminology Standards Development Organisation (IHTSDO). All rights reserved. SNOMED CT®, was originally created by The College of American Pathologists. \u0026quot;SNOMED\u0026quot; and \u0026quot;SNOMED CT\u0026quot; are registered trademarks of the IHTSDO http://www.ihtsdo.org/snomed-ct/get-snomed-ct\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003cp\u003e\n        \u003cb\u003eProperties\u003c/b\u003e\n      \u003c/p\u003e\n      \u003ctable class\u003d\"grid\"\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eURL\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDescription\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eType\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003einactive\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/field/Concept.active\u003c/td\u003e\n          \u003ctd\u003eWhether the code is active or not (defaults to false). Not the same as deprecated\u003c/td\u003e\n          \u003ctd\u003eboolean\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003edefinitionStatusId\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/field/Concept.definitionStatusId\u003c/td\u003e\n          \u003ctd\u003eEither of the codes that are descendants of 900000000000444006\u003c/td\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eparent\u003c/td\u003e\n          \u003ctd\u003ehttp://.........?\u003c/td\u003e\n          \u003ctd\u003eA SNOMED CT concept id that has the target of a direct is-a relationship from the concept\u003c/td\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echild\u003c/td\u003e\n          \u003ctd\u003ehttp://.........?\u003c/td\u003e\n          \u003ctd\u003eA SNOMED CT concept id that has a direct is-a relationship to the concept\u003c/td\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003emoduleId\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/field/Concept.moduleId\u003c/td\u003e\n          \u003ctd\u003eThe SNOMED CT concept id of the module that the concept belongs to.\u003c/td\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003enormalForm\u003c/td\u003e\n          \u003ctd\u003ehttp://.........?\u003c/td\u003e\n          \u003ctd\u003eGenerated Normal form expression for the provided code or expression, with terms\u003c/td\u003e\n          \u003ctd\u003estring\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003enormalFormTerse\u003c/td\u003e\n          \u003ctd\u003ehttp://.........?\u003c/td\u003e\n          \u003ctd\u003eGenerated Normal form expression for the provided code or expression, conceptIds only\u003c/td\u003e\n          \u003ctd\u003estring\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eDue to\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/42752001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eAssociated with\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/47429007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eAssociated morphology\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/116676008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas specimen\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/116686009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSpecimen source morphology\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/118168003\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSpecimen source topography\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/118169006\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSpecimen source identity\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/118170007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSpecimen procedure\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/118171006\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003ePart of\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/123005000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas active ingredient\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/127489000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSubject of information\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/131195008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eCausative agent\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246075003\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eAssociated finding\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246090004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eComponent\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246093002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSeverity\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246112005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eOccurrence\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246454002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eEpisodicity\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246456000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eTechnique\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246501002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eRevision status\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246513007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eUnits\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/246514001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eAfter\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/255234002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eAccess\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/260507000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eMethod\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/260686004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003ePriority\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/260870009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eClinical course\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/263502005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eLaterality\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/272741003\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eAssociated procedure\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363589002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eFinding site\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363698007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eLaterality\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363699004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eDirect morphology\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363700003\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eDirect substance\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363701004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas focus\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363702006\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas intent\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363703001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcedure site\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363704007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas definitional manifestation\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363705008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eIndirect morphology\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363709002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eIndirect device\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363710007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas interpretation\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363713009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eInterprets\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/363714003\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eMeasurement method\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370129005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProperty\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370130000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eRecipient category\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370131001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eScale type\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370132008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSpecimen substance\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370133003\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eTime aspect\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370134009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003ePathological process\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/370135005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcedure site - Direct\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/405813007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcedure site - Indirect\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/405814001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcedure device\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/405815000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcedure morphology\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/405816004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eFinding context\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/408729009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcedure context\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/408730004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eTemporal context\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/408731000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSubject relationship context\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/408732007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eRoute of administration\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/410675002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eHas dose form\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/411116001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eFinding method\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/418775008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eFinding informer\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/419066007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eUsing device\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/424226004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eUsing energy\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/424244007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eUsing substance\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/424361007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSurgical approach\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/424876005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eUsing access device\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/425391005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eRole group\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/609096000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProperty type\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704318007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eInheres in\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704319004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eTowards\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704320005\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eCharacterizes\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704321009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcess agent\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704322002\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcess duration\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704323007\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eProcess output\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704324001\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eRelative to\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704325000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003ePrecondition\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704326004\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eDirect site\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704327008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSpecified by\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704346009\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eObserves\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704347000\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eIs about\u003c/td\u003e\n          \u003ctd\u003ehttp://snomed.info/id/704647008\u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n      \u003cp\u003e\n        \u003cb\u003eFilters\u003c/b\u003e\n      \u003c/p\u003e\n      \u003ctable class\u003d\"grid\"\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDescription\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eoperator\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eValue\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003econcept\u003c/td\u003e\n          \u003ctd\u003eFilter that includes concepts based on their logical definition. e.g. [concept] [is-a] [x] - include all concepts with an is-a relationship to concept x, or [concept] [in] [x]- include all concepts in the reference set identified by concept x\u003c/td\u003e\n          \u003ctd\u003eis-a in \u003c/td\u003e\n          \u003ctd\u003eA SNOMED CT code\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eexpression\u003c/td\u003e\n          \u003ctd\u003eThe result of the filter is the result of executing the given SNOMED CT Expression Constraint\u003c/td\u003e\n          \u003ctd\u003e\u003d \u003c/td\u003e\n          \u003ctd\u003eA SNOMED CT ECL expression (see http://snomed.org/ecl)\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eexpressions\u003c/td\u003e\n          \u003ctd\u003eWhether post-coordinated expressions are included in the value set\u003c/td\u003e\n          \u003ctd\u003e\u003d \u003c/td\u003e\n          \u003ctd\u003etrue or false\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n      \u003cp\u003eThis code system http://snomed.info/sct defines many codes, but they are not represented here\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://snomed.info/sct",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.6.96"
+    }
+  ],
+  "name": "SNOMED_CT",
+  "title": "SNOMED CT (all versions)",
+  "status": "active",
+  "experimental": false,
+  "publisher": "IHTSDO",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://ihtsdo.org"
+        }
+      ]
+    }
+  ],
+  "description": "SNOMED CT is the most comprehensive and precise clinical health terminology product in the world, owned and distributed around the world by The International Health Terminology Standards Development Organisation (IHTSDO).",
+  "copyright": "© 2002-2016 International Health Terminology Standards Development Organisation (IHTSDO). All rights reserved. SNOMED CT®, was originally created by The College of American Pathologists. \"SNOMED\" and \"SNOMED CT\" are registered trademarks of the IHTSDO http://www.ihtsdo.org/snomed-ct/get-snomed-ct",
+  "caseSensitive": false,
+  "hierarchyMeaning": "is-a",
+  "compositional": true,
+  "versionNeeded": false,
+  "content": "not-present",
+  "filter": [
+    {
+      "code": "concept",
+      "description": "Filter that includes concepts based on their logical definition. e.g. [concept] [is-a] [x] - include all concepts with an is-a relationship to concept x, or [concept] [in] [x]- include all concepts in the reference set identified by concept x",
+      "operator": [
+        "is-a",
+        "in"
+      ],
+      "value": "A SNOMED CT code"
+    },
+    {
+      "code": "expression",
+      "description": "The result of the filter is the result of executing the given SNOMED CT Expression Constraint",
+      "operator": [
+        "\u003d"
+      ],
+      "value": "A SNOMED CT ECL expression (see http://snomed.org/ecl)"
+    },
+    {
+      "code": "expressions",
+      "description": "Whether post-coordinated expressions are included in the value set",
+      "operator": [
+        "\u003d"
+      ],
+      "value": "true or false"
+    }
+  ],
+  "property": [
+    {
+      "code": "inactive",
+      "uri": "http://snomed.info/field/Concept.active",
+      "description": "Whether the code is active or not (defaults to false). Not the same as deprecated",
+      "type": "boolean"
+    },
+    {
+      "code": "definitionStatusId",
+      "uri": "http://snomed.info/field/Concept.definitionStatusId",
+      "description": "Either of the codes that are descendants of 900000000000444006",
+      "type": "code"
+    },
+    {
+      "code": "parent",
+      "uri": "http://.........?",
+      "description": "A SNOMED CT concept id that has the target of a direct is-a relationship from the concept",
+      "type": "code"
+    },
+    {
+      "code": "child",
+      "uri": "http://.........?",
+      "description": "A SNOMED CT concept id that has a direct is-a relationship to the concept",
+      "type": "code"
+    },
+    {
+      "code": "moduleId",
+      "uri": "http://snomed.info/field/Concept.moduleId",
+      "description": "The SNOMED CT concept id of the module that the concept belongs to.",
+      "type": "code"
+    },
+    {
+      "code": "normalForm",
+      "uri": "http://.........?",
+      "description": "Generated Normal form expression for the provided code or expression, with terms",
+      "type": "string"
+    },
+    {
+      "code": "normalFormTerse",
+      "uri": "http://.........?",
+      "description": "Generated Normal form expression for the provided code or expression, conceptIds only",
+      "type": "string"
+    },
+    {
+      "code": "Due to",
+      "uri": "http://snomed.info/id/42752001",
+      "type": "code"
+    },
+    {
+      "code": "Associated with",
+      "uri": "http://snomed.info/id/47429007",
+      "type": "code"
+    },
+    {
+      "code": "Associated morphology",
+      "uri": "http://snomed.info/id/116676008",
+      "type": "code"
+    },
+    {
+      "code": "Has specimen",
+      "uri": "http://snomed.info/id/116686009",
+      "type": "code"
+    },
+    {
+      "code": "Specimen source morphology",
+      "uri": "http://snomed.info/id/118168003",
+      "type": "code"
+    },
+    {
+      "code": "Specimen source topography",
+      "uri": "http://snomed.info/id/118169006",
+      "type": "code"
+    },
+    {
+      "code": "Specimen source identity",
+      "uri": "http://snomed.info/id/118170007",
+      "type": "code"
+    },
+    {
+      "code": "Specimen procedure",
+      "uri": "http://snomed.info/id/118171006",
+      "type": "code"
+    },
+    {
+      "code": "Part of",
+      "uri": "http://snomed.info/id/123005000",
+      "type": "code"
+    },
+    {
+      "code": "Has active ingredient",
+      "uri": "http://snomed.info/id/127489000",
+      "type": "code"
+    },
+    {
+      "code": "Subject of information",
+      "uri": "http://snomed.info/id/131195008",
+      "type": "code"
+    },
+    {
+      "code": "Causative agent",
+      "uri": "http://snomed.info/id/246075003",
+      "type": "code"
+    },
+    {
+      "code": "Associated finding",
+      "uri": "http://snomed.info/id/246090004",
+      "type": "code"
+    },
+    {
+      "code": "Component",
+      "uri": "http://snomed.info/id/246093002",
+      "type": "code"
+    },
+    {
+      "code": "Severity",
+      "uri": "http://snomed.info/id/246112005",
+      "type": "code"
+    },
+    {
+      "code": "Occurrence",
+      "uri": "http://snomed.info/id/246454002",
+      "type": "code"
+    },
+    {
+      "code": "Episodicity",
+      "uri": "http://snomed.info/id/246456000",
+      "type": "code"
+    },
+    {
+      "code": "Technique",
+      "uri": "http://snomed.info/id/246501002",
+      "type": "code"
+    },
+    {
+      "code": "Revision status",
+      "uri": "http://snomed.info/id/246513007",
+      "type": "code"
+    },
+    {
+      "code": "Units",
+      "uri": "http://snomed.info/id/246514001",
+      "type": "code"
+    },
+    {
+      "code": "After",
+      "uri": "http://snomed.info/id/255234002",
+      "type": "code"
+    },
+    {
+      "code": "Access",
+      "uri": "http://snomed.info/id/260507000",
+      "type": "code"
+    },
+    {
+      "code": "Method",
+      "uri": "http://snomed.info/id/260686004",
+      "type": "code"
+    },
+    {
+      "code": "Priority",
+      "uri": "http://snomed.info/id/260870009",
+      "type": "code"
+    },
+    {
+      "code": "Clinical course",
+      "uri": "http://snomed.info/id/263502005",
+      "type": "code"
+    },
+    {
+      "code": "Laterality",
+      "uri": "http://snomed.info/id/272741003",
+      "type": "code"
+    },
+    {
+      "code": "Associated procedure",
+      "uri": "http://snomed.info/id/363589002",
+      "type": "code"
+    },
+    {
+      "code": "Finding site",
+      "uri": "http://snomed.info/id/363698007",
+      "type": "code"
+    },
+    {
+      "code": "Laterality",
+      "uri": "http://snomed.info/id/363699004",
+      "type": "code"
+    },
+    {
+      "code": "Direct morphology",
+      "uri": "http://snomed.info/id/363700003",
+      "type": "code"
+    },
+    {
+      "code": "Direct substance",
+      "uri": "http://snomed.info/id/363701004",
+      "type": "code"
+    },
+    {
+      "code": "Has focus",
+      "uri": "http://snomed.info/id/363702006",
+      "type": "code"
+    },
+    {
+      "code": "Has intent",
+      "uri": "http://snomed.info/id/363703001",
+      "type": "code"
+    },
+    {
+      "code": "Procedure site",
+      "uri": "http://snomed.info/id/363704007",
+      "type": "code"
+    },
+    {
+      "code": "Has definitional manifestation",
+      "uri": "http://snomed.info/id/363705008",
+      "type": "code"
+    },
+    {
+      "code": "Indirect morphology",
+      "uri": "http://snomed.info/id/363709002",
+      "type": "code"
+    },
+    {
+      "code": "Indirect device",
+      "uri": "http://snomed.info/id/363710007",
+      "type": "code"
+    },
+    {
+      "code": "Has interpretation",
+      "uri": "http://snomed.info/id/363713009",
+      "type": "code"
+    },
+    {
+      "code": "Interprets",
+      "uri": "http://snomed.info/id/363714003",
+      "type": "code"
+    },
+    {
+      "code": "Measurement method",
+      "uri": "http://snomed.info/id/370129005",
+      "type": "code"
+    },
+    {
+      "code": "Property",
+      "uri": "http://snomed.info/id/370130000",
+      "type": "code"
+    },
+    {
+      "code": "Recipient category",
+      "uri": "http://snomed.info/id/370131001",
+      "type": "code"
+    },
+    {
+      "code": "Scale type",
+      "uri": "http://snomed.info/id/370132008",
+      "type": "code"
+    },
+    {
+      "code": "Specimen substance",
+      "uri": "http://snomed.info/id/370133003",
+      "type": "code"
+    },
+    {
+      "code": "Time aspect",
+      "uri": "http://snomed.info/id/370134009",
+      "type": "code"
+    },
+    {
+      "code": "Pathological process",
+      "uri": "http://snomed.info/id/370135005",
+      "type": "code"
+    },
+    {
+      "code": "Procedure site - Direct",
+      "uri": "http://snomed.info/id/405813007",
+      "type": "code"
+    },
+    {
+      "code": "Procedure site - Indirect",
+      "uri": "http://snomed.info/id/405814001",
+      "type": "code"
+    },
+    {
+      "code": "Procedure device",
+      "uri": "http://snomed.info/id/405815000",
+      "type": "code"
+    },
+    {
+      "code": "Procedure morphology",
+      "uri": "http://snomed.info/id/405816004",
+      "type": "code"
+    },
+    {
+      "code": "Finding context",
+      "uri": "http://snomed.info/id/408729009",
+      "type": "code"
+    },
+    {
+      "code": "Procedure context",
+      "uri": "http://snomed.info/id/408730004",
+      "type": "code"
+    },
+    {
+      "code": "Temporal context",
+      "uri": "http://snomed.info/id/408731000",
+      "type": "code"
+    },
+    {
+      "code": "Subject relationship context",
+      "uri": "http://snomed.info/id/408732007",
+      "type": "code"
+    },
+    {
+      "code": "Route of administration",
+      "uri": "http://snomed.info/id/410675002",
+      "type": "code"
+    },
+    {
+      "code": "Has dose form",
+      "uri": "http://snomed.info/id/411116001",
+      "type": "code"
+    },
+    {
+      "code": "Finding method",
+      "uri": "http://snomed.info/id/418775008",
+      "type": "code"
+    },
+    {
+      "code": "Finding informer",
+      "uri": "http://snomed.info/id/419066007",
+      "type": "code"
+    },
+    {
+      "code": "Using device",
+      "uri": "http://snomed.info/id/424226004",
+      "type": "code"
+    },
+    {
+      "code": "Using energy",
+      "uri": "http://snomed.info/id/424244007",
+      "type": "code"
+    },
+    {
+      "code": "Using substance",
+      "uri": "http://snomed.info/id/424361007",
+      "type": "code"
+    },
+    {
+      "code": "Surgical approach",
+      "uri": "http://snomed.info/id/424876005",
+      "type": "code"
+    },
+    {
+      "code": "Using access device",
+      "uri": "http://snomed.info/id/425391005",
+      "type": "code"
+    },
+    {
+      "code": "Role group",
+      "uri": "http://snomed.info/id/609096000",
+      "type": "code"
+    },
+    {
+      "code": "Property type",
+      "uri": "http://snomed.info/id/704318007",
+      "type": "code"
+    },
+    {
+      "code": "Inheres in",
+      "uri": "http://snomed.info/id/704319004",
+      "type": "code"
+    },
+    {
+      "code": "Towards",
+      "uri": "http://snomed.info/id/704320005",
+      "type": "code"
+    },
+    {
+      "code": "Characterizes",
+      "uri": "http://snomed.info/id/704321009",
+      "type": "code"
+    },
+    {
+      "code": "Process agent",
+      "uri": "http://snomed.info/id/704322002",
+      "type": "code"
+    },
+    {
+      "code": "Process duration",
+      "uri": "http://snomed.info/id/704323007",
+      "type": "code"
+    },
+    {
+      "code": "Process output",
+      "uri": "http://snomed.info/id/704324001",
+      "type": "code"
+    },
+    {
+      "code": "Relative to",
+      "uri": "http://snomed.info/id/704325000",
+      "type": "code"
+    },
+    {
+      "code": "Precondition",
+      "uri": "http://snomed.info/id/704326004",
+      "type": "code"
+    },
+    {
+      "code": "Direct site",
+      "uri": "http://snomed.info/id/704327008",
+      "type": "code"
+    },
+    {
+      "code": "Specified by",
+      "uri": "http://snomed.info/id/704346009",
+      "type": "code"
+    },
+    {
+      "code": "Observes",
+      "uri": "http://snomed.info/id/704347000",
+      "type": "code"
+    },
+    {
+      "code": "Is about",
+      "uri": "http://snomed.info/id/704647008",
+      "type": "code"
+    }
+  ]
+}

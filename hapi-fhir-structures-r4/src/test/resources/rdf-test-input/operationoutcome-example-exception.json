@@ -1,0 +1,26 @@
+{
+  "resourceType": "OperationOutcome",
+  "id": "exception",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eSQL Link Communication Error (dbx \u003d 34234)\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "issue": [
+    {
+      "severity": "error",
+      "code": "exception",
+      "details": {
+        "text": "SQL Link Communication Error (dbx \u003d 34234)"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

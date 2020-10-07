@@ -1,0 +1,84 @@
+{
+  "resourceType": "RelatedPerson",
+  "id": "benedicte",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ctable\u003e\n        \u003ctbody\u003e\n          \u003ctr\u003e\n            \u003ctd\u003eName\u003c/td\u003e\n            \u003ctd\u003eBénédicte du Marché\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003eAddress\u003c/td\u003e\n            \u003ctd\u003e43, Place du Marché Sainte Catherine, 75004 Paris, France\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003eContacts\u003c/td\u003e\n            \u003ctd\u003ePhone: +33 (237) 998327\u003c/td\u003e\n          \u003c/tr\u003e\n        \u003c/tbody\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "text": "INSEE"
+      },
+      "system": "urn:oid:1.2.250.1.61",
+      "value": "272117510400399"
+    }
+  ],
+  "active": true,
+  "patient": {
+    "reference": "Patient/example"
+  },
+  "relationship": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+          "code": "N"
+        },
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+          "code": "WIFE"
+        }
+      ]
+    }
+  ],
+  "name": [
+    {
+      "family": "du Marché",
+      "_family": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/humanname-own-prefix",
+            "valueString": "VV"
+          }
+        ]
+      },
+      "given": [
+        "Bénédicte"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+33 (237) 998327"
+    }
+  ],
+  "gender": "female",
+  "address": [
+    {
+      "line": [
+        "43, Place du Marché Sainte Catherine"
+      ],
+      "city": "Paris",
+      "postalCode": "75004",
+      "country": "FRA"
+    }
+  ],
+  "photo": [
+    {
+      "contentType": "image/jpeg",
+      "url": "Binary/f016"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

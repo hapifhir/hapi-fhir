@@ -1,0 +1,78 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "ex-program-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExample Program Reason Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample Program Reason Span codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/ex-programcode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eas\u003ca name\u003d\"ex-program-code-as\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChild Asthma\u003c/td\u003e\u003ctd\u003eChild Asthma Program\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehd\u003ca name\u003d\"ex-program-code-hd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHemodialysis\u003c/td\u003e\u003ctd\u003eHemodialysis Program.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eauscr\u003ca name\u003d\"ex-program-code-auscr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAutism Screening\u003c/td\u003e\u003ctd\u003eAutism Screening Program.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enone\u003ca name\u003d\"ex-program-code-none\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNone\u003c/td\u003e\u003ctd\u003eNo program code applies.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/ex-programcode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1161"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ExampleProgramReasonCodes",
+  "title": "Example Program Reason Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sample Program Reason Span codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/ex-program-code",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "as",
+      "display": "Child Asthma",
+      "definition": "Child Asthma Program"
+    },
+    {
+      "code": "hd",
+      "display": "Hemodialysis",
+      "definition": "Hemodialysis Program."
+    },
+    {
+      "code": "auscr",
+      "display": "Autism Screening",
+      "definition": "Autism Screening Program."
+    },
+    {
+      "code": "none",
+      "display": "None",
+      "definition": "No program code applies."
+    }
+  ]
+}

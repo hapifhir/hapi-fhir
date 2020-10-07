@@ -1,0 +1,93 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "audit-source-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAudit Event Source Type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of process where the audit event originated from.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/security-source-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1\u003ca name\u003d\"audit-source-type-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUser Device\u003c/td\u003e\u003ctd\u003eEnd-user display device, diagnostic device.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2\u003ca name\u003d\"audit-source-type-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eData Interface\u003c/td\u003e\u003ctd\u003eData acquisition device or instrument.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e3\u003ca name\u003d\"audit-source-type-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWeb Server\u003c/td\u003e\u003ctd\u003eWeb Server process or thread.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4\u003ca name\u003d\"audit-source-type-4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApplication Server\u003c/td\u003e\u003ctd\u003eApplication Server process or thread.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5\u003ca name\u003d\"audit-source-type-5\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDatabase Server\u003c/td\u003e\u003ctd\u003eDatabase Server process or thread.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e6\u003ca name\u003d\"audit-source-type-6\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity Server\u003c/td\u003e\u003ctd\u003eSecurity server, e.g. a domain controller.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e7\u003ca name\u003d\"audit-source-type-7\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNetwork Device\u003c/td\u003e\u003ctd\u003eISO level 1-3 network component.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e8\u003ca name\u003d\"audit-source-type-8\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNetwork Router\u003c/td\u003e\u003ctd\u003eISO level 4-6 operating software.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e9\u003ca name\u003d\"audit-source-type-9\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eOther kind of device (defined by DICOM, but some other code/system can be used).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sec"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/security-source-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1137"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AuditEventSourceType",
+  "title": "Audit Event Source Type",
+  "status": "active",
+  "experimental": false,
+  "date": "2010-08-26T00:00:00+10:00",
+  "publisher": "NEMA/DICOM",
+  "description": "The type of process where the audit event originated from.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/audit-source-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "1",
+      "display": "User Device",
+      "definition": "End-user display device, diagnostic device."
+    },
+    {
+      "code": "2",
+      "display": "Data Interface",
+      "definition": "Data acquisition device or instrument."
+    },
+    {
+      "code": "3",
+      "display": "Web Server",
+      "definition": "Web Server process or thread."
+    },
+    {
+      "code": "4",
+      "display": "Application Server",
+      "definition": "Application Server process or thread."
+    },
+    {
+      "code": "5",
+      "display": "Database Server",
+      "definition": "Database Server process or thread."
+    },
+    {
+      "code": "6",
+      "display": "Security Server",
+      "definition": "Security server, e.g. a domain controller."
+    },
+    {
+      "code": "7",
+      "display": "Network Device",
+      "definition": "ISO level 1-3 network component."
+    },
+    {
+      "code": "8",
+      "display": "Network Router",
+      "definition": "ISO level 4-6 operating software."
+    },
+    {
+      "code": "9",
+      "display": "Other",
+      "definition": "Other kind of device (defined by DICOM, but some other code/system can be used)."
+    }
+  ]
+}

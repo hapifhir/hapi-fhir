@@ -1,0 +1,251 @@
+{
+  "resourceType": "Measure",
+  "id": "measure-cms146-example",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eId: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eMeasure/measure-cms146-example\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eIdentifier: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003esystem: \u003c/b\u003e\u003cspan\u003ehttp://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003e146\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eIdentifier: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003esystem: \u003c/b\u003e\u003cspan\u003ehttp://hl7.org/fhir/cqi/ecqm/Measure/Identifier/nqf\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003e0002\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eTitle: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eAppropriate Testing for Children with Pharyngitis\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eStatus: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eactive\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eDescription: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003ePercentage of children 2-18 years of age who were diagnosed with pharyngitis, ordered an antibiotic and received a group A streptococcus (strep) test for the episode.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003ePurpose: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eThe Infectious Diseases Society of America (IDSA) \u0026quot;recommends swabbing the throat and testing for GAS pharyngitis by rapid antigen detection test (RADT) and/or culture because the clinical features alone do not reliably discriminate between GAS and viral pharyngitis except when overt viral features like rhinorrhea, cough, oral ulcers, and/or hoarseness are present\u0026quot;\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eTopic: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-right: 25px;\"\u003e\u003cspan\u003e\u003cspan\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003esystem: \u003c/b\u003e\u003cspan\u003ehttp://loinc.org\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003ecode: \u003c/b\u003e\u003cspan\u003e57024-2\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLibrary: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ereference: \u003c/b\u003e\u003cspan\u003eLibrary/library-cms146-example\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eScoring: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eproportion\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eType: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eprocess\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eGroup:\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003eCMS146-group-1\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003einitial-population\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003einitial-population-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eCMS146.InInitialPopulation\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003enumerator\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003enumerator-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eCMS146.InNumerator\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003edenominator\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003edenominator-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eCMS146.InDenominator\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003edenominator-exclusion\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003edenominator-exclusions-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eCMS146.InDenominatorExclusions\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003eStratifier:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003estratifier-ages-up-to-9\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eCMS146.AgesUpToNine\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003eStratifier:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003estratifier-ages-10-plus\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eCMS146.AgesTenPlus\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003eStratifier:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003estratifier-ages-up-to-9\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003epath: \u003c/b\u003e\u003cspan\u003ePatient.gender\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eSupplemental Data:\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cp style\u003d\"margin-bottom: 5px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003esupplemental-data-gender\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px;\"\u003e\u003cb\u003epath: \u003c/b\u003e\u003cspan\u003ePatient.gender\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eSupplemental Data:\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cp style\u003d\"margin-bottom: 5px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003esupplemental-data-deceased\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px;\"\u003e\u003cb\u003epath: \u003c/b\u003e\u003cspan\u003edeceasedBoolean\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/Measure/measure-cms146-example",
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/cms",
+      "value": "146"
+    },
+    {
+      "use": "official",
+      "system": "http://hl7.org/fhir/cqi/ecqm/Measure/Identifier/nqf",
+      "value": "0002"
+    }
+  ],
+  "version": "1.0.0",
+  "name": "CMS146",
+  "title": "Appropriate Testing for Children with Pharyngitis",
+  "status": "active",
+  "experimental": true,
+  "date": "2017-03-10",
+  "publisher": "National Committee for Quality Assurance",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.ncqa.org/"
+        }
+      ]
+    }
+  ],
+  "description": "Percentage of children 3-18 years of age who were diagnosed with pharyngitis, ordered an antibiotic and received a group A streptococcus (strep) test for the episode.",
+  "useContext": [
+    {
+      "code": {
+        "code": "program"
+      },
+      "valueCodeableConcept": {
+        "text": "eligibile-provider"
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "age"
+      },
+      "valueRange": {
+        "low": {
+          "value": 3,
+          "unit": "a"
+        },
+        "high": {
+          "value": 18,
+          "unit": "a"
+        }
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Measure of children with a group A streptococcus test in the 7-day period from 3 days prior through 3 days after the diagnosis of pharyngitis",
+  "copyright": "Physician Performance Measure (Measures) and related data specifications were developed by the National Committee for Quality Assurance (NCQA).   The Measures are copyrighted but can be reproduced and distributed, without modification, for noncommercial purposes (eg, use by healthcare providers in connection with their practices). Commercial use is defined as the sale, licensing, or distribution of the Measures for commercial gain, or incorporation of the Measures into a product or service that is sold, licensed or distributed for commercial gain. Commercial use of the Measures requires a license agreement between the user and NCQA. NCQA is not responsible for any use of the Measures.   (c) 2008-2016 National Committee for Quality Assurance. All Rights Reserved.   Limited proprietary coding is contained in the Measure specifications for user convenience. Users of proprietary code sets should obtain all necessary licenses from the owners of the code sets. NCQA disclaims all liability for use or accuracy of any CPT or other codes contained in the specifications.  CPT(R) contained in the Measure specifications is copyright 2004-2015 American Medical Association. LOINC(R) copyright 2004-2015 Regenstrief Institute, Inc. This material contains SNOMED Clinical Terms(R) (SNOMED CT[R]) copyright 2004-2015 International Health Terminology Standards Development Organisation. ICD-10 copyright 2015 World Health Organization. All Rights Reserved.",
+  "approvalDate": "2016-01-01",
+  "lastReviewDate": "2016-09-01",
+  "effectivePeriod": {
+    "start": "2017-01-01",
+    "end": "2017-12-31"
+  },
+  "topic": [
+    {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "57024-2"
+        }
+      ]
+    }
+  ],
+  "author": [
+    {
+      "name": "National Committee for Quality Assurance"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "citation": "Linder, J.A., D.W. Bates, G.M. Lee, J.A. Finkelstein. 2005. _Antibiotic treatment of children with sore throat._ JAMA 294(18):2315-2322. "
+    },
+    {
+      "type": "documentation",
+      "citation": "Infectious Diseases Society of America. 2012. _Clinical Practice Guideline for the Diagnosis and Management of Group A Streptococcal Pharyngitis: 2012 Update._ "
+    },
+    {
+      "type": "documentation",
+      "citation": "Roberts, R.R., B. Hota, I. Ahmad, et al. _Hospital and Societal Costs of Antimicrobial-Resistant Infections in a Chicago Teaching Hospital: Implications for Antibiotic Stewardship._ Clin Infect Dis. Oct 2009; 49(8):1175-84."
+    }
+  ],
+  "library": [
+    "Library/library-cms146-example"
+  ],
+  "disclaimer": "These performance Measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. THE MEASURES AND SPECIFICATIONS ARE PROVIDED \"AS IS\" WITHOUT WARRANTY OF ANY KIND. Due to technical limitations, registered trademarks are indicated by (R) or [R] and unregistered trademarks are indicated by (TM) or [TM].",
+  "scoring": {
+    "coding": [
+      {
+        "code": "proportion"
+      }
+    ]
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "code": "process"
+        }
+      ]
+    }
+  ],
+  "rationale": "Group A streptococcal bacterial infections and other infections that cause pharyngitis (which are most often viral) often produce the same signs and symptoms (IDSA 2002). The American Academy of Pediatrics, the Centers for Disease Control and Prevention, and the Infectious Diseases Society of America all recommend a diagnostic test for Strep A to improve diagnostic accuracy and avoid unnecessary antibiotic treatment (Linder et al. 2005). Estimated economic costs of pediatric streptococcal pharyngitis in the United States range from $224 million to $539 million per year, including indirect costs related to parental work losses. At a higher level, the economic cost of antibiotic resistance vary but have extended as high as $20 billion in excess direct healthcare costs, with additional costs to society for lost productivity as high as $35 billion a year (2008 dollars) (Roberts et al. 2009).",
+  "clinicalRecommendationStatement": "The Infectious Diseases Society of America (IDSA) \"recommends swabbing the throat and testing for GAS pharyngitis by rapid antigen detection test (RADT) and/or culture because the clinical features alone do not reliably discriminate between GAS and viral pharyngitis except when overt viral features like rhinorrhea, cough, oral ulcers, and/or hoarseness are present\"",
+  "improvementNotation": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+        "code": "increase"
+      }
+    ]
+  },
+  "guidance": "This is an episode of care measure that examines all eligible episodes for the patient during the measurement period. If the patient has more than one episode, include all episodes in the measure",
+  "group": [
+    {
+      "id": "CMS146-group-1",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "initial-population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "CMS146.InInitialPopulation"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "CMS146.InNumerator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "CMS146.InDenominator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator-exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "CMS146.InDenominatorExclusions"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "code": {
+            "text": "stratifier-ages-up-to-9"
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "CMS146.AgesUpToNine"
+          }
+        },
+        {
+          "code": {
+            "text": "stratifier-ages-10-plus"
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "CMS146.AgesTenPlus"
+          }
+        },
+        {
+          "code": {
+            "text": "stratifier-gender"
+          },
+          "criteria": {
+            "language": "text/fhirpath",
+            "expression": "Patient.gender"
+          }
+        }
+      ]
+    }
+  ],
+  "supplementalData": [
+    {
+      "code": {
+        "text": "supplemental-data-gender"
+      },
+      "criteria": {
+        "language": "text/fhirpath",
+        "expression": "Patient.gender"
+      }
+    },
+    {
+      "code": {
+        "text": "supplemental-data-deceased"
+      },
+      "criteria": {
+        "language": "text/fhirpath",
+        "expression": "deceasedBoolean"
+      }
+    }
+  ]
+}

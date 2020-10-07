@@ -1,0 +1,91 @@
+{
+  "resourceType": "ValueSet",
+  "id": "security-labels",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSecurityLabels\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA single value set for all security labels defined by FHIR.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eImport all the codes that are contained in \u003ca href\u003d\"v3/ConfidentialityClassification/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-ConfidentialityClassification\u003c/a\u003e\u003c/li\u003e\u003cli\u003eImport all the codes that are contained in \u003ca href\u003d\"v3/InformationSensitivityPolicy/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-InformationSensitivityPolicy\u003c/a\u003e\u003c/li\u003e\u003cli\u003eImport all the codes that are contained in \u003ca href\u003d\"v3/Compartment/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-Compartment\u003c/a\u003e\u003c/li\u003e\u003cli\u003eImport all the codes that are contained in \u003ca href\u003d\"v3/SecurityIntegrityObservationValue/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-SecurityIntegrityObservationValue\u003c/a\u003e\u003c/li\u003e\u003cli\u003eImport all the codes that are contained in \u003ca href\u003d\"v3/SecurityControlObservationValue/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-SecurityControlObservationValue\u003c/a\u003e\u003c/li\u003e\u003cli\u003eImport all the codes that are contained in \u003ca href\u003d\"v3/ActUSPrivacyLaw/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-ActUSPrivacyLaw\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/security-labels",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.47"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "All Security Labels",
+  "title": "SecurityLabels",
+  "status": "active",
+  "experimental": false,
+  "date": "2014-07-28",
+  "publisher": "FHIR project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "A single value set for all security labels defined by FHIR.",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v3-ConfidentialityClassification"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v3-InformationSensitivityPolicy"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v3-Compartment"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v3-SecurityIntegrityObservationValue"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v3-SecurityControlObservationValue"
+        ]
+      },
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v3-ActUSPrivacyLaw"
+        ]
+      }
+    ]
+  }
+}

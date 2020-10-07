@@ -1,0 +1,600 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "measurereport-cms146-cat2-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eMeasureReport/measurereport-cms146-cat2-example\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eMeasure: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                     \u003cb\u003ereference: \u003c/b\u003e\n                     \u003cspan\u003eMeasure/CMS146\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eType: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003epatient-list\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003ePeriod: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003estart: \u003c/b\u003e\n                  \u003cspan\u003eWed Jan 01 00:00:00 MST 2014\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003eend: \u003c/b\u003e\n                  \u003cspan\u003eMon Mar 31 00:00:00 MDT 2014\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003ecomplete\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eReporting Organization: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cspan\u003e\n                        \u003cb\u003ename: \u003c/b\u003e\n                        \u003cspan\u003eGood Health Hospital\u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eGroup:\u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003evalue: \u003c/b\u003e\n                     \u003cspan\u003eCMS146-group-1\u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003ePopulation:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003einitial-population\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003ecount: \u003c/b\u003e\n                     \u003cspan\u003e500\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003esubjectResults: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eList/CMS146-initial-population\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003ePopulation:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003enumerator\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003ecount: \u003c/b\u003e\n                     \u003cspan\u003e200\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003esubjectResults: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eList/CMS146-numerator\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003ePopulation:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edenominator\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003ecount: \u003c/b\u003e\n                     \u003cspan\u003e500\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003esubjectResults: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eList/CMS146-denominator\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003ePopulation:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003ecount: \u003c/b\u003e\n                     \u003cspan\u003e100\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003esubjectResults: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eList/CMS146-denominator-exclusions\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003eStratifier:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cspan\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                        \u003cspan\u003eCMS146-group-1\u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003etrue\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-true-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e100\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-true-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-true-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e50\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-true-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003efalse\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-false-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e100\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-false-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-false-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e50\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-up-to-9-false-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003eStratifier:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cspan\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                        \u003cspan\u003eCMS146-group-1\u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003etrue\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-true-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e100\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-true-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-true-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e50\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-true-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003efalse\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-false-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e100\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-false-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-false-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e50\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-ages-10-plus-false-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003eStratifier:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cspan\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                        \u003cspan\u003eCMS146-group-1\u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003emale\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-male-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e100\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-male-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-male-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e50\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-male-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003efemale\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-female-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e100\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-female-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e250\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-female-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e50\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-female-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003eother\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-other-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-other-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-other-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-other-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003eunknown\u003c/span\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003einitial-population\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-unknown-initial-population\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003enumerator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-unknown-numerator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-unknown-denominator\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ePopulation:\u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003edenominator-exclusion\u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003ecount: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cspan\u003e0\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cb\u003esubjectResults: \u003c/b\u003e\n                           \u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                              \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cspan\u003eList/CMS146-stratifier-gender-unknown-denominator-exclusions\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003eSupplemental:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cspan\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                        \u003cspan\u003esupplemental-data-gender\u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003emale\u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecount: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e250\u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003esubjectResults: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                              \u003cb\u003ereference: \u003c/b\u003e\n                              \u003cspan\u003eList/CMS146-supplemental-data-gender-male\u003c/span\u003e\n                              \u003cbr/\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003efemale\u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecount: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e250\u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003esubjectResults: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                              \u003cb\u003ereference: \u003c/b\u003e\n                              \u003cspan\u003eList/CMS146-supplemental-data-gender-female\u003c/span\u003e\n                              \u003cbr/\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003eother\u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecount: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e0\u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003esubjectResults: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                              \u003cb\u003ereference: \u003c/b\u003e\n                              \u003cspan\u003eList/CMS146-supplemental-data-gender-other\u003c/span\u003e\n                              \u003cbr/\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003eunknown\u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecount: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e0\u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003esubjectResults: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                              \u003cb\u003ereference: \u003c/b\u003e\n                              \u003cspan\u003eList/CMS146-supplemental-data-gender-unknown\u003c/span\u003e\n                              \u003cbr/\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003eSupplemental:\u003c/b\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cspan\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                        \u003cspan\u003esupplemental-data-deceased\u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003etrue\u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecount: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e0\u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003esubjectResults: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                              \u003cb\u003ereference: \u003c/b\u003e\n                              \u003cspan\u003eList/CMS146-supplemental-data-deceased-true\u003c/span\u003e\n                              \u003cbr/\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"padding-left: 25px; margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eGroup:\u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                        \u003cb\u003evalue: \u003c/b\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003efalse\u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecount: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e500\u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003esubjectResults: \u003c/b\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                              \u003cb\u003ereference: \u003c/b\u003e\n                              \u003cspan\u003eList/CMS146-supplemental-data-deceased-false\u003c/span\u003e\n                              \u003cbr/\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n      \u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Organization",
+      "id": "reporter",
+      "name": "Good Health Hospital"
+    }
+  ],
+  "identifier": [
+    {
+      "value": "measurereport-cms146-cat2-example-2017-03-13"
+    }
+  ],
+  "status": "complete",
+  "type": "subject-list",
+  "measure": "Measure/CMS146",
+  "date": "2014-04-01",
+  "reporter": {
+    "reference": "#reporter"
+  },
+  "period": {
+    "start": "2014-01-01",
+    "end": "2014-03-31"
+  },
+  "group": [
+    {
+      "id": "CMS146-group-1",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "initial-population"
+              }
+            ]
+          },
+          "count": 500,
+          "subjectResults": {
+            "reference": "List/CMS146-initial-population"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "numerator"
+              }
+            ]
+          },
+          "count": 200,
+          "subjectResults": {
+            "reference": "List/CMS146-numerator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator"
+              }
+            ]
+          },
+          "count": 500,
+          "subjectResults": {
+            "reference": "List/CMS146-denominator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator-exclusion"
+              }
+            ]
+          },
+          "count": 100,
+          "subjectResults": {
+            "reference": "List/CMS146-denominator-exclusions"
+          }
+        }
+      ],
+      "stratifier": [
+        {
+          "code": [
+            {
+              "text": "stratifier-ages-up-to-9"
+            }
+          ],
+          "stratum": [
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-true-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-up-to-9-false-denominator-exclusions"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "code": [
+            {
+              "text": "stratifier-ages-10-plus"
+            }
+          ],
+          "stratum": [
+            {
+              "value": {
+                "text": "true"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-true-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "false"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-ages-10-plus-false-denominator-exclusions"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "code": [
+            {
+              "text": "stratifier-gender"
+            }
+          ],
+          "stratum": [
+            {
+              "value": {
+                "text": "male"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-male-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-male-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-male-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-male-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "female"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-female-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 100,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-female-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 250,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-female-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 50,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-female-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "other"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-other-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-other-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-other-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusion"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-other-denominator-exclusions"
+                  }
+                }
+              ]
+            },
+            {
+              "value": {
+                "text": "unknown"
+              },
+              "population": [
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "initial-population"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-unknown-initial-population"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "numerator"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-unknown-numerator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-unknown-denominator"
+                  }
+                },
+                {
+                  "code": {
+                    "coding": [
+                      {
+                        "code": "denominator-exclusions"
+                      }
+                    ]
+                  },
+                  "count": 0,
+                  "subjectResults": {
+                    "reference": "List/CMS146-stratifier-gender-unknown-denominator-exclusions"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

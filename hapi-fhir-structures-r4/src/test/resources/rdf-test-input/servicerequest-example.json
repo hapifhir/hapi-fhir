@@ -1,0 +1,43 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eTo be added\u003c/div\u003e"
+  },
+  "status": "completed",
+  "intent": "order",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "103693007",
+          "display": "Diagnostic procedure (procedure)"
+        }
+      ],
+      "text": "Diagnostics Procedure"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "303653007",
+        "display": "Computed tomography of head"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

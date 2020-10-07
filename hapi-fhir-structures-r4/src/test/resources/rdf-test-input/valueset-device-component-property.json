@@ -1,0 +1,158 @@
+{
+  "resourceType": "ValueSet",
+  "id": "device-component-property",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDeviceDefinitionPropertyCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes for identifying device properties.   This is based upon IEEE/HCD specified codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ccode\u003eurn:iso:std:iso:11073:10101\u003c/code\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68219\u003c/td\u003e\u003ctd\u003eMDC_TIME_CAP_STATE\u003c/td\u003e\u003ctd\u003eTime capability\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68220\u003c/td\u003e\u003ctd\u003eMDC_TIME_SYNC_PROTOCOL\u003c/td\u003e\u003ctd\u003eTime synchronization method\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68221\u003c/td\u003e\u003ctd\u003eMDC_TIME_SYNC_ACCURACY\u003c/td\u003e\u003ctd\u003eThe accuracy of the time synchronization\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68222\u003c/td\u003e\u003ctd\u003eMDC_TIME_RES_ABS\u003c/td\u003e\u003ctd\u003eThe resolution of the absolute time clock\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68223\u003c/td\u003e\u003ctd\u003eMDC_TIME_RES_REL\u003c/td\u003e\u003ctd\u003eThe resolution of the relative time clock\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68224\u003c/td\u003e\u003ctd\u003eMDC_TIME_RES_REL_HI_RES\u003c/td\u003e\u003ctd\u003eThe resolution of the high resolution time clock\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e68226\u003c/td\u003e\u003ctd\u003eMDC_TIME_RES_BO\u003c/td\u003e\u003ctd\u003eThe resolution of the base offset time clock\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e532353\u003c/td\u003e\u003ctd\u003eMDC_REG_CERT_DATA_CONTINUA_CERT_DEV_LIST\u003c/td\u003e\u003ctd\u003eThe specializations this device is certified for\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e532354\u003c/td\u003e\u003ctd\u003eMDC_REG_CERT_DATA_CONTINUA_REG_STATUS\u003c/td\u003e\u003ctd\u003eThe regulation type and status this device has\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e532355\u003c/td\u003e\u003ctd\u003eMDC_REG_CERT_DATA_CONTINUA_PHG_CERT_LIST\u003c/td\u003e\u003ctd\u003eThe upload transactions this gateway has been certified for\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/device-component-property",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.634"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DeviceDefinitionPropertyCode",
+  "title": "DeviceDefinitionPropertyCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes for identifying device properties.   This is based upon IEEE/HCD specified codes.",
+  "compose": {
+    "include": [
+      {
+        "system": "urn:iso:std:iso:11073:10101",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Time capability"
+              }
+            ],
+            "code": "68219",
+            "display": "MDC_TIME_CAP_STATE"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Time synchronization method"
+              }
+            ],
+            "code": "68220",
+            "display": "MDC_TIME_SYNC_PROTOCOL"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The accuracy of the time synchronization"
+              }
+            ],
+            "code": "68221",
+            "display": "MDC_TIME_SYNC_ACCURACY"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The resolution of the absolute time clock"
+              }
+            ],
+            "code": "68222",
+            "display": "MDC_TIME_RES_ABS"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The resolution of the relative time clock"
+              }
+            ],
+            "code": "68223",
+            "display": "MDC_TIME_RES_REL"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The resolution of the high resolution time clock"
+              }
+            ],
+            "code": "68224",
+            "display": "MDC_TIME_RES_REL_HI_RES"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The resolution of the base offset time clock"
+              }
+            ],
+            "code": "68226",
+            "display": "MDC_TIME_RES_BO"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The specializations this device is certified for"
+              }
+            ],
+            "code": "532353",
+            "display": "MDC_REG_CERT_DATA_CONTINUA_CERT_DEV_LIST"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The regulation type and status this device has"
+              }
+            ],
+            "code": "532354",
+            "display": "MDC_REG_CERT_DATA_CONTINUA_REG_STATUS"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The upload transactions this gateway has been certified for"
+              }
+            ],
+            "code": "532355",
+            "display": "MDC_REG_CERT_DATA_CONTINUA_PHG_CERT_LIST"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "resourceType": "Medication",
+  "id": "med0306",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: med0306\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Adcetris \u003cspan\u003e(Details : {http://hl7.org/fhir/sid/ndc code \u002751144-050-01\u0027 \u003d \u0027n/a\u0027, given as \u0027Adcetris\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emanufacturer\u003c/b\u003e: id: org3; name: Seattle Genetics Inc\u003c/p\u003e\u003cp\u003e\u003cb\u003eform\u003c/b\u003e: Lyophilized powder for injectable solution (qualifier value)  \u003cspan\u003e(Details : {SNOMED CT code \u0027421637006\u0027 \u003d \u0027Lyophilised powder for injectable solution\u0027, given as \u0027Lyophilized powder for injectable solution (qualifier value) \u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eBatches\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLotNumber\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpirationDate\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e12345\u003c/td\u003e\u003ctd\u003e31/10/2019\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Organization",
+      "id": "org3",
+      "name": "Seattle Genetics Inc"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/sid/ndc",
+        "code": "51144-050-01",
+        "display": "Adcetris"
+      }
+    ]
+  },
+  "manufacturer": {
+    "reference": "#org3"
+  },
+  "form": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "421637006",
+        "display": "Lyophilized powder for injectable solution (qualifier value) "
+      }
+    ]
+  },
+  "batch": {
+    "lotNumber": "12345",
+    "expirationDate": "2019-10-31"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

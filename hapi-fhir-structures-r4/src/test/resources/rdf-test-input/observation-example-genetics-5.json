@@ -1,0 +1,50 @@
+{
+  "resourceType": "Observation",
+  "id": "example-genetics-5",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-genetics-5\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: PCR validation \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eMolecular Lab Patient ID: HOSP-23456\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2013 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eSequence Analysis Laboratory\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Negative \u003cspan\u003e(Details : {SNOMED CT code \u0027260385009\u0027 \u003d \u0027Negative\u0027, given as \u0027Negative\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/observation-sequelTo",
+      "valueReference": {
+        "reference": "Observation/example-genetics-1",
+        "display": "ObservationForGenetics profile example 1"
+      }
+    }
+  ],
+  "status": "final",
+  "code": {
+    "text": "PCR validation"
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Molecular Lab Patient ID: HOSP-23456"
+  },
+  "issued": "2013-04-03T15:30:10+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/example",
+      "display": "Sequence Analysis Laboratory"
+    }
+  ],
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "260385009",
+        "display": "Negative"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

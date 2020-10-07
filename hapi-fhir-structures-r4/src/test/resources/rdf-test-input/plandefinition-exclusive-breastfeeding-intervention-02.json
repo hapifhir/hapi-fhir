@@ -1,0 +1,96 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "exclusive-breastfeeding-intervention-02",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003ePlanDefinition/exclusive-breastfeeding-intervention-02\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eIdentifier: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003evalue: \u003c/b\u003e\n                  \u003cspan\u003eexclusive-breastfeeding-intervention-02\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTitle: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eExclusive Breastfeeding Intervention-02\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eactive\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eDescription: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eExclusive breastfeeding intervention intended to improve outcomes for exclusive breastmilk feeding of newborns by notifying the provider to sign the breastmilk feeding readiness assessment order, if necessary.\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTopic: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003etext: \u003c/b\u003e\n                     \u003cspan\u003eExclusive Breastfeeding\u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eLibrary: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003ereference: \u003c/b\u003e\n                  \u003cspan\u003eLibrary/library-exclusive-breastfeeding-cds-logic\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ch2\u003eActions\u003c/h2\u003e\n         \u003cp style\u003d\"width: 100%;\" class\u003d\"hierarchy\"\u003e\n            \u003cspan\u003e\n               \u003cb\u003eStep: \u003c/b\u003e\n               \u003cbr/\u003e\n               \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003etitle: \u003c/b\u003e\n                  \u003cspan\u003eMother should be administered a breastfeeding readiness assessment.\u003c/span\u003e\n                  \u003cbr/\u003e\n               \u003c/span\u003e\n               \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003econdition: \u003c/b\u003e\n                  \u003cbr/\u003e\n                  \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003eapplicability\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                     \u003cb\u003eexpression: \u003c/b\u003e\n                     \u003cspan\u003eShould Notify Provider to Sign Assessment Order\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n               \u003c/span\u003e\n               \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eStep: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                        \u003cb\u003etitle: \u003c/b\u003e\n                        \u003cspan\u003eNotify the provider to sign the order.\u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                        \u003cb\u003etext: \u003c/b\u003e\n                        \u003cspan\u003eA Breastfeeding Readiness Assessment is recommended, please authorize or reject the order.\u003c/span\u003e\n                        \u003cbr/\u003e\n                     \u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/span\u003e\n            \u003c/span\u003e\n         \u003c/p\u003e\n      \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "value": "exclusive-breastfeeding-intervention-02"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Exclusive Breastfeeding Intervention-02",
+  "status": "active",
+  "date": "2015-03-08",
+  "description": "Exclusive breastfeeding intervention intended to improve outcomes for exclusive breastmilk feeding of newborns by notifying the provider to sign the breastmilk feeding readiness assessment order, if necessary.",
+  "topic": [
+    {
+      "text": "Exclusive Breastfeeding"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "derived-from",
+      "resource": "Measure/measure-exclusive-breastfeeding"
+    }
+  ],
+  "library": [
+    "Library/library-exclusive-breastfeeding-cds-logic"
+  ],
+  "action": [
+    {
+      "title": "Mother should be administered a breastfeeding readiness assessment.",
+      "trigger": [
+        {
+          "type": "named-event",
+          "name": "Admission"
+        },
+        {
+          "type": "named-event",
+          "name": "Birth"
+        },
+        {
+          "type": "named-event",
+          "name": "Infant Transfer to Recovery"
+        },
+        {
+          "type": "named-event",
+          "name": "Transfer to Post-Partum"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": {
+            "language": "text/cql",
+            "expression": "Should Notify Provider to Sign Assessment Order"
+          }
+        }
+      ],
+      "action": [
+        {
+          "title": "Notify the provider to sign the order.",
+          "textEquivalent": "A Breastfeeding Readiness Assessment is recommended, please authorize or reject the order.",
+          "type": {
+            "coding": [
+              {
+                "code": "create"
+              }
+            ]
+          },
+          "dynamicValue": [
+            {
+              "path": "/",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Communication Request to Provider"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "resourceType": "Provenance",
+  "id": "signature",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eprocedure record authored on 27-June 2015 by Harold Hippocrates, MD Content extracted from Referral received 26-June\u003c/div\u003e"
+  },
+  "target": [
+    {
+      "reference": "DocumentReference/example"
+    }
+  ],
+  "recorded": "2015-08-27T08:39:24+10:00",
+  "reason": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+          "code": "TREAT",
+          "display": "treatment"
+        }
+      ]
+    }
+  ],
+  "activity": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-DocumentCompletion",
+        "code": "AU",
+        "display": "authenticated"
+      }
+    ]
+  },
+  "agent": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/contractsignertypecodes",
+            "code": "VERF"
+          }
+        ]
+      },
+      "who": {
+        "identifier": {
+          "system": "urn:ietf:rfc:3986",
+          "value": "mailto://hhd@ssa.gov"
+        }
+      }
+    }
+  ],
+  "signature": [
+    {
+      "type": [
+        {
+          "system": "urn:iso-astm:E1762-95:2013",
+          "code": "1.2.840.10065.1.12.1.5",
+          "display": "Verification Signature"
+        }
+      ],
+      "when": "2015-08-27T08:39:24+10:00",
+      "who": {
+        "reference": "Practitioner/xcda-author"
+      },
+      "targetFormat": "application/fhir+xml",
+      "sigFormat": "application/signature+xml",
+      "data": "Li4u"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

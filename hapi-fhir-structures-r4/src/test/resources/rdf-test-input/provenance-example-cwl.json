@@ -1,0 +1,65 @@
+{
+  "resourceType": "Provenance",
+  "id": "example-cwl",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\n\t\t\t\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003eid\u003c/b\u003e: cwl-example\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003etarget\u003c/b\u003e: \u003ca href\u003d\"http://build.fhir.org/sequence-example-pgx-1.html\"\u003eMolecularSequence/example-pgx-1\u003c/a\u003e\n\t\t\t\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003eperiod\u003c/b\u003e: Nov 30, 2016 --\u0026gt; (ongoing)\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003erecorded\u003c/b\u003e: Dec 1, 2016 8:12:14 AM\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003ereason\u003c/b\u003e: profiling Short Tandem Repeats (STRs) from high throughput sequencing data. (Details:\n         [not stated] code null \u003d \u0027null\u0027, stated as \u0027profiling Short Tandem Repeats (STRs) from\n         high throughput sequencing data.\u0027)\u003c/p\u003e\n\t\t\t\u003ch3\u003eAgents\u003c/h3\u003e\n\t\t\t\u003ctable\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eRole\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eWho\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e*\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eAuthor (Details: http://hl7.org/fhir/provenance-participant-role code author \u003d \u0027Author\u0027,\n             stated as \u0027null\u0027)\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003ca href\u003d\"http://build.fhir.org/patient-example.html\"\u003ePatient/example\u003c/a\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\u003c/table\u003e\n\t\t\t\u003ch3\u003eEntities\u003c/h3\u003e\n\t\t\t\u003ctable\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eRole\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eReference\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e*\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003esource\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003ca href\u003d\"https://github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl\"\u003eCWL example\u003c/a\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\u003c/table\u003e\n\t\t\u003c/div\u003e"
+  },
+  "target": [
+    {
+      "reference": "MolecularSequence/example-pgx-1"
+    }
+  ],
+  "occurredPeriod": {
+    "start": "2016-11-30"
+  },
+  "recorded": "2016-12-01T08:12:14+10:00",
+  "reason": [
+    {
+      "text": "profiling Short Tandem Repeats (STRs) from high throughput sequencing data."
+    }
+  ],
+  "agent": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+            "code": "AUT"
+          }
+        ]
+      },
+      "who": {
+        "reference": "Patient/example"
+      }
+    }
+  ],
+  "entity": [
+    {
+      "role": "source",
+      "what": {
+        "identifier": {
+          "type": {
+            "coding": [
+              {
+                "system": "https://github.com/common-workflow-language/workflows",
+                "code": "CWL",
+                "display": "lobSTR"
+              }
+            ]
+          },
+          "value": "https://github.com/common-workflow-language/workflows/blob/master/workflows/lobSTR/lobSTR-workflow.cwl"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "resourceType": "MedicationRequest",
+  "id": "medrx0315",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: medrx0315\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 12345689 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: id: med0313; Lorazepam 2mg/ml injection solution 1ml vial (product) \u003cspan\u003e(Details : {SNOMED CT code \u0027400621001\u0027 \u003d \u0027Lorazepam 2mg/mL injection solution 1mL vial\u0027, given as \u0027Lorazepam 2mg/ml injection solution 1ml vial (product)\u0027})\u003c/span\u003e; Injection solution (qualifier value) \u003cspan\u003e(Details : {SNOMED CT code \u0027385219001\u0027 \u003d \u0027Injection solution\u0027, given as \u0027Injection solution (qualifier value)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eencounter who leads to this prescription\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthoredOn\u003c/b\u003e: 15/01/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003ePatrick Pump\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Epilepsy (disorder) \u003cspan\u003e(Details : {SNOMED CT code \u002784757009\u0027 \u003d \u0027Epilepsy\u0027, given as \u0027Epilepsy (disorder)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0313",
+      "code": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "400621001",
+            "display": "Lorazepam 2mg/ml injection solution 1ml vial (product)"
+          }
+        ]
+      },
+      "form": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "385219001",
+            "display": "Injection solution (qualifier value)"
+          }
+        ]
+      },
+      "ingredient": [
+        {
+          "itemCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "387106007",
+                "display": "Lorazepam (substance)"
+              }
+            ]
+          },
+          "strength": {
+            "numerator": {
+              "value": 2,
+              "system": "http://unitsofmeasure.org",
+              "code": "mg"
+            },
+            "denominator": {
+              "value": 1,
+              "system": "http://unitsofmeasure.org",
+              "code": "mL"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://www.bmc.nl/portal/prescriptions",
+      "value": "12345689"
+    }
+  ],
+  "status": "active",
+  "intent": "order",
+  "medicationReference": {
+    "reference": "#med0313"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "encounter": {
+    "reference": "Encounter/f001",
+    "display": "encounter who leads to this prescription"
+  },
+  "authoredOn": "2015-01-15",
+  "requester": {
+    "reference": "Practitioner/f007",
+    "display": "Patrick Pump"
+  },
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "84757009",
+          "display": "Epilepsy (disorder)"
+        }
+      ]
+    }
+  ],
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "0.05 - 0.1mg/kg IV over 2-5 minutes every 15 minutes as needed",
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 15,
+          "periodUnit": "min"
+        }
+      },
+      "asNeededBoolean": true,
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "255560000",
+            "display": "Intravenous"
+          }
+        ]
+      },
+      "method": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "420620005",
+            "display": "Push - dosing instruction imperative (qualifier value)"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseRange": {
+            "low": {
+              "value": 0.05,
+              "unit": "mg/kg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/kg"
+            },
+            "high": {
+              "value": 0.1,
+              "unit": "mg/kg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg/kg"
+            }
+          },
+          "rateRange": {
+            "low": {
+              "value": 2,
+              "unit": "min",
+              "system": "http://unitsofmeasure.org",
+              "code": "min"
+            },
+            "high": {
+              "value": 5,
+              "unit": "min",
+              "system": "http://unitsofmeasure.org",
+              "code": "min"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "standards-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStandardsStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eHL7 Ballot/Standards status of artifact.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/standards-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"standards-status-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eThis portion of the specification is not considered to be complete enough or sufficiently reviewed to be safe for implementation. It may have known issues or still be in the \u0026quot;in development\u0026quot; stage. It is included in the publication as a place-holder, to solicit feedback from the implementation community and/or to give implementers some insight as to functionality likely to be included in future versions of the specification. Content at this level should only be implemented by the brave or desperate and is very much \u0026quot;use at your own risk\u0026quot;. The content that is Draft that will usually be elevated to Trial Use once review and correction is complete after it has been subjected to ballot.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enormative\u003ca name\u003d\"standards-status-normative\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNormative\u003c/td\u003e\u003ctd\u003eThis content has been subject to review and production implementation in a wide variety of environments. The content is considered to be stable and has been \u0027locked\u0027, subjecting it to FHIR Inter-version Compatibility Rules. While changes are possible, they are expected to be infrequent and are tightly constrained. Compatibility Rules.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etrial-use\u003ca name\u003d\"standards-status-trial-use\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTrial-Use\u003c/td\u003e\u003ctd\u003eThis content has been well reviewed and is considered by the authors to be ready for use in production systems. It has been subjected to ballot and approved as an official standard. However, it has not yet seen widespread use in production across the full spectrum of environments it is intended to be used in. In some cases, there may be documented known issues that require implementation experience to determine appropriate resolutions for.\n\nFuture versions of FHIR may make significant changes to Trial Use content that are not compatible with previously published content.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einformative\u003ca name\u003d\"standards-status-informative\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformative\u003c/td\u003e\u003ctd\u003eThis portion of the specification is provided for implementer assistance, and does not make rules that implementers are required to follow. Typical examples of this content in the FHIR specification are tables of contents, registries, examples, and implementer advice.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeprecated\u003ca name\u003d\"standards-status-deprecated\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeprecated\u003c/td\u003e\u003ctd\u003eThis portion of the specification is provided for implementer assistance, and does not make rules that implementers are required to follow. Typical examples of this content in the FHIR specification are tables of contents, registries, examples, and implementer advice.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexternal\u003ca name\u003d\"standards-status-external\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExternal\u003c/td\u003e\u003ctd\u003eThis is content that is managed outside the FHIR Specification, but included for implementer convenience.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/standards-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1366"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "StandardsStatus",
+  "title": "StandardsStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "HL7 Ballot/Standards status of artifact.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/standards-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "draft",
+      "display": "Draft",
+      "definition": "This portion of the specification is not considered to be complete enough or sufficiently reviewed to be safe for implementation. It may have known issues or still be in the \"in development\" stage. It is included in the publication as a place-holder, to solicit feedback from the implementation community and/or to give implementers some insight as to functionality likely to be included in future versions of the specification. Content at this level should only be implemented by the brave or desperate and is very much \"use at your own risk\". The content that is Draft that will usually be elevated to Trial Use once review and correction is complete after it has been subjected to ballot."
+    },
+    {
+      "code": "normative",
+      "display": "Normative",
+      "definition": "This content has been subject to review and production implementation in a wide variety of environments. The content is considered to be stable and has been \u0027locked\u0027, subjecting it to FHIR Inter-version Compatibility Rules. While changes are possible, they are expected to be infrequent and are tightly constrained. Compatibility Rules."
+    },
+    {
+      "code": "trial-use",
+      "display": "Trial-Use",
+      "definition": "This content has been well reviewed and is considered by the authors to be ready for use in production systems. It has been subjected to ballot and approved as an official standard. However, it has not yet seen widespread use in production across the full spectrum of environments it is intended to be used in. In some cases, there may be documented known issues that require implementation experience to determine appropriate resolutions for.\n\nFuture versions of FHIR may make significant changes to Trial Use content that are not compatible with previously published content."
+    },
+    {
+      "code": "informative",
+      "display": "Informative",
+      "definition": "This portion of the specification is provided for implementer assistance, and does not make rules that implementers are required to follow. Typical examples of this content in the FHIR specification are tables of contents, registries, examples, and implementer advice."
+    },
+    {
+      "code": "deprecated",
+      "display": "Deprecated",
+      "definition": "This portion of the specification is provided for implementer assistance, and does not make rules that implementers are required to follow. Typical examples of this content in the FHIR specification are tables of contents, registries, examples, and implementer advice."
+    },
+    {
+      "code": "external",
+      "display": "External",
+      "definition": "This is content that is managed outside the FHIR Specification, but included for implementer convenience."
+    }
+  ]
+}

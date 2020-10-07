@@ -1,0 +1,72 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "fundsreserve",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFunds Reservation Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample funds reservation type codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/fundsreserve defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatient\u003ca name\u003d\"fundsreserve-patient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eThe payor is requested to reserve funds for the provision of the named services by any provider for settlement of future claims related to this request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprovider\u003ca name\u003d\"fundsreserve-provider\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider\u003c/td\u003e\u003ctd\u003eThe payor is requested to reserve funds solely for the named provider for settlement of future claims related to this request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enone\u003ca name\u003d\"fundsreserve-none\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNone\u003c/td\u003e\u003ctd\u003eThe payor is not being requested to reserve any funds for the settlement of future claims.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/fundsreserve",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1051"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "Funds Reservation Codes",
+  "status": "draft",
+  "experimental": true,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sample funds reservation type codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/fundsreserve",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "patient",
+      "display": "Patient",
+      "definition": "The payor is requested to reserve funds for the provision of the named services by any provider for settlement of future claims related to this request."
+    },
+    {
+      "code": "provider",
+      "display": "Provider",
+      "definition": "The payor is requested to reserve funds solely for the named provider for settlement of future claims related to this request."
+    },
+    {
+      "code": "none",
+      "display": "None",
+      "definition": "The payor is not being requested to reserve any funds for the settlement of future claims."
+    }
+  ]
+}

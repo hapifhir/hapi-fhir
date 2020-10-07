@@ -1,0 +1,70 @@
+{
+  "resourceType": "Schedule",
+  "id": "exampleloc2",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      Dr. Beverly Crusher - Starfleet HQ Sickbay Schedule\n\t\t\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "http://example.org/scheduleid",
+      "value": "47"
+    }
+  ],
+  "active": true,
+  "serviceCategory": [
+    {
+      "coding": [
+        {
+          "code": "31",
+          "display": "Specialist Surgical"
+        }
+      ]
+    }
+  ],
+  "serviceType": [
+    {
+      "coding": [
+        {
+          "code": "221",
+          "display": "Surgery - General"
+        }
+      ]
+    }
+  ],
+  "specialty": [
+    {
+      "coding": [
+        {
+          "code": "394610002",
+          "display": "Surgery-Neurosurgery"
+        }
+      ]
+    }
+  ],
+  "actor": [
+    {
+      "reference": "Practitioner/1",
+      "display": "Dr. Beverly Crusher"
+    },
+    {
+      "reference": "Location/2",
+      "display": "Starfleet HQ Sickbay"
+    }
+  ],
+  "planningHorizon": {
+    "start": "2017-12-25T09:15:00Z",
+    "end": "2017-12-25T09:30:00Z"
+  },
+  "comment": "The slots attached to this schedule are for neurosurgery operations at Starfleet HQ only.",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

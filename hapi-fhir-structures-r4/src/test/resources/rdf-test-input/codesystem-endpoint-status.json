@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "endpoint-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEndpointStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe status of the endpoint.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/endpoint-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"endpoint-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eThis endpoint is expected to be active and can be used.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esuspended\u003ca name\u003d\"endpoint-status-suspended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuspended\u003c/td\u003e\u003ctd\u003eThis endpoint is temporarily unavailable.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eerror\u003ca name\u003d\"endpoint-status-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eError\u003c/td\u003e\u003ctd\u003eThis endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoff\u003ca name\u003d\"endpoint-status-off\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOff\u003c/td\u003e\u003ctd\u003eThis endpoint is no longer to be used.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"endpoint-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in error\u003c/td\u003e\u003ctd\u003eThis instance should not have been part of this patient\u0027s medical record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etest\u003ca name\u003d\"endpoint-status-test\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTest\u003c/td\u003e\u003ctd\u003eThis endpoint is not intended for production usage.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/endpoint-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.495"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EndpointStatus",
+  "title": "EndpointStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The status of the endpoint.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/endpoint-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "active",
+      "display": "Active",
+      "definition": "This endpoint is expected to be active and can be used."
+    },
+    {
+      "code": "suspended",
+      "display": "Suspended",
+      "definition": "This endpoint is temporarily unavailable."
+    },
+    {
+      "code": "error",
+      "display": "Error",
+      "definition": "This endpoint has exceeded connectivity thresholds and is considered in an error state and should no longer be attempted to connect to until corrective action is taken."
+    },
+    {
+      "code": "off",
+      "display": "Off",
+      "definition": "This endpoint is no longer to be used."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in error",
+      "definition": "This instance should not have been part of this patient\u0027s medical record."
+    },
+    {
+      "code": "test",
+      "display": "Test",
+      "definition": "This endpoint is not intended for production usage."
+    }
+  ]
+}

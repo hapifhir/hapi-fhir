@@ -1,0 +1,63 @@
+{
+  "resourceType": "Patient",
+  "id": "glossy",
+  "meta": {
+    "lastUpdated": "2014-11-13T11:41:00+11:00",
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eHenry Levin the 7th\u003c/p\u003e\n      \u003cp\u003eMRN: 123456. Male, 24-Sept 1932\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://example.org/StructureDefinition/trials",
+      "valueCode": "renal"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "MR"
+          }
+        ]
+      },
+      "system": "http://www.goodhealth.org/identifiers/mrn",
+      "value": "123456"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "family": "Levin",
+      "given": [
+        "Henry"
+      ],
+      "suffix": [
+        "The 7th"
+      ]
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1932-09-24",
+  "generalPractitioner": [
+    {
+      "reference": "Practitioner/example",
+      "display": "Dr Adam Careful"
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/2",
+    "display": "Good Health Clinic"
+  }
+}

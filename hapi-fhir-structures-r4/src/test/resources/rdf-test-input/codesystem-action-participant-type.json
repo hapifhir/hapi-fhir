@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "action-participant-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eActionParticipantType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of participant for the action.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/action-participant-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatient\u003ca name\u003d\"action-participant-type-patient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eThe participant is the patient under evaluation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epractitioner\u003ca name\u003d\"action-participant-type-practitioner\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePractitioner\u003c/td\u003e\u003ctd\u003eThe participant is a practitioner involved in the patient\u0027s care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erelated-person\u003ca name\u003d\"action-participant-type-related-person\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelated Person\u003c/td\u003e\u003ctd\u003eThe participant is a person related to the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edevice\u003ca name\u003d\"action-participant-type-device\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDevice\u003c/td\u003e\u003ctd\u003eThe participant is a system or device used in the care of the patient.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/action-participant-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.812"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ActionParticipantType",
+  "title": "ActionParticipantType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of participant for the action.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/action-participant-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "patient",
+      "display": "Patient",
+      "definition": "The participant is the patient under evaluation."
+    },
+    {
+      "code": "practitioner",
+      "display": "Practitioner",
+      "definition": "The participant is a practitioner involved in the patient\u0027s care."
+    },
+    {
+      "code": "related-person",
+      "display": "Related Person",
+      "definition": "The participant is a person related to the patient."
+    },
+    {
+      "code": "device",
+      "display": "Device",
+      "definition": "The participant is a system or device used in the care of the patient."
+    }
+  ]
+}

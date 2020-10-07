@@ -1,0 +1,73 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "operation-parameter-use",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eOperationParameterUse\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eWhether an operation parameter is an input or an output parameter.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/operation-parameter-use defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein\u003ca name\u003d\"operation-parameter-use-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn\u003c/td\u003e\u003ctd\u003eThis is an input parameter.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eout\u003ca name\u003d\"operation-parameter-use-out\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOut\u003c/td\u003e\u003ctd\u003eThis is an output parameter.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    }
+  ],
+  "url": "http://hl7.org/fhir/operation-parameter-use",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.509"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "OperationParameterUse",
+  "title": "OperationParameterUse",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Whether an operation parameter is an input or an output parameter.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/operation-parameter-use",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "in",
+      "display": "In",
+      "definition": "This is an input parameter."
+    },
+    {
+      "code": "out",
+      "display": "Out",
+      "definition": "This is an output parameter."
+    }
+  ]
+}

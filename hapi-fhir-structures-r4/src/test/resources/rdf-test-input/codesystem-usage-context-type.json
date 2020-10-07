@@ -1,0 +1,104 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "usage-context-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eUsageContextType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA code that specifies a type of context being specified by a usage context.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/usage-context-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egender\u003ca name\u003d\"usage-context-type-gender\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGender\u003c/td\u003e\u003ctd\u003eThe gender of the patient. For this context type, appropriate values can be found in the http://hl7.org/fhir/ValueSet/administrative-gender value set.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eage\u003ca name\u003d\"usage-context-type-age\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAge Range\u003c/td\u003e\u003ctd\u003eThe age of the patient. For this context type, the value could be a range that specifies the applicable ages or a code from an appropriate value set such as the MeSH value set http://terminology.hl7.org/ValueSet/v3-AgeGroupObservationValue.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efocus\u003ca name\u003d\"usage-context-type-focus\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Focus\u003c/td\u003e\u003ctd\u003eThe clinical concept(s) addressed by the artifact. For example, disease, diagnostic test interpretation, medication ordering as in http://hl7.org/fhir/ValueSet/condition-code.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euser\u003ca name\u003d\"usage-context-type-user\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUser Type\u003c/td\u003e\u003ctd\u003eThe clinical specialty of the context in which the patient is being treated - For example, PCP, Patient, Cardiologist, Behavioral Professional, Oral Health Professional, Prescriber, etc... taken from a specialty value set such as the NUCC Health Care provider taxonomy value set http://hl7.org/fhir/ValueSet/provider-taxonomy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eworkflow\u003ca name\u003d\"usage-context-type-workflow\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWorkflow Setting\u003c/td\u003e\u003ctd\u003eThe settings in which the artifact is intended for use. For example, admission, pre-op, etc. For example, the ActEncounterCode value set http://terminology.hl7.org/ValueSet/v3-ActEncounterCode.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etask\u003ca name\u003d\"usage-context-type-task\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWorkflow Task\u003c/td\u003e\u003ctd\u003eThe context for the clinical task(s) represented by this artifact. For example, this could be any task context represented by the HL7 ActTaskCode value set http://terminology.hl7.org/ValueSet/v3-ActTaskCode. General categories include: order entry, patient documentation and patient information review.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evenue\u003ca name\u003d\"usage-context-type-venue\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Venue\u003c/td\u003e\u003ctd\u003eThe venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from the HL7 ServiceDeliveryLocationRoleType value set (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003especies\u003ca name\u003d\"usage-context-type-species\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpecies\u003c/td\u003e\u003ctd\u003eThe species to which an artifact applies. For example, SNOMED - 387961004 | Kingdom Animalia (organism).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprogram\u003ca name\u003d\"usage-context-type-program\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProgram\u003c/td\u003e\u003ctd\u003eA program/project of work for which this artifact is applicable.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1068"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "UsageContextType",
+  "title": "UsageContextType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A code that specifies a type of context being specified by a usage context.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/usage-context-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "gender",
+      "display": "Gender",
+      "definition": "The gender of the patient. For this context type, appropriate values can be found in the http://hl7.org/fhir/ValueSet/administrative-gender value set."
+    },
+    {
+      "code": "age",
+      "display": "Age Range",
+      "definition": "The age of the patient. For this context type, the value could be a range that specifies the applicable ages or a code from an appropriate value set such as the MeSH value set http://terminology.hl7.org/ValueSet/v3-AgeGroupObservationValue."
+    },
+    {
+      "code": "focus",
+      "display": "Clinical Focus",
+      "definition": "The clinical concept(s) addressed by the artifact. For example, disease, diagnostic test interpretation, medication ordering as in http://hl7.org/fhir/ValueSet/condition-code."
+    },
+    {
+      "code": "user",
+      "display": "User Type",
+      "definition": "The clinical specialty of the context in which the patient is being treated - For example, PCP, Patient, Cardiologist, Behavioral Professional, Oral Health Professional, Prescriber, etc... taken from a specialty value set such as the NUCC Health Care provider taxonomy value set http://hl7.org/fhir/ValueSet/provider-taxonomy."
+    },
+    {
+      "code": "workflow",
+      "display": "Workflow Setting",
+      "definition": "The settings in which the artifact is intended for use. For example, admission, pre-op, etc. For example, the ActEncounterCode value set http://terminology.hl7.org/ValueSet/v3-ActEncounterCode."
+    },
+    {
+      "code": "task",
+      "display": "Workflow Task",
+      "definition": "The context for the clinical task(s) represented by this artifact. For example, this could be any task context represented by the HL7 ActTaskCode value set http://terminology.hl7.org/ValueSet/v3-ActTaskCode. General categories include: order entry, patient documentation and patient information review."
+    },
+    {
+      "code": "venue",
+      "display": "Clinical Venue",
+      "definition": "The venue in which an artifact could be used. For example, Outpatient, Inpatient, Home, Nursing home. The code value may originate from the HL7 ServiceDeliveryLocationRoleType value set (http://terminology.hl7.org/ValueSet/v3-ServiceDeliveryLocationRoleType)."
+    },
+    {
+      "code": "species",
+      "display": "Species",
+      "definition": "The species to which an artifact applies. For example, SNOMED - 387961004 | Kingdom Animalia (organism)."
+    },
+    {
+      "code": "program",
+      "display": "Program",
+      "definition": "A program/project of work for which this artifact is applicable."
+    }
+  ]
+}

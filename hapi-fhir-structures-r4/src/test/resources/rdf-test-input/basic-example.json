@@ -1,0 +1,83 @@
+{
+  "resourceType": "Basic",
+  "id": "referral",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003e\u003cb\u003ePatient:\u003c/b\u003eRoel\u003c/p\u003e\n      \u003cp\u003e\u003cb\u003eRequestor:\u003c/b\u003eDokter Bronsig\u003c/p\u003e\n      \u003cp\u003e\u003cb\u003eType:\u003c/b\u003eConsultation\u003c/p\u003e\n      \u003cp\u003e\u003cb\u003eTarget Date:\u003c/b\u003eApril 1 - April 31\u003c/p\u003e\n      \u003cp\u003eCOMPLETED\u003c/p\u003e\n      \u003cb\u003eThe patient had fever peaks over the last couple of days. He is worried about these peaks.\u003c/b\u003e\n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://example.org/do-not-use/fhir-extensions/referral#requestingPractitioner",
+      "valueReference": {
+        "reference": "Practitioner/f201",
+        "display": "Dokter Bronsig"
+      }
+    },
+    {
+      "url": "http://example.org/do-not-use/fhir-extensions/referral#notes",
+      "valueString": "The patient had fever peaks over the last couple of days. He is worried about these peaks."
+    },
+    {
+      "url": "http://example.org/do-not-use/fhir-extensions/referral#fulfillingEncounter",
+      "valueReference": {
+        "reference": "Encounter/f201"
+      }
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://example.org/do-not-use/fhir-extensions/referral#referredForService",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "11429006",
+            "display": "Consultation"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://example.org/do-not-use/fhir-extensions/referral#targetDate",
+      "valuePeriod": {
+        "start": "2013-04-01",
+        "end": "2013-04-15"
+      }
+    },
+    {
+      "url": "http://example.org/do-not-use/fhir-extensions/referral#status",
+      "valueCode": "complete"
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://goodhealth.org/basic/identifiers",
+      "value": "19283746"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/basic-resource-type",
+        "code": "referral"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "created": "2013-05-14",
+  "author": {
+    "reference": "Practitioner/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

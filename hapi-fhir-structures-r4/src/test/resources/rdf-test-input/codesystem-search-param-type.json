@@ -1,0 +1,93 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "search-param-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSearchParamType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eData types allowed to be used for search parameters.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/search-param-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enumber\u003ca name\u003d\"search-param-type-number\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNumber\u003c/td\u003e\u003ctd\u003eSearch parameter SHALL be a number (a whole number, or a decimal).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edate\u003ca name\u003d\"search-param-type-date\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDate/DateTime\u003c/td\u003e\u003ctd\u003eSearch parameter is on a date/time. The date format is the standard XML format, though other formats may be supported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estring\u003ca name\u003d\"search-param-type-string\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eString\u003c/td\u003e\u003ctd\u003eSearch parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etoken\u003ca name\u003d\"search-param-type-token\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eToken\u003c/td\u003e\u003ctd\u003eSearch parameter on a coded element or identifier. May be used to search through the text, display, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \u0026quot;|\u0026quot;, depending on the modifier used.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereference\u003ca name\u003d\"search-param-type-reference\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReference\u003c/td\u003e\u003ctd\u003eA reference to another resource (Reference or canonical).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomposite\u003ca name\u003d\"search-param-type-composite\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComposite\u003c/td\u003e\u003ctd\u003eA composite search parameter that combines a search on two values together.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003equantity\u003ca name\u003d\"search-param-type-quantity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuantity\u003c/td\u003e\u003ctd\u003eA search parameter that searches on a quantity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euri\u003ca name\u003d\"search-param-type-uri\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eURI\u003c/td\u003e\u003ctd\u003eA search parameter that searches on a URI (RFC 3986).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003especial\u003ca name\u003d\"search-param-type-special\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpecial\u003c/td\u003e\u003ctd\u003eSpecial logic applies to this parameter per the description of the search parameter.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/search-param-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.12"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SearchParamType",
+  "title": "SearchParamType",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "Data types allowed to be used for search parameters.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/search-param-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "number",
+      "display": "Number",
+      "definition": "Search parameter SHALL be a number (a whole number, or a decimal)."
+    },
+    {
+      "code": "date",
+      "display": "Date/DateTime",
+      "definition": "Search parameter is on a date/time. The date format is the standard XML format, though other formats may be supported."
+    },
+    {
+      "code": "string",
+      "display": "String",
+      "definition": "Search parameter is a simple string, like a name part. Search is case-insensitive and accent-insensitive. May match just the start of a string. String parameters may contain spaces."
+    },
+    {
+      "code": "token",
+      "display": "Token",
+      "definition": "Search parameter on a coded element or identifier. May be used to search through the text, display, code and code/codesystem (for codes) and label, system and key (for identifier). Its value is either a string or a pair of namespace and value, separated by a \"|\", depending on the modifier used."
+    },
+    {
+      "code": "reference",
+      "display": "Reference",
+      "definition": "A reference to another resource (Reference or canonical)."
+    },
+    {
+      "code": "composite",
+      "display": "Composite",
+      "definition": "A composite search parameter that combines a search on two values together."
+    },
+    {
+      "code": "quantity",
+      "display": "Quantity",
+      "definition": "A search parameter that searches on a quantity."
+    },
+    {
+      "code": "uri",
+      "display": "URI",
+      "definition": "A search parameter that searches on a URI (RFC 3986)."
+    },
+    {
+      "code": "special",
+      "display": "Special",
+      "definition": "Special logic applies to this parameter per the description of the search parameter."
+    }
+  ]
+}

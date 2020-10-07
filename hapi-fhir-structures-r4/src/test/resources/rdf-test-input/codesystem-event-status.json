@@ -1,0 +1,99 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "event-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEventStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes identifying the lifecycle stage of an event.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/event-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epreparation\u003ca name\u003d\"event-status-preparation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePreparation\u003c/td\u003e\u003ctd\u003eThe core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein-progress\u003ca name\u003d\"event-status-in-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Progress\u003c/td\u003e\u003ctd\u003eThe event is currently occurring.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-done\u003ca name\u003d\"event-status-not-done\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Done\u003c/td\u003e\u003ctd\u003eThe event was terminated prior to any activity beyond preparation.  I.e. The \u0027main\u0027 activity has not yet begun.  The boundary between preparatory and the \u0027main\u0027 activity is context-specific.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-hold\u003ca name\u003d\"event-status-on-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Hold\u003c/td\u003e\u003ctd\u003eThe event has been temporarily stopped but is expected to resume in the future.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estopped\u003ca name\u003d\"event-status-stopped\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStopped\u003c/td\u003e\u003ctd\u003eThe event was terminated prior to the full completion of the intended activity but after at least some of the \u0027main\u0027 activity (beyond preparation) has occurred.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecompleted\u003ca name\u003d\"event-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eThe event has now concluded.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"event-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThis electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \u0026quot;stopped\u0026quot; rather than \u0026quot;entered-in-error\u0026quot;.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"event-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe authoring/source system does not know which of the status values currently applies for this event.  Note: This concept is not to be used for \u0026quot;other\u0026quot; - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/event-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.110"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EventStatus",
+  "title": "EventStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes identifying the lifecycle stage of an event.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/event-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "preparation",
+      "display": "Preparation",
+      "definition": "The core event has not started yet, but some staging activities have begun (e.g. surgical suite preparation).  Preparation stages may be tracked for billing purposes."
+    },
+    {
+      "code": "in-progress",
+      "display": "In Progress",
+      "definition": "The event is currently occurring."
+    },
+    {
+      "code": "not-done",
+      "display": "Not Done",
+      "definition": "The event was terminated prior to any activity beyond preparation.  I.e. The \u0027main\u0027 activity has not yet begun.  The boundary between preparatory and the \u0027main\u0027 activity is context-specific."
+    },
+    {
+      "code": "on-hold",
+      "display": "On Hold",
+      "definition": "The event has been temporarily stopped but is expected to resume in the future."
+    },
+    {
+      "code": "stopped",
+      "display": "Stopped",
+      "definition": "The event was terminated prior to the full completion of the intended activity but after at least some of the \u0027main\u0027 activity (beyond preparation) has occurred."
+    },
+    {
+      "code": "completed",
+      "display": "Completed",
+      "definition": "The event has now concluded."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"stopped\" rather than \"entered-in-error\".)."
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The authoring/source system does not know which of the status values currently applies for this event.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which."
+    }
+  ]
+}

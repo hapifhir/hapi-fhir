@@ -1,0 +1,206 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "event-resource-types",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEventResourceType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA list of all the event resource types defined in this version of the FHIR specification.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/event-resource-types defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eChargeItem\u003ca name\u003d\"event-resource-types-ChargeItem\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChargeItem\u003c/td\u003e\u003ctd\u003eItem containing charge code(s) associated with the provision of healthcare provider products.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eClaimResponse\u003ca name\u003d\"event-resource-types-ClaimResponse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClaimResponse\u003c/td\u003e\u003ctd\u003eRemittance resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eClinicalImpression\u003ca name\u003d\"event-resource-types-ClinicalImpression\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinicalImpression\u003c/td\u003e\u003ctd\u003eA clinical assessment performed when planning treatments and management strategies for a patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCommunication\u003ca name\u003d\"event-resource-types-Communication\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunication\u003c/td\u003e\u003ctd\u003eA record of information transmitted from a sender to a receiver.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eComposition\u003ca name\u003d\"event-resource-types-Composition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComposition\u003c/td\u003e\u003ctd\u003eA set of resources composed into a single coherent clinical statement with clinical attestation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCondition\u003ca name\u003d\"event-resource-types-Condition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCondition\u003c/td\u003e\u003ctd\u003eDetailed information about conditions, problems or diagnoses.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eConsent\u003ca name\u003d\"event-resource-types-Consent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsent\u003c/td\u003e\u003ctd\u003eA healthcare consumer\u0027s policy choices to permits or denies recipients or roles to perform actions for specific purposes and periods of time.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCoverage\u003ca name\u003d\"event-resource-types-Coverage\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoverage\u003c/td\u003e\u003ctd\u003eInsurance or medical plan or a payment agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDeviceUseStatement\u003ca name\u003d\"event-resource-types-DeviceUseStatement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeviceUseStatement\u003c/td\u003e\u003ctd\u003eRecord of use of a device.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDiagnosticReport\u003ca name\u003d\"event-resource-types-DiagnosticReport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnosticReport\u003c/td\u003e\u003ctd\u003eA Diagnostic report - a combination of request information, atomic results, images, interpretation, as well as formatted reports.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDocumentManifest\u003ca name\u003d\"event-resource-types-DocumentManifest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDocumentManifest\u003c/td\u003e\u003ctd\u003eA list that defines a set of documents.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDocumentReference\u003ca name\u003d\"event-resource-types-DocumentReference\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDocumentReference\u003c/td\u003e\u003ctd\u003eA reference to a document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEncounter\u003ca name\u003d\"event-resource-types-Encounter\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEncounter\u003c/td\u003e\u003ctd\u003eAn interaction during which services are provided to the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEnrollmentResponse\u003ca name\u003d\"event-resource-types-EnrollmentResponse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnrollmentResponse\u003c/td\u003e\u003ctd\u003eEnrollmentResponse resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEpisodeOfCare\u003ca name\u003d\"event-resource-types-EpisodeOfCare\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEpisodeOfCare\u003c/td\u003e\u003ctd\u003eAn association of a Patient with an Organization and  Healthcare Provider(s) for a period of time that the Organization assumes some level of responsibility.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eExplanationOfBenefit\u003ca name\u003d\"event-resource-types-ExplanationOfBenefit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExplanationOfBenefit\u003c/td\u003e\u003ctd\u003eExplanation of Benefit resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFamilyMemberHistory\u003ca name\u003d\"event-resource-types-FamilyMemberHistory\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFamilyMemberHistory\u003c/td\u003e\u003ctd\u003eInformation about patient\u0027s relatives, relevant for patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGuidanceResponse\u003ca name\u003d\"event-resource-types-GuidanceResponse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGuidanceResponse\u003c/td\u003e\u003ctd\u003eThe formal response to a guidance request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eImagingStudy\u003ca name\u003d\"event-resource-types-ImagingStudy\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImagingStudy\u003c/td\u003e\u003ctd\u003eA set of images produced in single study (one or more series of references images).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eImmunization\u003ca name\u003d\"event-resource-types-Immunization\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImmunization\u003c/td\u003e\u003ctd\u003eImmunization event information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMeasureReport\u003ca name\u003d\"event-resource-types-MeasureReport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMeasureReport\u003c/td\u003e\u003ctd\u003eResults of a measure evaluation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMedia\u003ca name\u003d\"event-resource-types-Media\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedia\u003c/td\u003e\u003ctd\u003eA photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMedicationAdministration\u003ca name\u003d\"event-resource-types-MedicationAdministration\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedicationAdministration\u003c/td\u003e\u003ctd\u003eAdministration of medication to a patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMedicationDispense\u003ca name\u003d\"event-resource-types-MedicationDispense\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedicationDispense\u003c/td\u003e\u003ctd\u003eDispensing a medication to a named patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMedicationStatement\u003ca name\u003d\"event-resource-types-MedicationStatement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedicationStatement\u003c/td\u003e\u003ctd\u003eRecord of medication being taken by a patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eObservation\u003ca name\u003d\"event-resource-types-Observation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eObservation\u003c/td\u003e\u003ctd\u003eMeasurements and simple assertions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePaymentNotice\u003ca name\u003d\"event-resource-types-PaymentNotice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePaymentNotice\u003c/td\u003e\u003ctd\u003ePaymentNotice request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePaymentReconciliation\u003ca name\u003d\"event-resource-types-PaymentReconciliation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePaymentReconciliation\u003c/td\u003e\u003ctd\u003ePaymentReconciliation resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eProcedure\u003ca name\u003d\"event-resource-types-Procedure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure\u003c/td\u003e\u003ctd\u003eAn action that is being or was performed on a patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eProcessResponse\u003ca name\u003d\"event-resource-types-ProcessResponse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcessResponse\u003c/td\u003e\u003ctd\u003eProcessResponse resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eQuestionnaireResponse\u003ca name\u003d\"event-resource-types-QuestionnaireResponse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuestionnaireResponse\u003c/td\u003e\u003ctd\u003eA structured set of questions and their answers.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRiskAssessment\u003ca name\u003d\"event-resource-types-RiskAssessment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRiskAssessment\u003c/td\u003e\u003ctd\u003ePotential outcomes for a subject with likelihood.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSupplyDelivery\u003ca name\u003d\"event-resource-types-SupplyDelivery\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSupplyDelivery\u003c/td\u003e\u003ctd\u003eDelivery of bulk Supplies.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTask\u003ca name\u003d\"event-resource-types-Task\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTask\u003c/td\u003e\u003ctd\u003eA task to be performed.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    }
+  ],
+  "url": "http://hl7.org/fhir/event-resource-types",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1061"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EventResourceType",
+  "title": "EventResourceType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "A list of all the event resource types defined in this version of the FHIR specification.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/event-resource-types",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "ChargeItem",
+      "display": "ChargeItem",
+      "definition": "Item containing charge code(s) associated with the provision of healthcare provider products."
+    },
+    {
+      "code": "ClaimResponse",
+      "display": "ClaimResponse",
+      "definition": "Remittance resource."
+    },
+    {
+      "code": "ClinicalImpression",
+      "display": "ClinicalImpression",
+      "definition": "A clinical assessment performed when planning treatments and management strategies for a patient."
+    },
+    {
+      "code": "Communication",
+      "display": "Communication",
+      "definition": "A record of information transmitted from a sender to a receiver."
+    },
+    {
+      "code": "Composition",
+      "display": "Composition",
+      "definition": "A set of resources composed into a single coherent clinical statement with clinical attestation."
+    },
+    {
+      "code": "Condition",
+      "display": "Condition",
+      "definition": "Detailed information about conditions, problems or diagnoses."
+    },
+    {
+      "code": "Consent",
+      "display": "Consent",
+      "definition": "A healthcare consumer\u0027s policy choices to permits or denies recipients or roles to perform actions for specific purposes and periods of time."
+    },
+    {
+      "code": "Coverage",
+      "display": "Coverage",
+      "definition": "Insurance or medical plan or a payment agreement."
+    },
+    {
+      "code": "DeviceUseStatement",
+      "display": "DeviceUseStatement",
+      "definition": "Record of use of a device."
+    },
+    {
+      "code": "DiagnosticReport",
+      "display": "DiagnosticReport",
+      "definition": "A Diagnostic report - a combination of request information, atomic results, images, interpretation, as well as formatted reports."
+    },
+    {
+      "code": "DocumentManifest",
+      "display": "DocumentManifest",
+      "definition": "A list that defines a set of documents."
+    },
+    {
+      "code": "DocumentReference",
+      "display": "DocumentReference",
+      "definition": "A reference to a document."
+    },
+    {
+      "code": "Encounter",
+      "display": "Encounter",
+      "definition": "An interaction during which services are provided to the patient."
+    },
+    {
+      "code": "EnrollmentResponse",
+      "display": "EnrollmentResponse",
+      "definition": "EnrollmentResponse resource."
+    },
+    {
+      "code": "EpisodeOfCare",
+      "display": "EpisodeOfCare",
+      "definition": "An association of a Patient with an Organization and  Healthcare Provider(s) for a period of time that the Organization assumes some level of responsibility."
+    },
+    {
+      "code": "ExplanationOfBenefit",
+      "display": "ExplanationOfBenefit",
+      "definition": "Explanation of Benefit resource."
+    },
+    {
+      "code": "FamilyMemberHistory",
+      "display": "FamilyMemberHistory",
+      "definition": "Information about patient\u0027s relatives, relevant for patient."
+    },
+    {
+      "code": "GuidanceResponse",
+      "display": "GuidanceResponse",
+      "definition": "The formal response to a guidance request."
+    },
+    {
+      "code": "ImagingStudy",
+      "display": "ImagingStudy",
+      "definition": "A set of images produced in single study (one or more series of references images)."
+    },
+    {
+      "code": "Immunization",
+      "display": "Immunization",
+      "definition": "Immunization event information."
+    },
+    {
+      "code": "MeasureReport",
+      "display": "MeasureReport",
+      "definition": "Results of a measure evaluation."
+    },
+    {
+      "code": "Media",
+      "display": "Media",
+      "definition": "A photo, video, or audio recording acquired or used in healthcare. The actual content may be inline or provided by direct reference."
+    },
+    {
+      "code": "MedicationAdministration",
+      "display": "MedicationAdministration",
+      "definition": "Administration of medication to a patient."
+    },
+    {
+      "code": "MedicationDispense",
+      "display": "MedicationDispense",
+      "definition": "Dispensing a medication to a named patient."
+    },
+    {
+      "code": "MedicationStatement",
+      "display": "MedicationStatement",
+      "definition": "Record of medication being taken by a patient."
+    },
+    {
+      "code": "Observation",
+      "display": "Observation",
+      "definition": "Measurements and simple assertions."
+    },
+    {
+      "code": "PaymentNotice",
+      "display": "PaymentNotice",
+      "definition": "PaymentNotice request."
+    },
+    {
+      "code": "PaymentReconciliation",
+      "display": "PaymentReconciliation",
+      "definition": "PaymentReconciliation resource."
+    },
+    {
+      "code": "Procedure",
+      "display": "Procedure",
+      "definition": "An action that is being or was performed on a patient."
+    },
+    {
+      "code": "ProcessResponse",
+      "display": "ProcessResponse",
+      "definition": "ProcessResponse resource."
+    },
+    {
+      "code": "QuestionnaireResponse",
+      "display": "QuestionnaireResponse",
+      "definition": "A structured set of questions and their answers."
+    },
+    {
+      "code": "RiskAssessment",
+      "display": "RiskAssessment",
+      "definition": "Potential outcomes for a subject with likelihood."
+    },
+    {
+      "code": "SupplyDelivery",
+      "display": "SupplyDelivery",
+      "definition": "Delivery of bulk Supplies."
+    },
+    {
+      "code": "Task",
+      "display": "Task",
+      "definition": "A task to be performed."
+    }
+  ]
+}

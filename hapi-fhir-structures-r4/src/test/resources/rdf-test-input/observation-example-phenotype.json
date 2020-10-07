@@ -1,0 +1,64 @@
+{
+  "resourceType": "Observation",
+  "id": "example-phenotype",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-phenotype\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: CYP2C9 gene product metabolic activity interpretation \u003cspan\u003e(Details : {LOINC code \u002779716-7\u0027 \u003d \u0027CYP2C9 gene product metabolic activity interpretation in Blood or Tissue Qualitative by CPIC\u0027, given as \u0027CYP2C9 gene product metabolic activity interpretation\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eJ*********** C***********\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2013 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Normal metabolizer \u003cspan\u003e(Details : {LOINC code \u0027LA25391-6\u0027 \u003d \u0027Normal metabolizer\u0027, given as \u0027Normal metabolizer\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003especimen\u003c/b\u003e: \u003ca\u003eMolecular Specimen ID: MLD45-Z4-1234\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ederivedFrom\u003c/b\u003e: \u003ca\u003eObservation/example-diplotype1\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsGene",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://www.genenames.org",
+            "code": "2623",
+            "display": "CYP2C9"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "79716-7",
+        "display": "CYP2C9 gene product metabolic activity interpretation"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/727127",
+    "display": "J*********** C***********"
+  },
+  "issued": "2013-04-03T15:30:10+01:00",
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "LA25391-6",
+        "display": "Normal metabolizer"
+      }
+    ]
+  },
+  "specimen": {
+    "reference": "Specimen/genetics-example1-somatic",
+    "display": "Molecular Specimen ID: MLD45-Z4-1234"
+  },
+  "derivedFrom": [
+    {
+      "reference": "Observation/example-diplotype1"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

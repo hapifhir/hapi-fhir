@@ -1,0 +1,1165 @@
+{
+  "resourceType": "Bundle",
+  "id": "micro",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "https://example.com/base/DiagnosticReport/micro",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "micro",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: micro\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 290741144\u003c/p\u003e\u003cp\u003e\u003cb\u003ebasedOn\u003c/b\u003e: \u003ca\u003eServiceRequest/req\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Microbiology \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0074 code \u0027MB\u0027 \u003d \u0027Microbiology)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Culture, MRSA \u003cspan\u003e(Details : {LOINC code \u0027632-0\u0027 \u003d \u0027Bacteria identified in Wound by Aerobe culture)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 10/08/2009 8:25:44 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003eresult\u003c/b\u003e: \u003ca\u003eObservation/org1\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "identifier": [
+          {
+            "system": "http://hnam.org/identifiers/orders",
+            "value": "290741144"
+          }
+        ],
+        "basedOn": [
+          {
+            "reference": "ServiceRequest/req"
+          }
+        ],
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "MB"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "632-0"
+            }
+          ],
+          "text": "Culture, MRSA"
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "issued": "2009-08-10T08:25:44+10:00",
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/org1"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx1-4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx1-4",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx1-4\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: ORGANISM \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u0027ORGANISM\u0027 \u003d \u0027ORGANISM)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Staphylococcus aureus \u003cspan\u003e(Details : {http://acme.org/lab/codes/organisms code \u0027Staaur\u0027 \u003d \u0027Staaur)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "ORGANISM"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/organisms",
+              "code": "Staaur"
+            }
+          ],
+          "text": "Staphylococcus aureus"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx1-5",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx1-5",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx1-5\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: CULTPOSNEG \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u0027CULTPOSNEG\u0027 \u003d \u0027CULTPOSNEG)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: POS \u003cspan\u003e(Details : {http://acme.org/lab/codes/flags code \u0027POS\u0027 \u003d \u0027POS)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "CULTPOSNEG"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/flags",
+              "code": "POS"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-1",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Ampicillin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760504\u0027 \u003d \u002760504\u0027, given as \u0027Ampicillin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Resistant \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027R\u0027 \u003d \u0027Resistant)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60504",
+              "display": "Ampicillin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "R"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-2",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-2",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-2\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Cefazolin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760512\u0027 \u003d \u002760512\u0027, given as \u0027Cefazolin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d2\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60512",
+              "display": "Cefazolin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-4",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-4\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Cefoxitin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760516\u0027 \u003d \u002760516\u0027, given as \u0027Cefoxitin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d4\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60516",
+              "display": "Cefoxitin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 4,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-6",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-6\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Clindamycin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760527\u0027 \u003d \u002760527\u0027, given as \u0027Clindamycin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026gt;\u003d0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60527",
+              "display": "Clindamycin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5,
+          "comparator": "\u003e\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-8",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-8",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-8\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Daptomycin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002761203\u0027 \u003d \u002761203\u0027, given as \u0027Daptomycin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026gt;\u003d1\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "61203",
+              "display": "Daptomycin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 1,
+          "comparator": "\u003e\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-10",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-10",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-10\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Doxycycline \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760532\u0027 \u003d \u002760532\u0027, given as \u0027Doxycycline\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60532",
+              "display": "Doxycycline"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-12",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-12",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-12\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Erythromycin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760533\u0027 \u003d \u002760533\u0027, given as \u0027Erythromycin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026gt;\u003d8\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Resistant \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027R\u0027 \u003d \u0027Resistant)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60533",
+              "display": "Erythromycin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 8,
+          "comparator": "\u003e\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "R"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-14",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-14",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-14\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Gentamicin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760536\u0027 \u003d \u002760536\u0027, given as \u0027Gentamicin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d2\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60536",
+              "display": "Gentamicin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-16",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-16",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-16\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Levofloxacin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002761007\u0027 \u003d \u002761007\u0027, given as \u0027Levofloxacin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "61007",
+              "display": "Levofloxacin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-18",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-18",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-18\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Linezolid \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760699\u0027 \u003d \u002760699\u0027, given as \u0027Linezolid\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 4\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60699",
+              "display": "Linezolid"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 4
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-20",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-20",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-20\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Moxifloxacin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002761204\u0027 \u003d \u002761204\u0027, given as \u0027Moxifloxacin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "61204",
+              "display": "Moxifloxacin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-22",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-22",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-22\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Oxacillin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760551\u0027 \u003d \u002760551\u0027, given as \u0027Oxacillin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60551",
+              "display": "Oxacillin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-24",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-24",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-24\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Penicillin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760552\u0027 \u003d \u002760552\u0027, given as \u0027Penicillin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026gt;\u003d2\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Resistant \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027R\u0027 \u003d \u0027Resistant)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60552",
+              "display": "Penicillin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 2,
+          "comparator": "\u003e\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "R"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-26",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-26",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-26\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Quinupristin/Dalfopristin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760697\u0027 \u003d \u002760697\u0027, given as \u0027Quinupristin/Dalfopristin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60697",
+              "display": "Quinupristin/Dalfopristin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-28",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-28",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-28\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Rifampin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760555\u0027 \u003d \u002760555\u0027, given as \u0027Rifampin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60555",
+              "display": "Rifampin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-30",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-30",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-30\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Tetracycline \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760558\u0027 \u003d \u002760558\u0027, given as \u0027Tetracycline\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d0.5\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60558",
+              "display": "Tetracycline"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.5,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-32",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-32",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-32\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Trimethoprim/Sulfamethoxazole \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760561\u0027 \u003d \u002760561\u0027, given as \u0027Trimethoprim/Sulfamethoxazole\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: \u0026lt;\u003d0.0526\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60561",
+              "display": "Trimethoprim/Sulfamethoxazole"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 0.0526,
+          "comparator": "\u003c\u003d"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx2-34",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx2-34",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx2-34\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Vancomycin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760563\u0027 \u003d \u002760563\u0027, given as \u0027Vancomycin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 1\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60563",
+              "display": "Vancomycin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueQuantity": {
+          "value": 1
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/nte-1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "nte-1",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: nte-1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: D-Test \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u00272099930\u0027 \u003d \u00272099930\u0027, given as \u0027D-Test\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: D-Test:  Negative - This isolate does not demonstrate inducible clindamycin resistance in vitro.\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "2099930",
+              "display": "D-Test"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "valueString": "D-Test:  Negative - This isolate does not demonstrate inducible clindamycin resistance in vitro."
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obx3-1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obx3-1",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obx3-1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Oxacillin \u003cspan\u003e(Details : {http://acme.org/lab/codes/tests code \u002760036\u0027 \u003d \u002760036\u0027, given as \u0027Oxacillin\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Susceptible \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027S\u0027 \u003d \u0027Susceptible)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/tests",
+              "code": "60036",
+              "display": "Oxacillin"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "S"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obr-2",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obr-2",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obr-2\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Susceptibility - Automated broth dilution (Billed) \u003cspan\u003e(Details : {http://acme.org/lab/codes/panels code \u002760790\u0027 \u003d \u002760790\u0027, given as \u0027Susceptibility - Automated broth dilution (Billed)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Todd Ashby\u003c/p\u003e\u003cp\u003e\u003cb\u003ehasMember\u003c/b\u003e: \u003c/p\u003e\u003cul\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-1\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-2\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-4\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-6\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-8\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-10\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-12\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-14\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-16\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-18\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-20\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-22\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-24\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-26\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-28\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-30\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-32\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx2-34\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/nte-1\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/panels",
+              "code": "60790",
+              "display": "Susceptibility - Automated broth dilution (Billed)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "performer": [
+          {
+            "display": "Todd Ashby"
+          }
+        ],
+        "hasMember": [
+          {
+            "reference": "Observation/obx2-1"
+          },
+          {
+            "reference": "Observation/obx2-2"
+          },
+          {
+            "reference": "Observation/obx2-4"
+          },
+          {
+            "reference": "Observation/obx2-6"
+          },
+          {
+            "reference": "Observation/obx2-8"
+          },
+          {
+            "reference": "Observation/obx2-10"
+          },
+          {
+            "reference": "Observation/obx2-12"
+          },
+          {
+            "reference": "Observation/obx2-14"
+          },
+          {
+            "reference": "Observation/obx2-16"
+          },
+          {
+            "reference": "Observation/obx2-18"
+          },
+          {
+            "reference": "Observation/obx2-20"
+          },
+          {
+            "reference": "Observation/obx2-22"
+          },
+          {
+            "reference": "Observation/obx2-24"
+          },
+          {
+            "reference": "Observation/obx2-26"
+          },
+          {
+            "reference": "Observation/obx2-28"
+          },
+          {
+            "reference": "Observation/obx2-30"
+          },
+          {
+            "reference": "Observation/obx2-32"
+          },
+          {
+            "reference": "Observation/obx2-34"
+          },
+          {
+            "reference": "Observation/nte-1"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/obr-3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "obr-3",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: obr-3\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Susceptibility - Disk diffusion (Billed) \u003cspan\u003e(Details : {http://acme.org/lab/codes/panels code \u002760418\u0027 \u003d \u002760418\u0027, given as \u0027Susceptibility - Disk diffusion (Billed)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ehasMember\u003c/b\u003e: \u003ca\u003eObservation/obx3-1\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/panels",
+              "code": "60418",
+              "display": "Susceptibility - Disk diffusion (Billed)"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "hasMember": [
+          {
+            "reference": "Observation/obx3-1"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/org1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "org1",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: org1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Staphylococcus aureus Panel \u003cspan\u003e(Details : {http://acme.org/lab/codes/organisms code \u0027Staaur\u0027 \u003d \u0027Staaur)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ehasMember\u003c/b\u003e: \u003c/p\u003e\u003cul\u003e\u003cli\u003e\u003ca\u003eObservation/obx1-4\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obx1-5\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obr-2\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/obr-3\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://acme.org/lab/codes/organisms",
+              "code": "Staaur"
+            }
+          ],
+          "text": "Staphylococcus aureus Panel"
+        },
+        "subject": {
+          "reference": "Patient/example"
+        },
+        "hasMember": [
+          {
+            "reference": "Observation/obx1-4"
+          },
+          {
+            "reference": "Observation/obx1-5"
+          },
+          {
+            "reference": "Observation/obr-2"
+          },
+          {
+            "reference": "Observation/obr-3"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/ServiceRequest/req",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "req",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: req\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 255337816\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: original-order\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Culture, MRSA \u003cspan\u003e(Details : {LOINC code \u0027632-0\u0027 \u003d \u0027Bacteria identified in Wound by Aerobe culture)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "identifier": [
+          {
+            "value": "255337816"
+          }
+        ],
+        "status": "active",
+        "intent": "original-order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "632-0"
+            }
+          ],
+          "text": "Culture, MRSA"
+        },
+        "subject": {
+          "reference": "Patient/example"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "med-admin-perform-function",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMedication administration  performer  function  codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMedicationAdministration Performer Function Codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/med-admin-perform-function defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eperformer\u003ca name\u003d\"med-admin-perform-function-performer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePerformer\u003c/td\u003e\u003ctd\u003eA person, non-person living subject, organization or device that who actually and principally carries out the action\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003everifier\u003ca name\u003d\"med-admin-perform-function-verifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVerifier\u003c/td\u003e\u003ctd\u003eA person who verifies the correctness and appropriateness of the service (plan, order, event, etc.) and hence takes on accountability.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewitness\u003ca name\u003d\"med-admin-perform-function-witness\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWitness\u003c/td\u003e\u003ctd\u003eA person witnessing the action happening without doing anything. A witness is not necessarily aware, much less approves of anything stated in the service event. Example for a witness is students watching an operation or an advanced directive witness.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/med-admin-perform-function",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1112"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MedicationAdministration Performer Function Codes",
+  "title": "Medication administration  performer  function  codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "MedicationAdministration Performer Function Codes",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/med-admin-perform-function",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "performer",
+      "display": "Performer",
+      "definition": "A person, non-person living subject, organization or device that who actually and principally carries out the action"
+    },
+    {
+      "code": "verifier",
+      "display": "Verifier",
+      "definition": "A person who verifies the correctness and appropriateness of the service (plan, order, event, etc.) and hence takes on accountability."
+    },
+    {
+      "code": "witness",
+      "display": "Witness",
+      "definition": "A person witnessing the action happening without doing anything. A witness is not necessarily aware, much less approves of anything stated in the service event. Example for a witness is students watching an operation or an advanced directive witness."
+    }
+  ]
+}

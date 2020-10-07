@@ -1,0 +1,100 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "concept-map-equivalence",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConceptMapEquivalence\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe degree of equivalence between concepts.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/concept-map-equivalence defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erelatedto\u003ca name\u003d\"concept-map-equivalence-relatedto\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelated To\u003c/td\u003e\u003ctd\u003eThe concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  equivalent\u003ca name\u003d\"concept-map-equivalence-equivalent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEquivalent\u003c/td\u003e\u003ctd\u003eThe definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e3\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e    equal\u003ca name\u003d\"concept-map-equivalence-equal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEqual\u003c/td\u003e\u003ctd\u003eThe definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wider\u003ca name\u003d\"concept-map-equivalence-wider\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWider\u003c/td\u003e\u003ctd\u003eThe target mapping is wider in meaning than the source concept.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  subsumes\u003ca name\u003d\"concept-map-equivalence-subsumes\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubsumes\u003c/td\u003e\u003ctd\u003eThe target mapping subsumes the meaning of the source concept (e.g. the source is-a target).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  narrower\u003ca name\u003d\"concept-map-equivalence-narrower\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNarrower\u003c/td\u003e\u003ctd\u003eThe target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  specializes\u003ca name\u003d\"concept-map-equivalence-specializes\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpecializes\u003c/td\u003e\u003ctd\u003eThe target mapping specializes the meaning of the source concept (e.g. the target is-a source).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  inexact\u003ca name\u003d\"concept-map-equivalence-inexact\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInexact\u003c/td\u003e\u003ctd\u003eThe target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is inexact SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunmatched\u003ca name\u003d\"concept-map-equivalence-unmatched\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnmatched\u003c/td\u003e\u003ctd\u003eThere is no match for this concept in the target code system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  disjoint\u003ca name\u003d\"concept-map-equivalence-disjoint\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisjoint\u003c/td\u003e\u003ctd\u003eThis is an explicit assertion that there is no mapping between the source and target concept.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/concept-map-equivalence",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.18"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ConceptMapEquivalence",
+  "title": "ConceptMapEquivalence",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "The degree of equivalence between concepts.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/concept-map-equivalence",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "relatedto",
+      "display": "Related To",
+      "definition": "The concepts are related to each other, and have at least some overlap in meaning, but the exact relationship is not known.",
+      "concept": [
+        {
+          "code": "equivalent",
+          "display": "Equivalent",
+          "definition": "The definitions of the concepts mean the same thing (including when structural implications of meaning are considered) (i.e. extensionally identical).",
+          "concept": [
+            {
+              "code": "equal",
+              "display": "Equal",
+              "definition": "The definitions of the concepts are exactly the same (i.e. only grammatical differences) and structural implications of meaning are identical or irrelevant (i.e. intentionally identical)."
+            }
+          ]
+        },
+        {
+          "code": "wider",
+          "display": "Wider",
+          "definition": "The target mapping is wider in meaning than the source concept."
+        },
+        {
+          "code": "subsumes",
+          "display": "Subsumes",
+          "definition": "The target mapping subsumes the meaning of the source concept (e.g. the source is-a target)."
+        },
+        {
+          "code": "narrower",
+          "display": "Narrower",
+          "definition": "The target mapping is narrower in meaning than the source concept. The sense in which the mapping is narrower SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally."
+        },
+        {
+          "code": "specializes",
+          "display": "Specializes",
+          "definition": "The target mapping specializes the meaning of the source concept (e.g. the target is-a source)."
+        },
+        {
+          "code": "inexact",
+          "display": "Inexact",
+          "definition": "The target mapping overlaps with the source concept, but both source and target cover additional meaning, or the definitions are imprecise and it is uncertain whether they have the same boundaries to their meaning. The sense in which the mapping is inexact SHALL be described in the comments in this case, and applications should be careful when attempting to use these mappings operationally."
+        }
+      ]
+    },
+    {
+      "code": "unmatched",
+      "display": "Unmatched",
+      "definition": "There is no match for this concept in the target code system.",
+      "concept": [
+        {
+          "code": "disjoint",
+          "display": "Disjoint",
+          "definition": "This is an explicit assertion that there is no mapping between the source and target concept."
+        }
+      ]
+    }
+  ]
+}

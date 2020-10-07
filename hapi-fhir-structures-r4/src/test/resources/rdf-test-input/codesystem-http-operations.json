@@ -1,0 +1,94 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "http-operations",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTestScriptRequestMethodCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe allowable request method or HTTP operation codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/http-operations defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edelete\u003ca name\u003d\"http-operations-delete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDELETE\u003c/td\u003e\u003ctd\u003eHTTP DELETE operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eget\u003ca name\u003d\"http-operations-get\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGET\u003c/td\u003e\u003ctd\u003eHTTP GET operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoptions\u003ca name\u003d\"http-operations-options\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOPTIONS\u003c/td\u003e\u003ctd\u003eHTTP OPTIONS operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatch\u003ca name\u003d\"http-operations-patch\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePATCH\u003c/td\u003e\u003ctd\u003eHTTP PATCH operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epost\u003ca name\u003d\"http-operations-post\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePOST\u003c/td\u003e\u003ctd\u003eHTTP POST operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eput\u003ca name\u003d\"http-operations-put\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePUT\u003c/td\u003e\u003ctd\u003eHTTP PUT operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehead\u003ca name\u003d\"http-operations-head\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHEAD\u003c/td\u003e\u003ctd\u003eHTTP HEAD operation.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/http-operations",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.717"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TestScriptRequestMethodCode",
+  "title": "TestScriptRequestMethodCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The allowable request method or HTTP operation codes.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/http-operations",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "delete",
+      "display": "DELETE",
+      "definition": "HTTP DELETE operation."
+    },
+    {
+      "code": "get",
+      "display": "GET",
+      "definition": "HTTP GET operation."
+    },
+    {
+      "code": "options",
+      "display": "OPTIONS",
+      "definition": "HTTP OPTIONS operation."
+    },
+    {
+      "code": "patch",
+      "display": "PATCH",
+      "definition": "HTTP PATCH operation."
+    },
+    {
+      "code": "post",
+      "display": "POST",
+      "definition": "HTTP POST operation."
+    },
+    {
+      "code": "put",
+      "display": "PUT",
+      "definition": "HTTP PUT operation."
+    },
+    {
+      "code": "head",
+      "display": "HEAD",
+      "definition": "HTTP HEAD operation."
+    }
+  ]
+}

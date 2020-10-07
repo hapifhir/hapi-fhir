@@ -1,0 +1,318 @@
+{
+  "resourceType": "Claim",
+  "id": "MED-00050",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of a CMS 1500 Claim\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Patient",
+      "id": "patient-1",
+      "name": [
+        {
+          "use": "official",
+          "family": "Ashcraft",
+          "given": [
+            "Alvina"
+          ]
+        }
+      ],
+      "gender": "female",
+      "birthDate": "1954-06-11",
+      "address": [
+        {
+          "use": "home",
+          "line": [
+            "123 Main Street"
+          ],
+          "city": "Portland",
+          "state": "OR",
+          "postalCode": "97125",
+          "country": "USA"
+        }
+      ]
+    },
+    {
+      "resourceType": "Coverage",
+      "id": "coverage-1",
+      "identifier": [
+        {
+          "system": "http://benefitsinc.com/certificate",
+          "value": "10138556"
+        }
+      ],
+      "status": "active",
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+            "code": "HIP",
+            "display": "health insurance plan policy"
+          }
+        ]
+      },
+      "subscriber": {
+        "reference": "#patient-1"
+      },
+      "beneficiary": {
+        "reference": "#patient-1"
+      },
+      "relationship": {
+        "coding": [
+          {
+            "code": "self"
+          }
+        ]
+      },
+      "period": {
+        "start": "2015-01-01T00:00:00-07:00",
+        "end": "2016-01-01T00:00:00-07:00"
+      },
+      "payor": [
+        {
+          "identifier": {
+            "system": "http://www.bindb.com/bin",
+            "value": "123456"
+          },
+          "display": "Humana Inc."
+        }
+      ],
+      "class": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/coverage-class",
+                "code": "group"
+              }
+            ]
+          },
+          "value": "80902206"
+        }
+      ]
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://CedarArmsMedicalCenter.com/claim",
+      "value": "MED-00050"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "institutional"
+      }
+    ]
+  },
+  "subType": {
+    "coding": [
+      {
+        "system": "https://www.cms.gov/codes/billtype",
+        "code": "831",
+        "display": "Hospital Outpatient Surgery performed in an Ambulatory ​Surgical Center"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "#patient-1"
+  },
+  "created": "2015-10-16T00:00:00-07:00",
+  "insurer": {
+    "identifier": {
+      "system": "http://www.bindb.com/bin",
+      "value": "123456"
+    },
+    "display": "Humana Inc."
+  },
+  "provider": {
+    "reference": "Organization/1"
+  },
+  "priority": {
+    "coding": [
+      {
+        "code": "normal"
+      }
+    ]
+  },
+  "payee": {
+    "type": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/payeetype",
+          "code": "provider"
+        }
+      ]
+    },
+    "party": {
+      "reference": "Organization/1"
+    }
+  },
+  "careTeam": [
+    {
+      "sequence": 1,
+      "provider": {
+        "reference": "Practitioner/example"
+      }
+    }
+  ],
+  "supportingInfo": [
+    {
+      "sequence": 1,
+      "category": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "hospitalized"
+          }
+        ]
+      },
+      "timingPeriod": {
+        "start": "2015-10-01T00:00:00-07:00",
+        "end": "2015-10-05T00:00:00-07:00"
+      }
+    },
+    {
+      "sequence": 2,
+      "category": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "discharge"
+          }
+        ]
+      },
+      "code": {
+        "coding": [
+          {
+            "system": "https://www.cms.gov/Outreach-and-Education/Medicare-Learning-Network-MLN/MLNMattersArticles/downloads/SE0801.pdf",
+            "code": "01",
+            "display": "Discharge to Home or Self Care"
+          }
+        ]
+      }
+    }
+  ],
+  "diagnosis": [
+    {
+      "sequence": 1,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10",
+            "code": "M96.1",
+            "display": "Postlaminectomy syndrome"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 2,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10",
+            "code": "G89.4",
+            "display": "Chronic pain syndrome"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 3,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10",
+            "code": "M53.88",
+            "display": "Other specified dorsopathies, sacral and sacrococcygeal region"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 4,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/icd-10",
+            "code": "M47.816",
+            "display": "Spondylosis without myelopathy or radiculopathy, lumbar region"
+          }
+        ]
+      }
+    }
+  ],
+  "insurance": [
+    {
+      "sequence": 1,
+      "focal": true,
+      "identifier": {
+        "system": "http://CedarArmsMedicalCenter.com/claim",
+        "value": "MED-00050"
+      },
+      "coverage": {
+        "reference": "#coverage-1"
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "careTeamSequence": [
+        1
+      ],
+      "diagnosisSequence": [
+        2,
+        4
+      ],
+      "informationSequence": [
+        1
+      ],
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://www.ama-assn.org/go/cpt",
+            "code": "62264",
+            "display": "Surgical Procedures on the Spine and Spinal Cord"
+          }
+        ]
+      },
+      "servicedDate": "2015-10-13",
+      "locationCodeableConcept": {
+        "coding": [
+          {
+            "system": "https://www.cms.gov/medicare/coding/place-of-service-codes/place_of_service_code_set.html",
+            "code": "24",
+            "display": "Ambulatory Surgical Center"
+          }
+        ]
+      },
+      "unitPrice": {
+        "value": 12500.00,
+        "currency": "USD"
+      },
+      "net": {
+        "value": 12500.00,
+        "currency": "USD"
+      }
+    }
+  ],
+  "total": {
+    "value": 12500.00,
+    "currency": "USD"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

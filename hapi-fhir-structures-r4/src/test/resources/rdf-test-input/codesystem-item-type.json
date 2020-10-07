@@ -1,0 +1,160 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "item-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eQuestionnaireItemType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDistinguishes groups from questions and display text and indicates data type for questions.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eProperties\u003c/b\u003e\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eURL\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003enotSelectable\u003c/td\u003e\u003ctd\u003ehttp://hl7.org/fhir/concept-properties#notSelectable\u003c/td\u003e\u003ctd\u003eIndicates that the code is abstract - only intended to be used as a selector for other concepts\u003c/td\u003e\u003ctd\u003eboolean\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003eThis code system http://hl7.org/fhir/item-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egroup\u003ca name\u003d\"item-type-group\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGroup\u003c/td\u003e\u003ctd\u003eAn item with no direct answer but should have at least one child item.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisplay\u003ca name\u003d\"item-type-display\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisplay\u003c/td\u003e\u003ctd\u003eText for display that will not capture an answer or have child items.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003equestion\u003ca name\u003d\"item-type-question\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuestion\u003c/td\u003e\u003ctd\u003eAn item that defines a specific answer to be captured, and which may have child items. (the answer provided in the QuestionnaireResponse should be of the defined datatype).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  boolean\u003ca name\u003d\"item-type-boolean\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBoolean\u003c/td\u003e\u003ctd\u003eQuestion with a yes/no answer (valueBoolean).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  decimal\u003ca name\u003d\"item-type-decimal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDecimal\u003c/td\u003e\u003ctd\u003eQuestion with is a real number answer (valueDecimal).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  integer\u003ca name\u003d\"item-type-integer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInteger\u003c/td\u003e\u003ctd\u003eQuestion with an integer answer (valueInteger).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  date\u003ca name\u003d\"item-type-date\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDate\u003c/td\u003e\u003ctd\u003eQuestion with a date answer (valueDate).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  dateTime\u003ca name\u003d\"item-type-dateTime\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDate Time\u003c/td\u003e\u003ctd\u003eQuestion with a date and time answer (valueDateTime).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  time\u003ca name\u003d\"item-type-time\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTime\u003c/td\u003e\u003ctd\u003eQuestion with a time (hour:minute:second) answer independent of date. (valueTime).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  string\u003ca name\u003d\"item-type-string\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eString\u003c/td\u003e\u003ctd\u003eQuestion with a short (few words to short sentence) free-text entry answer (valueString).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  text\u003ca name\u003d\"item-type-text\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eText\u003c/td\u003e\u003ctd\u003eQuestion with a long (potentially multi-paragraph) free-text entry answer (valueString).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  url\u003ca name\u003d\"item-type-url\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUrl\u003c/td\u003e\u003ctd\u003eQuestion with a URL (website, FTP site, etc.) answer (valueUri).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  choice\u003ca name\u003d\"item-type-choice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChoice\u003c/td\u003e\u003ctd\u003eQuestion with a Coding drawn from a list of possible answers (specified in either the answerOption property, or via the valueset referenced in the answerValueSet property) as an answer (valueCoding).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  open-choice\u003ca name\u003d\"item-type-open-choice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Choice\u003c/td\u003e\u003ctd\u003eAnswer is a Coding drawn from a list of possible answers (as with the choice type) or a free-text entry in a string (valueCoding or valueString).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  attachment\u003ca name\u003d\"item-type-attachment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttachment\u003c/td\u003e\u003ctd\u003eQuestion with binary content such as an image, PDF, etc. as an answer (valueAttachment).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  reference\u003ca name\u003d\"item-type-reference\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReference\u003c/td\u003e\u003ctd\u003eQuestion with a reference to another resource (practitioner, organization, etc.) as an answer (valueReference).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  quantity\u003ca name\u003d\"item-type-quantity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuantity\u003c/td\u003e\u003ctd\u003eQuestion with a combination of a numeric value and unit, potentially with a comparator (\u0026lt;, \u0026gt;, etc.) as an answer. (valueQuantity) There is an extension \u0027http://hl7.org/fhir/StructureDefinition/questionnaire-unit\u0027 that can be used to define what unit should be captured (or the unit that has a ucum conversion from the provided unit).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/item-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.445"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "QuestionnaireItemType",
+  "title": "QuestionnaireItemType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Distinguishes groups from questions and display text and indicates data type for questions.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/item-type",
+  "content": "complete",
+  "property": [
+    {
+      "code": "notSelectable",
+      "uri": "http://hl7.org/fhir/concept-properties#notSelectable",
+      "description": "Indicates that the code is abstract - only intended to be used as a selector for other concepts",
+      "type": "boolean"
+    }
+  ],
+  "concept": [
+    {
+      "code": "group",
+      "display": "Group",
+      "definition": "An item with no direct answer but should have at least one child item."
+    },
+    {
+      "code": "display",
+      "display": "Display",
+      "definition": "Text for display that will not capture an answer or have child items."
+    },
+    {
+      "code": "question",
+      "display": "Question",
+      "definition": "An item that defines a specific answer to be captured, and which may have child items. (the answer provided in the QuestionnaireResponse should be of the defined datatype).",
+      "property": [
+        {
+          "code": "notSelectable",
+          "valueBoolean": true
+        }
+      ],
+      "concept": [
+        {
+          "code": "boolean",
+          "display": "Boolean",
+          "definition": "Question with a yes/no answer (valueBoolean)."
+        },
+        {
+          "code": "decimal",
+          "display": "Decimal",
+          "definition": "Question with is a real number answer (valueDecimal)."
+        },
+        {
+          "code": "integer",
+          "display": "Integer",
+          "definition": "Question with an integer answer (valueInteger)."
+        },
+        {
+          "code": "date",
+          "display": "Date",
+          "definition": "Question with a date answer (valueDate)."
+        },
+        {
+          "code": "dateTime",
+          "display": "Date Time",
+          "definition": "Question with a date and time answer (valueDateTime)."
+        },
+        {
+          "code": "time",
+          "display": "Time",
+          "definition": "Question with a time (hour:minute:second) answer independent of date. (valueTime)."
+        },
+        {
+          "code": "string",
+          "display": "String",
+          "definition": "Question with a short (few words to short sentence) free-text entry answer (valueString)."
+        },
+        {
+          "code": "text",
+          "display": "Text",
+          "definition": "Question with a long (potentially multi-paragraph) free-text entry answer (valueString)."
+        },
+        {
+          "code": "url",
+          "display": "Url",
+          "definition": "Question with a URL (website, FTP site, etc.) answer (valueUri)."
+        },
+        {
+          "code": "choice",
+          "display": "Choice",
+          "definition": "Question with a Coding drawn from a list of possible answers (specified in either the answerOption property, or via the valueset referenced in the answerValueSet property) as an answer (valueCoding)."
+        },
+        {
+          "code": "open-choice",
+          "display": "Open Choice",
+          "definition": "Answer is a Coding drawn from a list of possible answers (as with the choice type) or a free-text entry in a string (valueCoding or valueString)."
+        },
+        {
+          "code": "attachment",
+          "display": "Attachment",
+          "definition": "Question with binary content such as an image, PDF, etc. as an answer (valueAttachment)."
+        },
+        {
+          "code": "reference",
+          "display": "Reference",
+          "definition": "Question with a reference to another resource (practitioner, organization, etc.) as an answer (valueReference)."
+        },
+        {
+          "code": "quantity",
+          "display": "Quantity",
+          "definition": "Question with a combination of a numeric value and unit, potentially with a comparator (\u003c, \u003e, etc.) as an answer. (valueQuantity) There is an extension \u0027http://hl7.org/fhir/StructureDefinition/questionnaire-unit\u0027 that can be used to define what unit should be captured (or the unit that has a ucum conversion from the provided unit)."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,144 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "map-transform",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStructureMapTransform\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eHow data is copied/created.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/map-transform defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecreate\u003ca name\u003d\"map-transform-create\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecreate\u003c/td\u003e\u003ctd\u003ecreate(type : string) - type is passed through to the application on the standard API, and must be known by it.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecopy\u003ca name\u003d\"map-transform-copy\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecopy\u003c/td\u003e\u003ctd\u003ecopy(source).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etruncate\u003ca name\u003d\"map-transform-truncate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etruncate\u003c/td\u003e\u003ctd\u003etruncate(source, length) - source must be stringy type.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eescape\u003ca name\u003d\"map-transform-escape\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eescape\u003c/td\u003e\u003ctd\u003eescape(source, fmt1, fmt2) - change source from one kind of escaping to another (plain, java, xml, json). note that this is for when the string itself is escaped.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecast\u003ca name\u003d\"map-transform-cast\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecast\u003c/td\u003e\u003ctd\u003ecast(source, type?) - case source from one type to another. target type can be left as implicit if there is one and only one target type known.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eappend\u003ca name\u003d\"map-transform-append\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eappend\u003c/td\u003e\u003ctd\u003eappend(source...) - source is element or string.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etranslate\u003ca name\u003d\"map-transform-translate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etranslate\u003c/td\u003e\u003ctd\u003etranslate(source, uri_of_map) - use the translate operation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereference\u003ca name\u003d\"map-transform-reference\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereference\u003c/td\u003e\u003ctd\u003ereference(source : object) - return a string that references the provided tree properly.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edateOp\u003ca name\u003d\"map-transform-dateOp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edateOp\u003c/td\u003e\u003ctd\u003ePerform a date operation. *Parameters to be documented*.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euuid\u003ca name\u003d\"map-transform-uuid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003euuid\u003c/td\u003e\u003ctd\u003eGenerate a random UUID (in lowercase). No Parameters.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epointer\u003ca name\u003d\"map-transform-pointer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epointer\u003c/td\u003e\u003ctd\u003eReturn the appropriate string to put in a reference that refers to the resource provided as a parameter.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eevaluate\u003ca name\u003d\"map-transform-evaluate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eevaluate\u003c/td\u003e\u003ctd\u003eExecute the supplied FHIRPath expression and use the value returned by that.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecc\u003ca name\u003d\"map-transform-cc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecc\u003c/td\u003e\u003ctd\u003eCreate a CodeableConcept. Parameters \u003d (text) or (system. Code[, display]).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ec\u003ca name\u003d\"map-transform-c\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ec\u003c/td\u003e\u003ctd\u003eCreate a Coding. Parameters \u003d (system. Code[, display]).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eqty\u003ca name\u003d\"map-transform-qty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eqty\u003c/td\u003e\u003ctd\u003eCreate a quantity. Parameters \u003d (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eid\u003ca name\u003d\"map-transform-id\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eid\u003c/td\u003e\u003ctd\u003eCreate an identifier. Parameters \u003d (system, value[, type]) where type is a code from the identifier type value set.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecp\u003ca name\u003d\"map-transform-cp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecp\u003c/td\u003e\u003ctd\u003eCreate a contact details. Parameters \u003d (value) or (system, value). If no system is provided, the system should be inferred from the content of the value.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/map-transform",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.682"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "StructureMapTransform",
+  "title": "StructureMapTransform",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "How data is copied/created.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/map-transform",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "create",
+      "display": "create",
+      "definition": "create(type : string) - type is passed through to the application on the standard API, and must be known by it."
+    },
+    {
+      "code": "copy",
+      "display": "copy",
+      "definition": "copy(source)."
+    },
+    {
+      "code": "truncate",
+      "display": "truncate",
+      "definition": "truncate(source, length) - source must be stringy type."
+    },
+    {
+      "code": "escape",
+      "display": "escape",
+      "definition": "escape(source, fmt1, fmt2) - change source from one kind of escaping to another (plain, java, xml, json). note that this is for when the string itself is escaped."
+    },
+    {
+      "code": "cast",
+      "display": "cast",
+      "definition": "cast(source, type?) - case source from one type to another. target type can be left as implicit if there is one and only one target type known."
+    },
+    {
+      "code": "append",
+      "display": "append",
+      "definition": "append(source...) - source is element or string."
+    },
+    {
+      "code": "translate",
+      "display": "translate",
+      "definition": "translate(source, uri_of_map) - use the translate operation."
+    },
+    {
+      "code": "reference",
+      "display": "reference",
+      "definition": "reference(source : object) - return a string that references the provided tree properly."
+    },
+    {
+      "code": "dateOp",
+      "display": "dateOp",
+      "definition": "Perform a date operation. *Parameters to be documented*."
+    },
+    {
+      "code": "uuid",
+      "display": "uuid",
+      "definition": "Generate a random UUID (in lowercase). No Parameters."
+    },
+    {
+      "code": "pointer",
+      "display": "pointer",
+      "definition": "Return the appropriate string to put in a reference that refers to the resource provided as a parameter."
+    },
+    {
+      "code": "evaluate",
+      "display": "evaluate",
+      "definition": "Execute the supplied FHIRPath expression and use the value returned by that."
+    },
+    {
+      "code": "cc",
+      "display": "cc",
+      "definition": "Create a CodeableConcept. Parameters \u003d (text) or (system. Code[, display])."
+    },
+    {
+      "code": "c",
+      "display": "c",
+      "definition": "Create a Coding. Parameters \u003d (system. Code[, display])."
+    },
+    {
+      "code": "qty",
+      "display": "qty",
+      "definition": "Create a quantity. Parameters \u003d (text) or (value, unit, [system, code]) where text is the natural representation e.g. [comparator]value[space]unit."
+    },
+    {
+      "code": "id",
+      "display": "id",
+      "definition": "Create an identifier. Parameters \u003d (system, value[, type]) where type is a code from the identifier type value set."
+    },
+    {
+      "code": "cp",
+      "display": "cp",
+      "definition": "Create a contact details. Parameters \u003d (value) or (system, value). If no system is provided, the system should be inferred from the content of the value."
+    }
+  ]
+}

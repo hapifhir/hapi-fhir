@@ -1,0 +1,88 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "identifier-use",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eIdentifierUse\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the purpose for this identifier, if known .\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/identifier-use defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eusual\u003ca name\u003d\"identifier-use-usual\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUsual\u003c/td\u003e\u003ctd\u003eThe identifier recommended for display and use in real-world interactions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eofficial\u003ca name\u003d\"identifier-use-official\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOfficial\u003c/td\u003e\u003ctd\u003eThe identifier considered to be most trusted for the identification of this item. Sometimes also known as \u0026quot;primary\u0026quot; and \u0026quot;main\u0026quot;. The determination of \u0026quot;official\u0026quot; is subjective and implementation guides often provide additional guidelines for use.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etemp\u003ca name\u003d\"identifier-use-temp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTemp\u003c/td\u003e\u003ctd\u003eA temporary identifier.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esecondary\u003ca name\u003d\"identifier-use-secondary\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecondary\u003c/td\u003e\u003ctd\u003eAn identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eold\u003ca name\u003d\"identifier-use-old\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOld\u003c/td\u003e\u003ctd\u003eThe identifier id no longer considered valid, but may be relevant for search purposes.  E.g. Changes to identifier schemes, account merges, etc.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/identifier-use",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.58"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "IdentifierUse",
+  "title": "IdentifierUse",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Identifies the purpose for this identifier, if known .",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/identifier-use",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "usual",
+      "display": "Usual",
+      "definition": "The identifier recommended for display and use in real-world interactions."
+    },
+    {
+      "code": "official",
+      "display": "Official",
+      "definition": "The identifier considered to be most trusted for the identification of this item. Sometimes also known as \"primary\" and \"main\". The determination of \"official\" is subjective and implementation guides often provide additional guidelines for use."
+    },
+    {
+      "code": "temp",
+      "display": "Temp",
+      "definition": "A temporary identifier."
+    },
+    {
+      "code": "secondary",
+      "display": "Secondary",
+      "definition": "An identifier that was assigned in secondary use - it serves to identify the object in a relative context, but cannot be consistently assigned to the same object again in a different context."
+    },
+    {
+      "code": "old",
+      "display": "Old",
+      "definition": "The identifier id no longer considered valid, but may be relevant for search purposes.  E.g. Changes to identifier schemes, account merges, etc."
+    }
+  ]
+}

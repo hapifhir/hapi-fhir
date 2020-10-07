@@ -1,0 +1,468 @@
+{
+  "resourceType": "ClaimResponse",
+  "id": "R3502",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the ClaimResponse\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://thebenefitcompany.com/claimresponse",
+      "value": "CR6532875367"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "vision"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "Patient/1"
+  },
+  "created": "2014-08-16",
+  "insurer": {
+    "reference": "Organization/2"
+  },
+  "requestor": {
+    "reference": "Organization/1"
+  },
+  "request": {
+    "identifier": {
+      "system": "http://happysight.com/claim",
+      "value": "6612346"
+    }
+  },
+  "outcome": "complete",
+  "disposition": "Claim settled as per contract.",
+  "payeeType": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/payeetype",
+        "code": "provider"
+      }
+    ]
+  },
+  "item": [
+    {
+      "itemSequence": 1,
+      "adjudication": [
+        {
+          "category": {
+            "coding": [
+              {
+                "code": "eligible"
+              }
+            ]
+          },
+          "amount": {
+            "value": 235.40,
+            "currency": "USD"
+          }
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "code": "copay"
+              }
+            ]
+          },
+          "amount": {
+            "value": 20.00,
+            "currency": "USD"
+          }
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "code": "eligpercent"
+              }
+            ]
+          },
+          "value": 80.00
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "code": "benefit"
+              }
+            ]
+          },
+          "amount": {
+            "value": 172.32,
+            "currency": "USD"
+          }
+        }
+      ],
+      "detail": [
+        {
+          "detailSequence": 1,
+          "noteNumber": [
+            1
+          ],
+          "adjudication": [
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "eligible"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 100.00,
+                "currency": "USD"
+              }
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "copay"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 20.00,
+                "currency": "USD"
+              }
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "eligpercent"
+                  }
+                ]
+              },
+              "value": 80.00
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 80.00,
+                "currency": "USD"
+              }
+            }
+          ]
+        },
+        {
+          "detailSequence": 2,
+          "noteNumber": [
+            1
+          ],
+          "adjudication": [
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "eligible"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 110.00,
+                "currency": "USD"
+              }
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "eligpercent"
+                  }
+                ]
+              },
+              "value": 80.00
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 88.00,
+                "currency": "USD"
+              }
+            }
+          ],
+          "subDetail": [
+            {
+              "subDetailSequence": 1,
+              "noteNumber": [
+                1
+              ],
+              "adjudication": [
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "eligible"
+                      }
+                    ]
+                  },
+                  "amount": {
+                    "value": 60.00,
+                    "currency": "USD"
+                  }
+                },
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "eligpercent"
+                      }
+                    ]
+                  },
+                  "value": 80.00
+                },
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "benefit"
+                      }
+                    ]
+                  },
+                  "amount": {
+                    "value": 48.00,
+                    "currency": "USD"
+                  }
+                }
+              ]
+            },
+            {
+              "subDetailSequence": 2,
+              "adjudication": [
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "eligible"
+                      }
+                    ]
+                  },
+                  "amount": {
+                    "value": 30.00,
+                    "currency": "USD"
+                  }
+                },
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "eligpercent"
+                      }
+                    ]
+                  },
+                  "value": 80.00
+                },
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "benefit"
+                      }
+                    ]
+                  },
+                  "amount": {
+                    "value": 24.00,
+                    "currency": "USD"
+                  }
+                }
+              ]
+            },
+            {
+              "subDetailSequence": 3,
+              "noteNumber": [
+                1
+              ],
+              "adjudication": [
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "eligible"
+                      }
+                    ]
+                  },
+                  "amount": {
+                    "value": 10.00,
+                    "currency": "USD"
+                  }
+                },
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "eligpercent"
+                      }
+                    ]
+                  },
+                  "value": 80.00
+                },
+                {
+                  "category": {
+                    "coding": [
+                      {
+                        "code": "benefit"
+                      }
+                    ]
+                  },
+                  "amount": {
+                    "value": 8.00,
+                    "currency": "USD"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "detailSequence": 3,
+          "noteNumber": [
+            1
+          ],
+          "adjudication": [
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "eligible"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 200.00,
+                "currency": "USD"
+              }
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "eligpercent"
+                  }
+                ]
+              },
+              "value": 80.00
+            },
+            {
+              "category": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "amount": {
+                "value": 14.00,
+                "currency": "USD"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "total": [
+    {
+      "category": {
+        "coding": [
+          {
+            "code": "submitted"
+          }
+        ]
+      },
+      "amount": {
+        "value": 235.40,
+        "currency": "USD"
+      }
+    },
+    {
+      "category": {
+        "coding": [
+          {
+            "code": "benefit"
+          }
+        ]
+      },
+      "amount": {
+        "value": 182.00,
+        "currency": "USD"
+      }
+    }
+  ],
+  "payment": {
+    "type": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/ex-paymenttype",
+          "code": "complete"
+        }
+      ]
+    },
+    "adjustment": {
+      "value": 75.00,
+      "currency": "USD"
+    },
+    "adjustmentReason": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/payment-adjustment-reason",
+          "code": "a002",
+          "display": "Prior Overpayment"
+        }
+      ]
+    },
+    "date": "2014-08-16",
+    "amount": {
+      "value": 107.00,
+      "currency": "USD"
+    },
+    "identifier": {
+      "system": "http://thebenefitcompany.com/paymentidentifier",
+      "value": "201416-123456"
+    }
+  },
+  "processNote": [
+    {
+      "number": 1,
+      "type": "display",
+      "text": "After hours surcharge declined",
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "en-CA"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

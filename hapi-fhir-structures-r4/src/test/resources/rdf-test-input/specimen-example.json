@@ -1,0 +1,118 @@
+{
+  "resourceType": "Specimen",
+  "id": "101",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 101\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 23234352356\u003c/p\u003e\u003cp\u003e\u003cb\u003eaccessionIdentifier\u003c/b\u003e: X352356\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: available\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Venous blood specimen \u003cspan\u003e(Details : {SNOMED CT code \u0027122555007\u0027 \u003d \u0027Venous blood specimen\u0027, given as \u0027Venous blood specimen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePeter Patient\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereceivedTime\u003c/b\u003e: 04/03/2011 7:03:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003erequest\u003c/b\u003e: \u003ca\u003eServiceRequest/example\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eCollections\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollector\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollected[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eQuantity\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMethod\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBodySite\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/example\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e30/05/2011 6:15:00 AM\u003c/td\u003e\u003ctd\u003e6 mL\u003c/td\u003e\u003ctd\u003eLine, Venous \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0488 code \u0027LNV\u0027 \u003d \u0027Line, Venous)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eRight median cubital vein \u003cspan\u003e(Details : {SNOMED CT code \u002749852007\u0027 \u003d \u0027Median cubital vein\u0027, given as \u0027Structure of median cubital vein (body structure)\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eContainers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eIdentifier\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCapacity\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eSpecimenQuantity\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAdditive[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e48736-15394-75465\u003c/td\u003e\u003ctd\u003eGreen Gel tube\u003c/td\u003e\u003ctd\u003eVacutainer \u003cspan\u003e(Details )\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e10 mL\u003c/td\u003e\u003ctd\u003e6 mL\u003c/td\u003e\u003ctd\u003eid: hep; Lithium/Li Heparin \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-EntityCode code \u0027HEPL\u0027 \u003d \u0027Lithium/Li Heparin)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: Specimen is grossly lipemic\u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Substance",
+      "id": "hep",
+      "code": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-EntityCode",
+            "code": "HEPL"
+          }
+        ]
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://ehr.acme.org/identifiers/collections",
+      "value": "23234352356"
+    }
+  ],
+  "accessionIdentifier": {
+    "system": "http://lab.acme.org/specimens/2011",
+    "value": "X352356"
+  },
+  "status": "available",
+  "type": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "122555007",
+        "display": "Venous blood specimen"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Peter Patient"
+  },
+  "receivedTime": "2011-03-04T07:03:00Z",
+  "request": [
+    {
+      "reference": "ServiceRequest/example"
+    }
+  ],
+  "collection": {
+    "collector": {
+      "reference": "Practitioner/example"
+    },
+    "collectedDateTime": "2011-05-30T06:15:00Z",
+    "quantity": {
+      "value": 6,
+      "unit": "mL"
+    },
+    "method": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0488",
+          "code": "LNV"
+        }
+      ]
+    },
+    "bodySite": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "49852007",
+          "display": "Structure of median cubital vein (body structure)"
+        }
+      ],
+      "text": "Right median cubital vein"
+    }
+  },
+  "container": [
+    {
+      "identifier": [
+        {
+          "value": "48736-15394-75465"
+        }
+      ],
+      "description": "Green Gel tube",
+      "type": {
+        "text": "Vacutainer"
+      },
+      "capacity": {
+        "value": 10,
+        "unit": "mL"
+      },
+      "specimenQuantity": {
+        "value": 6,
+        "unit": "mL"
+      },
+      "additiveReference": {
+        "reference": "#hep"
+      }
+    }
+  ],
+  "note": [
+    {
+      "text": "Specimen is grossly lipemic"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

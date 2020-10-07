@@ -1,0 +1,94 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "request-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eRequestStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes identifying the lifecycle stage of a request.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/request-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"request-status-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eThe request has been created but is not yet complete or ready for action.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"request-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eThe request is in force and ready to be acted upon.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-hold\u003ca name\u003d\"request-status-on-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Hold\u003c/td\u003e\u003ctd\u003eThe request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erevoked\u003ca name\u003d\"request-status-revoked\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRevoked\u003c/td\u003e\u003ctd\u003eThe request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecompleted\u003ca name\u003d\"request-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eThe activity described by the request has been fully performed.  No further activity will occur.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"request-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThis request should never have existed and should be considered \u0027void\u0027.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be \u0026quot;revoked\u0026quot; rather than \u0026quot;entered-in-error\u0026quot;.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"request-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \u0026quot;other\u0026quot; - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/request-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.112"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "RequestStatus",
+  "title": "RequestStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes identifying the lifecycle stage of a request.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/request-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "draft",
+      "display": "Draft",
+      "definition": "The request has been created but is not yet complete or ready for action."
+    },
+    {
+      "code": "active",
+      "display": "Active",
+      "definition": "The request is in force and ready to be acted upon."
+    },
+    {
+      "code": "on-hold",
+      "display": "On Hold",
+      "definition": "The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future."
+    },
+    {
+      "code": "revoked",
+      "display": "Revoked",
+      "definition": "The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur."
+    },
+    {
+      "code": "completed",
+      "display": "Completed",
+      "definition": "The activity described by the request has been fully performed.  No further activity will occur."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "This request should never have existed and should be considered \u0027void\u0027.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be \"revoked\" rather than \"entered-in-error\".)."
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which."
+    }
+  ]
+}

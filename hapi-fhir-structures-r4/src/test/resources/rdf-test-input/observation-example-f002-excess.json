@@ -1,0 +1,82 @@
+{
+  "resourceType": "Observation",
+  "id": "f002",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f002\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 6324 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Base excess in Blood by calculation \u003cspan\u003e(Details : {LOINC code \u002711555-0\u0027 \u003d \u0027Base excess in Blood by calculation\u0027, given as \u0027Base excess in Blood by calculation\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eP. van de Heuvel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 02/04/2013 10:30:10 AM --\u0026gt; 05/04/2013 10:30:10 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2013 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eA. Langeveld\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 12.6 mmol/l\u003cspan\u003e (Details: UCUM code mmol/L \u003d \u0027mmol/L\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: High \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027H\u0027 \u003d \u0027High\u0027, given as \u0027High\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eReferenceRanges\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLow\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eHigh\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e7.1 mmol/l\u003cspan\u003e (Details: UCUM code mmol/L \u003d \u0027mmol/L\u0027)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e11.2 mmol/l\u003cspan\u003e (Details: UCUM code mmol/L \u003d \u0027mmol/L\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://www.bmc.nl/zorgportal/identifiers/observations",
+      "value": "6324"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "11555-0",
+        "display": "Base excess in Blood by calculation"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "effectivePeriod": {
+    "start": "2013-04-02T10:30:10+01:00",
+    "end": "2013-04-05T10:30:10+01:00"
+  },
+  "issued": "2013-04-03T15:30:10+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/f005",
+      "display": "A. Langeveld"
+    }
+  ],
+  "valueQuantity": {
+    "value": 12.6,
+    "unit": "mmol/l",
+    "system": "http://unitsofmeasure.org",
+    "code": "mmol/L"
+  },
+  "interpretation": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+          "code": "H",
+          "display": "High"
+        }
+      ]
+    }
+  ],
+  "referenceRange": [
+    {
+      "low": {
+        "value": 7.1,
+        "unit": "mmol/l",
+        "system": "http://unitsofmeasure.org",
+        "code": "mmol/L"
+      },
+      "high": {
+        "value": 11.2,
+        "unit": "mmol/l",
+        "system": "http://unitsofmeasure.org",
+        "code": "mmol/L"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

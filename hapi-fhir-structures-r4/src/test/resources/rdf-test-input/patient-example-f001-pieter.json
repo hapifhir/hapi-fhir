@@ -1,0 +1,125 @@
+{
+  "resourceType": "Patient",
+  "id": "f001",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f001\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 738472983 (USUAL), ?? (USUAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eactive\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Pieter van de Heuvel \u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 0648352638(MOBILE), p.heuvel@gmail.com(HOME)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: male\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 17/11/1944\u003c/p\u003e\u003cp\u003e\u003cb\u003edeceased\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: Van Egmondkade 23 Amsterdam 1024 RJ NLD (HOME)\u003c/p\u003e\u003cp\u003e\u003cb\u003emaritalStatus\u003c/b\u003e: Getrouwd \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-MaritalStatus code \u0027M\u0027 \u003d \u0027Married\u0027, given as \u0027Married\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emultipleBirth\u003c/b\u003e: true\u003c/p\u003e\u003ch3\u003eContacts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRelationship\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTelecom\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eEmergency Contact \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0131 code \u0027C\u0027 \u003d \u0027Emergency Contact)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eSarah Abels \u003c/td\u003e\u003ctd\u003eph: 0690383372(MOBILE)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eCommunications\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLanguage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePreferred\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eNederlands \u003cspan\u003e(Details : {urn:ietf:bcp:47 code \u0027nl\u0027 \u003d \u0027Dutch\u0027, given as \u0027Dutch\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003emanagingOrganization\u003c/b\u003e: \u003ca\u003eBurgers University Medical Centre\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+      "value": "738472983"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.3"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "usual",
+      "family": "van de Heuvel",
+      "given": [
+        "Pieter"
+      ],
+      "suffix": [
+        "MSc"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "0648352638",
+      "use": "mobile"
+    },
+    {
+      "system": "email",
+      "value": "p.heuvel@gmail.com",
+      "use": "home"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1944-11-17",
+  "deceasedBoolean": false,
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "Van Egmondkade 23"
+      ],
+      "city": "Amsterdam",
+      "postalCode": "1024 RJ",
+      "country": "NLD"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "M",
+        "display": "Married"
+      }
+    ],
+    "text": "Getrouwd"
+  },
+  "multipleBirthBoolean": true,
+  "contact": [
+    {
+      "relationship": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+              "code": "C"
+            }
+          ]
+        }
+      ],
+      "name": {
+        "use": "usual",
+        "family": "Abels",
+        "given": [
+          "Sarah"
+        ]
+      },
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "0690383372",
+          "use": "mobile"
+        }
+      ]
+    }
+  ],
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "nl",
+            "display": "Dutch"
+          }
+        ],
+        "text": "Nederlands"
+      },
+      "preferred": true
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/f001",
+    "display": "Burgers University Medical Centre"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

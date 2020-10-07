@@ -1,0 +1,41 @@
+{
+  "resourceType": "MolecularSequence",
+  "id": "graphic-example-3",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: graphic-example-3\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: dna\u003c/p\u003e\u003cp\u003e\u003cb\u003ecoordinateSystem\u003c/b\u003e: 0\u003c/p\u003e\u003ch3\u003eReferenceSeqs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceSeqPointer\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrand\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowEnd\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003eMolecularSequence/graphic-example-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ewatson\u003c/td\u003e\u003ctd\u003e128273732\u003c/td\u003e\u003ctd\u003e128273736\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eVariants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEnd\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eObservedAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCigar\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e1282737234\u003c/td\u003e\u003ctd\u003e128273736\u003c/td\u003e\u003ctd\u003eGA\u003c/td\u003e\u003ctd\u003eAT\u003c/td\u003e\u003ctd\u003e2M\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003epointer\u003c/b\u003e: \u003ca\u003eMolecularSequence/graphic-example-4\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "type": "dna",
+  "coordinateSystem": 0,
+  "referenceSeq": {
+    "referenceSeqPointer": {
+      "reference": "MolecularSequence/graphic-example-5"
+    },
+    "strand": "watson",
+    "windowStart": 128273732,
+    "windowEnd": 128273736
+  },
+  "variant": [
+    {
+      "start": 1282737234,
+      "end": 128273736,
+      "observedAllele": "GA",
+      "referenceAllele": "AT",
+      "cigar": "2M"
+    }
+  ],
+  "pointer": [
+    {
+      "reference": "MolecularSequence/graphic-example-4"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

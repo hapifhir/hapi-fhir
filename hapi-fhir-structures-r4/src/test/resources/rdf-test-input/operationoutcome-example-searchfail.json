@@ -1,0 +1,29 @@
+{
+  "resourceType": "OperationOutcome",
+  "id": "searchfail",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eThe \u0026quot;name\u0026quot; parameter has the modifier \u0026quot;exact\u0026quot; which is not supported by this server\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "issue": [
+    {
+      "severity": "fatal",
+      "code": "code-invalid",
+      "details": {
+        "text": "The \"name\" parameter has the modifier \"exact\" which is not supported by this server"
+      },
+      "location": [
+        "http.name:exact"
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

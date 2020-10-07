@@ -1,0 +1,98 @@
+{
+  "resourceType": "DeviceRequest",
+  "id": "insulinpump",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: insulinpump\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: ip_request1.1\u003c/p\u003e\u003cp\u003e\u003cb\u003einstantiatesCanonical\u003c/b\u003e: \u003ca\u003ehttp://motivemi.com/artifacts/PlanDefinition/low-suicide-risk-order-set\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebasedOn\u003c/b\u003e: Homecare - DM follow-up\u003c/p\u003e\u003cp\u003e\u003cb\u003epriorRequest\u003c/b\u003e: CGM ambulatory\u003c/p\u003e\u003cp\u003e\u003cb\u003egroupIdentifier\u003c/b\u003e: ip_request1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: instance-order\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: routine\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Insulin delivery device panel \u003cspan\u003e(Details : {LOINC code \u002743148-6\u0027 \u003d \u0027Insulin delivery device panel)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/dicom\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: Encounter 1\u003c/p\u003e\u003cp\u003e\u003cb\u003eoccurrence\u003c/b\u003e: 08/05/2013 9:33:27 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthoredOn\u003c/b\u003e: 08/05/2013 9:33:27 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003eDr. Adam Careful\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformerType\u003c/b\u003e: Nurse \u003cspan\u003e(Details : {[not stated] code \u0027null\u0027 \u003d \u0027null\u0027, given as \u0027Qualified nurse\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Nurse Rossignol\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: gastroparesis \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonReference\u003c/b\u003e: Gastroparesis\u003c/p\u003e\u003cp\u003e\u003cb\u003esupportingInfo\u003c/b\u003e: Previous results\u003c/p\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: this is the right device brand and model\u003c/p\u003e\u003cp\u003e\u003cb\u003erelevantHistory\u003c/b\u003e: Request for unspecified device\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "value": "ip_request1.1"
+    }
+  ],
+  "instantiatesCanonical": [
+    "http://motivemi.com/artifacts/PlanDefinition/low-suicide-risk-order-set"
+  ],
+  "basedOn": [
+    {
+      "display": "Homecare - DM follow-up"
+    }
+  ],
+  "priorRequest": [
+    {
+      "display": "CGM ambulatory"
+    }
+  ],
+  "groupIdentifier": {
+    "value": "ip_request1"
+  },
+  "status": "active",
+  "intent": "instance-order",
+  "priority": "routine",
+  "codeCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "43148-6"
+      }
+    ],
+    "text": "Insulin delivery device panel"
+  },
+  "subject": {
+    "reference": "Patient/dicom"
+  },
+  "encounter": {
+    "display": "Encounter 1"
+  },
+  "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
+  "authoredOn": "2013-05-08T09:33:27+07:00",
+  "requester": {
+    "reference": "Practitioner/example",
+    "display": "Dr. Adam Careful"
+  },
+  "performerType": {
+    "coding": [
+      {
+        "display": "Qualified nurse"
+      }
+    ],
+    "text": "Nurse"
+  },
+  "performer": {
+    "display": "Nurse Rossignol"
+  },
+  "reasonCode": [
+    {
+      "text": "gastroparesis"
+    }
+  ],
+  "reasonReference": [
+    {
+      "display": "Gastroparesis"
+    }
+  ],
+  "supportingInfo": [
+    {
+      "display": "Previous results"
+    }
+  ],
+  "note": [
+    {
+      "text": "this is the right device brand and model"
+    }
+  ],
+  "relevantHistory": [
+    {
+      "display": "Request for unspecified device"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

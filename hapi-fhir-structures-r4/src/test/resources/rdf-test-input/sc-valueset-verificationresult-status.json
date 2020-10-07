@@ -1,0 +1,85 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "sc-verificationresult-status",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003estatusCanonicalMap (http://hl7.org/fhir/ConceptMap/sc-verificationresult-status)\u003c/h2\u003e\u003cp\u003eMapping from \u003ca href\u003d\"valueset-verificationresult-status.html\"\u003ehttp://hl7.org/fhir/ValueSet/verificationresult-status\u003c/a\u003e to \u003ca href\u003d\"valueset-resource-status.html\"\u003ehttp://hl7.org/fhir/ValueSet/resource-status\u003c/a\u003e\u003c/p\u003e\u003cp\u003eDRAFT. Published on 06/06/2018 12:06:02 AM by HL7 (FHIR Project) (\u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e, \u003ca href\u003d\"mailto:fhir@lists.hl7.org\"\u003efhir@lists.hl7.org\u003c/a\u003e). \u003c/p\u003e\u003cdiv\u003e\u003cp\u003eCanonical Mapping for \u0026quot;The validation status of the target\u0026quot;\u003c/p\u003e\n\u003c/div\u003e\u003cbr/\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eSource Code\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEquivalence\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDestination Code\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eattested\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003edraft\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003evalidated\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eaccepted\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ein-process\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eactive\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eval-fail, reval-fail\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003efailed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ereq-revalid (Requires revalidation)\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003ereplaced\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/sc-verificationresult-status",
+  "version": "4.0.1",
+  "name": "statusCanonicalMap",
+  "title": "Canonical Mapping for \"Status\"",
+  "status": "draft",
+  "date": "2018-06-06T00:06:02+10:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Canonical Mapping for \"The validation status of the target\"",
+  "sourceCanonical": "http://hl7.org/fhir/ValueSet/verificationresult-status",
+  "targetCanonical": "http://hl7.org/fhir/ValueSet/resource-status",
+  "group": [
+    {
+      "source": "http://hl7.org/fhir/CodeSystem/status",
+      "target": "http://hl7.org/fhir/resource-status",
+      "element": [
+        {
+          "code": "attested",
+          "target": [
+            {
+              "code": "draft",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "validated",
+          "target": [
+            {
+              "code": "accepted",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "in-process",
+          "target": [
+            {
+              "code": "active",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "val-fail, reval-fail",
+          "target": [
+            {
+              "code": "failed",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "req-revalid",
+          "target": [
+            {
+              "code": "replaced",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "reference-version-rules",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eReferenceVersionRules\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eWhether a reference needs to be version specific or version independent, or whether either can be used.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/reference-version-rules defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeither\u003ca name\u003d\"reference-version-rules-either\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEither Specific or independent\u003c/td\u003e\u003ctd\u003eThe reference may be either version independent or version specific.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eindependent\u003ca name\u003d\"reference-version-rules-independent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVersion independent\u003c/td\u003e\u003ctd\u003eThe reference must be version independent.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003especific\u003ca name\u003d\"reference-version-rules-specific\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVersion Specific\u003c/td\u003e\u003ctd\u003eThe reference must be version specific.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/reference-version-rules",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.90"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ReferenceVersionRules",
+  "title": "ReferenceVersionRules",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Whether a reference needs to be version specific or version independent, or whether either can be used.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/reference-version-rules",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "either",
+      "display": "Either Specific or independent",
+      "definition": "The reference may be either version independent or version specific."
+    },
+    {
+      "code": "independent",
+      "display": "Version independent",
+      "definition": "The reference must be version independent."
+    },
+    {
+      "code": "specific",
+      "display": "Version Specific",
+      "definition": "The reference must be version specific."
+    }
+  ]
+}

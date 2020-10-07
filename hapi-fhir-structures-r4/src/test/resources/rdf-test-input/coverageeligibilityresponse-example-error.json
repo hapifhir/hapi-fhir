@@ -1,0 +1,65 @@
+{
+  "resourceType": "CoverageEligibilityResponse",
+  "id": "E2503",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the CoverageEligibilityResponse.\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://www.BenefitsInc.com/fhir/coverageeligibilityresponse",
+      "value": "8812343"
+    }
+  ],
+  "status": "active",
+  "purpose": [
+    "validation"
+  ],
+  "patient": {
+    "reference": "Patient/f201"
+  },
+  "created": "2014-09-16",
+  "requestor": {
+    "identifier": {
+      "system": "http://national.org/clinic",
+      "value": "OR1234"
+    }
+  },
+  "request": {
+    "reference": "http://www.BenefitsInc.com/fhir/coverageeligibilityresponse/225476332406"
+  },
+  "outcome": "error",
+  "disposition": "Eligibiliy request could not be processed, please address errors before submitting.",
+  "insurer": {
+    "reference": "Organization/2"
+  },
+  "form": {
+    "coding": [
+      {
+        "system": "http://national.org/form",
+        "code": "ELRSP/2017/01"
+      }
+    ]
+  },
+  "error": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/adjudication-error",
+            "code": "a001"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

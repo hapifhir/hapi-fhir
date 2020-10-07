@@ -1,0 +1,102 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "myringotomy",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: myringotomy\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: ret4421\u003c/p\u003e\u003cp\u003e\u003cb\u003ebasedOn\u003c/b\u003e: ServiceRequest for Myringotomy and insertion of tympanic ventilation tube\u003c/p\u003e\u003cp\u003e\u003cb\u003ereplaces\u003c/b\u003e: prior ServiceRequest\u003c/p\u003e\u003cp\u003e\u003cb\u003erequisition\u003c/b\u003e: 1234\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Patient referral to specialist \u003cspan\u003e(Details : {SNOMED CT code \u0027103696004\u0027 \u003d \u0027Patient referral to specialist\u0027, given as \u0027Patient referral to specialist\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: routine\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Insertion of grommets \u003cspan\u003e(Details : {SNOMED CT code \u0027172676009\u0027 \u003d \u0027Myringotomy and insertion of short-term grommet\u0027, given as \u0027Myringotomy and insertion of tympanic ventilation tube\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eBeverly Weaver\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: Beverly Waver\u0027s encounter on 2014-02-14\u003c/p\u003e\u003cp\u003e\u003cb\u003eoccurrence\u003c/b\u003e: ?? --\u0026gt; 14/03/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthoredOn\u003c/b\u003e: 14/02/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003eSerena Shrink\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformerType\u003c/b\u003e: ENT \u003cspan\u003e(Details : {http://orionhealth.com/fhir/apps/specialties code \u0027ent\u0027 \u003d \u0027ent\u0027, given as \u0027ENT\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eDr Dave\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: For consideration of Grommets \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: In the past 2 years Beverly has had 6 instances of rt-sided Otitis media. She is     falling behind her peers at school, and displaying some learning difficulties.\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://orionhealth.com/fhir/apps/referralids",
+      "value": "ret4421"
+    }
+  ],
+  "basedOn": [
+    {
+      "display": "ServiceRequest for Myringotomy and insertion of tympanic ventilation tube"
+    }
+  ],
+  "replaces": [
+    {
+      "display": "prior ServiceRequest"
+    }
+  ],
+  "requisition": {
+    "value": "1234"
+  },
+  "status": "active",
+  "intent": "order",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "103696004",
+          "display": "Patient referral to specialist"
+        }
+      ]
+    }
+  ],
+  "priority": "routine",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "172676009",
+        "display": "Myringotomy and insertion of tympanic ventilation tube"
+      }
+    ],
+    "text": "Insertion of grommets"
+  },
+  "subject": {
+    "reference": "https://fhir.orionhealth.com/blaze/fhir/Patient/77662",
+    "display": "Beverly Weaver"
+  },
+  "encounter": {
+    "display": "Beverly Waver\u0027s encounter on 2014-02-14"
+  },
+  "occurrencePeriod": {
+    "end": "2014-03-14"
+  },
+  "authoredOn": "2014-02-14",
+  "requester": {
+    "reference": "https://fhir.orionhealth.com/blaze/fhir/Practitioner/77272",
+    "display": "Serena Shrink"
+  },
+  "performerType": {
+    "coding": [
+      {
+        "system": "http://orionhealth.com/fhir/apps/specialties",
+        "code": "ent",
+        "display": "ENT"
+      }
+    ]
+  },
+  "performer": [
+    {
+      "reference": "https://fhir.orionhealth.com/blaze/fhir/Practitioner/76597",
+      "display": "Dr Dave"
+    }
+  ],
+  "reasonCode": [
+    {
+      "text": "For consideration of Grommets"
+    }
+  ],
+  "note": [
+    {
+      "authorString": "Serena Shrink",
+      "time": "2014-02-14",
+      "text": "In the past 2 years Beverly has had 6 instances of rt-sided Otitis media. She is     falling behind her peers at school, and displaying some learning difficulties."
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

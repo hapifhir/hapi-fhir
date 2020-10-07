@@ -1,0 +1,1082 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Definition",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eto do\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "informative"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/Definition",
+  "version": "4.0.1",
+  "name": "Definition",
+  "title": "definition",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Health Level Seven International fhir",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Logical Model: A pattern to be followed by resources that represent a specific proposal, plan and/or order for some sort of action or service.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    },
+    {
+      "identity": "w5",
+      "uri": "http://hl7.org/fhir/fivews",
+      "name": "FiveWs Pattern Mapping"
+    },
+    {
+      "identity": "v2",
+      "uri": "http://hl7.org/v2",
+      "name": "HL7 v2 Mapping"
+    }
+  ],
+  "kind": "logical",
+  "abstract": false,
+  "type": "Definition",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Definition",
+        "path": "Definition",
+        "short": "Definition Pattern",
+        "definition": "A pattern to be followed by resources that represent a specific proposal, plan and/or order for some sort of action or service.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition",
+          "min": 0,
+          "max": "*"
+        },
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Act[moodCode\u003c\u003dDEFN]"
+          }
+        ]
+      },
+      {
+        "id": "Definition.url",
+        "path": "Definition.url",
+        "short": "Logical canonical URL to reference this {{title}} (globally unique)",
+        "definition": "An absolute URL that is used to identify this {{title}} when it is referenced in a specification, model, design or an instance. This SHALL be a URL, SHOULD be globally unique, and SHOULD be an address at which this {{title}} is (or will be) published. The URL SHOULD include the major version of the {{title}}. For more information see [Technical and Business Versions](resource.html#versions).",
+        "comment": "Can be a urn:uuid: or a urn:oid:, but real http: addresses are preferred.  This is the URI that will be used when making canonical references to this resource.",
+        "requirements": "Allows the {{title}} to be referenced by a single globally unique identifier.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.url",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".identifier"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          }
+        ]
+      },
+      {
+        "id": "Definition.identifier",
+        "path": "Definition.identifier",
+        "short": "Business Identifier for {{title}}",
+        "definition": "Business identifiers assigned to this {{title}} by the performer and/or other systems.  These identifiers remain constant as the resource is updated and propagates from server to server.",
+        "comment": "Note: This is a business identifier, not a resource identifier (see [discussion](resource.html#identifiers)).  It is best practice for the identifier to only appear on a single resource instance, however business practices may occasionally dictate that multiple resource instances with the same identifier can exist - possibly even with different resource types.  For example, multiple Patient and a Person resource instance might share the same social insurance number.",
+        "requirements": "Allows identification of the {{title}} as it is known by various participating systems and in a way that remains consistent across servers.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.identifier",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".identifier"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          }
+        ]
+      },
+      {
+        "id": "Definition.version",
+        "path": "Definition.version",
+        "short": "Business version of the {{title}}",
+        "definition": "The identifier that is used to identify this version of the {{title}} when it is referenced in a specification, model, design or instance. This is an arbitrary value managed by the {{title}} author and is not expected to be globally unique. For example, it might be a timestamp (e.g. yyyymmdd) if a managed version is not available. There is also no expectation that versions are orderable.",
+        "comment": "There may be multiple different instances of a {{title}} that have the same identifier but different versions.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.version",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A (to add?)"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.version"
+          }
+        ]
+      },
+      {
+        "id": "Definition.title",
+        "path": "Definition.title",
+        "short": "Name for this {{title}} (Human friendly)",
+        "definition": "A short, descriptive, user-friendly title for the {{title}}.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.title",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".title"
+          }
+        ]
+      },
+      {
+        "id": "Definition.derivedFromCanonical",
+        "path": "Definition.derivedFromCanonical",
+        "short": "Based on FHIR protocol or definition",
+        "definition": "The canonical URL pointing to another FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this definition.",
+        "requirements": "Protocols and order sets may be refinements of more generic protocols and order sets.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.derivedFromCanonical",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Definition"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dDEFN].target"
+          }
+        ]
+      },
+      {
+        "id": "Definition.derivedFromUri",
+        "path": "Definition.derivedFromUri",
+        "short": "Based on external protocol or definition",
+        "definition": "The URL pointing to an externally-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this definition.",
+        "comment": "This might be an HTML page, PDF, etc. or could just be a non-resolvable URI identifier.",
+        "requirements": "Protocols and order sets may be refinements of more generic protocols and order sets.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.derivedFromUri",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dDEFN].target"
+          }
+        ]
+      },
+      {
+        "id": "Definition.partOf",
+        "path": "Definition.partOf",
+        "short": "Part of referenced definition",
+        "definition": "A larger definition of which this particular definition is a component or step.",
+        "comment": "[The allowed reference resources may be adjusted as appropriate for the event resource].",
+        "requirements": "E.g. Drug administration as part of a procedure, procedure as part of observation, etc.",
+        "alias": [
+          "container"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.partOf",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Definition"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dCOMP].source[moodCode\u003dDEFN]"
+          }
+        ]
+      },
+      {
+        "id": "Definition.replaces",
+        "path": "Definition.replaces",
+        "short": "Request(s) replaced by this request",
+        "definition": "Completed or terminated request(s) whose function is taken by this new request.",
+        "requirements": "As new versions of a protocol or guideline are defined, allows identification of what versions are replaced by a new instance.",
+        "alias": [
+          "supersedes",
+          "prior",
+          "renewed order"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.replaces",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Definition"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dRPLC].target"
+          }
+        ]
+      },
+      {
+        "id": "Definition.status",
+        "path": "Definition.status",
+        "short": "draft | active | retired | unknown",
+        "definition": "The current state of the {{title}}.",
+        "comment": "A nominal state-transition diagram can be found in the [[definition.html#statemachine | Definition pattern]] documentation\n\nUnknown does not represent \"other\" - one of the defined statuses must apply.  Unknown is used when the authoring system is not sure what the current status is.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Definition.status",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This is labeled as \"Is Modifier\" because applications should not use a retired {{title}} without due consideration",
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "PublicationStatus"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+              "valueBoolean": true
+            }
+          ],
+          "strength": "required",
+          "description": "The lifecycle status of an artifact.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/publication-status|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".status"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.status"
+          }
+        ]
+      },
+      {
+        "id": "Definition.experimental",
+        "path": "Definition.experimental",
+        "short": "If for testing purposes, not real usage",
+        "definition": "A flag to indicate that this {{title}} is authored for testing purposes (or education/evaluation/marketing), and is not intended to be used for genuine usage.",
+        "comment": "Allows filtering of {{title}} that are appropriate for use vs. not.",
+        "requirements": "Enables experimental content to be developed following the same life-cycle as a production-level {{title}} would.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.experimental",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This is labeled as \"Is Modifier\" because applications should not use an experimental {{title}} in production.",
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A (to add?)"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.class"
+          }
+        ]
+      },
+      {
+        "id": "Definition.subject[x]",
+        "path": "Definition.subject[x]",
+        "short": "Type of individual the defined service is for",
+        "definition": "A code or group definition that describes the intended subject of instantiations of this definition.",
+        "requirements": "Many protocols, order sets and guidelines are inted for use only with specific types of patients or subjects.",
+        "alias": [
+          "Subject type"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.subject[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Group"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "DefinitionSubject"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes identifying the type of subject intended to be the recpient or focus of the defined action.  These should ideally be consistent across definition resources."
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dSBJ].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject"
+          }
+        ]
+      },
+      {
+        "id": "Definition.date",
+        "path": "Definition.date",
+        "short": "Date status first applied",
+        "definition": "For draft definitions, indicates the date of initial creation.  For active definitions, represents the date of activation.  For withdrawn definitions, indicates the date of withdrawal.",
+        "alias": [
+          "created"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.date",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].time"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.recorded"
+          }
+        ]
+      },
+      {
+        "id": "Definition.publisher",
+        "path": "Definition.publisher",
+        "short": "The name of the individual or organization that published the {{title}}",
+        "definition": "Helps establish the \"authority/credibility\" of the {{title}}.  May also allow for contact.",
+        "requirements": "Usually an organization, but may be an individual. The publisher (or steward) of the {{title}} is the organization or individual primarily responsible for the maintenance and upkeep of the {{title}}. This is not necessarily the same individual or organization that developed and initially authored the content. The publisher is the primary point of contact for questions or issues with the {{title}}. This item SHOULD be populated unless the information is available from context.",
+        "alias": [
+          "author"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.publisher",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.author"
+          }
+        ]
+      },
+      {
+        "id": "Definition.contact",
+        "path": "Definition.contact",
+        "short": "Contact details for the publisher",
+        "definition": "Contact details to assist a user in finding and communicating with the publisher.",
+        "comment": "May be a web site, an email address, a telephone number, etc.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.contact",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "ContactDetail"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dCALLBCK].role"
+          }
+        ]
+      },
+      {
+        "id": "Definition.description",
+        "path": "Definition.description",
+        "short": "Natural language description of the {{title}}",
+        "definition": "A free text natural language description of the {{title}} from the consumer\u0027s perspective.",
+        "comment": "This description can be used to capture details such as why the {{title}} was built, comments about misuse, instructions for clinical use and interpretation, literature references, examples from the paper world, etc. It is not a rendering of the module as conveyed in the text field of the resource itself. This item SHOULD be populated unless the information is available from context.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.description",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "markdown"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".text"
+          }
+        ]
+      },
+      {
+        "id": "Definition.useContext",
+        "path": "Definition.useContext",
+        "short": "Content intends to support these contexts",
+        "definition": "The content was developed with a focus and intent of supporting the contexts that are listed. These terms may be used to assist with indexing and searching of code system definitions.",
+        "comment": "When multiple usageContexts are specified, there is no expectation for whether all or any of the contexts apply.",
+        "requirements": "Assist in searching for appropriate content.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.useContext",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "UsageContext"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A (to add?)"
+          }
+        ]
+      },
+      {
+        "id": "Definition.jurisdiction",
+        "path": "Definition.jurisdiction",
+        "short": "Intended jurisdiction for {{title}} (if applicable)",
+        "definition": "A jurisdiction in which the {{title}} is intended to be used.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Definition.jurisdiction",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "Jurisdiction"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+              "valueBoolean": true
+            }
+          ],
+          "strength": "extensible",
+          "description": "Countries and regions within which this artifact is targeted for use.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/jurisdiction"
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A (to add?)"
+          }
+        ]
+      },
+      {
+        "id": "Definition.purpose",
+        "path": "Definition.purpose",
+        "short": "Why this {{title}} is defined",
+        "definition": "Explains why this {{title}} is needed and why it has been designed as it has.",
+        "comment": "This element does not describe the usage of the {{title}}.  Rather it is for traceability of \u0027\u0027why\u0027\u0027 the resource is either needed or \u0027\u0027why\u0027\u0027 it is defined as it is.  This may be used to point to source materials or specifications that drove the structure of this {{title}}.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.purpose",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "markdown"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".reasonCode.text"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          }
+        ]
+      },
+      {
+        "id": "Definition.copyright",
+        "path": "Definition.copyright",
+        "short": "Use and/or publishing restrictions",
+        "definition": "A copyright statement relating to the {{title}} and/or its contents. Copyright statements are generally legal restrictions on the use and publishing of the {{title}}.",
+        "requirements": "Consumers of the {{title}} must be able to determine any legal restrictions on the use of the artifact and/or its content.",
+        "alias": [
+          "License",
+          "Restrictions"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.copyright",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "markdown"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A (to add?)"
+          }
+        ]
+      },
+      {
+        "id": "Definition.approvalDate",
+        "path": "Definition.approvalDate",
+        "short": "When {{title}} approved by publisher",
+        "definition": "The date on which the asset content was approved by the publisher. Approval happens once when the content is officially approved for usage.",
+        "comment": "The date may be more recent than the approval date because of minor changes / editorial corrections.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.approvalDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003d\"SUBJ\"].act[classCode\u003dCACT;moodCode\u003dEVN;code\u003d\"approval\"].effectiveTime"
+          }
+        ]
+      },
+      {
+        "id": "Definition.lastReviewDate",
+        "path": "Definition.lastReviewDate",
+        "short": "Last review date for the {{title}}",
+        "definition": "The date on which the asset content was last reviewed. Review happens periodically after that, but doesn\u0027t change the original approval date.",
+        "comment": "If specified, this is usually after the approval date.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.lastReviewDate",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "date"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003d\"SUBJ\"; subsetCode\u003d\"RECENT\"].act[classCode\u003dCACT;moodCode\u003dEVN;code\u003d\"review\"].effectiveTime"
+          }
+        ]
+      },
+      {
+        "id": "Definition.effectivePeriod",
+        "path": "Definition.effectivePeriod",
+        "short": "The effective date range for the {{title}}",
+        "definition": "The period during which the {{title}} content was or is planned to be effective.",
+        "comment": "The effective period for a {{title}}  determines when the content is applicable for usage and is independent of publication and review dates. For example, a measure intended to be used for the year 2016 would be published in 2015.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.effectivePeriod",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Period"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A (to add?)"
+          }
+        ]
+      },
+      {
+        "id": "Definition.performerType",
+        "path": "Definition.performerType",
+        "short": "Desired kind of service performer",
+        "definition": "The type of individual that is expected to act upon instances of this definition.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Definition.performerType",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "PerformerType"
+            }
+          ],
+          "strength": "example",
+          "description": "Identifies types of practitioners, devices or other agents that are intended to perform a defined action.  While the detailed constraints of relevant agents will vary by resource, some degree of consistency around recommended codes across request and definition resources would be desirable."
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dPRF].role[scoper.determinerCode\u003dKIND].code"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.actor"
+          }
+        ]
+      }
+    ]
+  }
+}

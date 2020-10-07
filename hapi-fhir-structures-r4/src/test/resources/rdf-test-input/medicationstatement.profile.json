@@ -1,0 +1,1869 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "MedicationStatement",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ctable border\u003d\"0\" cellpadding\u003d\"0\" cellspacing\u003d\"0\" style\u003d\"border: 0px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003ctr style\u003d\"border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"The logical name of the element\"\u003eName\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Information about the use of the element\"\u003eFlags\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Minimum and Maximum # of times the the element can appear in the instance\"\u003eCard.\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"width: 100px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Reference to the type of the element\"\u003eType\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Additional information about the element\"\u003eDescription \u0026amp; Constraints\u003c/a\u003e\u003cspan style\u003d\"float: right\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e\u003c/a\u003e\u003c/span\u003e\u003c/th\u003e\u003c/tr\u003e\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAACCElEQVQ4y4XTv2sUQRTA8e9Mzt3kjoOLSXFgZ6GJQlALCysLC89OsLTXv0VFxE4stRAEQUghSWEXuM4qMZpATsUD70dyMdnduZ15z2IvMV5IfDDNm5nPm59GVTkpms1mTVXvhxDuichlEZn03m+KyJL3/mWj0fiKqp7YVlZWXrfbbR2PTqeji4uLn1WVEqdECKFRr9eP5WdnZ/HeXwROB0TEA3S7XarVKiLC1tYW8/PzeO/5LxBCUABrLXEc02q1KJfLB30F0P144dPU9LVL1kwcrU06WP0ewhML4JwDYDgcHo7I87wAjNq5ypU3Z8arT8F5u/xejw52zmGM+Rcg1wyIcc/BTYCdBlODyh3ElA1AHMekaUoURURRBECWZSNgaGzBxxAU9jfQ9jrJr2dcbbXobRYHlQAzo9X1gDR9+KUArE6CwLefZD9WCW6P0uRZKreXqADkHXZ3dshzjwRholJH397AOXcTwHTfzQ1n7q6NnYEAy+DWQVNwKWQJ6vcx557Se7HAzIN1M9rCwVteA/rAYDRRICQgSZEr7WLYO3bzJVJGQBu0D74PkoHkoBnIHvjfkO9AGABmDHCjFWgH8i7kPQh9yEeYH4DfLhBJgA2A7BBQJ9uwXWY3rhJqFo1AaiB1CBngwKZQcqAeSFSduL9Akj7qPF64jnALS5VTPwdgPwwJ+uog9Qcx4kRZiPKqxgAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement : A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient\u0027s memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \n\nThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient\u0027s memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.\"\u003eMedicationStatement\u003c/span\u003e\u003ca name\u003d\"MedicationStatement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; border: 1px grey solid; font-weight: bold; color: black; background-color: #fff5e6\" href\u003d\"versions.html#std-process\" title\u003d\"Standards Status \u003d Trial Use\"\u003eTU\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"domainresource.html\"\u003eDomainResource\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eRecord of medication being taken by a patient\u003cbr/\u003eElements defined in Ancestors: \u003ca href\u003d\"resource.html#Resource\" title\u003d\"The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.\"\u003eid\u003c/a\u003e, \u003ca href\u003d\"resource.html#Resource\" title\u003d\"The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.\"\u003emeta\u003c/a\u003e, \u003ca href\u003d\"resource.html#Resource\" title\u003d\"A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.\"\u003eimplicitRules\u003c/a\u003e, \u003ca href\u003d\"resource.html#Resource\" title\u003d\"The base language in which the resource is written.\"\u003elanguage\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"A human-readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \u0026quot;clinically safe\u0026quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.\"\u003etext\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.\"\u003econtained\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.\"\u003eextension\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).\"\u003emodifierExtension\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.identifier : Identifiers associated with this Medication Statement that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. They are business identifiers assigned to this resource by the performer or other systems and remain constant as the resource is updated and propagates from server to server.\"\u003eidentifier\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.identifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#Identifier\"\u003eIdentifier\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eExternal identifier\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.basedOn : A plan, proposal or order that is fulfilled in whole or in part by this event.\"\u003ebasedOn\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.basedOn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"medicationrequest.html\"\u003eMedicationRequest\u003c/a\u003e | \u003ca href\u003d\"careplan.html\"\u003eCarePlan\u003c/a\u003e | \u003ca href\u003d\"servicerequest.html\"\u003eServiceRequest\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eFulfils plan, proposal or order\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.partOf : A larger event of which this particular event is a component or step.\"\u003epartOf\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.partOf\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"medicationadministration.html\"\u003eMedicationAdministration\u003c/a\u003e | \u003ca href\u003d\"medicationdispense.html\"\u003eMedicationDispense\u003c/a\u003e | \u003ca href\u003d\"medicationstatement.html\"\u003eMedicationStatement\u003c/a\u003e | \u003ca href\u003d\"procedure.html\"\u003eProcedure\u003c/a\u003e | \u003ca href\u003d\"observation.html\"\u003eObservation\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003ePart of referenced event\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.status : A code representing the patient or other source\u0027s judgment about the state of the medication used that this statement is about.  Generally, this will be active or completed.\"\u003estatus\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.status\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"conformance-rules.html#isModifier\" title\u003d\"This element is a modifier element\"\u003e?!\u003c/a\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e1..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eactive | completed | entered-in-error | intended | stopped | on-hold | unknown | not-taken\u003cbr/\u003e\u003ca href\u003d\"valueset-medication-statement-status.html\" title\u003d\"A coded concept indicating the current status of a MedicationStatement.\"\u003eMedication  status  codes\u003c/a\u003e (\u003ca href\u003d\"terminologies.html#required\" title\u003d\"To be conformant, the concept in this element SHALL be from the specified value set.\"\u003eRequired\u003c/a\u003e)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.statusReason : Captures the reason for the current state of the MedicationStatement.\"\u003estatusReason\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.statusReason\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eReason for current status\u003cbr/\u003e\u003ca href\u003d\"valueset-reason-medication-status-codes.html\" title\u003d\"A coded concept indicating the reason for the status of the statement.\"\u003eSNOMED CT Drug Therapy Status codes \u003c/a\u003e (\u003ca href\u003d\"terminologies.html#example\" title\u003d\"Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.\"\u003eExample\u003c/a\u003e)\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.category : Indicates where the medication is expected to be consumed or administered.\"\u003ecategory\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.category\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eType of medication usage\u003cbr/\u003e\u003ca href\u003d\"valueset-medication-statement-category.html\" title\u003d\"A coded concept identifying where the medication included in the MedicationStatement is expected to be consumed or administered.\"\u003eMedication usage category codes\u003c/a\u003e (\u003ca href\u003d\"terminologies.html#preferred\" title\u003d\"Instances are encouraged to draw from the specified codes for interoperability purposes but are not required to do so to be considered conformant.\"\u003ePreferred\u003c/a\u003e)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAMQfAGm6/idTd4yTmF+v8Xa37KvW+lyh3KHJ62aq41ee2bXZ98nm/2mt5W2Ck5XN/C1chEZieho8WXXA/2Gn4P39/W+y6V+l3qjP8Njt/lx2izxPYGyv51Oa1EJWZ////////yH5BAEAAB8ALAAAAAAQABAAAAWH4Cd+Xml6Y0pCQts0EKp6GbYshaM/skhjhCChUmFIeL4OsHIxXRAISQTl6SgIG8+FgfBMoh2qtbLZQr0TQJhk3TC4pYPBApiyFVDEwSOf18UFXxMWBoUJBn9sDgmDewcJCRyJJBoEkRyYmAABPZQEAAOhA5seFDMaDw8BAQ9TpiokJyWwtLUhADs\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Choice of Types\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.medication[x] : Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.\"\u003emedication[x]\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.medication_x_\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e1..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eWhat medication was taken\u003cbr/\u003e\u003ca href\u003d\"valueset-medication-codes.html\" title\u003d\"A coded concept identifying the substance or product being taken.\"\u003eSNOMED CT Medication Codes\u003c/a\u003e (\u003ca href\u003d\"terminologies.html#example\" title\u003d\"Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.\"\u003eExample\u003c/a\u003e)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAMElEQVR42u3QwQkAMAwDsezq/WdoskKgFAoy6HkfV5LamJ1tc7MHAAD+5QQAAOCZBkurQFbnaRSlAAAAAElFTkSuQmCC)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.\"\u003emedicationCodeableConcept\u003c/span\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e medicationReference\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"medication.html\"\u003eMedication\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.subject : The person, animal or group who is/was taking the medication.\"\u003esubject\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.subject\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e1..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"patient.html\"\u003ePatient\u003c/a\u003e | \u003ca href\u003d\"group.html\"\u003eGroup\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eWho is/was taking  the medication\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.context : The encounter or episode of care that establishes the context for this MedicationStatement.\"\u003econtext\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.context\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"encounter.html\"\u003eEncounter\u003c/a\u003e | \u003ca href\u003d\"episodeofcare.html\"\u003eEpisodeOfCare\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eEncounter / Episode associated with MedicationStatement\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAMQfAGm6/idTd4yTmF+v8Xa37KvW+lyh3KHJ62aq41ee2bXZ98nm/2mt5W2Ck5XN/C1chEZieho8WXXA/2Gn4P39/W+y6V+l3qjP8Njt/lx2izxPYGyv51Oa1EJWZ////////yH5BAEAAB8ALAAAAAAQABAAAAWH4Cd+Xml6Y0pCQts0EKp6GbYshaM/skhjhCChUmFIeL4OsHIxXRAISQTl6SgIG8+FgfBMoh2qtbLZQr0TQJhk3TC4pYPBApiyFVDEwSOf18UFXxMWBoUJBn9sDgmDewcJCRyJJBoEkRyYmAABPZQEAAOhA5seFDMaDw8BAQ9TpiokJyWwtLUhADs\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Choice of Types\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.effective[x] : The interval of time during which it is being asserted that the patient is/was/will be taking the medication (or was not taking, when the MedicationStatement.taken element is No).\"\u003eeffective[x]\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.effective_x_\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe date/time or interval when the medication is/was/will be taken\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAMElEQVR42u3QwQkAMAwDsezq/WdoskKgFAoy6HkfV5LamJ1tc7MHAAD+5QQAAOCZBkurQFbnaRSlAAAAAElFTkSuQmCC)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.\"\u003eeffectiveDateTime\u003c/span\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"A time period defined by a start and end date and optionally time.\"\u003eeffectivePeriod\u003c/span\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#Period\"\u003ePeriod\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.dateAsserted : The date when the medication statement was asserted by the information source.\"\u003edateAsserted\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.dateAsserted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eWhen the statement was asserted?\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.informationSource : The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g. Claim or MedicationRequest.\"\u003einformationSource\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.informationSource\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"patient.html\"\u003ePatient\u003c/a\u003e | \u003ca href\u003d\"practitioner.html\"\u003ePractitioner\u003c/a\u003e | \u003ca href\u003d\"practitionerrole.html\"\u003ePractitionerRole\u003c/a\u003e | \u003ca href\u003d\"relatedperson.html\"\u003eRelatedPerson\u003c/a\u003e | \u003ca href\u003d\"organization.html\"\u003eOrganization\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003ePerson or organization that provided the information about the taking of this medication\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.derivedFrom : Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.\"\u003ederivedFrom\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.derivedFrom\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"resourcelist.html\"\u003eAny\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eAdditional supporting information\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.reasonCode : A reason for why the medication is being/was taken.\"\u003ereasonCode\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.reasonCode\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eReason for why the medication is being/was taken\u003cbr/\u003e\u003ca href\u003d\"valueset-condition-code.html\" title\u003d\"A coded concept identifying why the medication is being taken.\"\u003eCondition/Problem/Diagnosis Codes\u003c/a\u003e (\u003ca href\u003d\"terminologies.html#example\" title\u003d\"Instances are not expected or even encouraged to draw from the specified value set.  The value set merely provides examples of the types of concepts intended to be included.\"\u003eExample\u003c/a\u003e)\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.reasonReference : Condition or observation that supports why the medication is being/was taken.\"\u003ereasonReference\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.reasonReference\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"references.html#Reference\"\u003eReference\u003c/a\u003e(\u003ca href\u003d\"condition.html\"\u003eCondition\u003c/a\u003e | \u003ca href\u003d\"observation.html\"\u003eObservation\u003c/a\u003e | \u003ca href\u003d\"diagnosticreport.html\"\u003eDiagnosticReport\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eCondition or observation that supports why the medication is being/was taken\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.note : Provides extra information about the medication statement that is not conveyed by the other attributes.\"\u003enote\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.note\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#Annotation\"\u003eAnnotation\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eFurther information about the statement\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"MedicationStatement.dosage : Indicates how the medication is/was or should be taken by the patient.\"\u003edosage\u003c/span\u003e\u003ca name\u003d\"MedicationStatement.dosage\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"dosage.html#Dosage\"\u003eDosage\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eDetails of how medication is/was taken or should be taken\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr\u003e\u003ctd colspan\u003d\"5\" class\u003d\"hierarchy\"\u003e\u003cbr/\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e Documentation for this format\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
+      "valueString": "Clinical.Medications"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-security-category",
+      "valueCode": "patient"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/MedicationStatement",
+  "version": "4.0.1",
+  "name": "MedicationStatement",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Health Level Seven International (Pharmacy)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/medication/index.cfm"
+        }
+      ]
+    }
+  ],
+  "description": "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient\u0027s memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \n\nThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient\u0027s memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "workflow",
+      "uri": "http://hl7.org/fhir/workflow",
+      "name": "Workflow Pattern"
+    },
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    },
+    {
+      "identity": "w5",
+      "uri": "http://hl7.org/fhir/fivews",
+      "name": "FiveWs Pattern Mapping"
+    },
+    {
+      "identity": "v2",
+      "uri": "http://hl7.org/v2",
+      "name": "HL7 v2 Mapping"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "MedicationStatement",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "MedicationStatement",
+        "path": "MedicationStatement",
+        "short": "Record of medication being taken by a patient",
+        "definition": "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient\u0027s memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \n\nThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient\u0027s memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.",
+        "comment": "When interpreting a medicationStatement, the value of the status and NotTaken needed to be considered:\rMedicationStatement.status + MedicationStatement.wasNotTaken\rStatus\u003dActive + NotTaken\u003dT \u003d Not currently taking\rStatus\u003dCompleted + NotTaken\u003dT \u003d Not taken in the past\rStatus\u003dIntended + NotTaken\u003dT \u003d No intention of taking\rStatus\u003dActive + NotTaken\u003dF \u003d Taking, but not as prescribed\rStatus\u003dActive + NotTaken\u003dF \u003d Taking\rStatus\u003dIntended +NotTaken\u003d F \u003d Will be taking (not started)\rStatus\u003dCompleted + NotTaken\u003dF \u003d Taken in past\rStatus\u003dIn Error + NotTaken\u003dN/A \u003d In Error.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement",
+          "min": 0,
+          "max": "*"
+        },
+        "constraint": [
+          {
+            "key": "dom-2",
+            "severity": "error",
+            "human": "If the resource is contained in another resource, it SHALL NOT contain nested Resources",
+            "expression": "contained.contained.empty()",
+            "xpath": "not(parent::f:contained and f:contained)",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "key": "dom-3",
+            "severity": "error",
+            "human": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource",
+            "expression": "contained.where(((\u0027#\u0027+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference \u003d \u0027#\u0027).exists() or descendants().where(as(canonical) \u003d \u0027#\u0027).exists() or descendants().where(as(canonical) \u003d \u0027#\u0027).exists()).not()).trace(\u0027unmatched\u0027, id).empty()",
+            "xpath": "not(exists(for $id in f:contained/*/f:id/@value return $contained[not(parent::*/descendant::f:reference/@value\u003dconcat(\u0027#\u0027, $contained/*/id/@value) or descendant::f:reference[@value\u003d\u0027#\u0027])]))",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "key": "dom-4",
+            "severity": "error",
+            "human": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated",
+            "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+            "xpath": "not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "key": "dom-5",
+            "severity": "error",
+            "human": "If a resource is contained in another resource, it SHALL NOT have a security label",
+            "expression": "contained.meta.security.empty()",
+            "xpath": "not(exists(f:contained/*/f:meta/f:security))",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice",
+                "valueBoolean": true
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice-explanation",
+                "valueMarkdown": "When a resource has no narrative, only systems that fully understand the data can display the resource to a human safely. Including a human readable representation in the resource makes for a much more robust eco-system and cheaper handling of resources by intermediary systems. Some ecosystems restrict distribution of resources to only those systems that do fully understand the resources, and as a consequence implementers may believe that the narrative is superfluous. However experience shows that such eco-systems often open up to new participants over time."
+              }
+            ],
+            "key": "dom-6",
+            "severity": "warning",
+            "human": "A resource should have narrative for robust management",
+            "expression": "text.`div`.exists()",
+            "xpath": "exists(f:text/h:div)",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Entity. Role, or Act"
+          },
+          {
+            "identity": "workflow",
+            "map": "Event"
+          },
+          {
+            "identity": "rim",
+            "map": "SubstanceAdministration"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.id",
+        "path": "MedicationStatement.id",
+        "short": "Logical id of this artifact",
+        "definition": "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.",
+        "comment": "The only time that a resource does not have an id is when it is being submitted to the server using a create operation.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "MedicationStatement.meta",
+        "path": "MedicationStatement.meta",
+        "short": "Metadata about the resource",
+        "definition": "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.meta",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Meta"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "MedicationStatement.implicitRules",
+        "path": "MedicationStatement.implicitRules",
+        "short": "A set of rules under which this content was created",
+        "definition": "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.",
+        "comment": "Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element. Often, when used, the URL is a reference to an implementation guide that defines these special rules as part of it\u0027s narrative along with other profiles, value sets, etc.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.implicitRules",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element is labeled as a modifier because the implicit rules may provide additional knowledge about the resource that modifies it\u0027s meaning or interpretation",
+        "isSummary": true
+      },
+      {
+        "id": "MedicationStatement.language",
+        "path": "MedicationStatement.language",
+        "short": "Language of the resource content",
+        "definition": "The base language in which the resource is written.",
+        "comment": "Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource. Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.language",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet",
+              "valueCanonical": "http://hl7.org/fhir/ValueSet/all-languages"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "Language"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+              "valueBoolean": true
+            }
+          ],
+          "strength": "preferred",
+          "description": "A human language.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+        }
+      },
+      {
+        "id": "MedicationStatement.text",
+        "path": "MedicationStatement.text",
+        "short": "Text summary of the resource, for human interpretation",
+        "definition": "A human-readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.",
+        "comment": "Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative. In some cases, a resource may only have text with little or no additional discrete data (as long as all minOccurs\u003d1 elements are satisfied).  This may be necessary for data from legacy systems where information is captured as a \"text blob\" or where text is additionally entered raw or narrated and encoded information is added later.",
+        "alias": [
+          "narrative",
+          "html",
+          "xhtml",
+          "display"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "DomainResource.text",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Narrative"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Act.text?"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.contained",
+        "path": "MedicationStatement.contained",
+        "short": "Contained, inline Resources",
+        "definition": "These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.",
+        "comment": "This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again. Contained resources may have profiles and tags In their meta elements, but SHALL NOT have security labels.",
+        "alias": [
+          "inline resources",
+          "anonymous resources",
+          "contained resources"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "DomainResource.contained",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Resource"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.extension",
+        "path": "MedicationStatement.extension",
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "DomainResource.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.modifierExtension",
+        "path": "MedicationStatement.modifierExtension",
+        "short": "Extensions that cannot be ignored",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "DomainResource.modifierExtension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the resource that contains them",
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.identifier",
+        "path": "MedicationStatement.identifier",
+        "short": "External identifier",
+        "definition": "Identifiers associated with this Medication Statement that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. They are business identifiers assigned to this resource by the performer or other systems and remain constant as the resource is updated and propagates from server to server.",
+        "comment": "This is a business identifier, not a resource identifier.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.identifier",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.identifier"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          },
+          {
+            "identity": "rim",
+            "map": ".id"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.basedOn",
+        "path": "MedicationStatement.basedOn",
+        "short": "Fulfils plan, proposal or order",
+        "definition": "A plan, proposal or order that is fulfilled in whole or in part by this event.",
+        "requirements": "Allows tracing of authorization for the event and tracking whether proposals/recommendations were acted upon.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.basedOn",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/MedicationRequest",
+              "http://hl7.org/fhir/StructureDefinition/CarePlan",
+              "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.basedOn"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dFLFS].target[classCode\u003dSBADM or PROC or PCPR or OBS, moodCode\u003dRQO orPLAN or PRP]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.partOf",
+        "path": "MedicationStatement.partOf",
+        "short": "Part of referenced event",
+        "definition": "A larger event of which this particular event is a component or step.",
+        "requirements": "This should not be used when indicating which resource a MedicationStatement has been derived from.  If that is the use case, then MedicationStatement.derivedFrom should be used.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.partOf",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/MedicationAdministration",
+              "http://hl7.org/fhir/StructureDefinition/MedicationDispense",
+              "http://hl7.org/fhir/StructureDefinition/MedicationStatement",
+              "http://hl7.org/fhir/StructureDefinition/Procedure",
+              "http://hl7.org/fhir/StructureDefinition/Observation"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.partOf"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dCOMP]/target[classCode\u003dSPLY or SBADM or PROC or OBS,moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.status",
+        "path": "MedicationStatement.status",
+        "short": "active | completed | entered-in-error | intended | stopped | on-hold | unknown | not-taken",
+        "definition": "A code representing the patient or other source\u0027s judgment about the state of the medication used that this statement is about.  Generally, this will be active or completed.",
+        "comment": "MedicationStatement is a statement at a point in time.  The status is only representative at the point when it was asserted.  The value set for MedicationStatement.status contains codes that assert the status of the use of the medication by the patient (for example, stopped or on hold) as well as codes that assert the status of the medication statement itself (for example, entered in error).\r\rThis element is labeled as a modifier because the status contains codes that mark the resource as not currently valid.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.status",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element is labelled as a modifier because it is a status element that contains status entered-in-error which means that the resource should not be treated as valid",
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationStatementStatus"
+            }
+          ],
+          "strength": "required",
+          "description": "A coded concept indicating the current status of a MedicationStatement.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/medication-statement-status|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.status"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.status"
+          },
+          {
+            "identity": "rim",
+            "map": ".statusCode"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.statusReason",
+        "path": "MedicationStatement.statusReason",
+        "short": "Reason for current status",
+        "definition": "Captures the reason for the current state of the MedicationStatement.",
+        "comment": "This is generally only used for \"exception\" statuses such as \"not-taken\", \"on-hold\", \"cancelled\" or \"entered-in-error\". The reason for performing the event at all is captured in reasonCode, not here.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.statusReason",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationStatementStatusReason"
+            }
+          ],
+          "strength": "example",
+          "description": "A coded concept indicating the reason for the status of the statement.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/reason-medication-status-codes"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.statusReason"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dSUBJ].source[classCode\u003dCACT, moodCode\u003dEVN].reasonCOde"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.category",
+        "path": "MedicationStatement.category",
+        "short": "Type of medication usage",
+        "definition": "Indicates where the medication is expected to be consumed or administered.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.category",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationStatementCategory"
+            }
+          ],
+          "strength": "preferred",
+          "description": "A coded concept identifying where the medication included in the MedicationStatement is expected to be consumed or administered.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/medication-statement-category"
+        },
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.class"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dCOMP].source[classCode\u003dOBS, moodCode\u003dEVN, code\u003d\"type of medication usage\"].value"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.medication[x]",
+        "path": "MedicationStatement.medication[x]",
+        "short": "What medication was taken",
+        "definition": "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.",
+        "comment": "If only a code is specified, then it needs to be a code for a specific product. If more information is required, then the use of the medication resource is recommended.  For example, if you require form or lot number, then you must reference the Medication resource.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.medication[x]",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Medication"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationCode"
+            }
+          ],
+          "strength": "example",
+          "description": "A coded concept identifying the substance or product being taken.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/medication-codes"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.code"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.what[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dCSM].role[classCode\u003dADMM or MANU]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.subject",
+        "path": "MedicationStatement.subject",
+        "short": "Who is/was taking  the medication",
+        "definition": "The person, animal or group who is/was taking the medication.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.subject",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Group"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.subject"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject[x]"
+          },
+          {
+            "identity": "v2",
+            "map": "PID-3-Patient ID List"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dSBJ].role[classCode\u003dPAT]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.context",
+        "path": "MedicationStatement.context",
+        "short": "Encounter / Episode associated with MedicationStatement",
+        "definition": "The encounter or episode of care that establishes the context for this MedicationStatement.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.context",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Encounter",
+              "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.context"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dCOMP].source[classCode\u003dENC, moodCode\u003dEVN, code\u003d\"type of encounter or episode\"]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.effective[x]",
+        "path": "MedicationStatement.effective[x]",
+        "short": "The date/time or interval when the medication is/was/will be taken",
+        "definition": "The interval of time during which it is being asserted that the patient is/was/will be taking the medication (or was not taking, when the MedicationStatement.taken element is No).",
+        "comment": "This attribute reflects the period over which the patient consumed the medication and is expected to be populated on the majority of Medication Statements. If the medication is still being taken at the time the statement is recorded, the \"end\" date will be omitted.  The date/time attribute supports a variety of dates - year, year/month and exact date.  If something more than this is required, this should be conveyed as text.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.effective[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          },
+          {
+            "code": "Period"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.occurrence[x]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.done[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".effectiveTime"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.dateAsserted",
+        "path": "MedicationStatement.dateAsserted",
+        "short": "When the statement was asserted?",
+        "definition": "The date when the medication statement was asserted by the information source.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.dateAsserted",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.recorded"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].time"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.informationSource",
+        "path": "MedicationStatement.informationSource",
+        "short": "Person or organization that provided the information about the taking of this medication",
+        "definition": "The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g. Claim or MedicationRequest.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "MedicationStatement.informationSource",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.source"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dINF].role[classCode\u003dPAT, or codes for Practioner or Related Person (if PAT is the informer, then syntax for self-reported \u003dtrue)"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.derivedFrom",
+        "path": "MedicationStatement.derivedFrom",
+        "short": "Additional supporting information",
+        "definition": "Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.",
+        "comment": "Likely references would be to MedicationRequest, MedicationDispense, Claim, Observation or QuestionnaireAnswers.  The most common use cases for deriving a MedicationStatement comes from creating a MedicationStatement from a MedicationRequest or from a lab observation or a claim.  it should be noted that the amount of information that is available varies from the type resource that you derive the MedicationStatement from.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.derivedFrom",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Resource"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dSPRT]/target[classCode\u003dACT,moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.reasonCode",
+        "path": "MedicationStatement.reasonCode",
+        "short": "Reason for why the medication is being/was taken",
+        "definition": "A reason for why the medication is being/was taken.",
+        "comment": "This could be a diagnosis code. If a full condition record exists or additional detail is needed, use reasonForUseReference.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.reasonCode",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationReason"
+            }
+          ],
+          "strength": "example",
+          "description": "A coded concept identifying why the medication is being taken.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/condition-code"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.reasonCode"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".reasonCode"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.reasonReference",
+        "path": "MedicationStatement.reasonReference",
+        "short": "Condition or observation that supports why the medication is being/was taken",
+        "definition": "Condition or observation that supports why the medication is being/was taken.",
+        "comment": "This is a reference to a condition that is the reason why the medication is being/was taken.  If only a code exists, use reasonForUseCode.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.reasonReference",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Condition",
+              "http://hl7.org/fhir/StructureDefinition/Observation",
+              "http://hl7.org/fhir/StructureDefinition/DiagnosticReport"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.reasonReference"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dRSON]/target[classCode\u003dOBS,moodCode\u003dEVN, code\u003d\"reason for use\"].value"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.note",
+        "path": "MedicationStatement.note",
+        "short": "Further information about the statement",
+        "definition": "Provides extra information about the medication statement that is not conveyed by the other attributes.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.note",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Annotation"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.note"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dSUBJ]/source[classCode\u003dOBS,moodCode\u003dEVN,code\u003d\"annotation\"].value"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.dosage",
+        "path": "MedicationStatement.dosage",
+        "short": "Details of how medication is/was taken or should be taken",
+        "definition": "Indicates how the medication is/was or should be taken by the patient.",
+        "comment": "The dates included in the dosage on a Medication Statement reflect the dates for a given dose.  For example, \"from November 1, 2016 to November 3, 2016, take one tablet daily and from November 4, 2016 to November 7, 2016, take two tablets daily.\"  It is expected that this specificity may only be populated where the patient brings in their labeled container or where the Medication Statement is derived from a MedicationRequest.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "MedicationStatement.dosage",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Dosage"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "refer dosageInstruction mapping"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "MedicationStatement",
+        "path": "MedicationStatement",
+        "short": "Record of medication being taken by a patient",
+        "definition": "A record of a medication that is being consumed by a patient.   A MedicationStatement may indicate that the patient may be taking the medication now or has taken the medication in the past or will be taking the medication in the future.  The source of this information can be the patient, significant other (such as a family member or spouse), or a clinician.  A common scenario where this information is captured is during the history taking process during a patient visit or stay.   The medication information may come from sources such as the patient\u0027s memory, from a prescription bottle,  or from a list of medications the patient, clinician or other party maintains. \n\nThe primary difference between a medication statement and a medication administration is that the medication administration has complete administration information and is based on actual administration information from the person who administered the medication.  A medication statement is often, if not always, less specific.  There is no required date/time when the medication was administered, in fact we only know that a source has reported the patient is taking this medication, where details such as time, quantity, or rate or even medication product may be incomplete or missing or less precise.  As stated earlier, the medication statement information may come from the patient\u0027s memory, from a prescription bottle or from a list of medications the patient, clinician or other party maintains.  Medication administration is more formal and is not missing detailed information.",
+        "comment": "When interpreting a medicationStatement, the value of the status and NotTaken needed to be considered:\rMedicationStatement.status + MedicationStatement.wasNotTaken\rStatus\u003dActive + NotTaken\u003dT \u003d Not currently taking\rStatus\u003dCompleted + NotTaken\u003dT \u003d Not taken in the past\rStatus\u003dIntended + NotTaken\u003dT \u003d No intention of taking\rStatus\u003dActive + NotTaken\u003dF \u003d Taking, but not as prescribed\rStatus\u003dActive + NotTaken\u003dF \u003d Taking\rStatus\u003dIntended +NotTaken\u003d F \u003d Will be taking (not started)\rStatus\u003dCompleted + NotTaken\u003dF \u003d Taken in past\rStatus\u003dIn Error + NotTaken\u003dN/A \u003d In Error.",
+        "min": 0,
+        "max": "*",
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event"
+          },
+          {
+            "identity": "rim",
+            "map": "SubstanceAdministration"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.identifier",
+        "path": "MedicationStatement.identifier",
+        "short": "External identifier",
+        "definition": "Identifiers associated with this Medication Statement that are defined by business processes and/or used to refer to it when a direct URL reference to the resource itself is not appropriate. They are business identifiers assigned to this resource by the performer or other systems and remain constant as the resource is updated and propagates from server to server.",
+        "comment": "This is a business identifier, not a resource identifier.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.identifier"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          },
+          {
+            "identity": "rim",
+            "map": ".id"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.basedOn",
+        "path": "MedicationStatement.basedOn",
+        "short": "Fulfils plan, proposal or order",
+        "definition": "A plan, proposal or order that is fulfilled in whole or in part by this event.",
+        "requirements": "Allows tracing of authorization for the event and tracking whether proposals/recommendations were acted upon.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/MedicationRequest",
+              "http://hl7.org/fhir/StructureDefinition/CarePlan",
+              "http://hl7.org/fhir/StructureDefinition/ServiceRequest"
+            ]
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.basedOn"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dFLFS].target[classCode\u003dSBADM or PROC or PCPR or OBS, moodCode\u003dRQO orPLAN or PRP]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.partOf",
+        "path": "MedicationStatement.partOf",
+        "short": "Part of referenced event",
+        "definition": "A larger event of which this particular event is a component or step.",
+        "requirements": "This should not be used when indicating which resource a MedicationStatement has been derived from.  If that is the use case, then MedicationStatement.derivedFrom should be used.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/MedicationAdministration",
+              "http://hl7.org/fhir/StructureDefinition/MedicationDispense",
+              "http://hl7.org/fhir/StructureDefinition/MedicationStatement",
+              "http://hl7.org/fhir/StructureDefinition/Procedure",
+              "http://hl7.org/fhir/StructureDefinition/Observation"
+            ]
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.partOf"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dCOMP]/target[classCode\u003dSPLY or SBADM or PROC or OBS,moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.status",
+        "path": "MedicationStatement.status",
+        "short": "active | completed | entered-in-error | intended | stopped | on-hold | unknown | not-taken",
+        "definition": "A code representing the patient or other source\u0027s judgment about the state of the medication used that this statement is about.  Generally, this will be active or completed.",
+        "comment": "MedicationStatement is a statement at a point in time.  The status is only representative at the point when it was asserted.  The value set for MedicationStatement.status contains codes that assert the status of the use of the medication by the patient (for example, stopped or on hold) as well as codes that assert the status of the medication statement itself (for example, entered in error).\r\rThis element is labeled as a modifier because the status contains codes that mark the resource as not currently valid.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element is labelled as a modifier because it is a status element that contains status entered-in-error which means that the resource should not be treated as valid",
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationStatementStatus"
+            }
+          ],
+          "strength": "required",
+          "description": "A coded concept indicating the current status of a MedicationStatement.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/medication-statement-status|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.status"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.status"
+          },
+          {
+            "identity": "rim",
+            "map": ".statusCode"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.statusReason",
+        "path": "MedicationStatement.statusReason",
+        "short": "Reason for current status",
+        "definition": "Captures the reason for the current state of the MedicationStatement.",
+        "comment": "This is generally only used for \"exception\" statuses such as \"not-taken\", \"on-hold\", \"cancelled\" or \"entered-in-error\". The reason for performing the event at all is captured in reasonCode, not here.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationStatementStatusReason"
+            }
+          ],
+          "strength": "example",
+          "description": "A coded concept indicating the reason for the status of the statement.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/reason-medication-status-codes"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.statusReason"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dSUBJ].source[classCode\u003dCACT, moodCode\u003dEVN].reasonCOde"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.category",
+        "path": "MedicationStatement.category",
+        "short": "Type of medication usage",
+        "definition": "Indicates where the medication is expected to be consumed or administered.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationStatementCategory"
+            }
+          ],
+          "strength": "preferred",
+          "description": "A coded concept identifying where the medication included in the MedicationStatement is expected to be consumed or administered.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/medication-statement-category"
+        },
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.class"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dCOMP].source[classCode\u003dOBS, moodCode\u003dEVN, code\u003d\"type of medication usage\"].value"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.medication[x]",
+        "path": "MedicationStatement.medication[x]",
+        "short": "What medication was taken",
+        "definition": "Identifies the medication being administered. This is either a link to a resource representing the details of the medication or a simple attribute carrying a code that identifies the medication from a known list of medications.",
+        "comment": "If only a code is specified, then it needs to be a code for a specific product. If more information is required, then the use of the medication resource is recommended.  For example, if you require form or lot number, then you must reference the Medication resource.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Medication"
+            ]
+          }
+        ],
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationCode"
+            }
+          ],
+          "strength": "example",
+          "description": "A coded concept identifying the substance or product being taken.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/medication-codes"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.code"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.what[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dCSM].role[classCode\u003dADMM or MANU]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.subject",
+        "path": "MedicationStatement.subject",
+        "short": "Who is/was taking  the medication",
+        "definition": "The person, animal or group who is/was taking the medication.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Group"
+            ]
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.subject"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject[x]"
+          },
+          {
+            "identity": "v2",
+            "map": "PID-3-Patient ID List"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dSBJ].role[classCode\u003dPAT]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.context",
+        "path": "MedicationStatement.context",
+        "short": "Encounter / Episode associated with MedicationStatement",
+        "definition": "The encounter or episode of care that establishes the context for this MedicationStatement.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Encounter",
+              "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare"
+            ]
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.context"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dCOMP].source[classCode\u003dENC, moodCode\u003dEVN, code\u003d\"type of encounter or episode\"]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.effective[x]",
+        "path": "MedicationStatement.effective[x]",
+        "short": "The date/time or interval when the medication is/was/will be taken",
+        "definition": "The interval of time during which it is being asserted that the patient is/was/will be taking the medication (or was not taking, when the MedicationStatement.taken element is No).",
+        "comment": "This attribute reflects the period over which the patient consumed the medication and is expected to be populated on the majority of Medication Statements. If the medication is still being taken at the time the statement is recorded, the \"end\" date will be omitted.  The date/time attribute supports a variety of dates - year, year/month and exact date.  If something more than this is required, this should be conveyed as text.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "dateTime"
+          },
+          {
+            "code": "Period"
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.occurrence[x]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.done[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".effectiveTime"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.dateAsserted",
+        "path": "MedicationStatement.dateAsserted",
+        "short": "When the statement was asserted?",
+        "definition": "The date when the medication statement was asserted by the information source.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.recorded"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].time"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.informationSource",
+        "path": "MedicationStatement.informationSource",
+        "short": "Person or organization that provided the information about the taking of this medication",
+        "definition": "The person or organization that provided the information about the taking of this medication. Note: Use derivedFrom when a MedicationStatement is derived from other resources, e.g. Claim or MedicationRequest.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.source"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dINF].role[classCode\u003dPAT, or codes for Practioner or Related Person (if PAT is the informer, then syntax for self-reported \u003dtrue)"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.derivedFrom",
+        "path": "MedicationStatement.derivedFrom",
+        "short": "Additional supporting information",
+        "definition": "Allows linking the MedicationStatement to the underlying MedicationRequest, or to other information that supports or is used to derive the MedicationStatement.",
+        "comment": "Likely references would be to MedicationRequest, MedicationDispense, Claim, Observation or QuestionnaireAnswers.  The most common use cases for deriving a MedicationStatement comes from creating a MedicationStatement from a MedicationRequest or from a lab observation or a claim.  it should be noted that the amount of information that is available varies from the type resource that you derive the MedicationStatement from.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Resource"
+            ]
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dSPRT]/target[classCode\u003dACT,moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.reasonCode",
+        "path": "MedicationStatement.reasonCode",
+        "short": "Reason for why the medication is being/was taken",
+        "definition": "A reason for why the medication is being/was taken.",
+        "comment": "This could be a diagnosis code. If a full condition record exists or additional detail is needed, use reasonForUseReference.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "MedicationReason"
+            }
+          ],
+          "strength": "example",
+          "description": "A coded concept identifying why the medication is being taken.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/condition-code"
+        },
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.reasonCode"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".reasonCode"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.reasonReference",
+        "path": "MedicationStatement.reasonReference",
+        "short": "Condition or observation that supports why the medication is being/was taken",
+        "definition": "Condition or observation that supports why the medication is being/was taken.",
+        "comment": "This is a reference to a condition that is the reason why the medication is being/was taken.  If only a code exists, use reasonForUseCode.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Condition",
+              "http://hl7.org/fhir/StructureDefinition/Observation",
+              "http://hl7.org/fhir/StructureDefinition/DiagnosticReport"
+            ]
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.reasonReference"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dRSON]/target[classCode\u003dOBS,moodCode\u003dEVN, code\u003d\"reason for use\"].value"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.note",
+        "path": "MedicationStatement.note",
+        "short": "Further information about the statement",
+        "definition": "Provides extra information about the medication statement that is not conveyed by the other attributes.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Annotation"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "workflow",
+            "map": "Event.note"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dSUBJ]/source[classCode\u003dOBS,moodCode\u003dEVN,code\u003d\"annotation\"].value"
+          }
+        ]
+      },
+      {
+        "id": "MedicationStatement.dosage",
+        "path": "MedicationStatement.dosage",
+        "short": "Details of how medication is/was taken or should be taken",
+        "definition": "Indicates how the medication is/was or should be taken by the patient.",
+        "comment": "The dates included in the dosage on a Medication Statement reflect the dates for a given dose.  For example, \"from November 1, 2016 to November 3, 2016, take one tablet daily and from November 4, 2016 to November 7, 2016, take two tablets daily.\"  It is expected that this specificity may only be populated where the patient brings in their labeled container or where the Medication Statement is derived from a MedicationRequest.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Dosage"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "refer dosageInstruction mapping"
+          }
+        ]
+      }
+    ]
+  }
+}

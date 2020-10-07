@@ -1,0 +1,102 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "list-example-codes",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExample Use Codes for List\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eExample use codes for the List resource - typical kinds of use.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/list-example-use-codes defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ealerts\u003ca name\u003d\"list-example-codes-alerts\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAlerts\u003c/td\u003e\u003ctd\u003eA list of alerts for the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadverserxns\u003ca name\u003d\"list-example-codes-adverserxns\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdverse Reactions\u003c/td\u003e\u003ctd\u003eA list of part adverse reactions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eallergies\u003ca name\u003d\"list-example-codes-allergies\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAllergies\u003c/td\u003e\u003ctd\u003eA list of Allergies for the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedications\u003ca name\u003d\"list-example-codes-medications\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedication List\u003c/td\u003e\u003ctd\u003eA list of medication statements for the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproblems\u003ca name\u003d\"list-example-codes-problems\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProblem List\u003c/td\u003e\u003ctd\u003eA list of problems that the patient is known of have (or have had in the past).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eworklist\u003ca name\u003d\"list-example-codes-worklist\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWorklist\u003c/td\u003e\u003ctd\u003eA list of items that constitute a set of work to be performed (typically this code would be specialized for more specific uses, such as a ward round list).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewaiting\u003ca name\u003d\"list-example-codes-waiting\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWaiting List\u003c/td\u003e\u003ctd\u003eA list of items waiting for an event (perhaps a surgical patient waiting list).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprotocols\u003ca name\u003d\"list-example-codes-protocols\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProtocols\u003c/td\u003e\u003ctd\u003eA set of protocols to be followed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eplans\u003ca name\u003d\"list-example-codes-plans\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCare Plans\u003c/td\u003e\u003ctd\u003eA set of care plans that apply in a particular context of care.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/list-example-use-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1105"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ExampleUseCodesForList",
+  "title": "Example Use Codes for List",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Example use codes for the List resource - typical kinds of use.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/list-example-codes",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "alerts",
+      "display": "Alerts",
+      "definition": "A list of alerts for the patient."
+    },
+    {
+      "code": "adverserxns",
+      "display": "Adverse Reactions",
+      "definition": "A list of part adverse reactions."
+    },
+    {
+      "code": "allergies",
+      "display": "Allergies",
+      "definition": "A list of Allergies for the patient."
+    },
+    {
+      "code": "medications",
+      "display": "Medication List",
+      "definition": "A list of medication statements for the patient."
+    },
+    {
+      "code": "problems",
+      "display": "Problem List",
+      "definition": "A list of problems that the patient is known of have (or have had in the past)."
+    },
+    {
+      "code": "worklist",
+      "display": "Worklist",
+      "definition": "A list of items that constitute a set of work to be performed (typically this code would be specialized for more specific uses, such as a ward round list)."
+    },
+    {
+      "code": "waiting",
+      "display": "Waiting List",
+      "definition": "A list of items waiting for an event (perhaps a surgical patient waiting list)."
+    },
+    {
+      "code": "protocols",
+      "display": "Protocols",
+      "definition": "A set of protocols to be followed."
+    },
+    {
+      "code": "plans",
+      "display": "Care Plans",
+      "definition": "A set of care plans that apply in a particular context of care."
+    }
+  ]
+}

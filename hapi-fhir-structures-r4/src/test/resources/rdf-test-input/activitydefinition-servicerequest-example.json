@@ -1,0 +1,118 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "heart-valve-replacement",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n    \u003c/div\u003e"
+  },
+  "status": "draft",
+  "description": "Heart valve replacement",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "age"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "https://meshb.nlm.nih.gov",
+            "code": "D000328",
+            "display": "Adult"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "user"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "309343006",
+            "display": "Physician"
+          }
+        ]
+      }
+    }
+  ],
+  "purpose": "Describes the proposal to perform a Heart Valve replacement.",
+  "usage": "This activity definition is used as the definition of a service request to perform a heart valve replacement. Elements that apply universally are defined here, while elements that apply to the specific setting of a referral within a particular order set are defined in the order set.",
+  "topic": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "34068001",
+          "display": "Heart valve replacement"
+        }
+      ]
+    }
+  ],
+  "kind": "ServiceRequest",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "34068001",
+        "display": "Heart valve replacement"
+      }
+    ]
+  },
+  "timingTiming": {
+    "_event": [
+      {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+            "valueExpression": {
+              "language": "text/cql",
+              "expression": "Now()"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "location": {
+    "reference": "Location/1"
+  },
+  "participant": [
+    {
+      "type": "practitioner",
+      "role": {
+        "coding": [
+          {
+            "system": "http://nucc.org/provider-taxonomy",
+            "code": "207RI0011X",
+            "display": "Interventional Cardiology"
+          }
+        ],
+        "text": "Interventional Cardiology"
+      }
+    }
+  ],
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "17401000",
+          "display": "Heart valve structure"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

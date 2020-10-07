@@ -1,0 +1,58 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "questionnaire-display-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eQuestionnaire Text Categories\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes defining the purpose of a Questionnaire item of type \u0027text\u0027.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/questionnaire-display-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einstructions\u003ca name\u003d\"questionnaire-display-category-instructions\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInstructions\u003c/td\u003e\u003ctd\u003eThe text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esecurity\u003ca name\u003d\"questionnaire-display-category-security\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity\u003c/td\u003e\u003ctd\u003eThe text provides guidance on how the information should be or will be handled from a security/confidentiality/access control perspective when completed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehelp\u003ca name\u003d\"questionnaire-display-category-help\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHelp\u003c/td\u003e\u003ctd\u003eThe text provides additional guidance on populating the containing item.  Help text isn\u0027t necessarily expected to be rendered as part of the form, but may instead be made available through fly-over, pop-up button, link to a \u0026quot;help\u0026quot; page, etc.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/questionnaire-display-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.936"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "QuestionnaireTextCategories",
+  "title": "Questionnaire Text Categories",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 International - Patient Care WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/patientcare"
+        }
+      ]
+    }
+  ],
+  "description": "Codes defining the purpose of a Questionnaire item of type \u0027text\u0027.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-display-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "instructions",
+      "display": "Instructions",
+      "definition": "The text provides guidance on how to populate or use a portion of the questionnaire (or the questionnaire as a whole)."
+    },
+    {
+      "code": "security",
+      "display": "Security",
+      "definition": "The text provides guidance on how the information should be or will be handled from a security/confidentiality/access control perspective when completed"
+    },
+    {
+      "code": "help",
+      "display": "Help",
+      "definition": "The text provides additional guidance on populating the containing item.  Help text isn\u0027t necessarily expected to be rendered as part of the form, but may instead be made available through fly-over, pop-up button, link to a \"help\" page, etc."
+    }
+  ]
+}

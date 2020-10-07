@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "patient-extensions-Patient-birthOrderBoolean",
+  "url": "http://hl7.org/fhir/SearchParameter/patient-extensions-Patient-birthOrderBoolean",
+  "version": "4.0.1",
+  "name": "birthOrderBoolean",
+  "status": "draft",
+  "experimental": true,
+  "description": "Search based on whether a patient was part of a multiple birth or not.",
+  "code": "birthOrderBoolean",
+  "base": [
+    "Patient"
+  ],
+  "type": "token",
+  "xpath": "f:Patient/f:multipleBirthBoolean | f:Patient/f:multipleBirthInteger",
+  "xpathUsage": "normal"
+}

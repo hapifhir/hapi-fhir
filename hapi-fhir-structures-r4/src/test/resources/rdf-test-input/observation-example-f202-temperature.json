@@ -1,0 +1,106 @@
+{
+  "resourceType": "Observation",
+  "id": "f202",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f202\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: entered-in-error\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Vital Signs \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027vital-signs\u0027 \u003d \u0027Vital Signs\u0027, given as \u0027Vital Signs\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Temperature \u003cspan\u003e(Details : {http://acme.lab code \u0027BT\u0027 \u003d \u0027BT\u0027, given as \u0027Body temperature\u0027}; {LOINC code \u00278310-5\u0027 \u003d \u0027Body temperature\u0027, given as \u0027Body temperature\u0027}; {LOINC code \u00278331-1\u0027 \u003d \u0027Oral temperature\u0027, given as \u0027Oral temperature\u0027}; {SNOMED CT code \u002756342008\u0027 \u003d \u0027Temperature taking\u0027, given as \u0027Temperature taking\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 04/04/2013 1:27:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003ePractitioner/f201\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 39 degrees C\u003cspan\u003e (Details: UCUM code Cel \u003d \u0027Cel\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: High \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027H\u0027 \u003d \u0027High)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: Oral cavity \u003cspan\u003e(Details : {SNOMED CT code \u002774262004\u0027 \u003d \u0027Oral cavity\u0027, given as \u0027Oral cavity\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emethod\u003c/b\u003e: Oral temperature taking \u003cspan\u003e(Details : {SNOMED CT code \u002789003005\u0027 \u003d \u0027Oral temperature taking\u0027, given as \u0027Oral temperature taking\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eReferenceRanges\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eHigh\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e38.2 degrees C\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "status": "entered-in-error",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "vital-signs",
+          "display": "Vital Signs"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://acme.lab",
+        "code": "BT",
+        "display": "Body temperature"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "8310-5",
+        "display": "Body temperature"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "8331-1",
+        "display": "Oral temperature"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "56342008",
+        "display": "Temperature taking"
+      }
+    ],
+    "text": "Temperature"
+  },
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "issued": "2013-04-04T13:27:00+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/f201"
+    }
+  ],
+  "valueQuantity": {
+    "value": 39,
+    "unit": "degrees C",
+    "system": "http://unitsofmeasure.org",
+    "code": "Cel"
+  },
+  "interpretation": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+          "code": "H"
+        }
+      ]
+    }
+  ],
+  "bodySite": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "74262004",
+        "display": "Oral cavity"
+      }
+    ]
+  },
+  "method": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "89003005",
+        "display": "Oral temperature taking"
+      }
+    ]
+  },
+  "referenceRange": [
+    {
+      "high": {
+        "value": 38.2,
+        "unit": "degrees C"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

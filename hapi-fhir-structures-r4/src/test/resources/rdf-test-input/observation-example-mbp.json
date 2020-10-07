@@ -1,0 +1,50 @@
+{
+  "resourceType": "Observation",
+  "id": "mbp",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: mbp\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Vital Signs \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027vital-signs\u0027 \u003d \u0027Vital Signs\u0027, given as \u0027Vital Signs\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Mean blood pressure \u003cspan\u003e(Details : {LOINC code \u00278478-0\u0027 \u003d \u0027Mean blood pressure\u0027, given as \u0027Mean blood pressure\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 02/07/1999\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 80 mm[Hg]\u003cspan\u003e (Details: UCUM code mm[Hg] \u003d \u0027mmHg\u0027)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "vital-signs",
+          "display": "Vital Signs"
+        }
+      ],
+      "text": "Vital Signs"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8478-0",
+        "display": "Mean blood pressure"
+      }
+    ],
+    "text": "Mean blood pressure"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "effectiveDateTime": "1999-07-02",
+  "valueQuantity": {
+    "value": 80,
+    "unit": "mm[Hg]",
+    "system": "http://unitsofmeasure.org",
+    "code": "mm[Hg]"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

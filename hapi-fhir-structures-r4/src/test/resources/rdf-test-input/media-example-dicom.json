@@ -1,0 +1,84 @@
+{
+  "resourceType": "Media",
+  "id": "1.2.840.11361907579238403408700.3.1.04.19970327150033",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      Ultrasound Image on patient \u0026quot;James Chalmers\u0026quot;:\u003cbr/\u003e\n      \u003cimg src\u003d\"http://imaging.acme.com/wado/server?requestType\u003dWADO\u0026amp;contentType\u003dapplication%2Fdicom\u0026amp;studyUid\u003d1.2.840.113619.2.21.848.34082.0.538976288.3\u0026amp;seriesUid\u003d1.2.840.113619.2.21.3408.700.0.757923840.3.0\u0026amp;objectUid\u003d1.2.840.11361907579238403408700.3.1.04.19970327150033\" alt\u003d\"WADO reference to image\"/\u003e\n\n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://nema.org/fhir/extensions#0002-0010",
+      "valueUri": "urn:oid:1.2.840.10008.1.2.1"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "text": "InstanceUID"
+      },
+      "system": "urn:dicom:uid",
+      "value": "urn:oid:1.2.840.11361907579238403408700.3.1.04.19970327150033"
+    },
+    {
+      "type": {
+        "text": "accessionNo"
+      },
+      "system": "http://acme-imaging.com/accession/2012",
+      "value": "1234567"
+    },
+    {
+      "type": {
+        "text": "studyId"
+      },
+      "system": "urn:dicom:uid",
+      "value": "urn:oid:1.2.840.113619.2.21.848.34082.0.538976288.3"
+    },
+    {
+      "type": {
+        "text": "seriesId"
+      },
+      "system": "urn:dicom:uid",
+      "value": "urn:oid:1.2.840.113619.2.21.3408.700.0.757923840.3.0"
+    }
+  ],
+  "status": "completed",
+  "modality": {
+    "coding": [
+      {
+        "system": "http://dicom.nema.org/resources/ontology/DCM",
+        "code": "US"
+      }
+    ]
+  },
+  "view": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "399067008",
+        "display": "Lateral projection"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "device": {
+    "display": "G.E. Medical Systems"
+  },
+  "height": 480,
+  "width": 640,
+  "content": {
+    "contentType": "application/dicom",
+    "url": "http://imaging.acme.com/wado/server?requestType\u003dWADO\u0026contentType\u003dapplication%2Fdicom\u0026studyUid\u003d1.2.840.113619.2.21.848.34082.0.538976288.3\u0026seriesUid\u003d1.2.840.113619.2.21.3408.700.0.757923840.3.0\u0026objectUid\u003d1.2.840.11361907579238403408700.3.1.04.19970327150033"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

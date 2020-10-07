@@ -1,0 +1,48 @@
+{
+  "resourceType": "Bundle",
+  "id": "3ad0687e-f477-468c-afd5-fcc2bf897819",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://hl7.org/fhir/Location/2",
+      "resource": {
+        "resourceType": "Location",
+        "id": "2",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eUSS Enterprise\u003c/div\u003e"
+        },
+        "status": "active",
+        "name": "USSS Enterprise-D",
+        "mode": "instance"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/Location/3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "3",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eUSSS Enterprise-D Sickbay\u003c/div\u003e"
+        },
+        "status": "active",
+        "name": "USSS Enterprise-D Sickbay",
+        "mode": "instance",
+        "partOf": {
+          "reference": "Location/2",
+          "display": "USS Enterprise"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "resourceType": "ValueSet",
+  "id": "name-part-qualifier",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEntityNamePartQualifier\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA set of codes each of which specifies a certain subcategory of the name part in addition to the main name part type.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifierR2\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-LS\"\u003eLS\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLegal status\u003c/td\u003e\u003ctd\u003eFor organizations a suffix indicating the legal status, e.g., Inc., \u0026quot;Co.\u0026quot;, \u0026quot;AG\u0026quot;, \u0026quot;GmbH\u0026quot;, \u0026quot;B.V.\u0026quot; \u0026quot;S.A.\u0026quot;, \u0026quot;Ltd.\u0026quot; Etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-AC\"\u003eAC\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademic\u003c/td\u003e\u003ctd\u003eIndicates that a prefix like \u0026quot;Dr.\u0026quot; or a suffix like \u0026quot;M.D.\u0026quot; or \u0026quot;Ph.D.\u0026quot; is an academic title.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-NB\"\u003eNB\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNobility\u003c/td\u003e\u003ctd\u003eIn Europe and Asia, there are still people with nobility titles (aristocrats). German \u0026quot;von\u0026quot; is generally a nobility title, not a mere voorvoegsel. Others are \u0026quot;Earl of\u0026quot; or \u0026quot;His Majesty King of...\u0026quot; etc. Rarely used nowadays, but some systems do keep  track of this.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-PR\"\u003ePR\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProfessional\u003c/td\u003e\u003ctd\u003ePrimarily in the British Imperial culture people tend to have an abbreviation of their professional organization as part of their credential suffices\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-HON\"\u003eHON\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHonorific\u003c/td\u003e\u003ctd\u003eAn honorific such as \u0026quot;The Right Honourable\u0026quot; or \u0026quot;Weledelgeleerde Heer\u0026quot;.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-BR\"\u003eBR\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBirth\u003c/td\u003e\u003ctd\u003eA name that a person was given at birth or established as a consequence of adoption. NOTE: This is not used for temporary names assigned at birth such as \u0027Baby of Smith\u0027 – which is just a name with a use code of TEMP\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-AD\"\u003eAD\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcquired\u003c/td\u003e\u003ctd\u003eA name part a person acquired. The name part may be acquired by adoption, or the person may have chosen to use the name part for some other reason. NOTE  This differs from an other/psuedonym/alias in that an acquired name part is acquired on a formal basis rather than an informal one (e.g. registered as part of the official name)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-SP\"\u003eSP\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpouse\u003c/td\u003e\u003ctd\u003eThe name assumed from the partner in a marital relationship. Usually the spouse‘s family name. No inference about gender may be made from the existence of spouse names\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-MID\"\u003eMID\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMiddle Name\u003c/td\u003e\u003ctd\u003eIndicates that the name part is a middle name. In general, the  English  \u0026quot;middle name\u0026quot;  concept is all of the given names after the first. This qualifier may be used to explicitly indicate which given names are considered to be middle names. The middle name qualifier may also be used with family names. This is a Scandinavian use case, matching the concept of \u0026quot;mellomnavn\u0026quot;/\u0026quot;mellannamn\u0026quot;. There are specific rules that indicate what names may be taken as a mellannamnin different Scandinavian countries\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-CL\"\u003eCL\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCall me\u003c/td\u003e\u003ctd\u003eCallme is used to indicate which of the various name parts is used when interacting with the person\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifierR2/cs.html#v3-EntityNamePartQualifierR2-IN\"\u003eIN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInitial\u003c/td\u003e\u003ctd\u003eIndicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts. Initials may consist of more than one letter, e.g., \u0026quot;Ph.\u0026quot; could stand for \u0026quot;Philippe\u0026quot; or \u0026quot;Th.\u0026quot; for \u0026quot;Thomas\u0026quot;\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/EntityNamePartQualifier/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifier\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNamePartQualifier/cs.html#v3-EntityNamePartQualifier-VV\"\u003eVV\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVoorvoegsel\u003c/td\u003e\u003ctd\u003eA Dutch \u0026quot;voorvoegsel\u0026quot; is something like \u0026quot;van\u0026quot; or \u0026quot;de\u0026quot; that might have indicated nobility in the past but no longer so. Similar prefixes exist in other languages such as German, Spanish, French or Portugese\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/name-part-qualifier",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.906"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EntityNamePartQualifier",
+  "title": "EntityNamePartQualifier",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A set of codes each of which specifies a certain subcategory of the name part in addition to the main name part type.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifierR2",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "For organizations a suffix indicating the legal status, e.g., Inc., \"Co.\", \"AG\", \"GmbH\", \"B.V.\" \"S.A.\", \"Ltd.\" Etc."
+              }
+            ],
+            "code": "LS",
+            "display": "Legal status"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Indicates that a prefix like \"Dr.\" or a suffix like \"M.D.\" or \"Ph.D.\" is an academic title."
+              }
+            ],
+            "code": "AC",
+            "display": "Academic"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "In Europe and Asia, there are still people with nobility titles (aristocrats). German \"von\" is generally a nobility title, not a mere voorvoegsel. Others are \"Earl of\" or \"His Majesty King of...\" etc. Rarely used nowadays, but some systems do keep  track of this."
+              }
+            ],
+            "code": "NB",
+            "display": "Nobility"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Primarily in the British Imperial culture people tend to have an abbreviation of their professional organization as part of their credential suffices"
+              }
+            ],
+            "code": "PR",
+            "display": "Professional"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "An honorific such as \"The Right Honourable\" or \"Weledelgeleerde Heer\"."
+              }
+            ],
+            "code": "HON",
+            "display": "Honorific"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A name that a person was given at birth or established as a consequence of adoption. NOTE: This is not used for temporary names assigned at birth such as \u0027Baby of Smith\u0027 – which is just a name with a use code of TEMP"
+              }
+            ],
+            "code": "BR",
+            "display": "Birth"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A name part a person acquired. The name part may be acquired by adoption, or the person may have chosen to use the name part for some other reason. NOTE  This differs from an other/psuedonym/alias in that an acquired name part is acquired on a formal basis rather than an informal one (e.g. registered as part of the official name)"
+              }
+            ],
+            "code": "AD",
+            "display": "Acquired"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The name assumed from the partner in a marital relationship. Usually the spouse‘s family name. No inference about gender may be made from the existence of spouse names"
+              }
+            ],
+            "code": "SP",
+            "display": "Spouse"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Indicates that the name part is a middle name. In general, the  English  \"middle name\"  concept is all of the given names after the first. This qualifier may be used to explicitly indicate which given names are considered to be middle names. The middle name qualifier may also be used with family names. This is a Scandinavian use case, matching the concept of \"mellomnavn\"/\"mellannamn\". There are specific rules that indicate what names may be taken as a mellannamnin different Scandinavian countries"
+              }
+            ],
+            "code": "MID",
+            "display": "Middle Name"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Callme is used to indicate which of the various name parts is used when interacting with the person"
+              }
+            ],
+            "code": "CL",
+            "display": "Call me"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Indicates that a name part is just an initial. Initials do not imply a trailing period since this would not work with non-Latin scripts. Initials may consist of more than one letter, e.g., \"Ph.\" could stand for \"Philippe\" or \"Th.\" for \"Thomas\""
+              }
+            ],
+            "code": "IN",
+            "display": "Initial"
+          }
+        ]
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-EntityNamePartQualifier",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A Dutch \"voorvoegsel\" is something like \"van\" or \"de\" that might have indicated nobility in the past but no longer so. Similar prefixes exist in other languages such as German, Spanish, French or Portugese"
+              }
+            ],
+            "code": "VV",
+            "display": "Voorvoegsel"
+          }
+        ]
+      }
+    ]
+  }
+}

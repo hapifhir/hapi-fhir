@@ -1,0 +1,53 @@
+{
+  "resourceType": "Practitioner",
+  "id": "f204",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f204\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: UZI-nummer \u003d 12345678904 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Carla Espinosa\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: +31715262169(WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: Walvisbaai 3 Den helder 2333ZA NLD (WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: female\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 05/11/1967\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "text": "UZI-nummer"
+      },
+      "system": "urn:oid:2.16.528.1.1007.3.1",
+      "value": "12345678904"
+    }
+  ],
+  "name": [
+    {
+      "use": "usual",
+      "text": "Carla Espinosa"
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+31715262169",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "use": "work",
+      "line": [
+        "Walvisbaai 3"
+      ],
+      "city": "Den helder",
+      "postalCode": "2333ZA",
+      "country": "NLD"
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1967-11-05",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

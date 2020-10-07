@@ -1,0 +1,45 @@
+{
+  "resourceType": "Observation",
+  "id": "date-lastmp",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: date-lastmp\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: AOE \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027survey\u0027 \u003d \u0027Survey\u0027, given as \u0027Survey\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Date last menstrual period \u003cspan\u003e(Details : {LOINC code \u00278665-2\u0027 \u003d \u0027Last menstrual period start date\u0027, given as \u0027Date last menstrual period\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/pat2\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 24/01/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 30/12/2016\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "survey",
+          "display": "Survey"
+        }
+      ],
+      "text": "AOE"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8665-2",
+        "display": "Date last menstrual period"
+      }
+    ],
+    "text": "Date last menstrual period"
+  },
+  "subject": {
+    "reference": "Patient/pat2"
+  },
+  "effectiveDateTime": "2016-01-24",
+  "valueDateTime": "2016-12-30",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

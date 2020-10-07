@@ -1,0 +1,81 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "knowledge-resource-types",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eKnowledgeResourceType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA list of all the knowledge resource types defined in this version of the FHIR specification.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/knowledge-resource-types defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eActivityDefinition\u003ca name\u003d\"knowledge-resource-types-ActivityDefinition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActivityDefinition\u003c/td\u003e\u003ctd\u003eThe definition of a specific activity to be taken, independent of any particular patient or context.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCodeSystem\u003ca name\u003d\"knowledge-resource-types-CodeSystem\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCodeSystem\u003c/td\u003e\u003ctd\u003eA set of codes drawn from one or more code systems.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eConceptMap\u003ca name\u003d\"knowledge-resource-types-ConceptMap\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConceptMap\u003c/td\u003e\u003ctd\u003eA map from one set of concepts to one or more other concepts.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLibrary\u003ca name\u003d\"knowledge-resource-types-Library\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLibrary\u003c/td\u003e\u003ctd\u003eRepresents a library of quality improvement components.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMeasure\u003ca name\u003d\"knowledge-resource-types-Measure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMeasure\u003c/td\u003e\u003ctd\u003eA quality measure definition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePlanDefinition\u003ca name\u003d\"knowledge-resource-types-PlanDefinition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlanDefinition\u003c/td\u003e\u003ctd\u003eThe definition of a plan for a series of actions, independent of any specific patient or context.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eStructureDefinition\u003ca name\u003d\"knowledge-resource-types-StructureDefinition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStructureDefinition\u003c/td\u003e\u003ctd\u003eStructural Definition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eStructureMap\u003ca name\u003d\"knowledge-resource-types-StructureMap\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStructureMap\u003c/td\u003e\u003ctd\u003eA Map of relationships between 2 structures that can be used to transform data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eValueSet\u003ca name\u003d\"knowledge-resource-types-ValueSet\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eValueSet\u003c/td\u003e\u003ctd\u003eA set of codes drawn from one or more code systems.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    }
+  ],
+  "url": "http://hl7.org/fhir/knowledge-resource-types",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1063"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "KnowledgeResourceType",
+  "title": "KnowledgeResourceType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "A list of all the knowledge resource types defined in this version of the FHIR specification.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/knowledge-resource-types",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "ActivityDefinition",
+      "display": "ActivityDefinition",
+      "definition": "The definition of a specific activity to be taken, independent of any particular patient or context."
+    },
+    {
+      "code": "CodeSystem",
+      "display": "CodeSystem",
+      "definition": "A set of codes drawn from one or more code systems."
+    },
+    {
+      "code": "ConceptMap",
+      "display": "ConceptMap",
+      "definition": "A map from one set of concepts to one or more other concepts."
+    },
+    {
+      "code": "Library",
+      "display": "Library",
+      "definition": "Represents a library of quality improvement components."
+    },
+    {
+      "code": "Measure",
+      "display": "Measure",
+      "definition": "A quality measure definition."
+    },
+    {
+      "code": "PlanDefinition",
+      "display": "PlanDefinition",
+      "definition": "The definition of a plan for a series of actions, independent of any specific patient or context."
+    },
+    {
+      "code": "StructureDefinition",
+      "display": "StructureDefinition",
+      "definition": "Structural Definition."
+    },
+    {
+      "code": "StructureMap",
+      "display": "StructureMap",
+      "definition": "A Map of relationships between 2 structures that can be used to transform data."
+    },
+    {
+      "code": "ValueSet",
+      "display": "ValueSet",
+      "definition": "A set of codes drawn from one or more code systems."
+    }
+  ]
+}

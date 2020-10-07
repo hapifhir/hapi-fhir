@@ -1,0 +1,75 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "103",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eSNOMED CT to ICD-10-CM mappings for fracture of ulna (http://hl7.org/fhir/ConceptMap/103)\u003c/h2\u003e\n      \u003cp\u003eMapping from http://snomed.info/sct?fhir_vs to http://hl7.org/fhir/sid/icd-10-us\u003c/p\u003e\n      \u003cp\u003eDRAFT (not intended for production usage). Published on 13/06/2012 by HL7, Inc (FHIR project team (example): \n        \u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e). Creative Commons 0\n      \u003c/p\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eExample rule-based mappings between SNOMED CT to ICD-10-CM for fracture of ulna\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003cbr/\u003e\n      \u003ctable class\u003d\"grid\"\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eSource Code\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eEquivalence\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDestination Code\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eComment\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e263204007 (Fracture of shaft of ulna)\u003c/td\u003e\n          \u003ctd\u003enarrower\u003c/td\u003e\n          \u003ctd\u003eS52.209A\u003c/td\u003e\n          \u003ctd\u003eThe target mapping to ICD-10-CM is narrower, since additional patient data on the encounter (initial vs. subsequent) and fracture type is required for a valid ICD-10-CM mapping.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003enarrower\u003c/td\u003e\n          \u003ctd\u003eS52.209D\u003c/td\u003e\n          \u003ctd\u003eThe target mapping to ICD-10-CM is narrower, since additional patient data on the encounter (initial vs. subsequent), fracture type and healing (for subsequent encounter) is required for a valid ICD-10-CM mapping.\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/103",
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:uuid:53cd62ee-033e-414c-9f58-3ca97b5ffc3b"
+  },
+  "version": "4.0.1",
+  "name": "SNOMED CT to ICD-10-CM mappings for fracture of ulna",
+  "status": "draft",
+  "experimental": true,
+  "date": "2012-06-13",
+  "publisher": "HL7, Inc",
+  "contact": [
+    {
+      "name": "FHIR project team (example)",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Example rule-based mappings between SNOMED CT to ICD-10-CM for fracture of ulna",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "840",
+          "display": "United States of America"
+        }
+      ]
+    }
+  ],
+  "purpose": "Show example rule based mappings",
+  "copyright": "Creative Commons 0",
+  "sourceCanonical": "http://snomed.info/sct?fhir_vs",
+  "targetCanonical": "http://hl7.org/fhir/sid/icd-10-us",
+  "group": [
+    {
+      "source": "http://snomed.info/sct",
+      "sourceVersion": "March 2015 US Edition",
+      "target": "http://hl7.org/fhir/sid/icd-10-us",
+      "targetVersion": "2015",
+      "element": [
+        {
+          "code": "263204007",
+          "target": [
+            {
+              "code": "S52.209A",
+              "equivalence": "narrower",
+              "comment": "The target mapping to ICD-10-CM is narrower, since additional patient data on the encounter (initial vs. subsequent) and fracture type is required for a valid ICD-10-CM mapping."
+            }
+          ]
+        },
+        {
+          "target": [
+            {
+              "code": "S52.209D",
+              "equivalence": "narrower",
+              "comment": "The target mapping to ICD-10-CM is narrower, since additional patient data on the encounter (initial vs. subsequent), fracture type and healing (for subsequent encounter) is required for a valid ICD-10-CM mapping."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

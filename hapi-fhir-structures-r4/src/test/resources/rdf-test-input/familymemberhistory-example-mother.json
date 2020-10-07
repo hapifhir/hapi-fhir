@@ -1,0 +1,51 @@
+{
+  "resourceType": "FamilyMemberHistory",
+  "id": "mother",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eMother died of a stroke aged 56\u003c/div\u003e"
+  },
+  "status": "completed",
+  "patient": {
+    "reference": "Patient/100",
+    "display": "Peter Patient"
+  },
+  "relationship": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+        "code": "MTH",
+        "display": "mother"
+      }
+    ]
+  },
+  "condition": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "371041009",
+            "display": "Embolic Stroke"
+          }
+        ],
+        "text": "Stroke"
+      },
+      "onsetAge": {
+        "value": 56,
+        "unit": "yr",
+        "system": "http://unitsofmeasure.org",
+        "code": "a"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

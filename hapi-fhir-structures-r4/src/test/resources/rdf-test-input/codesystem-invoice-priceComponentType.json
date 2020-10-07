@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "invoice-priceComponentType",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eInvoicePriceComponentType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes indicating the kind of the price component.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/invoice-priceComponentType defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebase\u003ca name\u003d\"invoice-priceComponentType-base\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebase price\u003c/td\u003e\u003ctd\u003ethe amount is the base price used for calculating the total price before applying surcharges, discount or taxes.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esurcharge\u003ca name\u003d\"invoice-priceComponentType-surcharge\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003esurcharge\u003c/td\u003e\u003ctd\u003ethe amount is a surcharge applied on the base price.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ededuction\u003ca name\u003d\"invoice-priceComponentType-deduction\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ededuction\u003c/td\u003e\u003ctd\u003ethe amount is a deduction applied on the base price.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediscount\u003ca name\u003d\"invoice-priceComponentType-discount\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ediscount\u003c/td\u003e\u003ctd\u003ethe amount is a discount applied on the base price.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etax\u003ca name\u003d\"invoice-priceComponentType-tax\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etax\u003c/td\u003e\u003ctd\u003ethe amount is the tax component of the total price.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einformational\u003ca name\u003d\"invoice-priceComponentType-informational\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einformational\u003c/td\u003e\u003ctd\u003ethe amount is of informational character, it has not been applied in the calculation of the total price.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://hl7.org/fhir/invoice-priceComponentType",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.869"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "InvoicePriceComponentType",
+  "title": "InvoicePriceComponentType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes indicating the kind of the price component.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/invoice-priceComponentType",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "base",
+      "display": "base price",
+      "definition": "the amount is the base price used for calculating the total price before applying surcharges, discount or taxes."
+    },
+    {
+      "code": "surcharge",
+      "display": "surcharge",
+      "definition": "the amount is a surcharge applied on the base price."
+    },
+    {
+      "code": "deduction",
+      "display": "deduction",
+      "definition": "the amount is a deduction applied on the base price."
+    },
+    {
+      "code": "discount",
+      "display": "discount",
+      "definition": "the amount is a discount applied on the base price."
+    },
+    {
+      "code": "tax",
+      "display": "tax",
+      "definition": "the amount is the tax component of the total price."
+    },
+    {
+      "code": "informational",
+      "display": "informational",
+      "definition": "the amount is of informational character, it has not been applied in the calculation of the total price."
+    }
+  ]
+}

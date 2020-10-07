@@ -1,0 +1,93 @@
+{
+  "resourceType": "ChargeItemDefinition",
+  "id": "device",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: device\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://sap.org/ChargeItemDefinition/device-123\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Financial details for  custom made device\u003c/p\u003e\u003cp\u003e\u003cb\u003einstance\u003c/b\u003e: \u003ca\u003eDevice/12345\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eApplicabilities\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLanguage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpression\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eVerify ChargeItem pertains to Device 12345\u003c/td\u003e\u003ctd\u003etext/fhirpath\u003c/td\u003e\u003ctd\u003e%context.service.suppliedItem\u003d\u0027Device/12345\u0027\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epropertyGroup\u003c/b\u003e\u003c/p\u003e\u003ch3\u003ePriceComponents\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAmount\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ebase\u003c/td\u003e\u003ctd\u003eVerkaufspreis (netto) \u003cspan\u003e(Details : {http://fhir.de/CodeSystem/billing-attributes code \u0027VK\u0027 \u003d \u0027VK\u0027, given as \u0027Verkaufspreis (netto)\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epropertyGroup\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eApplicabilities\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003ePriceComponents\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eFactor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etax\u003c/td\u003e\u003ctd\u003eMehrwersteuersatz \u003cspan\u003e(Details : {http://fhir.de/CodeSystem/billing-attributes code \u0027MWST\u0027 \u003d \u0027MWST\u0027, given as \u0027Mehrwersteuersatz\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e1.19\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epropertyGroup\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eApplicabilities\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003ePriceComponents\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eFactor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etax\u003c/td\u003e\u003ctd\u003eMehrwersteuersatz \u003cspan\u003e(Details : {http://fhir.de/CodeSystem/billing-attributes code \u0027MWST\u0027 \u003d \u0027MWST\u0027, given as \u0027Mehrwersteuersatz\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e1.07\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://sap.org/ChargeItemDefinition/device-123",
+  "status": "active",
+  "description": "Financial details for  custom made device",
+  "instance": [
+    {
+      "reference": "Device/12345"
+    }
+  ],
+  "applicability": [
+    {
+      "description": "Verify ChargeItem pertains to Device 12345",
+      "language": "text/fhirpath",
+      "expression": "%context.service.suppliedItem\u003d\u0027Device/12345\u0027"
+    }
+  ],
+  "propertyGroup": [
+    {
+      "priceComponent": [
+        {
+          "type": "base",
+          "code": {
+            "coding": [
+              {
+                "system": "http://fhir.de/CodeSystem/billing-attributes",
+                "code": "VK",
+                "display": "Verkaufspreis (netto)"
+              }
+            ]
+          },
+          "amount": {
+            "value": 67.44,
+            "currency": "EUR"
+          }
+        }
+      ]
+    },
+    {
+      "applicability": [
+        {
+          "description": "Gültigkeit Steuersatz",
+          "language": "text/fhirpath",
+          "expression": "%context.occurenceDateTime \u003e \u00272018-04-01\u0027"
+        }
+      ],
+      "priceComponent": [
+        {
+          "type": "tax",
+          "code": {
+            "coding": [
+              {
+                "system": "http://fhir.de/CodeSystem/billing-attributes",
+                "code": "MWST",
+                "display": "Mehrwersteuersatz"
+              }
+            ]
+          },
+          "factor": 1.19
+        }
+      ]
+    },
+    {
+      "applicability": [
+        {
+          "description": "Gültigkeit Steuersatz",
+          "language": "text/fhirpath",
+          "expression": "%context.occurenceDateTime \u003c\u003d \u00272018-04-01\u0027"
+        }
+      ],
+      "priceComponent": [
+        {
+          "type": "tax",
+          "code": {
+            "coding": [
+              {
+                "system": "http://fhir.de/CodeSystem/billing-attributes",
+                "code": "MWST",
+                "display": "Mehrwersteuersatz"
+              }
+            ]
+          },
+          "factor": 1.07
+        }
+      ]
+    }
+  ]
+}

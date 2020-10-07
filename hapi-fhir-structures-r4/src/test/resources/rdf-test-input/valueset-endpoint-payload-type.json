@@ -1,0 +1,356 @@
+{
+  "resourceType": "ValueSet",
+  "id": "endpoint-payload-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/valueset-endpoint-payload-type",
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEndpoint Payload Type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis is an example value set defined by the FHIR project, that could be used to represent possible payload document types.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eSome content from IHE® Copyright © 2015 IHE International, Inc.    This content is from the IHE Technical Frameworks and Supplements,    available for free download and use at http://www.ihe.net/Technical_Frameworks/\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"codesystem-endpoint-payload-type.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/endpoint-payload-type\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003cli\u003eInclude these codes as defined in \u003ccode\u003eurn:oid:1.3.6.1.4.1.19376.1.2.3\u003c/code\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:handp:2008\u003c/td\u003e\u003ctd\u003eHistory and Physical Specification\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:xphr:2007\u003c/td\u003e\u003ctd\u003eHL7 CCD Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:aps:2007\u003c/td\u003e\u003ctd\u003eIHE Antepartum Summary\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:xds-ms:2007\u003c/td\u003e\u003ctd\u003eXDS Medical Summaries\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:xphr:2007\u003c/td\u003e\u003ctd\u003ePersonal Health Records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:edr:2007\u003c/td\u003e\u003ctd\u003eEmergency Department Referral (EDR)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:edes:2007\u003c/td\u003e\u003ctd\u003eEmergency Department Encounter Summary (EDES)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:apr:handp:2008\u003c/td\u003e\u003ctd\u003eAntepartum Record (APR) - History and Physical\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:apr:lab:2008\u003c/td\u003e\u003ctd\u003eAntepartum Record (APR) - Laboratory\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:apr:edu:2008\u003c/td\u003e\u003ctd\u003eAntepartum Record (APR) - Education\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:irc:2008\u003c/td\u003e\u003ctd\u003eImmunization Registry Content (IRC)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:crc:2008\u003c/td\u003e\u003ctd\u003eCancer Registry Content (CRC)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:cm:2008\u003c/td\u003e\u003ctd\u003eCare Management (CM)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:ic:2009\u003c/td\u003e\u003ctd\u003eImmunization Content (IC)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:tn:2007\u003c/td\u003e\u003ctd\u003ePCC TN\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:nn:2007\u003c/td\u003e\u003ctd\u003ePCC NN\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:ctn:2007\u003c/td\u003e\u003ctd\u003ePCC CTN\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:edpn:2007\u003c/td\u003e\u003ctd\u003ePCC EDPN\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:hp:2008\u003c/td\u003e\u003ctd\u003ePCC HP\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:ldhp:2009\u003c/td\u003e\u003ctd\u003ePCC LDHP\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:lds:2009\u003c/td\u003e\u003ctd\u003ePCC LDS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:mds:2009\u003c/td\u003e\u003ctd\u003ePCC MDS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:nds:2010\u003c/td\u003e\u003ctd\u003ePCC NDS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:ppvs:2010\u003c/td\u003e\u003ctd\u003ePCC PPVS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:trs:2011\u003c/td\u003e\u003ctd\u003ePCC TRS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:ets:2011\u003c/td\u003e\u003ctd\u003ePCC ETS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pcc:its:2011\u003c/td\u003e\u003ctd\u003ePCC ITS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:bppc:2007\u003c/td\u003e\u003ctd\u003eBasic Patient Privacy Consents\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:bppc-sd:2007\u003c/td\u003e\u003ctd\u003eBasic Patient Privacy Consents with Scanned Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:xdw:2011:workflowDoc\u003c/td\u003e\u003ctd\u003eXDW Workflow Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:dsg:detached:2014\u003c/td\u003e\u003ctd\u003eDSG Detached Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:dsg:enveloping:2014\u003c/td\u003e\u003ctd\u003eDSG Enveloping Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:xds-sd:pdf:2008\u003c/td\u003e\u003ctd\u003ePDF embedded in CDA per XDS-SD profile\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:iti:xds-sd:text:2008\u003c/td\u003e\u003ctd\u003eText embedded in CDA per XDS-SD profile\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:lab:xd-lab:2008\u003c/td\u003e\u003ctd\u003eCDA Laboratory Report\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:rad:TEXT\u003c/td\u003e\u003ctd\u003eRadiology XDS-I Text\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:rad:PDF\u003c/td\u003e\u003ctd\u003eRadiology XDS-I PDF\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:rad:CDA:ImagingReportStructuredHeadings:2013\u003c/td\u003e\u003ctd\u003eRadiology XDS-I Structured CDA\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:card:imaging:2011\u003c/td\u003e\u003ctd\u003eCardiac Imaging Report\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:card:CRC:2012\u003c/td\u003e\u003ctd\u003eCardiology CRC\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:card:EPRC-IE:2014\u003c/td\u003e\u003ctd\u003eCardiology EPRC-IE\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:dent:TEXT\u003c/td\u003e\u003ctd\u003eDental Text\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:dent:PDF\u003c/td\u003e\u003ctd\u003eDental PDF\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:dent:CDA:ImagingReportStructuredHeadings:2013\u003c/td\u003e\u003ctd\u003eDental CDA\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:all:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report All\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:all:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer All\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:breast:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Breast\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:colon:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Colon\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:prostate:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Prostate\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:thyroid:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Thyroid\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:lung:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Lung\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:skin:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Skin\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:kidney:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Kidney\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:cervix:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Cervix\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:endometrium:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Endometrium\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:ovary:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Ovary\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:esophagus: 2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Esophagus\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:stomach: 2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Stomach\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:liver:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Liver\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:pancreas: 2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Pancreas\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:testis:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Testis\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:urinary_bladder:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Urinary Bladder\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:lip_oral_cavity:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Lip Oral Cavity\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:pharynx:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Pharynx\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:salivary_gland:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Salivary Gland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pat:apsr:cancer:larynx:2010\u003c/td\u003e\u003ctd\u003eAnatomic Pathology Structured Report Cancer Larynx\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pharm:pre:2010\u003c/td\u003e\u003ctd\u003ePharmacy Pre\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pharm:padv:2010\u003c/td\u003e\u003ctd\u003ePharmacy PADV\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pharm:dis:2010\u003c/td\u003e\u003ctd\u003ePharmacy DIS\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:ihe:pharm:pml:2013\u003c/td\u003e\u003ctd\u003ePharmacy PML\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:hl7-org:sdwg:ccda-structuredBody:1.1\u003c/td\u003e\u003ctd\u003eFor documents following C-CDA constraints using a structured body. \u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eurn:hl7-org:sdwg:ccda-nonXMLBody:1.1\u003c/td\u003e\u003ctd\u003eFor documents following C-CDA constraints using a non structured body. \u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/endpoint-payload-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.496"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EndpointPayloadType",
+  "title": "Endpoint Payload Type",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 Patient Administration",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is an example value set defined by the FHIR project, that could be used to represent possible payload document types.",
+  "immutable": true,
+  "copyright": "Some content from IHE® Copyright © 2015 IHE International, Inc.    This content is from the IHE Technical Frameworks and Supplements,    available for free download and use at http://www.ihe.net/Technical_Frameworks/",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/endpoint-payload-type"
+      },
+      {
+        "system": "urn:oid:1.3.6.1.4.1.19376.1.2.3",
+        "concept": [
+          {
+            "code": "urn:ihe:pcc:handp:2008",
+            "display": "History and Physical Specification"
+          },
+          {
+            "code": "urn:ihe:pcc:xphr:2007",
+            "display": "HL7 CCD Document"
+          },
+          {
+            "code": "urn:ihe:pcc:aps:2007",
+            "display": "IHE Antepartum Summary"
+          },
+          {
+            "code": "urn:ihe:pcc:xds-ms:2007",
+            "display": "XDS Medical Summaries"
+          },
+          {
+            "code": "urn:ihe:pcc:xphr:2007",
+            "display": "Personal Health Records"
+          },
+          {
+            "code": "urn:ihe:pcc:edr:2007",
+            "display": "Emergency Department Referral (EDR)"
+          },
+          {
+            "code": "urn:ihe:pcc:edes:2007",
+            "display": "Emergency Department Encounter Summary (EDES)"
+          },
+          {
+            "code": "urn:ihe:pcc:apr:handp:2008",
+            "display": "Antepartum Record (APR) - History and Physical"
+          },
+          {
+            "code": "urn:ihe:pcc:apr:lab:2008",
+            "display": "Antepartum Record (APR) - Laboratory"
+          },
+          {
+            "code": "urn:ihe:pcc:apr:edu:2008",
+            "display": "Antepartum Record (APR) - Education"
+          },
+          {
+            "code": "urn:ihe:pcc:irc:2008",
+            "display": "Immunization Registry Content (IRC)"
+          },
+          {
+            "code": "urn:ihe:pcc:crc:2008",
+            "display": "Cancer Registry Content (CRC)"
+          },
+          {
+            "code": "urn:ihe:pcc:cm:2008",
+            "display": "Care Management (CM)"
+          },
+          {
+            "code": "urn:ihe:pcc:ic:2009",
+            "display": "Immunization Content (IC)"
+          },
+          {
+            "code": "urn:ihe:pcc:tn:2007",
+            "display": "PCC TN"
+          },
+          {
+            "code": "urn:ihe:pcc:nn:2007",
+            "display": "PCC NN"
+          },
+          {
+            "code": "urn:ihe:pcc:ctn:2007",
+            "display": "PCC CTN"
+          },
+          {
+            "code": "urn:ihe:pcc:edpn:2007",
+            "display": "PCC EDPN"
+          },
+          {
+            "code": "urn:ihe:pcc:hp:2008",
+            "display": "PCC HP"
+          },
+          {
+            "code": "urn:ihe:pcc:ldhp:2009",
+            "display": "PCC LDHP"
+          },
+          {
+            "code": "urn:ihe:pcc:lds:2009",
+            "display": "PCC LDS"
+          },
+          {
+            "code": "urn:ihe:pcc:mds:2009",
+            "display": "PCC MDS"
+          },
+          {
+            "code": "urn:ihe:pcc:nds:2010",
+            "display": "PCC NDS"
+          },
+          {
+            "code": "urn:ihe:pcc:ppvs:2010",
+            "display": "PCC PPVS"
+          },
+          {
+            "code": "urn:ihe:pcc:trs:2011",
+            "display": "PCC TRS"
+          },
+          {
+            "code": "urn:ihe:pcc:ets:2011",
+            "display": "PCC ETS"
+          },
+          {
+            "code": "urn:ihe:pcc:its:2011",
+            "display": "PCC ITS"
+          },
+          {
+            "code": "urn:ihe:iti:bppc:2007",
+            "display": "Basic Patient Privacy Consents"
+          },
+          {
+            "code": "urn:ihe:iti:bppc-sd:2007",
+            "display": "Basic Patient Privacy Consents with Scanned Document"
+          },
+          {
+            "code": "urn:ihe:iti:xdw:2011:workflowDoc",
+            "display": "XDW Workflow Document"
+          },
+          {
+            "code": "urn:ihe:iti:dsg:detached:2014",
+            "display": "DSG Detached Document"
+          },
+          {
+            "code": "urn:ihe:iti:dsg:enveloping:2014",
+            "display": "DSG Enveloping Document"
+          },
+          {
+            "code": "urn:ihe:iti:xds-sd:pdf:2008",
+            "display": "PDF embedded in CDA per XDS-SD profile"
+          },
+          {
+            "code": "urn:ihe:iti:xds-sd:text:2008",
+            "display": "Text embedded in CDA per XDS-SD profile"
+          },
+          {
+            "code": "urn:ihe:lab:xd-lab:2008",
+            "display": "CDA Laboratory Report"
+          },
+          {
+            "code": "urn:ihe:rad:TEXT",
+            "display": "Radiology XDS-I Text"
+          },
+          {
+            "code": "urn:ihe:rad:PDF",
+            "display": "Radiology XDS-I PDF"
+          },
+          {
+            "code": "urn:ihe:rad:CDA:ImagingReportStructuredHeadings:2013",
+            "display": "Radiology XDS-I Structured CDA"
+          },
+          {
+            "code": "urn:ihe:card:imaging:2011",
+            "display": "Cardiac Imaging Report"
+          },
+          {
+            "code": "urn:ihe:card:CRC:2012",
+            "display": "Cardiology CRC"
+          },
+          {
+            "code": "urn:ihe:card:EPRC-IE:2014",
+            "display": "Cardiology EPRC-IE"
+          },
+          {
+            "code": "urn:ihe:dent:TEXT",
+            "display": "Dental Text"
+          },
+          {
+            "code": "urn:ihe:dent:PDF",
+            "display": "Dental PDF"
+          },
+          {
+            "code": "urn:ihe:dent:CDA:ImagingReportStructuredHeadings:2013",
+            "display": "Dental CDA"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:all:2010",
+            "display": "Anatomic Pathology Structured Report All"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:all:2010",
+            "display": "Anatomic Pathology Structured Report Cancer All"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:breast:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Breast"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:colon:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Colon"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:prostate:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Prostate"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:thyroid:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Thyroid"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:lung:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Lung"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:skin:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Skin"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:kidney:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Kidney"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:cervix:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Cervix"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:endometrium:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Endometrium"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:ovary:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Ovary"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:esophagus: 2010",
+            "display": "Anatomic Pathology Structured Report Cancer Esophagus"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:stomach: 2010",
+            "display": "Anatomic Pathology Structured Report Cancer Stomach"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:liver:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Liver"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:pancreas: 2010",
+            "display": "Anatomic Pathology Structured Report Cancer Pancreas"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:testis:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Testis"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:urinary_bladder:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Urinary Bladder"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:lip_oral_cavity:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Lip Oral Cavity"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:pharynx:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Pharynx"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:salivary_gland:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Salivary Gland"
+          },
+          {
+            "code": "urn:ihe:pat:apsr:cancer:larynx:2010",
+            "display": "Anatomic Pathology Structured Report Cancer Larynx"
+          },
+          {
+            "code": "urn:ihe:pharm:pre:2010",
+            "display": "Pharmacy Pre"
+          },
+          {
+            "code": "urn:ihe:pharm:padv:2010",
+            "display": "Pharmacy PADV"
+          },
+          {
+            "code": "urn:ihe:pharm:dis:2010",
+            "display": "Pharmacy DIS"
+          },
+          {
+            "code": "urn:ihe:pharm:pml:2013",
+            "display": "Pharmacy PML"
+          },
+          {
+            "code": "urn:hl7-org:sdwg:ccda-structuredBody:1.1",
+            "display": "For documents following C-CDA constraints using a structured body. "
+          },
+          {
+            "code": "urn:hl7-org:sdwg:ccda-nonXMLBody:1.1",
+            "display": "For documents following C-CDA constraints using a non structured body. "
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "event-timing",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEventTiming\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eReal world event relating to the schedule.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/event-timing defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMORN\u003ca name\u003d\"event-timing-MORN\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMorning\u003c/td\u003e\u003ctd\u003eEvent occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMORN.early\u003ca name\u003d\"event-timing-MORN.46early\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEarly Morning\u003c/td\u003e\u003ctd\u003eEvent occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMORN.late\u003ca name\u003d\"event-timing-MORN.46late\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLate Morning\u003c/td\u003e\u003ctd\u003eEvent occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNOON\u003ca name\u003d\"event-timing-NOON\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNoon\u003c/td\u003e\u003ctd\u003eEvent occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFT\u003ca name\u003d\"event-timing-AFT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAfternoon\u003c/td\u003e\u003ctd\u003eEvent occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFT.early\u003ca name\u003d\"event-timing-AFT.46early\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEarly Afternoon\u003c/td\u003e\u003ctd\u003eEvent occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFT.late\u003ca name\u003d\"event-timing-AFT.46late\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLate Afternoon\u003c/td\u003e\u003ctd\u003eEvent occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEVE\u003ca name\u003d\"event-timing-EVE\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEvening\u003c/td\u003e\u003ctd\u003eEvent occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEVE.early\u003ca name\u003d\"event-timing-EVE.46early\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEarly Evening\u003c/td\u003e\u003ctd\u003eEvent occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEVE.late\u003ca name\u003d\"event-timing-EVE.46late\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLate Evening\u003c/td\u003e\u003ctd\u003eEvent occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNIGHT\u003ca name\u003d\"event-timing-NIGHT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNight\u003c/td\u003e\u003ctd\u003eEvent occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePHS\u003ca name\u003d\"event-timing-PHS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAfter Sleep\u003c/td\u003e\u003ctd\u003eEvent occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/event-timing",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.76"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EventTiming",
+  "title": "EventTiming",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Real world event relating to the schedule.",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "MORN",
+      "display": "Morning",
+      "definition": "Event occurs during the morning. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "MORN.early",
+      "display": "Early Morning",
+      "definition": "Event occurs during the early morning. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "MORN.late",
+      "display": "Late Morning",
+      "definition": "Event occurs during the late morning. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "NOON",
+      "display": "Noon",
+      "definition": "Event occurs around 12:00pm. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "AFT",
+      "display": "Afternoon",
+      "definition": "Event occurs during the afternoon. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "AFT.early",
+      "display": "Early Afternoon",
+      "definition": "Event occurs during the early afternoon. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "AFT.late",
+      "display": "Late Afternoon",
+      "definition": "Event occurs during the late afternoon. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "EVE",
+      "display": "Evening",
+      "definition": "Event occurs during the evening. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "EVE.early",
+      "display": "Early Evening",
+      "definition": "Event occurs during the early evening. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "EVE.late",
+      "display": "Late Evening",
+      "definition": "Event occurs during the late evening. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "NIGHT",
+      "display": "Night",
+      "definition": "Event occurs during the night. The exact time is unspecified and established by institution convention or patient interpretation."
+    },
+    {
+      "code": "PHS",
+      "display": "After Sleep",
+      "definition": "Event occurs [offset] after subject goes to sleep. The exact time is unspecified and established by institution convention or patient interpretation."
+    }
+  ]
+}

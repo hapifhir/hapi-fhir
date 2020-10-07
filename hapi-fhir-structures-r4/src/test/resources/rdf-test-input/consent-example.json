@@ -1,0 +1,63 @@
+{
+  "resourceType": "Consent",
+  "id": "consent-example-basic",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003e\n\tAuthorize Normal access for Treatment\n\t\t\t\u003c/p\u003e\n\t\t\t\u003cp\u003e\n    Patient \u0026quot;P. van de Heuvel\u0026quot; wishes to have all of the PHI collected at the Good Health Psychiatric Hospital \n   available for normal treatment use.\n\t\t\t\u003c/p\u003e\n\t\t\u003c/div\u003e"
+  },
+  "status": "active",
+  "scope": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+        "code": "patient-privacy"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "59284-0"
+        }
+      ]
+    }
+  ],
+  "patient": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "dateTime": "2016-05-11",
+  "organization": [
+    {
+      "reference": "Organization/f001"
+    }
+  ],
+  "sourceAttachment": {
+    "title": "The terms of the consent in lawyer speak."
+  },
+  "policyRule": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "OPTIN"
+      }
+    ]
+  },
+  "provision": {
+    "period": {
+      "start": "1964-01-01",
+      "end": "2016-01-01"
+    }
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

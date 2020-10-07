@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "supplydelivery-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSupplyDeliveryStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eStatus of the supply delivery.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/supplydelivery-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein-progress\u003ca name\u003d\"supplydelivery-status-in-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Progress\u003c/td\u003e\u003ctd\u003eSupply has been requested, but not delivered.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecompleted\u003ca name\u003d\"supplydelivery-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDelivered\u003c/td\u003e\u003ctd\u003eSupply has been delivered (\u0026quot;completed\u0026quot;).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eabandoned\u003ca name\u003d\"supplydelivery-status-abandoned\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAbandoned\u003c/td\u003e\u003ctd\u003eDelivery was not completed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"supplydelivery-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered In Error\u003c/td\u003e\u003ctd\u003eThis electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \u0026quot;abandoned\u0026quot; rather than \u0026quot;entered-in-error\u0026quot;.).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/supplydelivery-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.701"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SupplyDeliveryStatus",
+  "title": "SupplyDeliveryStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Status of the supply delivery.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/supplydelivery-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "in-progress",
+      "display": "In Progress",
+      "definition": "Supply has been requested, but not delivered."
+    },
+    {
+      "code": "completed",
+      "display": "Delivered",
+      "definition": "Supply has been delivered (\"completed\")."
+    },
+    {
+      "code": "abandoned",
+      "display": "Abandoned",
+      "definition": "Delivery was not completed."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered In Error",
+      "definition": "This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"abandoned\" rather than \"entered-in-error\".)."
+    }
+  ]
+}

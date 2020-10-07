@@ -1,0 +1,66 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "Measure-submit-data",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSubmit Data\u003c/h2\u003e\u003cp\u003eOPERATION: Submit Data\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/Measure-submit-data\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eThe submit-data operation is used to submit data-of-interest for a measure. There is no expectation that the submitted data represents all the data-of-interest, only that all the data submitted is relevant to the calculation of the measure for a particular subject or population\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/Measure/$submit-data\u003c/p\u003e\u003cp\u003eURL: [base]/Measure/[id]/$submit-data\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003emeasureReport\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"measurereport.html\"\u003eMeasureReport\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe measure report being submitted\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eresource\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"resource.html\"\u003eResource\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe individual resources that make up the data-of-interest being submitted\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eThe effect of invoking this operation is that the submitted data is posted to the receiving system and can be used for subsequent calculation of the relevant quality measure. The data-of-interest for a measure can be determined by examining the measure definition, or by invoking the $data-requirements operation\u003c/p\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/Measure-submit-data",
+  "version": "4.0.1",
+  "name": "Submit Data",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The submit-data operation is used to submit data-of-interest for a measure. There is no expectation that the submitted data represents all the data-of-interest, only that all the data submitted is relevant to the calculation of the measure for a particular subject or population",
+  "code": "submit-data",
+  "comment": "The effect of invoking this operation is that the submitted data is posted to the receiving system and can be used for subsequent calculation of the relevant quality measure. The data-of-interest for a measure can be determined by examining the measure definition, or by invoking the $data-requirements operation",
+  "resource": [
+    "Measure"
+  ],
+  "system": false,
+  "type": true,
+  "instance": true,
+  "parameter": [
+    {
+      "name": "measureReport",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The measure report being submitted",
+      "type": "MeasureReport"
+    },
+    {
+      "name": "resource",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "The individual resources that make up the data-of-interest being submitted",
+      "type": "Resource"
+    }
+  ]
+}

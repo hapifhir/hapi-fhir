@@ -1,0 +1,93 @@
+{
+  "resourceType": "ValueSet",
+  "id": "example-extensional",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003eValue set \u0026quot;LOINC Codes for Cholesterol\u0026quot;: This is an example value set that includes \n        all the  codes for serum cholesterol from LOINC v2.36.\u003c/p\u003e\n\t\t\t\u003cp\u003eDeveloped by: FHIR project team (example)\u003c/p\u003e\n\t\t\t\u003cp\u003ePublished for testing on 13-June 2012\u003c/p\u003e\n\t\t\t\u003cp\u003eThis value set includes the following LOINC codes:\u003c/p\u003e\n\t\t\t\u003cul\u003e\n\t\t\t\t\u003cli\u003e14647-2: Cholesterol [Moles/Volume]\u003c/li\u003e\n\t\t\t\t\u003cli\u003e2093-3: Cholesterol [Mass/Volume]\u003c/li\u003e\n\t\t\t\t\u003cli\u003e35200-5: Cholesterol [Mass Or Moles/Volume] \u003c/li\u003e\n\t\t\t\t\u003cli\u003e9342-7: Cholesterol [Percentile]\u003c/li\u003e\n\t\t\t\u003c/ul\u003e\n\t\t\t\u003cp\u003eThis content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.\u003c/p\u003e\n\t\t\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/example-extensional",
+  "identifier": [
+    {
+      "system": "http://acme.com/identifiers/valuesets",
+      "value": "loinc-cholesterol-int"
+    }
+  ],
+  "version": "20150622",
+  "name": "LOINC Codes for Cholesterol in Serum/Plasma",
+  "status": "draft",
+  "experimental": true,
+  "date": "2015-06-22",
+  "publisher": "HL7 International",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is an example value set that includes all the LOINC codes for serum/plasma cholesterol from v2.36.",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "age"
+      },
+      "valueQuantity": {
+        "value": 18,
+        "comparator": "\u003e",
+        "unit": "yrs",
+        "system": "http://unitsofmeasure.org",
+        "code": "a"
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "This value set was published by ACME Inc in order to make clear which codes are used for Cholesterol by AcmeClinicals (Adult Ambulatory care support in USA)",
+  "copyright": "This content from LOINC ® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.",
+  "compose": {
+    "lockedDate": "2012-06-13",
+    "inactive": true,
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "version": "2.36",
+        "concept": [
+          {
+            "code": "14647-2",
+            "display": "Cholesterol [Moles/Volume]"
+          },
+          {
+            "code": "2093-3",
+            "display": "Cholesterol [Mass/Volume]"
+          },
+          {
+            "code": "35200-5",
+            "display": "Cholesterol [Mass Or Moles/Volume]"
+          },
+          {
+            "code": "9342-7",
+            "display": "Cholesterol [Percentile]"
+          }
+        ]
+      }
+    ]
+  }
+}
