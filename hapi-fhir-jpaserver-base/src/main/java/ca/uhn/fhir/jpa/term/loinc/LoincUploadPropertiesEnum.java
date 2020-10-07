@@ -69,6 +69,8 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_PART_FILE_DEFAULT("AccessoryFiles/PartFile/Part.csv"),
 
 	// Part link
+	LOINC_PART_LINK_FILE("loinc.part.link.file"),
+	LOINC_PART_LINK_FILE_DEFAULT("AccessoryFiles/PartFile/LoincPartLink.csv"),
 	LOINC_PART_LINK_FILE_PRIMARY("loinc.part.link.primary.file"),
 	LOINC_PART_LINK_FILE_PRIMARY_DEFAULT("AccessoryFiles/PartFile/LoincPartLink_Primary.csv"),
 	LOINC_PART_LINK_FILE_SUPPLEMENTARY("loinc.part.link.supplementary.file"),
