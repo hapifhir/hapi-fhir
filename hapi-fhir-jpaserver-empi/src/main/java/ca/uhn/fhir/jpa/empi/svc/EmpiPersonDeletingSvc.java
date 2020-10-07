@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -95,10 +96,11 @@ public class EmpiPersonDeletingSvc {
 
 	private void deleteConflictBatch(DeleteConflictList theDcl, IFhirResourceDao<IBaseResource> theDao) {
 		DeleteConflictList newBatch = new DeleteConflictList();
+		TransactionDetails transactionDetails = new TransactionDetails();
 		for (DeleteConflict next : theDcl) {
 			IdDt nextSource = next.getSourceId();
 			ourLog.info("Have delete conflict {} - Cascading delete", nextSource);
-			theDao.delete(nextSource.toVersionless(), newBatch, null, null);
+			theDao.delete(nextSource.toVersionless(), newBatch, null, transactionDetails);
 		}
 		theDcl.removeAll();
 		theDcl.addAll(newBatch);
