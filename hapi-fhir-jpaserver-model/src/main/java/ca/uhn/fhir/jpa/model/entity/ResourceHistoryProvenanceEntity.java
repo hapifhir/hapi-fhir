@@ -55,8 +55,6 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"), nullable = false)
 	private ResourceTable myResourceTable;
-	@Column(name = "RES_PID", insertable = false, updatable = false, nullable = false)
-	private Long myResourceId;
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
 	@Column(name = "REQUEST_ID", length = Constants.REQUEST_ID_LENGTH, nullable = true)
@@ -72,7 +70,7 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("resourceId", myResourceId);
+		b.append("resourceId", myResourceTable.getId());
 		b.append("sourceUri", mySourceUri);
 		b.append("requestId", myRequestId);
 		return b.toString();
