@@ -113,8 +113,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -1283,18 +1281,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public void beforeCommit(boolean readOnly) {
-					HookParams hookParams = new HookParams()
-						.add(IBaseResource.class, theOldResource)
-						.add(IBaseResource.class, theResource)
-						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-						.add(TransactionDetails.class, theTransactionDetails);
-					doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
-				}
-			});
+			hookParams = new HookParams()
+				.add(IBaseResource.class, theOldResource)
+				.add(IBaseResource.class, theResource)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(TransactionDetails.class, theTransactionDetails);
+			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
+				theTransactionDetails.addDeferredInterceptorBroadcast(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
+			} else {
+				doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
+			}
 		}
 
 		return savedEntity;

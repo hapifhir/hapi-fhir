@@ -68,6 +68,7 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -540,9 +541,7 @@ public abstract class BaseTransactionProcessor {
 	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
-		if (theRequest != null) {
-			theRequest.startDeferredOperationCallback();
-		}
+		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts();
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
@@ -980,11 +979,19 @@ public abstract class BaseTransactionProcessor {
 				}
 				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
+
+			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents = theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
+			for (Map.Entry<Pointcut, HookParams> nextEntry : deferredBroadcastEvents.entries()) {
+				Pointcut nextPointcut = nextEntry.getKey();
+				HookParams nextParams = nextEntry.getValue();
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
+			}
+
 			return entriesToProcess;
 
 		} finally {
-			if (theRequest != null) {
-				theRequest.stopDeferredRequestOperationCallbackAndRunDeferredItems();
+			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
+				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
 	}

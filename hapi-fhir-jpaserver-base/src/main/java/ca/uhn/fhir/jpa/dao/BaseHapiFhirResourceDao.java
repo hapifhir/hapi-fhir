@@ -343,17 +343,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public void beforeCommit(boolean readOnly) {
-					HookParams hookParams = new HookParams()
-						.add(IBaseResource.class, theResource)
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(TransactionDetails.class, theTransactionDetails);
-					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
-				}
-			});
+			hookParams = new HookParams()
+				.add(IBaseResource.class, theResource)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(TransactionDetails.class, theTransactionDetails);
+			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
+				theTransactionDetails.addDeferredInterceptorBroadcast(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
+			} else {
+				doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
+			}
 		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, theResource).setCreated(true);
@@ -455,17 +454,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void beforeCommit(boolean readOnly) {
-				HookParams hookParams = new HookParams()
-					.add(IBaseResource.class, resourceToDelete)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(TransactionDetails.class, theTransactionDetails);
-				doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
-			}
-		});
+		HookParams hookParams = new HookParams()
+			.add(IBaseResource.class, resourceToDelete)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, theTransactionDetails);
+		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
+			theTransactionDetails.addDeferredInterceptorBroadcast(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+		} else {
+			doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+		}
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
 
