@@ -739,10 +739,10 @@
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.28</slf4j_version>
-		<spring_version>5.2.3.RELEASE</spring_version>
+		<spring_version>5.2.9.RELEASE</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.2.0.RELEASE</spring_data_version>
-		<spring_batch_version>4.2.2.RELEASE</spring_batch_version>
+		<spring_batch_version>4.2.3.RELEASE</spring_batch_version>
 		<spring_boot_version>2.2.6.RELEASE</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
@@ -1454,7 +1454,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.12</version>
+				<version>42.2.13</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
@@ -1574,7 +1574,7 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>bootstrap</artifactId>
-				<version>3.3.7</version>
+				<version>3.4.0</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.webjars</groupId>
@@ -2645,9 +2645,9 @@
 					<plugin>
 						<groupId>org.owasp</groupId>
 						<artifactId>dependency-check-maven</artifactId>
-						<version>3.1.1</version>
+						<version>6.0.2</version>
 						<configuration>
-							<failBuildOnCVSS>8</failBuildOnCVSS>
+							<failBuildOnCVSS>7</failBuildOnCVSS>
 						</configuration>
 						<executions>
 							<execution>

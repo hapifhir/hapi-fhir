@@ -40,7 +40,7 @@ public class SecurityInterceptors {
 		//END SNIPPET: basicAuthInterceptorRealm
 	}
 
-	// START SNIPPET: basicAuthInterceptor
+	// START SNIPPET: basicAuthInterceptorExample
 	@Interceptor
 	public class BasicSecurityInterceptor {
 
@@ -80,6 +80,6 @@ public class SecurityInterceptors {
 
 
 	}
-	//END SNIPPET: basicAuthInterceptor
+	//END SNIPPET: basicAuthInterceptorExample
 
 }
