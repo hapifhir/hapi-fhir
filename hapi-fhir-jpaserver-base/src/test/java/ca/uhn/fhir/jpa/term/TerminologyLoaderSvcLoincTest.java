@@ -39,6 +39,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,9 +69,54 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	@Test
-	public void testLoadLoinc() throws Exception {
+	public void testLoadLoincWithSplitPartLink() throws Exception {
 		addLoincMandatoryFilesToZip(myFiles);
+		verifyLoadLoinc();
+	}
 
+	@Test
+	public void testLoadLoincWithSinglePartLink() throws Exception {
+		addLoincMandatoryFilesAndSinglePartLinkToZip(myFiles);
+		verifyLoadLoinc();
+	}
+
+	@Test
+	public void testLoadLoincInvalidPartLinkFiles() throws IOException {
+
+		// Missing all PartLinkFiles
+		addBaseLoincMandatoryFilesToZip(myFiles);
+		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+
+		try {
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+		}
+
+		// Missing LoincPartLink_Supplementary
+		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		try {
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+		}
+
+		// Both Split and Single PartLink files
+		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+		myFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		try {
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
+		}
+
+	}
+
+
+	private void verifyLoadLoinc() throws Exception {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -138,10 +184,12 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals("LA6270-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Never", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertEquals("Beta.1", vs.getVersion());
 
 		// External AnswerList
 		vs = valueSets.get("LL1892-0");
 		assertEquals(0, vs.getCompose().getIncludeFirstRep().getConcept().size());
+		assertEquals("Beta.1", vs.getVersion());
 
 		// Part
 		code = concepts.get("LP101394-7");
@@ -175,6 +223,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(3, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("11488-4", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Consult note", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertNull(vs.getVersion());
 
 		// Document ontology parts
 		code = concepts.get("11488-4");
@@ -192,6 +241,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals("17787-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("NM Thyroid gland Study report", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertNull(vs.getVersion());
 
 		// RSNA Playbook Code Parts - Region Imaged
 		code = concepts.get("17787-3");
@@ -260,6 +310,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Creatinine [Mass/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 		assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
 		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+		assertNull(vs.getVersion());
 
 		// TOP 2000 - SI
 		vs = valueSets.get(LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_ID);
@@ -272,6 +323,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Creatinine [Moles/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 		assertEquals("718-7", vs.getCompose().getInclude().get(0).getConcept().get(1).getCode());
 		assertEquals("Hemoglobin [Mass/volume] in Blood", vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay());
+		assertNull(vs.getVersion());
 
 		// Universal lab order VS
 		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID_BASE);
@@ -280,6 +332,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("42176-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("1,3 beta glucan [Mass/volume] in Serum", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
+		assertNull(vs.getVersion());
 
 		// All LOINC codes
 		assertTrue(valueSets.containsKey("loinc-all"));
@@ -296,6 +349,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertTrue(vs.getCompose().hasInclude());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals("1.0.0", vs.getVersion());
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
@@ -353,6 +407,18 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		CodeSystem loincCS = mySystemCaptor.getValue();
 		assertEquals("2.67", loincCS.getVersion());
+		List<ValueSet> loincVS_resources = myValueSetsCaptor.getValue();
+		for (ValueSet loincVS : loincVS_resources) {
+			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+				assertEquals("2.67.Beta.1", loincVS.getVersion());
+			} else {
+				assertEquals("2.67", loincVS.getVersion());
+			}
+		}
+		List<ConceptMap> loincCM_resources = myConceptMapCaptor.getValue();
+		for (ConceptMap loincCM : loincCM_resources) {
+			assertEquals("2.67.Beta.1", loincCM.getVersion());
+		}
 
 		// Update LOINC marked as version 2.67
 		myFiles = new ZipCollectionBuilder();
@@ -362,6 +428,18 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		loincCS = mySystemCaptor.getValue();
 		assertEquals("2.67", loincCS.getVersion());
+		loincVS_resources = myValueSetsCaptor.getValue();
+		for (ValueSet loincVS : loincVS_resources) {
+			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+				assertEquals("2.67.Beta.1", loincVS.getVersion());
+			} else {
+				assertEquals("2.67", loincVS.getVersion());
+			}
+		}
+		loincCM_resources = myConceptMapCaptor.getValue();
+		for (ConceptMap loincCM : loincCM_resources) {
+			assertEquals("2.67.Beta.1", loincCM.getVersion());
+		}
 
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
@@ -371,6 +449,18 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		verify(myTermCodeSystemStorageSvc, times(3)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		loincCS = mySystemCaptor.getValue();
 		assertEquals("2.68", loincCS.getVersion());
+		loincVS_resources = myValueSetsCaptor.getValue();
+		for (ValueSet loincVS : loincVS_resources) {
+			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+				assertEquals("2.68.Beta.1", loincVS.getVersion());
+			} else {
+				assertEquals("2.68", loincVS.getVersion());
+			}
+		}
+		loincCM_resources = myConceptMapCaptor.getValue();
+		for (ConceptMap loincCM : loincCM_resources) {
+			assertEquals("2.68.Beta.1", loincCM.getVersion());
+		}
 
 	}
 
@@ -413,12 +503,27 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		}
 	}
 
+	public static void addLoincMandatoryFilesAndSinglePartLinkToZip(ZipCollectionBuilder theFiles) throws IOException {
+		addBaseLoincMandatoryFilesToZip(theFiles);
+		theFiles.addFileZip("/loinc/", "loincupload_singlepartlink.properties");
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode());
+	}
+
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		addLoincMandatoryFilesWithPropertiesFileToZip(theFiles, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addBaseLoincMandatoryFilesToZip(theFiles);
+		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 	}
 
 	public static void addLoincMandatoryFilesWithPropertiesFileToZip(ZipCollectionBuilder theFiles, String thePropertiesFile) throws IOException {
 		theFiles.addFileZip("/loinc/", thePropertiesFile);
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
+		addBaseLoincMandatoryFilesToZip(theFiles);
+	}
+
+	private static void addBaseLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException{
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
@@ -430,8 +535,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_DUPLICATE_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_FILE_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode());
-		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
 		theFiles.addFileZip("/loinc/", LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
