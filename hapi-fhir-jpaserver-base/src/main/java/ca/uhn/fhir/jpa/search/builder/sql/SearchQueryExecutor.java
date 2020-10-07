@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.Validate;
@@ -30,7 +31,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.sql.DataSource;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,13 +41,13 @@ import java.util.Iterator;
 public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 
 	private static final Long NO_MORE = -1L;
+	private static final SearchQueryExecutor NO_VALUE_EXECUTOR = new SearchQueryExecutor();
 	private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-	public static final SearchQueryExecutor EMPTY = new SearchQueryExecutor();
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
 	private final Integer myMaxResultsToFetch;
 	@Autowired
-	private DataSource myDataSource;
+	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private boolean myQueryInitialized;
 	private Connection myConnection;
 	private PreparedStatement myStatement;
@@ -79,7 +79,7 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	public void close() {
 		IoUtil.closeQuietly(myResultSet);
 		JdbcUtils.closeStatement(myStatement);
-		DataSourceUtils.releaseConnection(myConnection, myDataSource);
+		DataSourceUtils.releaseConnection(myConnection, myEntityManagerFactory.getDataSource());
 		myResultSet = null;
 		myStatement = null;
 		myConnection = null;
@@ -113,7 +113,7 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 					 * is managed by Spring has been started before this method is called.
 					 */
 					assert TransactionSynchronizationManager.isSynchronizationActive();
-					myConnection = DataSourceUtils.getConnection(myDataSource);
+					myConnection = DataSourceUtils.getConnection(myEntityManagerFactory.getDataSource());
 					myStatement = myConnection.prepareStatement(sql);
 
 					if (myMaxResultsToFetch != null) {
@@ -140,6 +140,10 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 				throw new InternalErrorException(e);
 			}
 		}
+	}
+
+	public static SearchQueryExecutor emptyExecutor() {
+		return NO_VALUE_EXECUTOR;
 	}
 }
 

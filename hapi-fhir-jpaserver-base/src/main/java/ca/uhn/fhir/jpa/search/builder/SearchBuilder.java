@@ -30,6 +30,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
 import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -103,7 +104,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -169,7 +169,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 	@Autowired
-	private DataSource myDataSource;
+	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
@@ -349,7 +349,7 @@ public class SearchBuilder implements ISearchBuilder {
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
 
-		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDataSource);
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(myEntityManagerFactory.getDataSource());
 		jdbcTemplate.setFetchSize(myFetchSize);
 		if (theMaximumResults != null) {
 			jdbcTemplate.setMaxRows(theMaximumResults);
@@ -1192,7 +1192,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
 			} else {
-				myResultsIterator = SearchQueryExecutor.EMPTY;
+				myResultsIterator = SearchQueryExecutor.emptyExecutor();
 			}
 
 		}
