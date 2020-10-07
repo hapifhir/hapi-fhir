@@ -91,7 +91,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] or [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
 		}
 
 		// Missing LoincPartLink_Supplementary
@@ -100,7 +100,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] or [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
+			assertEquals("Could not find any of the PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv] nor [AccessoryFiles/PartFile/LoincPartLink.csv]", e.getMessage());
 		}
 
 		// Both Split and Single PartLink files
@@ -110,7 +110,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
+			assertEquals("Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, AccessoryFiles/PartFile/LoincPartLink.csv, and the split PartLink files: [AccessoryFiles/PartFile/LoincPartLink_Primary.csv, AccessoryFiles/PartFile/LoincPartLink_Supplementary.csv]", e.getMessage());
 		}
 
 	}
