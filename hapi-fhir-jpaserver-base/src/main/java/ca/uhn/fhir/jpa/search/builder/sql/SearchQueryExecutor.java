@@ -79,7 +79,9 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	public void close() {
 		IoUtil.closeQuietly(myResultSet);
 		JdbcUtils.closeStatement(myStatement);
-		DataSourceUtils.releaseConnection(myConnection, myEntityManagerFactory.getDataSource());
+		if (myEntityManagerFactory != null) {
+			DataSourceUtils.releaseConnection(myConnection, myEntityManagerFactory.getDataSource());
+		}
 		myResultSet = null;
 		myStatement = null;
 		myConnection = null;
