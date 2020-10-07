@@ -29,6 +29,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -50,6 +51,7 @@ public class TransactionDetails {
 	private Map<IIdType, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, Object> myUserData;
 	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
+	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 
 	/**
 	 * Constructor
@@ -138,9 +140,10 @@ public class TransactionDetails {
 	 *
 	 * @since 5.2.0
 	 */
-	public void beginAcceptingDeferredInterceptorBroadcasts() {
+	public void beginAcceptingDeferredInterceptorBroadcasts(Pointcut... thePointcuts) {
 		Validate.isTrue(!isAcceptingDeferredInterceptorBroadcasts());
 		myDeferredInterceptorBroadcasts = ArrayListMultimap.create();
+		myDeferredInterceptorBroadcastPointcuts = EnumSet.of(thePointcuts[0], thePointcuts);
 	}
 
 	/**
@@ -157,10 +160,20 @@ public class TransactionDetails {
 	 *
 	 * @since 5.2.0
 	 */
+	public boolean isAcceptingDeferredInterceptorBroadcasts(Pointcut thePointcut) {
+		return myDeferredInterceptorBroadcasts != null && myDeferredInterceptorBroadcastPointcuts.contains(thePointcut);
+	}
+
+	/**
+	 * This can be used by processors for FHIR transactions to defer interceptor broadcasts on sub-requests if needed
+	 *
+	 * @since 5.2.0
+	 */
 	public ListMultimap<Pointcut, HookParams> endAcceptingDeferredInterceptorBroadcasts() {
 		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts());
 		ListMultimap<Pointcut, HookParams> retVal = myDeferredInterceptorBroadcasts;
 		myDeferredInterceptorBroadcasts = null;
+		myDeferredInterceptorBroadcastPointcuts = null;
 		return retVal;
 	}
 
@@ -170,7 +183,7 @@ public class TransactionDetails {
 	 * @since 5.2.0
 	 */
 	public void addDeferredInterceptorBroadcast(Pointcut thePointcut, HookParams theHookParams) {
-		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts());
+		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts(thePointcut));
 		myDeferredInterceptorBroadcasts.put(thePointcut, theHookParams);
 	}
 }

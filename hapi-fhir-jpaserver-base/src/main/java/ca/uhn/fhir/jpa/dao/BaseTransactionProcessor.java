@@ -541,7 +541,11 @@ public abstract class BaseTransactionProcessor {
 	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
-		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts();
+		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED
+		);
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
