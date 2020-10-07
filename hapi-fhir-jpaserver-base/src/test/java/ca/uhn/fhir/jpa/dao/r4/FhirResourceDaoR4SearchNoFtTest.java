@@ -55,6 +55,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -585,17 +586,18 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		org.setName("O1");
 		String orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless().getValue();
 
+		String yesterday = new DateType(DateUtils.addDays(new Date(), -1)).getValueAsString();
+		String tomorrow = new DateType(DateUtils.addDays(new Date(), 1)).getValueAsString();
+
 		runInTransaction(()->{
-			ResourceTable resourceTable = myResourceTableDao.findAll().get(0);
-			resourceTable.setUpdated(new InstantDt("2019-01-14T21:53:53.147-05:00"));
-			myResourceTableDao.save(resourceTable);
+			ourLog.info("Resources:\n * {}", myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		RuntimeResourceDefinition resDef = myFhirCtx.getResourceDefinition("DiagnosticReport");
-		map = myMatchUrlService.translateMatchUrl("DiagnosticReport?_lastUpdated=gt2019-01-13&_lastUpdated=lt2019-01-15", resDef);
+		map = myMatchUrlService.translateMatchUrl("Organization?_lastUpdated=gt" + yesterday + "&_lastUpdated=lt" + tomorrow, resDef);
 		map.setLoadSynchronous(true);
 		myCaptureQueriesListener.clear();
-		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(ids, contains(orgId));
 
