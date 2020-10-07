@@ -55,7 +55,7 @@ public class ResourceHistoryProvenanceEntity extends BasePartitionable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"), nullable = false)
 	private ResourceTable myResourceTable;
-	@Column(name = "RES_PID", insertable = false, updatable = false)
+	@Column(name = "RES_PID", insertable = false, updatable = false, nullable = false)
 	private Long myResourceId;
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
 	private String mySourceUri;
