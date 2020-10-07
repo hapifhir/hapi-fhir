@@ -154,7 +154,7 @@ public class LoadedFileDescriptors implements Closeable {
 			if (!multiPartFilesFound && !singlePartFilesFound) {
 				msg = "Could not find any of the PartLink files: " + notFoundMulti + " nor " + notFoundSingle;
 			} else {
-				msg = "Found both the single PartLink file, " + theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
+				msg = "Only either the single PartLink file or the split PartLink files can be present. Found both the single PartLink file, " + theSinglePartLinkFile + ", and the split PartLink files: " + theMultiPartLinkFiles;
 			}
 			throw new UnprocessableEntityException(msg);
 		}
