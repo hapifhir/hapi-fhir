@@ -145,6 +145,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 				.setConceptMapVersion(loincPartMapVersion)
 				.setConceptMapName(loincPartMapName)
 				.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+				.setSourceCodeSystemVersion(codeSystemVersionId)
 				.setSourceCode(partNumber)
 				.setSourceDisplay(partName)
 				.setTargetCodeSystem(extCodeSystem)
