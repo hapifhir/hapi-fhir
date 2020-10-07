@@ -963,8 +963,6 @@ public class InMemorySubscriptionMatcherR4Test {
 		ylist.add(createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00"));
 
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT+01:00"));
-		ourLog.info("AAAA: " + new DateRangeParam(new DateParam("2011-01-02")).getLowerBoundAsInstant());
-		ourLog.info("AAAA: " + new DateRangeParam(new DateParam("2011-01-02")).getUpperBoundAsInstant());
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
