@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -37,6 +38,9 @@ public class DeleteConflictServiceTest {
 	@SuppressWarnings("unused")
 	@MockBean
 	private IResourceLinkDao myResourceLinkDao;
+	@SuppressWarnings("unused")
+	@MockBean
+	private IResourceTableDao myResourceTableDao;
 	@SuppressWarnings("unused")
 	@MockBean
 	private FhirContext myFhirContext;

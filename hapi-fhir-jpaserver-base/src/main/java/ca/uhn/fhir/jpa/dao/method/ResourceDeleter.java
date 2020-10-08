@@ -140,7 +140,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
-		doCallHooks(theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hook);
+		doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hook);
 
 		myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequestDetails, theTransactionDetails);
 
@@ -156,17 +156,17 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
-		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-			@Override
-			public void beforeCommit(boolean readOnly) {
-				HookParams hookParams = new HookParams()
-					.add(IBaseResource.class, resourceToDelete)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(TransactionDetails.class, theTransactionDetails);
-				doCallHooks(theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
-			}
-		});
+		// Notify JPA interceptors
+		HookParams hookParams = new HookParams()
+			.add(IBaseResource.class, resourceToDelete)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+			.add(TransactionDetails.class, theTransactionDetails);
+		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
+			theTransactionDetails.addDeferredInterceptorBroadcast(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+		} else {
+			doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+		}
 
 		DaoMethodOutcome outcome = myDao.toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
 
@@ -279,7 +279,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 				.add(RequestDetails.class, theRequest)
 				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(TransactionDetails.class, theTransactionDetails);
-			doCallHooks(theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
+			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
 			myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false, theRequest, theTransactionDetails);
 
@@ -304,7 +304,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 						.add(RequestDetails.class, theRequest)
 						.addIfMatchesType(ServletRequestDetails.class, theRequest)
 						.add(TransactionDetails.class, theTransactionDetails);
-					doCallHooks(theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
+					doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
 			});
 		}
@@ -345,7 +345,11 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 		}
 	}
 
-	protected void doCallHooks(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, theParams);
+	protected void doCallHooks(TransactionDetails theTransactionDetails, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
+			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
+		} else {
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, thePointcut, theParams);
+		}
 	}
 }

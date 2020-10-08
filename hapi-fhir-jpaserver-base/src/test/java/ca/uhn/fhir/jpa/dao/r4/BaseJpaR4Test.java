@@ -638,6 +638,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			myPatientDao.read(theId, mySrd);
 		} else if ("Organization".equals(theId.getResourceType())) {
 			myOrganizationDao.read(theId, mySrd);
+		} else if ("Observation".equals(theId.getResourceType())) {
+			myObservationDao.read(theId, mySrd);
 		} else if ("CodeSystem".equals(theId.getResourceType())) {
 			myCodeSystemDao.read(theId, mySrd);
 		} else {
