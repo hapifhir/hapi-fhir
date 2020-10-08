@@ -76,6 +76,7 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 				.setConceptMapVersion(loincIeeeCmVersion)
 				.setConceptMapName(LOINC_IEEE_CM_NAME)
 				.setSourceCodeSystem(sourceCodeSystemUri)
+				.setSourceCodeSystemVersion(codeSystemVersionId)
 				.setSourceCode(loincNumber)
 				.setSourceDisplay(longCommonName)
 				.setTargetCodeSystem(targetCodeSystemUri)

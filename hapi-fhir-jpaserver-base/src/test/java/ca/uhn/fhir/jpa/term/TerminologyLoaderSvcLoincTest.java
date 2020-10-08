@@ -116,7 +116,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 
-	private void verifyLoadLoinc() throws Exception {
+	private void verifyLoadLoinc() {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
@@ -198,14 +198,15 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Part Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_ID);
-		assertEquals(null, conceptMap.getSource());
-		assertEquals(null, conceptMap.getTarget());
+		assertNull(conceptMap.getSource());
+		assertNull(conceptMap.getTarget());
 		assertEquals(LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_URI, conceptMap.getUrl());
 		assertEquals("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/. The LOINC Part File, LOINC/SNOMED CT Expression Association and Map Sets File, RELMA database and associated search index files include SNOMED Clinical Terms (SNOMED CT®) which is used by permission of the International Health Terminology Standards Development Organisation (IHTSDO) under license. All rights are reserved. SNOMED CT® was originally created by The College of American Pathologists. “SNOMED” and “SNOMED CT” are registered trademarks of the IHTSDO. Use of SNOMED CT content is subject to the terms and conditions set forth in the SNOMED CT Affiliate License Agreement.  It is the responsibility of those implementing this product to ensure they are appropriately licensed and for more information on the license, including how to register as an Affiliate Licensee, please refer to http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org. Under the terms of the Affiliate License, use of SNOMED CT in countries that are not IHTSDO Members is subject to reporting and fee payment obligations. However, IHTSDO agrees to waive the requirements to report and pay fees for use of SNOMED CT content included in the LOINC Part Mapping and LOINC Term Associations for purposes that support or enable more effective use of LOINC. This material includes content from the US Edition to SNOMED CT, which is developed and maintained by the U.S. National Library of Medicine and is available to authorized UMLS Metathesaurus Licensees from the UTS Downloads site at https://uts.nlm.nih.gov.", conceptMap.getCopyright());
 		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroup().get(0);
 		assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+		assertNull(group.getSourceVersion());
 		assertEquals(ITermLoaderSvc.SCT_URI, group.getTarget());
 		assertEquals("http://snomed.info/sct/900000000000207008/version/20170731", group.getTargetVersion());
 		assertEquals("LP18172-4", group.getElement().get(0).getCode());
@@ -274,6 +275,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
 		assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+		assertNull(group.getSourceVersion());
 		assertEquals(LoincRsnaPlaybookHandler.RID_CS_URI, group.getTarget());
 		assertEquals("LP199995-4", group.getElement().get(0).getCode());
 		assertEquals("Neck", group.getElement().get(0).getDisplay());
@@ -291,6 +293,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
 		assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+		assertNull(group.getSourceVersion());
 		assertEquals(LoincRsnaPlaybookHandler.RPID_CS_URI, group.getTarget());
 		assertEquals("24531-6", group.getElement().get(0).getCode());
 		assertEquals("US Retroperitoneum", group.getElement().get(0).getDisplay());
@@ -418,6 +421,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		List<ConceptMap> loincCM_resources = myConceptMapCaptor.getValue();
 		for (ConceptMap loincCM : loincCM_resources) {
 			assertEquals("2.67.Beta.1", loincCM.getVersion());
+			assertEquals(1, loincCM.getGroup().size());
+			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
+			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+			assertEquals("2.67", group.getSourceVersion());
 		}
 
 		// Update LOINC marked as version 2.67
@@ -439,6 +446,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		loincCM_resources = myConceptMapCaptor.getValue();
 		for (ConceptMap loincCM : loincCM_resources) {
 			assertEquals("2.67.Beta.1", loincCM.getVersion());
+			assertEquals(1, loincCM.getGroup().size());
+			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
+			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+			assertEquals("2.67", group.getSourceVersion());
 		}
 
 		// Load LOINC marked as version 2.68
@@ -460,6 +471,10 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		loincCM_resources = myConceptMapCaptor.getValue();
 		for (ConceptMap loincCM : loincCM_resources) {
 			assertEquals("2.68.Beta.1", loincCM.getVersion());
+			assertEquals(1, loincCM.getGroup().size());
+			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
+			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+			assertEquals("2.68", group.getSourceVersion());
 		}
 
 	}
@@ -554,13 +569,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
-		Map<String, ValueSet> valueSets = extractValueSets();
-		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
 
-		ConceptMap conceptMap;
 		TermConcept code;
-		ValueSet vs;
-		ConceptMap.ConceptMapGroupComponent group;
 
 		// Normal LOINC code
 		code = concepts.get("10013-1");
