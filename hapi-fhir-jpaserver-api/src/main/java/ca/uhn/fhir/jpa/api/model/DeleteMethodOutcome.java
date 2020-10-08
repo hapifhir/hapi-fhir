@@ -33,6 +33,8 @@ public class DeleteMethodOutcome extends MethodOutcome {
 
 	private List<ResourceTable> myDeletedEntities;
 
+	private long myExpungedCount;
+
 	public List<ResourceTable> getDeletedEntities() {
 		return myDeletedEntities;
 	}
@@ -42,4 +44,12 @@ public class DeleteMethodOutcome extends MethodOutcome {
 		return this;
 	}
 
+	public long getExpungedCount() {
+		return myExpungedCount;
+	}
+
+	public DeleteMethodOutcome setExpungedCount(long theExpungedCount) {
+		myExpungedCount = theExpungedCount;
+		return this;
+	}
 }

@@ -8,10 +8,12 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeResourceService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.r4.model.Patient;
@@ -31,6 +33,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +55,8 @@ class ResourceDeleterTest {
 	protected DaoConfig myDaoConfig;
 	@MockBean
 	protected IResourceTableDao myResourceTableDao;
+	@MockBean
+	protected MatchUrlService myMatchUrlService;
 
 	@MockBean
 	protected EntityManagerFactory myEntityManagerFactory;
@@ -61,6 +66,8 @@ class ResourceDeleterTest {
 	private DeleteConflictService myDeleteConflictService;
 	@MockBean
 	private MatchResourceUrlService myMatchResourceUrlService;
+	@MockBean
+	private ExpungeResourceService myExpungeResourceService;
 
 	@Configuration
 	public static class SpringConfig {
@@ -87,7 +94,8 @@ class ResourceDeleterTest {
 		Collection<ResourcePersistentId> list = Arrays.asList(id);
 		DeleteConflictList conflicts = new DeleteConflictList();
 		RequestDetails request = mock(RequestDetails.class);
+		when(myExpungeResourceService.deleteByResourcePids(any())).thenReturn(1965L);
 		DeleteMethodOutcome result = myResourceDeleter.deleteAndExpungePidList(url, list, conflicts, request);
-		assertEquals(1, result.getDeletedEntities().size());
+		assertEquals(1965L, result.getExpungedCount());
 	}
 }
