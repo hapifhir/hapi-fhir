@@ -46,6 +46,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.Date;
@@ -81,7 +82,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *                           won't be indexed and searches won't work.
 	 * @param theRequestDetails  TODO
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing,  @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -95,7 +96,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
 	 */
-	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails, @Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -167,7 +168,6 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	T readByPid(ResourcePersistentId thePid);
 
 	/**
-	 * @param theId
 	 * @param theRequestDetails TODO
 	 * @throws ResourceNotFoundException If the ID is not known to the server
 	 */
@@ -244,7 +244,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * @param theForceUpdateVersion Create a new version with the same contents as the current version even if the content hasn't changed (this is mostly useful for
 	 *                              resources mapping to external content such as external code systems)
 	 */
-	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails);
+	DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequestDetails,  @Nonnull TransactionDetails theTransactionDetails);
 
 	/**
 	 * Not supported in DSTU1!
