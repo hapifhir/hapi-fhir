@@ -20,10 +20,16 @@ package ca.uhn.fhir.rest.api.server.storage;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -34,7 +40,7 @@ import java.util.function.Supplier;
  * (i.e. a FHIR create, read, transaction, etc.).
  * <p>
  * The intent with this class is to hold things we want to pass from operation to operation within a transaction in
- * order to avoid looking things up multime times, etc.
+ * order to avoid looking things up multiple times, etc.
  * </p>
  *
  * @since 5.0.0
@@ -44,12 +50,14 @@ public class TransactionDetails {
 	private final Date myTransactionDate;
 	private Map<IIdType, ResourcePersistentId> myResolvedResourceIds = Collections.emptyMap();
 	private Map<String, Object> myUserData;
+	private ListMultimap<Pointcut, HookParams> myDeferredInterceptorBroadcasts;
+	private EnumSet<Pointcut> myDeferredInterceptorBroadcastPointcuts;
 
 	/**
 	 * Constructor
 	 */
 	public TransactionDetails() {
-		myTransactionDate = new Date();
+		this(new Date());
 	}
 
 	/**
@@ -125,6 +133,58 @@ public class TransactionDetails {
 			putUserData(theKey, retVal);
 		}
 		return retVal;
+	}
+
+	/**
+	 * This can be used by processors for FHIR transactions to defer interceptor broadcasts on sub-requests if needed
+	 *
+	 * @since 5.2.0
+	 */
+	public void beginAcceptingDeferredInterceptorBroadcasts(Pointcut... thePointcuts) {
+		Validate.isTrue(!isAcceptingDeferredInterceptorBroadcasts());
+		myDeferredInterceptorBroadcasts = ArrayListMultimap.create();
+		myDeferredInterceptorBroadcastPointcuts = EnumSet.of(thePointcuts[0], thePointcuts);
+	}
+
+	/**
+	 * This can be used by processors for FHIR transactions to defer interceptor broadcasts on sub-requests if needed
+	 *
+	 * @since 5.2.0
+	 */
+	public boolean isAcceptingDeferredInterceptorBroadcasts() {
+		return myDeferredInterceptorBroadcasts != null;
+	}
+
+	/**
+	 * This can be used by processors for FHIR transactions to defer interceptor broadcasts on sub-requests if needed
+	 *
+	 * @since 5.2.0
+	 */
+	public boolean isAcceptingDeferredInterceptorBroadcasts(Pointcut thePointcut) {
+		return myDeferredInterceptorBroadcasts != null && myDeferredInterceptorBroadcastPointcuts.contains(thePointcut);
+	}
+
+	/**
+	 * This can be used by processors for FHIR transactions to defer interceptor broadcasts on sub-requests if needed
+	 *
+	 * @since 5.2.0
+	 */
+	public ListMultimap<Pointcut, HookParams> endAcceptingDeferredInterceptorBroadcasts() {
+		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts());
+		ListMultimap<Pointcut, HookParams> retVal = myDeferredInterceptorBroadcasts;
+		myDeferredInterceptorBroadcasts = null;
+		myDeferredInterceptorBroadcastPointcuts = null;
+		return retVal;
+	}
+
+	/**
+	 * This can be used by processors for FHIR transactions to defer interceptor broadcasts on sub-requests if needed
+	 *
+	 * @since 5.2.0
+	 */
+	public void addDeferredInterceptorBroadcast(Pointcut thePointcut, HookParams theHookParams) {
+		Validate.isTrue(isAcceptingDeferredInterceptorBroadcasts(thePointcut));
+		myDeferredInterceptorBroadcasts.put(thePointcut, theHookParams);
 	}
 }
 

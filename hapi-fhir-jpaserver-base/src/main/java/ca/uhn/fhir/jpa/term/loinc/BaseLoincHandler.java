@@ -192,7 +192,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		if (isNotBlank(theVersionPropertyName)) {
 			version = myUploadProperties.getProperty(theVersionPropertyName);
 		} else {
-			version = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+			version = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		}
 
 		ValueSet vs;
