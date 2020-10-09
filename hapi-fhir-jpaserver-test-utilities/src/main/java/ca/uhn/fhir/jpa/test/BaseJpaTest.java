@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -190,5 +191,17 @@ public abstract class BaseJpaTest {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
+	}
+
+	protected String[] toValues(IIdType... theValues) {
+		ArrayList<String> retVal = new ArrayList<>();
+		for (IIdType next : theValues) {
+			retVal.add(next.getValue());
+		}
+		return retVal.toArray(new String[0]);
+	}
+
+	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {
+		return ClasspathUtil.loadResource(theCtx, theType, theClasspath);
 	}
 }

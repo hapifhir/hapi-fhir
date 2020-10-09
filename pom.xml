@@ -2494,6 +2494,7 @@
 				<module>hapi-fhir-jpaserver-searchparam</module>
 				<module>hapi-fhir-jpaserver-subscription</module>
 				<module>hapi-fhir-jaxrsserver-base</module>
+				<module>hapi-fhir-jpaserver-elastic</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
