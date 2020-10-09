@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -119,9 +120,9 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		ourLog.info("Created patient, got it: {}", id);
 
 		Bundle request = new Bundle();
-		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName + "&_expunge=true");
+		request.addEntry().setResource(p).getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName + "&" +  JpaConstants.PARAM_DELETE_EXPUNGE + "=true");
 
-		myPatientDao.deleteByUrl("Patient?identifier=urn%3Asystem%7C" + methodName + "&_expunge=true", mySrd);
+		myPatientDao.deleteByUrl("Patient?identifier=urn%3Asystem%7C" + methodName + "&" +  JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 
 		assertExpunged(id);
 	}

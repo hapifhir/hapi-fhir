@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
-public class TestR4ConfigWithElasticSearch extends TestR4Config {
+public class TestR4ConfigWithElasticSearch extends TestJpaR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
 	private static final String ELASTIC_VERSION = "6.5.4";

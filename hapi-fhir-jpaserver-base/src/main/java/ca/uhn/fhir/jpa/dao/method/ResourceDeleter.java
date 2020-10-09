@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeResourceService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -208,8 +209,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 	private boolean isExpungeDelete(String theUrl) {
 		// FIXME KHS can we avoid doing this twice?
 		List<NameValuePair> params = myMatchUrlService.translateMatchUrl(theUrl);
-		// FIXME KHS constant
-		return params.stream().anyMatch(param -> "_expunge".equals(param.getName()) && "true".equals(param.getValue()));
+		return params.stream().anyMatch(param -> JpaConstants.PARAM_DELETE_EXPUNGE.equals(param.getName()) && "true".equals(param.getValue()));
 	}
 
 	@Nonnull

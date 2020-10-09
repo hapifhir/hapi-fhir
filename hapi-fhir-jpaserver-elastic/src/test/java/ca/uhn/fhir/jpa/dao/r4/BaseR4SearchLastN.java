@@ -5,9 +5,9 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.config.TestR4ConfigWithElasticsearchClient;
-import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
-public class BaseR4SearchLastN extends BaseJpaTest {
+public class BaseR4SearchLastN extends BaseJpaR4Test {
 
 	private static final Map<String, String> observationPatientMap = new HashMap<>();
 	private static final Map<String, String> observationCategoryMap = new HashMap<>();
@@ -88,16 +88,6 @@ public class BaseR4SearchLastN extends BaseJpaTest {
 	protected PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private ElasticsearchSvcImpl myElasticsearchSvc;
-
-	@Override
-	protected FhirContext getContext() {
-		return myFhirCtx;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myPlatformTransactionManager;
-	}
 
 	@AfterEach
 	public void afterDisableLastN() {

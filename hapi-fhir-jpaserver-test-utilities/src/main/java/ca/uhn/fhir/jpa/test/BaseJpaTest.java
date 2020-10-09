@@ -20,12 +20,23 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -39,9 +50,14 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
-
+import org.mockito.Answers;
+import org.mockito.Mock;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 @TestPropertySource(properties = {
 	// Since scheduled tasks can cause searches, which messes up the
@@ -63,6 +79,15 @@ public abstract class BaseJpaTest {
 	protected ExpungeEverythingService myExpungeEverythingService;
 
 	@Autowired
+	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+
+	@Autowired
+	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
+
+	@Autowired
+	protected FhirContext myFhirContext;
+
+	@Autowired
 	PlatformTransactionManager myPlatformTransactionManager;
 
 	@Autowired
@@ -70,6 +95,9 @@ public abstract class BaseJpaTest {
 
 	@Autowired
 	MemoryCacheService myMemoryCacheService;
+
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	protected ServletRequestDetails mySrd;
 
 	@AfterEach
 	public void after() throws IOException {
@@ -102,5 +130,65 @@ public abstract class BaseJpaTest {
 				throw new InternalErrorException(theE);
 			}
 		});
+	}
+
+	protected List<IIdType> toUnqualifiedVersionlessIds(IBundleProvider theProvider) {
+
+		List<IIdType> retVal = new ArrayList<>();
+		Integer size = theProvider.size();
+		StopWatch sw = new StopWatch();
+		while (size == null) {
+			int timeout = 20000;
+			if (sw.getMillis() > timeout) {
+				String message = "Waited over " + timeout + "ms for search " + theProvider.getUuid();
+				ourLog.info(message);
+				fail(message);
+			}
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException theE) {
+				//ignore
+			}
+
+			if (theProvider instanceof PersistedJpaBundleProvider) {
+				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theProvider;
+				provider.clearCachedDataForUnitTest();
+			}
+			size = theProvider.size();
+		}
+
+		ourLog.info("Found {} results", size);
+		List<IBaseResource> resources = theProvider.getResources(0, size);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
+		int fromIndex = 0;
+		Integer toIndex = theFound.size();
+		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+	}
+
+	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound, int theFromIndex, Integer theToIndex, boolean theFirstCall) {
+		if (theToIndex == null) {
+			theToIndex = 99999;
+		}
+
+		List<String> retVal = new ArrayList<>();
+
+		IBundleProvider bundleProvider;
+		if (theFirstCall) {
+			bundleProvider = theFound;
+		} else {
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(null, theFound.getUuid());
+		}
+
+		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
+		for (IBaseResource next : resources) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		return retVal;
 	}
 }

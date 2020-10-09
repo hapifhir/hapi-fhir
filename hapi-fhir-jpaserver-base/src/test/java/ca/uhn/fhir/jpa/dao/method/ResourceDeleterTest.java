@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ExpungeResourceService;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -89,7 +90,7 @@ class ResourceDeleterTest {
 
 	@Test
 	void deleteAndExpungePidList() {
-		String url = "/Patient?_expunge=true";
+		String url = "/Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
 		ResourcePersistentId id = new ResourcePersistentId(123L);
 		Collection<ResourcePersistentId> list = Arrays.asList(id);
 		DeleteConflictList conflicts = new DeleteConflictList();

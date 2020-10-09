@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.test;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestJpaR4Config;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = {TestJpaR4Config.class})
