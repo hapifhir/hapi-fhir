@@ -667,6 +667,9 @@
 			<id>sqshq</id>
 			<name>Alexander Lukyanchikov</name>
 		</developer>
+		<developer>
+			<id>abrsystematic</id>
+		</developer>
 	</developers>
 
 	<licenses>
