@@ -160,30 +160,42 @@ public final class DateUtils {
 		return null;
 	}
 
-
 	public static Date getHighestInstantFromDate(Date theDateValue) {
-		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT+11:30"));
+		Calendar sourceCal = Calendar.getInstance();
+		sourceCal.setTime(theDateValue);
 
-	}
-	public static Date getLowestInstantFromDate(Date theDateValue) {
-		return getInstantFromDateWithTimezone(theDateValue, TimeZone.getTimeZone("GMT-11:30"));
-	}
-
-	public static Date getInstantFromDateWithTimezone(Date theDateValue, TimeZone theTimezone) {
-		Calendar cal = org.apache.commons.lang3.time.DateUtils.toCalendar(theDateValue);
-		cal.setTimeZone(theTimezone);
-		cal = org.apache.commons.lang3.time.DateUtils.truncate(cal, Calendar.DATE);
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT-12:00"));
+		copyDateAndTrundateTime(sourceCal, cal);
 		return cal.getTime();
 	}
 
-	public static int convertDatetoDayInteger(final Date theDateValue) {
+	public static Date getLowestInstantFromDate(Date theDateValue) {
+		Calendar sourceCal = Calendar.getInstance();
+		sourceCal.setTime(theDateValue);
+
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+14:00"));
+		copyDateAndTrundateTime(sourceCal, cal);
+		return cal.getTime();
+	}
+
+	private static void copyDateAndTrundateTime(Calendar theSourceCal, Calendar theCal) {
+		theCal.set(Calendar.YEAR, theSourceCal.get(Calendar.YEAR));
+		theCal.set(Calendar.MONTH, theSourceCal.get(Calendar.MONTH));
+		theCal.set(Calendar.DAY_OF_MONTH, theSourceCal.get(Calendar.DAY_OF_MONTH));
+		theCal.set(Calendar.HOUR_OF_DAY, 0);
+		theCal.set(Calendar.MINUTE, 0);
+		theCal.set(Calendar.SECOND, 0);
+		theCal.set(Calendar.MILLISECOND, 0);
+	}
+
+	public static int convertDateToDayInteger(final Date theDateValue) {
 		notNull(theDateValue, "Date value");
 		SimpleDateFormat format = new SimpleDateFormat(PATTERN_INTEGER_DATE);
 		String theDateString = format.format(theDateValue);
 		return Integer.parseInt(theDateString);
 	}
 
-	public static String convertDateToIso8601String(final Date theDateValue){
+	public static String convertDateToIso8601String(final Date theDateValue) {
 		notNull(theDateValue, "Date value");
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 		return format.format(theDateValue);
