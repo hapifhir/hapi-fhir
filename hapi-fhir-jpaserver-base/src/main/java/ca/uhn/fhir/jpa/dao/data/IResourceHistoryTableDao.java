@@ -66,8 +66,4 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 	@Modifying
 	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
-
-	@Modifying
-	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myResourceId in :resIds")
-	int deleteByResIds(@Param("resIds") List<Long> theResIds);
 }

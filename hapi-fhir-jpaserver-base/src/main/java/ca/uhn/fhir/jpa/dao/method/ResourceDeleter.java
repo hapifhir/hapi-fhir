@@ -246,7 +246,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 
 		myDeleteConflictService.validateOkToDeletePidsOrThrowException(thePids);
 
-		Long count = myExpungeResourceService.deleteByResourcePids(thePids);
+		Long count = myExpungeResourceService.expungeByResourcePids(thePids);
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 		String message = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", count, w.getMillis());
