@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -72,6 +74,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Communication;
 import org.hl7.fhir.r4.model.CommunicationRequest;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem;
@@ -573,6 +576,33 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		assertThat(ids, empty());
 	}
+
+	@Test
+	public void testLastUpdatedWithDateOnly() {
+		SearchParameterMap map;
+		List<String> ids;
+
+		Organization org = new Organization();
+		org.setName("O1");
+		String orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless().getValue();
+
+		String yesterday = new DateType(DateUtils.addDays(new Date(), -1)).getValueAsString();
+		String tomorrow = new DateType(DateUtils.addDays(new Date(), 1)).getValueAsString();
+
+		runInTransaction(()->{
+			ourLog.info("Resources:\n * {}", myResourceTableDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		RuntimeResourceDefinition resDef = myFhirCtx.getResourceDefinition("DiagnosticReport");
+		map = myMatchUrlService.translateMatchUrl("Organization?_lastUpdated=gt" + yesterday + "&_lastUpdated=lt" + tomorrow, resDef);
+		map.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		ids = toUnqualifiedVersionlessIdValues(myOrganizationDao.search(map));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(ids, contains(orgId));
+
+	}
+
 
 	/**
 	 * See #1053
@@ -5079,6 +5109,34 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(crId));
 	}
+
+
+	@Test
+	public void testSearchWithTwoChainedDates() {
+		// Matches
+		Encounter e1 = new Encounter();
+		e1.setPeriod(new Period().setStartElement(new DateTimeType("2020-09-14T12:00:00Z")).setEndElement(new DateTimeType("2020-09-14T12:00:00Z")));
+		String e1Id = myEncounterDao.create(e1).getId().toUnqualifiedVersionless().getValue();
+		Communication c1 = new Communication();
+		c1.getEncounter().setReference(e1Id);
+		myCommunicationDao.create(c1);
+
+		// Doesn't match
+		Encounter e2 = new Encounter();
+		e2.setPeriod(new Period().setStartElement(new DateTimeType("2020-02-14T12:00:00Z")).setEndElement(new DateTimeType("2020-02-14T12:00:00Z")));
+		String e2Id = myEncounterDao.create(e2).getId().toUnqualifiedVersionless().getValue();
+		Communication c2 = new Communication();
+		c2.getEncounter().setReference(e2Id);
+		myCommunicationDao.create(c2);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("ge2020-09-14").setChain("date"));
+		map.add(Communication.SP_ENCOUNTER, new ReferenceParam("le2020-09-15").setChain("date"));
+
+		IBundleProvider outcome = myCommunicationDao.search(map);
+		assertEquals(1, outcome.sizeOrThrowNpe());
+	}
+
 
 	@Test
 	public void testCircularReferencesDontBreakRevIncludes() {

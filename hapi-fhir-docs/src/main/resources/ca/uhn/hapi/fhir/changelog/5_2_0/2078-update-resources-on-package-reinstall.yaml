@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2078
+title: "When using package support to install a package with STORE_AND_INSTALL mode, resources that are already
+   present in the database will now be updated to the contents of the version in the package."

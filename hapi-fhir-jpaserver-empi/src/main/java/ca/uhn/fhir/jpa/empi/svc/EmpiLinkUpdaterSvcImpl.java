@@ -34,10 +34,7 @@ import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.Parameters;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,7 +115,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public IBaseParameters notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
+	public void notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
 		validateNotDuplicatePersonRequest(thePerson, theTarget);
 
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
@@ -136,10 +133,6 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		empiLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
-
-		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
-		retval.addParameter("success", true);
-		return retval;
 	}
 
 	private void validateNotDuplicatePersonRequest(IAnyResource thePerson, IAnyResource theTarget) {

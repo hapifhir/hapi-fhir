@@ -54,10 +54,10 @@ public class VectorMatchResultMap {
 	}
 
 	private EmpiMatchResultEnum computeMatchResult(Long theVector) {
-		if (myMatchVectors.stream().anyMatch(v -> (v & theVector) != 0)) {
+		if (myMatchVectors.stream().anyMatch(v -> (v & theVector) == v)) {
 			return EmpiMatchResultEnum.MATCH;
 		}
-		if (myPossibleMatchVectors.stream().anyMatch(v -> (v & theVector) != 0)) {
+		if (myPossibleMatchVectors.stream().anyMatch(v -> (v & theVector) == v)) {
 			return EmpiMatchResultEnum.POSSIBLE_MATCH;
 		}
 		return EmpiMatchResultEnum.NO_MATCH;

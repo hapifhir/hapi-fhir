@@ -1,9 +1,17 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,18 +26,20 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	private static final String SYSTEM_PARENTCHILD = "http://parentchild";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4CodeSystemTest.class);
+	private Long parentChildCsId;
+
+	private IIdType myCsId;
+	private static final String CS_ACME_URL = "http://acme.org";
 
 	@BeforeEach
 	@Transactional
 	public void before02() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
-		myCodeSystemDao.create(cs, mySrd);
-
-		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
+		myCsId = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
 
 		CodeSystem parentChildCs = new CodeSystem();
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
+		parentChildCs.setName("Parent Child CodeSystem");
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
@@ -38,7 +48,8 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		parentA.addConcept().setCode("ChildAA").setDisplay("Child AA");
 		parentChildCs.addConcept().setCode("ParentB").setDisplay("Parent B");
 
-		myCodeSystemDao.create(parentChildCs);
+		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
+		parentChildCsId = ((ResourceTable)parentChildCsOutcome.getEntity()).getId();
 
 	}
 
@@ -254,7 +265,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals("Married", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue());
+		assertFalse(((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue());
 	}
 
 	@Test
@@ -325,6 +336,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("FOO"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
 				.execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unknown code: [http://parentchild|FOO]", e.getMessage());
 		}
@@ -340,6 +352,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("FOO"))
 				.execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unknown code: [http://parentchild|FOO]", e.getMessage());
 		}
@@ -355,6 +368,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD + "A").setCode("ChildAA"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD + "B").setCode("ParentA"))
 				.execute();
+			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unable to test subsumption across different code systems", e.getMessage());
 		}
@@ -416,5 +430,527 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
+	@Test
+	public void testUpdateCodeSystemById() throws IOException {
+
+		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId).execute();
+		assertEquals("Parent Child CodeSystem", initialCodeSystem.getName());
+		initialCodeSystem.setName("Updated Parent Child CodeSystem");
+		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(initialCodeSystem);
+		HttpPut putRequest = new HttpPut(ourServerBase + "/CodeSystem/" + parentChildCsId);
+		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
+		try {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		} finally {
+			IOUtils.closeQuietly(resp);
+		}
+
+		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCsId).execute();
+		assertEquals("Updated Parent Child CodeSystem", updatedCodeSystem.getName());
+	}
+
+	@Test
+	public void testValidateCodeFoundByCode() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeNotFoundByCode() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5-a"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeMatchDisplay() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+		inParams.addParameter().setName("display").setValue(new StringType("Systolic blood pressure.inspiration - expiration"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeNotMatchDisplay() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+		inParams.addParameter().setName("display").setValue(new StringType("Old Systolic blood pressure.inspiration - expiration"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Unknown code {http://acme.org}8452-5 - Concept Display : Old Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeWithoutUrl() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+
+		try {
+			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeWithId() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+
+		Parameters respParam = myClient.operation().onInstance(myCsId).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeWithoutCodeOrCodingOrCodeableConcept() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("display").setValue(new StringType("Systolic blood pressure.inspiration - expiration"));
+
+		try {
+			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: No code, coding, or codeableConcept provided to validate.",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeWithCodeAndCoding() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("code").setValue(new CodeType("8452-5"));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-1")));
+
+		try {
+			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: $validate-code can only validate (code) OR (coding) OR (codeableConcept)",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodingWithUrlNotMatch() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-5").setSystem("http://url2")));
+
+		try {
+			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeFoundByCoding() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-5")));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodingWithSystem() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-5").setSystem(CS_ACME_URL)));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodingUrlNotMatch() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-5").setSystem("http://url2")));
+
+		try {
+			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodingWithDisplay() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-5").setDisplay("Systolic blood pressure.inspiration - expiration")));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeNotFoundByCoding() {
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("coding").setValue((new Coding().setCode("8452-5-a")));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConcept() {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConceptWithSystem() {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem(CS_ACME_URL);
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConceptWithDisplay() {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure.inspiration - expiration");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+
+	}
+
+	@Test
+	public void testValidateCodeNotFoundByCodeableConcept() {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5-a");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Unknown code {http://acme.org}8452-5-a", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConceptUrlNotMatch() throws Exception {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem("http://url2").setDisplay("Systolic blood pressure.inspiration - expiration");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		try {
+			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.",e.getMessage());
+		}
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConceptWithMultipleMatchedEntries() throws Exception {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure.inspiration - expiration");
+		cc.addCoding().setCode("8451-7").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure--inspiration");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConceptWithMultipleMatchedFirstEntry() throws Exception {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure.inspiration - expiration");
+		cc.addCoding().setCode("8451-7-a").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure--inspiration");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeFoundByCodeableConceptWithMultipleMatchedSecondEntry() throws Exception {
+
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5-a").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure.inspiration - expiration");
+		cc.addCoding().setCode("8451-7").setSystem(CS_ACME_URL).setDisplay("Systolic blood pressure--inspiration");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+		ourLog.info(resp);
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Systolic blood pressure--inspiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeWithUrlAndVersion_v1() {
+
+		String url = "http://url";
+		createCodeSystem(url, "v1", "1", "Code v1 display");
+		createCodeSystem(url, "v2", "1", "Code v2 display");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("version").setValue(new StringType("v1"));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+
+	@Test
+	public void testValidateCodeWithUrlAndVersion_v2() {
+
+		String url = "http://url";
+		createCodeSystem(url, "v1", "1", "Code v1 display");
+		createCodeSystem(url, "v2", "1", "Code v2 display");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("version").setValue(new StringType("v2"));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+
+	@Test
+	public void testValidateCodeWithUrlAndVersion_noVersion() {
+
+		String url = "http://url";
+		createCodeSystem(url, "v1", "1", "Code v1 display");
+		createCodeSystem(url, "v2", "1", "Code v2 display");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	@Test
+	public void testValidateCodeWithUrlAndVersion_noVersion_null_v1() {
+
+		String url = "http://url";
+		createCodeSystem(url, null, "1", "Code v1 display");
+		createCodeSystem(url, "v2", "1", "Code v2 display");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+
+	@Test
+	public void testValidateCodeWithUrlAndVersion_noVersion_null_v2() {
+
+		String url = "http://url";
+		createCodeSystem(url, "v1", "1", "Code v1 display");
+		createCodeSystem(url, null, "1", "Code v2 display");
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		ourLog.info("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
+
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
+	}
+
+	private void createCodeSystem(String url, String version, String code, String display) {
+
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(url).setVersion(version);
+
+		CodeSystem.ConceptDefinitionComponent concept1 = codeSystem.addConcept();
+		concept1.setCode("1000").setDisplay("Code Dispaly 1000");
+
+		CodeSystem.ConceptDefinitionComponent concept = codeSystem.addConcept();
+		concept.setCode(code).setDisplay(display);
+
+		CodeSystem.ConceptDefinitionComponent concept2 = codeSystem.addConcept();
+		concept2.setCode("2000").setDisplay("Code Dispaly 2000");
+
+		ourLog.info("CodeSystem: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		myCodeSystemDao.create(codeSystem, mySrd);
+	}
 
 }

@@ -157,7 +157,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		super.setPartitionId(theRequestPartitionId);
 	}
 
-	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
+	public boolean matches(IQueryParameterType theParam) {
 		throw new UnsupportedOperationException("No parameter matcher for " + theParam);
 	}
 

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.Enumerations;
@@ -13,6 +12,8 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 	@AfterAll
@@ -76,6 +77,18 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		});
 
 	}
+
+	@Test
+	public void testValidateCodeForCodeSystemOperationNotSupported() {
+		try {
+			myCodeSystemDao.validateCode(null, null, null, null, null, null, null, null);
+			fail();
+		} catch (UnsupportedOperationException theE) {
+			assertNotNull(theE);
+		}
+
+	}
+
 
 
 }

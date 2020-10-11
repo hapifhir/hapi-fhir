@@ -28,6 +28,7 @@ import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import ca.uhn.fhir.empi.rules.json.EmpiSimilarityJson;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.util.FhirTerser;
@@ -99,18 +100,19 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 				throw new ConfigurationException("Two MatchFields have the same name '" + fieldMatch.getName() + "'");
 			}
 			names.add(fieldMatch.getName());
-			validateThreshold(fieldMatch);
+			if (fieldMatch.getSimilarity() != null) {
+				validateSimilarity(fieldMatch);
+			} else if (fieldMatch.getMatcher() == null) {
+				throw new ConfigurationException("MatchField " + fieldMatch.getName() + " has neither a similarity nor a matcher.  At least one must be present.");
+			}
 			validatePath(fieldMatch);
 		}
 	}
 
-	private void validateThreshold(EmpiFieldMatchJson theFieldMatch) {
-		if (theFieldMatch.getMetric().isSimilarity()) {
-			if (theFieldMatch.getMatchThreshold() == null) {
-				throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " metric " + theFieldMatch.getMetric() + " requires a matchThreshold");
-			}
-		} else if (theFieldMatch.getMatchThreshold() != null) {
-			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " metric " + theFieldMatch.getMetric() + " should not have a matchThreshold");
+	private void validateSimilarity(EmpiFieldMatchJson theFieldMatch) {
+		EmpiSimilarityJson similarity = theFieldMatch.getSimilarity();
+		if (similarity.getMatchThreshold() == null) {
+			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " similarity " + similarity.getAlgorithm() + " requires a matchThreshold");
 		}
 	}
 

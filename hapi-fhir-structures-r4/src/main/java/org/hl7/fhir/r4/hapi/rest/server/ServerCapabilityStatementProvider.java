@@ -332,6 +332,7 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     sortSearchParameters(searchParameters);
     if (!searchParameters.isEmpty()) {
 
+      Set<String> paramNames = new HashSet<>();
       for (SearchParameter nextParameter : searchParameters) {
 
         if (nextParameter.getParamType() == null) {
@@ -344,6 +345,10 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
         String nextParamUnchainedName = nextParamName;
         if (nextParamName.contains(".")) {
           nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
+        }
+
+        if (!paramNames.add(nextParamUnchainedName)) {
+          continue;
         }
 
         String nextParamDescription = nextParameter.getDescription();
@@ -425,6 +430,8 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
           param.setMin(nextParam.isRequired() ? 1 : 0);
           param.setMax("1");
           param.setName(nextParam.getName());
+
+
         }
       }
 

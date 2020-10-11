@@ -438,7 +438,7 @@ public class IdHelperService {
 		if (retVal == null) {
 			IIdType id = theResource.getIdElement();
 			try {
-				retVal = this.resolveResourcePersistentIds(null, id.getResourceType(), id.getIdPart()).getIdAsLong();
+				retVal = this.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), id.getResourceType(), id.getIdPart()).getIdAsLong();
 			} catch (ResourceNotFoundException e) {
 				return null;
 			}

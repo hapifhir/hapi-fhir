@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -150,7 +152,21 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510_20200725();
 
 		//EMPI Target Type
-		empiLink.addColumn("20200727.1", "TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
+		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
+
+		//ConceptMap add version for search
+		Builder.BuilderWithTableName trmConceptMap = version.onTable("TRM_CONCEPT_MAP");
+		trmConceptMap.addColumn("20200910.1", "VER").nullable().type(ColumnTypeEnum.STRING, TermConceptMap.MAX_VER_LENGTH);
+		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL");
+		trmConceptMap.addIndex("20200910.3", "IDX_CONCEPT_MAP_URL").unique(true).withColumns("URL", "VER");
+
+		//Term CodeSystem Version and Term ValueSet Version
+		Builder.BuilderWithTableName trmCodeSystemVer = version.onTable("TRM_CODESYSTEM_VER");
+		trmCodeSystemVer.addIndex("20200923.1", "IDX_CODESYSTEM_AND_VER").unique(true).withColumns("CODESYSTEM_PID", "CS_VERSION_ID");
+		Builder.BuilderWithTableName trmValueSet = version.onTable("TRM_VALUESET");
+		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, TermValueSet.MAX_VER_LENGTH);
+		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL");
+		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VER");
 	}
 
 	protected void init510_20200725() {

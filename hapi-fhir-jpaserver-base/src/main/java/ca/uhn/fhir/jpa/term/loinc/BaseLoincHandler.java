@@ -52,7 +52,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 	private final List<ValueSet> myValueSets;
 	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 	private final Map<String, TermConcept> myCode2Concept;
-	private final Properties myUploadProperties;
+	protected final Properties myUploadProperties;
 
 	BaseLoincHandler(Map<String, TermConcept> theCode2Concept, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps, Properties theUploadProperties) {
 		myValueSets = theValueSets;
@@ -115,7 +115,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 			conceptMap.setId(theMapping.getConceptMapId());
 			conceptMap.setUrl(theMapping.getConceptMapUri());
 			conceptMap.setName(theMapping.getConceptMapName());
-			conceptMap.setVersion(myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()));
+			conceptMap.setVersion(theMapping.getConceptMapVersion());
 			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			conceptMap.addContact()
 				.setName(REGENSTRIEF_INSTITUTE_INC)
@@ -154,6 +154,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		if (group == null) {
 			group = conceptMap.addGroup();
 			group.setSource(theMapping.getSourceCodeSystem());
+			group.setSourceVersion(theMapping.getSourceCodeSystemVersion());
 			group.setTarget(theMapping.getTargetCodeSystem());
 			group.setTargetVersion(defaultIfBlank(theMapping.getTargetCodeSystemVersion(), null));
 		}
@@ -188,9 +189,11 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 	ValueSet getValueSet(String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
 
-		String version = null;
+		String version;
 		if (isNotBlank(theVersionPropertyName)) {
 			version = myUploadProperties.getProperty(theVersionPropertyName);
+		} else {
+			version = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		}
 
 		ValueSet vs;
@@ -226,8 +229,10 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		private String myCopyright;
 		private String myConceptMapId;
 		private String myConceptMapUri;
+		private String myConceptMapVersion;
 		private String myConceptMapName;
 		private String mySourceCodeSystem;
+		private String mySourceCodeSystemVersion;
 		private String mySourceCode;
 		private String mySourceDisplay;
 		private String myTargetCodeSystem;
@@ -260,6 +265,15 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 		ConceptMapping setConceptMapUri(String theConceptMapUri) {
 			myConceptMapUri = theConceptMapUri;
+			return this;
+		}
+
+		String getConceptMapVersion() {
+			return myConceptMapVersion;
+		}
+
+		ConceptMapping setConceptMapVersion(String theConceptMapVersion) {
+			myConceptMapVersion = theConceptMapVersion;
 			return this;
 		}
 
@@ -296,6 +310,15 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 		ConceptMapping setSourceCodeSystem(String theSourceCodeSystem) {
 			mySourceCodeSystem = theSourceCodeSystem;
+			return this;
+		}
+
+		String getSourceCodeSystemVersion() {
+			return mySourceCodeSystemVersion;
+		}
+
+		ConceptMapping setSourceCodeSystemVersion(String theSourceCodeSystemVersion) {
+			mySourceCodeSystemVersion = theSourceCodeSystemVersion;
 			return this;
 		}
 

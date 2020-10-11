@@ -337,6 +337,34 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 
 	}
 
+	@Test
+	public void testExpandValueSetContainingSystemIncludeAndExcludeWithNoCodes() throws IOException {
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/r4/iar/CodeSystem-iar-citizenship-status.xml");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/r4/iar/ValueSet-iar-citizenship-status.xml");
+		ValueSet.ConceptSetComponent excludeComponent = new ValueSet.ConceptSetComponent().setSystem("http://ccim.on.ca/fhir/iar/CodeSystem/iar-citizenship-status");
+		excludeComponent.addConcept().setCode("REF");
+		vs.getCompose().addExclude(excludeComponent);
+		myValueSetDao.create(vs);
+
+		CodeSystem cs2 = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		myCodeSystemDao.create(cs2);
+
+		ValueSet vs2 = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs-with-exclude.xml");
+		myValueSetDao.create(vs2);
+
+		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+
+		assertEquals(5, expansion.getExpansion().getContains().size());
+
+		ValueSet expansion2 = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
+
+		assertEquals(22, expansion2.getExpansion().getContains().size());
+
+	}
 
 
 }

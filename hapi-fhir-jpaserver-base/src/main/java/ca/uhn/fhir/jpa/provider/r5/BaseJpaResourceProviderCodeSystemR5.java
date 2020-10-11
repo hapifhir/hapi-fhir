@@ -23,9 +23,13 @@ package ca.uhn.fhir.jpa.provider.r5;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderValueSetDstu2;
+import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
@@ -55,6 +59,7 @@ public class BaseJpaResourceProviderCodeSystemR5 extends JpaResourceProviderR5<C
 			@OperationParam(name="code", min=0, max=1) CodeType theCode, 
 			@OperationParam(name="system", min=0, max=1) UriType theSystem,
 			@OperationParam(name="coding", min=0, max=1) Coding theCoding,
+			@OperationParam(name="version", min=0, max=1) StringType theVersion,
 			@OperationParam(name = "property", min = 0, max = OperationParam.MAX_UNLIMITED) List<CodeType> theProperties,
 			RequestDetails theRequestDetails
 			) {
@@ -62,7 +67,12 @@ public class BaseJpaResourceProviderCodeSystemR5 extends JpaResourceProviderR5<C
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			IValidationSupport.LookupCodeResult result;
+			if (theVersion != null) {
+				result = dao.lookupCode(theCode, new UriType(theSystem.getValue() + "|" + theVersion), theCoding, theRequestDetails);
+			} else {
+				result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
+			}
 			result.throwNotFoundIfAppropriate();
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} finally {
@@ -84,14 +94,51 @@ public class BaseJpaResourceProviderCodeSystemR5 extends JpaResourceProviderR5<C
 		@OperationParam(name="system", min=0, max=1) UriType theSystem,
 		@OperationParam(name="codingA", min=0, max=1) Coding theCodingA,
 		@OperationParam(name="codingB", min=0, max=1) Coding theCodingB,
+		@OperationParam(name="version", min=0, max=1) StringType theVersion,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
-			IFhirResourceDaoCodeSystem.SubsumesResult result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
+			IFhirResourceDaoCodeSystem.SubsumesResult result;
+			if (theVersion != null) {
+				theSystem = new UriType(theSystem.asStringValue() + "|" + theVersion.toString());
+			}
+			result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
 			return (Parameters) result.toParameters(theRequestDetails.getFhirContext());
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
+	
+	/**
+	 * $validate-code operation
+	 */
+	@SuppressWarnings("unchecked")
+	@Operation(name = JpaConstants.OPERATION_VALIDATE_CODE, idempotent = true, returnParameters = {
+		@OperationParam(name = "result", type = BooleanType.class, min = 1),
+		@OperationParam(name = "message", type = StringType.class),
+		@OperationParam(name = "display", type = StringType.class)
+	})
+	public Parameters validateCode(
+		HttpServletRequest theServletRequest,
+		@IdParam(optional = true) IdType theId,
+		@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
+		@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
+		@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+		@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
+		@OperationParam(name = "coding", min = 0, max = 1) Coding theCoding,
+		@OperationParam(name = "codeableConcept", min = 0, max = 1) CodeableConcept theCodeableConcept,
+		RequestDetails theRequestDetails
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
+				
+			IValidationSupport.CodeValidationResult result = dao.validateCode(theId, theCodeSystemUrl, theVersion, theCode, theDisplay, theCoding, theCodeableConcept, theRequestDetails);
+			return (Parameters) BaseJpaResourceProviderValueSetDstu2.toValidateCodeResult(getContext(), result);
 		} finally {
 			endRequest(theServletRequest);
 		}

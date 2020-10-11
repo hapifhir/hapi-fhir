@@ -26,9 +26,11 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -94,6 +96,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
+	@Autowired
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -161,6 +165,9 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 				if (theInstallationSpec.getInstallMode() == PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL) {
 					install(npmPackage, theInstallationSpec, retVal);
+
+					// If any SearchParameters were installed, let's load them right away
+					mySearchParamRegistry.refreshCacheIfNecessary();
 				}
 
 			} catch (IOException e) {
@@ -201,6 +208,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			count[i] = resources.size();
 
 			for (IBaseResource next : resources) {
+
 				try {
 					next = isStructureDefinitionWithoutSnapshot(next) ? generateSnapshot(next) : next;
 					create(next, theOutcome);
@@ -208,6 +216,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					ourLog.warn("Failed to upload resource of type {} with ID {} - Error: {}", myFhirContext.getResourceType(next), next.getIdElement().getValue(), e.toString());
 					throw new ImplementationGuideInstallationException(String.format("Error installing IG %s#%s: %s", name, version, e.toString()), e);
 				}
+
 			}
 
 		}
@@ -304,11 +313,21 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		SearchParameterMap map = createSearchParameterMapFor(theResource);
 		IBundleProvider searchResult = dao.search(map);
-		if (searchResult.isEmpty()) {
+		if (validForUpload(theResource)) {
+			if (searchResult.isEmpty()) {
 
-			if (validForUpload(theResource)) {
+				ourLog.info("Creating new resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 				dao.create(theResource);
+
+			} else {
+
+				ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
+				theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
+				DaoMethodOutcome outcome = dao.update(theResource);
+				if (!outcome.isNop()) {
+					theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
+				}
 			}
 
 		}
@@ -329,6 +348,13 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 			}
 
 			if (SearchParameterUtil.getBaseAsStrings(myFhirContext, theResource).isEmpty()) {
+				return false;
+			}
+		}
+
+		List<IPrimitiveType> statusTypes = myFhirContext.newFhirPath().evaluate(theResource, "status", IPrimitiveType.class);
+		if (statusTypes.size() > 0) {
+			if (!statusTypes.get(0).getValueAsString().equals("active")) {
 				return false;
 			}
 		}

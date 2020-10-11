@@ -238,7 +238,9 @@ public class EmpiLinkDaoSvc {
 
 	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
 		List<Long> collect = theLinks.stream().map(EmpiLink::getPersonPid).distinct().collect(Collectors.toList());
+		ourLog.info("Deleting {} EMPI link records...", theLinks.size());
 		myEmpiLinkDao.deleteAll(theLinks);
+		ourLog.info("{} EMPI link records deleted", theLinks.size());
 		return collect;
 	}
 

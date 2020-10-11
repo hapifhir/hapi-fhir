@@ -1,0 +1,4 @@
+---
+type: add
+issue: 2081
+title: "An implementation of CodeSystem validate-code operation has been added for R4 and R5."

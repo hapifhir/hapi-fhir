@@ -11,8 +11,11 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -22,7 +25,13 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ImplementationGuide;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.PractitionerRole;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -105,6 +115,20 @@ public class NpmTestR4 extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
 		igInstaller.install(spec);
+
+		runInTransaction(()->{
+			SearchParameterMap map = SearchParameterMap.newSynchronous(SearchParameter.SP_BASE, new TokenParam("NamingSystem"));
+			IBundleProvider outcome = mySearchParameterDao.search(map);
+			List<IBaseResource> resources = outcome.getResources(0, outcome.sizeOrThrowNpe());
+			for (int i = 0; i < resources.size(); i++) {
+				ourLog.info("**************************************************************************");
+				ourLog.info("**************************************************************************");
+				ourLog.info("Res " + i);
+				ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(i)));
+			}
+		});
+
+		igInstaller.install(spec);
 	}
 
 
@@ -153,7 +177,8 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.12.0", bytes);
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
-		igInstaller.install(spec);
+		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Be sure no further communication with the server
 		JettyUtil.closeServer(myServer);
@@ -206,9 +231,23 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(StructureDefinition.SP_URL, new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system"));
-			IBundleProvider outcome = myCodeSystemDao.search(map);
-			assertEquals(1, outcome.sizeOrThrowNpe());
+			IBundleProvider result = myCodeSystemDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
 		});
+	}
+
+
+	@Test
+	public void testInstallR4Package_DraftResourcesNotInstalled() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-draft-sample.tgz");
+		myFakeNpmServlet.myResponses.put("/hl7.fhir.uv.shorthand/0.11.1", bytes);
+
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
+
 	}
 
 	@Test
@@ -227,8 +266,12 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		igInstaller.install(spec);
 		outcome = igInstaller.install(spec);
 		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
-	}
 
+		// Ensure that we loaded the contents
+		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
+		assertEquals(1, searchResult.sizeOrThrowNpe());
+
+	}
 
 
 	@Test
@@ -249,9 +292,6 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		assertEquals(null, pkg.description());
 		assertEquals("UK.Core.r4", pkg.name());
 
-		// Ensure that we loaded the contents
-		IBundleProvider searchResult = myStructureDefinitionDao.search(SearchParameterMap.newSynchronous("url", new UriParam("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient")));
-		assertEquals(1, searchResult.sizeOrThrowNpe());
 	}
 
 	@Test
@@ -376,6 +416,7 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_ONLY);
 		igInstaller.install(spec);
 
+
 		runInTransaction(() -> {
 			NpmPackageVersionEntity versionEntity = myPackageVersionDao.findByPackageIdAndVersion("hl7.fhir.uv.shorthand", "0.12.0").orElseThrow(() -> new IllegalArgumentException());
 			assertEquals(true, versionEntity.isCurrentVersion());
@@ -432,6 +473,53 @@ public class NpmTestR4 extends BaseJpaR4Test {
 		});
 
 	}
+
+	@Test
+	public void testInstallPkgContainingSearchParameter() throws IOException {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] contents0111 = loadClasspathBytes("/packages/test-exchange-sample.tgz");
+		myFakeNpmServlet.myResponses.put("/test-exchange.fhir.us.com/2.1.1", contents0111);
+
+		contents0111 = loadClasspathBytes("/packages/test-exchange-sample-2.tgz");
+		myFakeNpmServlet.myResponses.put("/test-exchange.fhir.us.com/2.1.2", contents0111);
+
+		// Install older version
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		igInstaller.install(spec);
+
+		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
+		assertEquals(1, spSearch.sizeOrThrowNpe());
+		SearchParameter sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
+		assertEquals("network-id", sp.getCode());
+		assertEquals("2.1", sp.getVersion());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
+
+		Organization org = new Organization();
+		org.setName("Hello");
+		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+
+		PractitionerRole pr = new PractitionerRole();
+		pr.addExtension().setUrl("http://test-exchange.com/fhir/us/providerdataexchange/StructureDefinition/networkreference").setValue(new Reference(orgId));
+		myPractitionerRoleDao.create(pr);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous("network-id", new ReferenceParam(orgId.getValue()));
+		spSearch = myPractitionerRoleDao.search(map);
+		assertEquals(1, spSearch.sizeOrThrowNpe());
+		
+		// Install newer version
+		spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		igInstaller.install(spec);
+
+		spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
+		assertEquals(1, spSearch.sizeOrThrowNpe());
+		sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
+		assertEquals("network-id", sp.getCode());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
+		assertEquals("2.2", sp.getVersion());
+
+	}
+	
 
 	@Test
 	public void testLoadContents() throws IOException {

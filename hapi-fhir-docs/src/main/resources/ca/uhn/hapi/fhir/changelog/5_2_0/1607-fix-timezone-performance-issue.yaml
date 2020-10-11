@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 1607
+title: "A performance bottleneck was fixed in the datetime datatypes that caused lock contention when parsing resources
+   in heavily multithreaded environments. Thanks to GitHub user @abrsystematic for the pull request!"

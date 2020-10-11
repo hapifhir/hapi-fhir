@@ -2,11 +2,9 @@
 
 ## Introduction
 
-HAPI FHIR 5.1.0 introduces preliminary support for **EMPI**.
+An Enterprise Master Patient Index (EMPI) allows for links to be created and maintained between different Patient and/or Practitioner resources. These links are used to indicate the fact that different Patient/Practitioner resources are known or believed to refer to the same actual (real world) person.
 
-An EMPI allows for links to be created and maintained between different Patient and/or Practitioner resources. These links are used to indicate the fact that different Patient/Practitioner resources are known or believed to refer to the same actual (real world) person.
-
-These links may be created and updated using different combinations of automatic linking and manual linking.
+These links are created and updated using different combinations of automatic linking and manual linking.
 
 Note: This documentation describes EMPI for Patient resources. The same information applies for Practitioner resources.  You can substitute "Practitioner" for "Patient" anywhere it appears in this documentation.
 

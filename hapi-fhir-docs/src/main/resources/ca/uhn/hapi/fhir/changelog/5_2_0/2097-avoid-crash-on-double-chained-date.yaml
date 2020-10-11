@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2097
+title: "A crash in the JPA server was fixed when performing a search containined two chained search parameters to
+   date target types."

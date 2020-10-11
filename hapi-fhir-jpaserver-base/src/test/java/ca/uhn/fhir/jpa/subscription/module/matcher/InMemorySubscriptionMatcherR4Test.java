@@ -71,6 +71,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -100,11 +102,11 @@ public class InMemorySubscriptionMatcherR4Test {
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
-	private void assertNotMatched(Resource resource, SearchParameterMap params) {
-		InMemoryMatchResult result = match(resource, params);
+	private void assertNotMatched(Resource theResource, SearchParameterMap theParams) {
+		InMemoryMatchResult result = match(theResource, theParams);
 		assertTrue(result.supported(), result.getUnsupportedReason());
-		assertFalse(result.matched());
-		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
+		assertFalse(result.matched(), "Failed on ID: " + theResource.getId());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams)));
 	}
 
 	private InMemoryMatchResult match(Resource theResource, SearchParameterMap theParams) {
@@ -931,10 +933,11 @@ public class InMemorySubscriptionMatcherR4Test {
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {
 
 		List<Observation> nlist = new ArrayList<>();
-		nlist.add(createObservationWithEffective("NO2", "2011-01-03T00:00:00+01:00"));
+		nlist.add(createObservationWithEffective("NO1", "2011-01-01T10:00:00+01:00"));
+		nlist.add(createObservationWithEffective("NO2", "2011-01-03T13:00:00+01:00"));
 
 		List<Observation> ylist = new ArrayList<>();
-		nlist.add(createObservationWithEffective("YES00", "2011-01-02T23:00:00-11:30"));
+		ylist.add(createObservationWithEffective("YES00", "2011-01-02T23:00:00-11:30"));
 		ylist.add(createObservationWithEffective("YES01", "2011-01-02T00:00:00-11:30"));
 		ylist.add(createObservationWithEffective("YES02", "2011-01-02T00:00:00-10:00"));
 		ylist.add(createObservationWithEffective("YES03", "2011-01-02T00:00:00-09:00"));
@@ -959,6 +962,7 @@ public class InMemorySubscriptionMatcherR4Test {
 		ylist.add(createObservationWithEffective("YES22", "2011-01-02T00:00:00+10:00"));
 		ylist.add(createObservationWithEffective("YES23", "2011-01-02T00:00:00+11:00"));
 
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT+01:00"));
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
