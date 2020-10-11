@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 
 @Service
 public class PartitionRunner {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunner.class);
 	private static final int MAX_POOL_SIZE = 1000;
 
 	private final DaoConfig myDaoConfig;

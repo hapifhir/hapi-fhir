@@ -35,6 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -232,19 +234,20 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 
 		TransactionDetails transactionDetails = new TransactionDetails();
 
-		List<Long> pids = theResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList());
+		Slice<Long> pids = new SliceImpl<>(theResourceIds.stream().map(ResourcePersistentId::getIdAsLong).collect(Collectors.toList()));
 
 		if (theExpunge) {
+			// FIXME KHS only allow if permissioned
 			return deleteAndExpungeResources(pids);
 		} else {
 			return deleteResourcesOneAtATime(theUrl, pids, theDeleteConflicts, theRequest, transactionDetails);
 		}
 	}
 
-	private DeleteMethodOutcome deleteAndExpungeResources(List<Long> thePids) {
+	private DeleteMethodOutcome deleteAndExpungeResources(Slice<Long> thePids) {
 		StopWatch w = new StopWatch();
 
-		myDeleteConflictService.validateOkToDeletePidsOrThrowException(thePids);
+		myDeleteConflictService.validateOkToDeletePidsOrThrowException(thePids.getContent());
 
 		Long count = myExpungeResourceService.expungeByResourcePids(thePids);
 
@@ -259,7 +262,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 		return retVal;
 	}
 
-	private DeleteMethodOutcome deleteResourcesOneAtATime(String theUrl, List<Long> thePids, DeleteConflictList theDeleteConflicts, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
+	private DeleteMethodOutcome deleteResourcesOneAtATime(String theUrl, Slice<Long> thePids, DeleteConflictList theDeleteConflicts, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 		StopWatch w = new StopWatch();
 
 		List<ResourceTable> deletedResources = new ArrayList<>();
