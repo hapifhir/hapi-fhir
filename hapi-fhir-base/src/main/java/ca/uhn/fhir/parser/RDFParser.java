@@ -178,7 +178,7 @@ public class RDFParser extends BaseParser {
 			// If the resource already exists and has statements, return that existing resource.
 			if (parentResource != null && parentResource.listProperties().toList().size() > 0) {
 				return parentResource;
-			} else {
+			} else if (parentResource == null) {
 				return null;
 			}
 		}
