@@ -109,8 +109,8 @@ public class OperationOutcomeUtil {
 		return issueChild.getAccessor().getValues(theOutcome).size();
 	}
 
-	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
-		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition("OperationOutcome");
+	public static IBaseOperationOutcome newInstance(FhirContext theFhirContext) {
+		RuntimeResourceDefinition ooDef = theFhirContext.getResourceDefinition("OperationOutcome");
 		try {
 			return (IBaseOperationOutcome) ooDef.getImplementingClass().newInstance();
 		} catch (InstantiationException e) {

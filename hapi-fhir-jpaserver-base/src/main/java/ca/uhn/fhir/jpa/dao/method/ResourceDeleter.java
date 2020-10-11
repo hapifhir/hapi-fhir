@@ -57,7 +57,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceDeleter.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
+	private EntityManager myEntityManager;
 	@Autowired
 	private DeleteConflictService myDeleteConflictService;
 	@Autowired
@@ -165,7 +165,7 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 			doCallHooks(theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 		}
 
-		DaoMethodOutcome outcome = myDao.toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, resourceToDelete).setCreated(true);
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 		String message = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", 1, w.getMillis());

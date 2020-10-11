@@ -20,10 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -35,17 +32,16 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.method.ResourceDeleter;
 import ca.uhn.fhir.jpa.dao.method.ResourceReader;
+import ca.uhn.fhir.jpa.dao.method.ResourceUpdater;
+import ca.uhn.fhir.jpa.dao.method.ResourceValidater;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
-import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.patch.FhirPatch;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
@@ -55,7 +51,6 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -67,28 +62,22 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ValidationOptions;
-import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -102,7 +91,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -148,11 +136,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
-	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private ResourceReader<T> myResourceReader;
 	private ResourceDeleter<T> myResourceDeleter;
+	private ResourceUpdater<T> myResourceUpdater;
+	private ResourceValidater<T> myResourceValidater;
 
 	@Override
 	@Transactional
@@ -202,168 +191,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome create(final T theResource, String theIfNoneExist, RequestDetails theRequestDetails) {
-		return create(theResource, theIfNoneExist, true, new TransactionDetails(), theRequestDetails);
+		return myResourceUpdater.create(theResource, theIfNoneExist, true, new TransactionDetails(), theRequestDetails);
 	}
 
 	@Override
 	public DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, @Nonnull TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
-		return myTransactionService.execute(theRequestDetails, tx -> doCreateForPost(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails));
-	}
-
-	/**
-	 * Called for FHIR create (POST) operations
-	 */
-	private DaoMethodOutcome doCreateForPost(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequestDetails) {
-		if (theResource == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
-			throw new InvalidRequestException(msg);
-		}
-
-		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
-				throw new InvalidRequestException(message, createErrorOperationOutcome(message, "processing"));
-			} else {
-				// As of DSTU3, ID and version in the body should be ignored for a create/update
-				theResource.setId("");
-			}
-		}
-
-		if (myDaoConfig.getResourceServerIdStrategy() == DaoConfig.IdStrategyEnum.UUID) {
-			theResource.setId(UUID.randomUUID().toString());
-			theResource.setUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED, Boolean.TRUE);
-		}
-
-		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequestDetails, theResource, getResourceName());
-		return doCreateForPostOrPut(theResource, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails, requestPartitionId);
-	}
-
-	/**
-	 * Called both for FHIR create (POST) operations (via {@link #doCreateForPost(IBaseResource, String, boolean, TransactionDetails, RequestDetails)}
-	 * as well as for FHIR update (PUT) where we're doing a create-with-client-assigned-ID (via {@link #doUpdate(IBaseResource, String, boolean, boolean, RequestDetails, TransactionDetails)}.
-	 */
-	private DaoMethodOutcome doCreateForPostOrPut(T theResource, String theIfNoneExist, boolean thePerformIndexing, TransactionDetails theTransactionDetails, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-		StopWatch w = new StopWatch();
-
-		preProcessResourceForStorage(theResource);
-
-		ResourceTable entity = new ResourceTable();
-		entity.setResourceType(toResourceName(theResource));
-		entity.setPartitionId(theRequestPartitionId);
-
-		if (isNotBlank(theIfNoneExist)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType, theRequest);
-			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
-				throw new PreconditionFailedException(msg);
-			} else if (match.size() == 1) {
-				ResourcePersistentId pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid.getId());
-				IBaseResource resource = toResource(entity, false);
-				theResource.setId(resource.getIdElement().getValue());
-				return toMethodOutcome(theRequest, entity, resource).setCreated(false);
-			}
-		}
-
-		boolean serverAssignedId;
-		if (isNotBlank(theResource.getIdElement().getIdPart())) {
-			if (theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE) {
-				createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-				serverAssignedId = true;
-			} else {
-				switch (myDaoConfig.getResourceClientIdStrategy()) {
-					case NOT_ALLOWED:
-						throw new ResourceNotFoundException(
-							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
-					case ALPHANUMERIC:
-						if (theResource.getIdElement().isIdPartValidLong()) {
-							throw new InvalidRequestException(
-								getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
-						}
-						createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
-						break;
-					case ANY:
-						createForcedIdIfNeeded(entity, theResource.getIdElement(), true);
-						break;
-				}
-				serverAssignedId = false;
-			}
-		} else {
-			serverAssignedId = true;
-		}
-
-		// Notify interceptors
-		if (theRequest != null) {
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, getContext(), theResource);
-			notifyInterceptors(RestOperationTypeEnum.CREATE, requestDetails);
-		}
-
-		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_CREATED
-		HookParams hookParams = new HookParams()
-			.add(IBaseResource.class, theResource)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest)
-			.add(TransactionDetails.class, theTransactionDetails);
-		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
-
-		// Perform actual DB update
-		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, thePerformIndexing, theTransactionDetails, false, thePerformIndexing);
-
-		theResource.setId(entity.getIdDt());
-		if (serverAssignedId) {
-			switch (myDaoConfig.getResourceClientIdStrategy()) {
-				case NOT_ALLOWED:
-				case ALPHANUMERIC:
-					break;
-				case ANY:
-					ForcedId forcedId = createForcedIdIfNeeded(updatedEntity, theResource.getIdElement(), true);
-					if (forcedId != null) {
-						myForcedIdDao.save(forcedId);
-					}
-					break;
-			}
-		}
-
-		/*
-		 * If we aren't indexing (meaning we're probably executing a sub-operation within a transaction),
-		 * we'll manually increase the version. This is important because we want the updated version number
-		 * to be reflected in the resource shared with interceptors
-		 */
-		if (!thePerformIndexing) {
-			incrementId(theResource, entity, theResource.getIdElement());
-		}
-
-		// Update the version/last updated in the resource so that interceptors get
-		// the correct version
-		updateResourceMetadata(entity, theResource);
-
-		// Populate the PID in the resource so it is available to hooks
-		addPidToResource(entity, theResource);
-
-		// Notify JPA interceptors
-		if (!updatedEntity.isUnchangedInCurrentOperation()) {
-			hookParams = new HookParams()
-				.add(IBaseResource.class, theResource)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(TransactionDetails.class, theTransactionDetails);
-			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
-		}
-
-		DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, theResource).setCreated(true);
-		if (!thePerformIndexing) {
-			outcome.setId(theResource.getIdElement());
-		}
-
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
-
-		ourLog.debug(msg);
-		return outcome;
-	}
-
-	private IInstanceValidatorModule getInstanceValidator() {
-		return myInstanceValidator;
+		return myResourceUpdater.create(theResource, theRequestDetails, theIfNoneExist, thePerformIndexing, theTransactionDetails, theRequestDetails);
 	}
 
 	@Override
@@ -398,7 +231,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
-		return myResourceDeleter.deletePidList(theUrl, theResourceIds, theDeleteConflicts ,theRequest);
+		return myResourceDeleter.deletePidList(theUrl, theResourceIds, theDeleteConflicts, theRequest);
 	}
 
 	@PostConstruct
@@ -760,19 +593,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@PostConstruct
-	@Override
-	public void start() {
-		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
-		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
-		super.start();
-	}
-
-	@PostConstruct
 	public void postConstruct() {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
 		myResourceName = def.getName();
 		myResourceReader = myApplicationContext.getBean(ResourceReader.class, this);
 		myResourceDeleter = myApplicationContext.getBean(ResourceDeleter.class, this);
+		myResourceUpdater = myApplicationContext.getBean(ResourceUpdater.class, this);
+		myResourceValidater = myApplicationContext.getBean(ResourceValidater.class, this);
 	}
 
 	/**
@@ -823,7 +650,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@NotNull
-	private ResourceTable readEntityLatestVersion(IIdType theId, @Nullable RequestPartitionId theRequestPartitionId) {
+	public ResourceTable readEntityLatestVersion(IIdType theId, @Nullable RequestPartitionId theRequestPartitionId) {
 		return myResourceReader.readEntityLatestVersion(theId, theRequestPartitionId);
 	}
 
@@ -1034,226 +861,30 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, @Nonnull TransactionDetails theTransactionDetails) {
-		if (theResource == null) {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "missingBody");
-			throw new InvalidRequestException(msg);
-		}
-		assert theResource.getIdElement().hasIdPart() || isNotBlank(theMatchUrl);
-
-		/*
-		 * Resource updates will modify/update the version of the resource with the new version. This is generally helpful,
-		 * but leads to issues if the transaction is rolled back and retried. So if we do a rollback, we reset the resource
-		 * version to what it was.
-		 */
-		String id = theResource.getIdElement().getValue();
-		Runnable onRollback = () -> theResource.getIdElement().setValue(id);
-
-		// Execute the update in a retriable transasction
-		return myTransactionService.execute(theRequest, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
-	}
-
-	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
-		StopWatch w = new StopWatch();
-
-		T resource = theResource;
-
-		preProcessResourceForStorage(resource);
-
-		final ResourceTable entity;
-
-		IIdType resourceId;
-		if (isNotBlank(theMatchUrl)) {
-			Set<ResourcePersistentId> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType, theRequest);
-			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
-				throw new PreconditionFailedException(msg);
-			} else if (match.size() == 1) {
-				ResourcePersistentId pid = match.iterator().next();
-				entity = myEntityManager.find(ResourceTable.class, pid.getId());
-				resourceId = entity.getIdDt();
-			} else {
-				return create(resource, null, thePerformIndexing, theTransactionDetails, theRequest);
-			}
-		} else {
-			/*
-			 * Note: resourceId will not be null or empty here, because we
-			 * check it and reject requests in
-			 * BaseOutcomeReturningMethodBindingWithResourceParam
-			 */
-			resourceId = theResource.getIdElement();
-			assert resourceId != null;
-			assert resourceId.hasIdPart();
-
-			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, getResourceName());
-			try {
-				entity = readEntityLatestVersion(resourceId, requestPartitionId);
-			} catch (ResourceNotFoundException e) {
-				requestPartitionId = myRequestPartitionHelperService.determineCreatePartitionForRequest(theRequest, theResource, getResourceName());
-				return doCreateForPostOrPut(resource, null, thePerformIndexing, theTransactionDetails, theRequest, requestPartitionId);
-			}
-		}
-
-		if (resourceId.hasVersionIdPart() && Long.parseLong(resourceId.getVersionIdPart()) != entity.getVersion()) {
-			throw new ResourceVersionConflictException("Trying to update " + resourceId + " but this is not the current version");
-		}
-
-		if (resourceId.hasResourceType() && !resourceId.getResourceType().equals(getResourceName())) {
-			throw new UnprocessableEntityException(
-				"Invalid resource ID[" + entity.getIdDt().toUnqualifiedVersionless() + "] of type[" + entity.getResourceType() + "] - Does not match expected [" + getResourceName() + "]");
-		}
-
-		IBaseResource oldResource = toResource(entity, false);
-
-		/*
-		 * Mark the entity as not deleted - This is also done in the actual updateInternal()
-		 * method later on so it usually doesn't matter whether we do it here, but in the
-		 * case of a transaction with multiple PUTs we don't get there until later so
-		 * having this here means that a transaction can have a reference in one
-		 * resource to another resource in the same transaction that is being
-		 * un-deleted by the transaction. Wacky use case, sure. But it's real.
-		 *
-		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
-		 * for a test that needs this.
-		 */
-		boolean wasDeleted = entity.getDeleted() != null;
-		entity.setDeleted(null);
-
-		/*
-		 * If we aren't indexing, that means we're doing this inside a transaction.
-		 * The transaction will do the actual storage to the database a bit later on,
-		 * after placeholder IDs have been replaced, by calling {@link #updateInternal}
-		 * directly. So we just bail now.
-		 */
-		if (!thePerformIndexing) {
-			resource.setId(entity.getIdDt().getValue());
-			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
-			outcome.setPreviousResource(oldResource);
-			return outcome;
-		}
-
-		/*
-		 * Otherwise, we're not in a transaction
-		 */
-		ResourceTable savedEntity = updateInternal(theRequest, resource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource, theTransactionDetails);
-		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resource).setCreated(wasDeleted);
-
-		if (!thePerformIndexing) {
-			IIdType id = getContext().getVersion().newIdType();
-			id.setValue(entity.getIdDt().getValue());
-			outcome.setId(id);
-		}
-
-		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
-		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
-
-		ourLog.debug(msg);
-		return outcome;
+		return myResourceUpdater.update(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.SUPPORTS)
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
-		if (theRequest != null) {
-			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
-			notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
-		}
-
-		if (theMode == ValidationModeEnum.DELETE) {
-			if (theId == null || theId.hasIdPart() == false) {
-				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
-			}
-			final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
-
-			// Validate that there are no resources pointing to the candidate that
-			// would prevent deletion
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
-				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest, new TransactionDetails());
-			}
-			DeleteConflictService.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
-
-			IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
-			return new MethodOutcome(new IdDt(theId.getValue()), oo);
-		}
-
-		FhirValidator validator = getContext().newValidator();
-
-		validator.registerValidatorModule(getInstanceValidator());
-		validator.registerValidatorModule(new IdChecker(theMode));
-
-		IBaseResource resourceToValidateById = null;
-		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
-			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
-			IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDaoOrNull(type);
-			resourceToValidateById = dao.read(theId, theRequest);
-		}
-
-
-		ValidationResult result;
-		ValidationOptions options = new ValidationOptions()
-			.addProfileIfNotBlank(theProfile);
-
-		if (theResource == null) {
-			if (resourceToValidateById != null) {
-				result = validator.validateWithResult(resourceToValidateById, options);
-			} else {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "cantValidateWithNoResource");
-				throw new InvalidRequestException(msg);
-			}
-		} else if (isNotBlank(theRawResource)) {
-			result = validator.validateWithResult(theRawResource, options);
-		} else {
-			result = validator.validateWithResult(theResource, options);
-		}
-
-		if (result.isSuccessful()) {
-			MethodOutcome retVal = new MethodOutcome();
-			retVal.setOperationOutcome(result.toOperationOutcome());
-			return retVal;
-		} else {
-			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());
-		}
-
+		return myResourceValidater.validate(theResource, theId, theRawResource, theEncoding, theMode, theProfile, theRequest);
 	}
 
 	/**
 	 * Get the resource definition from the criteria which specifies the resource type
 	 */
 	@Override
-	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {
+	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String theCriteria) {
 		String resourceName;
-		if (criteria == null || criteria.trim().isEmpty()) {
+		if (theCriteria == null || theCriteria.trim().isEmpty()) {
 			throw new IllegalArgumentException("Criteria cannot be empty");
 		}
-		if (criteria.contains("?")) {
-			resourceName = criteria.substring(0, criteria.indexOf("?"));
+		if (theCriteria.contains("?")) {
+			resourceName = theCriteria.substring(0, theCriteria.indexOf("?"));
 		} else {
-			resourceName = criteria;
+			resourceName = theCriteria;
 		}
 
 		return getContext().getResourceDefinition(resourceName);
-	}
-
-	private static class IdChecker implements IValidatorModule {
-
-		private ValidationModeEnum myMode;
-
-		IdChecker(ValidationModeEnum theMode) {
-			myMode = theMode;
-		}
-
-		@Override
-		public void validateResource(IValidationContext<IBaseResource> theCtx) {
-			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
-			if (myMode == ValidationModeEnum.CREATE) {
-				if (hasId) {
-					throw new UnprocessableEntityException("Resource has an ID - ID must not be populated for a FHIR create");
-				}
-			} else if (myMode == ValidationModeEnum.UPDATE) {
-				if (hasId == false) {
-					throw new UnprocessableEntityException("Resource has no ID - ID must be populated for a FHIR update");
-				}
-			}
-		}
 	}
 }
