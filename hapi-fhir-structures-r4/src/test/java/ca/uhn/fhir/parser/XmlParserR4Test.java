@@ -1,14 +1,14 @@
 package ca.uhn.fhir.parser;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
 
-import ca.uhn.fhir.test.BaseTest;
+import java.io.IOException;
+import java.net.URL;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
@@ -16,17 +16,17 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.uhn.fhir.context.FhirContext;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
-import java.io.IOException;
-import java.net.URL;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.test.BaseTest;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -151,6 +151,31 @@ public class XmlParserR4Test extends BaseTest {
 		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
 		String auditEventAsString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ae);
 		assertEquals(auditEvent, auditEventAsString);
+	}
+	
+	/**
+	 * Ensure that a xml:lang attribute is de- and reserialized correctly
+	 */
+	@Test
+	public void testDivXhtmlLangAttribute() {
+		String parameters = "<Parameters xmlns=\"http://hl7.org/fhir\">\n" + 
+				"   <parameter>\n" + 
+				"      <name value=\"resource\"/>\n" + 
+				"      <resource>\n" + 
+				"         <Patient xmlns=\"http://hl7.org/fhir\">\n" + 
+				"            <id value=\"example\"/>\n" + 
+				"            <language value=\"de\"/>\n" + 
+				"            <text>\n" + 
+				"               <status value=\"generated\"/>\n" + 
+				"               <div xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"de\" lang=\"de\">42 </div>\n" + 
+				"            </text>\n" + 
+				"         </Patient>\n" + 
+				"      </resource>\n" + 
+				"   </parameter>\n" + 
+				"</Parameters>";
+		Parameters pa = ourCtx.newXmlParser().parseResource(Parameters.class, parameters);
+		String parameteresAsString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pa);
+		assertEquals(parameters, parameteresAsString);
 	}
 
 

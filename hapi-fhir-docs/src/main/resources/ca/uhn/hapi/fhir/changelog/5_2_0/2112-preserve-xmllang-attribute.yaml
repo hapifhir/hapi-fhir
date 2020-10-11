@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2112
+title: "When parsing XML encoded resources, if an `xml:lang` attribute was present in the narrative HTML, it would
+  incorrectly have its prefix omitted. Thanks to Oliver Egger for the pull request!"
