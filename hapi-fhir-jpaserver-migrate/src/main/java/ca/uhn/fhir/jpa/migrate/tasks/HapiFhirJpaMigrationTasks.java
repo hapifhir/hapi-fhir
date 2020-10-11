@@ -78,10 +78,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init520() {
 		Builder version = forVersion(VersionEnum.V5_2_0);
 
-		version.onTable("HFJ_RES_TAG").dropIndex("20200907.1", "IDX_RESTAG_TAGID");
-		version.onTable("HFJ_RES_TAG").addIndex("20200907.2", "IDX_RESTAG_TAGDEF").unique(false).withColumns("RES_ID", "TAG_ID");
-		version.onTable("HFJ_TAG_DEF").dropIndex("20200907.3", "IDX_TAGDEF_TYPESYSCODE");
-		version.onTable("HFJ_TAG_DEF").addIndex("20200907.4", "IDX_TAGDEF_TYPESYSCODE").unique(false).withColumns("TAG_TYPE", "TAG_SYSTEM", "TAG_CODE");
+		version.onTable("HFJ_RES_TAG").dropIndex("20201011.1", "IDX_RESTAG_TAGID");
+		version.onTable("HFJ_RES_TAG").addIndex("20201011.2", "IDX_RESTAG_TAGDEF").unique(false).withColumns("RES_ID", "TAG_ID");
+		version.onTable("HFJ_TAG_DEF").dropIndex("20201011.3", "IDX_TAGDEF_TYPESYSCODE");
+		version.onTable("HFJ_TAG_DEF").addIndex("20201011.4", "IDX_TAGDEF_TYPESYSCODE").unique(false).withColumns("TAG_TYPE", "TAG_SYSTEM", "TAG_CODE");
 	}
 
 	protected void init510() {
