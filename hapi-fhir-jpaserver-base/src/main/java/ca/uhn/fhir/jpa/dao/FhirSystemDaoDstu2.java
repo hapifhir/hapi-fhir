@@ -531,7 +531,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 				String matchUrl = nextEntry.getRequest().getIfNoneExist();
 				if (isNotBlank(matchUrl)) {
 					Class<? extends IBaseResource> resType = nextEntry.getResource().getClass();
-					Set<ResourcePersistentId> val = myMatchResourceUrlService.processMatchUrl(matchUrl, resType, theRequestDetails);
+					Set<ResourcePersistentId> val = myMatchResourceUrlService.searchByUrl(matchUrl, resType, theRequestDetails);
 					if (val.size() > 1) {
 						throw new InvalidRequestException(
 							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");

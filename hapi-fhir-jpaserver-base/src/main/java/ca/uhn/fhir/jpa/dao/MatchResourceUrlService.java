@@ -54,9 +54,7 @@ public class MatchResourceUrlService {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
-		StopWatch sw = new StopWatch();
-
+	public <R extends IBaseResource> Set<ResourcePersistentId> searchByUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
@@ -66,12 +64,18 @@ public class MatchResourceUrlService {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
 
+		return searchBySearchParams(paramMap, theResourceType, theRequest);
+	}
+
+	public <R extends IBaseResource> Set<ResourcePersistentId> searchBySearchParams(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest) {
+		StopWatch sw = new StopWatch();
+
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(paramMap, theRequest);
+		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {

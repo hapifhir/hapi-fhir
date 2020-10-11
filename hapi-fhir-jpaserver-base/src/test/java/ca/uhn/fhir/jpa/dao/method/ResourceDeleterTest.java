@@ -95,8 +95,12 @@ class ResourceDeleterTest {
 		Collection<ResourcePersistentId> list = Arrays.asList(id);
 		DeleteConflictList conflicts = new DeleteConflictList();
 		RequestDetails request = mock(RequestDetails.class);
-		when(myExpungeResourceService.expungeByResourcePids(any())).thenReturn(1965L);
+		DeleteMethodOutcome expungeOutcome = new DeleteMethodOutcome();
+		expungeOutcome.setExpungedResourcesCount(13L);
+		expungeOutcome.setExpungedEntitiesCount(17L);
+		when(myExpungeResourceService.expungeByResourcePids(any())).thenReturn(expungeOutcome);
 		DeleteMethodOutcome result = myResourceDeleter.deleteAndExpungePidList(url, list, conflicts, request);
-		assertEquals(1965L, result.getExpungedCount());
+		assertEquals(expungeOutcome.getExpungedResourcesCount(), result.getExpungedResourcesCount());
+		assertEquals(expungeOutcome.getExpungedEntitiesCount(), result.getExpungedEntitiesCount());
 	}
 }

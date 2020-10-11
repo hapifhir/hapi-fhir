@@ -90,7 +90,6 @@ public class PartitionRunner {
 
 		for (List<Long> nextPartition : partitions) {
 			Callable<Void> callableTask = () -> {
-				ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
 				partitionConsumer.accept(nextPartition);
 				return null;
 			};

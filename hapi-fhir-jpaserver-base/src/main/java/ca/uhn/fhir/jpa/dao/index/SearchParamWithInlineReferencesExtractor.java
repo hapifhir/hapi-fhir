@@ -248,7 +248,7 @@ public class SearchParamWithInlineReferencesExtractor {
 					throw new InvalidRequestException(msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
-				Set<ResourcePersistentId> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
+				Set<ResourcePersistentId> matches = myMatchResourceUrlService.searchByUrl(nextIdText, matchResourceType, theRequest);
 
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {

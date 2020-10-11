@@ -188,7 +188,6 @@ public class DeleteConflictService {
 		}
 
 		List<Long> conflictSourcePids = myResourceLinkDao.findSourcePidWithTargetPidIn(thePids);
-		// FIXME KHS test
 		// We don't care about references from resources we're about to delete
 		conflictSourcePids.removeAll(thePids);
 
@@ -197,6 +196,6 @@ public class DeleteConflictService {
 		}
 
 		ResourceTable firstConflict = myResourceTableDao.getOne(conflictSourcePids.get(0));
-		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflict.getIdDt().getValue());
+		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflict.getIdDt().toVersionless().getValue());
 	}
 }

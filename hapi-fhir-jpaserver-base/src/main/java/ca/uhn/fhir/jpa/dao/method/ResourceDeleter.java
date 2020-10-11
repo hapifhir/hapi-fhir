@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.method;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -12,8 +13,8 @@ import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeResourceService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
-import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -199,19 +199,18 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 
 	@Nonnull
 	private DeleteMethodOutcome doDeleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(getResourceType());
 
-		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, getResourceType(), theRequest);
-		if (isExpungeDelete(theUrl)) {
+		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theUrl, resourceDef);
+		paramMap.setLoadSynchronous(true);
+
+		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.searchBySearchParams(paramMap, getResourceType(), theRequest);
+
+		if (paramMap.isDeleteExpunge()) {
 			return deleteAndExpungePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 		} else {
 			return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 		}
-	}
-
-	private boolean isExpungeDelete(String theUrl) {
-		// FIXME KHS can we avoid doing this twice?
-		List<NameValuePair> params = myMatchUrlService.translateMatchUrl(theUrl);
-		return params.stream().anyMatch(param -> JpaConstants.PARAM_DELETE_EXPUNGE.equals(param.getName()) && "true".equals(param.getValue()));
 	}
 
 	@Nonnull
@@ -249,16 +248,17 @@ public class ResourceDeleter<T extends IBaseResource> extends BaseMethodService<
 
 		myDeleteConflictService.validateOkToDeletePidsOrThrowException(thePids.getContent());
 
-		Long count = myExpungeResourceService.expungeByResourcePids(thePids);
+		DeleteMethodOutcome expungeOutcome = myExpungeResourceService.expungeByResourcePids(thePids);
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-		String message = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", count, w.getMillis());
+		String message = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", expungeOutcome.getExpungedResourcesCount(), w.getMillis());
 		String severity = "information";
 		String code = "informational";
 		OperationOutcomeUtil.addIssue(myFhirContext, oo, severity, message, null, code);
 		DeleteMethodOutcome retVal = new DeleteMethodOutcome();
 		retVal.setOperationOutcome(oo);
-		retVal.setExpungedCount(count);
+		retVal.setExpungedResourcesCount(expungeOutcome.getExpungedResourcesCount());
+		retVal.setExpungedEntitiesCount(expungeOutcome.getExpungedEntitiesCount());
 		return retVal;
 	}
 

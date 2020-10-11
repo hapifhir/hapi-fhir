@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,28 +28,29 @@ public class ExpungeResourceService {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	public long expungeByResourcePids(Slice<Long> thePids) {
+	public DeleteMethodOutcome expungeByResourcePids(Slice<Long> thePids) {
 		if (thePids.isEmpty()) {
-			return 0;
+			return new DeleteMethodOutcome();
 		}
 		ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());
-		long deleteCount = 0;
 		List<ResourceForeignKey> resourceForeignKeys = getResourceForeignKeys();
 
-		// Lastly we need to delete records from the resource table all of these other tables link to:
-		resourceForeignKeys.add(new ResourceForeignKey("HFJ_RESOURCE", "RES_ID"));
-
+		AtomicInteger expungedEntitiesCount = new AtomicInteger();
 		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
-			AtomicInteger aCount = new AtomicInteger();
-			myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceForeignKey, pidChunk, aCount));
-			int count = aCount.get();
-			if (count > 0) {
-				ourLog.info("Expunged {} records from {}", count, resourceForeignKey.table);
-				deleteCount += count;
-			}
+			myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceForeignKey, pidChunk, expungedEntitiesCount));
 		}
-		ourLog.info("Expunged a total of {} records", deleteCount);
-		return deleteCount;
+
+		// Lastly we need to delete records from the resource table all of these other tables link to:
+		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
+		AtomicInteger expungedResourcesCount = new AtomicInteger();
+		myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceTablePk, pidChunk, expungedResourcesCount));
+		expungedEntitiesCount.addAndGet(expungedResourcesCount.get());
+
+		ourLog.info("Expunged a total of {} records", expungedEntitiesCount);
+		DeleteMethodOutcome retval = new DeleteMethodOutcome();
+		retval.setExpungedResourcesCount(expungedResourcesCount.get());
+		retval.setExpungedEntitiesCount(expungedEntitiesCount.get());
+		return retval;
 	}
 
 	@Nonnull
@@ -99,9 +101,11 @@ public class ExpungeResourceService {
 		}
 	}
 
-	private Integer delete(ResourceForeignKey theLink, List<Long> thePids) {
+	private Integer delete(ResourceForeignKey resourceForeignKey, List<Long> thePids) {
 		String pids = thePids.toString().replace("[", "(").replace("]", ")");
-		return myEntityManager.createNativeQuery("DELETE FROM " + theLink.table + " WHERE " + theLink.key + " IN " + pids).executeUpdate();
+		int retval = myEntityManager.createNativeQuery("DELETE FROM " + resourceForeignKey.table + " WHERE " + resourceForeignKey.key + " IN " + pids).executeUpdate();
+		ourLog.info("Expunged {} records from {}", retval, resourceForeignKey.table);
+		return retval;
 	}
 
 	private static class ResourceForeignKey {

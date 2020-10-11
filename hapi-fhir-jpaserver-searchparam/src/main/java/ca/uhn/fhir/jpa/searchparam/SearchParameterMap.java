@@ -76,6 +76,7 @@ public class SearchParameterMap implements Serializable {
 	private QuantityParam myNearDistanceParam;
 	private boolean myLastN;
 	private Integer myLastNMax;
+	private boolean myDeleteExpunge;
 
 	/**
 	 * Constructor
@@ -544,6 +545,15 @@ public class SearchParameterMap implements Serializable {
 
 	public QuantityParam getNearDistanceParam() {
 		return myNearDistanceParam;
+	}
+
+	public boolean isDeleteExpunge() {
+		return myDeleteExpunge;
+	}
+
+	public SearchParameterMap setDeleteExpunge(boolean theDeleteExpunge) {
+		myDeleteExpunge = theDeleteExpunge;
+		return this;
 	}
 
 	public enum EverythingModeEnum {
