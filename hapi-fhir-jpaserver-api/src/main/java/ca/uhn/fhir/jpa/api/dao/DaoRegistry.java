@@ -27,8 +27,10 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -41,13 +43,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class DaoRegistry implements IDaoRegistry {
-	@Autowired
-	private ApplicationContext myApplicationContext;
+public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
+	private ApplicationContext myAppCtx;
 
 	@Autowired
-	private FhirContext myFhirContext;
-
+	private FhirContext myContext;
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
 	private Set<String> mySupportedResourceTypes;
@@ -64,7 +64,7 @@ public class DaoRegistry implements IDaoRegistry {
 	 */
 	public DaoRegistry(FhirContext theFhirContext) {
 		super();
-		myFhirContext = theFhirContext;
+		myContext = theFhirContext;
 	}
 
 	public void setSupportedResourceTypes(Collection<String> theSupportedResourceTypes) {
@@ -77,10 +77,14 @@ public class DaoRegistry implements IDaoRegistry {
 
 	}
 
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myAppCtx = theApplicationContext;
+	}
 	public IFhirSystemDao getSystemDao() {
 		IFhirSystemDao retVal = mySystemDao;
 		if (retVal == null) {
-			retVal = myApplicationContext.getBean(IFhirSystemDao.class);
+			retVal = myAppCtx.getBean(IFhirSystemDao.class);
 			mySystemDao = retVal;
 		}
 		return retVal;
@@ -118,7 +122,7 @@ public class DaoRegistry implements IDaoRegistry {
 
 	@Nullable
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
-		String resourceName = myFhirContext.getResourceType(theResourceType);
+		String resourceName = myContext.getResourceType(theResourceType);
 		try {
 			return (IFhirResourceDao<T>) getResourceDao(resourceName);
 		} catch (InvalidRequestException e) {
@@ -153,7 +157,7 @@ public class DaoRegistry implements IDaoRegistry {
 			return;
 		}
 
-		Map<String, IFhirResourceDao> resourceDaos = myApplicationContext.getBeansOfType(IFhirResourceDao.class);
+		Map<String, IFhirResourceDao> resourceDaos = myAppCtx.getBeansOfType(IFhirResourceDao.class);
 
 		initializeMaps(resourceDaos.values());
 	}
@@ -165,7 +169,7 @@ public class DaoRegistry implements IDaoRegistry {
 		for (IFhirResourceDao nextResourceDao : theResourceDaos) {
 			Class resourceType = nextResourceDao.getResourceType();
 			assert resourceType != null;
-			RuntimeResourceDefinition nextResourceDef = myFhirContext.getResourceDefinition(resourceType);
+			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(resourceType);
 			if (mySupportedResourceTypes == null || mySupportedResourceTypes.contains(nextResourceDef.getName())) {
 				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
 			}
@@ -173,7 +177,7 @@ public class DaoRegistry implements IDaoRegistry {
 	}
 
 	public void register(IFhirResourceDao theResourceDao) {
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceDao.getResourceType());
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceDao.getResourceType());
 		String resourceName = resourceDef.getName();
 		myResourceNameToResourceDao.put(resourceName, theResourceDao);
 	}
@@ -184,10 +188,10 @@ public class DaoRegistry implements IDaoRegistry {
 			List<String> supportedResourceNames = myResourceNameToResourceDao
 				.keySet()
 				.stream()
-				.map(t -> myFhirContext.getResourceType(t))
+				.map(t -> myContext.getResourceType(t))
 				.sorted()
 				.collect(Collectors.toList());
-			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myFhirContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
+			throw new InvalidRequestException("Unable to process request, this server does not know how to handle resources of type " + myContext.getResourceType(theClass) + " - Can handle: " + supportedResourceNames);
 		}
 		return retVal;
 	}

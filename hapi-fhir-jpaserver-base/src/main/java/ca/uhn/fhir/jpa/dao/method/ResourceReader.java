@@ -47,7 +47,7 @@ public class ResourceReader<T extends IBaseResource> extends BaseMethodService<T
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceReader.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
+	protected EntityManager myEntityManager;
 
 	public ResourceReader(BaseHapiFhirResourceDao<T> theDao) {
 		super(theDao);

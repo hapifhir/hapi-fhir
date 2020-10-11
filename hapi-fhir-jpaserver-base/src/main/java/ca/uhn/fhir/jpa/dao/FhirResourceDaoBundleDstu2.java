@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 public class FhirResourceDaoBundleDstu2 extends BaseHapiFhirResourceDao<Bundle> {
 
 	@Override
-	public void preProcessResourceForStorage(IBaseResource theResource) {
+	protected void preProcessResourceForStorage(IBaseResource theResource) {
 		super.preProcessResourceForStorage(theResource);
 
 		for (Entry next : ((Bundle)theResource).getEntry()) {

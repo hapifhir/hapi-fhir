@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
-import ca.uhn.fhir.jpa.dao.method.ResourceUpdater;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -827,9 +826,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateOperationOutcomeError() {
-		ResourceUpdater<Bundle> updater = new ResourceUpdater(new JpaResourceDao<Bundle>());
-		updater.setFhirContext(myFhirCtx);
-		OperationOutcome oo = (OperationOutcome) updater.createErrorOperationOutcome("my message", "incomplete");
+		JpaResourceDao<Bundle> dao = new JpaResourceDao<Bundle>();
+		dao.setContext(myFhirCtx);
+		OperationOutcome oo = (OperationOutcome) dao.createErrorOperationOutcome("my message", "incomplete");
 		assertEquals(IssueSeverity.ERROR.toCode(), oo.getIssue().get(0).getSeverity().toCode());
 		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(IssueType.INCOMPLETE, oo.getIssue().get(0).getCode());
@@ -837,9 +836,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateOperationOutcomeInfo() {
-		ResourceUpdater<Bundle> updater = new ResourceUpdater(new JpaResourceDao<Bundle>());
-		updater.setFhirContext(myFhirCtx);
-		OperationOutcome oo = (OperationOutcome) updater.createInfoOperationOutcome("my message");
+		JpaResourceDao<Bundle> dao = new JpaResourceDao<Bundle>();
+		dao.setContext(myFhirCtx);
+		OperationOutcome oo = (OperationOutcome) dao.createInfoOperationOutcome("my message");
 		assertEquals(IssueSeverity.INFORMATION.toCode(), oo.getIssue().get(0).getSeverity().toCode());
 		assertEquals("my message", oo.getIssue().get(0).getDiagnostics());
 		assertEquals(IssueType.INFORMATIONAL, oo.getIssue().get(0).getCode());

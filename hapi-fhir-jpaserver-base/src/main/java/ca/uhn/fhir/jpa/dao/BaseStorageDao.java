@@ -83,7 +83,7 @@ public abstract class BaseStorageDao {
 	 *
 	 * @param theResource The resource that is about to be stored
 	 */
-	public void preProcessResourceForStorage(IBaseResource theResource) {
+	protected void preProcessResourceForStorage(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
@@ -124,7 +124,65 @@ public abstract class BaseStorageDao {
 
 	}
 
-	public void doCallHooks(TransactionDetails theTransactionDetails, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+	public DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
+		DaoMethodOutcome outcome = new DaoMethodOutcome();
+
+		if (theEntity instanceof ResourceTable) {
+			if (((ResourceTable) theEntity).isUnchangedInCurrentOperation()) {
+				outcome.setNop(true);
+			}
+		}
+
+		IIdType id = null;
+		if (theResource.getIdElement().getValue() != null) {
+			id = theResource.getIdElement();
+		}
+		if (id == null) {
+			id = theEntity.getIdDt();
+			if (getContext().getVersion().getVersion().isRi()) {
+				id = getContext().getVersion().newIdType().setValue(id.getValue());
+			}
+		}
+
+		outcome.setId(id);
+		if (theEntity.isDeleted() == false) {
+			outcome.setResource(theResource);
+		}
+		outcome.setEntity(theEntity);
+
+		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
+		if (outcome.getResource() != null) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				outcome.setResource(null);
+			}
+		}
+
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		// Note that this will only fire if someone actually goes to use the
+		// resource in a response (it's their responsibility to call
+		// outcome.fireResourceViewCallback())
+		outcome.registerResourceViewCallback(() -> {
+			if (outcome.getResource() != null) {
+				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+				HookParams params = new HookParams()
+					.add(IPreResourceShowDetails.class, showDetails)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				JpaInterceptorBroadcaster.doCallHooks(getInterceptorBroadcaster(), theRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				outcome.setResource(showDetails.getResource(0));
+			}
+		});
+
+		return outcome;
+	}
+
+	protected void doCallHooks(TransactionDetails theTransactionDetails, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts(thePointcut)) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(thePointcut, theParams);
 		} else {
@@ -133,6 +191,20 @@ public abstract class BaseStorageDao {
 	}
 
 	protected abstract IInterceptorBroadcaster getInterceptorBroadcaster();
+
+	public IBaseOperationOutcome createErrorOperationOutcome(String theMessage, String theCode) {
+		return createOperationOutcome(OO_SEVERITY_ERROR, theMessage, theCode);
+	}
+
+	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
+		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
+	}
+
+	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
+		return oo;
+	}
 
 	/**
 	 * Provide the DaoConfig

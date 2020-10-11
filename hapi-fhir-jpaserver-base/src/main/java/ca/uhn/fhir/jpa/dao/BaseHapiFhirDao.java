@@ -245,6 +245,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
+	/**
+	 * Returns the newly created forced ID. If the entity already had a forced ID, or if
+	 * none was created, returns null.
+	 */
+	protected ForcedId createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId, boolean theCreateForPureNumericIds) {
+		ForcedId retVal = null;
+		if (theId.isEmpty() == false && theId.hasIdPart() && theEntity.getForcedId() == null) {
+			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theId)) {
+				retVal = new ForcedId();
+				retVal.setResourceType(theEntity.getResourceType());
+				retVal.setForcedId(theId.getIdPart());
+				retVal.setResource(theEntity);
+				retVal.setPartitionId(theEntity.getPartitionId());
+				theEntity.setForcedId(retVal);
+			}
+		}
+
+		return retVal;
+	}
+
 	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {
 		TagList tagList = ResourceMetadataKeyEnum.TAG_LIST.get(theResource);
 		if (tagList != null) {
@@ -421,7 +441,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return myPersistedJpaBundleProviderFactory.newInstance(theRequest, search);
 	}
 
-	public void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
+	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
 		String newVersion;
 		long newVersionLong;
 		if (theResourceId == null || theResourceId.getVersionIdPart() == null) {
@@ -1260,7 +1280,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return savedEntity;
 	}
 
-	public void addPidToResource(IBasePersistedResource theEntity, IBaseResource theResource) {
+	protected void addPidToResource(IBasePersistedResource theEntity, IBaseResource theResource) {
 		if (theResource instanceof IAnyResource) {
 			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getPersistentId().getIdAsLong());
 		} else if (theResource instanceof IResource) {
@@ -1268,7 +1288,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		}
 	}
 
-	public void updateResourceMetadata(IBaseResourceEntity theEntity, IBaseResource theResource) {
+	protected void updateResourceMetadata(IBaseResourceEntity theEntity, IBaseResource theResource) {
 		IIdType id = theEntity.getIdDt();
 		if (getContext().getVersion().getVersion().isRi()) {
 			id = getContext().getVersion().newIdType().setValue(id.getValue());
