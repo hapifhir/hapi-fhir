@@ -17,6 +17,14 @@ public class CorsInterceptorTest {
 		CorsConfiguration corsConfiguration = new CorsConfiguration();
 		corsConfiguration.applyPermitDefaultValues();
 		corsConfiguration.setAllowedMethods(Arrays.asList(new String[] { "*" }));
+		corsConfiguration.setExposedHeaders(Arrays.asList(new String[] {
+			"Content-Location",
+			"Date",
+			"ETag",
+			"Location",
+			"X-Request-Id",
+			"X-Correlation-Id"
+		}));
 		CorsInterceptor corsInterceptor = new CorsInterceptor(corsConfiguration);
 
 System.err.println("Custom CorsConfiguration");
@@ -24,7 +32,7 @@ System.err.println("allowCredentials = " + corsConfiguration.getAllowCredentials
 System.err.println("allowedHeaders = " + Arrays.toString(corsConfiguration.getAllowedHeaders().toArray()));
 System.err.println("allowedMethods = " + Arrays.toString(corsConfiguration.getAllowedMethods().toArray()));
 System.err.println("allowedOrigins = " + Arrays.toString(corsConfiguration.getAllowedOrigins().toArray()));
-System.err.println("exposedHeaders = " + corsConfiguration.getExposedHeaders());
+System.err.println("exposedHeaders = " + Arrays.toString(corsConfiguration.getExposedHeaders().toArray()));
 System.err.println("maxAge = " + corsConfiguration.getMaxAge());
 
 		assertSame(corsConfiguration, corsInterceptor.getConfig());
@@ -32,7 +40,7 @@ System.err.println("maxAge = " + corsConfiguration.getMaxAge());
 		assertNotNull(corsConfiguration.getAllowedHeaders());
 		assertNotNull(corsConfiguration.getAllowedMethods());
 		assertNotNull(corsConfiguration.getAllowedOrigins());
-		assertNull(corsConfiguration.getExposedHeaders());
+		assertNotNull(corsConfiguration.getExposedHeaders());
 		assertEquals(Long.valueOf(1800l),corsConfiguration.getMaxAge());
 		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Content-Type"})));
 		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization"})));
