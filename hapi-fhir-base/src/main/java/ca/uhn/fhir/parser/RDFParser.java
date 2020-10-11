@@ -176,8 +176,10 @@ public class RDFParser extends BaseParser {
 		if (parentResource == null) {
 			parentResource = rdfModel.getResource(resourceUri);
 			// If the resource already exists and has statements, return that existing resource.
-			if (parentResource != null && parentResource.listProperties().toList().size() > 0){
+			if (parentResource != null && parentResource.listProperties().toList().size() > 0) {
 				return parentResource;
+			} else {
+				return null;
 			}
 		}
 
@@ -294,9 +296,10 @@ public class RDFParser extends BaseParser {
 						if (StringUtils.isNotBlank(encodedValue)) {
 
 							String propertyName = constructPredicateName(resource, childDefinition, childName, parentElement);
-
-							XSDDatatype dataType = getXSDDataTypeForFhirType(element.fhirType());
-							rdfResource.addProperty(rdfModel.createProperty(propertyName), this.createFhirValueBlankNode(rdfModel, encodedValue, dataType, cardinalityIndex));
+							if (element != null) {
+								XSDDatatype dataType = getXSDDataTypeForFhirType(element.fhirType());
+								rdfResource.addProperty(rdfModel.createProperty(propertyName), this.createFhirValueBlankNode(rdfModel, encodedValue, dataType, cardinalityIndex));
+							}
 						}
 					}
 					break;
@@ -354,13 +357,15 @@ public class RDFParser extends BaseParser {
 				}
 				case CONTAINED_RESOURCE_LIST:
 				case CONTAINED_RESOURCES: {
-					IIdType resourceId = ((IBaseResource)element).getIdElement();
-					Resource containedResource = rdfModel.createResource();
-					rdfResource.addProperty(rdfModel.createProperty(FHIR_NS+ DOMAIN_RESOURCE_CONTAINED), containedResource);
-					if (cardinalityIndex != null) {
-						containedResource.addProperty(rdfModel.createProperty(FHIR_NS + FHIR_INDEX), cardinalityIndex.toString(), XSDDatatype.XSDinteger );
+					if (element != null) {
+						IIdType resourceId = ((IBaseResource)element).getIdElement();
+						Resource containedResource = rdfModel.createResource();
+						rdfResource.addProperty(rdfModel.createProperty(FHIR_NS+ DOMAIN_RESOURCE_CONTAINED), containedResource);
+						if (cardinalityIndex != null) {
+							containedResource.addProperty(rdfModel.createProperty(FHIR_NS + FHIR_INDEX), cardinalityIndex.toString(), XSDDatatype.XSDinteger );
+						}
+						encodeResourceToRDFStreamWriter((IBaseResource)element, rdfModel, true, super.fixContainedResourceId(resourceId.getValue()), encodeContext, false, containedResource);
 					}
-					encodeResourceToRDFStreamWriter((IBaseResource)element, rdfModel, true, super.fixContainedResourceId(resourceId.getValue()), encodeContext, false, containedResource);
 					break;
 				}
 				case RESOURCE: {
