@@ -185,6 +185,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append(getParamName(), obj.getParamName());
 		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
+		b.append(getValueLowDateOrdinal(), obj.getValueLowDateOrdinal());
+		b.append(getValueHighDateOrdinal(), obj.getValueHighDateOrdinal());
 		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
