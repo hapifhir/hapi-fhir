@@ -7,10 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 
 public class CorsInterceptorTest {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(CorsInterceptorTest.class);
 
 	@Test
 	public void testCustomCorsConfig() {
@@ -27,14 +31,6 @@ public class CorsInterceptorTest {
 		}));
 		CorsInterceptor corsInterceptor = new CorsInterceptor(corsConfiguration);
 
-System.err.println("Custom CorsConfiguration");
-System.err.println("allowCredentials = " + corsConfiguration.getAllowCredentials());
-System.err.println("allowedHeaders = " + Arrays.toString(corsConfiguration.getAllowedHeaders().toArray()));
-System.err.println("allowedMethods = " + Arrays.toString(corsConfiguration.getAllowedMethods().toArray()));
-System.err.println("allowedOrigins = " + Arrays.toString(corsConfiguration.getAllowedOrigins().toArray()));
-System.err.println("exposedHeaders = " + Arrays.toString(corsConfiguration.getExposedHeaders().toArray()));
-System.err.println("maxAge = " + corsConfiguration.getMaxAge());
-
 		assertSame(corsConfiguration, corsInterceptor.getConfig());
 		assertNull(corsConfiguration.getAllowCredentials());
 		assertNotNull(corsConfiguration.getAllowedHeaders());
@@ -47,20 +43,21 @@ System.err.println("maxAge = " + corsConfiguration.getMaxAge());
 		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization", "Content-Type"})));
 		assertNotNull(corsConfiguration.checkHttpMethod(HttpMethod.GET));
 		assertNotNull(corsConfiguration.checkOrigin("http://clinfhir.com"));
+
+		ourLog.info("Custom CorsConfiguration:  allowCredentials = {};  allowedHeaders = {};  " +
+			"allowedMethods = {};  allowedOrigins = {};  exposedHeaders = {};  maxAge = {}",
+			corsConfiguration.getAllowCredentials(),
+			Arrays.toString(corsConfiguration.getAllowedHeaders().toArray()),
+			Arrays.toString(corsConfiguration.getAllowedMethods().toArray()),
+			Arrays.toString(corsConfiguration.getAllowedOrigins().toArray()),
+			Arrays.toString(corsConfiguration.getExposedHeaders().toArray()),
+			corsConfiguration.getMaxAge());
 	}
 
 	@Test
 	public void testDefaultCorsConfig() {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		CorsConfiguration corsConfiguration = corsInterceptor.getConfig();
-
-System.err.println("Default CorsConfiguration");
-System.err.println("allowCredentials = " + corsConfiguration.getAllowCredentials());
-System.err.println("allowedHeaders = " + Arrays.toString(corsConfiguration.getAllowedHeaders().toArray()));
-System.err.println("allowedMethods = " + Arrays.toString(corsConfiguration.getAllowedMethods().toArray()));
-System.err.println("allowedOrigins = " + Arrays.toString(corsConfiguration.getAllowedOrigins().toArray()));
-System.err.println("exposedHeaders = " + Arrays.toString(corsConfiguration.getExposedHeaders().toArray()));
-System.err.println("maxAge = " + corsConfiguration.getMaxAge());
 
 		assertNull(corsConfiguration.getAllowCredentials());
 		assertNotNull(corsConfiguration.getAllowedHeaders());
@@ -73,5 +70,14 @@ System.err.println("maxAge = " + corsConfiguration.getMaxAge());
 		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization", "Content-Type"})));
 		assertNotNull(corsConfiguration.checkHttpMethod(HttpMethod.GET));
 		assertNotNull(corsConfiguration.checkOrigin("http://clinfhir.com"));
+
+		ourLog.info("Default CorsConfiguration:  allowCredentials = {};  allowedHeaders = {};  " +
+			"allowedMethods = {};  allowedOrigins = {};  exposedHeaders = {};  maxAge = {}",
+			corsConfiguration.getAllowCredentials(),
+			Arrays.toString(corsConfiguration.getAllowedHeaders().toArray()),
+			Arrays.toString(corsConfiguration.getAllowedMethods().toArray()),
+			Arrays.toString(corsConfiguration.getAllowedOrigins().toArray()),
+			Arrays.toString(corsConfiguration.getExposedHeaders().toArray()),
+			corsConfiguration.getMaxAge());
 	}
 }
