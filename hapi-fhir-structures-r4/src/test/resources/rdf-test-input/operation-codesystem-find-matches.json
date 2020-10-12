@@ -1,0 +1,310 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "CodeSystem-find-matches",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFinding codes based on supplied properties\u003c/h2\u003e\u003cp\u003eOPERATION: Finding codes based on supplied properties\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/CodeSystem-find-matches\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eGiven a set of properties (and text), return one or more possible matching codes\u003c/p\u003e\n\u003cp\u003eThis operation takes a set of properties, and examines the code system looking for codes in the code system that match a set of known properties.\u003c/p\u003e\n\u003cp\u003eWhen looking for matches, there are 3 possible types of match:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003ea complete match - a code that represents all the provided properties correctly\u003c/li\u003e\n\u003cli\u003ea partial match - a code that represents some of the provided properties correctly, and not others\u003c/li\u003e\n\u003cli\u003ea possible match - a code that may represent the provided properties closely, but may capture less or more precise information for some of the properties\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThe $find-matches operation can be called in one of 2 modes:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eBy a human, looking for the best match for a set of properties. In this mode, the server returns a list of complete, possible or partial matches (possibly with comments), so that the user can choose (or not) the most appropriate code\u003c/li\u003e\n\u003cli\u003eBy a machine (typically in a system interface performing a transformation). In this mode, the server returns only a list of complete and partial matches, but no possible matches. The machine can choose a code from the list (or not) based on what properties are not coded\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThese modes are differentiated by the \u0027exact\u0027 parameter, so the client can indicate whether it only wants exact matches (including partial matches) or whether potential matches based on text matching are desired\u003c/p\u003e\n\u003cp\u003eThe find-matches operation is still preliminary. The interface can be expected to change as more experience is gained from implementations.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/CodeSystem/$find-matches\u003c/p\u003e\u003cp\u003eURL: [base]/CodeSystem/[id]/$find-matches\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003esystem\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#uri\"\u003euri\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe system in which composition is to be performed. This must be provided unless the operation is invoked on a code system instance\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eversion\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe version of the system for the inferencing to be performed\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eOne or more properties that contain information to be composed into the code\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty.value\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe value of the property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty.subproperty\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eNested Properties (mainly used for SNOMED CT composition, for relationship Groups)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty.subproperty.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the sub-property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty.subproperty.value\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe value of the sub-property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eexact\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eWhether the operation is being used by a human (\u0027false\u0027), or a machine (\u0027true\u0027). If the operation is being used by a human, the terminology server can return a list of possible matches, with commentary. For a machine, the server returns complete or partial matches, not possible matches. The default value is \u0027false\u0027\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003ecompositional\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003ePost-coordinated expressions are allowed to be returned in the matching codes (mainly for SNOMED CT). Default \u003d false\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eConcepts returned by the server as a result of the inferencing operation\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA code that matches the properties provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.unmatched\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eOne or more properties that contain properties that could not be matched into the code\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.unmatched.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.unmatched.value\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe value of the property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.unmatched.property\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eNested Properties (mainly used for SNOMED CT composition, for relationship Groups)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.unmatched.property.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the sub-property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.unmatched.property.value\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe value of the sub-property provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ematch.comment\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eInformation about the quality of the match, if operation is for a human\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv/\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/CodeSystem-find-matches",
+  "version": "4.0.1",
+  "name": "Finding codes based on supplied properties",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Given a set of properties (and text), return one or more possible matching codes\n\nThis operation takes a set of properties, and examines the code system looking for codes in the code system that match a set of known properties. \n\nWhen looking for matches, there are 3 possible types of match:\n* a complete match - a code that represents all the provided properties correctly\n* a partial match - a code that represents some of the provided properties correctly, and not others \n* a possible match - a code that may represent the provided properties closely, but may capture less or more precise information for some of the properties\n\nThe $find-matches operation can be called in one of 2 modes:\n* By a human, looking for the best match for a set of properties. In this mode, the server returns a list of complete, possible or partial matches (possibly with comments), so that the user can choose (or not) the most appropriate code\n* By a machine (typically in a system interface performing a transformation). In this mode, the server returns only a list of complete and partial matches, but no possible matches. The machine can choose a code from the list (or not) based on what properties are not coded\n\nThese modes are differentiated by the \u0027exact\u0027 parameter, so the client can indicate whether it only wants exact matches (including partial matches) or whether potential matches based on text matching are desired\n \nThe find-matches operation is still preliminary. The interface can be expected to change as more experience is gained from implementations.",
+  "code": "find-matches",
+  "resource": [
+    "CodeSystem"
+  ],
+  "system": false,
+  "type": true,
+  "instance": true,
+  "parameter": [
+    {
+      "name": "system",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The system in which composition is to be performed. This must be provided unless the operation is invoked on a code system instance",
+      "type": "uri"
+    },
+    {
+      "name": "version",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The version of the system for the inferencing to be performed",
+      "type": "string"
+    },
+    {
+      "name": "property",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "One or more properties that contain information to be composed into the code",
+      "part": [
+        {
+          "name": "code",
+          "use": "in",
+          "min": 1,
+          "max": "1",
+          "documentation": "Identifies the property provided",
+          "type": "code"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "code"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "Coding"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "string"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "integer"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "boolean"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "dateTime"
+            }
+          ],
+          "name": "value",
+          "use": "in",
+          "min": 0,
+          "max": "1",
+          "documentation": "The value of the property provided",
+          "type": "Element"
+        },
+        {
+          "name": "subproperty",
+          "use": "in",
+          "min": 0,
+          "max": "*",
+          "documentation": "Nested Properties (mainly used for SNOMED CT composition, for relationship Groups)",
+          "part": [
+            {
+              "name": "code",
+              "use": "in",
+              "min": 1,
+              "max": "1",
+              "documentation": "Identifies the sub-property provided",
+              "type": "code"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "code"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "Coding"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "string"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "integer"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "boolean"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "dateTime"
+                }
+              ],
+              "name": "value",
+              "use": "in",
+              "min": 1,
+              "max": "1",
+              "documentation": "The value of the sub-property provided",
+              "type": "Element"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "exact",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "Whether the operation is being used by a human (\u0027false\u0027), or a machine (\u0027true\u0027). If the operation is being used by a human, the terminology server can return a list of possible matches, with commentary. For a machine, the server returns complete or partial matches, not possible matches. The default value is \u0027false\u0027",
+      "type": "boolean"
+    },
+    {
+      "name": "compositional",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "Post-coordinated expressions are allowed to be returned in the matching codes (mainly for SNOMED CT). Default \u003d false",
+      "type": "boolean"
+    },
+    {
+      "name": "match",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "documentation": "Concepts returned by the server as a result of the inferencing operation",
+      "part": [
+        {
+          "name": "code",
+          "use": "out",
+          "min": 1,
+          "max": "1",
+          "documentation": "A code that matches the properties provided",
+          "type": "Coding"
+        },
+        {
+          "name": "unmatched",
+          "use": "out",
+          "min": 0,
+          "max": "*",
+          "documentation": "One or more properties that contain properties that could not be matched into the code",
+          "part": [
+            {
+              "name": "code",
+              "use": "out",
+              "min": 1,
+              "max": "1",
+              "documentation": "Identifies the property provided",
+              "type": "code"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "code"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "Coding"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "string"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "integer"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "boolean"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "dateTime"
+                }
+              ],
+              "name": "value",
+              "use": "out",
+              "min": 1,
+              "max": "1",
+              "documentation": "The value of the property provided",
+              "type": "Element"
+            },
+            {
+              "name": "property",
+              "use": "out",
+              "min": 0,
+              "max": "*",
+              "documentation": "Nested Properties (mainly used for SNOMED CT composition, for relationship Groups)",
+              "part": [
+                {
+                  "name": "code",
+                  "use": "out",
+                  "min": 1,
+                  "max": "1",
+                  "documentation": "Identifies the sub-property provided",
+                  "type": "code"
+                },
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                      "valueUri": "code"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                      "valueUri": "Coding"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                      "valueUri": "string"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                      "valueUri": "integer"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                      "valueUri": "boolean"
+                    },
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                      "valueUri": "dateTime"
+                    }
+                  ],
+                  "name": "value",
+                  "use": "out",
+                  "min": 1,
+                  "max": "1",
+                  "documentation": "The value of the sub-property provided",
+                  "type": "Element"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "comment",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "Information about the quality of the match, if operation is for a human",
+          "type": "string"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "parameter-group",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDeviceDefinitionParameterGroup\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes identifying groupings of parameters; e.g. Cardiovascular.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/parameter-group defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehaemodynamic\u003ca name\u003d\"parameter-group-haemodynamic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHaemodynamic Parameter Group\u003c/td\u003e\u003ctd\u003eHaemodynamic Parameter Group - MDC_PGRP_HEMO.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eecg\u003ca name\u003d\"parameter-group-ecg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eECG Parameter Group\u003c/td\u003e\u003ctd\u003eECG Parameter Group - MDC_PGRP_ECG.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erespiratory\u003ca name\u003d\"parameter-group-respiratory\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRespiratory Parameter Group\u003c/td\u003e\u003ctd\u003eRespiratory Parameter Group - MDC_PGRP_RESP.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eventilation\u003ca name\u003d\"parameter-group-ventilation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVentilation Parameter Group\u003c/td\u003e\u003ctd\u003eVentilation Parameter Group - MDC_PGRP_VENT.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eneurological\u003ca name\u003d\"parameter-group-neurological\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeurological Parameter Group\u003c/td\u003e\u003ctd\u003eNeurological Parameter Group - MDC_PGRP_NEURO.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edrug-delivery\u003ca name\u003d\"parameter-group-drug-delivery\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrug Delivery Parameter Group\u003c/td\u003e\u003ctd\u003eDrug Delivery Parameter Group - MDC_PGRP_DRUG.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efluid-chemistry\u003ca name\u003d\"parameter-group-fluid-chemistry\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFluid Chemistry Parameter Group\u003c/td\u003e\u003ctd\u003eFluid Chemistry Parameter Group - MDC_PGRP_FLUID.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eblood-chemistry\u003ca name\u003d\"parameter-group-blood-chemistry\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBlood Chemistry Parameter Group\u003c/td\u003e\u003ctd\u003eBlood Chemistry Parameter Group - MDC_PGRP_BLOOD_CHEM.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emiscellaneous\u003ca name\u003d\"parameter-group-miscellaneous\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMiscellaneous Parameter Group\u003c/td\u003e\u003ctd\u003eMiscellaneous Parameter Group - MDC_PGRP_MISC.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/parameter-group",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1264"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DeviceDefinitionParameterGroup",
+  "title": "DeviceDefinitionParameterGroup",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes identifying groupings of parameters; e.g. Cardiovascular.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/parameter-group",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "haemodynamic",
+      "display": "Haemodynamic Parameter Group",
+      "definition": "Haemodynamic Parameter Group - MDC_PGRP_HEMO."
+    },
+    {
+      "code": "ecg",
+      "display": "ECG Parameter Group",
+      "definition": "ECG Parameter Group - MDC_PGRP_ECG."
+    },
+    {
+      "code": "respiratory",
+      "display": "Respiratory Parameter Group",
+      "definition": "Respiratory Parameter Group - MDC_PGRP_RESP."
+    },
+    {
+      "code": "ventilation",
+      "display": "Ventilation Parameter Group",
+      "definition": "Ventilation Parameter Group - MDC_PGRP_VENT."
+    },
+    {
+      "code": "neurological",
+      "display": "Neurological Parameter Group",
+      "definition": "Neurological Parameter Group - MDC_PGRP_NEURO."
+    },
+    {
+      "code": "drug-delivery",
+      "display": "Drug Delivery Parameter Group",
+      "definition": "Drug Delivery Parameter Group - MDC_PGRP_DRUG."
+    },
+    {
+      "code": "fluid-chemistry",
+      "display": "Fluid Chemistry Parameter Group",
+      "definition": "Fluid Chemistry Parameter Group - MDC_PGRP_FLUID."
+    },
+    {
+      "code": "blood-chemistry",
+      "display": "Blood Chemistry Parameter Group",
+      "definition": "Blood Chemistry Parameter Group - MDC_PGRP_BLOOD_CHEM."
+    },
+    {
+      "code": "miscellaneous",
+      "display": "Miscellaneous Parameter Group",
+      "definition": "Miscellaneous Parameter Group - MDC_PGRP_MISC."
+    }
+  ]
+}

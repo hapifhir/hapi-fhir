@@ -1,0 +1,75 @@
+{
+  "resourceType": "Practitioner",
+  "id": "f201",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f201\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: UZI-nummer \u003d 12345678901 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eactive\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Dokter Bronsig(OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: +31715269111(WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: Walvisbaai 3 C4 - Automatisering Den helder 2333ZA NLD (WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: male\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 24/12/1956\u003c/p\u003e\u003ch3\u003eQualifications\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ePulmonologist \u003cspan\u003e(Details : {SNOMED CT code \u002741672002\u0027 \u003d \u0027Respiratory disease specialist\u0027, given as \u0027Pulmonologist\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "text": "UZI-nummer"
+      },
+      "system": "urn:oid:2.16.528.1.1007.3.1",
+      "value": "12345678901"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "text": "Dokter Bronsig",
+      "family": "Bronsig",
+      "given": [
+        "Arend"
+      ],
+      "prefix": [
+        "Dr."
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+31715269111",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "use": "work",
+      "line": [
+        "Walvisbaai 3",
+        "C4 - Automatisering"
+      ],
+      "city": "Den helder",
+      "postalCode": "2333ZA",
+      "country": "NLD"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1956-12-24",
+  "qualification": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "41672002",
+            "display": "Pulmonologist"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

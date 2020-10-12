@@ -1,0 +1,106 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "goal-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGoalLifecycleStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes that reflect the current state of a goal and whether the goal is still being targeted.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/goal-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproposed\u003ca name\u003d\"goal-status-proposed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProposed\u003c/td\u003e\u003ctd\u003eA goal is proposed for this patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eplanned\u003ca name\u003d\"goal-status-planned\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlanned\u003c/td\u003e\u003ctd\u003eA goal is planned for this patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccepted\u003ca name\u003d\"goal-status-accepted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccepted\u003c/td\u003e\u003ctd\u003eA proposed goal was accepted or acknowledged.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  active\u003ca name\u003d\"goal-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eThe goal is being sought actively.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  on-hold\u003ca name\u003d\"goal-status-on-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Hold\u003c/td\u003e\u003ctd\u003eThe goal remains a long term objective but is no longer being actively pursued for a temporary period of time.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  completed\u003ca name\u003d\"goal-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eThe goal is no longer being sought.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"goal-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe goal has been abandoned.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"goal-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe goal was entered in error and voided.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erejected\u003ca name\u003d\"goal-status-rejected\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRejected\u003c/td\u003e\u003ctd\u003eA proposed goal was rejected.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/goal-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.272"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GoalLifecycleStatus",
+  "title": "GoalLifecycleStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes that reflect the current state of a goal and whether the goal is still being targeted.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/goal-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "proposed",
+      "display": "Proposed",
+      "definition": "A goal is proposed for this patient."
+    },
+    {
+      "code": "planned",
+      "display": "Planned",
+      "definition": "A goal is planned for this patient."
+    },
+    {
+      "code": "accepted",
+      "display": "Accepted",
+      "definition": "A proposed goal was accepted or acknowledged.",
+      "concept": [
+        {
+          "code": "active",
+          "display": "Active",
+          "definition": "The goal is being sought actively."
+        },
+        {
+          "code": "on-hold",
+          "display": "On Hold",
+          "definition": "The goal remains a long term objective but is no longer being actively pursued for a temporary period of time."
+        },
+        {
+          "code": "completed",
+          "display": "Completed",
+          "definition": "The goal is no longer being sought."
+        }
+      ]
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The goal has been abandoned."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The goal was entered in error and voided."
+    },
+    {
+      "code": "rejected",
+      "display": "Rejected",
+      "definition": "A proposed goal was rejected."
+    }
+  ]
+}

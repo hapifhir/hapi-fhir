@@ -1,0 +1,143 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "meddisp0301",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: meddisp0301\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: in-progress\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: Vancomycin Hydrochloride. Generated Summary: id: med0301; Vancomycin Hydrochloride (VANCOMYCIN HYDROCHLORIDE) \u003cspan\u003e(Details : {http://hl7.org/fhir/sid/ndc code \u00270069-2587-10\u0027 \u003d \u0027n/a\u0027, given as \u0027Vancomycin Hydrochloride (VANCOMYCIN HYDROCHLORIDE)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esupportingInformation\u003c/b\u003e: \u003ca\u003eCondition/f203\u003c/a\u003e\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f006\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003elocation\u003c/b\u003e: \u003ca\u003ePharmacy\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthorizingPrescription\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0318\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Emergency Supply \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ActCode code \u0027EM\u0027 \u003d \u0027Emergency Supply\u0027, given as \u0027Emergency Supply\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 12 Vial\u003cspan\u003e (Details: http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm code Vial \u003d \u0027Vial\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edaysSupply\u003c/b\u003e: 3 Day\u003cspan\u003e (Details: UCUM code d \u003d \u0027d\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenPrepared\u003c/b\u003e: 15/01/2015 10:20:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003edestination\u003c/b\u003e: \u003ca\u003eLocation/ph\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereceiver\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0301",
+      "code": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/ndc",
+            "code": "0069-2587-10",
+            "display": "Vancomycin Hydrochloride (VANCOMYCIN HYDROCHLORIDE)"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "in-progress",
+  "medicationReference": {
+    "reference": "#med0301",
+    "display": "Vancomycin Hydrochloride"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "supportingInformation": [
+    {
+      "reference": "Condition/f203"
+    }
+  ],
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f006"
+      }
+    }
+  ],
+  "location": {
+    "reference": "Location/ukp",
+    "display": "Pharmacy"
+  },
+  "authorizingPrescription": [
+    {
+      "reference": "MedicationRequest/medrx0318"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "EM",
+        "display": "Emergency Supply"
+      }
+    ]
+  },
+  "quantity": {
+    "value": 12,
+    "unit": "Vial",
+    "system": "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm",
+    "code": "Vial"
+  },
+  "daysSupply": {
+    "value": 3,
+    "unit": "Day",
+    "system": "http://unitsofmeasure.org",
+    "code": "d"
+  },
+  "whenPrepared": "2015-01-15T10:20:00Z",
+  "destination": {
+    "reference": "Location/ph"
+  },
+  "receiver": [
+    {
+      "reference": "Patient/pat1",
+      "display": "Donald Duck"
+    }
+  ],
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "500mg IV q6h x 3 days",
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 6,
+          "periodUnit": "h"
+        }
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "255560000",
+            "display": "Intravenous"
+          }
+        ]
+      },
+      "method": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "420620005",
+            "display": "Push - dosing instruction imperative (qualifier value)"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 500,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

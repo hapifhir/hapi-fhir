@@ -1,0 +1,97 @@
+{
+  "resourceType": "ValueSet",
+  "id": "type-restful-interaction",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTypeRestfulInteraction\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eOperations supported by REST at the type or instance level.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"codesystem-restful-interaction.html\"\u003e\u003ccode\u003ehttp://hl7.org/fhir/restful-interaction\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-read\"\u003eread\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eread\u003c/td\u003e\u003ctd\u003eRead the current state of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-vread\"\u003evread\u003c/a\u003e\u003c/td\u003e\u003ctd\u003evread\u003c/td\u003e\u003ctd\u003eRead the state of a specific version of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-update\"\u003eupdate\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eupdate\u003c/td\u003e\u003ctd\u003eUpdate an existing resource by its id (or create it if it is new).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-patch\"\u003epatch\u003c/a\u003e\u003c/td\u003e\u003ctd\u003epatch\u003c/td\u003e\u003ctd\u003eUpdate an existing resource by posting a set of changes to it.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-delete\"\u003edelete\u003c/a\u003e\u003c/td\u003e\u003ctd\u003edelete\u003c/td\u003e\u003ctd\u003eDelete a resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-history-instance\"\u003ehistory-instance\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory-instance\u003c/td\u003e\u003ctd\u003eRetrieve the change history for a particular resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-history-type\"\u003ehistory-type\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory-type\u003c/td\u003e\u003ctd\u003eRetrieve the change history for all resources of a particular type.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-create\"\u003ecreate\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecreate\u003c/td\u003e\u003ctd\u003eCreate a new resource with a server assigned id.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-search-type\"\u003esearch-type\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esearch-type\u003c/td\u003e\u003ctd\u003eSearch all resources of the specified type based on some filter criteria.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/type-restful-interaction",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.180"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TypeRestfulInteraction",
+  "title": "TypeRestfulInteraction",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Operations supported by REST at the type or instance level.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/restful-interaction",
+        "concept": [
+          {
+            "code": "read"
+          },
+          {
+            "code": "vread"
+          },
+          {
+            "code": "update"
+          },
+          {
+            "code": "patch"
+          },
+          {
+            "code": "delete"
+          },
+          {
+            "code": "history-instance"
+          },
+          {
+            "code": "history-type"
+          },
+          {
+            "code": "create"
+          },
+          {
+            "code": "search-type"
+          }
+        ]
+      }
+    ]
+  }
+}

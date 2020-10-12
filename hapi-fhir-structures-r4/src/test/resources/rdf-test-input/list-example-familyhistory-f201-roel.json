@@ -1,0 +1,124 @@
+{
+  "resourceType": "List",
+  "id": "f201",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f201\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: current\u003c/p\u003e\u003cp\u003e\u003cb\u003emode\u003c/b\u003e: snapshot\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: History of family member diseases \u003cspan\u003e(Details : {LOINC code \u00278670-2\u0027 \u003d \u0027History of family member diseases\u0027, given as \u0027History of family member diseases\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: Both parents, both brothers and both children (twin) are still alive.\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: id: fmh-1; status: completed; Mother \u003cspan\u003e(Details : {SNOMED CT code \u002772705000\u0027 \u003d \u0027Mother\u0027, given as \u0027Mother\u0027})\u003c/span\u003e; \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: id: fmh-2; status: completed; Uncle \u003cspan\u003e(Details : {SNOMED CT code \u002738048003\u0027 \u003d \u0027Uncle\u0027, given as \u0027Uncle\u0027})\u003c/span\u003e; deceased\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "FamilyMemberHistory",
+      "id": "fmh-1",
+      "status": "completed",
+      "patient": {
+        "reference": "Patient/f201",
+        "display": "Roel"
+      },
+      "relationship": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "72705000",
+            "display": "Mother"
+          }
+        ]
+      },
+      "deceasedBoolean": false,
+      "condition": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "39839004",
+                "display": "Diaphragmatic hernia"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "FamilyMemberHistory",
+      "id": "fmh-2",
+      "status": "completed",
+      "patient": {
+        "reference": "Patient/f201",
+        "display": "Roel"
+      },
+      "relationship": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "38048003",
+            "display": "Uncle"
+          }
+        ]
+      },
+      "deceasedBoolean": true,
+      "condition": [
+        {
+          "code": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "115665000",
+                "display": "Atopy"
+              }
+            ]
+          },
+          "outcome": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "419099009",
+                "display": "Died"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "status": "current",
+  "mode": "snapshot",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8670-2",
+        "display": "History of family member diseases"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "note": [
+    {
+      "text": "Both parents, both brothers and both children (twin) are still alive."
+    }
+  ],
+  "entry": [
+    {
+      "item": {
+        "reference": "#fmh-1"
+      }
+    },
+    {
+      "item": {
+        "reference": "#fmh-2"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

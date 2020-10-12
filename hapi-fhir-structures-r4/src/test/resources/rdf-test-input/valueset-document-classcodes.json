@@ -1,0 +1,247 @@
+{
+  "resourceType": "ValueSet",
+  "id": "document-classcodes",
+  "meta": {
+    "lastUpdated": "2019-10-31T22:29:23.356+00:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDocument Class Value Set\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis is the code specifying the high-level kind of document (e.g. Prescription, Discharge Summary, Report, etc.). Note: Class code for documents comes from LOINC, and is based upon one of the following:The type of service described by the document. It is described at a very high level in Section 7.3 of the LOINC Manual. The type study performed. It was determined by identifying modalities for study reports. The section of the chart where the document is placed. It was determined from the SETs created for Claims Attachment requests.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://loinc.org\"\u003e\u003ccode\u003ehttp://loinc.org\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11369-6.html\"\u003e11369-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of Immunization\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11485-0.html\"\u003e11485-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAnesthesia records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11486-8.html\"\u003e11486-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChemotherapy records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11488-4.html\"\u003e11488-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsult Note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11506-3.html\"\u003e11506-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider-unspecified progress note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11543-6.html\"\u003e11543-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNursery records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/15508-5.html\"\u003e15508-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLabor and delivery records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/18726-0.html\"\u003e18726-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiology studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/18761-7.html\"\u003e18761-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider-unspecified transfer summary\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/18842-5.html\"\u003e18842-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDischarge summary\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/26436-6.html\"\u003e26436-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaboratory Studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/26441-6.html\"\u003e26441-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCardiology studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/26442-4.html\"\u003e26442-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eObstetrical studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/27895-2.html\"\u003e27895-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGastroenterology endoscopy studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/27896-0.html\"\u003e27896-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePulmonary studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/27897-8.html\"\u003e27897-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeuromuscular electrophysiology studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/27898-6.html\"\u003e27898-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePathology studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/28570-0.html\"\u003e28570-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider-unspecified procedure note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/28619-5.html\"\u003e28619-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOphthalmology/optometry studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/28634-4.html\"\u003e28634-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMiscellaneous studies (set)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29749-9.html\"\u003e29749-9\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDialysis records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29750-7.html\"\u003e29750-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeonatal intensive care records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29751-5.html\"\u003e29751-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCritical care records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29752-3.html\"\u003e29752-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePerioperative records\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34109-9.html\"\u003e34109-9\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEvaluation and management note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34117-2.html\"\u003e34117-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider-unspecified, History and physical note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34121-4.html\"\u003e34121-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInterventional procedure note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34122-2.html\"\u003e34122-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePathology procedure note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34133-9.html\"\u003e34133-9\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSummarization of episode note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34140-4.html\"\u003e34140-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTransfer of care referral note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34748-4.html\"\u003e34748-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTelephone encounter note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/34775-7.html\"\u003e34775-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeneral surgery Pre-operative evaluation and management note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47039-3.html\"\u003e47039-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInpatient Admission history and physical note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47042-7.html\"\u003e47042-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCounseling note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47045-0.html\"\u003e47045-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStudy report Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47046-8.html\"\u003e47046-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSummary of death\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47049-2.html\"\u003e47049-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNon-patient Communication\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/57017-6.html\"\u003e57017-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrivacy Policy Organization Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/57016-8.html\"\u003e57016-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrivacy Policy Acknowledgment Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/56445-0.html\"\u003e56445-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedication Summary Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/53576-5.html\"\u003e53576-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePersonal health monitoring report Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/56447-6.html\"\u003e56447-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlan of care note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/18748-4.html\"\u003e18748-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic imaging study\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11504-8.html\"\u003e11504-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note \u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/57133-1.html\"\u003e57133-1\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReferral note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/document-classcodes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.88.12.80.46"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DocumentClassValueSet",
+  "title": "Document Class Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "USHIK",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This is the code specifying the high-level kind of document (e.g. Prescription, Discharge Summary, Report, etc.). Note: Class code for documents comes from LOINC, and is based upon one of the following:The type of service described by the document. It is described at a very high level in Section 7.3 of the LOINC Manual. The type study performed. It was determined by identifying modalities for study reports. The section of the chart where the document is placed. It was determined from the SETs created for Claims Attachment requests.",
+  "copyright": "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "11369-6",
+            "display": "History of Immunization"
+          },
+          {
+            "code": "11485-0",
+            "display": "Anesthesia records"
+          },
+          {
+            "code": "11486-8",
+            "display": "Chemotherapy records"
+          },
+          {
+            "code": "11488-4",
+            "display": "Consult Note"
+          },
+          {
+            "code": "11506-3",
+            "display": "Provider-unspecified progress note"
+          },
+          {
+            "code": "11543-6",
+            "display": "Nursery records"
+          },
+          {
+            "code": "15508-5",
+            "display": "Labor and delivery records"
+          },
+          {
+            "code": "18726-0",
+            "display": "Radiology studies (set)"
+          },
+          {
+            "code": "18761-7",
+            "display": "Provider-unspecified transfer summary"
+          },
+          {
+            "code": "18842-5",
+            "display": "Discharge summary"
+          },
+          {
+            "code": "26436-6",
+            "display": "Laboratory Studies (set)"
+          },
+          {
+            "code": "26441-6",
+            "display": "Cardiology studies (set)"
+          },
+          {
+            "code": "26442-4",
+            "display": "Obstetrical studies (set)"
+          },
+          {
+            "code": "27895-2",
+            "display": "Gastroenterology endoscopy studies (set)"
+          },
+          {
+            "code": "27896-0",
+            "display": "Pulmonary studies (set)"
+          },
+          {
+            "code": "27897-8",
+            "display": "Neuromuscular electrophysiology studies (set)"
+          },
+          {
+            "code": "27898-6",
+            "display": "Pathology studies (set)"
+          },
+          {
+            "code": "28570-0",
+            "display": "Provider-unspecified procedure note"
+          },
+          {
+            "code": "28619-5",
+            "display": "Ophthalmology/optometry studies (set)"
+          },
+          {
+            "code": "28634-4",
+            "display": "Miscellaneous studies (set)"
+          },
+          {
+            "code": "29749-9",
+            "display": "Dialysis records"
+          },
+          {
+            "code": "29750-7",
+            "display": "Neonatal intensive care records"
+          },
+          {
+            "code": "29751-5",
+            "display": "Critical care records"
+          },
+          {
+            "code": "29752-3",
+            "display": "Perioperative records"
+          },
+          {
+            "code": "34109-9",
+            "display": "Evaluation and management note"
+          },
+          {
+            "code": "34117-2",
+            "display": "Provider-unspecified, History and physical note"
+          },
+          {
+            "code": "34121-4",
+            "display": "Interventional procedure note"
+          },
+          {
+            "code": "34122-2",
+            "display": "Pathology procedure note"
+          },
+          {
+            "code": "34133-9",
+            "display": "Summarization of episode note"
+          },
+          {
+            "code": "34140-4",
+            "display": "Transfer of care referral note"
+          },
+          {
+            "code": "34748-4",
+            "display": "Telephone encounter note"
+          },
+          {
+            "code": "34775-7",
+            "display": "General surgery Pre-operative evaluation and management note"
+          },
+          {
+            "code": "47039-3",
+            "display": "Inpatient Admission history and physical note"
+          },
+          {
+            "code": "47042-7",
+            "display": "Counseling note"
+          },
+          {
+            "code": "47045-0",
+            "display": "Study report Document"
+          },
+          {
+            "code": "47046-8",
+            "display": "Summary of death"
+          },
+          {
+            "code": "47049-2",
+            "display": "Non-patient Communication"
+          },
+          {
+            "code": "57017-6",
+            "display": "Privacy Policy Organization Document"
+          },
+          {
+            "code": "57016-8",
+            "display": "Privacy Policy Acknowledgment Document"
+          },
+          {
+            "code": "56445-0",
+            "display": "Medication Summary Document"
+          },
+          {
+            "code": "53576-5",
+            "display": "Personal health monitoring report Document"
+          },
+          {
+            "code": "56447-6",
+            "display": "Plan of care note"
+          },
+          {
+            "code": "18748-4",
+            "display": "Diagnostic imaging study"
+          },
+          {
+            "code": "11504-8",
+            "display": "Surgical operation note "
+          },
+          {
+            "code": "57133-1",
+            "display": "Referral note"
+          }
+        ]
+      }
+    ]
+  }
+}

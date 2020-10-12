@@ -1,0 +1,101 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "subscriber-relationship",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSubscriberPolicyholder Relationship Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes codes for the relationship between the Subscriber and the Beneficiary (insured/covered party/patient).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an extensible set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/subscriber-relationship defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003echild\u003ca name\u003d\"subscriber-relationship-child\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChild\u003c/td\u003e\u003ctd\u003eThe Beneficiary is a child of the Subscriber\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eparent\u003ca name\u003d\"subscriber-relationship-parent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eParent\u003c/td\u003e\u003ctd\u003eThe Beneficiary is a parent of the Subscriber\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003espouse\u003ca name\u003d\"subscriber-relationship-spouse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpouse\u003c/td\u003e\u003ctd\u003eThe Beneficiary is a spouse or equivalent of the Subscriber\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecommon\u003ca name\u003d\"subscriber-relationship-common\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommon Law Spouse\u003c/td\u003e\u003ctd\u003eThe Beneficiary is a common law spouse or equivalent of the Subscriber\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"subscriber-relationship-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eThe Beneficiary has some other relationship the Subscriber\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eself\u003ca name\u003d\"subscriber-relationship-self\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSelf\u003c/td\u003e\u003ctd\u003eThe Beneficiary is the Subscriber\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einjured\u003ca name\u003d\"subscriber-relationship-injured\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInjured Party\u003c/td\u003e\u003ctd\u003eThe Beneficiary is covered under insurance of the subscriber due to an injury.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/subscriber-relationship",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1386"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SubscriberRelationshipCodes",
+  "title": "SubscriberPolicyholder Relationship Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes codes for the relationship between the Subscriber and the Beneficiary (insured/covered party/patient).",
+  "copyright": "This is an extensible set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/subscriber-relationship",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "child",
+      "display": "Child",
+      "definition": "The Beneficiary is a child of the Subscriber"
+    },
+    {
+      "code": "parent",
+      "display": "Parent",
+      "definition": "The Beneficiary is a parent of the Subscriber"
+    },
+    {
+      "code": "spouse",
+      "display": "Spouse",
+      "definition": "The Beneficiary is a spouse or equivalent of the Subscriber"
+    },
+    {
+      "code": "common",
+      "display": "Common Law Spouse",
+      "definition": "The Beneficiary is a common law spouse or equivalent of the Subscriber"
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "The Beneficiary has some other relationship the Subscriber"
+    },
+    {
+      "code": "self",
+      "display": "Self",
+      "definition": "The Beneficiary is the Subscriber"
+    },
+    {
+      "code": "injured",
+      "display": "Injured Party",
+      "definition": "The Beneficiary is covered under insurance of the subscriber due to an injury."
+    }
+  ]
+}

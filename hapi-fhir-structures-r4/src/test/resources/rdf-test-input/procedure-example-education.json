@@ -1,0 +1,63 @@
+{
+  "resourceType": "Procedure",
+  "id": "education",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eHealth education - breast examination for early detection of breast mass\u003c/div\u003e"
+  },
+  "basedOn": [
+    {
+      "reference": "ServiceRequest/education",
+      "display": "Order for health education"
+    }
+  ],
+  "status": "completed",
+  "category": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "311401005",
+        "display": "Patient education (procedure)"
+      }
+    ],
+    "text": "Education"
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "48023004",
+        "display": "Breast self-examination technique education (procedure)"
+      }
+    ],
+    "text": "Health education - breast examination"
+  },
+  "subject": {
+    "display": "Jane Doe"
+  },
+  "performedDateTime": "2014-08-16",
+  "performer": [
+    {
+      "actor": {
+        "display": "Pamela Educator, RN"
+      }
+    }
+  ],
+  "location": {
+    "display": "Southside Community Health Center"
+  },
+  "reasonCode": [
+    {
+      "text": "early detection of breast mass"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

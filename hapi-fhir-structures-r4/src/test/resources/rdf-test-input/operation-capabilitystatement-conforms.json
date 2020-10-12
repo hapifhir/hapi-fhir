@@ -1,0 +1,98 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "CapabilityStatement-conforms",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTest if a server implements a client\u0027s required operations\u003c/h2\u003e\u003cp\u003eOPERATION: Test if a server implements a client\u0027s required operations\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/CapabilityStatement-conforms\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eThis operation asks the server to check that it implements all the resources, interactions, search parameters, and operations that the client provides in its capability statement. The client provides both capability statements by reference, and must ensure that all the referenced resources are available to the conformance server\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/CapabilityStatement/$conforms\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eleft\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#canonical\"\u003ecanonical\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA canonical reference to the left-hand system\u0027s capability statement\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eright\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#canonical\"\u003ecanonical\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA canonical reference to the right-hand system\u0027s capability statement\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003emode\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eWhat kind of comparison to perform - server to server, or client to server (use the codes \u0027server/server\u0027 or \u0027client/server\u0027)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eissues\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"operationoutcome.html\"\u003eOperationOutcome\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eOutcome of the CapabilityStatement test\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eunion\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"capabilitystatement.html\"\u003eCapabilityStatement\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe intersection of the functionality described by the CapabilityStatement resources\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eintersection\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"capabilitystatement.html\"\u003eCapabilityStatement\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe union of the functionality described by the CapabilityStatement resources\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eThe operation performs a full comparison of the functionality described by the two capability statements, including the profiles and value sets they reference, and also including concept maps and structure maps.\u003c/p\u003e\n\u003cp\u003eThe full execution of this operation is still a matter of research, but it is intended to support comparison of systems to see if they will interoperate\u003c/p\u003e\n\u003cp\u003eIf the capability statements can be successfully compared, then the return value is a 200 OK with an OperationOutcome along with intersection and union capability statements. The operation outcome can contain errors relating to differences between the capability statements. If the capability statements cannot be compared, because dependencies cannot be located, the return value is a 4xx error, with an OperationOutcome with at least one issue with severity \u0026gt;\u003d error\u003c/p\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/CapabilityStatement-conforms",
+  "version": "4.0.1",
+  "name": "Test if a server implements a client\u0027s required operations",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This operation asks the server to check that it implements all the resources, interactions, search parameters, and operations that the client provides in its capability statement. The client provides both capability statements by reference, and must ensure that all the referenced resources are available to the conformance server",
+  "code": "conforms",
+  "comment": "The operation performs a full comparison of the functionality described by the two capability statements, including the profiles and value sets they reference, and also including concept maps and structure maps.     \n\nThe full execution of this operation is still a matter of research, but it is intended to support comparison of systems to see if they will interoperate    \n\nIf the capability statements can be successfully compared, then the return value is a 200 OK with an OperationOutcome along with intersection and union capability statements. The operation outcome can contain errors relating to differences between the capability statements. If the capability statements cannot be compared, because dependencies cannot be located, the return value is a 4xx error, with an OperationOutcome with at least one issue with severity \u003e\u003d error",
+  "resource": [
+    "CapabilityStatement"
+  ],
+  "system": false,
+  "type": true,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "left",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "A canonical reference to the left-hand system\u0027s capability statement",
+      "type": "canonical"
+    },
+    {
+      "name": "right",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "A canonical reference to the right-hand system\u0027s capability statement",
+      "type": "canonical"
+    },
+    {
+      "name": "mode",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "What kind of comparison to perform - server to server, or client to server (use the codes \u0027server/server\u0027 or \u0027client/server\u0027)",
+      "type": "code"
+    },
+    {
+      "name": "issues",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "Outcome of the CapabilityStatement test",
+      "type": "OperationOutcome"
+    },
+    {
+      "name": "union",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "The intersection of the functionality described by the CapabilityStatement resources",
+      "type": "CapabilityStatement"
+    },
+    {
+      "name": "intersection",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "The union of the functionality described by the CapabilityStatement resources",
+      "type": "CapabilityStatement"
+    }
+  ]
+}

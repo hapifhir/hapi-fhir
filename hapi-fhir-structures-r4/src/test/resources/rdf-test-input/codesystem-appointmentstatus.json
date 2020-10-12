@@ -1,0 +1,109 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "appointmentstatus",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAppointmentStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe free/busy status of an appointment.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/appointmentstatus defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproposed\u003ca name\u003d\"appointmentstatus-proposed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProposed\u003c/td\u003e\u003ctd\u003eNone of the participant(s) have finalized their acceptance of the appointment request, and the start/end time might not be set yet.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epending\u003ca name\u003d\"appointmentstatus-pending\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePending\u003c/td\u003e\u003ctd\u003eSome or all of the participant(s) have not finalized their acceptance of the appointment request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebooked\u003ca name\u003d\"appointmentstatus-booked\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBooked\u003c/td\u003e\u003ctd\u003eAll participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003earrived\u003ca name\u003d\"appointmentstatus-arrived\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArrived\u003c/td\u003e\u003ctd\u003eThe patient/patients has/have arrived and is/are waiting to be seen.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efulfilled\u003ca name\u003d\"appointmentstatus-fulfilled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFulfilled\u003c/td\u003e\u003ctd\u003eThe planning stages of the appointment are now complete, the encounter resource will exist and will track further status changes. Note that an encounter may exist before the appointment status is fulfilled for many reasons.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"appointmentstatus-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe appointment has been cancelled.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enoshow\u003ca name\u003d\"appointmentstatus-noshow\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNo Show\u003c/td\u003e\u003ctd\u003eSome or all of the participant(s) have not/did not appear for the appointment (usually the patient).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"appointmentstatus-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in error\u003c/td\u003e\u003ctd\u003eThis instance should not have been part of this patient\u0027s medical record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003echecked-in\u003ca name\u003d\"appointmentstatus-checked-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChecked In\u003c/td\u003e\u003ctd\u003eWhen checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewaitlist\u003ca name\u003d\"appointmentstatus-waitlist\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWaitlisted\u003c/td\u003e\u003ctd\u003eThe appointment has been placed on a waitlist, to be scheduled/confirmed in the future when a slot/service is available.\nA specific time might or might not be pre-allocated.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/appointmentstatus",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.485"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AppointmentStatus",
+  "title": "AppointmentStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The free/busy status of an appointment.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/appointmentstatus",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "proposed",
+      "display": "Proposed",
+      "definition": "None of the participant(s) have finalized their acceptance of the appointment request, and the start/end time might not be set yet."
+    },
+    {
+      "code": "pending",
+      "display": "Pending",
+      "definition": "Some or all of the participant(s) have not finalized their acceptance of the appointment request."
+    },
+    {
+      "code": "booked",
+      "display": "Booked",
+      "definition": "All participant(s) have been considered and the appointment is confirmed to go ahead at the date/times specified."
+    },
+    {
+      "code": "arrived",
+      "display": "Arrived",
+      "definition": "The patient/patients has/have arrived and is/are waiting to be seen."
+    },
+    {
+      "code": "fulfilled",
+      "display": "Fulfilled",
+      "definition": "The planning stages of the appointment are now complete, the encounter resource will exist and will track further status changes. Note that an encounter may exist before the appointment status is fulfilled for many reasons."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The appointment has been cancelled."
+    },
+    {
+      "code": "noshow",
+      "display": "No Show",
+      "definition": "Some or all of the participant(s) have not/did not appear for the appointment (usually the patient)."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in error",
+      "definition": "This instance should not have been part of this patient\u0027s medical record."
+    },
+    {
+      "code": "checked-in",
+      "display": "Checked In",
+      "definition": "When checked in, all pre-encounter administrative work is complete, and the encounter may begin. (where multiple patients are involved, they are all present)."
+    },
+    {
+      "code": "waitlist",
+      "display": "Waitlisted",
+      "definition": "The appointment has been placed on a waitlist, to be scheduled/confirmed in the future when a slot/service is available.\nA specific time might or might not be pre-allocated."
+    }
+  ]
+}

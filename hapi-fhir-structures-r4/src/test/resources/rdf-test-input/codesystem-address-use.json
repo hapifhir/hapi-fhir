@@ -1,0 +1,88 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "address-use",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAddressUse\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe use of an address.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/address-use defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehome\u003ca name\u003d\"address-use-home\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHome\u003c/td\u003e\u003ctd\u003eA communication address at a home.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ework\u003ca name\u003d\"address-use-work\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWork\u003c/td\u003e\u003ctd\u003eAn office address. First choice for business related contacts during business hours.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etemp\u003ca name\u003d\"address-use-temp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTemporary\u003c/td\u003e\u003ctd\u003eA temporary address. The period can provide more detailed information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eold\u003ca name\u003d\"address-use-old\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOld / Incorrect\u003c/td\u003e\u003ctd\u003eThis address is no longer in use (or was never correct but retained for records).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebilling\u003ca name\u003d\"address-use-billing\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBilling\u003c/td\u003e\u003ctd\u003eAn address to be used to send bills, invoices, receipts etc.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/address-use",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.68"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AddressUse",
+  "title": "AddressUse",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The use of an address.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/address-use",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "home",
+      "display": "Home",
+      "definition": "A communication address at a home."
+    },
+    {
+      "code": "work",
+      "display": "Work",
+      "definition": "An office address. First choice for business related contacts during business hours."
+    },
+    {
+      "code": "temp",
+      "display": "Temporary",
+      "definition": "A temporary address. The period can provide more detailed information."
+    },
+    {
+      "code": "old",
+      "display": "Old / Incorrect",
+      "definition": "This address is no longer in use (or was never correct but retained for records)."
+    },
+    {
+      "code": "billing",
+      "display": "Billing",
+      "definition": "An address to be used to send bills, invoices, receipts etc."
+    }
+  ]
+}

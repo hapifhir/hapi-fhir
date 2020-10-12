@@ -1,0 +1,54 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "102",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003ch2\u003eDXA BONE DENSITOMETRY\u003c/h2\u003e\n\t\t\t\u003ctable\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eNAME\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eXXXXXXX\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eDOB\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e10/02/1974\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eREFERRING DR\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eSmith, Jane\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eINDICATIONS\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eEarly menopause on estrogen levels. No period  for 18 months\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003ePROCEDURE\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eDual energy x-ray absorptiometry (DEXA)\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\u003c/table\u003e\n\t\t\t\u003ch3\u003eBone Mineral Density\u003c/h3\u003e\n\t\t\t\u003ctable\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eScan Type\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eRegion\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eMeasured\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eAge\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eBMD\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eT-Score\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eZ-Score\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e?BMD(g/cm2)\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e?BMD(%)\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eAP Spine\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eL1-L4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e17/06/2008\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e34.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e1.148 g/cm²\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-0.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-0.5\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eLeft Femur\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eNeck\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e17/06/2008\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e34.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e0.891 g/cm²\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.0\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-0.9\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eLeft Femur\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eTotal\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e17/06/2008\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e34.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e0.887 g/cm²\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.2\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.3\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eRight Femur\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eNeck\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e17/06/2008\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e34.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e0.885 g/cm²\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.0\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.0\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003eRight Femur\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eTotal\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e17/06/2008\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e34.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e0.867 g/cm²\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-1.4\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\u003c/table\u003e\n\t\t\t\u003cp\u003eAssessment:\u003c/p\u003e\n\t\t\t\u003cul\u003e\n\t\t\t\t\u003cli\u003eThe Spine L1-L4 BMD is normal.\u003c/li\u003e\n\t\t\t\t\u003cli\u003eThe Left Femur Neck BMD is in the osteopenic range. Relative fracture risk is about 2.\u003c/li\u003e\n\t\t\t\t\u003cli\u003eThe Left Femur Total BMD is in the osteopenic range. Relative fracture risk is about 2.\u003c/li\u003e\n\t\t\t\t\u003cli\u003eThe Right Femur Neck BMD is in the osteopenic range. Relative fracture risk is about 2.\u003c/li\u003e\n\t\t\t\t\u003cli\u003eThe Right Femur Total BMD is in the osteopenic range. Relative fracture risk is about 2.\u003c/li\u003e\n\t\t\t\u003c/ul\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003eCOMMENT\u003c/b\u003e\n\t\t\t\u003c/p\u003e\n\t\t\t\u003cp\u003eOsteopenia on measured BMD. The estimated 10-year probability of fracture based on present age, gender and measured BMD is less than 10%. This absolute fracture risk remains low. A follow-up assessment may be considered in 2 to 3 years to monitor the trend in BMD.\u003c/p\u003e\n\t\t\t\u003cp\u003eThank you for your referral.  Dr Henry Seven  17/06/2008\u003c/p\u003e\n\t\t\t\u003cpre\u003e\nNote:\nWHO classification of osteoporosis (WHO Technical Report Series 1994: 843)\n- Normal: T-score equal to -1.0 s.d. or higher\n- Osteopenia: T-score  between -1.0 and -2.5 s.d.\n- Osteoporosis: T-score equal to -2.5 s.d. or lower\n- Severe/Established osteoporosis: Osteoporosis with one or more fragility fracture.\nT-score: The number of s.d. from the mean BMD for a gender-matched young adult population.\nZ-score: The number of s.d. from the mean BMD for an age-, weight- and gender-matched population.\nReference for 10-year probability of fracture risk: Kanis JA, Johnell O, Oden A, Dawson A,  De Laet C, Jonsson B. Ten year probabilities of osteoporotic fractures according to BMD and diagnostic thresholds. Osteoporos.Int. 2001;12(12):989-995.\nGE LUNAR PRODIGY DENSITOMETER\n\u003c/pre\u003e\n\t\t\u003c/div\u003e"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "38269-7"
+      }
+    ],
+    "text": "DXA BONE DENSITOMETRY"
+  },
+  "subject": {
+    "reference": "Patient/pat2"
+  },
+  "effectiveDateTime": "2008-06-17",
+  "issued": "2008-06-18T09:23:00+10:00",
+  "performer": [
+    {
+      "reference": "Practitioner/3ad0687e-f477-468c-afd5-fcc2bf897809",
+      "display": "Dr Henry Seven"
+    }
+  ],
+  "result": [
+    {
+      "reference": "Observation/bmd"
+    }
+  ],
+  "conclusionCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "391040000",
+          "display": "At risk of osteoporotic fracture"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

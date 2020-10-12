@@ -1,0 +1,82 @@
+{
+  "resourceType": "ValueSet",
+  "id": "system-restful-interaction",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSystemRestfulInteraction\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eOperations supported by REST at the system level.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"codesystem-restful-interaction.html\"\u003e\u003ccode\u003ehttp://hl7.org/fhir/restful-interaction\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-transaction\"\u003etransaction\u003c/a\u003e\u003c/td\u003e\u003ctd\u003etransaction\u003c/td\u003e\u003ctd\u003eUpdate, create or delete a set of resources as a single transaction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-batch\"\u003ebatch\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebatch\u003c/td\u003e\u003ctd\u003eperform a set of a separate interactions in a single http operation\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-search-system\"\u003esearch-system\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esearch-system\u003c/td\u003e\u003ctd\u003eSearch all resources based on some filter criteria.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-restful-interaction.html#restful-interaction-history-system\"\u003ehistory-system\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory-system\u003c/td\u003e\u003ctd\u003eRetrieve the change history for all resources on a system.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/system-restful-interaction",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.181"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SystemRestfulInteraction",
+  "title": "SystemRestfulInteraction",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Operations supported by REST at the system level.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/restful-interaction",
+        "concept": [
+          {
+            "code": "transaction"
+          },
+          {
+            "code": "batch"
+          },
+          {
+            "code": "search-system"
+          },
+          {
+            "code": "history-system"
+          }
+        ]
+      }
+    ]
+  }
+}

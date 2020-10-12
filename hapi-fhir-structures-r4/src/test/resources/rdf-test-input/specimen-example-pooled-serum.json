@@ -1,0 +1,59 @@
+{
+  "resourceType": "Specimen",
+  "id": "pooled-serum",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: pooled-serum\u003c/p\u003e\u003cp\u003e\u003cb\u003eaccessionIdentifier\u003c/b\u003e: 20171120-1234\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Pooled serum sample \u003cspan\u003e(Details : {https://vetmed.iastate.edu/vdl code \u0027Serum sample, pooled\u0027 \u003d \u0027Serum sample, pooled\u0027, given as \u0027Serum sample, pooled\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eGroup/herd1\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eCollections\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollector\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollected[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eJames Herriot, FRCVS\u003c/td\u003e\u003ctd\u003e14/11/2017\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eContainers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eRed Top Blood Collection Tube \u003cspan\u003e(Details : {https://vetmed.iastate.edu/vdl code \u0027RTT\u0027 \u003d \u0027RTT\u0027, given as \u0027Red Top Tube\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: Pooled serum sample from 30 individuals\u003c/p\u003e\u003c/div\u003e"
+  },
+  "accessionIdentifier": {
+    "system": "https://vetmed.iastate.edu/vdl",
+    "value": "20171120-1234"
+  },
+  "type": {
+    "coding": [
+      {
+        "system": "https://vetmed.iastate.edu/vdl",
+        "code": "Serum sample, pooled",
+        "display": "Serum sample, pooled"
+      }
+    ],
+    "text": "Pooled serum sample"
+  },
+  "subject": {
+    "reference": "Group/herd1"
+  },
+  "collection": {
+    "collector": {
+      "display": "James Herriot, FRCVS"
+    },
+    "collectedDateTime": "2017-11-14"
+  },
+  "container": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "https://vetmed.iastate.edu/vdl",
+            "code": "RTT",
+            "display": "Red Top Tube"
+          }
+        ],
+        "text": "Red Top Blood Collection Tube"
+      }
+    }
+  ],
+  "note": [
+    {
+      "text": "Pooled serum sample from 30 individuals"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

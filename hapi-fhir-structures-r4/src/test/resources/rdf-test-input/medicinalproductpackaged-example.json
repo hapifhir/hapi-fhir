@@ -1,0 +1,168 @@
+{
+  "resourceType": "MedicinalProductPackaged",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: {PCID}\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: ALU-PVC/PVDC BLISTERS. CARTONS OF 10 FILM-COATED TABLETS. \u003c/p\u003e\u003ch3\u003eBatchIdentifiers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eOuterPackaging\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eAAF5699\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epackageItem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Carton \u003cspan\u003e(Details : {http://ema.europa.eu/example/packageitemcontainertype code \u0027Carton\u0027 \u003d \u0027Carton)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 1 1\u003c/p\u003e\u003cp\u003e\u003cb\u003ematerial\u003c/b\u003e: PVC \u003cspan\u003e(Details : {http://ema.europa.eu/example/packageItemContainerMaterial code \u0027PVC\u0027 \u003d \u0027PVC)\u003c/span\u003e, PVDC \u003cspan\u003e(Details : {http://ema.europa.eu/example/packageItemContainerMaterial code \u0027PVDC\u0027 \u003d \u0027PVDC)\u003c/span\u003e, alu \u003cspan\u003e(Details : {http://ema.europa.eu/example/packageItemContainerMaterial code \u0027alu\u0027 \u003d \u0027alu)\u003c/span\u003e\u003c/p\u003e\u003ch3\u003ePackageItems\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003ephysicalCharacteristics\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003emanufacturer\u003c/b\u003e: \u003ca\u003eOrganization/example\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://ema.europa.eu/example/pcid",
+      "value": "{PCID}"
+    }
+  ],
+  "description": "ALU-PVC/PVDC BLISTERS. CARTONS OF 10 FILM-COATED TABLETS. ",
+  "batchIdentifier": [
+    {
+      "outerPackaging": {
+        "system": "http://ema.europa.eu/example/baid1",
+        "value": "AAF5699",
+        "period": {
+          "end": "2016-06-06"
+        }
+      }
+    }
+  ],
+  "packageItem": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://ema.europa.eu/example/packageitemcontainertype",
+            "code": "Carton"
+          }
+        ]
+      },
+      "quantity": {
+        "value": 1,
+        "unit": "1"
+      },
+      "material": [
+        {
+          "coding": [
+            {
+              "system": "http://ema.europa.eu/example/packageItemContainerMaterial",
+              "code": "PVC"
+            }
+          ]
+        },
+        {
+          "coding": [
+            {
+              "system": "http://ema.europa.eu/example/packageItemContainerMaterial",
+              "code": "PVDC"
+            }
+          ]
+        },
+        {
+          "coding": [
+            {
+              "system": "http://ema.europa.eu/example/packageItemContainerMaterial",
+              "code": "alu"
+            }
+          ]
+        }
+      ],
+      "packageItem": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://ema.europa.eu/example/packageitemcontainertype",
+                "code": "Blister"
+              }
+            ]
+          },
+          "quantity": {
+            "value": 1,
+            "unit": "1"
+          },
+          "material": [
+            {
+              "coding": [
+                {
+                  "system": "http://ema.europa.eu/example/packageItemContainerMaterial",
+                  "code": "Paperboard"
+                }
+              ]
+            }
+          ],
+          "manufacturedItem": [
+            {
+              "reference": "MedicinalProductManufactured/example"
+            }
+          ],
+          "physicalCharacteristics": {
+            "height": {
+              "value": 125,
+              "unit": "mm"
+            },
+            "width": {
+              "value": 45,
+              "unit": "mm"
+            }
+          },
+          "shelfLifeStorage": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://ema.europa.eu/example/shelfLifeTypePlaceHolder",
+                    "code": "ShelfLifeofPackagedMedicinalProduct"
+                  }
+                ]
+              },
+              "period": {
+                "value": 3,
+                "unit": "a"
+              },
+              "specialPrecautionsForStorage": [
+                {
+                  "coding": [
+                    {
+                      "system": "http://ema.europa.eu/example/specialprecautionsforstorage",
+                      "code": "Thismedicinalproductdoesnotrequireanyspecialstoragecondition."
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "manufacturer": [
+            {
+              "reference": "Organization/example"
+            }
+          ]
+        }
+      ],
+      "physicalCharacteristics": {
+        "height": {
+          "value": 50,
+          "unit": "mm"
+        },
+        "width": {
+          "value": 136,
+          "unit": "mm"
+        },
+        "depth": {
+          "value": 23.5,
+          "unit": "mm"
+        }
+      },
+      "manufacturer": [
+        {
+          "reference": "Organization/example"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

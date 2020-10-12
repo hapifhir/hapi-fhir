@@ -1,0 +1,565 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "ParameterDefinition",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ctable border\u003d\"0\" cellpadding\u003d\"0\" cellspacing\u003d\"0\" style\u003d\"border: 0px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003ctr style\u003d\"border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"The logical name of the element\"\u003eName\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Information about the use of the element\"\u003eFlags\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Minimum and Maximum # of times the the element can appear in the instance\"\u003eCard.\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"width: 100px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Reference to the type of the element\"\u003eType\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Additional information about the element\"\u003eDescription \u0026amp; Constraints\u003c/a\u003e\u003cspan style\u003d\"float: right\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e\u003c/a\u003e\u003c/span\u003e\u003c/th\u003e\u003c/tr\u003e\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPQfAOvGUf7ztuvPMf/78/fkl/Pbg+u8Rvjqteu2Pf3zxPz36Pz0z+vTmPzurPvuw/npofbjquvNefHVduuyN+uuMu3Oafbgjfnqvf/3zv/3xevPi+vRjP/20/bmsP///wD/ACH5BAEKAB8ALAAAAAAQABAAAAVl4CeOZGme5qCqqDg8jyVJaz1876DsmAQAgqDgltspMEhMJoMZ4iy6I1AooFCIv+wKybziALVAoAEjYLwDgGIpJhMslgxaLR4/3rMAWoBp32V5exg8Shl1ckRUQVaMVkQ2kCstKCEAOw\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Element\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition\" title\u003d\"ParameterDefinition : The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.\"\u003eParameterDefinition\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; border: 1px grey solid; font-weight: bold; color: black; background-color: #fff5e6\" href\u003d\"versions.html#std-process\" title\u003d\"Standards Status \u003d Trial Use\"\u003eTU\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"element.html\"\u003eElement\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eDefinition of a parameter to a module\u003cbr/\u003eElements defined in Ancestors: \u003ca href\u003d\"element.html#Element\" title\u003d\"Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.\"\u003eid\u003c/a\u003e, \u003ca href\u003d\"element.html#Element\" title\u003d\"May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.\"\u003eextension\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.name\" title\u003d\"ParameterDefinition.name : The name of the parameter used to allow access to the value of the parameter in evaluation contexts.\"\u003ename\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eName used to access the parameter value\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.use\" title\u003d\"ParameterDefinition.use : Whether the parameter is input or output for the module.\"\u003euse\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e1..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003ein | out\u003cbr/\u003e\u003ca href\u003d\"valueset-operation-parameter-use.html\" title\u003d\"Whether the parameter is input or output.\"\u003eOperationParameterUse\u003c/a\u003e (\u003ca href\u003d\"terminologies.html#required\" title\u003d\"To be conformant, the concept in this element SHALL be from the specified value set.\"\u003eRequired\u003c/a\u003e)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.min\" title\u003d\"ParameterDefinition.min : The minimum number of times this parameter SHALL appear in the request or response.\"\u003emin\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eMinimum cardinality\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.max\" title\u003d\"ParameterDefinition.max : The maximum number of times this element is permitted to appear in the request or response.\"\u003emax\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eMaximum cardinality (a number of *)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.documentation\" title\u003d\"ParameterDefinition.documentation : A brief discussion of what the parameter is for and how it is used by the module.\"\u003edocumentation\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eA brief description of the parameter\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.type\" title\u003d\"ParameterDefinition.type : The type of the parameter.\"\u003etype\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e1..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eWhat type of value\u003cbr/\u003e\u003ca href\u003d\"valueset-all-types.html\" title\u003d\"A list of all the concrete types defined in this version of the FHIR specification - Abstract Types, Data Types and Resource Types.\"\u003eFHIRAllTypes\u003c/a\u003e (\u003ca href\u003d\"terminologies.html#required\" title\u003d\"To be conformant, the concept in this element SHALL be from the specified value set.\"\u003eRequired\u003c/a\u003e)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjEwMPRyoQAAAFxJREFUOE/NjEEOACEIA/0o/38GGw+agoXYeNnDJDCUDnd/gkoFKhWozJiZI3gLwY6rAgxhsPKTPUzycTl8lAryMyMsVQG6TFi6cHULyz8KOjC7OIQKlQpU3uPjAwhX2CCcGsgOAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Reference to another Resource\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"metadatatypes-definitions.html#ParameterDefinition.profile\" title\u003d\"ParameterDefinition.profile : If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.\"\u003eprofile\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#canonical\"\u003ecanonical\u003c/a\u003e(\u003ca href\u003d\"structuredefinition.html\"\u003eStructureDefinition\u003c/a\u003e)\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eWhat profile the value is expected to be\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr\u003e\u003ctd colspan\u003d\"5\" class\u003d\"hierarchy\"\u003e\u003cbr/\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e Documentation for this format\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/ParameterDefinition",
+  "version": "4.0.1",
+  "name": "ParameterDefinition",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 FHIR Standard",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Base StructureDefinition for ParameterDefinition Type: The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    }
+  ],
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "ParameterDefinition",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Element",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "ParameterDefinition",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+            "valueCode": "trial-use"
+          }
+        ],
+        "path": "ParameterDefinition",
+        "short": "Definition of a parameter to a module",
+        "definition": "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "ParameterDefinition",
+          "min": 0,
+          "max": "*"
+        },
+        "condition": [
+          "ele-1"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "ParameterDefinition.id",
+        "path": "ParameterDefinition.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "ParameterDefinition.extension",
+        "path": "ParameterDefinition.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "ParameterDefinition.name",
+        "path": "ParameterDefinition.name",
+        "short": "Name used to access the parameter value",
+        "definition": "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.name",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.use",
+        "path": "ParameterDefinition.use",
+        "short": "in | out",
+        "definition": "Whether the parameter is input or output for the module.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.use",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "ParameterUse"
+            }
+          ],
+          "strength": "required",
+          "description": "Whether the parameter is input or output.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/operation-parameter-use|4.0.1"
+        }
+      },
+      {
+        "id": "ParameterDefinition.min",
+        "path": "ParameterDefinition.min",
+        "short": "Minimum cardinality",
+        "definition": "The minimum number of times this parameter SHALL appear in the request or response.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.min",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.max",
+        "path": "ParameterDefinition.max",
+        "short": "Maximum cardinality (a number of *)",
+        "definition": "The maximum number of times this element is permitted to appear in the request or response.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.max",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.documentation",
+        "path": "ParameterDefinition.documentation",
+        "short": "A brief description of the parameter",
+        "definition": "A brief discussion of what the parameter is for and how it is used by the module.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.documentation",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.type",
+        "path": "ParameterDefinition.type",
+        "short": "What type of value",
+        "definition": "The type of the parameter.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.type",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "FHIRAllTypes"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+              "valueBoolean": true
+            }
+          ],
+          "strength": "required",
+          "description": "A list of all the concrete types defined in this version of the FHIR specification - Abstract Types, Data Types and Resource Types.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/all-types|4.0.1"
+        }
+      },
+      {
+        "id": "ParameterDefinition.profile",
+        "path": "ParameterDefinition.profile",
+        "short": "What profile the value is expected to be",
+        "definition": "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "ParameterDefinition.profile",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "ParameterDefinition",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+            "valueCode": "trial-use"
+          }
+        ],
+        "path": "ParameterDefinition",
+        "short": "Definition of a parameter to a module",
+        "definition": "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "ParameterDefinition.name",
+        "path": "ParameterDefinition.name",
+        "short": "Name used to access the parameter value",
+        "definition": "The name of the parameter used to allow access to the value of the parameter in evaluation contexts.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.use",
+        "path": "ParameterDefinition.use",
+        "short": "in | out",
+        "definition": "Whether the parameter is input or output for the module.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "ParameterUse"
+            }
+          ],
+          "strength": "required",
+          "description": "Whether the parameter is input or output.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/operation-parameter-use|4.0.1"
+        }
+      },
+      {
+        "id": "ParameterDefinition.min",
+        "path": "ParameterDefinition.min",
+        "short": "Minimum cardinality",
+        "definition": "The minimum number of times this parameter SHALL appear in the request or response.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.max",
+        "path": "ParameterDefinition.max",
+        "short": "Maximum cardinality (a number of *)",
+        "definition": "The maximum number of times this element is permitted to appear in the request or response.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.documentation",
+        "path": "ParameterDefinition.documentation",
+        "short": "A brief description of the parameter",
+        "definition": "A brief discussion of what the parameter is for and how it is used by the module.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "ParameterDefinition.type",
+        "path": "ParameterDefinition.type",
+        "short": "What type of value",
+        "definition": "The type of the parameter.",
+        "min": 1,
+        "max": "1",
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "FHIRAllTypes"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+              "valueBoolean": true
+            }
+          ],
+          "strength": "required",
+          "description": "A list of all the concrete types defined in this version of the FHIR specification - Abstract Types, Data Types and Resource Types.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/all-types|4.0.1"
+        }
+      },
+      {
+        "id": "ParameterDefinition.profile",
+        "path": "ParameterDefinition.profile",
+        "short": "What profile the value is expected to be",
+        "definition": "If specified, this indicates a profile that the input data must conform to, or that the output data will conform to.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/StructureDefinition"
+            ]
+          }
+        ],
+        "isSummary": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "list-empty-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eList Empty Reasons\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eGeneral reasons for a list to be empty. Reasons are either related to a summary list (i.e. problem or medication list) or to a workflow related list (i.e. consultation list).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/list-empty-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enilknown\u003ca name\u003d\"list-empty-reason-nilknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNil Known\u003c/td\u003e\u003ctd\u003eClinical judgment that there are no known items for this list after reasonable investigation. Note that this a positive statement by a clinical user, and not a default position asserted by a computer system in the lack of other information. Example uses:  * For allergies: the patient or patient\u0027s agent/guardian has asserted that he/she is not aware of any allergies (NKA - nil known allergies)  * For medications: the patient or patient\u0027s agent/guardian has asserted that the patient is known to be taking no medications  * For diagnoses, problems and procedures: the patient or patient\u0027s agent/guardian has asserted that there is no known event to record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotasked\u003ca name\u003d\"list-empty-reason-notasked\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Asked\u003c/td\u003e\u003ctd\u003eThe investigation to find out whether there are items for this list has not occurred.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewithheld\u003ca name\u003d\"list-empty-reason-withheld\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformation Withheld\u003c/td\u003e\u003ctd\u003eThe content of the list was not provided due to privacy or confidentiality concerns. Note that it should not be assumed that this means that the particular information in question was withheld due to its contents - it can also be a policy decision.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunavailable\u003ca name\u003d\"list-empty-reason-unavailable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnavailable\u003c/td\u003e\u003ctd\u003eInformation to populate this list cannot be obtained; e.g. unconscious patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotstarted\u003ca name\u003d\"list-empty-reason-notstarted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Started\u003c/td\u003e\u003ctd\u003eThe work to populate this list has not yet begun.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclosed\u003ca name\u003d\"list-empty-reason-closed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClosed\u003c/td\u003e\u003ctd\u003eThis list has now closed or has ceased to be relevant or useful.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/list-empty-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1106"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ListEmptyReasons",
+  "title": "List Empty Reasons",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "General reasons for a list to be empty. Reasons are either related to a summary list (i.e. problem or medication list) or to a workflow related list (i.e. consultation list).",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/list-empty-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "nilknown",
+      "display": "Nil Known",
+      "definition": "Clinical judgment that there are no known items for this list after reasonable investigation. Note that this a positive statement by a clinical user, and not a default position asserted by a computer system in the lack of other information. Example uses:  * For allergies: the patient or patient\u0027s agent/guardian has asserted that he/she is not aware of any allergies (NKA - nil known allergies)  * For medications: the patient or patient\u0027s agent/guardian has asserted that the patient is known to be taking no medications  * For diagnoses, problems and procedures: the patient or patient\u0027s agent/guardian has asserted that there is no known event to record."
+    },
+    {
+      "code": "notasked",
+      "display": "Not Asked",
+      "definition": "The investigation to find out whether there are items for this list has not occurred."
+    },
+    {
+      "code": "withheld",
+      "display": "Information Withheld",
+      "definition": "The content of the list was not provided due to privacy or confidentiality concerns. Note that it should not be assumed that this means that the particular information in question was withheld due to its contents - it can also be a policy decision."
+    },
+    {
+      "code": "unavailable",
+      "display": "Unavailable",
+      "definition": "Information to populate this list cannot be obtained; e.g. unconscious patient."
+    },
+    {
+      "code": "notstarted",
+      "display": "Not Started",
+      "definition": "The work to populate this list has not yet begun."
+    },
+    {
+      "code": "closed",
+      "display": "Closed",
+      "definition": "This list has now closed or has ceased to be relevant or useful."
+    }
+  ]
+}

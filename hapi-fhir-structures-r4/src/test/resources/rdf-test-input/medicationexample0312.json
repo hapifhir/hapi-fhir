@@ -1,0 +1,69 @@
+{
+  "resourceType": "Medication",
+  "id": "med0312",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: med0312\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Nystatin 100,000 units/ml oral suspension (product) \u003cspan\u003e(Details : {SNOMED CT code \u0027324689003\u0027 \u003d \u0027Nystatin 100,000units/mL oral suspension\u0027, given as \u0027Nystatin 100,000 units/ml oral suspension (product)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eform\u003c/b\u003e: Oral suspension (qualifier value) \u003cspan\u003e(Details : {SNOMED CT code \u0027387048002\u0027 \u003d \u0027Nystatin\u0027, given as \u0027Oral suspension (qualifier value)\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eIngredients\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eItem[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrength\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eid: sub02; Nystatin (substance) \u003cspan\u003e(Details : {SNOMED CT code \u0027387048002\u0027 \u003d \u0027Nystatin\u0027, given as \u0027Nystatin (substance)\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e100000 [IU]\u003cspan\u003e (Details: UCUM code [IU] \u003d \u0027IU\u0027)\u003c/span\u003e/1 mL\u003cspan\u003e (Details: UCUM code mL \u003d \u0027mL\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Substance",
+      "id": "sub02",
+      "code": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "387048002",
+            "display": "Nystatin (substance)"
+          }
+        ]
+      }
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "324689003",
+        "display": "Nystatin 100,000 units/ml oral suspension (product)"
+      }
+    ]
+  },
+  "form": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "387048002",
+        "display": "Oral suspension (qualifier value)"
+      }
+    ]
+  },
+  "ingredient": [
+    {
+      "itemReference": {
+        "reference": "#sub02"
+      },
+      "strength": {
+        "numerator": {
+          "value": 100000,
+          "system": "http://unitsofmeasure.org",
+          "code": "[IU]"
+        },
+        "denominator": {
+          "value": 1,
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

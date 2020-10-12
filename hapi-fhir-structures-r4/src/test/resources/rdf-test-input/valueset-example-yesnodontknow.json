@@ -1,0 +1,52 @@
+{
+  "resourceType": "ValueSet",
+  "id": "yesnodontknow",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch3\u003eValue Set Contents\u003c/h3\u003e\n      \u003cp\u003eThis value set contains 3 concepts\u003c/p\u003e\n      \u003ctable class\u003d\"codes\"\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eSystem\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDisplay\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDefinition\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v2-0136-Y\"\u003e \u003c/a\u003e\n            \u003ca href\u003d\"v2/0136/index.html#v2-0136-Y\"\u003eY\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ehttp://terminology.hl7.org/CodeSystem/v2-0136\u003c/td\u003e\n          \u003ctd\u003eYes\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v2-0136-N\"\u003e \u003c/a\u003e\n            \u003ca href\u003d\"v2/0136/index.html#v2-0136-N\"\u003eN\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ehttp://terminology.hl7.org/CodeSystem/v2-0136\u003c/td\u003e\n          \u003ctd\u003eNo\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-data-absent-reason-asked-unknown\"\u003e \u003c/a\u003e\n            \u003ca href\u003d\"codesystem-data-absent-reason.html#data-absent-reason-asked-unknown\"\u003easked-unknown\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ehttp://terminology.hl7.org/CodeSystem/data-absent-reason\u003c/td\u003e\n          \u003ctd\u003eDon\u0027t know\u003c/td\u003e\n          \u003ctd\u003eThe source was asked but does not know the value.\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/yesnodontknow",
+  "version": "4.0.1",
+  "name": "Yes/No/Don\u0027t Know",
+  "status": "draft",
+  "description": "For Capturing simple yes-no-don\u0027t know answers",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://terminology.hl7.org/ValueSet/v2-0136"
+        ]
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+        "concept": [
+          {
+            "code": "asked-unknown",
+            "display": "Don\u0027t know"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:bf99fe50-2c2b-41ad-bd63-bee6919810b4",
+    "timestamp": "2015-07-14T10:00:00Z",
+    "contains": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0136",
+        "code": "Y",
+        "display": "Yes"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0136",
+        "code": "N",
+        "display": "No"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+        "code": "asked-unknown",
+        "display": "Don\u0027t know"
+      }
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "resourceType": "Group",
+  "id": "102",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eSelected Patients\u003c/p\u003e\n      \u003cul\u003e\n        \u003cli\u003ePatient Donald DUCK @ Acme Healthcare, Inc. MR \u003d 654321\u003c/li\u003e\n        \u003cli\u003ePatient Donald D DUCK @ Acme Healthcare, Inc. MR \u003d 123456\u003c/li\u003e\n        \u003cli\u003ePatient Simon Notsowell @ Acme Healthcare, Inc. MR \u003d 123457, DECEASED\u003c/li\u003e\n        \u003cli\u003ePatient Sandy Notsowell @ Acme Healthcare, Inc. MR \u003d 123458, DECEASED\u003c/li\u003e\n      \u003c/ul\u003e\n    \u003c/div\u003e"
+  },
+  "type": "person",
+  "actual": true,
+  "member": [
+    {
+      "entity": {
+        "reference": "Patient/pat1"
+      },
+      "period": {
+        "start": "2014-10-08"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/pat2"
+      },
+      "period": {
+        "start": "2015-04-02"
+      },
+      "inactive": true
+    },
+    {
+      "entity": {
+        "reference": "Patient/pat3"
+      },
+      "period": {
+        "start": "2015-08-06"
+      }
+    },
+    {
+      "entity": {
+        "reference": "Patient/pat4"
+      },
+      "period": {
+        "start": "2015-08-06"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

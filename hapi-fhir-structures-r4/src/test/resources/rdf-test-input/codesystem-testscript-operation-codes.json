@@ -1,0 +1,282 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "testscript-operation-codes",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTest script operation code\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines a set of codes that are used to indicate the supported operations of a testing engine or tool.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/testscript-operation-codes defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eread\u003ca name\u003d\"testscript-operation-codes-read\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRead\u003c/td\u003e\u003ctd\u003eRead the current state of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evread\u003ca name\u003d\"testscript-operation-codes-vread\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVersion Read\u003c/td\u003e\u003ctd\u003eRead the state of a specific version of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eupdate\u003ca name\u003d\"testscript-operation-codes-update\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUpdate\u003c/td\u003e\u003ctd\u003eUpdate an existing resource by its id.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eupdateCreate\u003ca name\u003d\"testscript-operation-codes-updateCreate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreate using Update\u003c/td\u003e\u003ctd\u003eUpdate an existing resource by its id (or create it if it is new).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatch\u003ca name\u003d\"testscript-operation-codes-patch\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatch\u003c/td\u003e\u003ctd\u003ePatch an existing resource by its id.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edelete\u003ca name\u003d\"testscript-operation-codes-delete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDelete\u003c/td\u003e\u003ctd\u003eDelete a resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeleteCondSingle\u003ca name\u003d\"testscript-operation-codes-deleteCondSingle\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConditional Delete Single\u003c/td\u003e\u003ctd\u003eConditionally delete a single resource based on search parameters.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeleteCondMultiple\u003ca name\u003d\"testscript-operation-codes-deleteCondMultiple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConditional Delete Multiple\u003c/td\u003e\u003ctd\u003eConditionally delete one or more resources based on search parameters.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehistory\u003ca name\u003d\"testscript-operation-codes-history\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory\u003c/td\u003e\u003ctd\u003eRetrieve the change history for a particular resource or resource type.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecreate\u003ca name\u003d\"testscript-operation-codes-create\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreate\u003c/td\u003e\u003ctd\u003eCreate a new resource with a server assigned id.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esearch\u003ca name\u003d\"testscript-operation-codes-search\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSearch\u003c/td\u003e\u003ctd\u003eSearch based on some filter criteria.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebatch\u003ca name\u003d\"testscript-operation-codes-batch\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBatch\u003c/td\u003e\u003ctd\u003eUpdate, create or delete a set of resources as independent actions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransaction\u003ca name\u003d\"testscript-operation-codes-transaction\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTransaction\u003c/td\u003e\u003ctd\u003eUpdate, create or delete a set of resources as a single transaction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecapabilities\u003ca name\u003d\"testscript-operation-codes-capabilities\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCapabilities\u003c/td\u003e\u003ctd\u003eGet a capability statement for the system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eapply\u003ca name\u003d\"testscript-operation-codes-apply\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$apply\u003c/td\u003e\u003ctd\u003eRealizes an ActivityDefinition in a specific context\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclosure\u003ca name\u003d\"testscript-operation-codes-closure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$closure\u003c/td\u003e\u003ctd\u003eClosure Table Maintenance\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efind-matches\u003ca name\u003d\"testscript-operation-codes-find-matches\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$find-matches\u003c/td\u003e\u003ctd\u003eFinding Codes based on supplied properties\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econforms\u003ca name\u003d\"testscript-operation-codes-conforms\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$conforms\u003c/td\u003e\u003ctd\u003eCompare two systems CapabilityStatements\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edata-requirements\u003ca name\u003d\"testscript-operation-codes-data-requirements\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$data-requirements\u003c/td\u003e\u003ctd\u003eAggregates and returns the parameters and data requirements for a resource and all its dependencies as a single module definition\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edocument\u003ca name\u003d\"testscript-operation-codes-document\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$document\u003c/td\u003e\u003ctd\u003eGenerate a Document\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eevaluate\u003ca name\u003d\"testscript-operation-codes-evaluate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$evaluate\u003c/td\u003e\u003ctd\u003eRequest clinical decision support guidance based on a specific decision support module\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eevaluate-measure\u003ca name\u003d\"testscript-operation-codes-evaluate-measure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$evaluate-measure\u003c/td\u003e\u003ctd\u003eInvoke an eMeasure and obtain the results\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeverything\u003ca name\u003d\"testscript-operation-codes-everything\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$everything\u003c/td\u003e\u003ctd\u003eReturn all the related information as described in the Encounter or Patient\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexpand\u003ca name\u003d\"testscript-operation-codes-expand\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$expand\u003c/td\u003e\u003ctd\u003eValue Set Expansion\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efind\u003ca name\u003d\"testscript-operation-codes-find\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$find\u003c/td\u003e\u003ctd\u003eFind a functional list\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egraphql\u003ca name\u003d\"testscript-operation-codes-graphql\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$graphql\u003c/td\u003e\u003ctd\u003eInvoke a GraphQL query\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eimplements\u003ca name\u003d\"testscript-operation-codes-implements\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$implements\u003c/td\u003e\u003ctd\u003eTest if a server implements a client\u0027s required operations\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elastn\u003ca name\u003d\"testscript-operation-codes-lastn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$lastn\u003c/td\u003e\u003ctd\u003eLast N Observations Query\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elookup\u003ca name\u003d\"testscript-operation-codes-lookup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$lookup\u003c/td\u003e\u003ctd\u003eConcept Look Up and Decomposition\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ematch\u003ca name\u003d\"testscript-operation-codes-match\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$match\u003c/td\u003e\u003ctd\u003eFind patient matches using MPI based logic\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emeta\u003ca name\u003d\"testscript-operation-codes-meta\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$meta\u003c/td\u003e\u003ctd\u003eAccess a list of profiles, tags, and security labels\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emeta-add\u003ca name\u003d\"testscript-operation-codes-meta-add\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$meta-add\u003c/td\u003e\u003ctd\u003eAdd profiles, tags, and security labels to a resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emeta-delete\u003ca name\u003d\"testscript-operation-codes-meta-delete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$meta-delete\u003c/td\u003e\u003ctd\u003eDelete profiles, tags, and security labels for a resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epopulate\u003ca name\u003d\"testscript-operation-codes-populate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$populate\u003c/td\u003e\u003ctd\u003ePopulate Questionnaire\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epopulatehtml\u003ca name\u003d\"testscript-operation-codes-populatehtml\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$populatehtml\u003c/td\u003e\u003ctd\u003eGenerate HTML for Questionnaire\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epopulatelink\u003ca name\u003d\"testscript-operation-codes-populatelink\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$populatelink\u003c/td\u003e\u003ctd\u003eGenerate a link to a Questionnaire completion webpage\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprocess-message\u003ca name\u003d\"testscript-operation-codes-process-message\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$process-message\u003c/td\u003e\u003ctd\u003eProcess a message according to the defined event\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003equestionnaire\u003ca name\u003d\"testscript-operation-codes-questionnaire\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$questionnaire\u003c/td\u003e\u003ctd\u003eBuild Questionnaire\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estats\u003ca name\u003d\"testscript-operation-codes-stats\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$stats\u003c/td\u003e\u003ctd\u003eObservation Statistics\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubset\u003ca name\u003d\"testscript-operation-codes-subset\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$subset\u003c/td\u003e\u003ctd\u003eFetch a subset of the CapabilityStatement resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubsumes\u003ca name\u003d\"testscript-operation-codes-subsumes\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$subsumes\u003c/td\u003e\u003ctd\u003eCodeSystem Subsumption Testing\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransform\u003ca name\u003d\"testscript-operation-codes-transform\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$transform\u003c/td\u003e\u003ctd\u003eModel Instance Transformation\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etranslate\u003ca name\u003d\"testscript-operation-codes-translate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$translate\u003c/td\u003e\u003ctd\u003eConcept Translation\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evalidate\u003ca name\u003d\"testscript-operation-codes-validate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$validate\u003c/td\u003e\u003ctd\u003eValidate a resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evalidate-code\u003ca name\u003d\"testscript-operation-codes-validate-code\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e$validate-code\u003c/td\u003e\u003ctd\u003eValueSet based Validation\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1195"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TestScriptOperationCode",
+  "title": "Test script operation code",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines a set of codes that are used to indicate the supported operations of a testing engine or tool.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/testscript-operation-codes",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "read",
+      "display": "Read",
+      "definition": "Read the current state of the resource."
+    },
+    {
+      "code": "vread",
+      "display": "Version Read",
+      "definition": "Read the state of a specific version of the resource."
+    },
+    {
+      "code": "update",
+      "display": "Update",
+      "definition": "Update an existing resource by its id."
+    },
+    {
+      "code": "updateCreate",
+      "display": "Create using Update",
+      "definition": "Update an existing resource by its id (or create it if it is new)."
+    },
+    {
+      "code": "patch",
+      "display": "Patch",
+      "definition": "Patch an existing resource by its id."
+    },
+    {
+      "code": "delete",
+      "display": "Delete",
+      "definition": "Delete a resource."
+    },
+    {
+      "code": "deleteCondSingle",
+      "display": "Conditional Delete Single",
+      "definition": "Conditionally delete a single resource based on search parameters."
+    },
+    {
+      "code": "deleteCondMultiple",
+      "display": "Conditional Delete Multiple",
+      "definition": "Conditionally delete one or more resources based on search parameters."
+    },
+    {
+      "code": "history",
+      "display": "History",
+      "definition": "Retrieve the change history for a particular resource or resource type."
+    },
+    {
+      "code": "create",
+      "display": "Create",
+      "definition": "Create a new resource with a server assigned id."
+    },
+    {
+      "code": "search",
+      "display": "Search",
+      "definition": "Search based on some filter criteria."
+    },
+    {
+      "code": "batch",
+      "display": "Batch",
+      "definition": "Update, create or delete a set of resources as independent actions."
+    },
+    {
+      "code": "transaction",
+      "display": "Transaction",
+      "definition": "Update, create or delete a set of resources as a single transaction."
+    },
+    {
+      "code": "capabilities",
+      "display": "Capabilities",
+      "definition": "Get a capability statement for the system."
+    },
+    {
+      "code": "apply",
+      "display": "$apply",
+      "definition": "Realizes an ActivityDefinition in a specific context"
+    },
+    {
+      "code": "closure",
+      "display": "$closure",
+      "definition": "Closure Table Maintenance"
+    },
+    {
+      "code": "find-matches",
+      "display": "$find-matches",
+      "definition": "Finding Codes based on supplied properties"
+    },
+    {
+      "code": "conforms",
+      "display": "$conforms",
+      "definition": "Compare two systems CapabilityStatements"
+    },
+    {
+      "code": "data-requirements",
+      "display": "$data-requirements",
+      "definition": "Aggregates and returns the parameters and data requirements for a resource and all its dependencies as a single module definition"
+    },
+    {
+      "code": "document",
+      "display": "$document",
+      "definition": "Generate a Document"
+    },
+    {
+      "code": "evaluate",
+      "display": "$evaluate",
+      "definition": "Request clinical decision support guidance based on a specific decision support module"
+    },
+    {
+      "code": "evaluate-measure",
+      "display": "$evaluate-measure",
+      "definition": "Invoke an eMeasure and obtain the results"
+    },
+    {
+      "code": "everything",
+      "display": "$everything",
+      "definition": "Return all the related information as described in the Encounter or Patient"
+    },
+    {
+      "code": "expand",
+      "display": "$expand",
+      "definition": "Value Set Expansion"
+    },
+    {
+      "code": "find",
+      "display": "$find",
+      "definition": "Find a functional list"
+    },
+    {
+      "code": "graphql",
+      "display": "$graphql",
+      "definition": "Invoke a GraphQL query"
+    },
+    {
+      "code": "implements",
+      "display": "$implements",
+      "definition": "Test if a server implements a client\u0027s required operations"
+    },
+    {
+      "code": "lastn",
+      "display": "$lastn",
+      "definition": "Last N Observations Query"
+    },
+    {
+      "code": "lookup",
+      "display": "$lookup",
+      "definition": "Concept Look Up and Decomposition"
+    },
+    {
+      "code": "match",
+      "display": "$match",
+      "definition": "Find patient matches using MPI based logic"
+    },
+    {
+      "code": "meta",
+      "display": "$meta",
+      "definition": "Access a list of profiles, tags, and security labels"
+    },
+    {
+      "code": "meta-add",
+      "display": "$meta-add",
+      "definition": "Add profiles, tags, and security labels to a resource"
+    },
+    {
+      "code": "meta-delete",
+      "display": "$meta-delete",
+      "definition": "Delete profiles, tags, and security labels for a resource"
+    },
+    {
+      "code": "populate",
+      "display": "$populate",
+      "definition": "Populate Questionnaire"
+    },
+    {
+      "code": "populatehtml",
+      "display": "$populatehtml",
+      "definition": "Generate HTML for Questionnaire"
+    },
+    {
+      "code": "populatelink",
+      "display": "$populatelink",
+      "definition": "Generate a link to a Questionnaire completion webpage"
+    },
+    {
+      "code": "process-message",
+      "display": "$process-message",
+      "definition": "Process a message according to the defined event"
+    },
+    {
+      "code": "questionnaire",
+      "display": "$questionnaire",
+      "definition": "Build Questionnaire"
+    },
+    {
+      "code": "stats",
+      "display": "$stats",
+      "definition": "Observation Statistics"
+    },
+    {
+      "code": "subset",
+      "display": "$subset",
+      "definition": "Fetch a subset of the CapabilityStatement resource"
+    },
+    {
+      "code": "subsumes",
+      "display": "$subsumes",
+      "definition": "CodeSystem Subsumption Testing"
+    },
+    {
+      "code": "transform",
+      "display": "$transform",
+      "definition": "Model Instance Transformation"
+    },
+    {
+      "code": "translate",
+      "display": "$translate",
+      "definition": "Concept Translation"
+    },
+    {
+      "code": "validate",
+      "display": "$validate",
+      "definition": "Validate a resource"
+    },
+    {
+      "code": "validate-code",
+      "display": "$validate-code",
+      "definition": "ValueSet based Validation"
+    }
+  ]
+}

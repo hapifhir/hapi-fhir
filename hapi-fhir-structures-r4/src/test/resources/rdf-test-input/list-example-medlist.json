@@ -1,0 +1,64 @@
+{
+  "resourceType": "List",
+  "id": "med-list",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eAdd hydroxocobalamin\u003c/p\u003e\n      \u003cp\u003eCancel Morphine Sulphate\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "status": "current",
+  "mode": "changes",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "182836005",
+        "display": "Review of medication"
+      }
+    ],
+    "text": "Medication Review"
+  },
+  "date": "2013-11-20T23:10:23+11:00",
+  "source": {
+    "reference": "Patient/example"
+  },
+  "entry": [
+    {
+      "flag": {
+        "coding": [
+          {
+            "system": "http://nehta.gov.au/codes/medications/changetype",
+            "code": "01",
+            "display": "Prescribed"
+          }
+        ]
+      },
+      "item": {
+        "display": "hydroxocobalamin"
+      }
+    },
+    {
+      "flag": {
+        "coding": [
+          {
+            "system": "http://nehta.gov.au/codes/medications/changetype",
+            "code": "02",
+            "display": "Cancelled"
+          }
+        ]
+      },
+      "deleted": true,
+      "item": {
+        "display": "Morphine Sulfate"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

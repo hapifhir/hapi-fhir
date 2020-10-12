@@ -1,0 +1,126 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "filter-operator",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFilterOperator\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe kind of operation to perform as a part of a property based filter.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/filter-operator defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eComments\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003d\u003ca name\u003d\"filter-operator-.61\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEquals\u003c/td\u003e\u003ctd\u003eThe specified property of the code equals the provided value.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eis-a\u003ca name\u003d\"filter-operator-is-a\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIs A (by subsumption)\u003c/td\u003e\u003ctd\u003eIncludes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (include descendant codes and self).\u003c/td\u003e\u003ctd\u003eThe definition of is-a is that all the properties of the value are true for the specified property of the code, which means that a code has an is-a relationship with itself. To exclude the root code, use descendent-of\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edescendent-of\u003ca name\u003d\"filter-operator-descendent-of\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDescendent Of (by subsumption)\u003c/td\u003e\u003ctd\u003eIncludes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself i.e. include descendant codes only).\u003c/td\u003e\u003ctd\u003eThe definition of is-a is that all the properties of the value are true for the specified property of the code. \n\nSpelling note: \u0026quot;descendant\u0026quot; is a more correct spelling, but the spelling \u0026quot;descendent\u0026quot; is maintained in the code for backwards compatibility reasons\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eis-not-a\u003ca name\u003d\"filter-operator-is-not-a\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot (Is A) (by subsumption)\u003c/td\u003e\u003ctd\u003eThe specified property of the code does not have an is-a relationship with the provided value.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eregex\u003ca name\u003d\"filter-operator-regex\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRegular Expression\u003c/td\u003e\u003ctd\u003eThe specified property of the code  matches the regex specified in the provided value.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein\u003ca name\u003d\"filter-operator-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Set\u003c/td\u003e\u003ctd\u003eThe specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list).\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-in\u003ca name\u003d\"filter-operator-not-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot in Set\u003c/td\u003e\u003ctd\u003eThe specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list).\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egeneralizes\u003ca name\u003d\"filter-operator-generalizes\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGeneralizes (by Subsumption)\u003c/td\u003e\u003ctd\u003eIncludes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (i.e. include ancestor codes and self).\u003c/td\u003e\u003ctd\u003eThe definition of is-a is that all the properties of the value are true for the specified property of the code, which means that a code has an is-a relationship with itself. To exclude the root code, add it explicitly to as an exclude\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexists\u003ca name\u003d\"filter-operator-exists\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExists\u003c/td\u003e\u003ctd\u003eThe specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values).\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/filter-operator",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.479"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FilterOperator",
+  "title": "FilterOperator",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The kind of operation to perform as a part of a property based filter.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/filter-operator",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "\u003d",
+      "display": "Equals",
+      "definition": "The specified property of the code equals the provided value."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "The definition of is-a is that all the properties of the value are true for the specified property of the code, which means that a code has an is-a relationship with itself. To exclude the root code, use descendent-of"
+        }
+      ],
+      "code": "is-a",
+      "display": "Is A (by subsumption)",
+      "definition": "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, including the provided concept itself (include descendant codes and self)."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "The definition of is-a is that all the properties of the value are true for the specified property of the code. \n\nSpelling note: \"descendant\" is a more correct spelling, but the spelling \"descendent\" is maintained in the code for backwards compatibility reasons"
+        }
+      ],
+      "code": "descendent-of",
+      "display": "Descendent Of (by subsumption)",
+      "definition": "Includes all concept ids that have a transitive is-a relationship with the concept Id provided as the value, excluding the provided concept itself i.e. include descendant codes only)."
+    },
+    {
+      "code": "is-not-a",
+      "display": "Not (Is A) (by subsumption)",
+      "definition": "The specified property of the code does not have an is-a relationship with the provided value."
+    },
+    {
+      "code": "regex",
+      "display": "Regular Expression",
+      "definition": "The specified property of the code  matches the regex specified in the provided value."
+    },
+    {
+      "code": "in",
+      "display": "In Set",
+      "definition": "The specified property of the code is in the set of codes or concepts specified in the provided value (comma separated list)."
+    },
+    {
+      "code": "not-in",
+      "display": "Not in Set",
+      "definition": "The specified property of the code is not in the set of codes or concepts specified in the provided value (comma separated list)."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "The definition of is-a is that all the properties of the value are true for the specified property of the code, which means that a code has an is-a relationship with itself. To exclude the root code, add it explicitly to as an exclude"
+        }
+      ],
+      "code": "generalizes",
+      "display": "Generalizes (by Subsumption)",
+      "definition": "Includes all concept ids that have a transitive is-a relationship from the concept Id provided as the value, including the provided concept itself (i.e. include ancestor codes and self)."
+    },
+    {
+      "code": "exists",
+      "display": "Exists",
+      "definition": "The specified property of the code has at least one value (if the specified value is true; if the specified value is false, then matches when the specified property of the code has no values)."
+    }
+  ]
+}

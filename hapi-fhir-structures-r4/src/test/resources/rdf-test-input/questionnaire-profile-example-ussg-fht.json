@@ -1,0 +1,1716 @@
+{
+  "resourceType": "Bundle",
+  "id": "ussg-fht",
+  "type": "transaction",
+  "entry": [
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/Questionnaire/54127-6",
+      "resource": {
+        "resourceType": "Questionnaire",
+        "id": "54127-6",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-questionnaire"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 54127-6\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/us/sdc/Questionnaire/54127-6\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 54127-6\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: US Surgeon General - Family Health Portrait\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003esubjectType\u003c/b\u003e: Patient\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 01/01/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: This represents an implementation of the \u0026quot;US Surgeon General family health portrait\u0026quot; form found at https://lforms-demo.nlm.nih.gov\u003c/p\u003e\u003cp\u003e\u003cb\u003euseContext\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Captures basic family history information\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: (c) 2015 Regenstrief Institute\u003c/p\u003e\u003cp\u003e\u003cb\u003eapprovalDate\u003c/b\u003e: 31/10/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003elastReviewDate\u003c/b\u003e: 15/03/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: US Surgeon General family health portrait [USSG-FHT] (Details: LOINC code 54127-6 \u003d \u0027US Surgeon General family health portrait [USSG-FHT]\u0027, stated as \u0027US Surgeon General family health portrait [USSG-FHT]\u0027)\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003elinkId\u003c/b\u003e: 0\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: group\u003c/p\u003e\u003ch3\u003eItems\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003elinkId\u003c/b\u003e: 1\u003c/p\u003e\u003cp\u003e\u003cb\u003edefinition\u003c/b\u003e: \u003ca\u003ehttp://loinc.org/rdf#54126-8\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etext\u003c/b\u003e: Your health information\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: group\u003c/p\u003e\u003cp\u003e\u003cb\u003erequired\u003c/b\u003e: true\u003c/p\u003e\u003ch3\u003eItems\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003elinkId\u003c/b\u003e: 2\u003c/p\u003e\u003cp\u003e\u003cb\u003edefinition\u003c/b\u003e: \u003ca\u003ehttp://loinc.org/rdf#54114-4\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etext\u003c/b\u003e: Family member health information\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: group\u003c/p\u003e\u003cp\u003e\u003cb\u003erepeats\u003c/b\u003e: true\u003c/p\u003e\u003ch3\u003eItems\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "contained": [
+          {
+            "resourceType": "ValueSet",
+            "id": "length",
+            "meta": {
+              "profile": [
+                "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+              ]
+            },
+            "name": "Length Units",
+            "status": "active",
+            "description": "Length units",
+            "immutable": true,
+            "compose": {
+              "include": [
+                {
+                  "system": "http://unitsofmeasure.org",
+                  "concept": [
+                    {
+                      "code": "[in_i]",
+                      "display": "inches"
+                    },
+                    {
+                      "code": "cm",
+                      "display": "centimeters"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "resourceType": "ValueSet",
+            "id": "weight",
+            "meta": {
+              "profile": [
+                "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+              ]
+            },
+            "name": "Weight Units",
+            "status": "active",
+            "description": "Weight units",
+            "immutable": true,
+            "compose": {
+              "include": [
+                {
+                  "system": "http://unitsofmeasure.org",
+                  "concept": [
+                    {
+                      "code": "[lb_i]",
+                      "display": "pounds"
+                    },
+                    {
+                      "code": "km",
+                      "display": "kilograms"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "url": "http://hl7.org/fhir/us/sdc/Questionnaire/54127-6",
+        "identifier": [
+          {
+            "system": "http://example.org/panel-id",
+            "value": "54127-6"
+          }
+        ],
+        "title": "US Surgeon General - Family Health Portrait",
+        "status": "active",
+        "experimental": true,
+        "subjectType": [
+          "Patient"
+        ],
+        "date": "2015",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "http://loinc.org"
+              }
+            ]
+          }
+        ],
+        "description": "This represents an implementation of the \"US Surgeon General family health portrait\" form found at https://lforms-demo.nlm.nih.gov",
+        "useContext": [
+          {
+            "code": {
+              "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+              "code": "species"
+            },
+            "valueCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "337915000",
+                  "display": "Homo sapiens"
+                }
+              ]
+            }
+          }
+        ],
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "purpose": "Captures basic family history information",
+        "copyright": "(c) 2015 Regenstrief Institute",
+        "approvalDate": "2015-10-31",
+        "lastReviewDate": "2017-03-15",
+        "code": [
+          {
+            "system": "http://loinc.org",
+            "code": "54127-6",
+            "display": "US Surgeon General family health portrait [USSG-FHT]"
+          }
+        ],
+        "item": [
+          {
+            "linkId": "0",
+            "type": "group",
+            "item": [
+              {
+                "linkId": "0.1",
+                "text": "Date Done",
+                "type": "date"
+              },
+              {
+                "linkId": "0.2",
+                "text": "Time Done",
+                "type": "time"
+              },
+              {
+                "linkId": "0.3",
+                "text": "Where Done",
+                "type": "string"
+              },
+              {
+                "linkId": "0.4",
+                "text": "Comment",
+                "type": "string"
+              }
+            ]
+          },
+          {
+            "linkId": "1",
+            "definition": "http://loinc.org/rdf#54126-8",
+            "text": "Your health information",
+            "type": "group",
+            "required": true,
+            "item": [
+              {
+                "linkId": "1.1",
+                "type": "group",
+                "item": [
+                  {
+                    "linkId": "1.1.1",
+                    "definition": "http://loinc.org/rdf#54125-0",
+                    "text": "Name",
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "linkId": "1.1.2",
+                    "definition": "http://loinc.org/rdf#54131-8",
+                    "text": "Gender",
+                    "type": "choice",
+                    "required": true,
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL1-9",
+                    "item": [
+                      {
+                        "linkId": "1.1.2.1.1",
+                        "text": "Please specify",
+                        "type": "string",
+                        "required": true
+                      }
+                    ]
+                  },
+                  {
+                    "linkId": "1.1.3",
+                    "definition": "http://loinc.org/rdf#21112-8",
+                    "text": "Date of Birth",
+                    "type": "date"
+                  },
+                  {
+                    "linkId": "1.1.4",
+                    "definition": "http://loinc.org/rdf#54132-6",
+                    "text": "Were you born a twin?",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL623-0",
+                    "initial": [
+                      {
+                        "valueCoding": {
+                          "system": "http://loinc.org",
+                          "code": "LA32-8",
+                          "display": "No"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "linkId": "1.1.5",
+                    "definition": "http://loinc.org/rdf#54128-4",
+                    "text": "Were you adopted?",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL361-7"
+                  },
+                  {
+                    "linkId": "1.1.6",
+                    "definition": "http://loinc.org/rdf#54135-9",
+                    "text": "Are your parents related to each other in any way other than marriage?",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL361-7"
+                  },
+                  {
+                    "linkId": "1.1.7",
+                    "definition": "http://loinc.org/rdf#8302-2",
+                    "text": "Height",
+                    "type": "decimal",
+                    "required": true,
+                    "item": [
+                      {
+                        "linkId": "1.1.7.1.1",
+                        "text": "Units",
+                        "type": "choice",
+                        "answerValueSet": "#length"
+                      }
+                    ]
+                  },
+                  {
+                    "linkId": "1.1.8",
+                    "definition": "http://loinc.org/rdf#29463-7",
+                    "text": "Weight",
+                    "type": "decimal",
+                    "item": [
+                      {
+                        "linkId": "1.1.8.1.1",
+                        "text": "Units",
+                        "type": "choice",
+                        "answerValueSet": "#weight"
+                      }
+                    ]
+                  },
+                  {
+                    "linkId": "1.1.9",
+                    "definition": "http://loinc.org/rdf#39156-5",
+                    "text": "Body mass index (BMI) [Ratio]",
+                    "type": "decimal",
+                    "readOnly": true
+                  },
+                  {
+                    "linkId": "1.1.10",
+                    "definition": "http://loinc.org/rdf#54134-2",
+                    "text": "Race",
+                    "type": "choice",
+                    "required": true,
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL629-7"
+                  },
+                  {
+                    "linkId": "1.1.11",
+                    "definition": "http://loinc.org/rdf#54133-4",
+                    "text": "Ethnicity",
+                    "type": "choice",
+                    "repeats": true,
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL628-9"
+                  }
+                ]
+              },
+              {
+                "linkId": "1.2",
+                "definition": "http://loinc.org/rdf#54137-5",
+                "text": "Your diseases history",
+                "type": "group",
+                "repeats": true,
+                "item": [
+                  {
+                    "linkId": "1.2.1",
+                    "definition": "http://loinc.org/rdf#54140-9",
+                    "text": "Disease or Condition",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL626-3"
+                  },
+                  {
+                    "linkId": "1.2.2",
+                    "definition": "http://loinc.org/rdf#54130-0",
+                    "text": "Age at Diagnosis",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL619-8"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "linkId": "2",
+            "definition": "http://loinc.org/rdf#54114-4",
+            "text": "Family member health information",
+            "type": "group",
+            "repeats": true,
+            "item": [
+              {
+                "linkId": "2.1",
+                "type": "group",
+                "item": [
+                  {
+                    "extension": [
+                      {
+                        "url": "http://hl7.org/fhir/StructureDefinition/questionnaire-referenceResource",
+                        "valueCode": "Patient"
+                      }
+                    ],
+                    "linkId": "2.1.1.0",
+                    "text": "Family Member identity",
+                    "type": "reference"
+                  },
+                  {
+                    "linkId": "2.1.1.1",
+                    "definition": "http://loinc.org/rdf#54136-7",
+                    "text": "Relationship to you",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL621-4"
+                  },
+                  {
+                    "linkId": "2.1.1.2",
+                    "definition": "http://loinc.org/rdf#54138-3",
+                    "text": "Name",
+                    "type": "string"
+                  },
+                  {
+                    "linkId": "2.1.1.3",
+                    "definition": "http://loinc.org/rdf#54123-5",
+                    "text": "Gender",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL1-9",
+                    "item": [
+                      {
+                        "linkId": "2.1.1.3.1.1",
+                        "text": "Please specify",
+                        "type": "string",
+                        "required": true
+                      }
+                    ]
+                  },
+                  {
+                    "linkId": "2.1.1.4",
+                    "definition": "http://loinc.org/rdf#54139-1",
+                    "text": "Living?",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL361-7",
+                    "item": [
+                      {
+                        "linkId": "2.1.1.4.1",
+                        "type": "group",
+                        "item": [
+                          {
+                            "linkId": "2.1.1.4.1.1",
+                            "definition": "http://loinc.org/rdf#54112-8",
+                            "text": "Cause of Death",
+                            "type": "choice",
+                            "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL627-1",
+                            "item": [
+                              {
+                                "linkId": "2.1.1.4.1.1.1",
+                                "text": "Please specify",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          {
+                            "linkId": "2.1.1.4.1.2",
+                            "definition": "http://loinc.org/rdf#54113-6",
+                            "text": "Age at Death",
+                            "type": "choice",
+                            "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL619-8"
+                          }
+                        ]
+                      },
+                      {
+                        "linkId": "2.1.1.4.2",
+                        "type": "group",
+                        "item": [
+                          {
+                            "linkId": "2.1.1.4.2.1",
+                            "definition": "http://loinc.org/rdf#54124-3",
+                            "text": "Date of Birth",
+                            "type": "date"
+                          },
+                          {
+                            "linkId": "2.1.1.4.2.2",
+                            "definition": "http://loinc.org/rdf#54141-7",
+                            "text": "Age",
+                            "type": "decimal"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "linkId": "2.1.1.5",
+                    "definition": "http://loinc.org/rdf#54121-9",
+                    "text": "Was this person born a twin?",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL623-0"
+                  },
+                  {
+                    "linkId": "2.1.1.6",
+                    "definition": "http://loinc.org/rdf#54122-7",
+                    "text": "Was this person adopted?",
+                    "type": "choice",
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL623-0"
+                  },
+                  {
+                    "linkId": "2.1.1.7",
+                    "definition": "http://loinc.org/rdf#54119-3",
+                    "text": "Race",
+                    "type": "choice",
+                    "repeats": true,
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL629-7"
+                  },
+                  {
+                    "linkId": "2.1.1.8",
+                    "definition": "http://loinc.org/rdf#54120-1",
+                    "text": "Ethnicity",
+                    "type": "choice",
+                    "repeats": true,
+                    "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL628-9"
+                  },
+                  {
+                    "linkId": "2.1.2",
+                    "definition": "http://loinc.org/rdf#54117-7",
+                    "text": "This family member\u0027s history of disease",
+                    "type": "group",
+                    "repeats": true,
+                    "item": [
+                      {
+                        "linkId": "2.1.2.1",
+                        "definition": "http://loinc.org/rdf#54116-9",
+                        "text": "Disease or Condition",
+                        "type": "choice",
+                        "required": true,
+                        "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL626-3"
+                      },
+                      {
+                        "linkId": "2.1.2.2",
+                        "definition": "http://loinc.org/rdf#54115-1",
+                        "text": "Age at Diagnosis",
+                        "type": "choice",
+                        "answerValueSet": "http://hl7.org/fhir/us/sdc/ValueSet/LL619-8"
+                      },
+                      {
+                        "linkId": "2.1.2.3",
+                        "text": "Mock-up item: Height",
+                        "type": "decimal"
+                      },
+                      {
+                        "linkId": "2.1.2.4",
+                        "text": "Mock-up item: Weight",
+                        "type": "decimal"
+                      },
+                      {
+                        "linkId": "2.1.2.5",
+                        "text": "Mock-up item: BMI",
+                        "type": "decimal"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/Questionnaire/54127-6"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL1-9",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL1-9",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL1-9\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL1-9\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Gender_M/F\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Male\u003d1, Female\u003d2\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA2-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Male\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA3-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Female\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA46-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Other\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL1-9",
+        "name": "Gender_M/F",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Male\u003d1, Female\u003d2",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA2-8",
+                  "display": "Male"
+                },
+                {
+                  "code": "LA3-6",
+                  "display": "Female"
+                },
+                {
+                  "code": "LA46-8",
+                  "display": "Other"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL1-9"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL623-0",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL623-0",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL623-0\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL623-0\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT twin\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool twin\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10427-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Yes - Identical (Same)\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10428-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Yes - Fraternal (Different)\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA32-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: No\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL623-0",
+        "name": "USSG-FHT twin",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool twin",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA10427-5",
+                  "display": "Yes - Identical (Same)"
+                },
+                {
+                  "code": "LA10428-3",
+                  "display": "Yes - Fraternal (Different)"
+                },
+                {
+                  "code": "LA32-8",
+                  "display": "No"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL623-0"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL361-7",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL361-7",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL361-7\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL361-7\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Y/N1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Yes/No\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA33-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Yes\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA32-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: No\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL361-7",
+        "name": "Y/N1",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Yes/No",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA33-6",
+                  "display": "Yes"
+                },
+                {
+                  "code": "LA32-8",
+                  "display": "No"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL361-7"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL629-7",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL629-7",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL629-7\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL629-7\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT race\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool race\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10608-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: American  Indian or Alaska Native\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA6156-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Asian\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10614-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Asian Indian\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10615-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Chinese\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10616-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Filipino\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10617-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Japanese\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10618-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Korean\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10620-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Vietnamese\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10619-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other Asian\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10610-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Black or African American\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10611-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Native Hawaiian or Other Pacific Islander\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10623-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Native Hawaiian\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10622-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Guamanian\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10621-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Chamorro\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10625-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Samoan\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10624-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other Pacific Islander\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA4457-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: White\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10613-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Other/Unknown/Refuse To Answer\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL629-7",
+        "name": "USSG-FHT race",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool race",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA10608-0",
+                  "display": "American  Indian or Alaska Native"
+                },
+                {
+                  "code": "LA6156-9",
+                  "display": "Asian"
+                },
+                {
+                  "code": "LA10614-8",
+                  "display": "-- Asian Indian"
+                },
+                {
+                  "code": "LA10615-5",
+                  "display": "-- Chinese"
+                },
+                {
+                  "code": "LA10616-3",
+                  "display": "-- Filipino"
+                },
+                {
+                  "code": "LA10617-1",
+                  "display": "-- Japanese"
+                },
+                {
+                  "code": "LA10618-9",
+                  "display": "-- Korean"
+                },
+                {
+                  "code": "LA10620-5",
+                  "display": "-- Vietnamese"
+                },
+                {
+                  "code": "LA10619-7",
+                  "display": "-- Other Asian"
+                },
+                {
+                  "code": "LA10610-6",
+                  "display": "Black or African American"
+                },
+                {
+                  "code": "LA10611-4",
+                  "display": "Native Hawaiian or Other Pacific Islander"
+                },
+                {
+                  "code": "LA10623-9",
+                  "display": "-- Native Hawaiian"
+                },
+                {
+                  "code": "LA10622-1",
+                  "display": "-- Guamanian"
+                },
+                {
+                  "code": "LA10621-3",
+                  "display": "-- Chamorro"
+                },
+                {
+                  "code": "LA10625-4",
+                  "display": "-- Samoan"
+                },
+                {
+                  "code": "LA10624-7",
+                  "display": "-- Other Pacific Islander"
+                },
+                {
+                  "code": "LA4457-3",
+                  "display": "White"
+                },
+                {
+                  "code": "LA10613-0",
+                  "display": "Other/Unknown/Refuse To Answer"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL629-7"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL628-9",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL628-9",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL628-9\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL628-9\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT ethnicity\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool ethnicity\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA6214-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Hispanic or Latino\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10599-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Central American\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10600-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Cuban\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10601-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Dominican(Republic)\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10602-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Mexican\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10605-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Puerto Rican\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10606-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- South American\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10604-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other Latin American\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10603-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other Hispanic/Latino/Spanish\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10597-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Non-Hispanic or Latino\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10598-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Ashkenazi Jewish\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10607-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Unknown/No answer\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL628-9",
+        "name": "USSG-FHT ethnicity",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool ethnicity",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA6214-6",
+                  "display": "Hispanic or Latino"
+                },
+                {
+                  "code": "LA10599-1",
+                  "display": "-- Central American"
+                },
+                {
+                  "code": "LA10600-7",
+                  "display": "-- Cuban"
+                },
+                {
+                  "code": "LA10601-5",
+                  "display": "-- Dominican(Republic)"
+                },
+                {
+                  "code": "LA10602-3",
+                  "display": "-- Mexican"
+                },
+                {
+                  "code": "LA10605-6",
+                  "display": "-- Puerto Rican"
+                },
+                {
+                  "code": "LA10606-4",
+                  "display": "-- South American"
+                },
+                {
+                  "code": "LA10604-9",
+                  "display": "-- Other Latin American"
+                },
+                {
+                  "code": "LA10603-1",
+                  "display": "-- Other Hispanic/Latino/Spanish"
+                },
+                {
+                  "code": "LA10597-5",
+                  "display": "Non-Hispanic or Latino"
+                },
+                {
+                  "code": "LA10598-3",
+                  "display": "Ashkenazi Jewish"
+                },
+                {
+                  "code": "LA10607-2",
+                  "display": "Unknown/No answer"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL628-9"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL626-3",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL626-3",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL626-3\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL626-3\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT diseases\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool diseases\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10533-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Blood Clots\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10572-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Blood Clot in Leg\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10573-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Blood Clot in Lungs\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10524-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10549-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Bone\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10536-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Breast Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10537-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Colon Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10548-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Esophageal Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10547-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Gastric Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10541-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Kidney Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10545-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Leukemia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10542-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Lung Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10546-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Muscle Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10539-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Ovarian Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10538-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Prostate Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10543-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Skin Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10540-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Thyroid Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10544-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Uterine Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10550-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10529-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Diabetes\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10551-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Diabetes Type 1\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10552-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Diabetes Type 2\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10553-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Gestational Diabetes\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10532-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Gastrointestinal Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10554-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Crohn\u0027s Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10555-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Irritable Bowel Syndrome\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10556-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Ulceritive Colitis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10557-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Colon Polyps\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10523-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Heart Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10558-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Heart Attack\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10526-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: High Cholesterol/Hyperlipidemia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA7444-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Hypertension\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10528-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Kidney Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10565-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Cystic Kidney Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10566-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Kidney Disease Present From Birth\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10567-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Nephrosis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10568-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Nephritis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10569-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Nephrotic Syndrome\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10570-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Diabetic Kidney Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10571-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other/Unknown\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10531-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Lung Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10559-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- COPD\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10560-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Chronic Bronchitis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10561-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Emphysema\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10562-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Chronic Lower Respiratory Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10563-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Influenza/Pneumonia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10564-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Asthma\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10590-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Neurological Disorders\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10527-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Osteoporosis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10535-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Psychological Disorders\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10574-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Anxiety\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10575-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Bipolar/Manic Depressive Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10576-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Depression\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10577-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Attention Deficit Hyper Activity\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10578-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Autism\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10579-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Personality Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10580-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Eating Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10581-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Obsessive Compulsive Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10582-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Panic Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10583-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Post Traumatic Stress Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10584-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Schizophrenia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10585-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Social Phobia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10586-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Dementia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10591-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Septicemia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10522-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Stroke/Brain Attack\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10530-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Sudden Infant Death Syndrome\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL626-3",
+        "name": "USSG-FHT diseases",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool diseases",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA10533-0",
+                  "display": "Blood Clots"
+                },
+                {
+                  "code": "LA10572-8",
+                  "display": "-- Blood Clot in Leg"
+                },
+                {
+                  "code": "LA10573-6",
+                  "display": "-- Blood Clot in Lungs"
+                },
+                {
+                  "code": "LA10524-9",
+                  "display": "Cancer"
+                },
+                {
+                  "code": "LA10549-6",
+                  "display": "-- Bone"
+                },
+                {
+                  "code": "LA10536-3",
+                  "display": "-- Breast Cancer"
+                },
+                {
+                  "code": "LA10537-1",
+                  "display": "-- Colon Cancer"
+                },
+                {
+                  "code": "LA10548-8",
+                  "display": "-- Esophageal Cancer"
+                },
+                {
+                  "code": "LA10547-0",
+                  "display": "-- Gastric Cancer"
+                },
+                {
+                  "code": "LA10541-3",
+                  "display": "-- Kidney Cancer"
+                },
+                {
+                  "code": "LA10545-4",
+                  "display": "-- Leukemia"
+                },
+                {
+                  "code": "LA10542-1",
+                  "display": "-- Lung Cancer"
+                },
+                {
+                  "code": "LA10546-2",
+                  "display": "-- Muscle Cancer"
+                },
+                {
+                  "code": "LA10539-7",
+                  "display": "-- Ovarian Cancer"
+                },
+                {
+                  "code": "LA10538-9",
+                  "display": "-- Prostate Cancer"
+                },
+                {
+                  "code": "LA10543-9",
+                  "display": "-- Skin Cancer"
+                },
+                {
+                  "code": "LA10540-5",
+                  "display": "-- Thyroid Cancer"
+                },
+                {
+                  "code": "LA10544-7",
+                  "display": "-- Uterine Cancer"
+                },
+                {
+                  "code": "LA10550-4",
+                  "display": "-- Other Cancer"
+                },
+                {
+                  "code": "LA10529-8",
+                  "display": "Diabetes"
+                },
+                {
+                  "code": "LA10551-2",
+                  "display": "-- Diabetes Type 1"
+                },
+                {
+                  "code": "LA10552-0",
+                  "display": "-- Diabetes Type 2"
+                },
+                {
+                  "code": "LA10553-8",
+                  "display": "-- Gestational Diabetes"
+                },
+                {
+                  "code": "LA10532-2",
+                  "display": "Gastrointestinal Disease"
+                },
+                {
+                  "code": "LA10554-6",
+                  "display": "-- Crohn\u0027s Disease"
+                },
+                {
+                  "code": "LA10555-3",
+                  "display": "-- Irritable Bowel Syndrome"
+                },
+                {
+                  "code": "LA10556-1",
+                  "display": "-- Ulceritive Colitis"
+                },
+                {
+                  "code": "LA10557-9",
+                  "display": "-- Colon Polyps"
+                },
+                {
+                  "code": "LA10523-1",
+                  "display": "Heart Disease"
+                },
+                {
+                  "code": "LA10558-7",
+                  "display": "-- Heart Attack"
+                },
+                {
+                  "code": "LA10526-4",
+                  "display": "High Cholesterol/Hyperlipidemia"
+                },
+                {
+                  "code": "LA7444-8",
+                  "display": "Hypertension"
+                },
+                {
+                  "code": "LA10528-0",
+                  "display": "Kidney Disease"
+                },
+                {
+                  "code": "LA10565-2",
+                  "display": "-- Cystic Kidney Disease"
+                },
+                {
+                  "code": "LA10566-0",
+                  "display": "-- Kidney Disease Present From Birth"
+                },
+                {
+                  "code": "LA10567-8",
+                  "display": "-- Nephrosis"
+                },
+                {
+                  "code": "LA10568-6",
+                  "display": "-- Nephritis"
+                },
+                {
+                  "code": "LA10569-4",
+                  "display": "-- Nephrotic Syndrome"
+                },
+                {
+                  "code": "LA10570-2",
+                  "display": "-- Diabetic Kidney Disease"
+                },
+                {
+                  "code": "LA10571-0",
+                  "display": "-- Other/Unknown"
+                },
+                {
+                  "code": "LA10531-4",
+                  "display": "Lung Disease"
+                },
+                {
+                  "code": "LA10559-5",
+                  "display": "-- COPD"
+                },
+                {
+                  "code": "LA10560-3",
+                  "display": "-- Chronic Bronchitis"
+                },
+                {
+                  "code": "LA10561-1",
+                  "display": "-- Emphysema"
+                },
+                {
+                  "code": "LA10562-9",
+                  "display": "-- Chronic Lower Respiratory Disease"
+                },
+                {
+                  "code": "LA10563-7",
+                  "display": "-- Influenza/Pneumonia"
+                },
+                {
+                  "code": "LA10564-5",
+                  "display": "-- Asthma"
+                },
+                {
+                  "code": "LA10590-0",
+                  "display": "Neurological Disorders"
+                },
+                {
+                  "code": "LA10527-2",
+                  "display": "Osteoporosis"
+                },
+                {
+                  "code": "LA10535-5",
+                  "display": "Psychological Disorders"
+                },
+                {
+                  "code": "LA10574-4",
+                  "display": "-- Anxiety"
+                },
+                {
+                  "code": "LA10575-1",
+                  "display": "-- Bipolar/Manic Depressive Disorder"
+                },
+                {
+                  "code": "LA10576-9",
+                  "display": "-- Depression"
+                },
+                {
+                  "code": "LA10577-7",
+                  "display": "-- Attention Deficit Hyper Activity"
+                },
+                {
+                  "code": "LA10578-5",
+                  "display": "-- Autism"
+                },
+                {
+                  "code": "LA10579-3",
+                  "display": "-- Personality Disorder"
+                },
+                {
+                  "code": "LA10580-1",
+                  "display": "-- Eating Disorder"
+                },
+                {
+                  "code": "LA10581-9",
+                  "display": "-- Obsessive Compulsive Disorder"
+                },
+                {
+                  "code": "LA10582-7",
+                  "display": "-- Panic Disorder"
+                },
+                {
+                  "code": "LA10583-5",
+                  "display": "-- Post Traumatic Stress Disorder"
+                },
+                {
+                  "code": "LA10584-3",
+                  "display": "-- Schizophrenia"
+                },
+                {
+                  "code": "LA10585-0",
+                  "display": "-- Social Phobia"
+                },
+                {
+                  "code": "LA10586-8",
+                  "display": "-- Dementia"
+                },
+                {
+                  "code": "LA10591-8",
+                  "display": "Septicemia"
+                },
+                {
+                  "code": "LA10522-3",
+                  "display": "Stroke/Brain Attack"
+                },
+                {
+                  "code": "LA10530-6",
+                  "display": "Sudden Infant Death Syndrome"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL626-3"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL619-8",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL619-8",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL619-8\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL619-8\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT age\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool age range\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10402-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Pre-Birth\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10403-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Newborn\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10394-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Infancy\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10395-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Childhood\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10404-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Adolescence\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10396-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: 20-29\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10397-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: 30-39\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10398-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: 40-49\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10399-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: 50-59\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10400-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: OVER 60\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA4489-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Unknown\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL619-8",
+        "name": "USSG-FHT age",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool age range",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA10402-8",
+                  "display": "Pre-Birth"
+                },
+                {
+                  "code": "LA10403-6",
+                  "display": "Newborn"
+                },
+                {
+                  "code": "LA10394-7",
+                  "display": "Infancy"
+                },
+                {
+                  "code": "LA10395-4",
+                  "display": "Childhood"
+                },
+                {
+                  "code": "LA10404-4",
+                  "display": "Adolescence"
+                },
+                {
+                  "code": "LA10396-2",
+                  "display": "20-29"
+                },
+                {
+                  "code": "LA10397-0",
+                  "display": "30-39"
+                },
+                {
+                  "code": "LA10398-8",
+                  "display": "40-49"
+                },
+                {
+                  "code": "LA10399-6",
+                  "display": "50-59"
+                },
+                {
+                  "code": "LA10400-2",
+                  "display": "OVER 60"
+                },
+                {
+                  "code": "LA4489-6",
+                  "display": "Unknown"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL619-8"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL621-4",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL621-4",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL621-4\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL621-4\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT relationship\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool relationship to patient\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10405-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Daughter\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10406-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Granddaughter\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10407-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Grandson\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10408-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Half-brother\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10409-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Half-sister\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10410-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Maternal Aunt\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10411-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Maternal Cousin\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10412-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Maternal Grandfather\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10413-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Maternal Grandmother\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10414-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Maternal Uncle\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10415-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Brother\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10416-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Father\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10417-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Mother\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10418-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Sister\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10419-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Nephew\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10420-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Niece\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10421-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Paternal Aunt\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10422-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Paternal Cousin\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10423-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Paternal Grandfather\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10424-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Paternal Grandmother\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10425-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Paternal Uncle\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10426-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Son\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL621-4",
+        "name": "USSG-FHT relationship",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool relationship to patient",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA10405-1",
+                  "display": "Daughter"
+                },
+                {
+                  "code": "LA10406-9",
+                  "display": "Granddaughter"
+                },
+                {
+                  "code": "LA10407-7",
+                  "display": "Grandson"
+                },
+                {
+                  "code": "LA10408-5",
+                  "display": "Half-brother"
+                },
+                {
+                  "code": "LA10409-3",
+                  "display": "Half-sister"
+                },
+                {
+                  "code": "LA10410-1",
+                  "display": "Maternal Aunt"
+                },
+                {
+                  "code": "LA10411-9",
+                  "display": "Maternal Cousin"
+                },
+                {
+                  "code": "LA10412-7",
+                  "display": "Maternal Grandfather"
+                },
+                {
+                  "code": "LA10413-5",
+                  "display": "Maternal Grandmother"
+                },
+                {
+                  "code": "LA10414-3",
+                  "display": "Maternal Uncle"
+                },
+                {
+                  "code": "LA10415-0",
+                  "display": "Brother"
+                },
+                {
+                  "code": "LA10416-8",
+                  "display": "Father"
+                },
+                {
+                  "code": "LA10417-6",
+                  "display": "Mother"
+                },
+                {
+                  "code": "LA10418-4",
+                  "display": "Sister"
+                },
+                {
+                  "code": "LA10419-2",
+                  "display": "Nephew"
+                },
+                {
+                  "code": "LA10420-0",
+                  "display": "Niece"
+                },
+                {
+                  "code": "LA10421-8",
+                  "display": "Paternal Aunt"
+                },
+                {
+                  "code": "LA10422-6",
+                  "display": "Paternal Cousin"
+                },
+                {
+                  "code": "LA10423-4",
+                  "display": "Paternal Grandfather"
+                },
+                {
+                  "code": "LA10424-2",
+                  "display": "Paternal Grandmother"
+                },
+                {
+                  "code": "LA10425-9",
+                  "display": "Paternal Uncle"
+                },
+                {
+                  "code": "LA10426-7",
+                  "display": "Son"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL621-4"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL624-8",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL624-8",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL624-8\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL624-8\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT living\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool living\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA33-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Yes\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA32-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: No\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA4489-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Unknown\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL624-8",
+        "name": "USSG-FHT living",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool living",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA33-6",
+                  "display": "Yes"
+                },
+                {
+                  "code": "LA32-8",
+                  "display": "No"
+                },
+                {
+                  "code": "LA4489-6",
+                  "display": "Unknown"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL624-8"
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/us/sdc/ValueSet/LL627-1",
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "LL627-1",
+        "meta": {
+          "profile": [
+            "http://hl7.org/fhir/us/sdc/StructureDefinition/sdc-valueset"
+          ]
+        },
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: LL627-1\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://details.loinc.org/AnswerList/LL627-1\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: USSG-FHT diseases \u0026amp; cause of death\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Regenstrief Institute, Inc and the LOINC Committee\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Family history tool diseases and cause of death\u003c/p\u003e\u003cp\u003e\u003cb\u003eimmutable\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Refer to https://loinc.org/terms-of-use\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecompose\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003einclude\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esystem\u003c/b\u003e: \u003ca\u003ehttp://loinc.org\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10533-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Blood Clots\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10572-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Blood Clot in Leg\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10573-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Blood Clot in Lungs\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10524-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10549-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Bone\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10536-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Breast Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10537-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Colon Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10548-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Esophageal Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10547-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Gastric Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10541-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Kidney Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10545-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Leukemia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10542-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Lung Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10546-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Muscle Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10539-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Ovarian Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10538-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Prostate Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10543-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Skin Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10540-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Thyroid Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10544-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Uterine Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10550-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other Cancer\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10529-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Diabetes\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10551-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Diabetes Type 1\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10552-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Diabetes Type 2\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10553-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Gestational Diabetes\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10532-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Gastrointestinal Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10554-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Crohn\u0027s Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10555-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Irritable Bowel Syndrome\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10556-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Ulceritive Colitis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10557-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Colon Polyps\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10523-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Heart Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10558-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Heart Attack\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10526-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: High Cholesterol/Hyperlipidemia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA7444-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Hypertension\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10528-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Kidney Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10565-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Cystic Kidney Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10566-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Kidney Disease Present From Birth\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10567-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Nephrosis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10568-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Nephritis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10569-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Nephrotic Syndrome\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10570-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Diabetic Kidney Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10571-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other/Unknown\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10531-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Lung Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10559-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- COPD\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10560-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Chronic Bronchitis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10561-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Emphysema\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10562-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Chronic Lower Respiratory Disease\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10563-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Influenza/Pneumonia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10564-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Asthma\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10590-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Neurological Disorders\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10527-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Osteoporosis\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10535-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Psychological Disorders\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10574-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Anxiety\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10575-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Bipolar/Manic Depressive Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10576-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Depression\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10577-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Attention Deficit Hyper Activity\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10578-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Autism\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10579-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Personality Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10580-1\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Eating Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10581-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Obsessive Compulsive Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10582-7\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Panic Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10583-5\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Post Traumatic Stress Disorder\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10584-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Schizophrenia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10585-0\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Social Phobia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10586-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Dementia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10591-8\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Septicemia\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10522-3\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Stroke/Brain Attack\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10530-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Sudden Infant Death Syndrome\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10595-9\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Cause of Death\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10587-6\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Suicide\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10588-4\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Accidental Death\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econcept\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: LA10589-2\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: -- Other/Unexpected\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "url": "http://details.loinc.org/AnswerList/LL627-1",
+        "name": "USSG-FHT diseases \u0026 cause of death",
+        "status": "active",
+        "publisher": "Regenstrief Institute, Inc and the LOINC Committee",
+        "description": "Family history tool diseases and cause of death",
+        "immutable": true,
+        "copyright": "Refer to https://loinc.org/terms-of-use",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "concept": [
+                {
+                  "code": "LA10533-0",
+                  "display": "Blood Clots"
+                },
+                {
+                  "code": "LA10572-8",
+                  "display": "-- Blood Clot in Leg"
+                },
+                {
+                  "code": "LA10573-6",
+                  "display": "-- Blood Clot in Lungs"
+                },
+                {
+                  "code": "LA10524-9",
+                  "display": "Cancer"
+                },
+                {
+                  "code": "LA10549-6",
+                  "display": "-- Bone"
+                },
+                {
+                  "code": "LA10536-3",
+                  "display": "-- Breast Cancer"
+                },
+                {
+                  "code": "LA10537-1",
+                  "display": "-- Colon Cancer"
+                },
+                {
+                  "code": "LA10548-8",
+                  "display": "-- Esophageal Cancer"
+                },
+                {
+                  "code": "LA10547-0",
+                  "display": "-- Gastric Cancer"
+                },
+                {
+                  "code": "LA10541-3",
+                  "display": "-- Kidney Cancer"
+                },
+                {
+                  "code": "LA10545-4",
+                  "display": "-- Leukemia"
+                },
+                {
+                  "code": "LA10542-1",
+                  "display": "-- Lung Cancer"
+                },
+                {
+                  "code": "LA10546-2",
+                  "display": "-- Muscle Cancer"
+                },
+                {
+                  "code": "LA10539-7",
+                  "display": "-- Ovarian Cancer"
+                },
+                {
+                  "code": "LA10538-9",
+                  "display": "-- Prostate Cancer"
+                },
+                {
+                  "code": "LA10543-9",
+                  "display": "-- Skin Cancer"
+                },
+                {
+                  "code": "LA10540-5",
+                  "display": "-- Thyroid Cancer"
+                },
+                {
+                  "code": "LA10544-7",
+                  "display": "-- Uterine Cancer"
+                },
+                {
+                  "code": "LA10550-4",
+                  "display": "-- Other Cancer"
+                },
+                {
+                  "code": "LA10529-8",
+                  "display": "Diabetes"
+                },
+                {
+                  "code": "LA10551-2",
+                  "display": "-- Diabetes Type 1"
+                },
+                {
+                  "code": "LA10552-0",
+                  "display": "-- Diabetes Type 2"
+                },
+                {
+                  "code": "LA10553-8",
+                  "display": "-- Gestational Diabetes"
+                },
+                {
+                  "code": "LA10532-2",
+                  "display": "Gastrointestinal Disease"
+                },
+                {
+                  "code": "LA10554-6",
+                  "display": "-- Crohn\u0027s Disease"
+                },
+                {
+                  "code": "LA10555-3",
+                  "display": "-- Irritable Bowel Syndrome"
+                },
+                {
+                  "code": "LA10556-1",
+                  "display": "-- Ulceritive Colitis"
+                },
+                {
+                  "code": "LA10557-9",
+                  "display": "-- Colon Polyps"
+                },
+                {
+                  "code": "LA10523-1",
+                  "display": "Heart Disease"
+                },
+                {
+                  "code": "LA10558-7",
+                  "display": "-- Heart Attack"
+                },
+                {
+                  "code": "LA10526-4",
+                  "display": "High Cholesterol/Hyperlipidemia"
+                },
+                {
+                  "code": "LA7444-8",
+                  "display": "Hypertension"
+                },
+                {
+                  "code": "LA10528-0",
+                  "display": "Kidney Disease"
+                },
+                {
+                  "code": "LA10565-2",
+                  "display": "-- Cystic Kidney Disease"
+                },
+                {
+                  "code": "LA10566-0",
+                  "display": "-- Kidney Disease Present From Birth"
+                },
+                {
+                  "code": "LA10567-8",
+                  "display": "-- Nephrosis"
+                },
+                {
+                  "code": "LA10568-6",
+                  "display": "-- Nephritis"
+                },
+                {
+                  "code": "LA10569-4",
+                  "display": "-- Nephrotic Syndrome"
+                },
+                {
+                  "code": "LA10570-2",
+                  "display": "-- Diabetic Kidney Disease"
+                },
+                {
+                  "code": "LA10571-0",
+                  "display": "-- Other/Unknown"
+                },
+                {
+                  "code": "LA10531-4",
+                  "display": "Lung Disease"
+                },
+                {
+                  "code": "LA10559-5",
+                  "display": "-- COPD"
+                },
+                {
+                  "code": "LA10560-3",
+                  "display": "-- Chronic Bronchitis"
+                },
+                {
+                  "code": "LA10561-1",
+                  "display": "-- Emphysema"
+                },
+                {
+                  "code": "LA10562-9",
+                  "display": "-- Chronic Lower Respiratory Disease"
+                },
+                {
+                  "code": "LA10563-7",
+                  "display": "-- Influenza/Pneumonia"
+                },
+                {
+                  "code": "LA10564-5",
+                  "display": "-- Asthma"
+                },
+                {
+                  "code": "LA10590-0",
+                  "display": "Neurological Disorders"
+                },
+                {
+                  "code": "LA10527-2",
+                  "display": "Osteoporosis"
+                },
+                {
+                  "code": "LA10535-5",
+                  "display": "Psychological Disorders"
+                },
+                {
+                  "code": "LA10574-4",
+                  "display": "-- Anxiety"
+                },
+                {
+                  "code": "LA10575-1",
+                  "display": "-- Bipolar/Manic Depressive Disorder"
+                },
+                {
+                  "code": "LA10576-9",
+                  "display": "-- Depression"
+                },
+                {
+                  "code": "LA10577-7",
+                  "display": "-- Attention Deficit Hyper Activity"
+                },
+                {
+                  "code": "LA10578-5",
+                  "display": "-- Autism"
+                },
+                {
+                  "code": "LA10579-3",
+                  "display": "-- Personality Disorder"
+                },
+                {
+                  "code": "LA10580-1",
+                  "display": "-- Eating Disorder"
+                },
+                {
+                  "code": "LA10581-9",
+                  "display": "-- Obsessive Compulsive Disorder"
+                },
+                {
+                  "code": "LA10582-7",
+                  "display": "-- Panic Disorder"
+                },
+                {
+                  "code": "LA10583-5",
+                  "display": "-- Post Traumatic Stress Disorder"
+                },
+                {
+                  "code": "LA10584-3",
+                  "display": "-- Schizophrenia"
+                },
+                {
+                  "code": "LA10585-0",
+                  "display": "-- Social Phobia"
+                },
+                {
+                  "code": "LA10586-8",
+                  "display": "-- Dementia"
+                },
+                {
+                  "code": "LA10591-8",
+                  "display": "Septicemia"
+                },
+                {
+                  "code": "LA10522-3",
+                  "display": "Stroke/Brain Attack"
+                },
+                {
+                  "code": "LA10530-6",
+                  "display": "Sudden Infant Death Syndrome"
+                },
+                {
+                  "code": "LA10595-9",
+                  "display": "Cause of Death"
+                },
+                {
+                  "code": "LA10587-6",
+                  "display": "-- Suicide"
+                },
+                {
+                  "code": "LA10588-4",
+                  "display": "-- Accidental Death"
+                },
+                {
+                  "code": "LA10589-2",
+                  "display": "-- Other/Unexpected"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "http://hl7.org/fhir/us/sdc/ValueSet/LL627-1"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

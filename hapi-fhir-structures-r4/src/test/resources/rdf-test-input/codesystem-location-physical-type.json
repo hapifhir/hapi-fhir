@@ -1,0 +1,127 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "location-physical-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eLocation type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate the physical form of the Location.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/location-physical-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esi\u003ca name\u003d\"location-physical-type-si\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSite\u003c/td\u003e\u003ctd\u003eA collection of buildings or other locations such as a site or a campus.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebu\u003ca name\u003d\"location-physical-type-bu\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBuilding\u003c/td\u003e\u003ctd\u003eAny Building or structure. This may contain rooms, corridors, wings, etc. It might not have walls, or a roof, but is considered a defined/allocated space.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewi\u003ca name\u003d\"location-physical-type-wi\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWing\u003c/td\u003e\u003ctd\u003eA Wing within a Building, this often contains levels, rooms and corridors.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewa\u003ca name\u003d\"location-physical-type-wa\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWard\u003c/td\u003e\u003ctd\u003eA Ward is a section of a medical facility that may contain rooms and other types of location.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elvl\u003ca name\u003d\"location-physical-type-lvl\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLevel\u003c/td\u003e\u003ctd\u003eA Level in a multi-level Building/Structure.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eco\u003ca name\u003d\"location-physical-type-co\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCorridor\u003c/td\u003e\u003ctd\u003eAny corridor within a Building, that may connect rooms.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ero\u003ca name\u003d\"location-physical-type-ro\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRoom\u003c/td\u003e\u003ctd\u003eA space that is allocated as a room, it may have walls/roof etc., but does not require these.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebd\u003ca name\u003d\"location-physical-type-bd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBed\u003c/td\u003e\u003ctd\u003eA space that is allocated for sleeping/laying on. This is not the physical bed/trolley that may be moved about, but the space it may occupy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eve\u003ca name\u003d\"location-physical-type-ve\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVehicle\u003c/td\u003e\u003ctd\u003eA means of transportation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eho\u003ca name\u003d\"location-physical-type-ho\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHouse\u003c/td\u003e\u003ctd\u003eA residential dwelling. Usually used to reference a location that a person/patient may reside.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eca\u003ca name\u003d\"location-physical-type-ca\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCabinet\u003c/td\u003e\u003ctd\u003eA container that can store goods, equipment, medications or other items.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erd\u003ca name\u003d\"location-physical-type-rd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRoad\u003c/td\u003e\u003ctd\u003eA defined path to travel between 2 points that has a known name.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003earea\u003ca name\u003d\"location-physical-type-area\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArea\u003c/td\u003e\u003ctd\u003eA defined physical boundary of something, such as a flood risk zone, region, postcode\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ejdn\u003ca name\u003d\"location-physical-type-jdn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eJurisdiction\u003c/td\u003e\u003ctd\u003eA wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy), not just an physical boundary\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1108"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "LocationType",
+  "title": "Location type",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate the physical form of the Location.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/location-physical-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "si",
+      "display": "Site",
+      "definition": "A collection of buildings or other locations such as a site or a campus."
+    },
+    {
+      "code": "bu",
+      "display": "Building",
+      "definition": "Any Building or structure. This may contain rooms, corridors, wings, etc. It might not have walls, or a roof, but is considered a defined/allocated space."
+    },
+    {
+      "code": "wi",
+      "display": "Wing",
+      "definition": "A Wing within a Building, this often contains levels, rooms and corridors."
+    },
+    {
+      "code": "wa",
+      "display": "Ward",
+      "definition": "A Ward is a section of a medical facility that may contain rooms and other types of location."
+    },
+    {
+      "code": "lvl",
+      "display": "Level",
+      "definition": "A Level in a multi-level Building/Structure."
+    },
+    {
+      "code": "co",
+      "display": "Corridor",
+      "definition": "Any corridor within a Building, that may connect rooms."
+    },
+    {
+      "code": "ro",
+      "display": "Room",
+      "definition": "A space that is allocated as a room, it may have walls/roof etc., but does not require these."
+    },
+    {
+      "code": "bd",
+      "display": "Bed",
+      "definition": "A space that is allocated for sleeping/laying on. This is not the physical bed/trolley that may be moved about, but the space it may occupy."
+    },
+    {
+      "code": "ve",
+      "display": "Vehicle",
+      "definition": "A means of transportation."
+    },
+    {
+      "code": "ho",
+      "display": "House",
+      "definition": "A residential dwelling. Usually used to reference a location that a person/patient may reside."
+    },
+    {
+      "code": "ca",
+      "display": "Cabinet",
+      "definition": "A container that can store goods, equipment, medications or other items."
+    },
+    {
+      "code": "rd",
+      "display": "Road",
+      "definition": "A defined path to travel between 2 points that has a known name."
+    },
+    {
+      "code": "area",
+      "display": "Area",
+      "definition": "A defined physical boundary of something, such as a flood risk zone, region, postcode"
+    },
+    {
+      "code": "jdn",
+      "display": "Jurisdiction",
+      "definition": "A wide scope that covers a conceptual domain, such as a Nation (Country wide community or Federal Government - e.g. Ministry of Health),  Province or State (community or Government), Business (throughout the enterprise), Nation with a business scope of an agency (e.g. CDC, FDA etc.) or a Business segment (UK Pharmacy), not just an physical boundary"
+    }
+  ]
+}

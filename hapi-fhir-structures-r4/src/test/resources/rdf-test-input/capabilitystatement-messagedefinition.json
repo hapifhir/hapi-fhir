@@ -1,0 +1,67 @@
+{
+  "resourceType": "CapabilityStatement",
+  "id": "messagedefinition",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2/\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eSample capability statement showing new MessageDefinition structure\u003c/p\u003e\n\n      \u003c/div\u003e\n    \u003c/div\u003e"
+  },
+  "status": "draft",
+  "experimental": true,
+  "date": "2012-01-04",
+  "publisher": "ACME Corporation",
+  "contact": [
+    {
+      "name": "System Administrator",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "wile@acme.org"
+        }
+      ]
+    }
+  ],
+  "description": "Sample capability statement showing new MessageDefinition structure",
+  "kind": "instance",
+  "software": {
+    "name": "EHR"
+  },
+  "implementation": {
+    "description": "Acme Message endpoint",
+    "url": "http://acem.com/fhir/message-drop"
+  },
+  "fhirVersion": "4.0.1",
+  "format": [
+    "xml",
+    "json"
+  ],
+  "messaging": [
+    {
+      "endpoint": [
+        {
+          "protocol": {
+            "system": "http://terminology.hl7.org/CodeSystem/message-transport",
+            "code": "mllp"
+          },
+          "address": "mllp:10.1.1.10:9234"
+        }
+      ],
+      "reliableCache": 30,
+      "documentation": "ADT A08 equivalent for external system notifications",
+      "supportedMessage": [
+        {
+          "mode": "receiver",
+          "definition": "MessageDefinition/example"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "resourceType": "ValueSet",
+  "id": "inactive",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch3\u003eValue Set Contents\u003c/h3\u003e\n      \u003cp\u003eThis value set contains 5 concepts\u003c/p\u003e\n      \u003cp\u003eAll codes from system \n        \u003ca href\u003d\"v3/ActMood/cs.html\"\u003e\n          \u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-ActMood\u003c/code\u003e\n        \u003c/a\u003e\n      \u003c/p\u003e\n      \u003ctable class\u003d\"codes\"\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eLvl\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDisplay\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDefinition\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v3-ActMood-CRT\"\u003e \u003c/a\u003e0\n          \u003c/td\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003ca href\u003d\"v3/ActMood/cs.html#v3-ActMood-CRT\"\u003eCRT\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ecriterion\u003c/td\u003e\n          \u003ctd\u003eDeprecation Comment: \n                           This concept This codes should no longer be used.  Instead, set attribute Act.isCriterionInd to \u0026quot;true\u0026quot; and use the desired mood for your criterion.\n\n                        \n                           Definition: A condition that must be true for the source act to be considered.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v3-ActMood-EXPEC\"\u003e \u003c/a\u003e0\n          \u003c/td\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003ca href\u003d\"v3/ActMood/cs.html#v3-ActMood-EXPEC\"\u003eEXPEC\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eexpectation\u003c/td\u003e\n          \u003ctd\u003eDefinition: An act that is considered to have some noteworthy likelihood of occurring in the future (has_match \u003d event).\n\n                        \n                           Examples:Prognosis of a condition, Expected date of discharge from hospital, patient will likely need an emergency decompression of the intracranial pressure by morning.\n\n                        \n                           UsageNotes:INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with expectation, which is a prediction that something will happen in the future. GOL (goal) reflects a hope rather than a prediction. RSK (risk) reflects a potential negative event that may or may not be expected to happen.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v3-ActMood-GOL\"\u003e \u003c/a\u003e1\n          \u003c/td\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e  \n            \u003ca href\u003d\"v3/ActMood/cs.html#v3-ActMood-GOL\"\u003eGOL\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003egoal\u003c/td\u003e\n          \u003ctd\u003eDefinition: An expectation that is considered to be desirable to occur in the future \n\n                        \n                           Examples:Target weight below 80Kg, Stop smoking, Regain ability to walk, goal is to administer thrombolytics to candidate patients presenting with acute myocardial infarction.\n\n                        \n                           UsageNotes: INT (intent) reflects a plan for the future, which is a declaration to do something.  This contrasts with goal which doesn\u0027t represent an intention to act, merely a hope for an eventual result.  A goal is distinct from the intended actions to reach that goal.  \u0026quot;I will reduce the dose of drug x to 20mg\u0026quot; is an intent.  \u0026quot;I hope to be able to get the patient to the point where I can reduce the dose of drug x to 20mg\u0026quot; is a goal. EXPEC (expectation) reflects a prediction rather than a hope. RSK (risk) reflects a potential negative event rather than a hope.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v3-ActMood-RSK\"\u003e \u003c/a\u003e1\n          \u003c/td\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e  \n            \u003ca href\u003d\"v3/ActMood/cs.html#v3-ActMood-RSK\"\u003eRSK\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003erisk\u003c/td\u003e\n          \u003ctd\u003eDefinition:An act that may occur in the future and which is regarded as undesirable \n\n                        \n                           Examples:Increased risk of DVT, at risk for sub-acute bacterial endocarditis.\n\n                        \n                           UsageNotes:Note: An observation in RSK mood expresses the undesirable act, and not the underlying risk factor. A risk factor that is present (e.g. obesity, smoking, etc) should be expressed in event mood. INT (intent) reflects a plan for the future, which is a declaration to do something. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen. GOL (goal) reflects a hope to achieve something. EXPEC (expectation) is the prediction of a positive or negative event. This contrasts with RSK (risk), which is the potential that something negative will occur that may or may not ever happen, and may not be expected to happen.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003ca name\u003d\"http---terminology.hl7.org-CodeSystem-v3-ActMood-OPT\"\u003e \u003c/a\u003e0\n          \u003c/td\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003ca href\u003d\"v3/ActMood/cs.html#v3-ActMood-OPT\"\u003eOPT\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eoption\u003c/td\u003e\n          \u003ctd\u003eDefinition: One of a set of acts that specify an option for the property values that the parent act may have. Typically used in definitions or orders to describe alternatives. An option can only be used as a group, that is, all assigned values must be used together. The actual mood of the act is the same as the parent act, and they must be linked by an actrelationship with type \u003d OPTN.\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/inactive",
+  "version": "4.0.1",
+  "name": "Example-inactive",
+  "title": "Example with inactive codes",
+  "status": "draft",
+  "description": "HL7 v3 ActMood Predicate codes, including inactive codes",
+  "compose": {
+    "inactive": true,
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActMood",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "descendent-of",
+            "value": "_ActMoodPredicate"
+          }
+        ]
+      }
+    ]
+  },
+  "expansion": {
+    "identifier": "urn:uuid:46c00b3f-003a-4f31-9d4b-ea2de58b2a99",
+    "timestamp": "2017-02-26T10:00:00Z",
+    "contains": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActMood",
+        "inactive": true,
+        "code": "CRT",
+        "display": "criterion"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActMood",
+        "code": "EXPEC",
+        "display": "expectation",
+        "contains": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActMood",
+            "code": "GOL",
+            "display": "goal"
+          },
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ActMood",
+            "code": "RSK",
+            "display": "risk"
+          }
+        ]
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActMood",
+        "code": "OPT",
+        "display": "option"
+      }
+    ]
+  }
+}

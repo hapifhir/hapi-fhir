@@ -1,0 +1,137 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "basic-resource-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eBasic Resource Types\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines codes for resources not yet supported by (or which will never be supported by) FHIR.  Many of the codes listed here will eventually be turned into official resources.  However, there is no guarantee that any particular resource will be created nor that the scope will be exactly as defined by the codes presented here.  Codes in this set will be deprecated if/when formal resources are defined that encompass these concepts.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/basic-resource-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econsent\u003ca name\u003d\"basic-resource-type-consent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsent\u003c/td\u003e\u003ctd\u003eAn assertion of permission for an activity or set of activities to occur, possibly subject to particular limitations; e.g. surgical consent, information disclosure consent, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereferral\u003ca name\u003d\"basic-resource-type-referral\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReferral\u003c/td\u003e\u003ctd\u003eA request that care of a particular type be provided to a patient.  Could involve the transfer of care, a consult, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadvevent\u003ca name\u003d\"basic-resource-type-advevent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdverse Event\u003c/td\u003e\u003ctd\u003eAn undesired reaction caused by exposure to some agent (e.g. a medication, immunization, food, or environmental agent).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaptmtreq\u003ca name\u003d\"basic-resource-type-aptmtreq\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppointment Request\u003c/td\u003e\u003ctd\u003eA request that a time be scheduled for a type of service for a specified patient, potentially subject to other constraints\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransfer\u003ca name\u003d\"basic-resource-type-transfer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTransfer\u003c/td\u003e\u003ctd\u003eThe transition of a patient or set of material from one location to another\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediet\u003ca name\u003d\"basic-resource-type-diet\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiet\u003c/td\u003e\u003ctd\u003eThe specification of a set of food and/or other nutritional material to be delivered to a patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadminact\u003ca name\u003d\"basic-resource-type-adminact\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdministrative Activity\u003c/td\u003e\u003ctd\u003eAn occurrence of a non-care-related event in the healthcare domain, such as approvals, reviews, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexposure\u003ca name\u003d\"basic-resource-type-exposure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExposure\u003c/td\u003e\u003ctd\u003eRecord of a situation where a subject was exposed to a substance.  Usually of interest to public health.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einvestigation\u003ca name\u003d\"basic-resource-type-investigation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInvestigation\u003c/td\u003e\u003ctd\u003eA formalized inquiry into the circumstances surrounding a particular unplanned event or potential event for the purposes of identifying possible causes and contributing factors for the event\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccount\u003ca name\u003d\"basic-resource-type-account\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccount\u003c/td\u003e\u003ctd\u003eA financial instrument used to track costs, charges or other amounts.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einvoice\u003ca name\u003d\"basic-resource-type-invoice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInvoice\u003c/td\u003e\u003ctd\u003eA request for payment for goods and/or services.  Includes the idea of a healthcare insurance claim.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadjudicat\u003ca name\u003d\"basic-resource-type-adjudicat\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInvoice Adjudication\u003c/td\u003e\u003ctd\u003eThe determination of what will be paid against a particular invoice based on coverage, plan rules, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epredetreq\u003ca name\u003d\"basic-resource-type-predetreq\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePre-determination Request\u003c/td\u003e\u003ctd\u003eA request for a pre-determination of the cost that would be paid under an insurance plan for a hypothetical claim for goods or services\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epredetermine\u003ca name\u003d\"basic-resource-type-predetermine\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePredetermination\u003c/td\u003e\u003ctd\u003eAn adjudication of what would be paid under an insurance plan for a hypothetical claim for goods or services\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estudy\u003ca name\u003d\"basic-resource-type-study\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStudy\u003c/td\u003e\u003ctd\u003eAn investigation to determine information about a particular therapy or product\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprotocol\u003ca name\u003d\"basic-resource-type-protocol\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProtocol\u003c/td\u003e\u003ctd\u003eA set of (possibly conditional) steps to be taken to achieve some aim.  Includes study protocols, treatment protocols, emergency protocols, etc.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/basic-resource-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1072"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "BasicResourceTypes",
+  "title": "Basic Resource Types",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines codes for resources not yet supported by (or which will never be supported by) FHIR.  Many of the codes listed here will eventually be turned into official resources.  However, there is no guarantee that any particular resource will be created nor that the scope will be exactly as defined by the codes presented here.  Codes in this set will be deprecated if/when formal resources are defined that encompass these concepts.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/basic-resource-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "consent",
+      "display": "Consent",
+      "definition": "An assertion of permission for an activity or set of activities to occur, possibly subject to particular limitations; e.g. surgical consent, information disclosure consent, etc."
+    },
+    {
+      "code": "referral",
+      "display": "Referral",
+      "definition": "A request that care of a particular type be provided to a patient.  Could involve the transfer of care, a consult, etc."
+    },
+    {
+      "code": "advevent",
+      "display": "Adverse Event",
+      "definition": "An undesired reaction caused by exposure to some agent (e.g. a medication, immunization, food, or environmental agent)."
+    },
+    {
+      "code": "aptmtreq",
+      "display": "Appointment Request",
+      "definition": "A request that a time be scheduled for a type of service for a specified patient, potentially subject to other constraints"
+    },
+    {
+      "code": "transfer",
+      "display": "Transfer",
+      "definition": "The transition of a patient or set of material from one location to another"
+    },
+    {
+      "code": "diet",
+      "display": "Diet",
+      "definition": "The specification of a set of food and/or other nutritional material to be delivered to a patient."
+    },
+    {
+      "code": "adminact",
+      "display": "Administrative Activity",
+      "definition": "An occurrence of a non-care-related event in the healthcare domain, such as approvals, reviews, etc."
+    },
+    {
+      "code": "exposure",
+      "display": "Exposure",
+      "definition": "Record of a situation where a subject was exposed to a substance.  Usually of interest to public health."
+    },
+    {
+      "code": "investigation",
+      "display": "Investigation",
+      "definition": "A formalized inquiry into the circumstances surrounding a particular unplanned event or potential event for the purposes of identifying possible causes and contributing factors for the event"
+    },
+    {
+      "code": "account",
+      "display": "Account",
+      "definition": "A financial instrument used to track costs, charges or other amounts."
+    },
+    {
+      "code": "invoice",
+      "display": "Invoice",
+      "definition": "A request for payment for goods and/or services.  Includes the idea of a healthcare insurance claim."
+    },
+    {
+      "code": "adjudicat",
+      "display": "Invoice Adjudication",
+      "definition": "The determination of what will be paid against a particular invoice based on coverage, plan rules, etc."
+    },
+    {
+      "code": "predetreq",
+      "display": "Pre-determination Request",
+      "definition": "A request for a pre-determination of the cost that would be paid under an insurance plan for a hypothetical claim for goods or services"
+    },
+    {
+      "code": "predetermine",
+      "display": "Predetermination",
+      "definition": "An adjudication of what would be paid under an insurance plan for a hypothetical claim for goods or services"
+    },
+    {
+      "code": "study",
+      "display": "Study",
+      "definition": "An investigation to determine information about a particular therapy or product"
+    },
+    {
+      "code": "protocol",
+      "display": "Protocol",
+      "definition": "A set of (possibly conditional) steps to be taken to achieve some aim.  Includes study protocols, treatment protocols, emergency protocols, etc."
+    }
+  ]
+}

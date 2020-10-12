@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "metric-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDeviceMetricCategory\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDescribes the category of the metric.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/metric-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emeasurement\u003ca name\u003d\"metric-category-measurement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMeasurement\u003c/td\u003e\u003ctd\u003eDeviceObservations generated for this DeviceMetric are measured.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esetting\u003ca name\u003d\"metric-category-setting\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSetting\u003c/td\u003e\u003ctd\u003eDeviceObservations generated for this DeviceMetric is a setting that will influence the behavior of the Device.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecalculation\u003ca name\u003d\"metric-category-calculation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCalculation\u003c/td\u003e\u003ctd\u003eDeviceObservations generated for this DeviceMetric are calculated.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunspecified\u003ca name\u003d\"metric-category-unspecified\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnspecified\u003c/td\u003e\u003ctd\u003eThe category of this DeviceMetric is unspecified.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "dev"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/metric-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.649"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DeviceMetricCategory",
+  "title": "DeviceMetricCategory",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Describes the category of the metric.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/metric-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "measurement",
+      "display": "Measurement",
+      "definition": "DeviceObservations generated for this DeviceMetric are measured."
+    },
+    {
+      "code": "setting",
+      "display": "Setting",
+      "definition": "DeviceObservations generated for this DeviceMetric is a setting that will influence the behavior of the Device."
+    },
+    {
+      "code": "calculation",
+      "display": "Calculation",
+      "definition": "DeviceObservations generated for this DeviceMetric are calculated."
+    },
+    {
+      "code": "unspecified",
+      "display": "Unspecified",
+      "definition": "The category of this DeviceMetric is unspecified."
+    }
+  ]
+}

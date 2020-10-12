@@ -1,0 +1,102 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "cm-name-use-v3",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ev3.NameUse (http://hl7.org/fhir/ConceptMap/cm-name-use-v3)\u003c/h2\u003e\u003cp\u003eMapping from \u003ca href\u003d\"valueset-name-use.html\"\u003ehttp://hl7.org/fhir/ValueSet/name-use\u003c/a\u003e to \u003ca href\u003d\"v3/EntityNameUseR2/vs.html\"\u003ehttp://terminology.hl7.org/ValueSet/v3-EntityNameUseR2\u003c/a\u003e\u003c/p\u003e\u003cp\u003eDRAFT. Published on 01/11/2019 9:29:23 AM by HL7 (FHIR Project) (\u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e, \u003ca href\u003d\"mailto:fhir@lists.hl7.org\"\u003efhir@lists.hl7.org\u003c/a\u003e). \u003c/p\u003e\u003cbr/\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eSource Code\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEquivalence\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDestination Code\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eusual\u003c/td\u003e\u003ctd\u003eequal\u003c/td\u003e\u003ctd\u003eC (customary)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eofficial\u003c/td\u003e\u003ctd\u003eequal\u003c/td\u003e\u003ctd\u003eOR (official registry name)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003etemp\u003c/td\u003e\u003ctd\u003eequal\u003c/td\u003e\u003ctd\u003eT (temporary)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003enickname\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eP (Other/Pseudonym/Alias)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eanonymous\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eANON (Anonymous)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eold\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eOLD (no longer in use)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003emaiden (Name changed for Marriage)\u003c/td\u003e\u003ctd\u003eequal\u003c/td\u003e\u003ctd\u003eM (maiden name)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/cm-name-use-v3",
+  "version": "4.0.1",
+  "name": "v3.NameUse",
+  "title": "v3 map for NameUse",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "sourceCanonical": "http://hl7.org/fhir/ValueSet/name-use",
+  "targetCanonical": "http://terminology.hl7.org/ValueSet/v3-EntityNameUseR2",
+  "group": [
+    {
+      "source": "http://hl7.org/fhir/name-use",
+      "target": "http://terminology.hl7.org/CodeSystem/v3-EntityNameUseR2",
+      "element": [
+        {
+          "code": "usual",
+          "target": [
+            {
+              "code": "C",
+              "equivalence": "equal"
+            }
+          ]
+        },
+        {
+          "code": "official",
+          "target": [
+            {
+              "code": "OR",
+              "equivalence": "equal"
+            }
+          ]
+        },
+        {
+          "code": "temp",
+          "target": [
+            {
+              "code": "T",
+              "equivalence": "equal"
+            }
+          ]
+        },
+        {
+          "code": "nickname",
+          "target": [
+            {
+              "code": "P",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "anonymous",
+          "target": [
+            {
+              "code": "ANON",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "old",
+          "target": [
+            {
+              "code": "OLD",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "maiden",
+          "target": [
+            {
+              "code": "M",
+              "equivalence": "equal"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

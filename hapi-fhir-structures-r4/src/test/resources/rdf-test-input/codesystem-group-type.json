@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "group-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGroupType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eTypes of resources that are part of group.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/group-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eperson\u003ca name\u003d\"group-type-person\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePerson\u003c/td\u003e\u003ctd\u003eGroup contains \u0026quot;person\u0026quot; Patient resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eanimal\u003ca name\u003d\"group-type-animal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAnimal\u003c/td\u003e\u003ctd\u003eGroup contains \u0026quot;animal\u0026quot; Patient resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epractitioner\u003ca name\u003d\"group-type-practitioner\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePractitioner\u003c/td\u003e\u003ctd\u003eGroup contains healthcare practitioner resources (Practitioner or PractitionerRole).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edevice\u003ca name\u003d\"group-type-device\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDevice\u003c/td\u003e\u003ctd\u003eGroup contains Device resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedication\u003ca name\u003d\"group-type-medication\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedication\u003c/td\u003e\u003ctd\u003eGroup contains Medication resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubstance\u003ca name\u003d\"group-type-substance\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubstance\u003c/td\u003e\u003ctd\u003eGroup contains Substance resources.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/group-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.285"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GroupType",
+  "title": "GroupType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Types of resources that are part of group.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/group-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "person",
+      "display": "Person",
+      "definition": "Group contains \"person\" Patient resources."
+    },
+    {
+      "code": "animal",
+      "display": "Animal",
+      "definition": "Group contains \"animal\" Patient resources."
+    },
+    {
+      "code": "practitioner",
+      "display": "Practitioner",
+      "definition": "Group contains healthcare practitioner resources (Practitioner or PractitionerRole)."
+    },
+    {
+      "code": "device",
+      "display": "Device",
+      "definition": "Group contains Device resources."
+    },
+    {
+      "code": "medication",
+      "display": "Medication",
+      "definition": "Group contains Medication resources."
+    },
+    {
+      "code": "substance",
+      "display": "Substance",
+      "definition": "Group contains Substance resources."
+    }
+  ]
+}

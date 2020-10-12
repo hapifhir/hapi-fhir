@@ -1,0 +1,46 @@
+{
+  "resourceType": "ValueSet",
+  "id": "iso3166-1-N",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eIso 3166 Part 1: Numeric Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines the ISO 3166 Part 1 Numeric codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude codes from \u003ccode\u003eurn:iso:std:iso:3166\u003c/code\u003e where code  matches (by regex)  [0-9]{3}\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/iso3166-1-N",
+  "version": "4.0.1",
+  "name": "Iso3166-1-N",
+  "title": "Iso 3166 Part 1: Numeric Codes",
+  "status": "active",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines the ISO 3166 Part 1 Numeric codes",
+  "compose": {
+    "include": [
+      {
+        "system": "urn:iso:std:iso:3166",
+        "filter": [
+          {
+            "property": "code",
+            "op": "regex",
+            "value": "[0-9]{3}"
+          }
+        ]
+      }
+    ]
+  }
+}

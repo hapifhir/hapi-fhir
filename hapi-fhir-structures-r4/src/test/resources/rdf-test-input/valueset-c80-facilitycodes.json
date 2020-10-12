@@ -1,0 +1,383 @@
+{
+  "resourceType": "ValueSet",
+  "id": "c80-facilitycodes",
+  "meta": {
+    "lastUpdated": "2019-10-31T22:29:23.356+00:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFacility Type Code Value Set\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis is the code representing the type of organizational setting where the clinical encounter, service, interaction, or treatment occurred. The value set used for Healthcare Facility Type has been defined by HITSP to be the value set reproduced from HITSP C80 Table 2-147.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d82242000\"\u003e82242000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-children\u0027s\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d225732001\"\u003e225732001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-community\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d79993009\"\u003e79993009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-government\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d32074000\"\u003e32074000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-long term care\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d4322002\"\u003e4322002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-military field\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d224687002\"\u003e224687002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-prison\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d62480006\"\u003e62480006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-psychiatric\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d80522000\"\u003e80522000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-rehabilitation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d36125001\"\u003e36125001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-trauma center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d48311003\"\u003e48311003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-Veterans\u0027 Administration\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d284546000\"\u003e284546000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospice facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d42665001\"\u003e42665001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNursing home\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d45618002\"\u003e45618002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSkilled nursing facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d418518002\"\u003e418518002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDialysis unit--hospital\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d73770003\"\u003e73770003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEmergency department--hospital\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d69362002\"\u003e69362002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital ambulatory surgery facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d52668009\"\u003e52668009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital birthing center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d360957003\"\u003e360957003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient allergy clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d10206005\"\u003e10206005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient dental clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d37550003\"\u003e37550003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient dermatology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d73644007\"\u003e73644007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient endocrinology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d31628002\"\u003e31628002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient family medicine clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d58482006\"\u003e58482006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient gastroenterology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d90484001\"\u003e90484001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient general surgery clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d1814000\"\u003e1814000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient geriatric health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d22549003\"\u003e22549003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient gynecology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d56293002\"\u003e56293002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient hematology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d360966004\"\u003e360966004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient immunology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d2849009\"\u003e2849009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient infectious disease clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d14866005\"\u003e14866005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient mental health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d38238005\"\u003e38238005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient neurology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d56189001\"\u003e56189001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient obstetrical clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d89972002\"\u003e89972002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient oncology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d78088001\"\u003e78088001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient ophthalmology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d78001009\"\u003e78001009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient orthopedics clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d23392004\"\u003e23392004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient otorhinolaryngology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d36293008\"\u003e36293008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient pain clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d3729002\"\u003e3729002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient pediatric clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d5584006\"\u003e5584006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient peripheral vascular clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d37546005\"\u003e37546005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient rehabilitation clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d57159002\"\u003e57159002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient respiratory disease clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d331006\"\u003e331006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient rheumatology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d50569004\"\u003e50569004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital outpatient urology clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d79491001\"\u003e79491001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital radiology facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d33022008\"\u003e33022008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital-based outpatient clinic or department--OTHER-NOT LISTED\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d19602009\"\u003e19602009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFee-for-service private physicians\u0027 group office\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d39350007\"\u003e39350007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrivate physicians\u0027 group office\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d83891005\"\u003e83891005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSolo practice private office\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394759007\"\u003e394759007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIndependent ambulatory care provider site--OTHER--NOT LISTED\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d405607001\"\u003e405607001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmbulatory surgery center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d309900005\"\u003e309900005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCare of the elderly day hospital\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d275576008\"\u003e275576008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eElderly assessment clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d10531005\"\u003e10531005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree-standing ambulatory surgery facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d91154008\"\u003e91154008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree-standing birthing center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d41844007\"\u003e41844007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree-standing geriatric health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d45899008\"\u003e45899008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree-standing laboratory facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d51563005\"\u003e51563005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree-standing mental health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d1773006\"\u003e1773006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree-standing radiology facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d72311000\"\u003e72311000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth maintenance organization\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d6827000\"\u003e6827000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLocal community health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d309898008\"\u003e309898008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePsychogeriatric day hospital\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d39913001\"\u003e39913001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResidential school infirmary\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d77931003\"\u003e77931003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRural health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d25681007\"\u003e25681007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSexually transmitted disease health center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d20078004\"\u003e20078004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubstance abuse treatment center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d46224007\"\u003e46224007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVaccination clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d81234003\"\u003e81234003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWalk-in clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d35971002\"\u003e35971002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmbulatory care site--OTHER--NOT LISTED\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d11424001\"\u003e11424001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmbulance-based care\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d409519008\"\u003e409519008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContained casualty setting\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d901005\"\u003e901005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHelicopter-based care\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d2081004\"\u003e2081004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital ship\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d59374000\"\u003e59374000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTraveler\u0027s aid clinic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d413456002\"\u003e413456002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult day care center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d413817003\"\u003e413817003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChild day care center\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d310205006\"\u003e310205006\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrivate residential home\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419955002\"\u003e419955002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResidential institution\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d272501009\"\u003e272501009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSports facility\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d394777002\"\u003e394777002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth encounter site--NOT LISTED\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/c80-facilitycodes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.88.12.80.67"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FacilityTypeCodeValueSet",
+  "title": "Facility Type Code Value Set",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HITSP",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This is the code representing the type of organizational setting where the clinical encounter, service, interaction, or treatment occurred. The value set used for Healthcare Facility Type has been defined by HITSP to be the value set reproduced from HITSP C80 Table 2-147.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "82242000",
+            "display": "Hospital-children\u0027s"
+          },
+          {
+            "code": "225732001",
+            "display": "Hospital-community"
+          },
+          {
+            "code": "79993009",
+            "display": "Hospital-government"
+          },
+          {
+            "code": "32074000",
+            "display": "Hospital-long term care"
+          },
+          {
+            "code": "4322002",
+            "display": "Hospital-military field"
+          },
+          {
+            "code": "224687002",
+            "display": "Hospital-prison"
+          },
+          {
+            "code": "62480006",
+            "display": "Hospital-psychiatric"
+          },
+          {
+            "code": "80522000",
+            "display": "Hospital-rehabilitation"
+          },
+          {
+            "code": "36125001",
+            "display": "Hospital-trauma center"
+          },
+          {
+            "code": "48311003",
+            "display": "Hospital-Veterans\u0027 Administration"
+          },
+          {
+            "code": "284546000",
+            "display": "Hospice facility"
+          },
+          {
+            "code": "42665001",
+            "display": "Nursing home"
+          },
+          {
+            "code": "45618002",
+            "display": "Skilled nursing facility"
+          },
+          {
+            "code": "418518002",
+            "display": "Dialysis unit--hospital"
+          },
+          {
+            "code": "73770003",
+            "display": "Emergency department--hospital"
+          },
+          {
+            "code": "69362002",
+            "display": "Hospital ambulatory surgery facility"
+          },
+          {
+            "code": "52668009",
+            "display": "Hospital birthing center"
+          },
+          {
+            "code": "360957003",
+            "display": "Hospital outpatient allergy clinic"
+          },
+          {
+            "code": "10206005",
+            "display": "Hospital outpatient dental clinic"
+          },
+          {
+            "code": "37550003",
+            "display": "Hospital outpatient dermatology clinic"
+          },
+          {
+            "code": "73644007",
+            "display": "Hospital outpatient endocrinology clinic"
+          },
+          {
+            "code": "31628002",
+            "display": "Hospital outpatient family medicine clinic"
+          },
+          {
+            "code": "58482006",
+            "display": "Hospital outpatient gastroenterology clinic"
+          },
+          {
+            "code": "90484001",
+            "display": "Hospital outpatient general surgery clinic"
+          },
+          {
+            "code": "1814000",
+            "display": "Hospital outpatient geriatric health center"
+          },
+          {
+            "code": "22549003",
+            "display": "Hospital outpatient gynecology clinic"
+          },
+          {
+            "code": "56293002",
+            "display": "Hospital outpatient hematology clinic"
+          },
+          {
+            "code": "360966004",
+            "display": "Hospital outpatient immunology clinic"
+          },
+          {
+            "code": "2849009",
+            "display": "Hospital outpatient infectious disease clinic"
+          },
+          {
+            "code": "14866005",
+            "display": "Hospital outpatient mental health center"
+          },
+          {
+            "code": "38238005",
+            "display": "Hospital outpatient neurology clinic"
+          },
+          {
+            "code": "56189001",
+            "display": "Hospital outpatient obstetrical clinic"
+          },
+          {
+            "code": "89972002",
+            "display": "Hospital outpatient oncology clinic"
+          },
+          {
+            "code": "78088001",
+            "display": "Hospital outpatient ophthalmology clinic"
+          },
+          {
+            "code": "78001009",
+            "display": "Hospital outpatient orthopedics clinic"
+          },
+          {
+            "code": "23392004",
+            "display": "Hospital outpatient otorhinolaryngology clinic"
+          },
+          {
+            "code": "36293008",
+            "display": "Hospital outpatient pain clinic"
+          },
+          {
+            "code": "3729002",
+            "display": "Hospital outpatient pediatric clinic"
+          },
+          {
+            "code": "5584006",
+            "display": "Hospital outpatient peripheral vascular clinic"
+          },
+          {
+            "code": "37546005",
+            "display": "Hospital outpatient rehabilitation clinic"
+          },
+          {
+            "code": "57159002",
+            "display": "Hospital outpatient respiratory disease clinic"
+          },
+          {
+            "code": "331006",
+            "display": "Hospital outpatient rheumatology clinic"
+          },
+          {
+            "code": "50569004",
+            "display": "Hospital outpatient urology clinic"
+          },
+          {
+            "code": "79491001",
+            "display": "Hospital radiology facility"
+          },
+          {
+            "code": "33022008",
+            "display": "Hospital-based outpatient clinic or department--OTHER-NOT LISTED"
+          },
+          {
+            "code": "19602009",
+            "display": "Fee-for-service private physicians\u0027 group office"
+          },
+          {
+            "code": "39350007",
+            "display": "Private physicians\u0027 group office"
+          },
+          {
+            "code": "83891005",
+            "display": "Solo practice private office"
+          },
+          {
+            "code": "394759007",
+            "display": "Independent ambulatory care provider site--OTHER--NOT LISTED"
+          },
+          {
+            "code": "405607001",
+            "display": "Ambulatory surgery center"
+          },
+          {
+            "code": "309900005",
+            "display": "Care of the elderly day hospital"
+          },
+          {
+            "code": "275576008",
+            "display": "Elderly assessment clinic"
+          },
+          {
+            "code": "10531005",
+            "display": "Free-standing ambulatory surgery facility"
+          },
+          {
+            "code": "91154008",
+            "display": "Free-standing birthing center"
+          },
+          {
+            "code": "41844007",
+            "display": "Free-standing geriatric health center"
+          },
+          {
+            "code": "45899008",
+            "display": "Free-standing laboratory facility"
+          },
+          {
+            "code": "51563005",
+            "display": "Free-standing mental health center"
+          },
+          {
+            "code": "1773006",
+            "display": "Free-standing radiology facility"
+          },
+          {
+            "code": "72311000",
+            "display": "Health maintenance organization"
+          },
+          {
+            "code": "6827000",
+            "display": "Local community health center"
+          },
+          {
+            "code": "309898008",
+            "display": "Psychogeriatric day hospital"
+          },
+          {
+            "code": "39913001",
+            "display": "Residential school infirmary"
+          },
+          {
+            "code": "77931003",
+            "display": "Rural health center"
+          },
+          {
+            "code": "25681007",
+            "display": "Sexually transmitted disease health center"
+          },
+          {
+            "code": "20078004",
+            "display": "Substance abuse treatment center"
+          },
+          {
+            "code": "46224007",
+            "display": "Vaccination clinic"
+          },
+          {
+            "code": "81234003",
+            "display": "Walk-in clinic"
+          },
+          {
+            "code": "35971002",
+            "display": "Ambulatory care site--OTHER--NOT LISTED"
+          },
+          {
+            "code": "11424001",
+            "display": "Ambulance-based care"
+          },
+          {
+            "code": "409519008",
+            "display": "Contained casualty setting"
+          },
+          {
+            "code": "901005",
+            "display": "Helicopter-based care"
+          },
+          {
+            "code": "2081004",
+            "display": "Hospital ship"
+          },
+          {
+            "code": "59374000",
+            "display": "Traveler\u0027s aid clinic"
+          },
+          {
+            "code": "413456002",
+            "display": "Adult day care center"
+          },
+          {
+            "code": "413817003",
+            "display": "Child day care center"
+          },
+          {
+            "code": "310205006",
+            "display": "Private residential home"
+          },
+          {
+            "code": "419955002",
+            "display": "Residential institution"
+          },
+          {
+            "code": "272501009",
+            "display": "Sports facility"
+          },
+          {
+            "code": "394777002",
+            "display": "Health encounter site--NOT LISTED"
+          }
+        ]
+      }
+    ]
+  }
+}

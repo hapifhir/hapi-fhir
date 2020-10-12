@@ -1,0 +1,82 @@
+{
+  "resourceType": "ValueSet",
+  "id": "series-performer-function",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eImagingStudy series performer function\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003ePerformer function of an agent in an imaging study series\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/ParticipationType/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-ParticipationType\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-CON\"\u003eCON\u003c/a\u003e\u003c/td\u003e\u003ctd\u003econsultant\u003c/td\u003e\u003ctd\u003eAn advisor participating in the service by performing evaluations and making recommendations.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-VRF\"\u003eVRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003everifier\u003c/td\u003e\u003ctd\u003eA person who verifies the correctness and appropriateness of the service (plan, order, event, etc.) and hence takes on accountability.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-PRF\"\u003ePRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eperformer\u003c/td\u003e\u003ctd\u003eDefinition: A person, non-person living subject, organization or device that who actually and principally carries out the action. Device should only be assigned as a performer in circumstances where the device is performing independent of human intervention.  Need not be the principal responsible actor.\u003cbr/\u003e\n                        \n                           Exampe: A surgery resident operating under supervision of attending surgeon, a search and rescue dog locating survivors, an electronic laboratory analyzer or the laboratory discipline requested to perform a laboratory test. The performer may also be the patient in self-care, e.g. fingerstick blood sugar. The traditional order filler is a performer. This information should accompany every service event.\u003cbr/\u003e\n                        \n                           Note: that existing HL7 designs assign an organization as the playing entity of the Role that is the performer.  These designs should be revised in subsequent releases to make this the scooping entity for the role involved.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-SPRF\"\u003eSPRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esecondary performer\u003c/td\u003e\u003ctd\u003eA person assisting in an act through his substantial presence and involvement   This includes: assistants, technicians, associates, or whatever the job titles may be.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-REF\"\u003eREF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereferrer\u003c/td\u003e\u003ctd\u003eA person having referred the subject of the service to the performer (referring physician).  Typically, a referring physician will receive a report.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "ii"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/series-performer-function",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.989"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ImagingStudySeriesPerformerFunction",
+  "title": "ImagingStudy series performer function",
+  "status": "draft",
+  "experimental": true,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Performer function of an agent in an imaging study series",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+        "concept": [
+          {
+            "code": "CON",
+            "display": "consultant"
+          },
+          {
+            "code": "VRF",
+            "display": "verifier"
+          },
+          {
+            "code": "PRF",
+            "display": "performer"
+          },
+          {
+            "code": "SPRF",
+            "display": "secondary performer"
+          },
+          {
+            "code": "REF",
+            "display": "referrer"
+          }
+        ]
+      }
+    ]
+  }
+}

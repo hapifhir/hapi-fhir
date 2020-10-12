@@ -1,0 +1,124 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "research-subject-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eResearchSubjectStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eIndicates the progression of a study subject through a study.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/research-subject-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecandidate\u003ca name\u003d\"research-subject-status-candidate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCandidate\u003c/td\u003e\u003ctd\u003eAn identified person that can be considered for inclusion in a study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeligible\u003ca name\u003d\"research-subject-status-eligible\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEligible\u003c/td\u003e\u003ctd\u003eA person that has met the eligibility criteria for inclusion in a study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efollow-up\u003ca name\u003d\"research-subject-status-follow-up\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFollow-up\u003c/td\u003e\u003ctd\u003eA person is no longer receiving study intervention and/or being evaluated with tests and procedures according to the protocol, but they are being monitored on a protocol-prescribed schedule.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eineligible\u003ca name\u003d\"research-subject-status-ineligible\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIneligible\u003c/td\u003e\u003ctd\u003eA person who did not meet one or more criteria required for participation in a study is considered to have failed screening or\nis ineligible for the study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-registered\u003ca name\u003d\"research-subject-status-not-registered\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Registered\u003c/td\u003e\u003ctd\u003eA person for whom registration was not completed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoff-study\u003ca name\u003d\"research-subject-status-off-study\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOff-study\u003c/td\u003e\u003ctd\u003eA person that has ended their participation on a study either because their treatment/observation is complete or through not\nresponding, withdrawal, non-compliance and/or adverse event.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-study\u003ca name\u003d\"research-subject-status-on-study\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn-study\u003c/td\u003e\u003ctd\u003eA person that is enrolled or registered on a study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-study-intervention\u003ca name\u003d\"research-subject-status-on-study-intervention\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn-study-intervention\u003c/td\u003e\u003ctd\u003eThe person is receiving the treatment or participating in an activity (e.g. yoga, diet, etc.) that the study is evaluating.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-study-observation\u003ca name\u003d\"research-subject-status-on-study-observation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn-study-observation\u003c/td\u003e\u003ctd\u003eThe subject is being evaluated via tests and assessments according to the study calendar, but is not receiving any intervention. Note that this state is study-dependent and might not exist in all studies.  A synonym for this is \u0026quot;short-term follow-up\u0026quot;.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epending-on-study\u003ca name\u003d\"research-subject-status-pending-on-study\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePending on-study\u003c/td\u003e\u003ctd\u003eA person is pre-registered for a study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epotential-candidate\u003ca name\u003d\"research-subject-status-potential-candidate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePotential Candidate\u003c/td\u003e\u003ctd\u003eA person that is potentially eligible for participation in the study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003escreening\u003ca name\u003d\"research-subject-status-screening\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eScreening\u003c/td\u003e\u003ctd\u003eA person who is being evaluated for eligibility for a study.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewithdrawn\u003ca name\u003d\"research-subject-status-withdrawn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWithdrawn\u003c/td\u003e\u003ctd\u003eThe person has withdrawn their participation in the study before registration.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "brr"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/research-subject-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.830"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ResearchSubjectStatus",
+  "title": "ResearchSubjectStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Indicates the progression of a study subject through a study.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/research-subject-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "candidate",
+      "display": "Candidate",
+      "definition": "An identified person that can be considered for inclusion in a study."
+    },
+    {
+      "code": "eligible",
+      "display": "Eligible",
+      "definition": "A person that has met the eligibility criteria for inclusion in a study."
+    },
+    {
+      "code": "follow-up",
+      "display": "Follow-up",
+      "definition": "A person is no longer receiving study intervention and/or being evaluated with tests and procedures according to the protocol, but they are being monitored on a protocol-prescribed schedule."
+    },
+    {
+      "code": "ineligible",
+      "display": "Ineligible",
+      "definition": "A person who did not meet one or more criteria required for participation in a study is considered to have failed screening or\nis ineligible for the study."
+    },
+    {
+      "code": "not-registered",
+      "display": "Not Registered",
+      "definition": "A person for whom registration was not completed."
+    },
+    {
+      "code": "off-study",
+      "display": "Off-study",
+      "definition": "A person that has ended their participation on a study either because their treatment/observation is complete or through not\nresponding, withdrawal, non-compliance and/or adverse event."
+    },
+    {
+      "code": "on-study",
+      "display": "On-study",
+      "definition": "A person that is enrolled or registered on a study."
+    },
+    {
+      "code": "on-study-intervention",
+      "display": "On-study-intervention",
+      "definition": "The person is receiving the treatment or participating in an activity (e.g. yoga, diet, etc.) that the study is evaluating."
+    },
+    {
+      "code": "on-study-observation",
+      "display": "On-study-observation",
+      "definition": "The subject is being evaluated via tests and assessments according to the study calendar, but is not receiving any intervention. Note that this state is study-dependent and might not exist in all studies.  A synonym for this is \"short-term follow-up\"."
+    },
+    {
+      "code": "pending-on-study",
+      "display": "Pending on-study",
+      "definition": "A person is pre-registered for a study."
+    },
+    {
+      "code": "potential-candidate",
+      "display": "Potential Candidate",
+      "definition": "A person that is potentially eligible for participation in the study."
+    },
+    {
+      "code": "screening",
+      "display": "Screening",
+      "definition": "A person who is being evaluated for eligibility for a study."
+    },
+    {
+      "code": "withdrawn",
+      "display": "Withdrawn",
+      "definition": "The person has withdrawn their participation in the study before registration."
+    }
+  ]
+}

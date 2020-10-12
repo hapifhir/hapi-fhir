@@ -1,0 +1,91 @@
+{
+  "resourceType": "Contract",
+  "id": "C-123",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the contract\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://happyvalley.com/contract",
+      "value": "12347"
+    }
+  ],
+  "term": [
+    {
+      "offer": {
+        "text": "Can\u0027t refuse"
+      },
+      "asset": [
+        {
+          "type": [
+            {
+              "coding": [
+                {
+                  "system": "urn:ietf:rfc:3986",
+                  "code": "RicardianContract"
+                }
+              ]
+            }
+          ],
+          "subtype": [
+            {
+              "text": "sample"
+            }
+          ],
+          "period": [
+            {
+              "start": "2017-06-01"
+            }
+          ],
+          "valuedItem": [
+            {
+              "entityCodeableConcept": {
+                "text": "Ford Bobcat"
+              },
+              "identifier": {
+                "system": "http://somewhere.motor-vehicle.com/vin",
+                "value": "XXSVT34-7665t952236"
+              },
+              "effectiveTime": "1995",
+              "quantity": {
+                "value": 1
+              },
+              "unitPrice": {
+                "value": 200.00,
+                "currency": "CAD"
+              },
+              "factor": 1.0,
+              "points": 1.0,
+              "net": {
+                "value": 200.00,
+                "currency": "CAD"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "rule": [
+    {
+      "contentAttachment": {
+        "contentType": "application/txt",
+        "url": "http://www.rfc-editor.org/bcp/bcp13.txt"
+      }
+    }
+  ],
+  "legallyBindingAttachment": {
+    "contentType": "application/pdf",
+    "url": "http://www.aws3.com/storage/doc.pdf"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,244 @@
+{
+  "resourceType": "ValueSet",
+  "id": "supplement-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSupplement Type Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eSupplementType :  Codes for nutritional supplements to be provided to the patient. This value set is composed of SNOMED CT (US Extension) Concepts from SCTID 470581016 (Enteral+supplement feeds hierarchy (product)) and is provided as a suggestive example.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442901000124106\"\u003e442901000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult clear liquid supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443031000124106\"\u003e443031000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult critical care formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443051000124104\"\u003e443051000124104\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult diabetes specialty formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442911000124109\"\u003e442911000124109\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult elemental formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443021000124108\"\u003e443021000124108\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult hepatic specialty formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442971000124100\"\u003e442971000124100\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult high energy formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442981000124102\"\u003e442981000124102\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult hydrolyzed protein formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442991000124104\"\u003e442991000124104\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult high protein formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443011000124100\"\u003e443011000124100\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult high protein high fiber formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442961000124107\"\u003e442961000124107\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult low carbohydrate formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442951000124105\"\u003e442951000124105\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult pulmonary specialty formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442941000124108\"\u003e442941000124108\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult renal specialty formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442921000124101\"\u003e442921000124101\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult standard formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442931000124103\"\u003e442931000124103\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult soy protein isolate formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444331000124106\"\u003e444331000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiabetic meal replacement bar\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443361000124100\"\u003e443361000124100\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric Formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443391000124108\"\u003e443391000124108\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric clear liquid supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443401000124105\"\u003e443401000124105\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric elemental formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443491000124103\"\u003e443491000124103\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric high energy formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443501000124106\"\u003e443501000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric high energy formula with increased fiber\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443421000124100\"\u003e443421000124100\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric hydrolyzed protein formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443471000124104\"\u003e443471000124104\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric increased fiber formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444431000124104\"\u003e444431000124104\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric reduced energy formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443451000124109\"\u003e443451000124109\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePediatric standard formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444321000124108\"\u003e444321000124108\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard pudding oral supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d441561000124106\"\u003e441561000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard enteral formula with fiber\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443461000124106\"\u003e443461000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard Formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d441531000124102\"\u003e441531000124102\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard Enteral Formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443561000124107\"\u003e443561000124107\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSoy based formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443481000124101\"\u003e443481000124101\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRenal Formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d441571000124104\"\u003e441571000124104\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHigh energy enteral formula with fiber\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d441591000124103\"\u003e441591000124103\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiabetic enteral formula with fiber\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d441601000124106\"\u003e441601000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiabetic high calorie high protein enteral formula with fiber\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443351000124102\"\u003e443351000124102\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIncreased fiber formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443771000124106\"\u003e443771000124106\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHydrolyzed protein formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d441671000124100\"\u003e441671000124100\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHydrolyzed peptide-based high protein enteral formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443111000124101\"\u003e443111000124101\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHigh protein formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443431000124102\"\u003e443431000124102\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHigh Energy Formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443411000124108\"\u003e443411000124108\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eElemental Formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444361000124102\"\u003e444361000124102\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eElectrolyte replacement supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444401000124107\"\u003e444401000124107\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFrozen electrolyte replacement supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444381000124107\"\u003e444381000124107\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLiquid electrolyte replacement supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d444371000124109\"\u003e444371000124109\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePowdered electrolyte replacement supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d443441000124107\"\u003e443441000124107\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClear liquid supplement\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d442651000124102\"\u003e442651000124102\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdult formula\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/supplement-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.390"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SupplementTypeCodes",
+  "title": "Supplement Type Codes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR NutritionOrder team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "SupplementType :  Codes for nutritional supplements to be provided to the patient. This value set is composed of SNOMED CT (US Extension) Concepts from SCTID 470581016 (Enteral+supplement feeds hierarchy (product)) and is provided as a suggestive example.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "version": "http://snomed.info/sct/731000124108",
+        "concept": [
+          {
+            "code": "442901000124106",
+            "display": "Adult clear liquid supplement"
+          },
+          {
+            "code": "443031000124106",
+            "display": "Adult critical care formula"
+          },
+          {
+            "code": "443051000124104",
+            "display": "Adult diabetes specialty formula"
+          },
+          {
+            "code": "442911000124109",
+            "display": "Adult elemental formula"
+          },
+          {
+            "code": "443021000124108",
+            "display": "Adult hepatic specialty formula"
+          },
+          {
+            "code": "442971000124100",
+            "display": "Adult high energy formula"
+          },
+          {
+            "code": "442981000124102",
+            "display": "Adult hydrolyzed protein formula"
+          },
+          {
+            "code": "442991000124104",
+            "display": "Adult high protein formula"
+          },
+          {
+            "code": "443011000124100",
+            "display": "Adult high protein high fiber formula"
+          },
+          {
+            "code": "442961000124107",
+            "display": "Adult low carbohydrate formula"
+          },
+          {
+            "code": "442951000124105",
+            "display": "Adult pulmonary specialty formula"
+          },
+          {
+            "code": "442941000124108",
+            "display": "Adult renal specialty formula"
+          },
+          {
+            "code": "442921000124101",
+            "display": "Adult standard formula"
+          },
+          {
+            "code": "442931000124103",
+            "display": "Adult soy protein isolate formula"
+          },
+          {
+            "code": "444331000124106",
+            "display": "Diabetic meal replacement bar"
+          },
+          {
+            "code": "443361000124100",
+            "display": "Pediatric Formula"
+          },
+          {
+            "code": "443391000124108",
+            "display": "Pediatric clear liquid supplement"
+          },
+          {
+            "code": "443401000124105",
+            "display": "Pediatric elemental formula"
+          },
+          {
+            "code": "443491000124103",
+            "display": "Pediatric high energy formula"
+          },
+          {
+            "code": "443501000124106",
+            "display": "Pediatric high energy formula with increased fiber"
+          },
+          {
+            "code": "443421000124100",
+            "display": "Pediatric hydrolyzed protein formula"
+          },
+          {
+            "code": "443471000124104",
+            "display": "Pediatric increased fiber formula"
+          },
+          {
+            "code": "444431000124104",
+            "display": "Pediatric reduced energy formula"
+          },
+          {
+            "code": "443451000124109",
+            "display": "Pediatric standard formula"
+          },
+          {
+            "code": "444321000124108",
+            "display": "Standard pudding oral supplement"
+          },
+          {
+            "code": "441561000124106",
+            "display": "Standard enteral formula with fiber"
+          },
+          {
+            "code": "443461000124106",
+            "display": "Standard Formula"
+          },
+          {
+            "code": "441531000124102",
+            "display": "Standard Enteral Formula"
+          },
+          {
+            "code": "443561000124107",
+            "display": "Soy based formula"
+          },
+          {
+            "code": "443481000124101",
+            "display": "Renal Formula"
+          },
+          {
+            "code": "441571000124104",
+            "display": "High energy enteral formula with fiber"
+          },
+          {
+            "code": "441591000124103",
+            "display": "Diabetic enteral formula with fiber"
+          },
+          {
+            "code": "441601000124106",
+            "display": "Diabetic high calorie high protein enteral formula with fiber"
+          },
+          {
+            "code": "443351000124102",
+            "display": "Increased fiber formula"
+          },
+          {
+            "code": "443771000124106",
+            "display": "Hydrolyzed protein formula"
+          },
+          {
+            "code": "441671000124100",
+            "display": "Hydrolyzed peptide-based high protein enteral formula"
+          },
+          {
+            "code": "443111000124101",
+            "display": "High protein formula"
+          },
+          {
+            "code": "443431000124102",
+            "display": "High Energy Formula"
+          },
+          {
+            "code": "443411000124108",
+            "display": "Elemental Formula"
+          },
+          {
+            "code": "444361000124102",
+            "display": "Electrolyte replacement supplement"
+          },
+          {
+            "code": "444401000124107",
+            "display": "Frozen electrolyte replacement supplement"
+          },
+          {
+            "code": "444381000124107",
+            "display": "Liquid electrolyte replacement supplement"
+          },
+          {
+            "code": "444371000124109",
+            "display": "Powdered electrolyte replacement supplement"
+          },
+          {
+            "code": "443441000124107",
+            "display": "Clear liquid supplement"
+          },
+          {
+            "code": "442651000124102",
+            "display": "Adult formula"
+          }
+        ]
+      }
+    ]
+  }
+}

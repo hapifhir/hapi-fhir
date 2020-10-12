@@ -1,0 +1,70 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "goal-relationship-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGoalRelationshipType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eTypes of relationships between two goals.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/goal-relationship-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epredecessor\u003ca name\u003d\"goal-relationship-type-predecessor\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePredecessor\u003c/td\u003e\u003ctd\u003eIndicates that the target goal is one which must be met before striving for the current goal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esuccessor\u003ca name\u003d\"goal-relationship-type-successor\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuccessor\u003c/td\u003e\u003ctd\u003eIndicates that the target goal is a desired objective once the current goal is met.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereplacement\u003ca name\u003d\"goal-relationship-type-replacement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReplacement\u003c/td\u003e\u003ctd\u003eIndicates that this goal has been replaced by the target goal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emilestone\u003ca name\u003d\"goal-relationship-type-milestone\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMilestone\u003c/td\u003e\u003ctd\u003eIndicates that the target goal is considered to be a \u0026quot;piece\u0026quot; of attaining this goal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"goal-relationship-type-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eIndicates that the relationship is not covered by one of the pre-defined codes.  (An extension may convey more information about the meaning of the relationship.).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/goal-relationship-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1269"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GoalRelationshipType",
+  "title": "GoalRelationshipType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Types of relationships between two goals.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/goal-relationship-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "predecessor",
+      "display": "Predecessor",
+      "definition": "Indicates that the target goal is one which must be met before striving for the current goal."
+    },
+    {
+      "code": "successor",
+      "display": "Successor",
+      "definition": "Indicates that the target goal is a desired objective once the current goal is met."
+    },
+    {
+      "code": "replacement",
+      "display": "Replacement",
+      "definition": "Indicates that this goal has been replaced by the target goal."
+    },
+    {
+      "code": "milestone",
+      "display": "Milestone",
+      "definition": "Indicates that the target goal is considered to be a \"piece\" of attaining this goal."
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "Indicates that the relationship is not covered by one of the pre-defined codes.  (An extension may convey more information about the meaning of the relationship.)."
+    }
+  ]
+}

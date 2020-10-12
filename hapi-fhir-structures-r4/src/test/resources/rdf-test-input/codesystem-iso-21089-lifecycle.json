@@ -1,0 +1,156 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "iso-21089-lifecycle",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eISO 21089-2017 Health Record Lifecycle Events\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eAttached is vocabulary for the 27 record lifecycle events, as per ISO TS 21089-2017, Health Informatics - Trusted End-to-End Information Flows, Section 3, Terms and Definitions (2017, at ISO Central Secretariat, passed ballot and ready for publication).  This will also be included in the FHIR EHR Record Lifecycle Event Implementation Guide, balloted and (to be) published with FHIR STU-3.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThese codes are excerpted from ISO Standard, TS 21089-2017 - Health Informatics - Trusted End-to-End Information Flows, Copyright by ISO International. Copies of this standard are available through the ISO Web Site at www.iso.org.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccess\u003ca name\u003d\"iso-21089-lifecycle-access\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccess/View Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to obtain and open a record entry for inspection or review.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehold\u003ca name\u003d\"iso-21089-lifecycle-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdd Legal Hold Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to tag or otherwise indicate special access management and suspension of record entry deletion/destruction, if deemed relevant to a lawsuit or which are reasonably anticipated to be relevant or to fulfill organizational policy under the legal doctrine of “duty to preserve”.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eamend\u003ca name\u003d\"iso-21089-lifecycle-amend\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmend (Update) Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent makes any change to record entry content currently residing in storage considered permanent (persistent).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003earchive\u003ca name\u003d\"iso-21089-lifecycle-archive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArchive Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to create and move archive artifacts containing record entry content, typically to long-term offline storage.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eattest\u003ca name\u003d\"iso-21089-lifecycle-attest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttest Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to capture the agent’s digital signature (or equivalent indication) during formal validation of record entry content.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edecrypt\u003ca name\u003d\"iso-21089-lifecycle-decrypt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDecrypt Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to decode record entry content from a cipher.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeidentify\u003ca name\u003d\"iso-21089-lifecycle-deidentify\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDe-Identify (Anononymize) Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to scrub record entry content to reduce the association between a set of identifying data and the data subject in a way that might or might not be reversible.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeprecate\u003ca name\u003d\"iso-21089-lifecycle-deprecate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeprecate Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to tag record entry(ies) as obsolete, erroneous or untrustworthy, to warn against its future use.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edestroy\u003ca name\u003d\"iso-21089-lifecycle-destroy\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDestroy/Delete Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to permanently erase record entry content from the system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisclose\u003ca name\u003d\"iso-21089-lifecycle-disclose\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisclose Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to release, transfer, provision access to, or otherwise divulge record entry content.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eencrypt\u003ca name\u003d\"iso-21089-lifecycle-encrypt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEncrypt Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to encode record entry content in a cipher.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eextract\u003ca name\u003d\"iso-21089-lifecycle-extract\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExtract Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to selectively pull out a subset of record entry content, based on explicit criteria.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elink\u003ca name\u003d\"iso-21089-lifecycle-link\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLink Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to connect related record entries.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emerge\u003ca name\u003d\"iso-21089-lifecycle-merge\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMerge Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to combine or join content from two or more record entries, resulting in a single logical record entry.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoriginate\u003ca name\u003d\"iso-21089-lifecycle-originate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOriginate/Retain Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to: a) initiate capture of potential record content, and b) incorporate that content into the storage considered a permanent part of the health record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epseudonymize\u003ca name\u003d\"iso-21089-lifecycle-pseudonymize\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePseudonymize Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to remove record entry content to reduce the association between a set of identifying data and the data subject in a way that may be reversible.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereactivate\u003ca name\u003d\"iso-21089-lifecycle-reactivate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRe-activate Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to recreate or restore full status to record entries previously deleted or deprecated.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereceive\u003ca name\u003d\"iso-21089-lifecycle-receive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReceive/Retain Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to a) initiate capture of data content from elsewhere, and b) incorporate that content into the storage considered a permanent part of the health record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereidentify\u003ca name\u003d\"iso-21089-lifecycle-reidentify\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRe-identify Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to restore information to data that allows identification of information source and/or information subject.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunhold\u003ca name\u003d\"iso-21089-lifecycle-unhold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRemove Legal Hold Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to remove a tag or other cues for special access management had required to fulfill organizational policy under the legal doctrine of “duty to preserve”.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereport\u003ca name\u003d\"iso-21089-lifecycle-report\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReport (Output) Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to produce and deliver record entry content in a particular form and manner.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erestore\u003ca name\u003d\"iso-21089-lifecycle-restore\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRestore Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to recreate record entries and their content from a previous created archive artefact.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransform\u003ca name\u003d\"iso-21089-lifecycle-transform\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTransform/Translate Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to change the form, language or code system used to represent record entry content.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransmit\u003ca name\u003d\"iso-21089-lifecycle-transmit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTransmit Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to send record entry content from one (EHR/PHR/other) system to another.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunlink\u003ca name\u003d\"iso-21089-lifecycle-unlink\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnlink Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to disconnect two or more record entries previously connected, rendering them separate (disconnected) again.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunmerge\u003ca name\u003d\"iso-21089-lifecycle-unmerge\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnmerge Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to reverse a previous record entry merge operation, rendering them separate again.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003everify\u003ca name\u003d\"iso-21089-lifecycle-verify\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVerify Record Lifecycle Event\u003c/td\u003e\u003ctd\u003eOccurs when an agent causes the system to confirm compliance of data or data objects with regulations, requirements, specifications, or other imposed conditions based on organizational policy.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/iso-21089-lifecycle",
+  "name": "ISO 21089-2017 Health Record Lifecycle Events",
+  "status": "active",
+  "experimental": false,
+  "description": "Attached is vocabulary for the 27 record lifecycle events, as per ISO TS 21089-2017, Health Informatics - Trusted End-to-End Information Flows, Section 3, Terms and Definitions (2017, at ISO Central Secretariat, passed ballot and ready for publication).  This will also be included in the FHIR EHR Record Lifecycle Event Implementation Guide, balloted and (to be) published with FHIR STU-3.",
+  "copyright": "These codes are excerpted from ISO Standard, TS 21089-2017 - Health Informatics - Trusted End-to-End Information Flows, Copyright by ISO International. Copies of this standard are available through the ISO Web Site at www.iso.org.",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "access",
+      "display": "Access/View Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to obtain and open a record entry for inspection or review."
+    },
+    {
+      "code": "hold",
+      "display": "Add Legal Hold Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to tag or otherwise indicate special access management and suspension of record entry deletion/destruction, if deemed relevant to a lawsuit or which are reasonably anticipated to be relevant or to fulfill organizational policy under the legal doctrine of “duty to preserve”."
+    },
+    {
+      "code": "amend",
+      "display": "Amend (Update) Record Lifecycle Event",
+      "definition": "Occurs when an agent makes any change to record entry content currently residing in storage considered permanent (persistent)."
+    },
+    {
+      "code": "archive",
+      "display": "Archive Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to create and move archive artifacts containing record entry content, typically to long-term offline storage."
+    },
+    {
+      "code": "attest",
+      "display": "Attest Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to capture the agent’s digital signature (or equivalent indication) during formal validation of record entry content."
+    },
+    {
+      "code": "decrypt",
+      "display": "Decrypt Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to decode record entry content from a cipher."
+    },
+    {
+      "code": "deidentify",
+      "display": "De-Identify (Anononymize) Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to scrub record entry content to reduce the association between a set of identifying data and the data subject in a way that might or might not be reversible."
+    },
+    {
+      "code": "deprecate",
+      "display": "Deprecate Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to tag record entry(ies) as obsolete, erroneous or untrustworthy, to warn against its future use."
+    },
+    {
+      "code": "destroy",
+      "display": "Destroy/Delete Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to permanently erase record entry content from the system."
+    },
+    {
+      "code": "disclose",
+      "display": "Disclose Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to release, transfer, provision access to, or otherwise divulge record entry content."
+    },
+    {
+      "code": "encrypt",
+      "display": "Encrypt Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to encode record entry content in a cipher."
+    },
+    {
+      "code": "extract",
+      "display": "Extract Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to selectively pull out a subset of record entry content, based on explicit criteria."
+    },
+    {
+      "code": "link",
+      "display": "Link Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to connect related record entries."
+    },
+    {
+      "code": "merge",
+      "display": "Merge Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to combine or join content from two or more record entries, resulting in a single logical record entry."
+    },
+    {
+      "code": "originate",
+      "display": "Originate/Retain Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to: a) initiate capture of potential record content, and b) incorporate that content into the storage considered a permanent part of the health record."
+    },
+    {
+      "code": "pseudonymize",
+      "display": "Pseudonymize Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to remove record entry content to reduce the association between a set of identifying data and the data subject in a way that may be reversible."
+    },
+    {
+      "code": "reactivate",
+      "display": "Re-activate Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to recreate or restore full status to record entries previously deleted or deprecated."
+    },
+    {
+      "code": "receive",
+      "display": "Receive/Retain Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to a) initiate capture of data content from elsewhere, and b) incorporate that content into the storage considered a permanent part of the health record."
+    },
+    {
+      "code": "reidentify",
+      "display": "Re-identify Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to restore information to data that allows identification of information source and/or information subject."
+    },
+    {
+      "code": "unhold",
+      "display": "Remove Legal Hold Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to remove a tag or other cues for special access management had required to fulfill organizational policy under the legal doctrine of “duty to preserve”."
+    },
+    {
+      "code": "report",
+      "display": "Report (Output) Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to produce and deliver record entry content in a particular form and manner."
+    },
+    {
+      "code": "restore",
+      "display": "Restore Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to recreate record entries and their content from a previous created archive artefact."
+    },
+    {
+      "code": "transform",
+      "display": "Transform/Translate Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to change the form, language or code system used to represent record entry content."
+    },
+    {
+      "code": "transmit",
+      "display": "Transmit Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to send record entry content from one (EHR/PHR/other) system to another."
+    },
+    {
+      "code": "unlink",
+      "display": "Unlink Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to disconnect two or more record entries previously connected, rendering them separate (disconnected) again."
+    },
+    {
+      "code": "unmerge",
+      "display": "Unmerge Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to reverse a previous record entry merge operation, rendering them separate again."
+    },
+    {
+      "code": "verify",
+      "display": "Verify Record Lifecycle Event",
+      "definition": "Occurs when an agent causes the system to confirm compliance of data or data objects with regulations, requirements, specifications, or other imposed conditions based on organizational policy."
+    }
+  ]
+}

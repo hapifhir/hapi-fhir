@@ -1,0 +1,109 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "guide-parameter-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGuideParameterCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCode of parameter that is input to the guide.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/guide-parameter-code defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eapply\u003ca name\u003d\"guide-parameter-code-apply\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApply Metadata Value\u003c/td\u003e\u003ctd\u003eIf the value of this string 0..* parameter is one of the metadata fields then all conformance resources will have any specified [Resource].[field] overwritten with the ImplementationGuide.[field], where field is one of: version, date, status, publisher, contact, copyright, experimental, jurisdiction, useContext.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epath-resource\u003ca name\u003d\"guide-parameter-code-path-resource\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResource Path\u003c/td\u003e\u003ctd\u003eThe value of this string 0..* parameter is a subfolder of the build context\u0027s location that is to be scanned to load resources. Scope is (if present) a particular resource type.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epath-pages\u003ca name\u003d\"guide-parameter-code-path-pages\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePages Path\u003c/td\u003e\u003ctd\u003eThe value of this string 0..1 parameter is a subfolder of the build context\u0027s location that contains files that are part of the html content processed by the builder.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epath-tx-cache\u003ca name\u003d\"guide-parameter-code-path-tx-cache\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTerminology Cache Path\u003c/td\u003e\u003ctd\u003eThe value of this string 0..1 parameter is a subfolder of the build context\u0027s location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexpansion-parameter\u003ca name\u003d\"guide-parameter-code-expansion-parameter\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExpansion Profile\u003c/td\u003e\u003ctd\u003eThe value of this string 0..* parameter is a parameter (name\u003dvalue) when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erule-broken-links\u003ca name\u003d\"guide-parameter-code-rule-broken-links\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBroken Links Rule\u003c/td\u003e\u003ctd\u003eThe value of this string 0..1 parameter is either \u0026quot;warning\u0026quot; or \u0026quot;error\u0026quot; (default \u003d \u0026quot;error\u0026quot;). If the value is \u0026quot;warning\u0026quot; then IG build tools allow the IG to be considered successfully build even when there is no internal broken links.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egenerate-xml\u003ca name\u003d\"guide-parameter-code-generate-xml\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGenerate XML\u003c/td\u003e\u003ctd\u003eThe value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in XML format. If not present, the Publication Tool decides whether to generate XML.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egenerate-json\u003ca name\u003d\"guide-parameter-code-generate-json\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGenerate JSON\u003c/td\u003e\u003ctd\u003eThe value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in JSON format. If not present, the Publication Tool decides whether to generate JSON.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egenerate-turtle\u003ca name\u003d\"guide-parameter-code-generate-turtle\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGenerate Turtle\u003c/td\u003e\u003ctd\u003eThe value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in Turtle format. If not present, the Publication Tool decides whether to generate Turtle.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehtml-template\u003ca name\u003d\"guide-parameter-code-html-template\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHTML Template\u003c/td\u003e\u003ctd\u003eThe value of this string singleton parameter is the name of the file to use as the builder template for each generated page (see templating).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/guide-parameter-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.997"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GuideParameterCode",
+  "title": "GuideParameterCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Code of parameter that is input to the guide.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/guide-parameter-code",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "apply",
+      "display": "Apply Metadata Value",
+      "definition": "If the value of this string 0..* parameter is one of the metadata fields then all conformance resources will have any specified [Resource].[field] overwritten with the ImplementationGuide.[field], where field is one of: version, date, status, publisher, contact, copyright, experimental, jurisdiction, useContext."
+    },
+    {
+      "code": "path-resource",
+      "display": "Resource Path",
+      "definition": "The value of this string 0..* parameter is a subfolder of the build context\u0027s location that is to be scanned to load resources. Scope is (if present) a particular resource type."
+    },
+    {
+      "code": "path-pages",
+      "display": "Pages Path",
+      "definition": "The value of this string 0..1 parameter is a subfolder of the build context\u0027s location that contains files that are part of the html content processed by the builder."
+    },
+    {
+      "code": "path-tx-cache",
+      "display": "Terminology Cache Path",
+      "definition": "The value of this string 0..1 parameter is a subfolder of the build context\u0027s location that is used as the terminology cache. If this is not present, the terminology cache is on the local system, not under version control."
+    },
+    {
+      "code": "expansion-parameter",
+      "display": "Expansion Profile",
+      "definition": "The value of this string 0..* parameter is a parameter (name\u003dvalue) when expanding value sets for this implementation guide. This is particularly used to specify the versions of published terminologies such as SNOMED CT."
+    },
+    {
+      "code": "rule-broken-links",
+      "display": "Broken Links Rule",
+      "definition": "The value of this string 0..1 parameter is either \"warning\" or \"error\" (default \u003d \"error\"). If the value is \"warning\" then IG build tools allow the IG to be considered successfully build even when there is no internal broken links."
+    },
+    {
+      "code": "generate-xml",
+      "display": "Generate XML",
+      "definition": "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in XML format. If not present, the Publication Tool decides whether to generate XML."
+    },
+    {
+      "code": "generate-json",
+      "display": "Generate JSON",
+      "definition": "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in JSON format. If not present, the Publication Tool decides whether to generate JSON."
+    },
+    {
+      "code": "generate-turtle",
+      "display": "Generate Turtle",
+      "definition": "The value of this boolean 0..1 parameter specifies whether the IG publisher creates examples in Turtle format. If not present, the Publication Tool decides whether to generate Turtle."
+    },
+    {
+      "code": "html-template",
+      "display": "HTML Template",
+      "definition": "The value of this string singleton parameter is the name of the file to use as the builder template for each generated page (see templating)."
+    }
+  ]
+}

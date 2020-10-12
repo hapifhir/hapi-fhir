@@ -1,0 +1,128 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "claim-informationcategory",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eClaim Information Category Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample Information Category codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/claiminformationcategory defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einfo\u003ca name\u003d\"claim-informationcategory-info\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformation\u003c/td\u003e\u003ctd\u003eCodes conveying additional situation and condition information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edischarge\u003ca name\u003d\"claim-informationcategory-discharge\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDischarge\u003c/td\u003e\u003ctd\u003eDischarge status and discharge to locations.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eonset\u003ca name\u003d\"claim-informationcategory-onset\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOnset\u003c/td\u003e\u003ctd\u003ePeriod, start or end dates of aspects of the Condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erelated\u003ca name\u003d\"claim-informationcategory-related\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelated Services\u003c/td\u003e\u003ctd\u003eNature and date of the related event e.g. Last exam, service, X-ray etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexception\u003ca name\u003d\"claim-informationcategory-exception\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eException\u003c/td\u003e\u003ctd\u003eInsurance policy exceptions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ematerial\u003ca name\u003d\"claim-informationcategory-material\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaterials Forwarded\u003c/td\u003e\u003ctd\u003eMaterials being forwarded, e.g. Models, molds, images, documents.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eattachment\u003ca name\u003d\"claim-informationcategory-attachment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttachment\u003c/td\u003e\u003ctd\u003eMaterials attached such as images, documents and resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emissingtooth\u003ca name\u003d\"claim-informationcategory-missingtooth\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMissing Tooth\u003c/td\u003e\u003ctd\u003eTeeth which are missing for any reason, for example: prior extraction, never developed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprosthesis\u003ca name\u003d\"claim-informationcategory-prosthesis\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProsthesis\u003c/td\u003e\u003ctd\u003eThe type of prosthesis and date of supply if a previously supplied prosthesis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"claim-informationcategory-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eOther information identified by the type.system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehospitalized\u003ca name\u003d\"claim-informationcategory-hospitalized\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospitalized\u003c/td\u003e\u003ctd\u003eAn indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eemploymentimpacted\u003ca name\u003d\"claim-informationcategory-employmentimpacted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEmploymentImpacted\u003c/td\u003e\u003ctd\u003eAn indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexternalcause\u003ca name\u003d\"claim-informationcategory-externalcause\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExternal Caause\u003c/td\u003e\u003ctd\u003eThe external cause of an illness or injury.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatientreasonforvisit\u003ca name\u003d\"claim-informationcategory-patientreasonforvisit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient Reason for Visit\u003c/td\u003e\u003ctd\u003eThe reason for the patient visit.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1163"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ClaimInformationCategoryCodes",
+  "title": "Claim Information Category Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sample Information Category codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/claim-informationcategory",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "info",
+      "display": "Information",
+      "definition": "Codes conveying additional situation and condition information."
+    },
+    {
+      "code": "discharge",
+      "display": "Discharge",
+      "definition": "Discharge status and discharge to locations."
+    },
+    {
+      "code": "onset",
+      "display": "Onset",
+      "definition": "Period, start or end dates of aspects of the Condition."
+    },
+    {
+      "code": "related",
+      "display": "Related Services",
+      "definition": "Nature and date of the related event e.g. Last exam, service, X-ray etc."
+    },
+    {
+      "code": "exception",
+      "display": "Exception",
+      "definition": "Insurance policy exceptions."
+    },
+    {
+      "code": "material",
+      "display": "Materials Forwarded",
+      "definition": "Materials being forwarded, e.g. Models, molds, images, documents."
+    },
+    {
+      "code": "attachment",
+      "display": "Attachment",
+      "definition": "Materials attached such as images, documents and resources."
+    },
+    {
+      "code": "missingtooth",
+      "display": "Missing Tooth",
+      "definition": "Teeth which are missing for any reason, for example: prior extraction, never developed."
+    },
+    {
+      "code": "prosthesis",
+      "display": "Prosthesis",
+      "definition": "The type of prosthesis and date of supply if a previously supplied prosthesis."
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "Other information identified by the type.system."
+    },
+    {
+      "code": "hospitalized",
+      "display": "Hospitalized",
+      "definition": "An indication that the patient was hospitalized, the period if known otherwise a Yes/No (boolean)."
+    },
+    {
+      "code": "employmentimpacted",
+      "display": "EmploymentImpacted",
+      "definition": "An indication that the patient was unable to work, the period if known otherwise a Yes/No (boolean)."
+    },
+    {
+      "code": "externalcause",
+      "display": "External Caause",
+      "definition": "The external cause of an illness or injury."
+    },
+    {
+      "code": "patientreasonforvisit",
+      "display": "Patient Reason for Visit",
+      "definition": "The reason for the patient visit."
+    }
+  ]
+}

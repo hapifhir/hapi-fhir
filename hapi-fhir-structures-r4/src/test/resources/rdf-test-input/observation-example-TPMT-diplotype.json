@@ -1,0 +1,56 @@
+{
+  "resourceType": "Observation",
+  "id": "example-TPMT-diplotype",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-TPMT-diplotype\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Diplotype Call \u003cspan\u003e(Details : {SNOMED CT code \u0027363779003\u0027 \u003d \u0027Genotype determination\u0027, given as \u0027Genotype determination\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eE***********\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2013 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: *1/*4\u003c/p\u003e\u003cp\u003e\u003cb\u003ederivedFrom\u003c/b\u003e: \u003c/p\u003e\u003cul\u003e\u003cli\u003e\u003ca\u003eObservation/example-TPMT-haplotype-one\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/example-TPMT-haplotype-two\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsGene",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://www.genenames.org",
+            "code": "12014",
+            "display": "TPMT"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "363779003",
+        "display": "Genotype determination"
+      }
+    ],
+    "text": "Diplotype Call"
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "E***********"
+  },
+  "issued": "2013-04-03T15:30:10+01:00",
+  "valueString": "*1/*4",
+  "derivedFrom": [
+    {
+      "reference": "Observation/example-TPMT-haplotype-one"
+    },
+    {
+      "reference": "Observation/example-TPMT-haplotype-two"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

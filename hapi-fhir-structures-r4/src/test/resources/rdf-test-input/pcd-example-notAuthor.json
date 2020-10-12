@@ -1,0 +1,89 @@
+{
+  "resourceType": "Contract",
+  "id": "pcd-example-notAuthor",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eThe following scenario is based on existing\n      jurisdictional policy and are realized in existing systems in Canada. The default policy is\n      one of implied consent for the provision of care, so these scenarios all deal with withdrawal\n      or withholding consent for that purpose. In other jurisdictions, where an express consent\n      model is used (Opt-In), these would examples would contain the phrase \u0026quot;consent to\u0026quot; rather than\n      \u0026quot;withhold\u0026quot; or \u0026quot;withdraw\u0026quot; consent for. \u003cp\u003e specific to use-case 5) Withhold or withdraw consent\n        for disclosure of records that were authored by a specific organization (or service delivery\n        location). \u003c/p\u003e\u003cp\u003e Patient \u0026quot;P. van de Heuvel\u0026quot; wishes to have all of the PHI collected at the\n        Good Health Psychiatric Hospital restricted from disclosure to every provider. \u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "issued": "2015-11-18",
+  "subject": [
+    {
+      "reference": "Patient/f001",
+      "display": "P. van de Heuvel"
+    }
+  ],
+  "authority": [
+    {
+      "reference": "Organization/3",
+      "display": "Michigan Health"
+    }
+  ],
+  "domain": [
+    {
+      "reference": "Location/ukp",
+      "display": "UK Pharmacies"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "57016-8"
+      }
+    ]
+  },
+  "subType": [
+    {
+      "coding": [
+        {
+          "system": "http://www.infoway-inforoute.ca.org/Consent-subtype-codes",
+          "code": "Opt-In",
+          "display": "Default Authorization with exceptions."
+        }
+      ]
+    }
+  ],
+  "term": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/consent-term-type-codes",
+            "code": "withhold-authored-by",
+            "display": "Withhold all data authored by specified actor entity."
+          }
+        ]
+      },
+      "offer": {
+        "topic": {
+          "reference": "Organization/2.16.840.1.113883.19.5",
+          "display": "Good Health Clinic"
+        },
+        "text": "Withhold all data authored by Good Health provider."
+      }
+    }
+  ],
+  "friendly": [
+    {
+      "contentAttachment": {
+        "title": "The terms of the consent in friendly consumer speak."
+      }
+    }
+  ],
+  "legal": [
+    {
+      "contentAttachment": {
+        "title": "The terms of the consent in lawyer speak."
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

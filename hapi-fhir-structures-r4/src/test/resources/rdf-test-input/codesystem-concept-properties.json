@@ -1,0 +1,61 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "concept-properties",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFHIR Defined Concept Properties\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA set of common concept properties for use on coded systems throughout the FHIR eco-system.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/concept-properties defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einactive\u003ca name\u003d\"concept-properties-inactive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInactive\u003c/td\u003e\u003ctd\u003eTrue if the concept is not considered active - e.g. not a valid concept any more. Property type is boolean, default value is false\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeprecated\u003ca name\u003d\"concept-properties-deprecated\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeprecated\u003c/td\u003e\u003ctd\u003eThe date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged, and they should be expected to be made inactive in a future release. Property type is dateTime\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotSelectable\u003ca name\u003d\"concept-properties-notSelectable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Selectable\u003c/td\u003e\u003ctd\u003eThe concept is not intended to be chosen by the user - only intended to be used as a selector for other concepts. Note, though, that the interpretation of this is highly contextual; all concepts are selectable in some context. Property type is boolean\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eparent\u003ca name\u003d\"concept-properties-parent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eParent\u003c/td\u003e\u003ctd\u003eThe concept identified in this property is a parent of the concept on which it is a property. The property type will be \u0027code\u0027. The meaning of \u0027parent\u0027 is defined by the hierarchyMeaning attribute\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003echild\u003ca name\u003d\"concept-properties-child\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChild\u003c/td\u003e\u003ctd\u003eThe concept identified in this property is a child of the concept on which it is a property. The property type will be \u0027code\u0027. The meaning of \u0027child\u0027 is defined by the hierarchyMeaning attribute\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 4
+    }
+  ],
+  "url": "http://hl7.org/fhir/concept-properties",
+  "version": "4.0.1",
+  "name": "FHIR Defined Concept Properties",
+  "status": "draft",
+  "publisher": "FHIR Project",
+  "description": "A set of common concept properties for use on coded systems throughout the FHIR eco-system.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/concept-properties",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "inactive",
+      "display": "Inactive",
+      "definition": "True if the concept is not considered active - e.g. not a valid concept any more. Property type is boolean, default value is false"
+    },
+    {
+      "code": "deprecated",
+      "display": "Deprecated",
+      "definition": "The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged, and they should be expected to be made inactive in a future release. Property type is dateTime"
+    },
+    {
+      "code": "notSelectable",
+      "display": "Not Selectable",
+      "definition": "The concept is not intended to be chosen by the user - only intended to be used as a selector for other concepts. Note, though, that the interpretation of this is highly contextual; all concepts are selectable in some context. Property type is boolean"
+    },
+    {
+      "code": "parent",
+      "display": "Parent",
+      "definition": "The concept identified in this property is a parent of the concept on which it is a property. The property type will be \u0027code\u0027. The meaning of \u0027parent\u0027 is defined by the hierarchyMeaning attribute"
+    },
+    {
+      "code": "child",
+      "display": "Child",
+      "definition": "The concept identified in this property is a child of the concept on which it is a property. The property type will be \u0027code\u0027. The meaning of \u0027child\u0027 is defined by the hierarchyMeaning attribute"
+    }
+  ]
+}

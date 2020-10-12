@@ -1,0 +1,56 @@
+{
+  "resourceType": "MedicinalProductPharmaceutical",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: {PhPID}\u003c/p\u003e\u003cp\u003e\u003cb\u003eadministrableDoseForm\u003c/b\u003e: Film-coatedtablet \u003cspan\u003e(Details : {http://ema.europa.eu/example/administrabledoseform code \u0027Film-coatedtablet\u0027 \u003d \u0027Film-coatedtablet)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eunitOfPresentation\u003c/b\u003e: Tablet \u003cspan\u003e(Details : {http://ema.europa.eu/example/unitofpresentation code \u0027Tablet\u0027 \u003d \u0027Tablet)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eingredient\u003c/b\u003e: \u003ca\u003eMedicinalProductIngredient/example\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eRouteOfAdministrations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eOralUse \u003cspan\u003e(Details : {http://ema.europa.eu/example/routeofadministration code \u0027OralUse\u0027 \u003d \u0027OralUse)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://ema.europa.eu/example/phpididentifiersets",
+      "value": "{PhPID}"
+    }
+  ],
+  "administrableDoseForm": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/administrabledoseform",
+        "code": "Film-coatedtablet"
+      }
+    ]
+  },
+  "unitOfPresentation": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/unitofpresentation",
+        "code": "Tablet"
+      }
+    ]
+  },
+  "ingredient": [
+    {
+      "reference": "MedicinalProductIngredient/example"
+    }
+  ],
+  "routeOfAdministration": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://ema.europa.eu/example/routeofadministration",
+            "code": "OralUse"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

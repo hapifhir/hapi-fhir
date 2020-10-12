@@ -1,0 +1,43 @@
+{
+  "resourceType": "Observation",
+  "id": "example-genetics-3",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-genetics-3\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Further analysis \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eMolecular Lab Patient ID: HOSP-23456\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2013 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eSequence Analysis Laboratory\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: The EGFR p.L858R mutation has been associated with response to anti-EGFR therapy\u003c/p\u003e\u003cp\u003e\u003cb\u003ederivedFrom\u003c/b\u003e: \u003ca\u003eObservationForGenetics profile example 1\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "code": {
+    "text": "Further analysis"
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Molecular Lab Patient ID: HOSP-23456"
+  },
+  "issued": "2013-04-03T15:30:10+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/example",
+      "display": "Sequence Analysis Laboratory"
+    }
+  ],
+  "note": [
+    {
+      "text": "The EGFR p.L858R mutation has been associated with response to anti-EGFR therapy"
+    }
+  ],
+  "derivedFrom": [
+    {
+      "reference": "Observation/example-genetics-1",
+      "display": "ObservationForGenetics profile example 1"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

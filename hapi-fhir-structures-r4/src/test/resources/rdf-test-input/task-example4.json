@@ -1,0 +1,94 @@
+{
+  "resourceType": "Task",
+  "id": "example4",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example4\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 20170201-002 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003egroupIdentifier\u003c/b\u003e: G20170201-001 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003epartOf\u003c/b\u003e: \u003ca\u003eLipid Panel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: completed\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: filler-order\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: routine\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Specimen Collection \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003efocus\u003c/b\u003e: BloodDraw ServiceRequest\u003c/p\u003e\u003cp\u003e\u003cb\u003efor\u003c/b\u003e: \u003ca\u003ePeter James Chalmers\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eExample In-Patient Encounter\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eexecutionPeriod\u003c/b\u003e: 31/10/2016 8:45:05 AM --\u0026gt; 31/10/2016 2:45:05 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthoredOn\u003c/b\u003e: 31/10/2016 8:45:05 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003elastModified\u003c/b\u003e: 31/10/2016 9:45:05 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003eClinical Laboratory @ Acme Hospital\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformerType\u003c/b\u003e: Performer \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/task-performer-type code \u0027performer\u0027 \u003d \u0027performer\u0027, given as \u0027Performer\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eowner\u003c/b\u003e: \u003ca\u003eLuigi Maas\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eRestrictions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRepetitions\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePeriod\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd\u003e?? --\u0026gt; 01/11/2016 9:45:05 AM\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eOutputs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValue[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ecollected specimen \u003cspan\u003e(Details )\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003eSpecimen/101\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http:/goodhealth.org/identifiers",
+      "value": "20170201-002"
+    }
+  ],
+  "groupIdentifier": {
+    "use": "official",
+    "system": "http:/goodhealth.org/accession/identifiers",
+    "value": "G20170201-001"
+  },
+  "partOf": [
+    {
+      "reference": "Task/example1",
+      "display": "Lipid Panel"
+    }
+  ],
+  "status": "completed",
+  "intent": "filler-order",
+  "priority": "routine",
+  "code": {
+    "text": "Specimen Collection"
+  },
+  "focus": {
+    "display": "BloodDraw ServiceRequest"
+  },
+  "for": {
+    "reference": "Patient/example",
+    "display": "Peter James Chalmers"
+  },
+  "encounter": {
+    "reference": "Encounter/example",
+    "display": "Example In-Patient Encounter"
+  },
+  "executionPeriod": {
+    "start": "2016-10-31T08:45:05+10:00",
+    "end": "2016-10-31T14:45:05+10:00"
+  },
+  "authoredOn": "2016-10-31T08:45:05+10:00",
+  "lastModified": "2016-10-31T09:45:05+10:00",
+  "requester": {
+    "reference": "Organization/1832473e-2fe0-452d-abe9-3cdb9879522f",
+    "display": "Clinical Laboratory @ Acme Hospital"
+  },
+  "performerType": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/task-performer-type",
+          "code": "performer",
+          "display": "Performer"
+        }
+      ],
+      "text": "Performer"
+    }
+  ],
+  "owner": {
+    "reference": "Practitioner/f202",
+    "display": "Luigi Maas"
+  },
+  "restriction": {
+    "repetitions": 1,
+    "period": {
+      "end": "2016-11-01T09:45:05+10:00"
+    }
+  },
+  "output": [
+    {
+      "type": {
+        "text": "collected specimen"
+      },
+      "valueReference": {
+        "reference": "Specimen/101"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

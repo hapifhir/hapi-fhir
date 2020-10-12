@@ -1,0 +1,119 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "request-resource-types",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eRequestResourceType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA list of all the request resource types defined in this version of the FHIR specification.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/request-resource-types defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAppointment\u003ca name\u003d\"request-resource-types-Appointment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppointment\u003c/td\u003e\u003ctd\u003eA booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAppointmentResponse\u003ca name\u003d\"request-resource-types-AppointmentResponse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppointmentResponse\u003c/td\u003e\u003ctd\u003eA reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCarePlan\u003ca name\u003d\"request-resource-types-CarePlan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCarePlan\u003c/td\u003e\u003ctd\u003eHealthcare plan for patient or group.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eClaim\u003ca name\u003d\"request-resource-types-Claim\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClaim\u003c/td\u003e\u003ctd\u003eClaim, Pre-determination or Pre-authorization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCommunicationRequest\u003ca name\u003d\"request-resource-types-CommunicationRequest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunicationRequest\u003c/td\u003e\u003ctd\u003eA request for information to be sent to a receiver.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eContract\u003ca name\u003d\"request-resource-types-Contract\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContract\u003c/td\u003e\u003ctd\u003eLegal Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDeviceRequest\u003ca name\u003d\"request-resource-types-DeviceRequest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeviceRequest\u003c/td\u003e\u003ctd\u003eMedical device request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEnrollmentRequest\u003ca name\u003d\"request-resource-types-EnrollmentRequest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnrollmentRequest\u003c/td\u003e\u003ctd\u003eEnrollment request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eImmunizationRecommendation\u003ca name\u003d\"request-resource-types-ImmunizationRecommendation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImmunizationRecommendation\u003c/td\u003e\u003ctd\u003eGuidance or advice relating to an immunization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMedicationRequest\u003ca name\u003d\"request-resource-types-MedicationRequest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedicationRequest\u003c/td\u003e\u003ctd\u003eOrdering of medication for patient or group.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNutritionOrder\u003ca name\u003d\"request-resource-types-NutritionOrder\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNutritionOrder\u003c/td\u003e\u003ctd\u003eDiet, formula or nutritional supplement request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eServiceRequest\u003ca name\u003d\"request-resource-types-ServiceRequest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eServiceRequest\u003c/td\u003e\u003ctd\u003eA record of a request for service such as diagnostic investigations, treatments, or operations to be performed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSupplyRequest\u003ca name\u003d\"request-resource-types-SupplyRequest\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSupplyRequest\u003c/td\u003e\u003ctd\u003eRequest for a medication, substance or device.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTask\u003ca name\u003d\"request-resource-types-Task\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTask\u003c/td\u003e\u003ctd\u003eA task to be performed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eVisionPrescription\u003ca name\u003d\"request-resource-types-VisionPrescription\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVisionPrescription\u003c/td\u003e\u003ctd\u003ePrescription for vision correction products for a patient.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/request-resource-types",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1059"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "RequestResourceType",
+  "title": "RequestResourceType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "A list of all the request resource types defined in this version of the FHIR specification.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/request-resource-types",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "Appointment",
+      "display": "Appointment",
+      "definition": "A booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s)."
+    },
+    {
+      "code": "AppointmentResponse",
+      "display": "AppointmentResponse",
+      "definition": "A reply to an appointment request for a patient and/or practitioner(s), such as a confirmation or rejection."
+    },
+    {
+      "code": "CarePlan",
+      "display": "CarePlan",
+      "definition": "Healthcare plan for patient or group."
+    },
+    {
+      "code": "Claim",
+      "display": "Claim",
+      "definition": "Claim, Pre-determination or Pre-authorization."
+    },
+    {
+      "code": "CommunicationRequest",
+      "display": "CommunicationRequest",
+      "definition": "A request for information to be sent to a receiver."
+    },
+    {
+      "code": "Contract",
+      "display": "Contract",
+      "definition": "Legal Agreement."
+    },
+    {
+      "code": "DeviceRequest",
+      "display": "DeviceRequest",
+      "definition": "Medical device request."
+    },
+    {
+      "code": "EnrollmentRequest",
+      "display": "EnrollmentRequest",
+      "definition": "Enrollment request."
+    },
+    {
+      "code": "ImmunizationRecommendation",
+      "display": "ImmunizationRecommendation",
+      "definition": "Guidance or advice relating to an immunization."
+    },
+    {
+      "code": "MedicationRequest",
+      "display": "MedicationRequest",
+      "definition": "Ordering of medication for patient or group."
+    },
+    {
+      "code": "NutritionOrder",
+      "display": "NutritionOrder",
+      "definition": "Diet, formula or nutritional supplement request."
+    },
+    {
+      "code": "ServiceRequest",
+      "display": "ServiceRequest",
+      "definition": "A record of a request for service such as diagnostic investigations, treatments, or operations to be performed."
+    },
+    {
+      "code": "SupplyRequest",
+      "display": "SupplyRequest",
+      "definition": "Request for a medication, substance or device."
+    },
+    {
+      "code": "Task",
+      "display": "Task",
+      "definition": "A task to be performed."
+    },
+    {
+      "code": "VisionPrescription",
+      "display": "VisionPrescription",
+      "definition": "Prescription for vision correction products for a patient."
+    }
+  ]
+}

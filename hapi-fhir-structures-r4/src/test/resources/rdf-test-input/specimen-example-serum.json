@@ -1,0 +1,57 @@
+{
+  "resourceType": "Specimen",
+  "id": "sst",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: sst\u003c/p\u003e\u003cp\u003e\u003cb\u003eaccessionIdentifier\u003c/b\u003e: 20150816-00124\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Serum sample \u003cspan\u003e(Details : {SNOMED CT code \u0027119364003\u0027 \u003d \u0027Serum specimen\u0027, given as \u0027Serum sample\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/pat2\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erequest\u003c/b\u003e: \u003ca\u003eServiceRequest/ft4\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eCollections\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollector\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollected[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f202\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e16/08/2015 6:40:17 AM\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eContainers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eSerum Separator Tube \u003cspan\u003e(Details : {http://acme.com/labs code \u0027SST\u0027 \u003d \u0027SST\u0027, given as \u0027Serum Separator Tube\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "accessionIdentifier": {
+    "system": "http://acme.com/labs/accession-ids",
+    "value": "20150816-00124"
+  },
+  "type": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "119364003",
+        "display": "Serum sample"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat2"
+  },
+  "request": [
+    {
+      "reference": "ServiceRequest/ft4"
+    }
+  ],
+  "collection": {
+    "collector": {
+      "reference": "Practitioner/f202"
+    },
+    "collectedDateTime": "2015-08-16T06:40:17Z"
+  },
+  "container": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://acme.com/labs",
+            "code": "SST",
+            "display": "Serum Separator Tube"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

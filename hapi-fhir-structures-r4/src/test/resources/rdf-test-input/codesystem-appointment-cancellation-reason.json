@@ -1,0 +1,191 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "appointment-cancellation-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAppointment cancellation reason\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of reasons for the cancellation of an appointment.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason defines many codes, of which the following are some examples:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epat\u003ca name\u003d\"appointment-cancellation-reason-pat\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-crs\u003ca name\u003d\"appointment-cancellation-reason-pat-crs\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Canceled via automated reminder system\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-cpp\u003ca name\u003d\"appointment-cancellation-reason-pat-cpp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Canceled via Patient Portal\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-dec\u003ca name\u003d\"appointment-cancellation-reason-pat-dec\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Deceased\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-fb\u003ca name\u003d\"appointment-cancellation-reason-pat-fb\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Feeling Better\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-lt\u003ca name\u003d\"appointment-cancellation-reason-pat-lt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Lack of Transportation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-mt\u003ca name\u003d\"appointment-cancellation-reason-pat-mt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Member Terminated\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-mv\u003ca name\u003d\"appointment-cancellation-reason-pat-mv\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Moved\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-preg\u003ca name\u003d\"appointment-cancellation-reason-pat-preg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Pregnant\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-swl\u003ca name\u003d\"appointment-cancellation-reason-pat-swl\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Scheduled from Wait List\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pat-ucp\u003ca name\u003d\"appointment-cancellation-reason-pat-ucp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient: Unhappy/Changed Provider\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprov\u003ca name\u003d\"appointment-cancellation-reason-prov\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-pers\u003ca name\u003d\"appointment-cancellation-reason-prov-pers\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: Personal\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-dch\u003ca name\u003d\"appointment-cancellation-reason-prov-dch\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: Discharged\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-edu\u003ca name\u003d\"appointment-cancellation-reason-prov-edu\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: Edu/Meeting\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-hosp\u003ca name\u003d\"appointment-cancellation-reason-prov-hosp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: Hospitalized\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-labs\u003ca name\u003d\"appointment-cancellation-reason-prov-labs\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: Labs Out of Acceptable Range\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-mri\u003ca name\u003d\"appointment-cancellation-reason-prov-mri\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: MRI Screening Form Marked Do Not Proceed\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prov-onc\u003ca name\u003d\"appointment-cancellation-reason-prov-onc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider: Oncology Treatment Plan Changes\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emaint\u003ca name\u003d\"appointment-cancellation-reason-maint\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEquipment Maintenance/Repair\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emeds-inc\u003ca name\u003d\"appointment-cancellation-reason-meds-inc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrep/Med Incomplete\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"appointment-cancellation-reason-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-cms\u003ca name\u003d\"appointment-cancellation-reason-oth-cms\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: CMS Therapy Cap Service Not Authorized\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-err\u003ca name\u003d\"appointment-cancellation-reason-oth-err\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Error\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-fin\u003ca name\u003d\"appointment-cancellation-reason-oth-fin\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Financial\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-iv\u003ca name\u003d\"appointment-cancellation-reason-oth-iv\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Improper IV Access/Infiltrate IV\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-int\u003ca name\u003d\"appointment-cancellation-reason-oth-int\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: No Interpreter Available\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-mu\u003ca name\u003d\"appointment-cancellation-reason-oth-mu\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Prep/Med/Results Unavailable\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-room\u003ca name\u003d\"appointment-cancellation-reason-oth-room\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Room/Resource Maintenance\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-oerr\u003ca name\u003d\"appointment-cancellation-reason-oth-oerr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Schedule Order Error\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-swie\u003ca name\u003d\"appointment-cancellation-reason-oth-swie\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Silent Walk In Error\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  oth-weath\u003ca name\u003d\"appointment-cancellation-reason-oth-weath\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther: Weather\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1382"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AppointmentCancellationReason",
+  "title": "Appointment cancellation reason",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of reasons for the cancellation of an appointment.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/appointment-cancellation-reason",
+  "content": "example",
+  "concept": [
+    {
+      "code": "pat",
+      "display": "Patient",
+      "concept": [
+        {
+          "code": "pat-crs",
+          "display": "Patient: Canceled via automated reminder system"
+        },
+        {
+          "code": "pat-cpp",
+          "display": "Patient: Canceled via Patient Portal"
+        },
+        {
+          "code": "pat-dec",
+          "display": "Patient: Deceased"
+        },
+        {
+          "code": "pat-fb",
+          "display": "Patient: Feeling Better"
+        },
+        {
+          "code": "pat-lt",
+          "display": "Patient: Lack of Transportation"
+        },
+        {
+          "code": "pat-mt",
+          "display": "Patient: Member Terminated"
+        },
+        {
+          "code": "pat-mv",
+          "display": "Patient: Moved"
+        },
+        {
+          "code": "pat-preg",
+          "display": "Patient: Pregnant"
+        },
+        {
+          "code": "pat-swl",
+          "display": "Patient: Scheduled from Wait List"
+        },
+        {
+          "code": "pat-ucp",
+          "display": "Patient: Unhappy/Changed Provider"
+        }
+      ]
+    },
+    {
+      "code": "prov",
+      "display": "Provider",
+      "concept": [
+        {
+          "code": "prov-pers",
+          "display": "Provider: Personal"
+        },
+        {
+          "code": "prov-dch",
+          "display": "Provider: Discharged"
+        },
+        {
+          "code": "prov-edu",
+          "display": "Provider: Edu/Meeting"
+        },
+        {
+          "code": "prov-hosp",
+          "display": "Provider: Hospitalized"
+        },
+        {
+          "code": "prov-labs",
+          "display": "Provider: Labs Out of Acceptable Range"
+        },
+        {
+          "code": "prov-mri",
+          "display": "Provider: MRI Screening Form Marked Do Not Proceed"
+        },
+        {
+          "code": "prov-onc",
+          "display": "Provider: Oncology Treatment Plan Changes"
+        }
+      ]
+    },
+    {
+      "code": "maint",
+      "display": "Equipment Maintenance/Repair"
+    },
+    {
+      "code": "meds-inc",
+      "display": "Prep/Med Incomplete"
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "concept": [
+        {
+          "code": "oth-cms",
+          "display": "Other: CMS Therapy Cap Service Not Authorized"
+        },
+        {
+          "code": "oth-err",
+          "display": "Other: Error"
+        },
+        {
+          "code": "oth-fin",
+          "display": "Other: Financial"
+        },
+        {
+          "code": "oth-iv",
+          "display": "Other: Improper IV Access/Infiltrate IV"
+        },
+        {
+          "code": "oth-int",
+          "display": "Other: No Interpreter Available"
+        },
+        {
+          "code": "oth-mu",
+          "display": "Other: Prep/Med/Results Unavailable"
+        },
+        {
+          "code": "oth-room",
+          "display": "Other: Room/Resource Maintenance"
+        },
+        {
+          "code": "oth-oerr",
+          "display": "Other: Schedule Order Error"
+        },
+        {
+          "code": "oth-swie",
+          "display": "Other: Silent Walk In Error"
+        },
+        {
+          "code": "oth-weath",
+          "display": "Other: Weather"
+        }
+      ]
+    }
+  ]
+}

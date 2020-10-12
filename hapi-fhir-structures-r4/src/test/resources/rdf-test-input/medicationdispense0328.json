@@ -1,0 +1,101 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "meddisp0328",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: meddisp0328\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: in-progress\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: Nasonex 0.05mg/ACTUAT Nasal Inhaler \u003cspan\u003e(Details : {RxNorm code \u00271797870\u0027 \u003d \u0027NASONEX 50 MCG/ACTUAT Metered Dose Nasal Spray\u0027, given as \u0027Nasonex 0.05mg/ACTUAT Nasal Inhaler\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f006\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eauthorizingPrescription\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0321\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Emergency Supply \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ActCode code \u0027EM\u0027 \u003d \u0027Emergency Supply\u0027, given as \u0027Emergency Supply\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 30 ml\u003cspan\u003e (Details: UCUM code ml \u003d \u0027ml\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edaysSupply\u003c/b\u003e: 30 Day\u003cspan\u003e (Details: UCUM code d \u003d \u0027d\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenPrepared\u003c/b\u003e: 15/01/2015 10:20:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "in-progress",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+        "code": "1797870",
+        "display": "Nasonex 0.05mg/ACTUAT Nasal Inhaler"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f006"
+      }
+    }
+  ],
+  "authorizingPrescription": [
+    {
+      "reference": "MedicationRequest/medrx0321"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "EM",
+        "display": "Emergency Supply"
+      }
+    ]
+  },
+  "quantity": {
+    "value": 30,
+    "system": "http://unitsofmeasure.org",
+    "code": "ml"
+  },
+  "daysSupply": {
+    "value": 30,
+    "unit": "Day",
+    "system": "http://unitsofmeasure.org",
+    "code": "d"
+  },
+  "whenPrepared": "2015-01-15T10:20:00Z",
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "Use two sprays twice daily",
+      "additionalInstruction": [
+        {
+          "text": "Shake Well"
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "frequency": 2,
+          "period": 1,
+          "periodUnit": "d"
+        }
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 1,
+            "unit": "ea",
+            "system": "http://unitsofmeasure.org",
+            "code": "ea"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

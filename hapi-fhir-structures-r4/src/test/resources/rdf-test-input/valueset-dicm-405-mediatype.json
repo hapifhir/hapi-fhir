@@ -1,0 +1,97 @@
+{
+  "resourceType": "ValueSet",
+  "id": "dicm-405-mediatype",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMedia Type Code\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMedia Type Code\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThese codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright 2011 by the National Electrical Manufacturers Association.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://dicom.nema.org/resources/ontology/DCM\"\u003e\u003ccode\u003ehttp://dicom.nema.org/resources/ontology/DCM\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110030\"\u003e110030\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUSB Disk Emulation\u003c/td\u003e\u003ctd\u003eA device that connects using the USB hard drive interface. These may be USB-Sticks, portable hard drives, and other technologies\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110031\"\u003e110031\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEmail\u003c/td\u003e\u003ctd\u003eEmail and email attachments used as a media for data transport\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110032\"\u003e110032\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCD\u003c/td\u003e\u003ctd\u003eCD-R, CD-ROM, and CD-RW media used for data transport\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110033\"\u003e110033\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDVD\u003c/td\u003e\u003ctd\u003eDVD, DVD-RAM, and other DVD formatted media used for data transport\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110034\"\u003e110034\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompact Flash\u003c/td\u003e\u003ctd\u003eMedia that comply with the Compact Flash standard\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110035\"\u003e110035\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMulti-media Card\u003c/td\u003e\u003ctd\u003eMedia that comply with the Multi-media Card standard\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110036\"\u003e110036\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecure Digital Card\u003c/td\u003e\u003ctd\u003eMedia that comply with the Secure Digital Card standard\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110037\"\u003e110037\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eURI\u003c/td\u003e\u003ctd\u003eURI Identifier for network or other resource, see RFC 3968\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110010\"\u003e110010\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFilm\u003c/td\u003e\u003ctd\u003eFilm type of output\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-dicom-dcim.html#dicom-dcim-110038\"\u003e110038\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePaper Document\u003c/td\u003e\u003ctd\u003eAny paper or similar document\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sec"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/dicm-405-mediatype",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:1.2.840.10008.6.​1.​908"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MediaTypeCode",
+  "title": "Media Type Code",
+  "status": "active",
+  "experimental": false,
+  "date": "2010-08-26",
+  "publisher": "NEMA/DICOM",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Media Type Code",
+  "copyright": "These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright 2011 by the National Electrical Manufacturers Association.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://dicom.nema.org/resources/ontology/DCM",
+        "concept": [
+          {
+            "code": "110030"
+          },
+          {
+            "code": "110031"
+          },
+          {
+            "code": "110032"
+          },
+          {
+            "code": "110033"
+          },
+          {
+            "code": "110034"
+          },
+          {
+            "code": "110035"
+          },
+          {
+            "code": "110036"
+          },
+          {
+            "code": "110037"
+          },
+          {
+            "code": "110010"
+          },
+          {
+            "code": "110038"
+          }
+        ]
+      }
+    ]
+  }
+}

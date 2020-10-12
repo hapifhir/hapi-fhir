@@ -1,0 +1,92 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "task-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTask Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes indicating the type of action that is expected to be performed\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/CodeSystem/task-code defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eapprove\u003ca name\u003d\"task-code-approve\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActivate/approve the focal resource\u003c/td\u003e\u003ctd\u003eTake what actions are needed to transition the focus resource from \u0027draft\u0027 to \u0027active\u0027 or \u0027in-progress\u0027, as appropriate for the resource type.  This may involve additing additional content, approval, validation, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efulfill\u003ca name\u003d\"task-code-fulfill\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFulfill the focal request\u003c/td\u003e\u003ctd\u003eAct to perform the actions defined in the focus request.  This might result in a \u0027more assertive\u0027 request (order for a plan or proposal, filler order for a placer order), but is intend to eventually result in events.  The degree of fulfillment requested might be limited by Task.restriction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eabort\u003ca name\u003d\"task-code-abort\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMark the focal resource as no longer active\u003c/td\u003e\u003ctd\u003eAbort, cancel or withdraw the focal resource, as appropriate for the type of resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereplace\u003ca name\u003d\"task-code-replace\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReplace the focal resource with the input resource\u003c/td\u003e\u003ctd\u003eReplace the focal resource with the specified input resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003echange\u003ca name\u003d\"task-code-change\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChange the focal resource\u003c/td\u003e\u003ctd\u003eUpdate the focal resource of the owning system to reflect the content specified as the Task.focus\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esuspend\u003ca name\u003d\"task-code-suspend\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuspend the focal resource\u003c/td\u003e\u003ctd\u003eTransition the focal resource from \u0027active\u0027 or \u0027in-progress\u0027 to \u0027suspended\u0027\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresume\u003ca name\u003d\"task-code-resume\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRe-activate the focal resource\u003c/td\u003e\u003ctd\u003eTransition the focal resource from \u0027suspended\u0027 to \u0027active\u0027 or \u0027in-progress\u0027 as appropriate for the resource type.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/CodeSystem/task-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1397"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TaskCode",
+  "title": "Task Codes",
+  "status": "active",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Codes indicating the type of action that is expected to be performed",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/task-code",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "approve",
+      "display": "Activate/approve the focal resource",
+      "definition": "Take what actions are needed to transition the focus resource from \u0027draft\u0027 to \u0027active\u0027 or \u0027in-progress\u0027, as appropriate for the resource type.  This may involve additing additional content, approval, validation, etc."
+    },
+    {
+      "code": "fulfill",
+      "display": "Fulfill the focal request",
+      "definition": "Act to perform the actions defined in the focus request.  This might result in a \u0027more assertive\u0027 request (order for a plan or proposal, filler order for a placer order), but is intend to eventually result in events.  The degree of fulfillment requested might be limited by Task.restriction."
+    },
+    {
+      "code": "abort",
+      "display": "Mark the focal resource as no longer active",
+      "definition": "Abort, cancel or withdraw the focal resource, as appropriate for the type of resource."
+    },
+    {
+      "code": "replace",
+      "display": "Replace the focal resource with the input resource",
+      "definition": "Replace the focal resource with the specified input resource"
+    },
+    {
+      "code": "change",
+      "display": "Change the focal resource",
+      "definition": "Update the focal resource of the owning system to reflect the content specified as the Task.focus"
+    },
+    {
+      "code": "suspend",
+      "display": "Suspend the focal resource",
+      "definition": "Transition the focal resource from \u0027active\u0027 or \u0027in-progress\u0027 to \u0027suspended\u0027"
+    },
+    {
+      "code": "resume",
+      "display": "Re-activate the focal resource",
+      "definition": "Transition the focal resource from \u0027suspended\u0027 to \u0027active\u0027 or \u0027in-progress\u0027 as appropriate for the resource type."
+    }
+  ]
+}

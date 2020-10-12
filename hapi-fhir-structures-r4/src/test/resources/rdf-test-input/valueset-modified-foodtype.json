@@ -1,0 +1,119 @@
+{
+  "resourceType": "ValueSet",
+  "id": "modified-foodtype",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTexture Modified Food Type Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eTextureModifiedFoodType: Codes for types of foods that are texture-modified. This value set is composed SNOMED CT Concepts from SCTID 255620007 Foods (substance) and is provided as a suggestive example.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d255620007\"\u003e255620007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFoods\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d28647000\"\u003e28647000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMeat\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d22836000\"\u003e22836000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVegetables\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d72511004\"\u003e72511004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFruit\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d226760005\"\u003e226760005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDairy foods\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d226887002\"\u003e226887002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDietary Fats and Oils\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d102263004\"\u003e102263004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEggs\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d74242007\"\u003e74242007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFood Starch\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d227415002\"\u003e227415002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFruit Nuts and Seeds\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d264331002\"\u003e264331002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGrain\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d227518002\"\u003e227518002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSauce seasonings and soups\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d44027008\"\u003e44027008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSeafood\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d226529007\"\u003e226529007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStarchy food\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d227210005\"\u003e227210005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVegetables plus herbs and spices\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/modified-foodtype",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.388"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TextureModifiedFoodTypeCodes",
+  "title": "Texture Modified Food Type Codes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR NutritionOrder team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "TextureModifiedFoodType: Codes for types of foods that are texture-modified. This value set is composed SNOMED CT Concepts from SCTID 255620007 Foods (substance) and is provided as a suggestive example.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "255620007",
+            "display": "Foods"
+          },
+          {
+            "code": "28647000",
+            "display": "Meat"
+          },
+          {
+            "code": "22836000",
+            "display": "Vegetables"
+          },
+          {
+            "code": "72511004",
+            "display": "Fruit"
+          },
+          {
+            "code": "226760005",
+            "display": "Dairy foods"
+          },
+          {
+            "code": "226887002",
+            "display": "Dietary Fats and Oils"
+          },
+          {
+            "code": "102263004",
+            "display": "Eggs"
+          },
+          {
+            "code": "74242007",
+            "display": "Food Starch"
+          },
+          {
+            "code": "227415002",
+            "display": "Fruit Nuts and Seeds"
+          },
+          {
+            "code": "264331002",
+            "display": "Grain"
+          },
+          {
+            "code": "227518002",
+            "display": "Sauce seasonings and soups"
+          },
+          {
+            "code": "44027008",
+            "display": "Seafood"
+          },
+          {
+            "code": "226529007",
+            "display": "Starchy food"
+          },
+          {
+            "code": "227210005",
+            "display": "Vegetables plus herbs and spices"
+          }
+        ]
+      }
+    ]
+  }
+}

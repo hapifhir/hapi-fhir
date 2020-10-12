@@ -1,0 +1,49 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "serum-zika-dengue-virus-igm",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eActivityDefinition/serum-zika-dengue-virus-igm\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003edraft\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eDescription: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eOrder Serum Zika and Dengue Virus IgM\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eRelated: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-top: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edocumentation\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-top: 5px;\"\u003e\n                     \u003cb\u003edisplay: \u003c/b\u003e\n                     \u003cspan\u003eExplanation of diagnostic tests for Zika virus and which to use based on the patients clinical and exposure history.\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-top: 5px;\"\u003e\n                     \u003cb\u003eurl: \u003c/b\u003e\n                     \u003cspan\u003ehttp://www.cdc.gov/zika/hc-providers/diagnostic.html\u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eCategory: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003ediagnostic\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eCode: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                     \u003cb\u003etext: \u003c/b\u003e\n                     \u003cspan\u003eSerum Zika and Dengue Virus IgM\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eParticipant: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003epractitioner\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n      \u003c/div\u003e"
+  },
+  "url": "http://example.org/ActivityDefinition/serum-zika-dengue-virus-igm",
+  "status": "draft",
+  "description": "Order Serum Zika and Dengue Virus IgM",
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "display": "Explanation of diagnostic tests for Zika virus and which to use based on the patient’s clinical and exposure history.",
+      "url": "http://www.cdc.gov/zika/hc-providers/diagnostic.html"
+    },
+    {
+      "type": "derived-from",
+      "resource": "ActivityDefinition/serum-dengue-virus-igm"
+    }
+  ],
+  "library": [
+    "Library/zika-virus-intervention-logic"
+  ],
+  "kind": "ServiceRequest",
+  "code": {
+    "text": "Serum Zika and Dengue Virus IgM"
+  },
+  "timingTiming": {
+    "_event": [
+      {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+            "valueExpression": {
+              "language": "text/cql",
+              "expression": "Now()"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "participant": [
+    {
+      "type": "practitioner"
+    }
+  ]
+}

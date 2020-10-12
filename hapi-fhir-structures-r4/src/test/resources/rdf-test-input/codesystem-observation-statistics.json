@@ -1,0 +1,150 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "observation-statistics",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStatisticsCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe statistical operation parameter -\u0026quot;statistic\u0026quot; codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/observation-statistics defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaverage\u003ca name\u003d\"observation-statistics-average\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAverage\u003c/td\u003e\u003ctd\u003eThe [mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emaximum\u003ca name\u003d\"observation-statistics-maximum\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaximum\u003c/td\u003e\u003ctd\u003eThe [maximum](https://en.wikipedia.org/wiki/Maximal_element) value of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eminimum\u003ca name\u003d\"observation-statistics-minimum\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMinimum\u003c/td\u003e\u003ctd\u003eThe [minimum](https://en.wikipedia.org/wiki/Minimal_element) value of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecount\u003ca name\u003d\"observation-statistics-count\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCount\u003c/td\u003e\u003ctd\u003eThe [number] of valid measurements over the stated period that contributed to the other statistical outputs.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etotal-count\u003ca name\u003d\"observation-statistics-total-count\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTotal Count\u003c/td\u003e\u003ctd\u003eThe total [number] of valid measurements over the stated period, including observations that were ignored because they did not contain valid result values.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedian\u003ca name\u003d\"observation-statistics-median\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedian\u003c/td\u003e\u003ctd\u003eThe [median](https://en.wikipedia.org/wiki/Median) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estd-dev\u003ca name\u003d\"observation-statistics-std-dev\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard Deviation\u003c/td\u003e\u003ctd\u003eThe [standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esum\u003ca name\u003d\"observation-statistics-sum\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSum\u003c/td\u003e\u003ctd\u003eThe [sum](https://en.wikipedia.org/wiki/Summation) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evariance\u003ca name\u003d\"observation-statistics-variance\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVariance\u003c/td\u003e\u003ctd\u003eThe [variance](https://en.wikipedia.org/wiki/Variance) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e20-percent\u003ca name\u003d\"observation-statistics-20-percent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e20th Percentile\u003c/td\u003e\u003ctd\u003eThe 20th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e80-percent\u003ca name\u003d\"observation-statistics-80-percent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e80th Percentile\u003c/td\u003e\u003ctd\u003eThe 80th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4-lower\u003ca name\u003d\"observation-statistics-4-lower\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLower Quartile\u003c/td\u003e\u003ctd\u003eThe lower [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4-upper\u003ca name\u003d\"observation-statistics-4-upper\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUpper Quartile\u003c/td\u003e\u003ctd\u003eThe upper [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4-dev\u003ca name\u003d\"observation-statistics-4-dev\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuartile Deviation\u003c/td\u003e\u003ctd\u003eThe difference between the upper and lower [Quartiles](https://en.wikipedia.org/wiki/Quartile) is called the Interquartile range. (IQR \u003d Q3-Q1) Quartile deviation or Semi-interquartile range is one-half the difference between the first and the third quartiles.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5-1\u003ca name\u003d\"observation-statistics-5-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e1st Quintile\u003c/td\u003e\u003ctd\u003eThe lowest of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5-2\u003ca name\u003d\"observation-statistics-5-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e2nd Quintile\u003c/td\u003e\u003ctd\u003eThe second of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5-3\u003ca name\u003d\"observation-statistics-5-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e3rd Quintile\u003c/td\u003e\u003ctd\u003eThe third of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5-4\u003ca name\u003d\"observation-statistics-5-4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e4th Quintile\u003c/td\u003e\u003ctd\u003eThe fourth of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eskew\u003ca name\u003d\"observation-statistics-skew\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSkew\u003c/td\u003e\u003ctd\u003eSkewness is a measure of the asymmetry of the probability distribution of a real-valued random variable about its mean. The skewness value can be positive or negative, or even undefined.  Source: [Wikipedia](https://en.wikipedia.org/wiki/Skewness).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ekurtosis\u003ca name\u003d\"observation-statistics-kurtosis\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eKurtosis\u003c/td\u003e\u003ctd\u003eKurtosis  is a measure of the \u0026quot;tailedness\u0026quot; of the probability distribution of a real-valued random variable.   Source: [Wikipedia](https://en.wikipedia.org/wiki/Kurtosis).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eregression\u003ca name\u003d\"observation-statistics-regression\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRegression\u003c/td\u003e\u003ctd\u003eLinear regression is an approach for modeling two-dimensional sample points with one independent variable and one dependent variable (conventionally, the x and y coordinates in a Cartesian coordinate system) and finds a linear function (a non-vertical straight line) that, as accurately as possible, predicts the dependent variable values as a function of the independent variables. Source: [Wikipedia](https://en.wikipedia.org/wiki/Simple_linear_regression)  This Statistic code will return both a gradient and an intercept value.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/observation-statistics",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1126"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "StatisticsCode",
+  "title": "StatisticsCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The statistical operation parameter -\"statistic\" codes.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/observation-statistics",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "average",
+      "display": "Average",
+      "definition": "The [mean](https://en.wikipedia.org/wiki/Arithmetic_mean) of N measurements over the stated period."
+    },
+    {
+      "code": "maximum",
+      "display": "Maximum",
+      "definition": "The [maximum](https://en.wikipedia.org/wiki/Maximal_element) value of N measurements over the stated period."
+    },
+    {
+      "code": "minimum",
+      "display": "Minimum",
+      "definition": "The [minimum](https://en.wikipedia.org/wiki/Minimal_element) value of N measurements over the stated period."
+    },
+    {
+      "code": "count",
+      "display": "Count",
+      "definition": "The [number] of valid measurements over the stated period that contributed to the other statistical outputs."
+    },
+    {
+      "code": "total-count",
+      "display": "Total Count",
+      "definition": "The total [number] of valid measurements over the stated period, including observations that were ignored because they did not contain valid result values."
+    },
+    {
+      "code": "median",
+      "display": "Median",
+      "definition": "The [median](https://en.wikipedia.org/wiki/Median) of N measurements over the stated period."
+    },
+    {
+      "code": "std-dev",
+      "display": "Standard Deviation",
+      "definition": "The [standard deviation](https://en.wikipedia.org/wiki/Standard_deviation) of N measurements over the stated period."
+    },
+    {
+      "code": "sum",
+      "display": "Sum",
+      "definition": "The [sum](https://en.wikipedia.org/wiki/Summation) of N measurements over the stated period."
+    },
+    {
+      "code": "variance",
+      "display": "Variance",
+      "definition": "The [variance](https://en.wikipedia.org/wiki/Variance) of N measurements over the stated period."
+    },
+    {
+      "code": "20-percent",
+      "display": "20th Percentile",
+      "definition": "The 20th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period."
+    },
+    {
+      "code": "80-percent",
+      "display": "80th Percentile",
+      "definition": "The 80th [Percentile](https://en.wikipedia.org/wiki/Percentile) of N measurements over the stated period."
+    },
+    {
+      "code": "4-lower",
+      "display": "Lower Quartile",
+      "definition": "The lower [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period."
+    },
+    {
+      "code": "4-upper",
+      "display": "Upper Quartile",
+      "definition": "The upper [Quartile](https://en.wikipedia.org/wiki/Quartile) Boundary of N measurements over the stated period."
+    },
+    {
+      "code": "4-dev",
+      "display": "Quartile Deviation",
+      "definition": "The difference between the upper and lower [Quartiles](https://en.wikipedia.org/wiki/Quartile) is called the Interquartile range. (IQR \u003d Q3-Q1) Quartile deviation or Semi-interquartile range is one-half the difference between the first and the third quartiles."
+    },
+    {
+      "code": "5-1",
+      "display": "1st Quintile",
+      "definition": "The lowest of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population."
+    },
+    {
+      "code": "5-2",
+      "display": "2nd Quintile",
+      "definition": "The second of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population."
+    },
+    {
+      "code": "5-3",
+      "display": "3rd Quintile",
+      "definition": "The third of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population."
+    },
+    {
+      "code": "5-4",
+      "display": "4th Quintile",
+      "definition": "The fourth of four values that divide the N measurements into a frequency distribution of five classes with each containing one fifth of the total population."
+    },
+    {
+      "code": "skew",
+      "display": "Skew",
+      "definition": "Skewness is a measure of the asymmetry of the probability distribution of a real-valued random variable about its mean. The skewness value can be positive or negative, or even undefined.  Source: [Wikipedia](https://en.wikipedia.org/wiki/Skewness)."
+    },
+    {
+      "code": "kurtosis",
+      "display": "Kurtosis",
+      "definition": "Kurtosis  is a measure of the \"tailedness\" of the probability distribution of a real-valued random variable.   Source: [Wikipedia](https://en.wikipedia.org/wiki/Kurtosis)."
+    },
+    {
+      "code": "regression",
+      "display": "Regression",
+      "definition": "Linear regression is an approach for modeling two-dimensional sample points with one independent variable and one dependent variable (conventionally, the x and y coordinates in a Cartesian coordinate system) and finds a linear function (a non-vertical straight line) that, as accurately as possible, predicts the dependent variable values as a function of the independent variables. Source: [Wikipedia](https://en.wikipedia.org/wiki/Simple_linear_regression)  This Statistic code will return both a gradient and an intercept value."
+    }
+  ]
+}

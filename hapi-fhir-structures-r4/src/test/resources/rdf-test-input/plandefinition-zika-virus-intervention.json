@@ -1,0 +1,156 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "zika-virus-intervention",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003ePlanDefinition/zika-virus-intervention\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eIdentifier: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003evalue: \u003c/b\u003e\n                  \u003cspan\u003ezika-virus-intervention\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTitle: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eExample Zika Virus Intervention\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eactive\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eDescription: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eZika Virus Management intervention describing the CDC Guidelines for Zika Virus Reporting and Management.\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTopic: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003etext: \u003c/b\u003e\n                     \u003cspan\u003eZika Virus Management\u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eLibrary: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003ereference: \u003c/b\u003e\n                  \u003cspan\u003eLibrary/zika-virus-intervention-logic\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ch2\u003eActions\u003c/h2\u003e\n         \u003cp style\u003d\"width: 100%;\" class\u003d\"hierarchy\"\u003e\n            \u003cspan\u003e\n               \u003cb\u003eStep: \u003c/b\u003e\n               \u003cbr/\u003e\n               \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003etitle: \u003c/b\u003e\n                  \u003cspan\u003eZika Virus Assessment\u003c/span\u003e\n                  \u003cbr/\u003e\n               \u003c/span\u003e\n               \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cb\u003econdition: \u003c/b\u003e\n                  \u003cbr/\u003e\n                  \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003eapplicability\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                     \u003cb\u003eexpression: \u003c/b\u003e\n                     \u003cspan\u003eIs Patient Pregnant\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n               \u003c/span\u003e\n               \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eStep: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                           \u003cspan\u003eapplicability\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                           \u003cb\u003eexpression: \u003c/b\u003e\n                           \u003cspan\u003eShould Administer Zika Virus Exposure Assessment\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 100px;\"\u003e#administer-zika-virus-exposure-assessment\u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan\u003e\n\t\t\t\t\t\t\t \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n\t\t\t\t\t\t\t\t\u003cb\u003edescription: \u003c/b\u003e\n\t\t\t\t\t\t\t\t\u003cspan\u003eAdminister Zika Virus Exposure Assessment\u003c/span\u003e\n\t\t\t\t\t\t\t\t\u003cbr/\u003e\n\t\t\t\t\t\t\t \u003c/span\u003e\n\t\t\t\t\t\t\t \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n\t\t\t\t\t\t\t\t\u003cb\u003ecategory: \u003c/b\u003e\n\t\t\t\t\t\t\t\t\u003cspan\u003eprocedure\u003c/span\u003e\n\t\t\t\t\t\t\t\t\u003cbr/\u003e\n\t\t\t\t\t\t\t \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eStep: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                           \u003cspan\u003eapplicability\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003eexpression: \u003c/b\u003e\n                           \u003cspan\u003eShould Order Serum + Urine rRT-PCR Test\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 125px;\"\u003eActivityDefinition/order-serum-urine-rrt-pcr-test\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eStep: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                           \u003cspan\u003eapplicability\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003eexpression: \u003c/b\u003e\n                           \u003cspan\u003eShould Order Serum Zika Virus IgM + Dengue Virus IgM\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 125px;\"\u003e#order-serum-zika-dengue-virus-igm\u003c/span\u003e\n                           \u003cbr/\u003e\n                           \u003cspan\u003e\n                              \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                                 \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                                    \u003cb\u003edescription: \u003c/b\u003e\n                                    \u003cspan\u003eOrder Serum Zika and Dengue Virus IgM\u003c/span\u003e\n                                    \u003cbr/\u003e\n                                 \u003c/span\u003e\n                                 \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                                    \u003cb\u003erelated:\u003c/b\u003e\n                                    \u003cbr/\u003e\n                                    \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                       \u003cb\u003etype: \u003c/b\u003e\n                                       \u003cspan\u003edocumentation\u003c/span\u003e\n                                       \u003cbr/\u003e\n                                    \u003c/span\u003e\n                                    \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                       \u003cb\u003edisplay: \u003c/b\u003e\n                                       \u003cspan\u003eExplanation of diagnostic tests for Zika virus and which to use based on the patients clinical and exposure history.\u003c/span\u003e\n                                       \u003cbr/\u003e\n                                    \u003c/span\u003e\n                                 \u003c/span\u003e\n                                 \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                    \u003cb\u003ecategory: \u003c/b\u003e\n                                    \u003cspan\u003ediagnostic\u003c/span\u003e\n                                    \u003cbr/\u003e\n                                 \u003c/span\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                           \u003cspan/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eStep: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                           \u003cspan\u003eapplicability\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003eexpression: \u003c/b\u003e\n                           \u003cspan\u003eShould Consider IgM Antibody Testing\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 125px;\"\u003eActivityDefinition/consider-igm-antibody-testing\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eStep: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                        \u003cb\u003econdition: \u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003etype: \u003c/b\u003e\n                           \u003cspan\u003eapplicability\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                           \u003cb\u003eexpression: \u003c/b\u003e\n                           \u003cspan\u003eShould Provide Mosquito Prevention and Contraception Advice\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                     \u003cspan style\u003d\"padding-left: 50px;\"\u003e\n                        \u003cspan\u003e\n                           \u003cb\u003eStep: \u003c/b\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                              \u003cb\u003econdition: \u003c/b\u003e\n                              \u003cbr/\u003e\n                              \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cbr/\u003e\n                                 \u003cspan style\u003d\"padding-left: 125px;\"\u003e#provide-mosquito-prevention-advice\u003c/span\u003e\n                                 \u003cspan\u003e\n                                    \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                                       \u003cbr/\u003e\n                                       \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                          \u003cb\u003edescription: \u003c/b\u003e\n                                          \u003cspan\u003eProvide mosquito prevention advice\u003c/span\u003e\n                                          \u003cbr/\u003e\n                                       \u003c/span\u003e\n                                       \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                                          \u003cb\u003erelated:\u003c/b\u003e\n                                          \u003cbr/\u003e\n                                          \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                             \u003cb\u003etype: \u003c/b\u003e\n                                             \u003cspan\u003edocumentation\u003c/span\u003e\n                                             \u003cbr/\u003e\n                                          \u003c/span\u003e\n                                          \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                             \u003cb\u003edisplay: \u003c/b\u003e\n                                             \u003cspan\u003eAdvice for patients about how to avoid Mosquito bites.\u003c/span\u003e\n                                             \u003cbr/\u003e\n                                          \u003c/span\u003e\n                                       \u003c/span\u003e\n                                       \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                                          \u003cb\u003erelated:\u003c/b\u003e\n                                          \u003cbr/\u003e\n                                          \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                             \u003cb\u003etype: \u003c/b\u003e\n                                             \u003cspan\u003edocumentation\u003c/span\u003e\n                                             \u003cbr/\u003e\n                                          \u003c/span\u003e\n                                          \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                             \u003cb\u003edisplay: \u003c/b\u003e\n                                             \u003cspan\u003eAdvice for patients about which mosquito repellents are effective and safe to use in pregnancy. [DEET, IF3535 and Picardin are safe during]\u003c/span\u003e\n                                             \u003cbr/\u003e\n                                          \u003c/span\u003e\n                                       \u003c/span\u003e\n                                       \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                          \u003cb\u003ecategory: \u003c/b\u003e\n                                          \u003cspan\u003ecommunication\u003c/span\u003e\n                                          \u003cbr/\u003e\n                                       \u003c/span\u003e\n                                    \u003c/span\u003e\n                                 \u003c/span\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                           \u003cspan style\u003d\"padding-left: 75px;\"/\u003e\n                        \u003c/span\u003e\n                        \u003cspan\u003e\n                           \u003cb\u003eStep: \u003c/b\u003e\n                           \u003cbr/\u003e\n                           \u003cspan style\u003d\"padding-left: 75px;\"\u003e\n                              \u003cb\u003econdition: \u003c/b\u003e\n                              \u003cbr/\u003e\n                              \u003cspan style\u003d\"padding-left: 100px;\"\u003e\n                                 \u003cb\u003ereference: \u003c/b\u003e\n                                 \u003cbr/\u003e\n                                 \u003cspan style\u003d\"padding-left: 125px;\"\u003eActivityDefinition/provide-contraception-advice\u003c/span\u003e\n                                 \u003cbr/\u003e\n                              \u003c/span\u003e\n                           \u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/span\u003e\n            \u003c/span\u003e\n         \u003c/p\u003e\n      \u003c/div\u003e"
+  },
+  "url": "http://example.org/PlanDefinition/zika-virus-intervention",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "zika-virus-intervention"
+    }
+  ],
+  "version": "2.0.0",
+  "title": "Example Zika Virus Intervention",
+  "status": "active",
+  "date": "2017-01-12",
+  "description": "Zika Virus Management intervention describing the CDC Guidelines for Zika Virus Reporting and Management.",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "age"
+      },
+      "valueRange": {
+        "low": {
+          "value": 12,
+          "unit": "a"
+        }
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "user"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "309343006",
+            "display": "Physician"
+          }
+        ]
+      }
+    }
+  ],
+  "topic": [
+    {
+      "text": "Zika Virus Management"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "derived-from",
+      "url": "https://www.cdc.gov/mmwr/volumes/65/wr/mm6539e1.htm?s_cid\u003dmm6539e1_w"
+    },
+    {
+      "type": "predecessor",
+      "resource": "PlanDefinition/zika-virus-intervention-initial"
+    }
+  ],
+  "library": [
+    "Library/zika-virus-intervention-logic"
+  ],
+  "action": [
+    {
+      "title": "Zika Virus Assessment",
+      "trigger": [
+        {
+          "type": "named-event",
+          "name": "patient-view"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": {
+            "language": "text/cql",
+            "expression": "Is Patient Pregnant"
+          }
+        }
+      ],
+      "action": [
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Should Administer Zika Virus Exposure Assessment"
+              }
+            }
+          ],
+          "definitionCanonical": "ActivityDefinition/administer-zika-virus-exposure-assessment"
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Should Order Serum + Urine rRT-PCR Test"
+              }
+            }
+          ],
+          "definitionCanonical": "ActivityDefinition/order-serum-urine-rrt-pcr-test"
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Should Order Serum Zika Virus IgM + Dengue Virus IgM"
+              }
+            }
+          ],
+          "definitionCanonical": "ActivityDefinition/order-serum-zika-dengue-virus-igm"
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Should Consider IgM Antibody Testing"
+              }
+            }
+          ],
+          "definitionCanonical": "ActivityDefinition/consider-igm-antibody-testing"
+        },
+        {
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Should Provide Mosquito Prevention and Contraception Advice"
+              }
+            }
+          ],
+          "action": [
+            {
+              "definitionCanonical": "ActivityDefinition/provide-mosquito-prevention-advice"
+            },
+            {
+              "definitionCanonical": "ActivityDefinition/provide-contraception-advice"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

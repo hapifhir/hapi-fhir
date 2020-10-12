@@ -1,0 +1,107 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "flag-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFlag Category\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eExample list of general categories for flagged issues. (Not complete or necessarily appropriate.)\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/flag-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediet\u003ca name\u003d\"flag-category-diet\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiet\u003c/td\u003e\u003ctd\u003eFlags related to the subject\u0027s dietary needs.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edrug\u003ca name\u003d\"flag-category-drug\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrug\u003c/td\u003e\u003ctd\u003eFlags related to the subject\u0027s medications.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elab\u003ca name\u003d\"flag-category-lab\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLab\u003c/td\u003e\u003ctd\u003eFlags related to performing laboratory tests and related processes (e.g. phlebotomy).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadmin\u003ca name\u003d\"flag-category-admin\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdministrative\u003c/td\u003e\u003ctd\u003eFlags related to administrative and financial processes.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econtact\u003ca name\u003d\"flag-category-contact\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubject Contact\u003c/td\u003e\u003ctd\u003eFlags related to coming into contact with the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclinical\u003ca name\u003d\"flag-category-clinical\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical\u003c/td\u003e\u003ctd\u003eFlags related to the subject\u0027s clinical data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebehavioral\u003ca name\u003d\"flag-category-behavioral\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBehavioral\u003c/td\u003e\u003ctd\u003eFlags related to behavior.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresearch\u003ca name\u003d\"flag-category-research\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResearch\u003c/td\u003e\u003ctd\u003eFlags related to research.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadvance-directive\u003ca name\u003d\"flag-category-advance-directive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdvance Directive\u003c/td\u003e\u003ctd\u003eFlags related to subject\u0027s advance directives.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esafety\u003ca name\u003d\"flag-category-safety\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSafety\u003c/td\u003e\u003ctd\u003eFlags related to safety precautions.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/flag-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1071"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FlagCategory",
+  "title": "Flag Category",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 International - Patient Care WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/patientcare"
+        }
+      ]
+    }
+  ],
+  "description": "Example list of general categories for flagged issues. (Not complete or necessarily appropriate.)",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/flag-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "diet",
+      "display": "Diet",
+      "definition": "Flags related to the subject\u0027s dietary needs."
+    },
+    {
+      "code": "drug",
+      "display": "Drug",
+      "definition": "Flags related to the subject\u0027s medications."
+    },
+    {
+      "code": "lab",
+      "display": "Lab",
+      "definition": "Flags related to performing laboratory tests and related processes (e.g. phlebotomy)."
+    },
+    {
+      "code": "admin",
+      "display": "Administrative",
+      "definition": "Flags related to administrative and financial processes."
+    },
+    {
+      "code": "contact",
+      "display": "Subject Contact",
+      "definition": "Flags related to coming into contact with the patient."
+    },
+    {
+      "code": "clinical",
+      "display": "Clinical",
+      "definition": "Flags related to the subject\u0027s clinical data."
+    },
+    {
+      "code": "behavioral",
+      "display": "Behavioral",
+      "definition": "Flags related to behavior."
+    },
+    {
+      "code": "research",
+      "display": "Research",
+      "definition": "Flags related to research."
+    },
+    {
+      "code": "advance-directive",
+      "display": "Advance Directive",
+      "definition": "Flags related to subject\u0027s advance directives."
+    },
+    {
+      "code": "safety",
+      "display": "Safety",
+      "definition": "Flags related to safety precautions."
+    }
+  ]
+}

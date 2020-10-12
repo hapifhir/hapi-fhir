@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "plan-definition-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePlanDefinitionType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of PlanDefinition.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/plan-definition-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eorder-set\u003ca name\u003d\"plan-definition-type-order-set\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOrder Set\u003c/td\u003e\u003ctd\u003eA pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclinical-protocol\u003ca name\u003d\"plan-definition-type-clinical-protocol\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Protocol\u003c/td\u003e\u003ctd\u003eDefines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeca-rule\u003ca name\u003d\"plan-definition-type-eca-rule\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eECA Rule\u003c/td\u003e\u003ctd\u003eA decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eworkflow-definition\u003ca name\u003d\"plan-definition-type-workflow-definition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWorkflow Definition\u003c/td\u003e\u003ctd\u003eDefines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1245"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PlanDefinitionType",
+  "title": "PlanDefinitionType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of PlanDefinition.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/plan-definition-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "order-set",
+      "display": "Order Set",
+      "definition": "A pre-defined and approved group of orders related to a particular clinical condition (e.g. hypertension treatment and monitoring) or stage of care (e.g. hospital admission to Coronary Care Unit). An order set is used as a checklist for the clinician when managing a patient with a specific condition. It is a structured collection of orders relevant to that condition and presented to the clinician in a computerized provider order entry (CPOE) system."
+    },
+    {
+      "code": "clinical-protocol",
+      "display": "Clinical Protocol",
+      "definition": "Defines a desired/typical sequence of clinical activities including preconditions, triggers and temporal relationships."
+    },
+    {
+      "code": "eca-rule",
+      "display": "ECA Rule",
+      "definition": "A decision support rule of the form [on Event] if Condition then Action. It is intended to be a shareable, computable definition of actions that should be taken whenever some condition is met in response to a particular event or events."
+    },
+    {
+      "code": "workflow-definition",
+      "display": "Workflow Definition",
+      "definition": "Defines the steps for a group of one or more systems in an event flow process along with the step constraints, sequence, pre-conditions and decision points to complete a particular objective."
+    }
+  ]
+}

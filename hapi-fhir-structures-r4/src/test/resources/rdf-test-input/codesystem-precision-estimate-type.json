@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "precision-estimate-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePrecisionEstimateType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMethod of reporting variability of estimates, such as confidence intervals, interquartile range or standard deviation.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/precision-estimate-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCI\u003ca name\u003d\"precision-estimate-type-CI\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003econfidence interval\u003c/td\u003e\u003ctd\u003econfidence interval.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIQR\u003ca name\u003d\"precision-estimate-type-IQR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einterquartile range\u003c/td\u003e\u003ctd\u003einterquartile range.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSD\u003ca name\u003d\"precision-estimate-type-SD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003estandard deviation\u003c/td\u003e\u003ctd\u003estandard deviation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSE\u003ca name\u003d\"precision-estimate-type-SE\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003estandard error\u003c/td\u003e\u003ctd\u003estandard error.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/precision-estimate-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1358"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PrecisionEstimateType",
+  "title": "PrecisionEstimateType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Method of reporting variability of estimates, such as confidence intervals, interquartile range or standard deviation.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/precision-estimate-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "CI",
+      "display": "confidence interval",
+      "definition": "confidence interval."
+    },
+    {
+      "code": "IQR",
+      "display": "interquartile range",
+      "definition": "interquartile range."
+    },
+    {
+      "code": "SD",
+      "display": "standard deviation",
+      "definition": "standard deviation."
+    },
+    {
+      "code": "SE",
+      "display": "standard error",
+      "definition": "standard error."
+    }
+  ]
+}

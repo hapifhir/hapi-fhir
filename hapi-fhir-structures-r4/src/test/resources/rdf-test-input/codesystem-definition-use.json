@@ -1,0 +1,91 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "definition-use",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStructure Definition Use Codes / Keywords\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eStructure Definition Use Codes / Keywords\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/definition-use defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efhir-structure\u003ca name\u003d\"definition-use-fhir-structure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFHIR Structure\u003c/td\u003e\u003ctd\u003eThis structure is defined as part of the base FHIR Specification\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecustom-resource\u003ca name\u003d\"definition-use-custom-resource\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCustom Resource\u003c/td\u003e\u003ctd\u003eThis structure is intended to be treated like a FHIR resource (e.g. on the FHIR API)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edam\u003ca name\u003d\"definition-use-dam\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDomain Analysis Model\u003c/td\u003e\u003ctd\u003eThis structure captures an analysis of a domain\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewire-format\u003ca name\u003d\"definition-use-wire-format\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWire Format\u003c/td\u003e\u003ctd\u003eThis structure represents and existing structure (e.g. CDA, HL7 v2)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003earchetype\u003ca name\u003d\"definition-use-archetype\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDomain Analysis Model\u003c/td\u003e\u003ctd\u003eThis structure captures an analysis of a domain\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etemplate\u003ca name\u003d\"definition-use-template\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTemplate\u003c/td\u003e\u003ctd\u003eThis structure is a template (n.b: \u0027template\u0027 has many meanings)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/definition-use",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1191"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DefinitionUseCodes",
+  "title": "Structure Definition Use Codes / Keywords",
+  "status": "active",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Structure Definition Use Codes / Keywords",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/definition-use",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "fhir-structure",
+      "display": "FHIR Structure",
+      "definition": "This structure is defined as part of the base FHIR Specification"
+    },
+    {
+      "code": "custom-resource",
+      "display": "Custom Resource",
+      "definition": "This structure is intended to be treated like a FHIR resource (e.g. on the FHIR API)"
+    },
+    {
+      "code": "dam",
+      "display": "Domain Analysis Model",
+      "definition": "This structure captures an analysis of a domain"
+    },
+    {
+      "code": "wire-format",
+      "display": "Wire Format",
+      "definition": "This structure represents and existing structure (e.g. CDA, HL7 v2)"
+    },
+    {
+      "code": "archetype",
+      "display": "Domain Analysis Model",
+      "definition": "This structure captures an analysis of a domain"
+    },
+    {
+      "code": "template",
+      "display": "Template",
+      "definition": "This structure is a template (n.b: \u0027template\u0027 has many meanings)"
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "service-uscls",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eUSCLS Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes a smattering of USCLS codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/ex-USCLS defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1101\u003ca name\u003d\"service-uscls-1101\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExam, comp, primary\u003c/td\u003e\u003ctd\u003eExam, comp, primary\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1102\u003ca name\u003d\"service-uscls-1102\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExam, comp, mixed\u003c/td\u003e\u003ctd\u003eExam, comp, mixed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1103\u003ca name\u003d\"service-uscls-1103\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExam, comp, permanent\u003c/td\u003e\u003ctd\u003eExam, comp, permanent\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1201\u003ca name\u003d\"service-uscls-1201\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExam, recall\u003c/td\u003e\u003ctd\u003eExam, recall\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1205\u003ca name\u003d\"service-uscls-1205\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExam, emergency\u003c/td\u003e\u003ctd\u003eExam, emergency\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2101\u003ca name\u003d\"service-uscls-2101\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiograph, series (12)\u003c/td\u003e\u003ctd\u003eRadiograph, series (12)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2102\u003ca name\u003d\"service-uscls-2102\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiograph, series (16)\u003c/td\u003e\u003ctd\u003eRadiograph, series (16)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2141\u003ca name\u003d\"service-uscls-2141\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiograph, bitewing\u003c/td\u003e\u003ctd\u003eRadiograph, bitewing\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2601\u003ca name\u003d\"service-uscls-2601\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiograph, panoramic\u003c/td\u003e\u003ctd\u003eRadiograph, panoramic\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11101\u003ca name\u003d\"service-uscls-11101\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePolishing, 1 unit\u003c/td\u003e\u003ctd\u003ePolishing, 1 unit\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11102\u003ca name\u003d\"service-uscls-11102\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePolishing, 2 unit\u003c/td\u003e\u003ctd\u003ePolishing, 2 unit\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11103\u003ca name\u003d\"service-uscls-11103\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePolishing, 3 unit\u003c/td\u003e\u003ctd\u003ePolishing, 3 unit\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11104\u003ca name\u003d\"service-uscls-11104\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePolishing, 4 unit\u003c/td\u003e\u003ctd\u003ePolishing, 4 unit\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e21211\u003ca name\u003d\"service-uscls-21211\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmalgam, 1 surface\u003c/td\u003e\u003ctd\u003eAmalgam, 1 surface\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e21212\u003ca name\u003d\"service-uscls-21212\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmalgam, 2 surface\u003c/td\u003e\u003ctd\u003eAmalgam, 2 surface\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e27211\u003ca name\u003d\"service-uscls-27211\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCrown, PFM\u003c/td\u003e\u003ctd\u003eCrown, PFM\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e67211\u003ca name\u003d\"service-uscls-67211\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaryland Bridge\u003c/td\u003e\u003ctd\u003eMaryland Bridge\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e99111\u003ca name\u003d\"service-uscls-99111\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLab, commercial\u003c/td\u003e\u003ctd\u003eLab, commercial\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e99333\u003ca name\u003d\"service-uscls-99333\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLab, in office\u003c/td\u003e\u003ctd\u003eLab, in office\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e99555\u003ca name\u003d\"service-uscls-99555\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExpense\u003c/td\u003e\u003ctd\u003eExpense\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/ex-USCLS",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1153"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "USCLSCodes",
+  "title": "USCLS Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes a smattering of USCLS codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/service-uscls",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "1101",
+      "display": "Exam, comp, primary",
+      "definition": "Exam, comp, primary"
+    },
+    {
+      "code": "1102",
+      "display": "Exam, comp, mixed",
+      "definition": "Exam, comp, mixed"
+    },
+    {
+      "code": "1103",
+      "display": "Exam, comp, permanent",
+      "definition": "Exam, comp, permanent"
+    },
+    {
+      "code": "1201",
+      "display": "Exam, recall",
+      "definition": "Exam, recall"
+    },
+    {
+      "code": "1205",
+      "display": "Exam, emergency",
+      "definition": "Exam, emergency"
+    },
+    {
+      "code": "2101",
+      "display": "Radiograph, series (12)",
+      "definition": "Radiograph, series (12)"
+    },
+    {
+      "code": "2102",
+      "display": "Radiograph, series (16)",
+      "definition": "Radiograph, series (16)"
+    },
+    {
+      "code": "2141",
+      "display": "Radiograph, bitewing",
+      "definition": "Radiograph, bitewing"
+    },
+    {
+      "code": "2601",
+      "display": "Radiograph, panoramic",
+      "definition": "Radiograph, panoramic"
+    },
+    {
+      "code": "11101",
+      "display": "Polishing, 1 unit",
+      "definition": "Polishing, 1 unit"
+    },
+    {
+      "code": "11102",
+      "display": "Polishing, 2 unit",
+      "definition": "Polishing, 2 unit"
+    },
+    {
+      "code": "11103",
+      "display": "Polishing, 3 unit",
+      "definition": "Polishing, 3 unit"
+    },
+    {
+      "code": "11104",
+      "display": "Polishing, 4 unit",
+      "definition": "Polishing, 4 unit"
+    },
+    {
+      "code": "21211",
+      "display": "Amalgam, 1 surface",
+      "definition": "Amalgam, 1 surface"
+    },
+    {
+      "code": "21212",
+      "display": "Amalgam, 2 surface",
+      "definition": "Amalgam, 2 surface"
+    },
+    {
+      "code": "27211",
+      "display": "Crown, PFM",
+      "definition": "Crown, PFM"
+    },
+    {
+      "code": "67211",
+      "display": "Maryland Bridge",
+      "definition": "Maryland Bridge"
+    },
+    {
+      "code": "99111",
+      "display": "Lab, commercial",
+      "definition": "Lab, commercial"
+    },
+    {
+      "code": "99333",
+      "display": "Lab, in office",
+      "definition": "Lab, in office"
+    },
+    {
+      "code": "99555",
+      "display": "Expense",
+      "definition": "Expense"
+    }
+  ]
+}

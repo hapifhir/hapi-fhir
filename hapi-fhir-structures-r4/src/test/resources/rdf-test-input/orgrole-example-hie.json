@@ -1,0 +1,58 @@
+{
+  "resourceType": "OrganizationAffiliation",
+  "id": "orgrole2",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: orgrole2\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: member hospital \u003d hosp32 (SECONDARY)\u003c/p\u003e\u003cp\u003e\u003cb\u003eactive\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003eorganization\u003c/b\u003e: \u003ca\u003eMonument Health Information Exchange\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eparticipatingOrganization\u003c/b\u003e: \u003ca\u003eFounding Fathers Memorial Hospital\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Hospital member \u003cspan\u003e(Details : {http://hl7.org/fhir/organization-role code \u0027member\u0027 \u003d \u0027Member\u0027, given as \u0027Member\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eendpoint\u003c/b\u003e: \u003ca\u003eFounding Fathers Memorial Hospital HIE endpoint\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "secondary",
+      "type": {
+        "text": "member hospital"
+      },
+      "system": "http://example.org/www.monumentHIE.com",
+      "value": "hosp32",
+      "assigner": {
+        "reference": "http://hl7.org/fhir/ig/vhdir/Organization/monumentHIE",
+        "display": "Monument Health Information Exchange"
+      }
+    }
+  ],
+  "active": true,
+  "organization": {
+    "reference": "http://hl7.org/fhir/ig/vhdir/Organization/monumentHIE",
+    "display": "Monument Health Information Exchange"
+  },
+  "participatingOrganization": {
+    "reference": "http://hl7.org/fhir/ig/vhdir/Organization/foundingfathers",
+    "display": "Founding Fathers Memorial Hospital"
+  },
+  "code": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/organization-role",
+          "code": "member",
+          "display": "Member"
+        }
+      ],
+      "text": "Hospital member"
+    }
+  ],
+  "endpoint": [
+    {
+      "reference": "http://hl7.org/fhir/ig/vhdir/Endpoint/foundingfathersHIE",
+      "display": "Founding Fathers Memorial Hospital HIE endpoint"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

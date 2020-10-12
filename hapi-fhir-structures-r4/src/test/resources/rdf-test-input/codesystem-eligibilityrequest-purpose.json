@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "eligibilityrequest-purpose",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEligibilityRequestPurpose\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA code specifying the types of information being requested.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/eligibilityrequest-purpose defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eauth-requirements\u003ca name\u003d\"eligibilityrequest-purpose-auth-requirements\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoverage auth-requirements\u003c/td\u003e\u003ctd\u003eThe prior authorization requirements for the listed, or discovered if specified, converages for the categories of service and/or specifed biling codes are requested.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebenefits\u003ca name\u003d\"eligibilityrequest-purpose-benefits\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoverage benefits\u003c/td\u003e\u003ctd\u003eThe plan benefits and optionally benefits consumed  for the listed, or discovered if specified, converages are requested.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediscovery\u003ca name\u003d\"eligibilityrequest-purpose-discovery\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoverage Discovery\u003c/td\u003e\u003ctd\u003eThe insurer is requested to report on any coverages which they are aware of in addition to any specifed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evalidation\u003ca name\u003d\"eligibilityrequest-purpose-validation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoverage Validation\u003c/td\u003e\u003ctd\u003eA check that the specified coverages are in-force is requested.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/eligibilityrequest-purpose",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1183"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EligibilityRequestPurpose",
+  "title": "EligibilityRequestPurpose",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A code specifying the types of information being requested.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/eligibilityrequest-purpose",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "auth-requirements",
+      "display": "Coverage auth-requirements",
+      "definition": "The prior authorization requirements for the listed, or discovered if specified, converages for the categories of service and/or specifed biling codes are requested."
+    },
+    {
+      "code": "benefits",
+      "display": "Coverage benefits",
+      "definition": "The plan benefits and optionally benefits consumed  for the listed, or discovered if specified, converages are requested."
+    },
+    {
+      "code": "discovery",
+      "display": "Coverage Discovery",
+      "definition": "The insurer is requested to report on any coverages which they are aware of in addition to any specifed."
+    },
+    {
+      "code": "validation",
+      "display": "Coverage Validation",
+      "definition": "A check that the specified coverages are in-force is requested."
+    }
+  ]
+}

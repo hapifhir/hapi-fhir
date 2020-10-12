@@ -1,0 +1,578 @@
+{
+  "resourceType": "CompartmentDefinition",
+  "id": "device",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\r\nThe following resources may be in this compartment:\r\n\u003c/p\u003e\r\n\u003ctable class\u003d\"grid\"\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eInclusion Criteria\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"account.html\"\u003eAccount\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"appointment.html\"\u003eAppointment\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eactor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"appointmentresponse.html\"\u003eAppointmentResponse\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eactor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"auditevent.html\"\u003eAuditEvent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eagent\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"chargeitem.html\"\u003eChargeItem\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eenterer, performer-actor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"claim.html\"\u003eClaim\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eprocedure-udi, item-udi, detail-udi, subdetail-udi\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"communication.html\"\u003eCommunication\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esender, recipient\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"communicationrequest.html\"\u003eCommunicationRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esender, recipient\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"composition.html\"\u003eComposition\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"detectedissue.html\"\u003eDetectedIssue\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"devicerequest.html\"\u003eDeviceRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003edevice, subject, requester, performer\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"deviceusestatement.html\"\u003eDeviceUseStatement\u003c/a\u003e\u003c/td\u003e\u003ctd\u003edevice\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"diagnosticreport.html\"\u003eDiagnosticReport\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"documentmanifest.html\"\u003eDocumentManifest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject, author\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"documentreference.html\"\u003eDocumentReference\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject, author\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"explanationofbenefit.html\"\u003eExplanationOfBenefit\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eprocedure-udi, item-udi, detail-udi, subdetail-udi\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"flag.html\"\u003eFlag\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"group.html\"\u003eGroup\u003c/a\u003e\u003c/td\u003e\u003ctd\u003emember\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"invoice.html\"\u003eInvoice\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eparticipant\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"list.html\"\u003eList\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject, source\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"media.html\"\u003eMedia\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"medicationadministration.html\"\u003eMedicationAdministration\u003c/a\u003e\u003c/td\u003e\u003ctd\u003edevice\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"messageheader.html\"\u003eMessageHeader\u003c/a\u003e\u003c/td\u003e\u003ctd\u003etarget\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"observation.html\"\u003eObservation\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject, device\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"provenance.html\"\u003eProvenance\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eagent\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"questionnaireresponse.html\"\u003eQuestionnaireResponse\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"requestgroup.html\"\u003eRequestGroup\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"riskassessment.html\"\u003eRiskAssessment\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eperformer\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"schedule.html\"\u003eSchedule\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eactor\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"servicerequest.html\"\u003eServiceRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eperformer, requester\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"specimen.html\"\u003eSpecimen\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esubject\u003c/td\u003e\u003c/tr\u003e\r\n \u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"supplyrequest.html\"\u003eSupplyRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003erequester\u003c/td\u003e\u003c/tr\u003e\r\n\u003c/table\u003e\r\n\u003cp\u003e\r\nA resource is in this compartment if the nominated search parameter (or chain) refers to the patient resource that defines the compartment.\r\n\u003c/p\u003e\r\n\u003cp\u003e\r\n\r\n\u003c/p\u003e\r\n\u003cp\u003e\r\nThe following resources are never in this compartment:\r\n\u003c/p\u003e\r\n\u003cul\u003e\r\n \u003cli\u003e\u003ca href\u003d\"activitydefinition.html\"\u003eActivityDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"adverseevent.html\"\u003eAdverseEvent\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"allergyintolerance.html\"\u003eAllergyIntolerance\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"basic.html\"\u003eBasic\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"binary.html\"\u003eBinary\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"biologicallyderivedproduct.html\"\u003eBiologicallyDerivedProduct\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"bodystructure.html\"\u003eBodyStructure\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"capabilitystatement.html\"\u003eCapabilityStatement\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"careplan.html\"\u003eCarePlan\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"careteam.html\"\u003eCareTeam\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"catalogentry.html\"\u003eCatalogEntry\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"chargeitemdefinition.html\"\u003eChargeItemDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"claimresponse.html\"\u003eClaimResponse\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"clinicalimpression.html\"\u003eClinicalImpression\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"codesystem.html\"\u003eCodeSystem\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"compartmentdefinition.html\"\u003eCompartmentDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"conceptmap.html\"\u003eConceptMap\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"condition.html\"\u003eCondition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"consent.html\"\u003eConsent\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"contract.html\"\u003eContract\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"coverage.html\"\u003eCoverage\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"coverageeligibilityrequest.html\"\u003eCoverageEligibilityRequest\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"coverageeligibilityresponse.html\"\u003eCoverageEligibilityResponse\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"device.html\"\u003eDevice\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"devicedefinition.html\"\u003eDeviceDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"devicemetric.html\"\u003eDeviceMetric\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"effectevidencesynthesis.html\"\u003eEffectEvidenceSynthesis\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"encounter.html\"\u003eEncounter\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"endpoint.html\"\u003eEndpoint\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"enrollmentrequest.html\"\u003eEnrollmentRequest\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"enrollmentresponse.html\"\u003eEnrollmentResponse\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"episodeofcare.html\"\u003eEpisodeOfCare\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"eventdefinition.html\"\u003eEventDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"evidence.html\"\u003eEvidence\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"evidencevariable.html\"\u003eEvidenceVariable\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"examplescenario.html\"\u003eExampleScenario\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"familymemberhistory.html\"\u003eFamilyMemberHistory\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"goal.html\"\u003eGoal\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"graphdefinition.html\"\u003eGraphDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"guidanceresponse.html\"\u003eGuidanceResponse\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"healthcareservice.html\"\u003eHealthcareService\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"imagingstudy.html\"\u003eImagingStudy\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"immunization.html\"\u003eImmunization\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"immunizationevaluation.html\"\u003eImmunizationEvaluation\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"immunizationrecommendation.html\"\u003eImmunizationRecommendation\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"implementationguide.html\"\u003eImplementationGuide\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"insuranceplan.html\"\u003eInsurancePlan\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"library.html\"\u003eLibrary\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"linkage.html\"\u003eLinkage\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"location.html\"\u003eLocation\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"measure.html\"\u003eMeasure\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"measurereport.html\"\u003eMeasureReport\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medication.html\"\u003eMedication\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicationdispense.html\"\u003eMedicationDispense\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicationknowledge.html\"\u003eMedicationKnowledge\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicationrequest.html\"\u003eMedicationRequest\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicationstatement.html\"\u003eMedicationStatement\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproduct.html\"\u003eMedicinalProduct\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductauthorization.html\"\u003eMedicinalProductAuthorization\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductcontraindication.html\"\u003eMedicinalProductContraindication\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductindication.html\"\u003eMedicinalProductIndication\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductingredient.html\"\u003eMedicinalProductIngredient\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductinteraction.html\"\u003eMedicinalProductInteraction\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductmanufactured.html\"\u003eMedicinalProductManufactured\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductpackaged.html\"\u003eMedicinalProductPackaged\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductpharmaceutical.html\"\u003eMedicinalProductPharmaceutical\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"medicinalproductundesirableeffect.html\"\u003eMedicinalProductUndesirableEffect\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"messagedefinition.html\"\u003eMessageDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"molecularsequence.html\"\u003eMolecularSequence\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"namingsystem.html\"\u003eNamingSystem\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"nutritionorder.html\"\u003eNutritionOrder\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"observationdefinition.html\"\u003eObservationDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"operationdefinition.html\"\u003eOperationDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"operationoutcome.html\"\u003eOperationOutcome\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"organization.html\"\u003eOrganization\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"organizationaffiliation.html\"\u003eOrganizationAffiliation\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"patient.html\"\u003ePatient\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"paymentnotice.html\"\u003ePaymentNotice\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"paymentreconciliation.html\"\u003ePaymentReconciliation\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"person.html\"\u003ePerson\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"plandefinition.html\"\u003ePlanDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"practitioner.html\"\u003ePractitioner\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"practitionerrole.html\"\u003ePractitionerRole\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"procedure.html\"\u003eProcedure\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"questionnaire.html\"\u003eQuestionnaire\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"relatedperson.html\"\u003eRelatedPerson\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"researchdefinition.html\"\u003eResearchDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"researchelementdefinition.html\"\u003eResearchElementDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"researchstudy.html\"\u003eResearchStudy\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"researchsubject.html\"\u003eResearchSubject\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"riskevidencesynthesis.html\"\u003eRiskEvidenceSynthesis\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"searchparameter.html\"\u003eSearchParameter\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"slot.html\"\u003eSlot\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"specimendefinition.html\"\u003eSpecimenDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"structuredefinition.html\"\u003eStructureDefinition\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"structuremap.html\"\u003eStructureMap\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"subscription.html\"\u003eSubscription\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substance.html\"\u003eSubstance\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substancenucleicacid.html\"\u003eSubstanceNucleicAcid\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substancepolymer.html\"\u003eSubstancePolymer\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substanceprotein.html\"\u003eSubstanceProtein\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substancereferenceinformation.html\"\u003eSubstanceReferenceInformation\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substancesourcematerial.html\"\u003eSubstanceSourceMaterial\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"substancespecification.html\"\u003eSubstanceSpecification\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"supplydelivery.html\"\u003eSupplyDelivery\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"task.html\"\u003eTask\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"terminologycapabilities.html\"\u003eTerminologyCapabilities\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"testreport.html\"\u003eTestReport\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"testscript.html\"\u003eTestScript\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"valueset.html\"\u003eValueSet\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"verificationresult.html\"\u003eVerificationResult\u003c/a\u003e\u003c/li\u003e\r\n \u003cli\u003e\u003ca href\u003d\"visionprescription.html\"\u003eVisionPrescription\u003c/a\u003e\u003c/li\u003e\r\n\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/CompartmentDefinition/device",
+  "version": "4.0.1",
+  "name": "Base FHIR compartment definition for Device",
+  "status": "draft",
+  "experimental": true,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project Team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "There is an instance of the device compartment for each Device resource, and the identity of the compartment is the same as the Device. The set of resources associated with a particular device",
+  "code": "Device",
+  "search": true,
+  "resource": [
+    {
+      "code": "Account",
+      "param": [
+        "subject"
+      ]
+    },
+    {
+      "code": "ActivityDefinition"
+    },
+    {
+      "code": "AdverseEvent"
+    },
+    {
+      "code": "AllergyIntolerance"
+    },
+    {
+      "code": "Appointment",
+      "param": [
+        "actor"
+      ]
+    },
+    {
+      "code": "AppointmentResponse",
+      "param": [
+        "actor"
+      ]
+    },
+    {
+      "code": "AuditEvent",
+      "param": [
+        "agent"
+      ]
+    },
+    {
+      "code": "Basic"
+    },
+    {
+      "code": "Binary"
+    },
+    {
+      "code": "BiologicallyDerivedProduct"
+    },
+    {
+      "code": "BodyStructure"
+    },
+    {
+      "code": "Bundle"
+    },
+    {
+      "code": "CapabilityStatement"
+    },
+    {
+      "code": "CarePlan"
+    },
+    {
+      "code": "CareTeam"
+    },
+    {
+      "code": "CatalogEntry"
+    },
+    {
+      "code": "ChargeItem",
+      "param": [
+        "enterer",
+        "performer-actor"
+      ]
+    },
+    {
+      "code": "ChargeItemDefinition"
+    },
+    {
+      "code": "Claim",
+      "param": [
+        "procedure-udi",
+        "item-udi",
+        "detail-udi",
+        "subdetail-udi"
+      ]
+    },
+    {
+      "code": "ClaimResponse"
+    },
+    {
+      "code": "ClinicalImpression"
+    },
+    {
+      "code": "CodeSystem"
+    },
+    {
+      "code": "Communication",
+      "param": [
+        "sender",
+        "recipient"
+      ]
+    },
+    {
+      "code": "CommunicationRequest",
+      "param": [
+        "sender",
+        "recipient"
+      ]
+    },
+    {
+      "code": "CompartmentDefinition"
+    },
+    {
+      "code": "Composition",
+      "param": [
+        "author"
+      ]
+    },
+    {
+      "code": "ConceptMap"
+    },
+    {
+      "code": "Condition"
+    },
+    {
+      "code": "Consent"
+    },
+    {
+      "code": "Contract"
+    },
+    {
+      "code": "Coverage"
+    },
+    {
+      "code": "CoverageEligibilityRequest"
+    },
+    {
+      "code": "CoverageEligibilityResponse"
+    },
+    {
+      "code": "DetectedIssue",
+      "param": [
+        "author"
+      ]
+    },
+    {
+      "code": "Device"
+    },
+    {
+      "code": "DeviceDefinition"
+    },
+    {
+      "code": "DeviceMetric"
+    },
+    {
+      "code": "DeviceRequest",
+      "param": [
+        "device",
+        "subject",
+        "requester",
+        "performer"
+      ]
+    },
+    {
+      "code": "DeviceUseStatement",
+      "param": [
+        "device"
+      ]
+    },
+    {
+      "code": "DiagnosticReport",
+      "param": [
+        "subject"
+      ]
+    },
+    {
+      "code": "DocumentManifest",
+      "param": [
+        "subject",
+        "author"
+      ]
+    },
+    {
+      "code": "DocumentReference",
+      "param": [
+        "subject",
+        "author"
+      ]
+    },
+    {
+      "code": "EffectEvidenceSynthesis"
+    },
+    {
+      "code": "Encounter"
+    },
+    {
+      "code": "Endpoint"
+    },
+    {
+      "code": "EnrollmentRequest"
+    },
+    {
+      "code": "EnrollmentResponse"
+    },
+    {
+      "code": "EpisodeOfCare"
+    },
+    {
+      "code": "EventDefinition"
+    },
+    {
+      "code": "Evidence"
+    },
+    {
+      "code": "EvidenceVariable"
+    },
+    {
+      "code": "ExampleScenario"
+    },
+    {
+      "code": "ExplanationOfBenefit",
+      "param": [
+        "procedure-udi",
+        "item-udi",
+        "detail-udi",
+        "subdetail-udi"
+      ]
+    },
+    {
+      "code": "FamilyMemberHistory"
+    },
+    {
+      "code": "Flag",
+      "param": [
+        "author"
+      ]
+    },
+    {
+      "code": "Goal"
+    },
+    {
+      "code": "GraphDefinition"
+    },
+    {
+      "code": "Group",
+      "param": [
+        "member"
+      ]
+    },
+    {
+      "code": "GuidanceResponse"
+    },
+    {
+      "code": "HealthcareService"
+    },
+    {
+      "code": "ImagingStudy"
+    },
+    {
+      "code": "Immunization"
+    },
+    {
+      "code": "ImmunizationEvaluation"
+    },
+    {
+      "code": "ImmunizationRecommendation"
+    },
+    {
+      "code": "ImplementationGuide"
+    },
+    {
+      "code": "InsurancePlan"
+    },
+    {
+      "code": "Invoice",
+      "param": [
+        "participant"
+      ]
+    },
+    {
+      "code": "Library"
+    },
+    {
+      "code": "Linkage"
+    },
+    {
+      "code": "List",
+      "param": [
+        "subject",
+        "source"
+      ]
+    },
+    {
+      "code": "Location"
+    },
+    {
+      "code": "Measure"
+    },
+    {
+      "code": "MeasureReport"
+    },
+    {
+      "code": "Media",
+      "param": [
+        "subject"
+      ]
+    },
+    {
+      "code": "Medication"
+    },
+    {
+      "code": "MedicationAdministration",
+      "param": [
+        "device"
+      ]
+    },
+    {
+      "code": "MedicationDispense"
+    },
+    {
+      "code": "MedicationKnowledge"
+    },
+    {
+      "code": "MedicationRequest"
+    },
+    {
+      "code": "MedicationStatement"
+    },
+    {
+      "code": "MedicinalProduct"
+    },
+    {
+      "code": "MedicinalProductAuthorization"
+    },
+    {
+      "code": "MedicinalProductContraindication"
+    },
+    {
+      "code": "MedicinalProductIndication"
+    },
+    {
+      "code": "MedicinalProductIngredient"
+    },
+    {
+      "code": "MedicinalProductInteraction"
+    },
+    {
+      "code": "MedicinalProductManufactured"
+    },
+    {
+      "code": "MedicinalProductPackaged"
+    },
+    {
+      "code": "MedicinalProductPharmaceutical"
+    },
+    {
+      "code": "MedicinalProductUndesirableEffect"
+    },
+    {
+      "code": "MessageDefinition"
+    },
+    {
+      "code": "MessageHeader",
+      "param": [
+        "target"
+      ]
+    },
+    {
+      "code": "MolecularSequence"
+    },
+    {
+      "code": "NamingSystem"
+    },
+    {
+      "code": "NutritionOrder"
+    },
+    {
+      "code": "Observation",
+      "param": [
+        "subject",
+        "device"
+      ]
+    },
+    {
+      "code": "ObservationDefinition"
+    },
+    {
+      "code": "OperationDefinition"
+    },
+    {
+      "code": "OperationOutcome"
+    },
+    {
+      "code": "Organization"
+    },
+    {
+      "code": "OrganizationAffiliation"
+    },
+    {
+      "code": "Patient"
+    },
+    {
+      "code": "PaymentNotice"
+    },
+    {
+      "code": "PaymentReconciliation"
+    },
+    {
+      "code": "Person"
+    },
+    {
+      "code": "PlanDefinition"
+    },
+    {
+      "code": "Practitioner"
+    },
+    {
+      "code": "PractitionerRole"
+    },
+    {
+      "code": "Procedure"
+    },
+    {
+      "code": "Provenance",
+      "param": [
+        "agent"
+      ]
+    },
+    {
+      "code": "Questionnaire"
+    },
+    {
+      "code": "QuestionnaireResponse",
+      "param": [
+        "author"
+      ]
+    },
+    {
+      "code": "RelatedPerson"
+    },
+    {
+      "code": "RequestGroup",
+      "param": [
+        "author"
+      ]
+    },
+    {
+      "code": "ResearchDefinition"
+    },
+    {
+      "code": "ResearchElementDefinition"
+    },
+    {
+      "code": "ResearchStudy"
+    },
+    {
+      "code": "ResearchSubject"
+    },
+    {
+      "code": "RiskAssessment",
+      "param": [
+        "performer"
+      ]
+    },
+    {
+      "code": "RiskEvidenceSynthesis"
+    },
+    {
+      "code": "Schedule",
+      "param": [
+        "actor"
+      ]
+    },
+    {
+      "code": "SearchParameter"
+    },
+    {
+      "code": "ServiceRequest",
+      "param": [
+        "performer",
+        "requester"
+      ]
+    },
+    {
+      "code": "Slot"
+    },
+    {
+      "code": "Specimen",
+      "param": [
+        "subject"
+      ]
+    },
+    {
+      "code": "SpecimenDefinition"
+    },
+    {
+      "code": "StructureDefinition"
+    },
+    {
+      "code": "StructureMap"
+    },
+    {
+      "code": "Subscription"
+    },
+    {
+      "code": "Substance"
+    },
+    {
+      "code": "SubstanceNucleicAcid"
+    },
+    {
+      "code": "SubstancePolymer"
+    },
+    {
+      "code": "SubstanceProtein"
+    },
+    {
+      "code": "SubstanceReferenceInformation"
+    },
+    {
+      "code": "SubstanceSourceMaterial"
+    },
+    {
+      "code": "SubstanceSpecification"
+    },
+    {
+      "code": "SupplyDelivery"
+    },
+    {
+      "code": "SupplyRequest",
+      "param": [
+        "requester"
+      ]
+    },
+    {
+      "code": "Task"
+    },
+    {
+      "code": "TerminologyCapabilities"
+    },
+    {
+      "code": "TestReport"
+    },
+    {
+      "code": "TestScript"
+    },
+    {
+      "code": "ValueSet"
+    },
+    {
+      "code": "VerificationResult"
+    },
+    {
+      "code": "VisionPrescription"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "resourceType": "MedicinalProductUndesirableEffect",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003esymptomConditionEffect\u003c/b\u003e: Prevention of\\nVTE in adult\\npatients who have\\nundergone\\nelective hip or\\nknee replacement\\nsurgery (VTEp) \u003cspan\u003e(Details : {http://ema.europa.eu/example/undesirableeffectassymptom-condition-effect code \u0027Anaemia\u0027 \u003d \u0027Anaemia)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eclassification\u003c/b\u003e: Bloodandlymphaticsystemdisorders \u003cspan\u003e(Details : {http://ema.europa.eu/example/symptom-condition-effectclassification code \u0027Bloodandlymphaticsystemdisorders\u0027 \u003d \u0027Bloodandlymphaticsystemdisorders)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003efrequencyOfOccurrence\u003c/b\u003e: Common \u003cspan\u003e(Details : {http://ema.europa.eu/example/frequencyofoccurrence code \u0027Common\u0027 \u003d \u0027Common)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "symptomConditionEffect": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/undesirableeffectassymptom-condition-effect",
+        "code": "Anaemia"
+      }
+    ],
+    "text": "Prevention of\\nVTE in adult\\npatients who have\\nundergone\\nelective hip or\\nknee replacement\\nsurgery (VTEp)"
+  },
+  "classification": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/symptom-condition-effectclassification",
+        "code": "Bloodandlymphaticsystemdisorders"
+      }
+    ]
+  },
+  "frequencyOfOccurrence": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/frequencyofoccurrence",
+        "code": "Common"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

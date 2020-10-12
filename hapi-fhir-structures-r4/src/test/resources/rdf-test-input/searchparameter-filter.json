@@ -1,0 +1,33 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "filter",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: filter\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/SearchParameter/filter\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 1\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: FilterSearchParameter\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 26/07/2018\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Health Level Seven International (FHIR Infrastructure)\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: This is the formal declaration for the _filter parameter, documented at [http://hl7.org/fhir/search_filter.html](http://hl7.org/fhir/search_filter.html)\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Support combination searches when the simple name\u003dvalue basis of search cannot express what is required\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: _filter\u003c/p\u003e\u003cp\u003e\u003cb\u003ebase\u003c/b\u003e: Resource\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: special\u003c/p\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/SearchParameter/filter",
+  "version": "1",
+  "name": "FilterSearchParameter",
+  "status": "draft",
+  "experimental": false,
+  "date": "2018-07-26",
+  "publisher": "Health Level Seven International (FHIR Infrastructure)",
+  "contact": [
+    {
+      "name": "FHIR Project",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is the formal declaration for the _filter parameter, documented at [http://hl7.org/fhir/search_filter.html](http://hl7.org/fhir/search_filter.html)",
+  "purpose": "Support combination searches when the simple name\u003dvalue basis of search cannot express what is required",
+  "code": "_filter",
+  "base": [
+    "Resource"
+  ],
+  "type": "special"
+}

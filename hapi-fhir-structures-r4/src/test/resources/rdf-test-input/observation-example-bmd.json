@@ -1,0 +1,52 @@
+{
+  "resourceType": "Observation",
+  "id": "bmd",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: bmd\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: BMD - Left Femur \u003cspan\u003e(Details : {LOINC code \u002724701-5\u0027 \u003d \u0027Femur DXA Bone density\u0027, given as \u0027Femur DXA Bone density\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/pat2\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eAcme Imaging Diagnostics\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0.887 g/cm²\u003cspan\u003e (Details: UCUM code g/cm-2 \u003d \u0027g/cm-2\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: Left Femur \u003cspan\u003e(Details : {SNOMED CT code \u002771341001:272741003\u003d7771000\u0027 \u003d \u0027Femur where Laterality \u003d Left)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "24701-5",
+        "display": "Femur DXA Bone density"
+      }
+    ],
+    "text": "BMD - Left Femur"
+  },
+  "subject": {
+    "reference": "Patient/pat2"
+  },
+  "performer": [
+    {
+      "reference": "Organization/1832473e-2fe0-452d-abe9-3cdb9879522f",
+      "display": "Acme Imaging Diagnostics"
+    }
+  ],
+  "valueQuantity": {
+    "value": 0.887,
+    "unit": "g/cm²",
+    "system": "http://unitsofmeasure.org",
+    "code": "g/cm-2"
+  },
+  "bodySite": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "71341001:272741003\u003d7771000"
+      }
+    ],
+    "text": "Left Femur"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "structure-definition-kind",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStructureDefinitionKind\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDefines the type of structure that a definition is describing.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/structure-definition-kind defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprimitive-type\u003ca name\u003d\"structure-definition-kind-primitive-type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrimitive Data Type\u003c/td\u003e\u003ctd\u003eA primitive type that has a value and an extension. These can be used throughout complex datatype, Resource and extension definitions. Only the base specification can define primitive types.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomplex-type\u003ca name\u003d\"structure-definition-kind-complex-type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComplex Data Type\u003c/td\u003e\u003ctd\u003eA  complex structure that defines a set of data elements that is suitable for use in \u0027resources\u0027. The base specification defines a number of complex types, and other specifications can define additional types. These structures do not have a maintained identity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresource\u003ca name\u003d\"structure-definition-kind-resource\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResource\u003c/td\u003e\u003ctd\u003eA \u0027resource\u0027 - a directed acyclic graph of elements that aggregrates other types into an identifiable entity. The base FHIR resources are defined by the FHIR specification itself but other \u0027resources\u0027 can be defined in additional specifications (though these will not be recognised as \u0027resources\u0027 by the FHIR specification (i.e. they do not get end-points etc, or act as the targets of references in FHIR defined resources - though other specificatiosn can treat them this way).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elogical\u003ca name\u003d\"structure-definition-kind-logical\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLogical\u003c/td\u003e\u003ctd\u003eA pattern or a template that is not intended to be a real resource or complex type.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/structure-definition-kind",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.669"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "StructureDefinitionKind",
+  "title": "StructureDefinitionKind",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Defines the type of structure that a definition is describing.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/structure-definition-kind",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "primitive-type",
+      "display": "Primitive Data Type",
+      "definition": "A primitive type that has a value and an extension. These can be used throughout complex datatype, Resource and extension definitions. Only the base specification can define primitive types."
+    },
+    {
+      "code": "complex-type",
+      "display": "Complex Data Type",
+      "definition": "A  complex structure that defines a set of data elements that is suitable for use in \u0027resources\u0027. The base specification defines a number of complex types, and other specifications can define additional types. These structures do not have a maintained identity."
+    },
+    {
+      "code": "resource",
+      "display": "Resource",
+      "definition": "A \u0027resource\u0027 - a directed acyclic graph of elements that aggregrates other types into an identifiable entity. The base FHIR resources are defined by the FHIR specification itself but other \u0027resources\u0027 can be defined in additional specifications (though these will not be recognised as \u0027resources\u0027 by the FHIR specification (i.e. they do not get end-points etc, or act as the targets of references in FHIR defined resources - though other specificatiosn can treat them this way)."
+    },
+    {
+      "code": "logical",
+      "display": "Logical",
+      "definition": "A pattern or a template that is not intended to be a real resource or complex type."
+    }
+  ]
+}

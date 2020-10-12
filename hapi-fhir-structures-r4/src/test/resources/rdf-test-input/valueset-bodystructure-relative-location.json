@@ -1,0 +1,111 @@
+{
+  "resourceType": "ValueSet",
+  "id": "bodystructure-relative-location",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eBodystructure Location Qualifier\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eSNOMED-CT concepts modifying the anatomic location\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes content from SNOMED CT, which is copyright © 2002+ International Health Terminology Standards Development Organisation (IHTSDO), and distributed by agreement between IHTSDO and HL7. Implementer use of SNOMED CT is not covered by this agreement\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419161000\"\u003e419161000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnilateral left\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d419465000\"\u003e419465000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnilateral right\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d51440002\"\u003e51440002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBilateral\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d261183002\"\u003e261183002\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUpper\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d261122009\"\u003e261122009\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLower\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d255561001\"\u003e255561001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedial\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d49370004\"\u003e49370004\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLateral\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d264217000\"\u003e264217000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuperior\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d261089000\"\u003e261089000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInferior\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d255551008\"\u003e255551008\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePosterior\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d351726001\"\u003e351726001\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBelow\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d352730000\"\u003e352730000\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAbove\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/bodystructure-relative-location",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.140"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "BodystructureLocationQualifier",
+  "title": "Bodystructure Location Qualifier",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Order and Observation Workgroup",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "SNOMED-CT concepts modifying the anatomic location",
+  "copyright": "This value set includes content from SNOMED CT, which is copyright © 2002+ International Health Terminology Standards Development Organisation (IHTSDO), and distributed by agreement between IHTSDO and HL7. Implementer use of SNOMED CT is not covered by this agreement",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "419161000",
+            "display": "Unilateral left"
+          },
+          {
+            "code": "419465000",
+            "display": "Unilateral right"
+          },
+          {
+            "code": "51440002",
+            "display": "Bilateral"
+          },
+          {
+            "code": "261183002",
+            "display": "Upper"
+          },
+          {
+            "code": "261122009",
+            "display": "Lower"
+          },
+          {
+            "code": "255561001",
+            "display": "Medial"
+          },
+          {
+            "code": "49370004",
+            "display": "Lateral"
+          },
+          {
+            "code": "264217000",
+            "display": "Superior"
+          },
+          {
+            "code": "261089000",
+            "display": "Inferior"
+          },
+          {
+            "code": "255551008",
+            "display": "Posterior"
+          },
+          {
+            "code": "351726001",
+            "display": "Below"
+          },
+          {
+            "code": "352730000",
+            "display": "Above"
+          }
+        ]
+      }
+    ]
+  }
+}

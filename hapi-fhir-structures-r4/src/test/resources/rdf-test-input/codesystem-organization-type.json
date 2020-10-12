@@ -1,0 +1,117 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "organization-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eOrganization type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate a type of organization.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/organization-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprov\u003ca name\u003d\"organization-type-prov\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealthcare Provider\u003c/td\u003e\u003ctd\u003eAn organization that provides healthcare services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edept\u003ca name\u003d\"organization-type-dept\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital Department\u003c/td\u003e\u003ctd\u003eA department or ward within a hospital (Generally is not applicable to top level organizations)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eteam\u003ca name\u003d\"organization-type-team\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOrganizational team\u003c/td\u003e\u003ctd\u003eAn organizational team is usually a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egovt\u003ca name\u003d\"organization-type-govt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGovernment\u003c/td\u003e\u003ctd\u003eA political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eins\u003ca name\u003d\"organization-type-ins\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInsurance Company\u003c/td\u003e\u003ctd\u003eA company that provides insurance to its subscribers that may include healthcare related policies.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epay\u003ca name\u003d\"organization-type-pay\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePayer\u003c/td\u003e\u003ctd\u003eA company, charity, or governmental organization, which processes claims and/or issues payments to providers on behalf of patients or groups of patients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eedu\u003ca name\u003d\"organization-type-edu\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEducational Institute\u003c/td\u003e\u003ctd\u003eAn educational institution that provides education or research facilities.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereli\u003ca name\u003d\"organization-type-reli\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReligious Institution\u003c/td\u003e\u003ctd\u003eAn organization that is identified as a part of a religious institution.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecrs\u003ca name\u003d\"organization-type-crs\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Research Sponsor\u003c/td\u003e\u003ctd\u003eAn organization that is identified as a Pharmaceutical/Clinical Research Sponsor.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecg\u003ca name\u003d\"organization-type-cg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunity Group\u003c/td\u003e\u003ctd\u003eAn un-incorporated community group.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebus\u003ca name\u003d\"organization-type-bus\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNon-Healthcare Business or Corporation\u003c/td\u003e\u003ctd\u003eAn organization that is a registered business or corporation but not identified by other types.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"organization-type-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eOther type of organization not already specified.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/organization-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1128"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "OrganizationType",
+  "title": "Organization type",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate a type of organization.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/organization-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "prov",
+      "display": "Healthcare Provider",
+      "definition": "An organization that provides healthcare services."
+    },
+    {
+      "code": "dept",
+      "display": "Hospital Department",
+      "definition": "A department or ward within a hospital (Generally is not applicable to top level organizations)"
+    },
+    {
+      "code": "team",
+      "display": "Organizational team",
+      "definition": "An organizational team is usually a grouping of practitioners that perform a specific function within an organization (which could be a top level organization, or a department)."
+    },
+    {
+      "code": "govt",
+      "display": "Government",
+      "definition": "A political body, often used when including organization records for government bodies such as a Federal Government, State or Local Government."
+    },
+    {
+      "code": "ins",
+      "display": "Insurance Company",
+      "definition": "A company that provides insurance to its subscribers that may include healthcare related policies."
+    },
+    {
+      "code": "pay",
+      "display": "Payer",
+      "definition": "A company, charity, or governmental organization, which processes claims and/or issues payments to providers on behalf of patients or groups of patients."
+    },
+    {
+      "code": "edu",
+      "display": "Educational Institute",
+      "definition": "An educational institution that provides education or research facilities."
+    },
+    {
+      "code": "reli",
+      "display": "Religious Institution",
+      "definition": "An organization that is identified as a part of a religious institution."
+    },
+    {
+      "code": "crs",
+      "display": "Clinical Research Sponsor",
+      "definition": "An organization that is identified as a Pharmaceutical/Clinical Research Sponsor."
+    },
+    {
+      "code": "cg",
+      "display": "Community Group",
+      "definition": "An un-incorporated community group."
+    },
+    {
+      "code": "bus",
+      "display": "Non-Healthcare Business or Corporation",
+      "definition": "An organization that is a registered business or corporation but not identified by other types."
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "Other type of organization not already specified."
+    }
+  ]
+}

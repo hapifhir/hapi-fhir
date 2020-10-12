@@ -1,0 +1,105 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "observation-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eObservationStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes providing the status of an observation.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/observation-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eregistered\u003ca name\u003d\"observation-status-registered\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRegistered\u003c/td\u003e\u003ctd\u003eThe existence of the observation is registered, but there is no result yet available.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epreliminary\u003ca name\u003d\"observation-status-preliminary\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePreliminary\u003c/td\u003e\u003ctd\u003eThis is an initial or interim observation: data may be incomplete or unverified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efinal\u003ca name\u003d\"observation-status-final\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFinal\u003c/td\u003e\u003ctd\u003eThe observation is complete and there are no further actions needed. Additional information such \u0026quot;released\u0026quot;, \u0026quot;signed\u0026quot;, etc would be represented using [Provenance](provenance.html) which provides not only the act but also the actors and dates and other related data. These act states would be associated with an observation status of `preliminary` until they are all completed and then a status of `final` would be applied.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eamended\u003ca name\u003d\"observation-status-amended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmended\u003c/td\u003e\u003ctd\u003eSubsequent to being Final, the observation has been modified subsequent.  This includes updates/new information and corrections.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  corrected\u003ca name\u003d\"observation-status-corrected\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCorrected\u003c/td\u003e\u003ctd\u003eSubsequent to being Final, the observation has been modified to correct an error in the test result.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"observation-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe observation is unavailable because the measurement was not started or not completed (also sometimes called \u0026quot;aborted\u0026quot;).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"observation-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \u0026quot;cancelled\u0026quot; rather than \u0026quot;entered-in-error\u0026quot;.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"observation-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \u0026quot;other\u0026quot; - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    }
+  ],
+  "url": "http://hl7.org/fhir/observation-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.401"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ObservationStatus",
+  "title": "ObservationStatus",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes providing the status of an observation.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/observation-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "registered",
+      "display": "Registered",
+      "definition": "The existence of the observation is registered, but there is no result yet available."
+    },
+    {
+      "code": "preliminary",
+      "display": "Preliminary",
+      "definition": "This is an initial or interim observation: data may be incomplete or unverified."
+    },
+    {
+      "code": "final",
+      "display": "Final",
+      "definition": "The observation is complete and there are no further actions needed. Additional information such \"released\", \"signed\", etc would be represented using [Provenance](provenance.html) which provides not only the act but also the actors and dates and other related data. These act states would be associated with an observation status of `preliminary` until they are all completed and then a status of `final` would be applied."
+    },
+    {
+      "code": "amended",
+      "display": "Amended",
+      "definition": "Subsequent to being Final, the observation has been modified subsequent.  This includes updates/new information and corrections.",
+      "concept": [
+        {
+          "code": "corrected",
+          "display": "Corrected",
+          "definition": "Subsequent to being Final, the observation has been modified to correct an error in the test result."
+        }
+      ]
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The observation is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\")."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The observation has been withdrawn following previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)."
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which."
+    }
+  ]
+}

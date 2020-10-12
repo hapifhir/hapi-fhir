@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "participationstatus",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eParticipationStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe Participation status of an appointment.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/participationstatus defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccepted\u003ca name\u003d\"participationstatus-accepted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccepted\u003c/td\u003e\u003ctd\u003eThe participant has accepted the appointment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeclined\u003ca name\u003d\"participationstatus-declined\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeclined\u003c/td\u003e\u003ctd\u003eThe participant has declined the appointment and will not participate in the appointment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etentative\u003ca name\u003d\"participationstatus-tentative\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTentative\u003c/td\u003e\u003ctd\u003eThe participant has  tentatively accepted the appointment. This could be automatically created by a system and requires further processing before it can be accepted. There is no commitment that attendance will occur.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eneeds-action\u003ca name\u003d\"participationstatus-needs-action\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeeds Action\u003c/td\u003e\u003ctd\u003eThe participant needs to indicate if they accept the appointment by changing this status to one of the other statuses.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/participationstatus",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.487"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ParticipationStatus",
+  "title": "ParticipationStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The Participation status of an appointment.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/participationstatus",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "accepted",
+      "display": "Accepted",
+      "definition": "The participant has accepted the appointment."
+    },
+    {
+      "code": "declined",
+      "display": "Declined",
+      "definition": "The participant has declined the appointment and will not participate in the appointment."
+    },
+    {
+      "code": "tentative",
+      "display": "Tentative",
+      "definition": "The participant has  tentatively accepted the appointment. This could be automatically created by a system and requires further processing before it can be accepted. There is no commitment that attendance will occur."
+    },
+    {
+      "code": "needs-action",
+      "display": "Needs Action",
+      "definition": "The participant needs to indicate if they accept the appointment by changing this status to one of the other statuses."
+    }
+  ]
+}

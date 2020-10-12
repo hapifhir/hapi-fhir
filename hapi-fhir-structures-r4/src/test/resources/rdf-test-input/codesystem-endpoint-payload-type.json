@@ -1,0 +1,67 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "endpoint-payload-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEndpoint Payload Type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis is an example value set defined by the FHIR project, that could be used to represent possible payload document types.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eSome content from IHE® Copyright © 2015 IHE International, Inc.    This content is from the IHE Technical Frameworks and Supplements,    available for free download and use at http://www.ihe.net/Technical_Frameworks/\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/endpoint-payload-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eany\u003ca name\u003d\"endpoint-payload-type-any\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAny\u003c/td\u003e\u003ctd\u003eAny payload type can be used with this endpoint, it is either a payload agnostic infrastructure (such as a storage repository), or some other type of endpoint where payload considerations are internally handled, and not available\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enone\u003ca name\u003d\"endpoint-payload-type-none\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNone\u003c/td\u003e\u003ctd\u003eThis endpoint does not require any content to be sent; simply connecting to the endpoint is enough notification. This can be used as a \u0027ping\u0027 to wakeup a service to retrieve content, which could be to ensure security considerations are correctly handled\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/endpoint-payload-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1139"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EndpointPayloadType",
+  "title": "Endpoint Payload Type",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 Patient Administration",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is an example value set defined by the FHIR project, that could be used to represent possible payload document types.",
+  "copyright": "Some content from IHE® Copyright © 2015 IHE International, Inc.    This content is from the IHE Technical Frameworks and Supplements,    available for free download and use at http://www.ihe.net/Technical_Frameworks/",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "any",
+      "display": "Any",
+      "definition": "Any payload type can be used with this endpoint, it is either a payload agnostic infrastructure (such as a storage repository), or some other type of endpoint where payload considerations are internally handled, and not available"
+    },
+    {
+      "code": "none",
+      "display": "None",
+      "definition": "This endpoint does not require any content to be sent; simply connecting to the endpoint is enough notification. This can be used as a \u0027ping\u0027 to wakeup a service to retrieve content, which could be to ensure security considerations are correctly handled"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \n      \u003cp\u003e\n        \u003cb\u003eSNOMED CT\u003c/b\u003e\n      \u003c/p\u003e\n      \n      \u003cp\u003e oid: 2.16.840.1.113883.6.96\u003c/p\u003e\n      \n      \u003cp\u003e uri: http://snomed.info/sct\u003c/p\u003e\n    \n    \u003c/div\u003e"
+  },
+  "name": "SNOMED CT",
+  "status": "active",
+  "kind": "codesystem",
+  "date": "2014-12-13",
+  "publisher": "HL7 International on behalf of IHTSDO",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "responsible": "IHTSDO \u0026 affiliates",
+  "description": "SNOMED CT is a concept-based, scientifically validated terminology that provides a unique and permanent concept identifier that can be included in multiple HL7 data types including CD and CE.  The concepts are managed to avoid \"semantic drift\" so the meaning remains constant.  If the concept is found to be ambiguous or the meaning changes, the concept is inactivated but still retained and the identifier is never reused.    SNOMED CT\u0027s concepts are interrelated hierarchically and using description logic.    SNOMED CT concepts have a unique \"fully-specified name\", a preferred term, and, optionally, synonyms.  The description languages include English and Spanish.",
+  "uniqueId": [
+    {
+      "type": "oid",
+      "value": "2.16.840.1.113883.6.96"
+    },
+    {
+      "type": "uri",
+      "value": "http://snomed.info/sct",
+      "preferred": true
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

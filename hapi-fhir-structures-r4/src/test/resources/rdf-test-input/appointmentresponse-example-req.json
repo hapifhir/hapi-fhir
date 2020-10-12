@@ -1,0 +1,45 @@
+{
+  "resourceType": "AppointmentResponse",
+  "id": "exampleresp",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eAccept Brian MRI results discussion\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://example.org/sampleappointmentresponse-identifier",
+      "value": "response123"
+    }
+  ],
+  "appointment": {
+    "reference": "Appointment/examplereq",
+    "display": "Brian MRI results discussion"
+  },
+  "start": "2013-12-25T13:15:00Z",
+  "end": "2013-12-25T13:30:00Z",
+  "participantType": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+          "code": "ATND"
+        }
+      ]
+    }
+  ],
+  "actor": {
+    "reference": "Practitioner/example",
+    "display": "Dr Adam Careful"
+  },
+  "participantStatus": "tentative",
+  "comment": "can\u0027t we try for this time, can\u0027t do mornings",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

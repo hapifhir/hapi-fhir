@@ -1,0 +1,45 @@
+{
+  "resourceType": "Flag",
+  "id": "example-encounter",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eFollow Infection Control Level 3 Protocol\u003c/div\u003e"
+  },
+  "status": "active",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://example.org/local",
+          "code": "infection",
+          "display": "Infection Control Level"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://example.org/local/if1",
+        "code": "l3",
+        "display": "Follow Level 3 Protocol"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Peter Patient"
+  },
+  "encounter": {
+    "reference": "Encounter/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

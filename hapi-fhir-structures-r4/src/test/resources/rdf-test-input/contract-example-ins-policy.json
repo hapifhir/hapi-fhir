@@ -1,0 +1,174 @@
+{
+  "resourceType": "Contract",
+  "id": "INS-101",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003cp\u003ePlan: Your Choice Split Copay (Non-Grandfathered)\u003c/p\u003e\n         \u003cp\u003eCertificate Form Number: YCSCWLN (01-2017)\u003c/p\u003e\n      \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://xyz-insurance.com/forms",
+      "value": "YCSCWLN(01-2017)"
+    }
+  ],
+  "applies": {
+    "start": "2017-01-01"
+  },
+  "subject": [
+    {
+      "reference": "Patient/1"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/contract-type",
+        "code": "healthinsurance",
+        "display": "Health Insurance"
+      }
+    ]
+  },
+  "term": [
+    {
+      "offer": {
+        "text": "The benefits, limitations, exclusions and other coverage provisions in this booklet are subject to the terms of our contract with the Group. This booklet is a part of that contract, which is on file in the Group\u0027s office."
+      },
+      "asset": [
+        {
+          "type": [
+            {
+              "coding": [
+                {
+                  "system": "urn:ietf:rfc:3986",
+                  "code": "RicardianContract"
+                }
+              ]
+            }
+          ],
+          "subtype": [
+            {
+              "text": "sample"
+            }
+          ],
+          "period": [
+            {
+              "start": "2017-06-01"
+            }
+          ],
+          "valuedItem": [
+            {
+              "entityCodeableConcept": {
+                "text": "Ford Bobcat"
+              },
+              "identifier": {
+                "system": "http://somewhere.motor-vehicle.com/vin",
+                "value": "XXSVT34-7665t952236"
+              },
+              "effectiveTime": "1995",
+              "quantity": {
+                "value": 1
+              },
+              "unitPrice": {
+                "value": 200.00,
+                "currency": "CAD"
+              },
+              "factor": 1.0,
+              "points": 1.0,
+              "net": {
+                "value": 200.00,
+                "currency": "CAD"
+              }
+            }
+          ]
+        }
+      ],
+      "group": [
+        {
+          "offer": {
+            "text": "Eligible Providers"
+          }
+        },
+        {
+          "offer": {
+            "text": "Responsibility for Payment"
+          }
+        },
+        {
+          "offer": {
+            "text": "List of Benefits"
+          },
+          "group": [
+            {
+              "offer": {
+                "text": "Copays"
+              },
+              "group": [
+                {
+                  "offer": {
+                    "text": "Emergency Room Copay"
+                  }
+                },
+                {
+                  "offer": {
+                    "text": "Professional Visit Copay"
+                  }
+                }
+              ]
+            },
+            {
+              "offer": {
+                "text": "Calendar Year Deductible"
+              }
+            },
+            {
+              "offer": {
+                "text": "Out-Of-Pocket Maximum"
+              }
+            },
+            {
+              "offer": {
+                "text": "Medical Services"
+              },
+              "group": [
+                {
+                  "offer": {
+                    "text": "Ambulance Services"
+                  }
+                },
+                {
+                  "offer": {
+                    "text": "Dental Services"
+                  }
+                },
+                {
+                  "offer": {
+                    "text": "Diagnostic Services"
+                  }
+                },
+                {
+                  "offer": {
+                    "text": "Emergency Room Services"
+                  }
+                },
+                {
+                  "offer": {
+                    "text": "Hospital Inpatient Care"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

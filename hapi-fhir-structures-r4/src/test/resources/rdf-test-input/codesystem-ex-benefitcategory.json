@@ -1,0 +1,198 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "ex-benefitcategory",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eBenefit Category Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes examples of Benefit Category codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/ex-benefitcategory defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1\u003ca name\u003d\"ex-benefitcategory-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical Care\u003c/td\u003e\u003ctd\u003eMedical Care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2\u003ca name\u003d\"ex-benefitcategory-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical\u003c/td\u003e\u003ctd\u003eSurgical.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e3\u003ca name\u003d\"ex-benefitcategory-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsultation\u003c/td\u003e\u003ctd\u003eConsultation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4\u003ca name\u003d\"ex-benefitcategory-4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic XRay\u003c/td\u003e\u003ctd\u003eDiagnostic XRay.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5\u003ca name\u003d\"ex-benefitcategory-5\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic Lab\u003c/td\u003e\u003ctd\u003eDiagnostic Lab.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e14\u003ca name\u003d\"ex-benefitcategory-14\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRenal Supplies\u003c/td\u003e\u003ctd\u003eRenal Supplies excluding Dialysis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e23\u003ca name\u003d\"ex-benefitcategory-23\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic Dental\u003c/td\u003e\u003ctd\u003eDiagnostic Dental.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e24\u003ca name\u003d\"ex-benefitcategory-24\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePeriodontics\u003c/td\u003e\u003ctd\u003ePeriodontics.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e25\u003ca name\u003d\"ex-benefitcategory-25\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRestorative\u003c/td\u003e\u003ctd\u003eRestorative.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e26\u003ca name\u003d\"ex-benefitcategory-26\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEndodontics\u003c/td\u003e\u003ctd\u003eEndodontics.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e27\u003ca name\u003d\"ex-benefitcategory-27\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaxillofacial Prosthetics\u003c/td\u003e\u003ctd\u003eMaxillofacial Prosthetics.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e28\u003ca name\u003d\"ex-benefitcategory-28\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdjunctive Dental Services\u003c/td\u003e\u003ctd\u003eAdjunctive Dental Services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e30\u003ca name\u003d\"ex-benefitcategory-30\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth Benefit Plan Coverage\u003c/td\u003e\u003ctd\u003eHealth Benefit Plan Coverage.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e35\u003ca name\u003d\"ex-benefitcategory-35\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental Care\u003c/td\u003e\u003ctd\u003eDental Care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e36\u003ca name\u003d\"ex-benefitcategory-36\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental Crowns\u003c/td\u003e\u003ctd\u003eDental Crowns.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e37\u003ca name\u003d\"ex-benefitcategory-37\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental Accident\u003c/td\u003e\u003ctd\u003eDental Accident.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e49\u003ca name\u003d\"ex-benefitcategory-49\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital Room and Board\u003c/td\u003e\u003ctd\u003eHospital Room and Board.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e55\u003ca name\u003d\"ex-benefitcategory-55\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMajor Medical\u003c/td\u003e\u003ctd\u003eMajor Medical.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e56\u003ca name\u003d\"ex-benefitcategory-56\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedically Related Transportation\u003c/td\u003e\u003ctd\u003eMedically Related Transportation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e61\u003ca name\u003d\"ex-benefitcategory-61\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn-vitro Fertilization\u003c/td\u003e\u003ctd\u003eIn-vitro Fertilization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e62\u003ca name\u003d\"ex-benefitcategory-62\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMRI Scan\u003c/td\u003e\u003ctd\u003eMRI Scan.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e63\u003ca name\u003d\"ex-benefitcategory-63\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDonor Procedures\u003c/td\u003e\u003ctd\u003eDonor Procedures such as organ harvest.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e69\u003ca name\u003d\"ex-benefitcategory-69\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaternity\u003c/td\u003e\u003ctd\u003eMaternity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e76\u003ca name\u003d\"ex-benefitcategory-76\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRenal Dialysis\u003c/td\u003e\u003ctd\u003eRenal dialysis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eF1\u003ca name\u003d\"ex-benefitcategory-F1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical Coverage\u003c/td\u003e\u003ctd\u003eMedical Coverage.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eF3\u003ca name\u003d\"ex-benefitcategory-F3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental Coverage\u003c/td\u003e\u003ctd\u003eDental Coverage.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eF4\u003ca name\u003d\"ex-benefitcategory-F4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHearing Coverage\u003c/td\u003e\u003ctd\u003eHearing Coverage.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eF6\u003ca name\u003d\"ex-benefitcategory-F6\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVision Coverage\u003c/td\u003e\u003ctd\u003eVision Coverage.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1175"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "BenefitCategoryCodes",
+  "title": "Benefit Category Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes examples of Benefit Category codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/ex-benefitcategory",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "1",
+      "display": "Medical Care",
+      "definition": "Medical Care."
+    },
+    {
+      "code": "2",
+      "display": "Surgical",
+      "definition": "Surgical."
+    },
+    {
+      "code": "3",
+      "display": "Consultation",
+      "definition": "Consultation."
+    },
+    {
+      "code": "4",
+      "display": "Diagnostic XRay",
+      "definition": "Diagnostic XRay."
+    },
+    {
+      "code": "5",
+      "display": "Diagnostic Lab",
+      "definition": "Diagnostic Lab."
+    },
+    {
+      "code": "14",
+      "display": "Renal Supplies",
+      "definition": "Renal Supplies excluding Dialysis."
+    },
+    {
+      "code": "23",
+      "display": "Diagnostic Dental",
+      "definition": "Diagnostic Dental."
+    },
+    {
+      "code": "24",
+      "display": "Periodontics",
+      "definition": "Periodontics."
+    },
+    {
+      "code": "25",
+      "display": "Restorative",
+      "definition": "Restorative."
+    },
+    {
+      "code": "26",
+      "display": "Endodontics",
+      "definition": "Endodontics."
+    },
+    {
+      "code": "27",
+      "display": "Maxillofacial Prosthetics",
+      "definition": "Maxillofacial Prosthetics."
+    },
+    {
+      "code": "28",
+      "display": "Adjunctive Dental Services",
+      "definition": "Adjunctive Dental Services."
+    },
+    {
+      "code": "30",
+      "display": "Health Benefit Plan Coverage",
+      "definition": "Health Benefit Plan Coverage."
+    },
+    {
+      "code": "35",
+      "display": "Dental Care",
+      "definition": "Dental Care."
+    },
+    {
+      "code": "36",
+      "display": "Dental Crowns",
+      "definition": "Dental Crowns."
+    },
+    {
+      "code": "37",
+      "display": "Dental Accident",
+      "definition": "Dental Accident."
+    },
+    {
+      "code": "49",
+      "display": "Hospital Room and Board",
+      "definition": "Hospital Room and Board."
+    },
+    {
+      "code": "55",
+      "display": "Major Medical",
+      "definition": "Major Medical."
+    },
+    {
+      "code": "56",
+      "display": "Medically Related Transportation",
+      "definition": "Medically Related Transportation."
+    },
+    {
+      "code": "61",
+      "display": "In-vitro Fertilization",
+      "definition": "In-vitro Fertilization."
+    },
+    {
+      "code": "62",
+      "display": "MRI Scan",
+      "definition": "MRI Scan."
+    },
+    {
+      "code": "63",
+      "display": "Donor Procedures",
+      "definition": "Donor Procedures such as organ harvest."
+    },
+    {
+      "code": "69",
+      "display": "Maternity",
+      "definition": "Maternity."
+    },
+    {
+      "code": "76",
+      "display": "Renal Dialysis",
+      "definition": "Renal dialysis."
+    },
+    {
+      "code": "F1",
+      "display": "Medical Coverage",
+      "definition": "Medical Coverage."
+    },
+    {
+      "code": "F3",
+      "display": "Dental Coverage",
+      "definition": "Dental Coverage."
+    },
+    {
+      "code": "F4",
+      "display": "Hearing Coverage",
+      "definition": "Hearing Coverage."
+    },
+    {
+      "code": "F6",
+      "display": "Vision Coverage",
+      "definition": "Vision Coverage."
+    }
+  ]
+}

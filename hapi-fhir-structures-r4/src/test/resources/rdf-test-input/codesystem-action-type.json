@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "action-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eActionType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of action to be performed.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/action-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecreate\u003ca name\u003d\"action-type-create\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreate\u003c/td\u003e\u003ctd\u003eThe action is to create a new resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eupdate\u003ca name\u003d\"action-type-update\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUpdate\u003c/td\u003e\u003ctd\u003eThe action is to update an existing resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eremove\u003ca name\u003d\"action-type-remove\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRemove\u003c/td\u003e\u003ctd\u003eThe action is to remove an existing resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efire-event\u003ca name\u003d\"action-type-fire-event\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFire Event\u003c/td\u003e\u003ctd\u003eThe action is to fire a specific event.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/action-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1246"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ActionType",
+  "title": "ActionType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of action to be performed.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/action-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "create",
+      "display": "Create",
+      "definition": "The action is to create a new resource."
+    },
+    {
+      "code": "update",
+      "display": "Update",
+      "definition": "The action is to update an existing resource."
+    },
+    {
+      "code": "remove",
+      "display": "Remove",
+      "definition": "The action is to remove an existing resource."
+    },
+    {
+      "code": "fire-event",
+      "display": "Fire Event",
+      "definition": "The action is to fire a specific event."
+    }
+  ]
+}

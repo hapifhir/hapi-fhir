@@ -1,0 +1,207 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "opioidcds-05",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: opioidcds-05\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/ig/opioid-cds/PlanDefinition/opioidcds-05\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: cdc-opioid-guidance (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 0.1.0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: cdc-opioid-05\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: CDC Opioid Prescribing Guideline Recommendation #5\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: ECA Rule \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/plan-definition-type code \u0027eca-rule\u0027 \u003d \u0027ECA Rule\u0027, given as \u0027ECA Rule\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 23/04/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Centers for Disease Control and Prevention (CDC)\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: When opioids are started, providers should prescribe the lowest effective dosage.\u003c/p\u003e\u003cp\u003e\u003cb\u003euseContext\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America\u0027, given as \u0027United States of America\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.\u003c/p\u003e\u003cp\u003e\u003cb\u003eusage\u003c/b\u003e: Providers should use caution when prescribing opioids at any dosage, should carefully reassess evidence of individual benefits and risks when considering increasing dosage to ≥50 morphine milligram equivalents (MME)/day, and should avoid increasing dosage to ≥90 MME/day or carefully justify a decision to titrate dosage to \u0026gt;90 MME/day\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: © CDC 2016+.\u003c/p\u003e\u003cp\u003e\u003cb\u003etopic\u003c/b\u003e: Opioid Prescribing \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthor\u003c/b\u003e: , , , \u003c/p\u003e\u003cp\u003e\u003cb\u003erelatedArtifact\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003elibrary\u003c/b\u003e: \u003ca\u003eLibrary/opioidcds-recommendation-05\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: High risk for opioid overdose.\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Total morphine milligram equivalent (MME) exceeds recommended amount. Taper to less than 50.\u003c/p\u003e\u003cp\u003e\u003cb\u003edocumentation\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etrigger\u003c/b\u003e: \u003c/p\u003e\u003ch3\u003eConditions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eKind\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpression\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eapplicability\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003egroupingBehavior\u003c/b\u003e: visual-group\u003c/p\u003e\u003cp\u003e\u003cb\u003eselectionBehavior\u003c/b\u003e: exactly-one\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: action.title\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: action.description\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: activity.extension\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003ch3\u003eActions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ig/opioid-cds/PlanDefinition/opioidcds-05",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "cdc-opioid-guidance"
+    }
+  ],
+  "version": "0.1.0",
+  "name": "cdc-opioid-05",
+  "title": "CDC Opioid Prescribing Guideline Recommendation #5",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+        "code": "eca-rule",
+        "display": "ECA Rule"
+      }
+    ]
+  },
+  "status": "draft",
+  "date": "2017-04-23",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "When opioids are started, providers should prescribe the lowest effective dosage.",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "182888003",
+            "display": "Medication requested (situation)"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "82423001",
+            "display": "Chronic pain (finding)"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US",
+          "display": "United States of America"
+        }
+      ]
+    }
+  ],
+  "purpose": "CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.",
+  "usage": "Providers should use caution when prescribing opioids at any dosage, should carefully reassess evidence of individual benefits and risks when considering increasing dosage to ≥50 morphine milligram equivalents (MME)/day, and should avoid increasing dosage to ≥90 MME/day or carefully justify a decision to titrate dosage to \u003e90 MME/day",
+  "copyright": "© CDC 2016+.",
+  "topic": [
+    {
+      "text": "Opioid Prescribing"
+    }
+  ],
+  "author": [
+    {
+      "name": "Kensaku Kawamoto, MD, PhD, MHS"
+    },
+    {
+      "name": "Bryn Rhodes"
+    },
+    {
+      "name": "Floyd Eisenberg, MD, MPH"
+    },
+    {
+      "name": "Robert McClure, MD, MPH"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "display": "CDC guideline for prescribing opioids for chronic pain",
+      "url": "https://guidelines.gov/summaries/summary/50153/cdc-guideline-for-prescribing-opioids-for-chronic-pain---united-states-2016#420"
+    },
+    {
+      "type": "documentation",
+      "display": "MME Conversion Tables",
+      "url": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
+    }
+  ],
+  "library": [
+    "Library/opioidcds-recommendation-05"
+  ],
+  "action": [
+    {
+      "title": "High risk for opioid overdose.",
+      "description": "Total morphine milligram equivalent (MME) exceeds recommended amount. Taper to less than 50.",
+      "documentation": [
+        {
+          "type": "documentation",
+          "document": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                      "code": "strong",
+                      "display": "Strong"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                      "code": "low",
+                      "display": "Low quality"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "trigger": [
+        {
+          "type": "named-event",
+          "name": "medication-prescribe"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": {
+            "description": "Is total MME \u003e\u003d 50?",
+            "language": "text/cql",
+            "expression": "Is MME 50 Or More?"
+          }
+        }
+      ],
+      "groupingBehavior": "visual-group",
+      "selectionBehavior": "exactly-one",
+      "dynamicValue": [
+        {
+          "path": "action.title",
+          "expression": {
+            "language": "text/cql",
+            "expression": "getSummary"
+          }
+        },
+        {
+          "path": "action.description",
+          "expression": {
+            "language": "text/cql",
+            "expression": "getDetail"
+          }
+        },
+        {
+          "path": "activity.extension",
+          "expression": {
+            "language": "text/cql",
+            "expression": "getIndicator"
+          }
+        }
+      ],
+      "action": [
+        {
+          "description": "Will reduce dosage"
+        },
+        {
+          "description": "Risk of overdose carefully considered and outweighed by benefit; snooze 3 mo"
+        },
+        {
+          "description": "Acute pain; snooze 1 mo"
+        },
+        {
+          "description": "N/A - see comment (will be reviewed by medical director); snooze 3 mo"
+        }
+      ]
+    }
+  ]
+}

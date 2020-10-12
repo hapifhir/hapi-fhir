@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "composition-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCompositionStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe workflow/clinical status of the composition.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/composition-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epreliminary\u003ca name\u003d\"composition-status-preliminary\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePreliminary\u003c/td\u003e\u003ctd\u003eThis is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efinal\u003ca name\u003d\"composition-status-final\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFinal\u003c/td\u003e\u003ctd\u003eThis version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eamended\u003ca name\u003d\"composition-status-amended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmended\u003c/td\u003e\u003ctd\u003eThe composition content or the referenced resources have been modified (edited or added to) subsequent to being released as \u0026quot;final\u0026quot; and the composition is complete and verified by an authorized person.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"composition-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/composition-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.242"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CompositionStatus",
+  "title": "CompositionStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The workflow/clinical status of the composition.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/composition-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "preliminary",
+      "display": "Preliminary",
+      "definition": "This is a preliminary composition or document (also known as initial or interim). The content may be incomplete or unverified."
+    },
+    {
+      "code": "final",
+      "display": "Final",
+      "definition": "This version of the composition is complete and verified by an appropriate person and no further work is planned. Any subsequent updates would be on a new version of the composition."
+    },
+    {
+      "code": "amended",
+      "display": "Amended",
+      "definition": "The composition content or the referenced resources have been modified (edited or added to) subsequent to being released as \"final\" and the composition is complete and verified by an authorized person."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The composition or document was originally created/issued in error, and this is an amendment that marks that the entire series should not be considered as valid."
+    }
+  ]
+}

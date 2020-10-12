@@ -1,0 +1,880 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "FiveWs",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eto do\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "informative"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/FiveWs",
+  "version": "4.0.1",
+  "name": "FiveWs",
+  "title": "fivews",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Health Level Seven International fhir",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Logical Model: Who What When Where Why - Common pattern for all resources that deals with attribution.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "w5",
+      "uri": "http://hl7.org/fhir/fivews",
+      "name": "FiveWs Pattern Mapping"
+    }
+  ],
+  "kind": "logical",
+  "abstract": false,
+  "type": "FiveWs",
+  "snapshot": {
+    "element": [
+      {
+        "id": "FiveWs",
+        "path": "FiveWs",
+        "short": "Who What When Where Why - Common pattern for all resources that deals with attribution",
+        "definition": "Who What When Where Why - Common pattern for all resources that deals with attribution.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs",
+          "min": 0,
+          "max": "*"
+        },
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "FiveWs.identifier",
+        "path": "FiveWs.identifier",
+        "short": "Business Identifier",
+        "definition": "Business Identifier.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.identifier",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.version",
+        "path": "FiveWs.version",
+        "short": "Identifier for this version",
+        "definition": "Identifier for this version.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.version",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.version"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.status",
+        "path": "FiveWs.status",
+        "short": "Status Field",
+        "definition": "Status Field.",
+        "alias": [
+          "fulfills"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.status",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "Not known why this is labelled a modifier",
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "CanonicalStatus"
+            }
+          ],
+          "strength": "required",
+          "description": "Status Field.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/resource-status|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.status"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.class",
+        "path": "FiveWs.class",
+        "short": "Classifier Field",
+        "definition": "Classifier Field.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.class",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.class"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.grade",
+        "path": "FiveWs.grade",
+        "short": "A field that indicates the potential impact of the content of the resource",
+        "definition": "A field that indicates the potential impact of the content of the resource.",
+        "alias": [
+          "container"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.grade",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "FiveWs.what[x]",
+        "path": "FiveWs.what[x]",
+        "short": "What this resource is about",
+        "definition": "what this resource is about.",
+        "alias": [
+          "Suspended Reason",
+          "Cancelled Reason"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.what[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Resource"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.what[x]"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.subject",
+        "path": "FiveWs.subject",
+        "short": "Who this resource is about",
+        "definition": "Who this resource is about.",
+        "alias": [
+          "type"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.subject",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.context",
+        "path": "FiveWs.context",
+        "short": "Context for the work described in this resource",
+        "definition": "a resource that gives context for the work described in this resource (usually Encounter or EpisodeOfCare).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.context",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Encounter",
+              "http://hl7.org/fhir/StructureDefinition/EpisodeOfCare"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false
+      },
+      {
+        "id": "FiveWs.init",
+        "path": "FiveWs.init",
+        "short": "When the work described in this resource was started (or will be)",
+        "definition": "when the work described in this resource was started (or will be).",
+        "alias": [
+          "patient"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.init",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.init"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.planned",
+        "path": "FiveWs.planned",
+        "short": "When this resource is planned to occur",
+        "definition": "when this resource is planned to occur.",
+        "alias": [
+          "encounter"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.planned",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Timing"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.planned"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.done[x]",
+        "path": "FiveWs.done[x]",
+        "short": "When the work described in this resource was completed (or will be)",
+        "definition": "when the work described in this resource was completed (or will be).",
+        "alias": [
+          "timing"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.done[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          },
+          {
+            "code": "Period"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.done[x]"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.recorded",
+        "path": "FiveWs.recorded",
+        "short": "When this resource itself was created",
+        "definition": "when this resource itself was created.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "FiveWs.recorded",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "instant"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.recorded"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.author",
+        "path": "FiveWs.author",
+        "short": "Who authored the content of the resource",
+        "definition": "who authored the content of the resource.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.author",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.author"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.source",
+        "path": "FiveWs.source",
+        "short": "Who provided the information in this resource",
+        "definition": "Who provided the information in this resource.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.source",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.source"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.actor",
+        "path": "FiveWs.actor",
+        "short": "Who did the work described the resource (or will do)",
+        "definition": "who did the work described the resource (or will do).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.actor",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.actor"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.cause",
+        "path": "FiveWs.cause",
+        "short": "Who prompted the work described in the resource",
+        "definition": "who prompted the work described in the resource.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.cause",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.cause"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.witness",
+        "path": "FiveWs.witness",
+        "short": "Who attests to the content of the resource (individual or org)",
+        "definition": "who attests to the content of the resource (individual or org).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.witness",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.witness"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.who",
+        "path": "FiveWs.who",
+        "short": "An actor involved in the work described by this resource",
+        "definition": "An actor involved in the work described by this resource.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.who",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.who"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.where[x]",
+        "path": "FiveWs.where[x]",
+        "short": "The location of the work described",
+        "definition": "The location of the work described.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.where[x]",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Location"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.where[x]"
+          }
+        ]
+      },
+      {
+        "id": "FiveWs.why[x]",
+        "path": "FiveWs.why[x]",
+        "short": "Why this work was done",
+        "definition": "Why this work was done.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "FiveWs.why[x]",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Resource"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          }
+        ]
+      }
+    ]
+  }
+}

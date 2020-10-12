@@ -1,0 +1,65 @@
+{
+  "resourceType": "Provenance",
+  "id": "example-biocompute-object",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\n\t\t\t\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003eid\u003c/b\u003e: example-biocompute-object\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003etarget\u003c/b\u003e: \u003ca href\u003d\"http://build.fhir.org/sequence-example.html\"\u003eMolecularSequence/example\u003c/a\u003e\n\t\t\t\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003eperiod\u003c/b\u003e: 2017-6-6 --\u0026gt; (ongoing)\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003erecorded\u003c/b\u003e: 2016-6-9 8:12:14\u003c/p\u003e\u003cp\u003e\n\t\t\t\t\u003cb\u003ereason\u003c/b\u003e: antiviral resistance detection (Details: [not stated] code null \u003d \u0027null\u0027, stated as\n         \u0027antiviral resistance detection\u0027)\u003c/p\u003e\n\t\t\t\u003ch3\u003eAgents\u003c/h3\u003e\n\t\t\t\u003ctable\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eRole\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eWho\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e*\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003eAuthor (Details: http://hl7.org/fhir/provenance-participant-role code author \u003d \u0027Author\u0027,\n             stated as \u0027null\u0027)\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003ca href\u003d\"http://build.fhir.org/practitioner-example.html\"\u003ePractitioner/example\u003c/a\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\u003c/table\u003e\n\t\t\t\u003ch3\u003eEntities\u003c/h3\u003e\n\t\t\t\u003ctable\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e-\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eRole\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003cb\u003eReference\u003c/b\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\u003ctd\u003e*\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003esource\u003c/td\u003e\n\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\u003ca href\u003d\"https://hive.biochemistry.gwu.edu/cgi-bin/prd/htscsrs/servlet.cgi?pageid\u003dbcoexample_1\"\u003eBiocompute example\u003c/a\u003e\n\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\u003c/tr\u003e\n\t\t\t\u003c/table\u003e\n\t\t\u003c/div\u003e"
+  },
+  "target": [
+    {
+      "reference": "MolecularSequence/example"
+    }
+  ],
+  "occurredPeriod": {
+    "start": "2017-06-06"
+  },
+  "recorded": "2016-06-09T08:12:14+10:00",
+  "reason": [
+    {
+      "text": "antiviral resistance detection"
+    }
+  ],
+  "agent": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+            "code": "AUT"
+          }
+        ]
+      },
+      "who": {
+        "reference": "Practitioner/example"
+      }
+    }
+  ],
+  "entity": [
+    {
+      "role": "source",
+      "what": {
+        "identifier": {
+          "type": {
+            "coding": [
+              {
+                "system": "https://hive.biochemistry.gwu.edu",
+                "code": "biocompute",
+                "display": "obj.1001"
+              }
+            ]
+          },
+          "value": "https://hive.biochemistry.gwu.edu/cgi-bin/prd/htscsrs/servlet.cgi?pageid\u003dbcoexample_1"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -639,6 +639,9 @@ public class RestfulServerUtils {
 			case JSON:
 				parser = context.newJsonParser();
 				break;
+			case RDF:
+				parser = context.newRDFParser();
+				break;
 			case XML:
 			default:
 				parser = context.newXmlParser();

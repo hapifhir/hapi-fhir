@@ -1,0 +1,43 @@
+{
+  "resourceType": "MolecularSequence",
+  "id": "breastcancer",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: breastcancer\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: rna\u003c/p\u003e\u003cp\u003e\u003cb\u003ecoordinateSystem\u003c/b\u003e: 0\u003c/p\u003e\u003cp\u003e\u003cb\u003epatient\u003c/b\u003e: \u003ca\u003ePatient/brcapat\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eReferenceSeqs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceSeqId\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowEnd\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eHomo sapiens BRCA2, DNA repair associated (BRCA2), mRNA \u003cspan\u003e(Details : {http://www.ncbi.nlm.nih.gov/nuccore/ code \u0027NM_000059.3\u0027 \u003d \u0027NM_000059.3\u0027, given as \u0027Homo sapiens BRCA2, DNA repair associated (BRCA2), mRNA\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e101488058\u003c/td\u003e\u003ctd\u003e101499444\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eVariants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEnd\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eObservedAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceAllele\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e32316186\u003c/td\u003e\u003ctd\u003e32316187\u003c/td\u003e\u003ctd\u003eA\u003c/td\u003e\u003ctd\u003eC\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "type": "rna",
+  "coordinateSystem": 0,
+  "patient": {
+    "reference": "Patient/brcapat"
+  },
+  "referenceSeq": {
+    "referenceSeqId": {
+      "coding": [
+        {
+          "system": "http://www.ncbi.nlm.nih.gov/nuccore/",
+          "code": "NM_000059.3",
+          "display": "Homo sapiens BRCA2, DNA repair associated (BRCA2), mRNA"
+        }
+      ]
+    },
+    "windowStart": 101488058,
+    "windowEnd": 101499444
+  },
+  "variant": [
+    {
+      "start": 32316186,
+      "end": 32316187,
+      "observedAllele": "A",
+      "referenceAllele": "C"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}
