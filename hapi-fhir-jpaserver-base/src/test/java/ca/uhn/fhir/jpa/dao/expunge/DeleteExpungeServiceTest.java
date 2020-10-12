@@ -21,8 +21,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class DeleteExpungeServiceTest extends BaseJpaR4Test {
 
-	// FIXME KHS partitions?
-
 	@Autowired
 	DaoConfig myDaoConfig;
 

@@ -22,24 +22,13 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DeleteConflict;
-import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -57,9 +46,9 @@ public class EmpiPersonDeletingSvc {
 	@Autowired
 	private ExpungeService myExpungeService;
 	@Autowired
-	IResourceExpungeService myResourceExpungeService;
+	DeleteExpungeService myDeleteExpungeService;
 
 	public DeleteMethodOutcome expungePersonPids(List<Long> thePersonPids) {
-		return myResourceExpungeService.expungeByResourcePids(new SliceImpl<>(thePersonPids));
+		return myDeleteExpungeService.expungeByResourcePids(new SliceImpl<>(thePersonPids));
 	}
 }

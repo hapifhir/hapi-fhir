@@ -68,7 +68,6 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	public long removeAllEmpiLinks() {
 		ourLog.info("Clearing all EMPI Links...");
 		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
-		// FIXME KHS why is this done in 2 places?
 		DeleteMethodOutcome deleteOutcome = myEmpiPersonDeletingSvcImpl.expungePersonPids(personPids);
 		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links and expunged {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
 		return personPids.size();
