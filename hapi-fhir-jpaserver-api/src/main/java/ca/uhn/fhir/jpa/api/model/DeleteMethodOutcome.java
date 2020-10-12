@@ -32,6 +32,8 @@ import java.util.List;
 public class DeleteMethodOutcome extends MethodOutcome {
 
 	private List<ResourceTable> myDeletedEntities;
+	private long myExpungedResourcesCount;
+	private long myExpungedEntitiesCount;
 
 	public List<ResourceTable> getDeletedEntities() {
 		return myDeletedEntities;
@@ -42,4 +44,21 @@ public class DeleteMethodOutcome extends MethodOutcome {
 		return this;
 	}
 
+	public long getExpungedResourcesCount() {
+		return myExpungedResourcesCount;
+	}
+
+	public DeleteMethodOutcome setExpungedResourcesCount(long theExpungedResourcesCount) {
+		myExpungedResourcesCount = theExpungedResourcesCount;
+		return this;
+	}
+
+	public long getExpungedEntitiesCount() {
+		return myExpungedEntitiesCount;
+	}
+
+	public DeleteMethodOutcome setExpungedEntitiesCount(long theExpungedEntitiesCount) {
+		myExpungedEntitiesCount = theExpungedEntitiesCount;
+		return this;
+	}
 }

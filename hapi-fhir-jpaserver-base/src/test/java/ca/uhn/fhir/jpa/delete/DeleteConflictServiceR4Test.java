@@ -5,9 +5,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Condition;
@@ -41,11 +44,13 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myInterceptorRegistry.registerInterceptor(myDeleteInterceptor);
 		myInterceptorDeleteCount = 0;
 		myDeleteInterceptor.clear();
+		myDaoConfig.setAllowMultipleDelete(true);
 	}
 
 	@AfterEach
 	public void afterUnregisterInterceptor() {
 		myInterceptorRegistry.unregisterAllInterceptors();
+		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 	}
 
 	@Test
@@ -231,6 +236,39 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		assertEquals(1, conflicts.size());
 	}
 
+	@Test
+	public void testDeleteExpungeThrowExceptionIfLink() {
+		Organization organization = new Organization();
+		organization.setName("FOO");
+		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(organizationId));
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		try {
+			myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(e.getMessage(), "Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " +
+				patientId.toVersionless());
+		}
+	}
+
+	@Test
+	public void testDeleteExpungeNoThrowExceptionWhenLinkInSearchResults() {
+		Patient mom = new Patient();
+		IIdType momId = myPatientDao.create(mom).getId().toUnqualifiedVersionless();
+
+		Patient child = new Patient();
+		List<Patient.PatientLinkComponent> link;
+		child.addLink().setOther(new Reference(mom));
+		IIdType childId = myPatientDao.create(child).getId().toUnqualifiedVersionless();
+
+		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
+		assertEquals(2, outcome.getExpungedResourcesCount());
+		assertEquals(7, outcome.getExpungedEntitiesCount());
+	}
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {
 		for (DeleteConflict next : theList) {
 			IdDt source = next.getSourceId();

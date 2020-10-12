@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
@@ -319,4 +320,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		Validate.notNull(myVersion);
 		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
 	}
+
+    public DeleteMethodOutcome expungeByResourcePids(Slice<Long> thePids) {
+		return new DeleteMethodOutcome();
+    }
 }
