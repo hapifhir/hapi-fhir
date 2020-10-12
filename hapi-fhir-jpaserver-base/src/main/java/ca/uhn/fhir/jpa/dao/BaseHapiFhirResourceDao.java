@@ -33,8 +33,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
-import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -157,7 +156,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
-	private IResourceExpungeService myResourceExpungeService;
+	private DeleteExpungeService myDeleteExpungeService;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
@@ -519,7 +518,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (paramMap.isDeleteExpunge()) {
-			return myResourceExpungeService.expungeByResourcePids(new SliceImpl<>(ResourcePersistentId.toLongList(resourceIds)));
+			return myDeleteExpungeService.expungeByResourcePids(new SliceImpl<>(ResourcePersistentId.toLongList(resourceIds)));
 		} else {
 			return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 		}

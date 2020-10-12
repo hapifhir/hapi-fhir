@@ -29,15 +29,12 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
@@ -46,11 +43,8 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -69,10 +63,6 @@ public class DeleteConflictService {
 	DaoConfig myDaoConfig;
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
-	@Autowired
-	private PartitionRunner myPartitionRunner;
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest, TransactionDetails theTransactionDetails) {
 
@@ -184,29 +174,4 @@ public class DeleteConflictService {
 	static void setMaxRetryAttempts(Integer theMaxRetryAttempts) {
 		MAX_RETRY_ATTEMPTS = theMaxRetryAttempts;
 	}
-
-	public void validateOkToDeleteAndExpunge(Slice<Long> theAllTargetPids) {
-		List<Long> conflictSourcePids = Collections.synchronizedList(new ArrayList<>());
-		myPartitionRunner.runInPartitionedThreads(theAllTargetPids, someTargetPids -> findSourcePidsWithTargetPidIn(theAllTargetPids.getContent(), someTargetPids, conflictSourcePids));
-
-		if (conflictSourcePids.isEmpty()) {
-			return;
-		}
-
-		ResourceTable firstConflict = myResourceTableDao.getOne(conflictSourcePids.get(0));
-		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflict.getIdDt().toVersionless().getValue());
-	}
-
-	private void findSourcePidsWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<Long> theSourcePids) {
-		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
-		if (theSourcePids.isEmpty()) {
-			List<Long> someSourcePids = myResourceLinkDao.findSourcePidWithTargetPidIn(theSomeTargetPids);
-			// Remove sources we're planning to delete, since those conflicts don't matter
-			someSourcePids.removeAll(theAllTargetPids);
-			if (!someSourcePids.isEmpty()) {
-				theSourcePids.addAll(someSourcePids);
-			}
-		}
-	}
-
 }

@@ -39,6 +39,4 @@ public interface IResourceExpungeService {
 	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount);
 
 	void deleteAllSearchParams(Long theResourceId);
-
-	DeleteMethodOutcome expungeByResourcePids(Slice<Long> thePids);
 }
