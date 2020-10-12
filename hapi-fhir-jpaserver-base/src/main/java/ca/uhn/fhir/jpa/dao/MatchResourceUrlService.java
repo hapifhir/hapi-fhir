@@ -55,33 +55,34 @@ public class MatchResourceUrlService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
-		StopWatch sw = new StopWatch();
-
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-
 		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
-		paramMap.setLoadSynchronous(true);
-
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
+		paramMap.setLoadSynchronous(true);
 
+		return search(paramMap, theResourceType, theRequest);
+	}
+
+	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theTheRequest) {
+		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(paramMap, theRequest);
+		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theTheRequest);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theTheRequest)) {
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw.toString());
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(RequestDetails.class, theTheRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theTheRequest)
 				.add(StorageProcessingMessage.class, message);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theTheRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 		return retVal;
 	}

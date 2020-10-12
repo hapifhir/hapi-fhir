@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -50,6 +51,7 @@ import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,12 +64,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -76,6 +82,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ResourceExpungeService implements IResourceExpungeService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceExpungeService.class);
 
+	@Autowired
+	protected PlatformTransactionManager myPlatformTransactionManager;
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
@@ -116,6 +126,12 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
+	@Autowired
+	private DeleteConflictService myDeleteConflictService;
+	@Autowired
+	private PartitionRunner myPartitionRunner;
+	@Autowired
+	private ResourceTableFKProvider myResourceTableFKProvider;
 
 	@Override
 	@Transactional
@@ -322,6 +338,45 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	}
 
     public DeleteMethodOutcome expungeByResourcePids(Slice<Long> thePids) {
-		return new DeleteMethodOutcome();
+		 if (thePids.isEmpty()) {
+			 return new DeleteMethodOutcome();
+		 }
+
+		 myDeleteConflictService.validateOkToDeleteAndExpunge(thePids);
+		 ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());
+		 List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();
+
+		 AtomicInteger expungedEntitiesCount = new AtomicInteger();
+		 for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
+			 myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceForeignKey, pidChunk, expungedEntitiesCount));
+		 }
+
+		 // Lastly we need to delete records from the resource table all of these other tables link to:
+		 ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
+		 AtomicInteger expungedResourcesCount = new AtomicInteger();
+		 myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceTablePk, pidChunk, expungedResourcesCount));
+		 expungedEntitiesCount.addAndGet(expungedResourcesCount.get());
+
+		 ourLog.info("Expunged a total of {} records", expungedEntitiesCount);
+		 DeleteMethodOutcome retval = new DeleteMethodOutcome();
+		 retval.setExpungedResourcesCount(expungedResourcesCount.get());
+		 retval.setExpungedEntitiesCount(expungedEntitiesCount.get());
+		 return retval;
     }
+
+	private void deleteInTransaction(ResourceForeignKey theResourceForeignKey, List<Long> thePidChunk, AtomicInteger theACount) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+
+		Integer count = txTemplate.execute(t -> delete(theResourceForeignKey, thePidChunk));
+		if (count != null) {
+			theACount.addAndGet(count);
+		}
+	}
+
+	private Integer delete(ResourceForeignKey resourceForeignKey, List<Long> thePids) {
+		String pids = thePids.toString().replace("[", "(").replace("]", ")");
+		int retval = myEntityManager.createNativeQuery("DELETE FROM " + resourceForeignKey.table + " WHERE " + resourceForeignKey.key + " IN " + pids).executeUpdate();
+		ourLog.info("Expunged {} records from {}", retval, resourceForeignKey.table);
+		return retval;
+	}
 }

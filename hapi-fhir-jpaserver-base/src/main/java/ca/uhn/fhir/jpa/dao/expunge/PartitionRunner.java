@@ -48,7 +48,7 @@ public class PartitionRunner {
 		myDaoConfig = theDaoConfig;
 	}
 
-	void runInPartitionedThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+	public void runInPartitionedThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 
 		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (callableTasks.size() == 0) {

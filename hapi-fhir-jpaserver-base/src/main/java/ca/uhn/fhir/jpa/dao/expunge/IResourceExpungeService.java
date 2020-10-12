@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.data.domain.Slice;
 
@@ -38,4 +39,6 @@ public interface IResourceExpungeService {
 	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount);
 
 	void deleteAllSearchParams(Long theResourceId);
+
+	DeleteMethodOutcome expungeByResourcePids(Slice<Long> thePids);
 }
