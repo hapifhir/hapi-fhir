@@ -13,6 +13,9 @@ public class ResourceTableFKProvider {
 		// To find all the FKs that need to be included here, run the following SQL in the INFORMATION_SCHEMA:
 		// SELECT FKTABLE_NAME, FKCOLUMN_NAME FROM CROSS_REFERENCES WHERE PKTABLE_NAME = 'HFJ_RESOURCE'
 		List<ResourceForeignKey> resourceForeignKeys = new ArrayList<>();
+		// Note this one is a secondary dependency
+		resourceForeignKeys.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
+
 		// FIXME KHS hook
 //		resourcePidLinks.add(new ResourcePidLink("CDH_LB_REF", "LB_RES_ID"));
 //		resourcePidLinks.add(new ResourcePidLink("CDH_LB_REF", "ROOT_RES_ID"));

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.util.EmpiUtil;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -51,11 +52,10 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	public long expungeAllEmpiLinksOfTargetType(String theResourceType) {
 		throwExceptionIfInvalidTargetType(theResourceType);
 		ourLog.info("Clearing all EMPI Links for resource type {}...", theResourceType);
-		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
-		myEmpiPersonDeletingSvcImpl.deletePersonResourcesAndHandleConflicts(longs);
-		myEmpiPersonDeletingSvcImpl.expungeHistoricalAndCurrentVersionsOfIds(longs);
-		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links.", longs.size());
-		return longs.size();
+		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
+		DeleteMethodOutcome deleteOutcome = myEmpiPersonDeletingSvcImpl.expungePersonPids(personPids);
+		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links and {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
+		return personPids.size();
 	}
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
@@ -68,9 +68,9 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	public long removeAllEmpiLinks() {
 		ourLog.info("Clearing all EMPI Links...");
 		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
-		myEmpiPersonDeletingSvcImpl.deletePersonResourcesAndHandleConflicts(personPids);
-		myEmpiPersonDeletingSvcImpl.expungeHistoricalAndCurrentVersionsOfIds(personPids);
-		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links.", personPids.size());
+		// FIXME KHS why is this done in 2 places?
+		DeleteMethodOutcome deleteOutcome = myEmpiPersonDeletingSvcImpl.expungePersonPids(personPids);
+		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links and expunged {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
 		return personPids.size();
 	}
 }
