@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<title th:include="window-title :: result" />
 		<th:block th:include="tmpl-head :: head" />
@@ -24,20 +24,22 @@
 					<!-- *************************************************** -->
 					<!-- ** Response                                      ** -->
 					<!-- *************************************************** -->
-					<div class="well" id="resultWell">
-						Executed request against FHIR RESTful server in 
-						<th:block th:text="${latencyMs} + 'ms'"/>
+					<div class="card" id="resultWell">
+                  <div class="card-header">
+                     Executed request against FHIR RESTful server in
+                     <th:block th:text="${latencyMs} + 'ms'"/>
+                  </div>
 					</div>
 
-					<div th:if="${clientCodeJson} != null" class="panel panel-default">
-						<div class="panel-heading">
+					<div th:if="${clientCodeJson} != null" class="card" style="margin-top: 20px;">
+						<div class="card-header">
 							Client Code - 
 							<small style="color: #888;">
 								Use the following code snippet to execute this action in your
 								own client.
 							</small>
 						</div>
-						<div class="panel-body clientCodeBox" id="clientCodeBody">
+						<div class="card-body clientCodeBox" id="clientCodeBody">
 						</div>
 						<script type="text/javascript" src="js/ClientCodeGeneratorHapi.js"></script>
 						<script type="text/javascript" th:utext="'var jsonClientCode = ' + ${clientCodeJson} + ';'">
@@ -47,7 +49,7 @@
 						</script>
 					</div>
 					 
-					<div th:if="${requestUrl} != null">
+					<div th:if="${requestUrl} != null" style="margin-top: 20px;">
 
 						<table class="table table-bordered table-striped requestTable" id="requestTable">
 							<colgroup>
@@ -57,7 +59,7 @@
 							<tbody>
 								<tr>
 									<td style="white-space: nowrap;">
-										<span class="glyphicon glyphicon glyphicon-chevron-right"></span>
+                              <i class="fas fa-chevron-right"></i>
 										Request
 									</td>
 									<td>
@@ -92,7 +94,7 @@
 							<tbody>
 								<tr>
 									<td style="white-space: nowrap;">
-										<span class="glyphicon glyphicon glyphicon-chevron-left"></span>
+                              <i class="fas fa-chevron-left"></i>
 										Response
 									</td>
 									<td>
@@ -127,7 +129,7 @@
 										<div th:if="${bundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
 											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
 												<div class="panel-heading">
-													<h4 class="panel-title">
+													<div class="panel-title">
 														<th:block th:if="${#lists.isEmpty(bundle.entries)}">Bundle contains no entries</th:block>
 														<a th:unless="${#lists.isEmpty(bundle.entries)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
                                              <i id="collapseOneIcon" class="far fa-minus-square"></i>
@@ -140,7 +142,7 @@
 															<!-- Prev/Next Page Buttons -->
 															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	
 																style="margin-left: 15px;">
-																<span class="glyphicon glyphicon-step-backward"></span>
+                                                <i class="fas fa-angle-double-left"></i>
 																Prev Page
 															</button>
 															<script type="text/javascript" th:inline="javascript">
@@ -157,7 +159,7 @@
 															</script>
 	
 															<button	class="btn btn-success btn-xs" type="button" id="page-next-btn">
-																<span class="glyphicon glyphicon-step-forward"></span>
+                                                <i class="fas fa-angle-double-right"></i>
 																Next Page
 															</button>
 															<script type="text/javascript" th:inline="javascript">
@@ -172,9 +174,9 @@
 																});
 															</script>
 														</th:block>
-													</h4>
+													</div>
 												</div>
-												<div id="collapseOne" class="panel-collapse collapse in" th:unless="${#lists.isEmpty(bundle.entries)}">
+												<div id="collapseOne" class="panel-collapse in" th:unless="${#lists.isEmpty(bundle.entries)}">
 													<div class="panel-body" style="padding-bottom: 0px;">
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
 															<colgroup>
@@ -239,7 +241,7 @@
 										<div th:if="${riBundle} != null" class="panel-group" id="accordion" style="margin-bottom: 0px;">
 											<div class="panel panel-default" style="border: none; border-bottom: 1px solid #ddd; border-radius: 0px;">
 												<div class="panel-heading">
-													<h4 class="panel-title">
+													<div class="panel-title">
 														<th:block th:if="${#lists.isEmpty(riBundle.entry)}">Bundle contains no entries</th:block>
 														<a th:unless="${#lists.isEmpty(riBundle.entry)}" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
                                              <i id="collapseOneIcon" class="far fa-minus-square"></i>
@@ -252,7 +254,7 @@
 															<!-- Prev/Next Page Buttons -->
 															<button	class="btn btn-success btn-xs" type="button" id="page-prev-btn"	
 																style="margin-left: 15px;">
-																<span class="glyphicon glyphicon-step-backward"></span>
+                                                <i class="fas fa-angle-double-left"></i>
 																Prev Page
 															</button>
 															<script type="text/javascript" th:inline="javascript">
@@ -272,7 +274,7 @@
 															</script>
 	
 															<button	class="btn btn-success btn-xs" type="button" id="page-next-btn">
-																<span class="glyphicon glyphicon-step-forward"></span>
+                                                <i class="fas fa-angle-double-right"></i>
 																Next Page
 															</button>
 															<script type="text/javascript" th:inline="javascript">
@@ -287,9 +289,9 @@
 																});
 															</script>
 														</th:block>
-													</h4>
+													</div>
 												</div>
-												<div id="collapseOne" class="panel-collapse collapse in" th:unless="${#lists.isEmpty(riBundle.entry)}">
+												<div id="collapseOne" class="panel-collapse in" th:unless="${#lists.isEmpty(riBundle.entry)}">
 													<div class="panel-body" style="padding-bottom: 0px;">
 														<table class="table table-condensed" style="padding-bottom: 0px; margin-bottom: 0px;">
 															<colgroup>

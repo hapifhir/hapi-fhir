@@ -144,7 +144,7 @@
 
 		<!-- WebJars -->
 		<dependency>
-			<groupId>org.webjars</groupId>
+			<groupId>org.webjars.npm</groupId>
 			<artifactId>bootstrap</artifactId>
 		</dependency>
 		<dependency>
@@ -174,6 +174,10 @@
 		<dependency>
 			<groupId>org.webjars.bower</groupId>
 			<artifactId>moment</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.webjars.npm</groupId>
+			<artifactId>popper.js</artifactId>
 		</dependency>
 
 

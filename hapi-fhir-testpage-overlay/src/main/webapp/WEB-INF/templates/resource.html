@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<title th:include="window-title :: resource" />
 		<th:block th:include="tmpl-head :: head" />
@@ -26,49 +26,46 @@
 					<!-- ** Default Home                                         ** -->
 					<!-- ********************************************************** -->
 
-						<div class="well">
+						<div class="card">
+                     <div class="card-header">
 							This is a RESTful server tester, which can be used to send
 							requests to, and receive responses from the server at the
-							following URL: 
+							following URL:
+                        <a th:href="${base}" th:text="${base}"></a>
+                     </div>
 						</div>
 
 						<!-- ************************************************ -->
 						<!-- ** Resource Actions                           ** -->
 						<!-- ************************************************ -->
 						
-						<div class="panel panel-default" th:if="${resourceName.empty} == false">
-							<div class="panel-heading">
-								<h3 class="panel-title" th:text="'Resource: ' + ${resourceName}">Resource: <b>Patient</b></h3>
-							</div>
-							<div class="panel-body">
+						<div class="card" style="margin-top: 20px;" th:if="${resourceName.empty} == false">
+							<h3 class="card-header panel-title" th:text="'Resource: ' + ${resourceName}">Resource: <b>Patient</b></h3>
+							<div class="card-body">
 								This page contains various operations for interacting with
 								the <th:block th:text="${resourceName}"></th:block> resource.
 							</div>
 						</div>
 						
 						<!-- Nav tabs -->
-						<ul class="nav nav-tabs" role="tablist" id="resource-nav-tabs">
+						<ul class="nav nav-tabs" role="tablist" id="resource-nav-tabs" style="margin-top: 20px; padding-left: 5px;">
 							<!-- Search Tab -->
-							<li th:if="${haveSearchParams}" >
-								<a href="#tab-search" role="tab" data-toggle="tab">Search</a>
+							<li th:if="${haveSearchParams}" class="nav-item">
+								<a href="#tab-search" role="tab" data-toggle="tab" class="nav-link" id="search-tab">Search</a>
 							</li>
-							<li th:if="${!haveSearchParams}" class="disabled">
-								<a href="#tab-search" role="tab">Search</a>
+							<li th:if="${!haveSearchParams}" class="disabled nav-item">
+								<a href="#tab-search" role="tab" class="nav-link disabled">Search</a>
 							</li>
 							<!-- Queries Tab -->
-							<li th:if="${!queries.empty}">
-								<a href="#tab-queries" role="tab" data-toggle="tab">Queries</a>
+							<li th:if="${!queries.empty}" class="nav-item">
+								<a href="#tab-queries" role="tab" data-toggle="tab" class="nav-link" id="queries-tab">Queries</a>
 							</li>
-							<li th:if="${queries.empty}" class="disabled">
-								<a href="#tab-queries" role="tab">Queries</a>
+							<li th:if="${queries.empty}" class="disabled nav-item">
+								<a href="#tab-queries" role="tab" class="nav-link disabled">Queries</a>
 							</li>
 							<!-- CRUD Tab -->
-							<li th:class="(${!haveSearchParams} and ${queries.empty}) ? 'active'">
-								<a href="#tab-otheractions" role="tab" data-toggle="tab" name="tabCrudOperationsLink">CRUD Operations</a>
-							</li>
-							<!-- Tags Tab -->
-							<li>
-								<a href="#tab-tags" role="tab" data-toggle="tab">Tags</a>
+							<li th:class="(${!haveSearchParams} and ${queries.empty}) ? 'active'" class="nav-item">
+								<a href="#tab-otheractions" role="tab" data-toggle="tab" name="tabCrudOperationsLink" class="nav-link" id="crud-tab">CRUD Operations</a>
 							</li>
 						</ul>
 						<script type="text/javascript">
@@ -83,19 +80,19 @@
 						</script>
 						
 						<!-- Tab panes -->
-						<div class="tab-content">
+						<div class="card" style="top: -2px;"><div class="card-body tab-content">
 
 							<!-- *************************************************** -->
 							<!-- Search Tab -->
 							<!-- *************************************************** -->
-							<div class="tab-pane active" id="tab-search">
+							<div class="tab-pane active" id="tab-search" aria-labelledby="search-tab">
 	
 								<!-- Search contents -->
 								<div class="container-fluid">
-									<div class="row-fluid">
+									<div class="row">
 								    	<div class="col-sm-2" style="padding-left: 0px;">
-											<button type="button" id="search-btn" class="btn btn-primary btn-block">
-												<span class="glyphicon glyphicon-search"></span>
+											<button type="button" id="search-btn" class="btn btn-success btn-block">
+                                    <i class="fab fa-searchengin"></i>
 												Search
 											</button>
 										</div>												
@@ -121,9 +118,9 @@
 											$("#outerForm").attr("action", "search").submit();
 										});
 									</script>
+
 									<br clear="all"/>
-									
-									<div class="row-fluid">
+									<div class="row">
 										<h4>Search Parameters <small>Optionally add parameter(s) to the search</small></h4>
 									</div>
 									
@@ -132,10 +129,11 @@
 									</div>
 									
 									<!-- Includes -->
-									<div class="row-fluid">
+                           <br clear="all"/>
+									<div class="row">
 										<h4>Includes <small>Also include resources which are referenced by the search results</small></h4>
-									</div>									
-									<div class="row-fluid">
+									</div>
+                           <div class="row">
 										<span th:each="include : ${includes}" class="includeCheckContainer">
 											<span class="includeCheckCheck">
 												<input type="checkbox" th:value="${include}" th:id="'inc_' + ${include}"></input>
@@ -145,10 +143,11 @@
 									</div>
 
 									<!-- Results Sorting -->
-									<div class="row-fluid">
+                           <br clear="all"/>
+									<div class="row">
 										<h4>Sort Results</h4>
 									</div>
-									<div class="row-fluid">
+									<div class="row">
 										<!-- Sort By... -->
 										<div class='col-sm-6'>
 										<label>Sort By</label>
@@ -185,11 +184,13 @@
 									</div>
 									<br clear="all"/>
 
-									<div class="row-fluid">
+                           <!-- Other Options -->
+                           <br clear="all"/>
+									<div class="row">
 										<h4>Other Options</h4>
 									</div>
 									
-									<div class="row-fluid">
+									<div class="row">
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
@@ -201,13 +202,13 @@
 								            </div>
 								        </div>
 									</div>
-									<br clear="all"/>
 
 									<!-- Reverse Includes -->
-									<div class="row-fluid">
+									<br clear="all"/>
+									<div class="row">
 										<h4>Reverse Includes <small>Also include resources which reference to the search results</small></h4>
 									</div>									
-									<div class="row-fluid">
+									<div class="row">
 										<span class="includeCheckCheck">
 											<input type="checkbox" th:value="'*'" th:id="'revinc_STAR'" />
 										</span>
@@ -227,7 +228,7 @@
 							<!-- *************************************************** -->
 							<!-- Queries Tab -->
 							<!-- *************************************************** -->
-							<div class="tab-pane" id="tab-queries">
+							<div class="tab-pane" id="tab-queries" aria-labelledby="queries-tab">
 								<div th:replace="tmpl-queries :: queries-list" ></div>
 							</div>
 							<!-- End of queries tab -->
@@ -235,19 +236,19 @@
 							<!-- *************************************************** -->
 							<!-- Other Operations Tab -->
 							<!-- *************************************************** -->
-							<div class="tab-pane" id="tab-otheractions">
+							<div class="tab-pane" id="tab-otheractions" aria-labelledby="crud-tab">
 								<div class="container-fluid">
 
 								<!-- Read/VRead -->
 								
-									<div class="row-fluid">
-										<div>
+									<div class="row">
+                              <div class="col-12">
 											<b>Read</b> an individual resource instance given its
 											ID (and optionally a version ID to retrieve a specific version
 											of that instance to <b>vread</b> that instance)
 										</div>										
 									</div>
-								    <div class="row-fluid">
+								    <div class="row">
 								    	<div class="col-sm-2">
 											<button type="button" id="read-btn"
 												class="btn btn-primary btn-block">
@@ -258,9 +259,11 @@
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    ID
-								                    <span class="loadingStar">*</span>
+								                    <div class="input-group-prepend">
+                                               <span class="input-group-text">
+                                                  ID
+                                                  <span class="loadingStar">*</span>
+                                               </span>
 								                    </div>
 								                    <input type="text" class="form-control" id="read-id"/>
 								                </div>
@@ -269,8 +272,10 @@
 										<div class='col-sm-4'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Version ID
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    Version ID
+                                               </span>
 								                    </div>
 								                    <input type="text" class="form-control" id="read-vid" placeholder="(add for vread)"/>
 								                </div>
@@ -293,12 +298,14 @@
 									
 								<!-- Resource History -->
 								
-									<div class="row-fluid">
-										Retrieve the update <b>history</b> across the <th:block th:text="${resourceName}"/> 
-										resource type, or against a specific instance of this resource type if
-										an ID is specified. 			
+									<div class="row">
+                              <div class="col-12">
+                                 Retrieve the update <b>history</b> across the <th:block th:text="${resourceName}"/> 
+                                 resource type, or against a specific instance of this resource type if
+                                 an ID is specified.
+                              </div>
 									</div>
-								    <div class="row-fluid top-buffer">
+								    <div class="row top-buffer">
 								    	<div class="col-sm-2">
 											<button type="button" id="resource-history-btn" class="btn btn-primary btn-block"
 												name="action-history-type">
@@ -309,8 +316,10 @@
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    ID
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    ID
+                                               </span>
 								                    </div>
 								                    <input type="text" class="form-control" id="resource-history-id" placeholder="(instance ID)"/>
 								                </div>
@@ -319,11 +328,13 @@
 								        <div class='col-sm-5'>
 								            <div class="form-group">
 								                <div class='input-group date' id='resource-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
-								                    <div class="input-group-addon">
-								                    Since
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    Since
+                                               </span>
 								                    </div>
 								                    <input type='text' class="form-control" id="resource-history-since" placeholder="(opt)"/>
-								                    <div class="input-group-addon">
+								                    <div class="input-group-addon"> <!-- input-group-addon is from Bootstrap3 but the time picker needs it there -->
 								                    <span class="glyphicon glyphicon-calendar"></span>
 								                    </div>
 								                </div>
@@ -332,8 +343,10 @@
 										<div class='col-sm-2'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Limit
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    Limit
+                                               </span>
 								                    </div>
 								                    <input type="text" class="form-control" id="resource-history-limit" placeholder="(#)"/>
 								                </div>
@@ -365,10 +378,12 @@
 																	
 								<!-- Delete -->
 								
-									<div class="row-fluid">
-										<b>Delete</b> an individual instance of the resource 			
+									<div class="row">
+                              <div class="col-12">
+										   <b>Delete</b> an individual instance of the resource
+                              </div>
 									</div>
-								    <div class="row-fluid top-buffer">
+								    <div class="row top-buffer">
 								    	<div class="col-sm-2">
 											<button type="button" id="resource-delete-btn" class="btn btn-primary btn-block">
 												<i class="fa fa-trash-alt"></i>
@@ -378,11 +393,13 @@
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    ID
-								                    <span class="loadingStar">*</span>
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    ID
+                                                  <span class="loadingStar">*</span>
+                                               </span>
 								                    </div>
-								                    <input type="text" class="form-control" id="resource-delete-id"/>
+								                    <input type="text" class="form-control rounded-right" id="resource-delete-id"/>
 								                </div>
 								            </div>
 								        </div>											
@@ -401,11 +418,13 @@
 																	
 								<!-- Create -->
 								
-									<div class="row-fluid">
-										<b>Create</b> an instance of the resource. Generally you do not need to specify an ID
-										but you may force the server to use a specific ID by including one. 
+									<div class="row">
+                              <div class="col-12">
+                                 <b>Create</b> an instance of the resource. Generally you do not need to specify an ID
+                                 but you may force the server to use a specific ID by including one.
+                              </div>
 									</div>
-								    <div class="row-fluid top-buffer">
+								    <div class="row top-buffer">
 								    	<div class="col-sm-2">
 											<button type="button" id="resource-create-btn"
 												class="btn btn-primary btn-block">
@@ -416,8 +435,10 @@
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    ID
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    ID
+                                               </span>
 								                    </div>
 								                    <input type="text" class="form-control" id="resource-create-id" placeholder="(optional)"/>
 								                </div>
@@ -426,9 +447,11 @@
 										<div class='col-sm-7'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Contents
-								                    <span class="loadingStar">*</span>
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                     Contents
+								                           <span class="loadingStar">*</span>
+                                               </span>
 								                    </div>
 								                    <textarea class="form-control" id="resource-create-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
 								                </div>
@@ -463,10 +486,12 @@
 
 								<!-- Update -->
 								
-									<div class="row-fluid">
-										<b>Update</b> an existing instance of the resource by ID.
+									<div class="row">
+                              <div class="col-12">
+   										<b>Update</b> an existing instance of the resource by ID.
+                              </div>
 									</div>
-								    <div class="row-fluid top-buffer">
+								    <div class="row top-buffer">
 								    	<div class="col-sm-2">
 											<button type="button" id="resource-update-btn" class="btn btn-primary btn-block">
 												<i class="fa fa-book-open"></i>
@@ -476,20 +501,24 @@
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-									                    ID
-														<span class="loadingStar">*</span>
-								                    </div>
-								                    <input type="text" class="form-control" id="resource-update-id" placeholder="(resource ID)" th:value="${updateResourceId}"/>
+                                           <div class="input-group-prepend">
+                                            <span class="input-group-text">
+   									                  ID
+                                                <span class="loadingStar">*</span>
+                                             </span>
+								                   </div>
+                                           <input type="text" class="form-control" id="resource-update-id" placeholder="(resource ID)" th:value="${updateResourceId}"/>
 								                </div>
 								            </div>
 								        </div>											
 										<div class='col-sm-7'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Contents
-								                    <span class="loadingStar">*</span>
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+								                           Contents
+                                                   <span class="loadingStar">*</span>
+                                               </span>
 								                    </div>
 								                    <textarea class="form-control" id="resource-update-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"><th:block th:if="${updateResource} != null" th:text="${updateResource}"/></textarea>
 								                </div>
@@ -526,12 +555,14 @@
 
 								<!-- Validate -->
 								
-									<div class="row-fluid">
-										<b>Validate</b> an instance of the resource to check whether it
-										would be acceptable for creating/updating, without actually
-										storing it on the server.
+									<div class="row">
+                              <div class="col-12">
+                                 <b>Validate</b> an instance of the resource to check whether it
+                                 would be acceptable for creating/updating, without actually
+                                 storing it on the server.
+                              </div>
 									</div>
-								    <div class="row-fluid top-buffer">
+								    <div class="row top-buffer">
 								    	<div class="col-sm-2">
 											<button type="button" id="resource-validate-btn" class="btn btn-primary btn-block">
 												<i class="fa fa-thumbs-up"></i>
@@ -541,9 +572,11 @@
 										<div class='col-sm-10'>
 								            <div class="form-group">
 								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    Contents
-								                    <span class="loadingStar">*</span>
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                     Contents
+								                           <span class="loadingStar">*</span>
+                                               </span>
 								                    </div>
 								                    <textarea class="form-control" id="resource-validate-body" style="white-space: nowrap; overflow: auto;" placeholder="(place resource body here)" rows="1"></textarea>
 								                </div>
@@ -569,68 +602,9 @@
 								</div>
 							</div>
 							<!-- End of other operations tab -->
-							
-							<!-- *************************************************** -->
-							<!-- Queries Tab -->
-							<!-- *************************************************** -->
-							<div class="tab-pane" id="tab-tags">
-								<div class="container-fluid">
 
-								<!-- Get Tags -->
-								<!-- 
-								
-									<div class="row-fluid">
-										Show all of the tags currently in use on the server for this resource type. If an ID is specified,
-										returns only tags posted to the given version. If an ID and a version are specified, 
-										returns only the tags posted to the given resource version.									
-									</div>
-								    <div class="row-fluid">
-								    	<div class="col-sm-2">
-											<button type="button" id="get-resource-tags-btn" class="btn btn-primary btn-block">
-												<i class="fa fa-tags"></i>
-												Get Tags
-											</button>
-										</div>
-										<div class='col-sm-3'>
-								            <div class="form-group">
-								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    ID
-								                    </div>
-								                    <input type="text" class="form-control" id="resource-tags-id" placeholder="(instance ID)"/>
-								                </div>
-								            </div>
-								        </div>																					
-										<div class='col-sm-3'>
-								            <div class="form-group">
-								                <div class='input-group date'>
-								                    <div class="input-group-addon">
-								                    VID
-								                    </div>
-								                    <input type="text" class="form-control" id="resource-tags-vid" placeholder="(version)"/>
-								                </div>
-								            </div>
-								        </div>																					
-										<script type="text/javascript">
-											$('#get-resource-tags-btn').click(
-												function() {
-													var btn = $(this);
-													handleActionButtonClick($(this));
-													var id = $('#resource-tags-id').val();
-													if (id != null) btn.append($('<input />', { type: 'hidden', name: 'resource-tags-id', value: id }));
-													var vid = $('#resource-tags-vid').val();
-													if (vid != null) btn.append($('<input />', { type: 'hvidden', name: 'resource-tags-vid', value: vid }));
-													$("#outerForm").attr("action", "get-tags").submit();
-											});
-										</script>
-									</div>
-								-->
-							
-								</div>							
-							</div>
-							<!-- End of queries tab -->
-							
-						</div>
+
+                  </div></div>
 						<!-- End of tab pane -->
 						
 				</div>
