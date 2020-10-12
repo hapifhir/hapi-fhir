@@ -27,12 +27,12 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -65,24 +65,24 @@ public class MatchResourceUrlService {
 		return search(paramMap, theResourceType, theRequest);
 	}
 
-	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theTheRequest) {
+	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest) {
 		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theTheRequest);
+		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
-		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theTheRequest)) {
+		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
 			StorageProcessingMessage message = new StorageProcessingMessage();
 			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw.toString());
 			HookParams params = new HookParams()
-				.add(RequestDetails.class, theTheRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theTheRequest)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
 				.add(StorageProcessingMessage.class, message);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theTheRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
 		}
 		return retVal;
 	}

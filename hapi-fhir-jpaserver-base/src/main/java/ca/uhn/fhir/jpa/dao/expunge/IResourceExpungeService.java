@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.data.domain.Slice;
 
