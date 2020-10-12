@@ -42,10 +42,13 @@ import java.util.Collections;
 
 public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>implements IFhirResourceDaoPatient<Patient> {
 
-	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequest) {
+	private IBundleProvider doEverythingOperation(IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequest) {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		if (theCount != null) {
 			paramMap.setCount(theCount.getValue());
+		}
+		if (theOffset != null) {
+			paramMap.setOffset(theOffset.getValue());
 		}
 		if (theContent != null) {
 			paramMap.add(Constants.PARAM_CONTENT, theContent);
@@ -69,13 +72,13 @@ public class FhirResourceDaoPatientR4 extends BaseHapiFhirResourceDao<Patient>im
 	}
 
 	@Override
-	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
-		return doEverythingOperation(theId, theCount, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
+	public IBundleProvider patientInstanceEverything(HttpServletRequest theServletRequest, IIdType theId, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
+		return doEverythingOperation(theId, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
 	}
 
 	@Override
-	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
-		return doEverythingOperation(null, theCount, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
+	public IBundleProvider patientTypeEverything(HttpServletRequest theServletRequest, IPrimitiveType<Integer> theCount, IPrimitiveType<Integer> theOffset, DateRangeParam theLastUpdated, SortSpec theSort, StringAndListParam theContent, StringAndListParam theNarrative, StringAndListParam theFilter, RequestDetails theRequestDetails) {
+		return doEverythingOperation(null, theCount, theOffset, theLastUpdated, theSort, theContent, theNarrative, theFilter, theRequestDetails);
 	}
 
 }

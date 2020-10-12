@@ -101,12 +101,21 @@ public class MatchUrlService {
 				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
-				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
+				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
 						paramMap.setCount(Integer.parseInt(intString));
 					} catch (NumberFormatException e) {
 						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + intString);
+					}
+				}
+			} else if (Constants.PARAM_OFFSET.equals(nextParamName)) {
+				if (paramList != null && paramList.size() > 0 && paramList.get(0).size() > 0) {
+					String intString = paramList.get(0).get(0);
+					try {
+						paramMap.setOffset(Integer.parseInt(intString));
+					} catch (NumberFormatException e) {
+						throw new InvalidRequestException("Invalid " + Constants.PARAM_OFFSET + " value: " + intString);
 					}
 				}
 			} else if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {

@@ -50,6 +50,16 @@ public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQue
 	IQuery<Y> count(int theCount);
 
 	/**
+	 * Specifies the <code>_offset</code> parameter, which indicates to the server the offset of the query. Use
+	 * with {@link #count(int)}.
+	 *
+	 * This parameter is not part of the FHIR standard, all servers might not implement it.
+	 *
+	 * @since 5.2
+	 */
+	IQuery<Y> offset(int theOffset);
+
+	/**
 	 * Add an "_include" specification or an "_include:recurse" specification. If you are using
 	 * a constant from one of the built-in structures you can select whether you want recursive
 	 * behaviour by using the following syntax:

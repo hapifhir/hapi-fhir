@@ -49,6 +49,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -231,6 +232,76 @@ public class RestfulServerUtils {
 
 			parser.setEncodeElements(newElements);
 		}
+	}
+
+
+	public static String createLinkSelf(String theServerBase, RequestDetails theRequest) {
+		StringBuilder b = new StringBuilder();
+		b.append(theServerBase);
+
+		if (isNotBlank(theRequest.getRequestPath())) {
+			b.append('/');
+			if (isNotBlank(theRequest.getTenantId()) && theRequest.getRequestPath().startsWith(theRequest.getTenantId() + "/")) {
+				b.append(theRequest.getRequestPath().substring(theRequest.getTenantId().length() + 1));
+			} else {
+				b.append(theRequest.getRequestPath());
+			}
+		}
+		// For POST the URL parameters get jumbled with the post body parameters so don't include them, they might be huge
+		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+			boolean first = true;
+			Map<String, String[]> parameters = theRequest.getParameters();
+			for (String nextParamName : new TreeSet<>(parameters.keySet())) {
+				for (String nextParamValue : parameters.get(nextParamName)) {
+					if (first) {
+						b.append('?');
+						first = false;
+					} else {
+						b.append('&');
+					}
+					b.append(UrlUtil.escapeUrlParam(nextParamName));
+					b.append('=');
+					b.append(UrlUtil.escapeUrlParam(nextParamValue));
+				}
+			}
+		}
+
+		return b.toString();
+	}
+
+	public static String createOffsetPagingLink(String theServerBase, String requestPath, String tenantId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters) {
+		StringBuilder b = new StringBuilder();
+		b.append(theServerBase);
+
+		if (isNotBlank(requestPath)) {
+			b.append('/');
+			if (isNotBlank(tenantId) && requestPath.startsWith(tenantId + "/")) {
+				b.append(requestPath.substring(tenantId.length() + 1));
+			} else {
+				b.append(requestPath);
+			}
+		}
+
+		Map<String, String[]> params = Maps.newLinkedHashMap(theRequestParameters);
+		params.put(Constants.PARAM_OFFSET, new String[]{String.valueOf(theOffset)});
+		params.put(Constants.PARAM_COUNT, new String[]{String.valueOf(theCount)});
+
+		boolean first = true;
+		for (String nextParamName : new TreeSet<>(params.keySet())) {
+			for (String nextParamValue : params.get(nextParamName)) {
+				if (first) {
+					b.append('?');
+					first = false;
+				} else {
+					b.append('&');
+				}
+				b.append(UrlUtil.escapeUrlParam(nextParamName));
+				b.append('=');
+				b.append(UrlUtil.escapeUrlParam(nextParamValue));
+			}
+		}
+
+		return b.toString();
 	}
 
 	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
@@ -571,6 +642,10 @@ public class RestfulServerUtils {
 
 	public static Integer extractCountParameter(RequestDetails theRequest) {
 		return RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_COUNT);
+	}
+
+	public static Integer extractOffsetParameter(RequestDetails theRequest) {
+		return RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_OFFSET);
 	}
 
 	public static IPrimitiveType<Date> extractLastUpdatedFromResource(IBaseResource theResource) {

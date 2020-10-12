@@ -70,6 +70,7 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -1243,8 +1244,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 
-			if (!isPagingProviderDatabaseBacked(theRequest)) {
+			final Integer offset = RestfulServerUtils.extractOffsetParameter(theRequest);
+			if (offset != null || !isPagingProviderDatabaseBacked(theRequest)) {
 				theParams.setLoadSynchronous(true);
+				if (offset != null) {
+					Validate.inclusiveBetween(0, Integer.MAX_VALUE, offset.intValue(), "Offset must be a positive integer");
+				}
+				theParams.setOffset(offset);
+			}
+
+			final Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+			if (count != null) {
+				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
+				if (maxPageSize != null) {
+					Validate.inclusiveBetween(1, theRequest.getServer().getMaximumPageSize(), count.intValue(), "Count must be positive integer and less than " + maxPageSize);
+				}
+				theParams.setCount(count);
+			} else if (theRequest.getServer().getDefaultPageSize() != null) {
+				theParams.setCount(theRequest.getServer().getDefaultPageSize());
 			}
 		}
 
