@@ -1,0 +1,36 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "ft4",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: ft4\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: reflex-order\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Free T4 \u003cspan\u003e(Details : {LOINC code \u00273024-7\u0027 \u003d \u0027Thyroxine (T4) free [Mass/volume] in Serum or Plasma\u0027, given as \u0027Thyroxine (T4) free [Mass/​volume] in Serum or Plasma\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/pat2\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eoccurrence\u003c/b\u003e: 27/08/2015 9:33:27 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003ePractitioner/example\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "active",
+  "intent": "reflex-order",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "3024-7",
+        "display": "Thyroxine (T4) free [Mass/​volume] in Serum or Plasma"
+      }
+    ],
+    "text": "Free T4"
+  },
+  "subject": {
+    "reference": "Patient/pat2"
+  },
+  "occurrenceDateTime": "2015-08-27T09:33:27+07:00",
+  "requester": {
+    "reference": "Practitioner/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

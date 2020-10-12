@@ -1,0 +1,77 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "allergyintolerance-verification",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAllergyIntolerance Verification Status Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003ePreferred value set for AllergyIntolerance Verification Status.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/allergyintolerance-verification defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunconfirmed\u003ca name\u003d\"allergyintolerance-verification-unconfirmed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnconfirmed\u003c/td\u003e\u003ctd\u003eA low level of certainty about the propensity for a reaction to the identified substance.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econfirmed\u003ca name\u003d\"allergyintolerance-verification-confirmed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConfirmed\u003c/td\u003e\u003ctd\u003eA high level of certainty about the propensity for a reaction to the identified substance, which may include clinical evidence by testing or rechallenge.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erefuted\u003ca name\u003d\"allergyintolerance-verification-refuted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRefuted\u003c/td\u003e\u003ctd\u003eA propensity for a reaction to the identified substance has been disputed or disproven with a sufficient level of clinical certainty to justify invalidating the assertion. This might or might not include testing or rechallenge.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"allergyintolerance-verification-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe statement was entered in error and is not valid.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1371"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AllergyIntoleranceVerificationStatusCodes",
+  "title": "AllergyIntolerance Verification Status Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Preferred value set for AllergyIntolerance Verification Status.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/allergyintolerance-verification",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "unconfirmed",
+      "display": "Unconfirmed",
+      "definition": "A low level of certainty about the propensity for a reaction to the identified substance."
+    },
+    {
+      "code": "confirmed",
+      "display": "Confirmed",
+      "definition": "A high level of certainty about the propensity for a reaction to the identified substance, which may include clinical evidence by testing or rechallenge."
+    },
+    {
+      "code": "refuted",
+      "display": "Refuted",
+      "definition": "A propensity for a reaction to the identified substance has been disputed or disproven with a sufficient level of clinical certainty to justify invalidating the assertion. This might or might not include testing or rechallenge."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The statement was entered in error and is not valid."
+    }
+  ]
+}

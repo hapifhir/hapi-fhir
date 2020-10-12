@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "map-model-mode",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStructureMapModelMode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eHow the referenced structure is used in this mapping.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/map-model-mode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esource\u003ca name\u003d\"map-model-mode-source\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSource Structure Definition\u003c/td\u003e\u003ctd\u003eThis structure describes an instance passed to the mapping engine that is used a source of data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003equeried\u003ca name\u003d\"map-model-mode-queried\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQueried Structure Definition\u003c/td\u003e\u003ctd\u003eThis structure describes an instance that the mapping engine may ask for that is used a source of data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etarget\u003ca name\u003d\"map-model-mode-target\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTarget Structure Definition\u003c/td\u003e\u003ctd\u003eThis structure describes an instance passed to the mapping engine that is used a target of data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproduced\u003ca name\u003d\"map-model-mode-produced\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProduced Structure Definition\u003c/td\u003e\u003ctd\u003eThis structure describes an instance that the mapping engine may ask to create that is used a target of data.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/map-model-mode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.676"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "StructureMapModelMode",
+  "title": "StructureMapModelMode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "How the referenced structure is used in this mapping.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/map-model-mode",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "source",
+      "display": "Source Structure Definition",
+      "definition": "This structure describes an instance passed to the mapping engine that is used a source of data."
+    },
+    {
+      "code": "queried",
+      "display": "Queried Structure Definition",
+      "definition": "This structure describes an instance that the mapping engine may ask for that is used a source of data."
+    },
+    {
+      "code": "target",
+      "display": "Target Structure Definition",
+      "definition": "This structure describes an instance passed to the mapping engine that is used a target of data."
+    },
+    {
+      "code": "produced",
+      "display": "Produced Structure Definition",
+      "definition": "This structure describes an instance that the mapping engine may ask to create that is used a target of data."
+    }
+  ]
+}

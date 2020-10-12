@@ -1,0 +1,35 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "example-extension",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-extension\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/SearchParameter/example-extension\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Example Search Parameter on an extension\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Health Level Seven International (FHIR Infrastructure)\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Search by url for a participation agreement, which is stored in a DocumentReference\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: part-agree\u003c/p\u003e\u003cp\u003e\u003cb\u003ebase\u003c/b\u003e: Patient\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: reference\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: DocumentReference.extension(\u0027http://example.org/fhir/StructureDefinition/participation-agreement\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003expath\u003c/b\u003e: f:DocumentReference/f:extension[@url\u003d\u0027http://example.org/fhir/StructureDefinition/participation-agreement\u0027]\u003c/p\u003e\u003cp\u003e\u003cb\u003expathUsage\u003c/b\u003e: normal\u003c/p\u003e\u003cp\u003e\u003cb\u003etarget\u003c/b\u003e: DocumentReference\u003c/p\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/SearchParameter/example-extension",
+  "name": "Example Search Parameter on an extension",
+  "status": "draft",
+  "experimental": true,
+  "publisher": "Health Level Seven International (FHIR Infrastructure)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Search by url for a participation agreement, which is stored in a DocumentReference",
+  "code": "part-agree",
+  "base": [
+    "Patient"
+  ],
+  "type": "reference",
+  "expression": "DocumentReference.extension(\u0027http://example.org/fhir/StructureDefinition/participation-agreement\u0027)",
+  "xpath": "f:DocumentReference/f:extension[@url\u003d\u0027http://example.org/fhir/StructureDefinition/participation-agreement\u0027]",
+  "xpathUsage": "normal",
+  "target": [
+    "DocumentReference"
+  ]
+}

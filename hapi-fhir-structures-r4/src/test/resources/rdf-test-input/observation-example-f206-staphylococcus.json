@@ -1,0 +1,71 @@
+{
+  "resourceType": "Observation",
+  "id": "f206",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f206\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Blood culture \u003cspan\u003e(Details : {http://acmelabs.org code \u0027104177\u0027 \u003d \u0027104177\u0027, given as \u0027Blood culture\u0027}; {LOINC code \u0027600-7\u0027 \u003d \u0027Bacteria identified in Blood by Culture\u0027, given as \u0027Bacteria identified in Blood by Culture\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 11/03/2013 10:28:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eLuigi Maas\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Staphylococcus aureus \u003cspan\u003e(Details : {SNOMED CT code \u00273092008\u0027 \u003d \u0027Staphylococcus aureus\u0027, given as \u0027Staphylococcus aureus\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Positive \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027POS\u0027 \u003d \u0027Positive)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emethod\u003c/b\u003e: Blood culture for bacteria, including anaerobic screen \u003cspan\u003e(Details : {SNOMED CT code \u0027104177005\u0027 \u003d \u0027Blood culture for bacteria, including anaerobic screen\u0027, given as \u0027Blood culture for bacteria, including anaerobic screen\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://acmelabs.org",
+        "code": "104177",
+        "display": "Blood culture"
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "600-7",
+        "display": "Bacteria identified in Blood by Culture"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "issued": "2013-03-11T10:28:00+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/f202",
+      "display": "Luigi Maas"
+    }
+  ],
+  "valueCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "3092008",
+        "display": "Staphylococcus aureus"
+      }
+    ]
+  },
+  "interpretation": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+          "code": "POS"
+        }
+      ]
+    }
+  ],
+  "method": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "104177005",
+        "display": "Blood culture for bacteria, including anaerobic screen"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

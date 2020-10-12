@@ -1,0 +1,121 @@
+{
+  "resourceType": "MedicinalProduct",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: {mpid}\u003c/p\u003e\u003cp\u003e\u003cb\u003eproductClassification\u003c/b\u003e: WHOAnatomicalTherapeuticChemicalATCClassificationSystem|B01AF02 \u003cspan\u003e(Details : {http://ema.europa.eu/example/WHOAnatomicalTherapeuticChemicalATCClassificationSystem code \u0027WHOAnatomicalTherapeuticChemicalATCClassificationSystem|B01AF02\u0027 \u003d \u0027WHOAnatomicalTherapeuticChemicalATCClassificationSystem|B01AF02)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eattachedDocument\u003c/b\u003e: \u003ca\u003eDocumentReference/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emasterFile\u003c/b\u003e: \u003ca\u003eDocumentReference/example\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eproductName\u003c/b\u003e: Equilidem 2.5 mg film-coated tablets\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003enamePart\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epart\u003c/b\u003e: Equilidem\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: INV (Details: [not stated] code INV \u003d \u0027INV\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003enamePart\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epart\u003c/b\u003e: 2.5 mg\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: STR (Details: [not stated] code STR \u003d \u0027STR\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003enamePart\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epart\u003c/b\u003e: film-coated tablets\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: FRM (Details: [not stated] code FRM \u003d \u0027FRM\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003c/blockquote\u003e\u003ch3\u003eCountryLanguages\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCountry\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eJurisdiction\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLanguage\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eEU \u003cspan\u003e(Details : {http://ema.europa.eu/example/countryCode code \u0027EU\u0027 \u003d \u0027EU)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eEU \u003cspan\u003e(Details : {http://ema.europa.eu/example/jurisdictionCode code \u0027EU\u0027 \u003d \u0027EU)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eEN \u003cspan\u003e(Details : {http://ema.europa.eu/example/languageCode code \u0027EN\u0027 \u003d \u0027EN)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003ch3\u003eManufacturingBusinessOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eOperationType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAuthorisationReferenceNumber\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEffectiveDate\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eManufacturer\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRegulator\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eBatchrelease \u003cspan\u003e(Details : {http://ema.europa.eu/example/manufacturingOperationType code \u0027Batchrelease\u0027 \u003d \u0027Batchrelease)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e1324TZ\u003c/td\u003e\u003ctd\u003e15/03/2013\u003c/td\u003e\u003ctd\u003e\u003ca\u003eOrganization/example\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003eOrganization/example\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://ema.europa.eu/example/MPID",
+      "value": "{mpid}"
+    }
+  ],
+  "productClassification": [
+    {
+      "coding": [
+        {
+          "system": "http://ema.europa.eu/example/WHOAnatomicalTherapeuticChemicalATCClassificationSystem",
+          "code": "WHOAnatomicalTherapeuticChemicalATCClassificationSystem|B01AF02"
+        }
+      ]
+    }
+  ],
+  "attachedDocument": [
+    {
+      "reference": "DocumentReference/example"
+    }
+  ],
+  "masterFile": [
+    {
+      "reference": "DocumentReference/example"
+    }
+  ],
+  "name": [
+    {
+      "productName": "Equilidem 2.5 mg film-coated tablets",
+      "namePart": [
+        {
+          "part": "Equilidem",
+          "type": {
+            "code": "INV"
+          }
+        },
+        {
+          "part": "2.5 mg",
+          "type": {
+            "code": "STR"
+          }
+        },
+        {
+          "part": "film-coated tablets",
+          "type": {
+            "code": "FRM"
+          }
+        }
+      ],
+      "countryLanguage": [
+        {
+          "country": {
+            "coding": [
+              {
+                "system": "http://ema.europa.eu/example/countryCode",
+                "code": "EU"
+              }
+            ]
+          },
+          "jurisdiction": {
+            "coding": [
+              {
+                "system": "http://ema.europa.eu/example/jurisdictionCode",
+                "code": "EU"
+              }
+            ]
+          },
+          "language": {
+            "coding": [
+              {
+                "system": "http://ema.europa.eu/example/languageCode",
+                "code": "EN"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "manufacturingBusinessOperation": [
+    {
+      "operationType": {
+        "coding": [
+          {
+            "system": "http://ema.europa.eu/example/manufacturingOperationType",
+            "code": "Batchrelease"
+          }
+        ]
+      },
+      "authorisationReferenceNumber": {
+        "system": "http://ema.europa.eu/example/manufacturingAuthorisationReferenceNumber",
+        "value": "1324TZ"
+      },
+      "effectiveDate": "2013-03-15",
+      "manufacturer": [
+        {
+          "reference": "Organization/example"
+        }
+      ],
+      "regulator": {
+        "reference": "Organization/example"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "example",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eCodeSystem \u0026quot;ACME Codes for Cholesterol\u0026quot;: This is an example code system that includes \n        all the codes for serum cholesterol defined by ACME inc.\u003c/p\u003e\n      \u003cp\u003eDeveloped by: FHIR project team (example)\u003c/p\u003e\n      \u003cp\u003ePublished for testing on 28-Jan 2016\u003c/p\u003e\n      \u003cp\u003eThis code system defines all the ACME codes for serum cholesterol:\u003c/p\u003e\n      \u003ctable class\u003d\"grid\"\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDisplay\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDefinition\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echol-mmol\u003c/td\u003e\n          \u003ctd\u003eSChol (mmol/L)\u003c/td\u003e\n          \u003ctd\u003eSerum Cholesterol, in mmol/L\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echol-mass\u003c/td\u003e\n          \u003ctd\u003eSChol (mg/L)\u003c/td\u003e\n          \u003ctd\u003eSerum Cholesterol, in mg/L\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003echol\u003c/td\u003e\n          \u003ctd\u003eSChol\u003c/td\u003e\n          \u003ctd\u003eSerum Cholesterol\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/CodeSystem/example",
+  "identifier": [
+    {
+      "system": "http://acme.com/identifiers/codesystems",
+      "value": "internal-cholesterol-inl"
+    }
+  ],
+  "version": "20160128",
+  "name": "ACMECholCodesBlood",
+  "title": "ACME Codes for Cholesterol in Serum/Plasma",
+  "status": "draft",
+  "experimental": true,
+  "date": "2016-01-28",
+  "publisher": "Acme Co",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is an example code system that includes all the ACME codes for serum/plasma cholesterol from v2.36.",
+  "caseSensitive": true,
+  "content": "complete",
+  "filter": [
+    {
+      "code": "acme-plasma",
+      "description": "An internal filter used to select codes that are only used with plasma",
+      "operator": [
+        "\u003d"
+      ],
+      "value": "the value of this filter is either \u0027true\u0027 or \u0027false\u0027"
+    }
+  ],
+  "concept": [
+    {
+      "code": "chol-mmol",
+      "display": "SChol (mmol/L)",
+      "definition": "Serum Cholesterol, in mmol/L",
+      "designation": [
+        {
+          "use": {
+            "system": "http://acme.com/config/fhir/codesystems/internal",
+            "code": "internal-label"
+          },
+          "value": "From ACME POC Testing"
+        }
+      ]
+    },
+    {
+      "code": "chol-mass",
+      "display": "SChol (mg/L)",
+      "definition": "Serum Cholesterol, in mg/L",
+      "designation": [
+        {
+          "use": {
+            "system": "http://acme.com/config/fhir/codesystems/internal",
+            "code": "internal-label"
+          },
+          "value": "From Paragon Labs"
+        }
+      ]
+    },
+    {
+      "code": "chol",
+      "display": "SChol",
+      "definition": "Serum Cholesterol",
+      "designation": [
+        {
+          "use": {
+            "system": "http://acme.com/config/fhir/codesystems/internal",
+            "code": "internal-label"
+          },
+          "value": "Obdurate Labs uses this with both kinds of units..."
+        }
+      ]
+    }
+  ]
+}

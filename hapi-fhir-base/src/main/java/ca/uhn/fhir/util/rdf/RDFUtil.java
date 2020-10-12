@@ -20,42 +20,31 @@ package ca.uhn.fhir.util.rdf;
  * #L%
  */
 
-import org.apache.commons.io.input.ReaderInputStream;
-import org.apache.commons.io.output.WriterOutputStream;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.system.StreamRDFWriter;
+import org.apache.jena.riot.RDFDataMgr;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.util.*;
 
 public class RDFUtil {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RDFUtil.class);
-	private static final Map<String, Integer> VALID_ENTITY_NAMES;
 
-	static {
-		HashMap<String, Integer> validEntityNames = new HashMap<>(1448);
-		VALID_ENTITY_NAMES = Collections.unmodifiableMap(validEntityNames);
+	public static Model initializeRDFModel() {
+		// Create the model
+		return ModelFactory.createDefaultModel();
 	}
 
-	public static StreamRDF createRDFWriter(final Writer writer, final Lang lang) {
-		WriterOutputStream wos = new WriterOutputStream(writer, Charset.defaultCharset());
-		return StreamRDFWriter.getWriterStream(wos, lang);
+	public static Model readRDFToModel(final Reader reader, final Lang lang) {
+		Model rdfModel = initializeRDFModel();
+		RDFDataMgr.read(rdfModel, reader, null, lang);
+		return rdfModel;
 	}
 
-	public static StreamRDF createRDFReader(final Reader reader, final Lang lang) {
-		ReaderInputStream ris = new ReaderInputStream(reader, Charset.defaultCharset());
-		return StreamRDFWriter.getWriterStream(null, lang);
+	public static void writeRDFModel(Writer writer, Model rdfModel, Lang lang) {
+		// This writes to the provided Writer.
+		// Jena has deprecated methods that use a generic Writer
+		// writer could be explicitly casted to StringWriter in order to hit a
+		// non-deprecated overload
+		RDFDataMgr.write(writer, rdfModel, lang);
 	}
-
-	public static Triple triple(String tripleAsTurtle) {
-		Model m = ModelFactory.createDefaultModel();
-		m.read(new StringReader(tripleAsTurtle), "urn:x-base:", "TURTLE");
-		return m.listStatements().next().asTriple();
-	}
-
 }

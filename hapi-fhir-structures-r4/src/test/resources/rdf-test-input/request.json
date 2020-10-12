@@ -1,0 +1,1391 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Request",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eto do\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "informative"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/Request",
+  "version": "4.0.1",
+  "name": "Request",
+  "title": "request",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Health Level Seven International fhir",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Logical Model: A pattern to be followed by resources that represent a specific proposal, plan and/or order for some sort of action or service.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "v2",
+      "uri": "http://hl7.org/v2",
+      "name": "HL7 v2 Mapping"
+    },
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    },
+    {
+      "identity": "w5",
+      "uri": "http://hl7.org/fhir/fivews",
+      "name": "FiveWs Pattern Mapping"
+    }
+  ],
+  "kind": "logical",
+  "abstract": false,
+  "type": "Request",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Request",
+        "path": "Request",
+        "short": "Request Pattern",
+        "definition": "A pattern to be followed by resources that represent a specific proposal, plan and/or order for some sort of action or service.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request",
+          "min": 0,
+          "max": "*"
+        },
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC"
+          },
+          {
+            "identity": "rim",
+            "map": "Act[moodCode\u003c\u003dINT]"
+          }
+        ]
+      },
+      {
+        "id": "Request.identifier",
+        "path": "Request.identifier",
+        "short": "Business Identifier for {{title}}",
+        "definition": "Business identifiers assigned to this {{title}} by the author and/or other systems.  These identifiers remain constant as the resource is updated and propagates from server to server.",
+        "comment": "The identifier.type element is used to distinguish between the identifiers assigned by the requester/placer and the performer/filler.\n\nNote: This is a business identifier, not a resource identifier (see [discussion](resource.html#identifiers)).  It is best practice for the identifier to only appear on a single resource instance, however business practices may occasionally dictate that multiple resource instances with the same identifier can exist - possibly even with different resource types.  For example, multiple Patient and a Person resource instance might share the same social insurance number.",
+        "requirements": "Allows identification of the {{title}} as it is known by various participating systems and in a way that remains consistent across servers.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.identifier",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.2, ORC.3"
+          },
+          {
+            "identity": "rim",
+            "map": ".identifier"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          }
+        ]
+      },
+      {
+        "id": "Request.instantiatesCanonical",
+        "path": "Request.instantiatesCanonical",
+        "short": "Instantiates FHIR protocol or definition",
+        "definition": "The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this {{title}}.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.instantiatesCanonical",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Definition"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dDEFN].target"
+          }
+        ]
+      },
+      {
+        "id": "Request.instantiatesUri",
+        "path": "Request.instantiatesUri",
+        "short": "Instantiates external protocol or definition",
+        "definition": "The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this {{title}}.",
+        "comment": "This might be an HTML page, PDF, etc. or could just be a non-resolvable URI identifier.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.instantiatesUri",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dDEFN].target"
+          }
+        ]
+      },
+      {
+        "id": "Request.basedOn",
+        "path": "Request.basedOn",
+        "short": "Fulfills plan, proposal or order",
+        "definition": "A plan, proposal or order that is fulfilled in whole or in part by this {{title}}.",
+        "comment": "[The allowed reference resources may be adjusted as appropriate for the request resource].",
+        "requirements": "Allows tracing of authorization for the request and tracking whether proposals/recommendations were acted upon.",
+        "alias": [
+          "fulfills"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.basedOn",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Request"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.8 (plus others)"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dFLFS].target"
+          }
+        ]
+      },
+      {
+        "id": "Request.replaces",
+        "path": "Request.replaces",
+        "short": "Request(s) replaced by this {{title}}",
+        "definition": "Completed or terminated request(s) whose function is taken by this new {{title}}.",
+        "comment": "The replacement could be because the initial request was immediately rejected (due to an issue) or because the previous request was completed, but the need for the action described by the request remains ongoing.",
+        "requirements": "Allows tracing the continuation of a therapy or administrative process instantiated through multiple requests.",
+        "alias": [
+          "supersedes",
+          "prior",
+          "renewed order"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.replaces",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Request"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Handled by message location of ORC (ORC.1\u003dRO or RU)"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dRPLC].target"
+          }
+        ]
+      },
+      {
+        "id": "Request.groupIdentifier",
+        "path": "Request.groupIdentifier",
+        "short": "Composite request this is part of",
+        "definition": "A shared identifier common to all requests that were authorized more or less simultaneously by a single author, representing the identifier of the requisition, prescription or similar form.",
+        "comment": "Requests are linked either by a \"basedOn\" relationship (i.e. one request is fulfilling another) or by having a common requisition.  Requests that are part of the same requisition are generally treated independently from the perspective of changing their state or maintaining them after initial creation.",
+        "requirements": "Some business processes need to know if multiple items were ordered as part of the same \"prescription\" or \"requisition\" for billing or other purposes.",
+        "alias": [
+          "grouperId",
+          "requisition"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.groupIdentifier",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.4"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship(typeCode\u003dCOMP].source[moodCode\u003dINT].identifier"
+          }
+        ]
+      },
+      {
+        "id": "Request.status",
+        "path": "Request.status",
+        "short": "draft | active | suspended | cancelled | completed | entered-in-error | unknown",
+        "definition": "The current state of the {{title}}.",
+        "comment": "The status is generally fully in the control of the requester - they determine whether the order is draft or active and, after it has been activated, completed, cancelled or suspended. States relating to the activities of the performer are reflected on either the corresponding [Event](event.html)(s) or using the [Task](task.html) resource.  A nominal state-transition diagram can be found in the [[request.html#statemachine | Request pattern]] documentation  Unknown does not represent \"other\" - one of the defined statuses must apply.  Unknown is used when the authoring system is not sure what the current status is.  A status of \u0027active\u0027 when doNotPerform is true means that the request to not perform is currently in force.\n\nA status of completed for a \"doNotPerform\" request indicates that the period of non-performance is now satisfied and the request no longer holds.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Request.status",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element is labeled as a modifier because it is a status element that contains status entered-in-error which means that the resource should not be treated as valid",
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "RequestStatus"
+            }
+          ],
+          "strength": "required",
+          "description": "Codes identifying the lifecycle stage of a request.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/request-status|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.5"
+          },
+          {
+            "identity": "rim",
+            "map": ".status"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.status"
+          }
+        ]
+      },
+      {
+        "id": "Request.statusReason",
+        "path": "Request.statusReason",
+        "short": "Reason for current status",
+        "definition": "Captures the reason for the current state of the {{title}}.",
+        "comment": "This is generally only used for \"exception\" statuses such as \"suspended\" or \"cancelled\".  The reason why the {{title}} was created at all is captured in reasonCode, not here.  [distinct reason codes for different statuses can be enforced using invariants if they are universal bindings].",
+        "alias": [
+          "Suspended Reason",
+          "Cancelled Reason"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.statusReason",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "RequestStatusReason"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes identifying the reason for the current state of a request."
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dSUBJ].source[classCode\u003dCACT, moodCode\u003dEVN].reasonCOde"
+          }
+        ]
+      },
+      {
+        "id": "Request.intent",
+        "path": "Request.intent",
+        "short": "proposal | plan | order (immutable)",
+        "definition": "Indicates the level of authority/intentionality associated with the {{title}} and where the request fits into the workflow chain.",
+        "comment": "This element is expected to be immutable.  E.g. A \"proposal\" instance should never change to be a \"plan\" instance or \"order\" instance.  Instead, a new instance \u0027basedOn\u0027 the prior instance should be created with the new \u0027intent\u0027 value.\n\nOne exception to this is that the granularity of Request.intent is allowed to change.  For example, a Request identified as an \"order\" might later be clarified to be a \"filler-order\".  Or, in rarer cases (to meet recipient constraints), the reverse might also occur.\n\nWhen resources map to this element, they are free to define as many codes as necessary to cover their space and will map to \"proposal, plan or order\".  Can have multiple codes that map to one of these.  E.g. \"original order\", \"encoded order\", \"reflex order\" would all map to \"order\".  Expectation is that the set of codes is mutually exclusive or a strict all-encompassing hierarchy.",
+        "requirements": "Proposals/recommendations, plans and orders all use the same structure and can exist in the same fulfillment chain.",
+        "alias": [
+          "category"
+        ],
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Request.intent",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element changes the interpretation of all descriptive attributes. For example \"the time the request is recommended to occur\" vs. \"the time the request is authorized to occur\" or \"who is recommended to perform the request\" vs. \"who is authorized to perform the request",
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "RequestIntent"
+            }
+          ],
+          "strength": "required",
+          "description": "Codes indicating the degree of authority/intentionality associated with a request.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/request-intent|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "N/A"
+          },
+          {
+            "identity": "rim",
+            "map": ".moodCode (nuances beyond PRP/PLAN/RQO would need to be elsewhere)"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.class"
+          }
+        ]
+      },
+      {
+        "id": "Request.priority",
+        "path": "Request.priority",
+        "short": "routine | urgent | asap | stat",
+        "definition": "Indicates how quickly the {{title}} should be addressed with respect to other requests.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.priority",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "meaningWhenMissing": "If missing, this task should be performed with normal priority",
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "RequestPriority"
+            }
+          ],
+          "strength": "required",
+          "description": "Identifies the level of importance to be assigned to actioning the request.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/request-priority|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "TQ1.9"
+          },
+          {
+            "identity": "rim",
+            "map": ".priorityCode"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.grade"
+          }
+        ]
+      },
+      {
+        "id": "Request.doNotPerform",
+        "path": "Request.doNotPerform",
+        "short": "true if request is prohibiting action",
+        "definition": "If true indicates that the {{title}} is asking for the specified action to *not* occur.",
+        "comment": "The attributes provided with the request qualify what is not to be done.  For example, if an effectiveTime is provided, the \"do not\" request only applies within the specified time.  If a performerType is specified then the \"do not\" request only applies to performers of that type.  Qualifiers include: code, subject, occurrence, perormerType and performer.\n\nIn some cases, the Request.code may pre-coordinate prohibition into the requested action.  E.g. \"NPO\" (nothing by mouth), \"DNR\" (do not recussitate).  If this happens, doNotPerform SHALL NOT be set to true.  I.e. The resource shall not have double negation. (E.g. \"Do not DNR\").",
+        "requirements": "Supports things like Do Not Recussitate, Nothing by mouth, etc.",
+        "alias": [
+          "prohibited"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.doNotPerform",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          }
+        ],
+        "meaningWhenMissing": "If do not perform is not specified, the request is a positive request e.g. \"do perform\"",
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "If true this element negates the specified action. For Example,  instead of a request for a procedure, it is a request for the procedure to not occur.",
+        "isSummary": true
+      },
+      {
+        "id": "Request.code",
+        "path": "Request.code",
+        "short": "What\u0027s being requested/ordered",
+        "definition": "A code that identifies the specific service or action being asked to be done (or not done).",
+        "alias": [
+          "type"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.code",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "RequestCode"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes indicating the details of what is being requested.  These will vary significantly based on the type of request resource and will often be example/preferred rather than extensible/required."
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".code"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.what[x]"
+          }
+        ]
+      },
+      {
+        "id": "Request.subject",
+        "path": "Request.subject",
+        "short": "Individual the service is ordered/prohibited for",
+        "definition": "The individual or set of individuals the action is to be performed/not performed on or for.",
+        "comment": "[For resources that aren\u0027t patient-specific, the set of allowed resources may be extended to include other things.  Group should generally be retained unless there\u0027s certainty this resource won\u0027t be used for veterinary, research or public health settings where Group may be necessary (e.g. this cage of rats/crate of chickens, group of people in a 5 mile radious of the incident, etc.)].",
+        "requirements": "Links the request to the Patient context.",
+        "alias": [
+          "patient"
+        ],
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Request.subject",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Group"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Accompanying PID segment"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dSBJ].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject"
+          }
+        ]
+      },
+      {
+        "id": "Request.encounter",
+        "path": "Request.encounter",
+        "short": "Encounter created as part of",
+        "definition": "The Encounter during which this {{title}} was created or to which the creation of this record is tightly associated.",
+        "comment": "This will typically be the encounter the request was created during, but some requests may be initiated prior to or after the official completion of an encounter but still be tied to the context of the encounter (e.g. pre-admission lab tests).",
+        "requirements": "Links the {{title}} to the Encounter context.",
+        "alias": [
+          "context"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.encounter",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Encounter"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Accompanying PV1"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship(typeCode\u003dCOMP].source[classCode\u003c\u003dPCPR, moodCode\u003dEVN]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.context"
+          }
+        ]
+      },
+      {
+        "id": "Request.occurrence[x]",
+        "path": "Request.occurrence[x]",
+        "short": "When service should (not) occur",
+        "definition": "The date or time(s) at which the activity or service is desired to occur or not occur.",
+        "comment": "[The list of types may be constrained as appropriate for the type of event].",
+        "alias": [
+          "timing"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.occurrence[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          },
+          {
+            "code": "Period"
+          },
+          {
+            "code": "Timing"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Accompanying TQ1/TQ2 segments"
+          },
+          {
+            "identity": "rim",
+            "map": ".effectiveTime"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.planned"
+          }
+        ]
+      },
+      {
+        "id": "Request.authoredOn",
+        "path": "Request.authoredOn",
+        "short": "When request was created/transitioned to active",
+        "definition": "For draft {{title}}s, indicates the date of initial creation.  For requests with other statuses, indicates the date of activation.",
+        "alias": [
+          "createdOn",
+          "signedOn"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.authoredOn",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.9"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].time"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.recorded"
+          }
+        ]
+      },
+      {
+        "id": "Request.requester",
+        "path": "Request.requester",
+        "short": "Who/what is requesting service",
+        "definition": "Who initiated the {{request}} and has responsibility for its activation.",
+        "comment": "[Resources may choose to constrain potential requesters, though should consider proposals and plans as well as orders].",
+        "alias": [
+          "author"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.requester",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/Organization",
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Device"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.12"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.author"
+          }
+        ]
+      },
+      {
+        "id": "Request.reported[x]",
+        "path": "Request.reported[x]",
+        "short": "Reported rather than primary record",
+        "definition": "Indicates if this record was captured as a secondary \u0027reported\u0027 record rather than as an original primary source-of-truth record.  It may also indicate the source of the report.",
+        "requirements": "Reported data may have different rules on editing and may be visually distinguished from primary data.",
+        "alias": [
+          "informer"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.reported[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dRPT].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.source"
+          }
+        ]
+      },
+      {
+        "id": "Request.performerType",
+        "path": "Request.performerType",
+        "short": "Desired kind of service performer",
+        "definition": "The type of individual that is desired to act upon/ not act upon the {{request}}.",
+        "comment": "If specified without indicating a performer, this indicates that the performer must be (or can\u0027t be) of the specified type.  If specified with a performer then it indicates the requirements of the performer if the designated performer is not available.  If doNotPerform is true, then only one of performerType and performer should be present.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.performerType",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "PerformerType"
+            }
+          ],
+          "strength": "example",
+          "description": "Identifies types of practitioners, devices or other agents that should fulfill a request.  While the detailed constraints of relevant agents will vary by resource, some degree of consistency around recommended codes across request and definition resources would be desirable."
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "PRT"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dPRF].role[scoper.determinerCode\u003dKIND].code"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.actor"
+          }
+        ]
+      },
+      {
+        "id": "Request.performer",
+        "path": "Request.performer",
+        "short": "Specific desired (non)performer",
+        "definition": "Indicates who or what is being asked to perform (or not perform) the {{request}}.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Request.performer",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/Organization",
+              "http://hl7.org/fhir/StructureDefinition/CareTeam",
+              "http://hl7.org/fhir/StructureDefinition/HealthcareService",
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Device",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "PRT"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dPRF].role[scoper.determinerCode\u003dINSTANCE]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.actor"
+          }
+        ]
+      },
+      {
+        "id": "Request.reasonCode",
+        "path": "Request.reasonCode",
+        "short": "Why is service (not) needed?",
+        "definition": "Describes why the request is being made in coded or textual form.",
+        "comment": "Textual reasons can be captured using reasonCode.text.  If doNoPerform is true, this will be the reason why the request is being made to not act.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.reasonCode",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "RequestReason"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes identifying why this request was necessary.  These may be clinical reasons (e.g. diagnoses, symptoms) and/or administrative reasons.  While the detailed constraints of relevant reasons will vary by resource, some degree of consistency across resources around recommended codes would be desirable."
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.16"
+          },
+          {
+            "identity": "rim",
+            "map": ".reasonCode"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          }
+        ]
+      },
+      {
+        "id": "Request.reasonReference",
+        "path": "Request.reasonReference",
+        "short": "Why is service (not) needed?",
+        "definition": "Indicates another resource whose existence justifies this request.",
+        "comment": "[Additional resources may be added as appropriate].",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.reasonReference",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Condition",
+              "http://hl7.org/fhir/StructureDefinition/Observation",
+              "http://hl7.org/fhir/StructureDefinition/DiagnosticReport",
+              "http://hl7.org/fhir/StructureDefinition/DocumentReference"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC.16"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dRSON].target"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          }
+        ]
+      },
+      {
+        "id": "Request.insurance",
+        "path": "Request.insurance",
+        "short": "Associated insurance coverage",
+        "definition": "Insurance plans, coverage extensions, pre-authorizations and/or pre-determinations that may be relevant in delivering the requested service.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.insurance",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Coverage",
+              "http://hl7.org/fhir/StructureDefinition/ClaimResponse"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "IN1/IN2"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dCOVBY].target"
+          }
+        ]
+      },
+      {
+        "id": "Request.supportingInfo",
+        "path": "Request.supportingInfo",
+        "short": "Extra information to use in performing request",
+        "definition": "Information that may be needed by/relevant to the performer in their execution of this {{title}}.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.supportingInfo",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Resource"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Accompanying segments"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dPERT].target"
+          }
+        ]
+      },
+      {
+        "id": "Request.note",
+        "path": "Request.note",
+        "short": "Comments made about {{title}}",
+        "definition": "Comments made about the {{title}} by the requester, performer, subject or other participants.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.note",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Annotation"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "NTE"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship(typeCode\u003dSUBJ].source[classCode\u003dANNGEN, moodCode\u003dEVN].value[xsi:type\u003dST]"
+          }
+        ]
+      },
+      {
+        "id": "Request.relevantHistory",
+        "path": "Request.relevantHistory",
+        "short": "Key events in history of {{title}}",
+        "definition": "Links to Provenance records for past versions of this resource or fulfilling request or event resources that identify key state transitions or updates that are likely to be relevant to a user looking at the current version of the resource.",
+        "comment": "This element does not point to the Provenance associated with the *current* version of the resource - as it would be created after this version existed.  The Provenance for the current version can be retrieved with a _revinclude.  Referenced provenances should adhere to the provenance-relevant-history profile.",
+        "alias": [
+          "eventHistory"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Request.relevantHistory",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Provenance"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "N/A"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship(typeCode\u003dSUBJ].source[classCode\u003dCACT, moodCode\u003dEVN]"
+          }
+        ]
+      }
+    ]
+  }
+}

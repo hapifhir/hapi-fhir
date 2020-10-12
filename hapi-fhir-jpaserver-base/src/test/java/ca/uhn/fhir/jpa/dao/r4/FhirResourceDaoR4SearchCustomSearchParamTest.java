@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -460,6 +461,24 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(appId.getValue(), p2id.getValue(), p1id.getValue()));
 
+	}
+
+	@Test
+	public void testBuiltInSearchParameterNotReplacedByDraftSearchParameter() {
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
+
+		SearchParameter memberSp = new SearchParameter();
+		memberSp.setCode("family");
+		memberSp.addBase("Patient");
+		memberSp.setType(Enumerations.SearchParamType.STRING);
+		memberSp.setExpression("Patient.name.family");
+		memberSp.setStatus(Enumerations.PublicationStatus.DRAFT);
+		mySearchParameterDao.create(memberSp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", "family");
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
 	}
 
 

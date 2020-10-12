@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "namingsystem-identifier-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eNamingSystemIdentifierType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the style of unique identifier used to identify a namespace.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/namingsystem-identifier-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoid\u003ca name\u003d\"namingsystem-identifier-type-oid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOID\u003c/td\u003e\u003ctd\u003eAn ISO object identifier; e.g. 1.2.3.4.5.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euuid\u003ca name\u003d\"namingsystem-identifier-type-uuid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUUID\u003c/td\u003e\u003ctd\u003eA universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euri\u003ca name\u003d\"namingsystem-identifier-type-uri\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eURI\u003c/td\u003e\u003ctd\u003eA uniform resource identifier (ideally a URL - uniform resource locator); e.g. http://unitsofmeasure.org.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"namingsystem-identifier-type-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eSome other type of unique identifier; e.g. HL7-assigned reserved string such as LN for LOINC.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/namingsystem-identifier-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.493"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "NamingSystemIdentifierType",
+  "title": "NamingSystemIdentifierType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Identifies the style of unique identifier used to identify a namespace.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/namingsystem-identifier-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "oid",
+      "display": "OID",
+      "definition": "An ISO object identifier; e.g. 1.2.3.4.5."
+    },
+    {
+      "code": "uuid",
+      "display": "UUID",
+      "definition": "A universally unique identifier of the form a5afddf4-e880-459b-876e-e4591b0acc11."
+    },
+    {
+      "code": "uri",
+      "display": "URI",
+      "definition": "A uniform resource identifier (ideally a URL - uniform resource locator); e.g. http://unitsofmeasure.org."
+    },
+    {
+      "code": "other",
+      "display": "Other",
+      "definition": "Some other type of unique identifier; e.g. HL7-assigned reserved string such as LN for LOINC."
+    }
+  ]
+}

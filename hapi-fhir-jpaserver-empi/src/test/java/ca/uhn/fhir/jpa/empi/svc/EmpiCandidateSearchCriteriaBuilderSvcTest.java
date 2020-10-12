@@ -67,7 +67,18 @@ public class EmpiCandidateSearchCriteriaBuilderSvcTest extends BaseEmpiR4Test {
 		searchParamJson.addSearchParam("identifier");
 		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertTrue(result.isPresent());
-		assertEquals(result.get(), "Patient?identifier=urn:oid:1.2.36.146.595.217.0.1|12345");
+		assertEquals(result.get(), "Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7C12345");
+	}
+
+	@Test
+	public void testIdentifierSpaceIsEscaped() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:oid:1.2.36.146.595.217.0.1").setValue("abc def");
+		EmpiResourceSearchParamJson searchParamJson = new EmpiResourceSearchParamJson();
+		searchParamJson.addSearchParam("identifier");
+		Optional<String> result = myEmpiCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
+		assertTrue(result.isPresent());
+		assertEquals("Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7Cabc%20def", result.get());
 	}
 
 	@Test

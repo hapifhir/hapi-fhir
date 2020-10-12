@@ -1,0 +1,54 @@
+{
+  "resourceType": "Procedure",
+  "id": "colon-biopsy",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eBiopsy of colon, which was part of colonoscopy\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "value": "12345"
+    }
+  ],
+  "partOf": [
+    {
+      "reference": "Procedure/colonoscopy",
+      "display": "Colonoscopy"
+    }
+  ],
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "76164006",
+        "display": "Biopsy of colon (procedure)"
+      }
+    ],
+    "text": "Biopsy of colon"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/example",
+        "display": "Dr Adam Careful"
+      }
+    }
+  ],
+  "location": {
+    "reference": "Location/1",
+    "display": "Burgers University Medical Center, South Wing, second floor"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

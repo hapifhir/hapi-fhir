@@ -114,8 +114,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE.getCode(), LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_IMAGING_DOCUMENT_CODES_FILE.getCode(), LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PART_FILE.getCode(), LOINC_PART_FILE_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()),
-				uploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_PART_RELATED_CODE_MAPPING_FILE.getCode(), LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_RSNA_PLAYBOOK_FILE.getCode(), LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode()),
 				uploadProperties.getProperty(LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE.getCode(), LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode()),
@@ -123,6 +121,12 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 				uploadProperties.getProperty(LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE.getCode(), LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode())
 			);
 			descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
+
+			List<String> splitPartLinkFilenameFragments = Arrays.asList(
+				uploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()),
+				uploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode())
+			);
+			descriptors.verifyPartLinkFilesExist(splitPartLinkFilenameFragments, uploadProperties.getProperty(LOINC_PART_LINK_FILE.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode()));
 
 			List<String> optionalFilenameFragments = Arrays.asList(
 				uploadProperties.getProperty(LOINC_GROUP_FILE.getCode(), LOINC_GROUP_FILE_DEFAULT.getCode()),
@@ -378,6 +382,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		try {
 			String loincCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
 			loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
+			String  codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			if (codeSystemVersionId != null) {
+				loincCs.setVersion(codeSystemVersionId);
+				loincCs.setId(loincCs.getId() + "-" + codeSystemVersionId);
+			}
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load loinc.xml", e);
 		}
@@ -470,12 +479,13 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		// Part link
 		handler = new LoincPartLinkHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
-		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
-		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
+		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		IOUtils.closeQuietly(theDescriptors);
 
-		valueSets.add(getValueSetLoincAll());
+		valueSets.add(getValueSetLoincAll(theUploadProperties));
 
 		for (Entry<String, TermConcept> next : code2concept.entrySet()) {
 			TermConcept nextConcept = next.getValue();
@@ -494,12 +504,20 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return new UploadStatistics(conceptCount, target);
 	}
 
-	private ValueSet getValueSetLoincAll() {
+	private ValueSet getValueSetLoincAll(Properties theUploadProperties) {
 		ValueSet retVal = new ValueSet();
 
-		retVal.setId("loinc-all");
+		String codeSystemVersionId = theUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String valueSetId;
+		if (codeSystemVersionId != null) {
+			valueSetId = "loinc-all" + "-" + codeSystemVersionId;
+		} else {
+			valueSetId = "loinc-all";
+			codeSystemVersionId = "1.0.0";
+		}
+		retVal.setId(valueSetId);
 		retVal.setUrl("http://loinc.org/vs");
-		retVal.setVersion("1.0.0");
+		retVal.setVersion(codeSystemVersionId);
 		retVal.setName("All LOINC codes");
 		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		retVal.setDate(new Date());
@@ -585,6 +603,14 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	}
 
 	public static void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
+		iterateOverZipFile(theDescriptors, theFileNamePart, theHandler, theDelimiter, theQuoteMode, theIsPartialFilename, true);
+	}
+
+	public static void iterateOverZipFileOptional(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
+		iterateOverZipFile(theDescriptors, theFileNamePart, theHandler, theDelimiter, theQuoteMode, theIsPartialFilename, false);
+	}
+
+	private static void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename, boolean theRequireMatch) {
 
 		boolean foundMatch = false;
 		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
@@ -631,7 +657,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		}
 
-		if (!foundMatch) {
+		if (!foundMatch && theRequireMatch) {
 			throw new InvalidRequestException("Did not find file matching " + theFileNamePart);
 		}
 

@@ -1,0 +1,62 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "extra-security-role-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e \u003chr/\u003e\u003ch2\u003eSecurityRoleType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis CodeSystem contains Additional FHIR-defined Security Role types not defined elsewhere\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/extra-security-role-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eauthserver\u003ca name\u003d\"extra-security-role-type-authserver\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthorization server\u003c/td\u003e\u003ctd\u003eAn entity providing authorization services to enable the electronic sharing of health-related information based on resource owner\u0027s preapproved permissions. For example, an UMA Authorization Server[UMA]\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edatacollector\u003ca name\u003d\"extra-security-role-type-datacollector\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edata collector\u003c/td\u003e\u003ctd\u003eAn entity that collects information over which the data subject may have certain rights under policy or law to control that information\u0027s management and distribution by data collectors, including the right to access, retrieve, distribute, or delete that information. \u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edataprocessor\u003ca name\u003d\"extra-security-role-type-dataprocessor\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edata processor\u003c/td\u003e\u003ctd\u003eAn entity that processes collected information over which the data subject may have certain rights under policy or law to control that information\u0027s management and distribution by data processors, including the right to access, retrieve, distribute, or delete that information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edatasubject\u003ca name\u003d\"extra-security-role-type-datasubject\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edata subject\u003c/td\u003e\u003ctd\u003eA person whose personal information is collected or processed, and who may have certain rights under policy or law to control that information\u0027s management and distribution by data collectors or processors, including the right to access, retrieve, distribute, or delete that information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehumanuser\u003ca name\u003d\"extra-security-role-type-humanuser\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehuman user\u003c/td\u003e\u003ctd\u003eThe human user that has participated.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/extra-security-role-type",
+  "version": "4.0.1",
+  "name": "SecurityRoleType",
+  "status": "draft",
+  "experimental": true,
+  "date": "2017-02-13",
+  "publisher": "HL7 International",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This CodeSystem contains Additional FHIR-defined Security Role types not defined elsewhere",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "authserver",
+      "display": "authorization server",
+      "definition": "An entity providing authorization services to enable the electronic sharing of health-related information based on resource owner\u0027s preapproved permissions. For example, an UMA Authorization Server[UMA]"
+    },
+    {
+      "code": "datacollector",
+      "display": "data collector",
+      "definition": "An entity that collects information over which the data subject may have certain rights under policy or law to control that information\u0027s management and distribution by data collectors, including the right to access, retrieve, distribute, or delete that information. "
+    },
+    {
+      "code": "dataprocessor",
+      "display": "data processor",
+      "definition": "An entity that processes collected information over which the data subject may have certain rights under policy or law to control that information\u0027s management and distribution by data processors, including the right to access, retrieve, distribute, or delete that information."
+    },
+    {
+      "code": "datasubject",
+      "display": "data subject",
+      "definition": "A person whose personal information is collected or processed, and who may have certain rights under policy or law to control that information\u0027s management and distribution by data collectors or processors, including the right to access, retrieve, distribute, or delete that information."
+    },
+    {
+      "code": "humanuser",
+      "display": "human user",
+      "definition": "The human user that has participated."
+    }
+  ]
+}

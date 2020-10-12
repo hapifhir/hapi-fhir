@@ -1,0 +1,118 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "ex-diagnosistype",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExample Diagnosis Type Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes example Diagnosis Type codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/ex-diagnosistype defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadmitting\u003ca name\u003d\"ex-diagnosistype-admitting\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdmitting Diagnosis\u003c/td\u003e\u003ctd\u003eThe diagnosis given as the reason why the patient was admitted to the hospital.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclinical\u003ca name\u003d\"ex-diagnosistype-clinical\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis made on the basis of medical signs and patient-reported symptoms, rather than diagnostic tests.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edifferential\u003ca name\u003d\"ex-diagnosistype-differential\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDifferential Diagnosis\u003c/td\u003e\u003ctd\u003eOne of a set of the possible diagnoses that could be connected to the signs, symptoms, and lab findings.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edischarge\u003ca name\u003d\"ex-diagnosistype-discharge\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDischarge Diagnosis\u003c/td\u003e\u003ctd\u003eThe diagnosis given when the patient is discharged from the hospital.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elaboratory\u003ca name\u003d\"ex-diagnosistype-laboratory\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaboratory Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis based significantly on laboratory reports or test results, rather than the physical examination of the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enursing\u003ca name\u003d\"ex-diagnosistype-nursing\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNursing Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis which identifies people\u0027s responses to situations in their lives, such as a readiness to change or a willingness to accept assistance.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprenatal\u003ca name\u003d\"ex-diagnosistype-prenatal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrenatal Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis determined prior to birth.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprincipal\u003ca name\u003d\"ex-diagnosistype-principal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrincipal Diagnosis\u003c/td\u003e\u003ctd\u003eThe single medical diagnosis that is most relevant to the patient\u0027s chief complaint or need for treatment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eradiology\u003ca name\u003d\"ex-diagnosistype-radiology\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadiology Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis based primarily on the results from medical imaging studies.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eremote\u003ca name\u003d\"ex-diagnosistype-remote\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRemote Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis determined using telemedicine techniques.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eretrospective\u003ca name\u003d\"ex-diagnosistype-retrospective\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRetrospective Diagnosis\u003c/td\u003e\u003ctd\u003eThe labeling of an illness in a specific historical event using modern knowledge, methods and disease classifications.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eself\u003ca name\u003d\"ex-diagnosistype-self\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSelf Diagnosis\u003c/td\u003e\u003ctd\u003eA diagnosis determined by the patient.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/ex-diagnosistype",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1167"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ExampleDiagnosisTypeCodes",
+  "title": "Example Diagnosis Type Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes example Diagnosis Type codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/ex-diagnosistype",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "admitting",
+      "display": "Admitting Diagnosis",
+      "definition": "The diagnosis given as the reason why the patient was admitted to the hospital."
+    },
+    {
+      "code": "clinical",
+      "display": "Clinical Diagnosis",
+      "definition": "A diagnosis made on the basis of medical signs and patient-reported symptoms, rather than diagnostic tests."
+    },
+    {
+      "code": "differential",
+      "display": "Differential Diagnosis",
+      "definition": "One of a set of the possible diagnoses that could be connected to the signs, symptoms, and lab findings."
+    },
+    {
+      "code": "discharge",
+      "display": "Discharge Diagnosis",
+      "definition": "The diagnosis given when the patient is discharged from the hospital."
+    },
+    {
+      "code": "laboratory",
+      "display": "Laboratory Diagnosis",
+      "definition": "A diagnosis based significantly on laboratory reports or test results, rather than the physical examination of the patient."
+    },
+    {
+      "code": "nursing",
+      "display": "Nursing Diagnosis",
+      "definition": "A diagnosis which identifies people\u0027s responses to situations in their lives, such as a readiness to change or a willingness to accept assistance."
+    },
+    {
+      "code": "prenatal",
+      "display": "Prenatal Diagnosis",
+      "definition": "A diagnosis determined prior to birth."
+    },
+    {
+      "code": "principal",
+      "display": "Principal Diagnosis",
+      "definition": "The single medical diagnosis that is most relevant to the patient\u0027s chief complaint or need for treatment."
+    },
+    {
+      "code": "radiology",
+      "display": "Radiology Diagnosis",
+      "definition": "A diagnosis based primarily on the results from medical imaging studies."
+    },
+    {
+      "code": "remote",
+      "display": "Remote Diagnosis",
+      "definition": "A diagnosis determined using telemedicine techniques."
+    },
+    {
+      "code": "retrospective",
+      "display": "Retrospective Diagnosis",
+      "definition": "The labeling of an illness in a specific historical event using modern knowledge, methods and disease classifications."
+    },
+    {
+      "code": "self",
+      "display": "Self Diagnosis",
+      "definition": "A diagnosis determined by the patient."
+    }
+  ]
+}

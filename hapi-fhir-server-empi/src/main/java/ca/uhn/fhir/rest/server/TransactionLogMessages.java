@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TransactionLogMessages {
 	private List<String> myMessages;
@@ -29,6 +30,10 @@ public class TransactionLogMessages {
 
 	private TransactionLogMessages(String theTransactionGuid) {
 		myTransactionGuid = theTransactionGuid;
+	}
+
+	public static TransactionLogMessages createNew() {
+		return new TransactionLogMessages(UUID.randomUUID().toString());
 	}
 
 	public static TransactionLogMessages createFromTransactionGuid(String theTransactionGuid) {

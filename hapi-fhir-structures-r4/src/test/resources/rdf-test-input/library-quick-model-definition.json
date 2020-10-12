@@ -1,0 +1,46 @@
+{
+  "resourceType": "Library",
+  "id": "library-quick-model-definition",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eLibrary/library-quick-model-definition\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eIdentifier: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003evalue: \u003c/b\u003e\n                  \u003cspan\u003eQUICK\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eVersion: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e1.0.0\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTitle: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eQUICK Model Definition\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eType: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode: \u003c/b\u003e\n                           \u003cspan\u003emodel-definition\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003edraft\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eDescription: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eModel definition for the QUICK Logical Model\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTopic: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                     \u003cb\u003etext: \u003c/b\u003e\n                     \u003cspan\u003eQUICK\u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eContent: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003eapplication/xml\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eurl: \u003c/b\u003e\n                     \u003cspan\u003ehttp://cqlrepository.org/quick-modelinfo.xml\u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n      \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "value": "QUICK"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "QUICK Model Definition",
+  "status": "draft",
+  "type": {
+    "coding": [
+      {
+        "code": "model-definition"
+      }
+    ]
+  },
+  "date": "2016-07-08",
+  "description": "Model definition for the QUICK Logical Model",
+  "topic": [
+    {
+      "text": "QUICK"
+    }
+  ],
+  "content": [
+    {
+      "contentType": "application/xml",
+      "url": "http://cqlrepository.org/quick-modelinfo.xml"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

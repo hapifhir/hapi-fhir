@@ -1,0 +1,83 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "conditional-read-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConditionalReadStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA code that indicates how the server supports conditional read.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/conditional-read-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-supported\u003ca name\u003d\"conditional-read-status-not-supported\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Supported\u003c/td\u003e\u003ctd\u003eNo support for conditional reads.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emodified-since\u003ca name\u003d\"conditional-read-status-modified-since\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIf-Modified-Since\u003c/td\u003e\u003ctd\u003eConditional reads are supported, but only with the If-Modified-Since HTTP Header.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-match\u003ca name\u003d\"conditional-read-status-not-match\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIf-None-Match\u003c/td\u003e\u003ctd\u003eConditional reads are supported, but only with the If-None-Match HTTP Header.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efull-support\u003ca name\u003d\"conditional-read-status-full-support\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFull Support\u003c/td\u003e\u003ctd\u003eConditional reads are supported, with both If-Modified-Since and If-None-Match HTTP Headers.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/conditional-read-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.201"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ConditionalReadStatus",
+  "title": "ConditionalReadStatus",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A code that indicates how the server supports conditional read.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/conditional-read-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "not-supported",
+      "display": "Not Supported",
+      "definition": "No support for conditional reads."
+    },
+    {
+      "code": "modified-since",
+      "display": "If-Modified-Since",
+      "definition": "Conditional reads are supported, but only with the If-Modified-Since HTTP Header."
+    },
+    {
+      "code": "not-match",
+      "display": "If-None-Match",
+      "definition": "Conditional reads are supported, but only with the If-None-Match HTTP Header."
+    },
+    {
+      "code": "full-support",
+      "display": "Full Support",
+      "definition": "Conditional reads are supported, with both If-Modified-Since and If-None-Match HTTP Headers."
+    }
+  ]
+}

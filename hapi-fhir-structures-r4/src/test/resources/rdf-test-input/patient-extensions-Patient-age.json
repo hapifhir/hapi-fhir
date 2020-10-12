@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "patient-extensions-Patient-age",
+  "url": "http://hl7.org/fhir/SearchParameter/patient-extensions-Patient-age",
+  "version": "4.0.1",
+  "name": "age",
+  "status": "draft",
+  "experimental": true,
+  "description": "Searches for patients based on age as calculated based on current date and date of birth.  Deceased patients are excluded from the search.",
+  "code": "age",
+  "base": [
+    "Patient"
+  ],
+  "type": "number",
+  "xpath": "f:Patient/f:birthDate",
+  "xpathUsage": "normal"
+}

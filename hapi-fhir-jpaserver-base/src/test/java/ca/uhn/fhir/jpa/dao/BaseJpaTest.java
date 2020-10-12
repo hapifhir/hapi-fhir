@@ -40,7 +40,7 @@ import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.VersionIndependentConcept;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -511,9 +511,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal;
 	}
 
-	protected static Set<String> toCodes(List<VersionIndependentConcept> theConcepts) {
+	protected static Set<String> toCodes(List<FhirVersionIndependentConcept> theConcepts) {
 		HashSet<String> retVal = new HashSet<>();
-		for (VersionIndependentConcept next : theConcepts) {
+		for (FhirVersionIndependentConcept next : theConcepts) {
 			retVal.add(next.getCode());
 		}
 		return retVal;

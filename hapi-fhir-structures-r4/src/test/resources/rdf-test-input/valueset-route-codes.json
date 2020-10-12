@@ -1,0 +1,68 @@
+{
+  "resourceType": "ValueSet",
+  "id": "route-codes",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eThe value set to instantiate this attribute should be drawn from a terminologically robust code system that consists of or contains route of administration concepts.\u003c/p\u003e\n      \u003cp\u003ePossible sources include:\u003c/p\u003e\n      \u003cul\u003e\n        \u003cli\u003eSNOMED CT - Children of SCTID: 284009009 \u0026quot;route of administration value\u0026quot;\u003c/li\u003e\n        \u003cli\u003eISO 11239 - Routes of administration\u003c/li\u003e\n        \u003cli\u003eNCIt - Children of NCIt concept C66729 \u0026quot;route of administration\u0026quot; (note: this covers SDTM and FDA route of administration concepts)\u003c/li\u003e\n        \u003cli\u003eEDQM - Route of administration\u003c/li\u003e\n      \u003c/ul\u003e\n      \u003cp\u003eSNOMED CT is being used here as the example terminology.\u003c/p\u003e\n      \u003cp\u003eNote: to avoid confusion with other attributes in this resource concepts that are pre-coordinated with method and/or site of administration \n      (e.g. \u0026quot;intravenous infusion\u0026quot; where \u0026quot;infusion\u0026quot; is the method or \u0026quot;IV into left subclavian vein\u0026quot; where \u0026quot;left subclavian vein\u0026quot; is the site) \n      should not be used in this value set.\n      \u003c/p\u003e\n      \u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e  \n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/route-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.98"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SNOMEDCTRouteCodes",
+  "title": "SNOMED CT Route Codes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes all Route codes from SNOMED CT - provided as an exemplar.",
+  "copyright": "This value set includes content from SNOMED CT, which is copyright © 2002 International Health Terminology Standards Development Organisation (IHTSDO), and distributed by agreement between IHTSDO and HL7. Implementer use of SNOMED CT is not covered by this agreement.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "284009009"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,11 +53,11 @@ public class EmpiMessageHandler implements MessageHandler {
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
-	private EmpiResourceFilteringSvc myEmpiResourceFileringSvc;
+	private EmpiResourceFilteringSvc myEmpiResourceFilteringSvc;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
-		ourLog.info("Handling resource modified message: {}", theMessage);
+		ourLog.trace("Handling resource modified message: {}", theMessage);
 
 		if (!(theMessage instanceof ResourceModifiedJsonMessage)) {
 			ourLog.warn("Unexpected message payload type: {}", theMessage);
@@ -65,7 +66,7 @@ public class EmpiMessageHandler implements MessageHandler {
 
 		ResourceModifiedMessage msg = ((ResourceModifiedJsonMessage) theMessage).getPayload();
 		try {
-			if (myEmpiResourceFileringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
+			if (myEmpiResourceFilteringSvc.shouldBeProcessed(getResourceFromPayload(msg))) {
 				matchEmpiAndUpdateLinks(msg);
 			}
 		} catch (Exception e) {
@@ -91,28 +92,32 @@ public class EmpiMessageHandler implements MessageHandler {
 					ourLog.trace("Not processing modified message for {}", theMsg.getOperationType());
 			}
 		}catch (Exception e) {
-			log(empiContext, "Failure during EMPI processing: " + e.getMessage());
+			log(empiContext, "Failure during EMPI processing: " + e.getMessage(), e);
 		} finally {
+
 			// Interceptor call: EMPI_AFTER_PERSISTED_RESOURCE_CHECKED
+			ResourceOperationMessage outgoingMsg = new ResourceOperationMessage(myFhirContext, theMsg.getPayload(myFhirContext), theMsg.getOperationType());
+			outgoingMsg.setTransactionId(theMsg.getTransactionId());
+
 			HookParams params = new HookParams()
-				.add(ResourceModifiedMessage.class, theMsg)
+				.add(ResourceOperationMessage.class, outgoingMsg)
 				.add(TransactionLogMessages.class, empiContext.getTransactionLogMessages());
 			myInterceptorBroadcaster.callHooks(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
 
 	private EmpiTransactionContext createEmpiContext(ResourceModifiedMessage theMsg) {
-		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getParentTransactionGuid());
+		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
 		EmpiTransactionContext.OperationType empiOperation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				empiOperation = EmpiTransactionContext.OperationType.CREATE;
+				empiOperation = EmpiTransactionContext.OperationType.CREATE_RESOURCE;
 				break;
 			case UPDATE:
-				empiOperation = EmpiTransactionContext.OperationType.UPDATE;
+				empiOperation = EmpiTransactionContext.OperationType.UPDATE_RESOURCE;
 				break;
 			case MANUALLY_TRIGGERED:
-				empiOperation = EmpiTransactionContext.OperationType.BATCH;
+				empiOperation = EmpiTransactionContext.OperationType.SUBMIT_RESOURCE_TO_EMPI;
 				break;
 			case DELETE:
 			default:
@@ -140,8 +145,13 @@ public class EmpiMessageHandler implements MessageHandler {
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theEmpiTransactionContext);
 	}
 
-	private void log(EmpiTransactionContext theMessages, String theMessage) {
-		theMessages.addTransactionLogMessage(theMessage);
+	private void log(EmpiTransactionContext theEmpiContext, String theMessage) {
+		theEmpiContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
+	}
+
+	private void log(EmpiTransactionContext theEmpiContext, String theMessage, Exception theException) {
+		theEmpiContext.addTransactionLogMessage(theMessage);
+		ourLog.error(theMessage, theException);
 	}
 }

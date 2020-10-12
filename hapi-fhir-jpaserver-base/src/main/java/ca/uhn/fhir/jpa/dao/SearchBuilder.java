@@ -1034,6 +1034,7 @@ public class SearchBuilder implements ISearchBuilder {
 				lastUpdatedPredicates.add(predicateLower);
 			}
 			if (theLastUpdated.getUpperBoundAsInstant() != null) {
+				ourLog.debug("LastUpdated upper bound: {}", new InstantDt(theLastUpdated.getUpperBoundAsInstant()));
 				Predicate predicateUpper = builder.lessThanOrEqualTo(myQueryStack.getLastUpdatedColumn(), theLastUpdated.getUpperBoundAsInstant());
 				lastUpdatedPredicates.add(predicateUpper);
 			}

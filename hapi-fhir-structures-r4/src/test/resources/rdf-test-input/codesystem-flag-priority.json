@@ -1,0 +1,63 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "flag-priority",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFlag Priority Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set is provided as an exemplar. The value set is driven by IHE Table B.8-4: Abnormal Flags, Alert Priority.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/flag-priority-code defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePN\u003ca name\u003d\"flag-priority-PN\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNo alarm\u003c/td\u003e\u003ctd\u003eNo alarm.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePL\u003ca name\u003d\"flag-priority-PL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLow priority\u003c/td\u003e\u003ctd\u003eLow priority.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePM\u003ca name\u003d\"flag-priority-PM\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedium priority\u003c/td\u003e\u003ctd\u003eMedium priority.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePH\u003ca name\u003d\"flag-priority-PH\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHigh priority\u003c/td\u003e\u003ctd\u003eHigh priority.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/flag-priority-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.951"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FlagPriorityCodes",
+  "title": "Flag Priority Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set is provided as an exemplar. The value set is driven by IHE Table B.8-4: Abnormal Flags, Alert Priority.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/flag-priority",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "PN",
+      "display": "No alarm",
+      "definition": "No alarm."
+    },
+    {
+      "code": "PL",
+      "display": "Low priority",
+      "definition": "Low priority."
+    },
+    {
+      "code": "PM",
+      "display": "Medium priority",
+      "definition": "Medium priority."
+    },
+    {
+      "code": "PH",
+      "display": "High priority",
+      "definition": "High priority."
+    }
+  ]
+}

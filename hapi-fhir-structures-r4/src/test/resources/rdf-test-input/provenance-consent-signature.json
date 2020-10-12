@@ -1,0 +1,58 @@
+{
+  "resourceType": "Provenance",
+  "id": "consent-signature",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: consent-signature\u003c/p\u003e\u003cp\u003e\u003cb\u003etarget\u003c/b\u003e: \u003ca\u003eConsent/consent-example-signature\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erecorded\u003c/b\u003e: 26/05/2016 12:41:10 AM\u003c/p\u003e\u003ch3\u003eAgents\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRole\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWho\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eauthor (originator) \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ParticipationType code \u0027AUT\u0027 \u003d \u0027author (originator))\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePatient/72\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003esignature\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "target": [
+    {
+      "reference": "Consent/consent-example-signature"
+    }
+  ],
+  "recorded": "2016-05-26T00:41:10-04:00",
+  "agent": [
+    {
+      "role": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+              "code": "AUT"
+            }
+          ]
+        }
+      ],
+      "who": {
+        "reference": "Patient/72"
+      }
+    }
+  ],
+  "signature": [
+    {
+      "type": [
+        {
+          "system": "urn:iso-astm:E1762-95:2013",
+          "code": "1.2.840.10065.1.12.1.1",
+          "display": "Author\u0027s Signature"
+        }
+      ],
+      "when": "2016-05-26T00:41:10-04:00",
+      "who": {
+        "reference": "Patient/72"
+      },
+      "targetFormat": "application/fhir+xml",
+      "sigFormat": "application/signature+xml",
+      "data": "dGhpcyBibG9iIGlzIHNuaXBwZWQ\u003d"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

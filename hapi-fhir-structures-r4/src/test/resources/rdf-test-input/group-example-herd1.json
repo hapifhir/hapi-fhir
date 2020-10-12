@@ -1,0 +1,63 @@
+{
+  "resourceType": "Group",
+  "id": "herd1",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: herd1\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 20171120-1234\u003c/p\u003e\u003cp\u003e\u003cb\u003eactive\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: animal\u003c/p\u003e\u003cp\u003e\u003cb\u003eactual\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Porcine \u003cspan\u003e(Details : {SNOMED CT code \u0027388393002\u0027 \u003d \u0027Genus Sus\u0027, given as \u0027Genus Sus (organism)\u0027}; {https://www.aphis.usda.gov code \u0027POR\u0027 \u003d \u0027POR\u0027, given as \u0027porcine\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Breeding herd\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 2500\u003c/p\u003e\u003ch3\u003eCharacteristics\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValue[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExclude\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003egender \u003cspan\u003e(Details )\u003c/span\u003e\u003c/td\u003e\u003ctd\u003efemale \u003cspan\u003e(Details )\u003c/span\u003e\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://example.org/fhir/StructureDefinition/owner",
+      "valueReference": {
+        "reference": "RelatedPerson/peter",
+        "display": "Peter Chalmers"
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "system": "https://vetmed.iastate.edu/vdl",
+      "value": "20171120-1234"
+    }
+  ],
+  "active": true,
+  "type": "animal",
+  "actual": true,
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "388393002",
+        "display": "Genus Sus (organism)"
+      },
+      {
+        "system": "https://www.aphis.usda.gov",
+        "code": "POR",
+        "display": "porcine"
+      }
+    ],
+    "text": "Porcine"
+  },
+  "name": "Breeding herd",
+  "quantity": 2500,
+  "characteristic": [
+    {
+      "code": {
+        "text": "gender"
+      },
+      "valueCodeableConcept": {
+        "text": "female"
+      },
+      "exclude": false
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

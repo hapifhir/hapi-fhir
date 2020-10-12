@@ -82,7 +82,7 @@ public class EmpiResourceFieldMatcher {
 	}
 
 	private EmpiMatchEvaluation match(IBase theLeftValue, IBase theRightValue) {
-		return myEmpiFieldMatchJson.getMetric().match(myFhirContext, theLeftValue, theRightValue, myEmpiFieldMatchJson.getExact(), myEmpiFieldMatchJson.getMatchThreshold());
+		return myEmpiFieldMatchJson.match(myFhirContext, theLeftValue, theRightValue);
 	}
 
 	private void validate(IBaseResource theResource) {

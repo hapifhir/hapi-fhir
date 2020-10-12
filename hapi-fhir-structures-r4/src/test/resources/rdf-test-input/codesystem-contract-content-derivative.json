@@ -1,0 +1,87 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "contract-content-derivative",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eThis is an example set of Content Derivative type\n      codes, which represent the minimal content derived from the basal information source at a\n      specific stage in its lifecycle, which is sufficient to manage that source information, for\n      example, in a repository, registry, processes and workflows, for making access control\n      decisions, and providing query responses.\u003chr/\u003e\u003ch2\u003eContract Content Derivation Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set of Content Derivative type codes, which represent the minimal content derived from the basal information source at a specific stage in its lifecycle, which is sufficient to manage that source information, for example, in a repository, registry, processes and workflows, for making access control decisions, and providing query responses.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/contract-content-derivative defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eregistration\u003ca name\u003d\"contract-content-derivative-registration\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContent Registration\u003c/td\u003e\u003ctd\u003eContent derivative that conveys sufficient information needed to register the source basal content from which it is derived.  This derivative content may be used to register the basal content as it changes status in its lifecycle.  For example, content registration may occur when the basal content is created, updated, inactive, or deleted.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eretrieval\u003ca name\u003d\"contract-content-derivative-retrieval\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContent Retrieval\u003c/td\u003e\u003ctd\u003eA content derivative that conveys sufficient information to locate and retrieve the content.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estatement\u003ca name\u003d\"contract-content-derivative-statement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContent Statement\u003c/td\u003e\u003ctd\u003eContent derivative that has less than full fidelity to the basal information source from which it was \u0027transcribed\u0027. It provides recipients with the full content representation they may require for compliance purposes, and typically include a reference to or an attached unstructured representation for recipients needing an exact copy of the legal agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eshareable\u003ca name\u003d\"contract-content-derivative-shareable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eShareable Content\u003c/td\u003e\u003ctd\u003eA Content Derivative that conveys sufficient information to determine the authorized entities with which the content may be shared.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/contract-content-derivative",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1204"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ContractContentDerivationCodes",
+  "title": "Contract Content Derivation Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is an example set of Content Derivative type codes, which represent the minimal content derived from the basal information source at a specific stage in its lifecycle, which is sufficient to manage that source information, for example, in a repository, registry, processes and workflows, for making access control decisions, and providing query responses.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/contract-content-derivative",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "registration",
+      "display": "Content Registration",
+      "definition": "Content derivative that conveys sufficient information needed to register the source basal content from which it is derived.  This derivative content may be used to register the basal content as it changes status in its lifecycle.  For example, content registration may occur when the basal content is created, updated, inactive, or deleted."
+    },
+    {
+      "code": "retrieval",
+      "display": "Content Retrieval",
+      "definition": "A content derivative that conveys sufficient information to locate and retrieve the content."
+    },
+    {
+      "code": "statement",
+      "display": "Content Statement",
+      "definition": "Content derivative that has less than full fidelity to the basal information source from which it was \u0027transcribed\u0027. It provides recipients with the full content representation they may require for compliance purposes, and typically include a reference to or an attached unstructured representation for recipients needing an exact copy of the legal agreement."
+    },
+    {
+      "code": "shareable",
+      "display": "Shareable Content",
+      "definition": "A Content Derivative that conveys sufficient information to determine the authorized entities with which the content may be shared."
+    }
+  ]
+}

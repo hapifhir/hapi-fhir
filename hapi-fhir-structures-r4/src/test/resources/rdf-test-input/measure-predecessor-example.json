@@ -1,0 +1,235 @@
+{
+  "resourceType": "Measure",
+  "id": "measure-predecessor-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eId: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eMeasure/measure-predecessor-example\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eIdentifier: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003eexclusive-breastfeeding-measure\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eTitle: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eExclusive Breastfeeding Measure\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eStatus: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eactive\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eDescription: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eExclusive breastfeeding measure of outcomes for exclusive breastmilk feeding of newborns.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003ePurpose: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eExclusive breast milk feeding for the first 6 months of neonatal life can result in numerous long-term health benefits for both mother and newborn and is recommended by a number of national and international organizations. Evidence suggests that the prenatal and intrapartum period is critical for the success of exclusive (or any) breast feeding. Therefore, it is recommended that newborns are fed breast milk only from birth to discharge.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eTopic: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-right: 25px;\"\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003etext: \u003c/b\u003e\u003cspan\u003eExclusive Breastfeeding\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLibrary: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ereference: \u003c/b\u003e\u003cspan\u003eLibrary/library-exclusive-breastfeeding-cqm-logic\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eType: \u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eoutcome\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp/\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eGroup:\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003ePopulation Group 1\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003einitial-population\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003einitial-population-1-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eInitialPopulation1\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003edenominator\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003edenominator-1-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eDenominator1\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003edenominator-exclusion\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003edenominator-exclusions-1-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eDenominatorExclusions1\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003enumerator\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003enumerator-1-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eNumerator1\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ctable class\u003d\"grid dict\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eGroup:\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003ePopulation Group 2\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003einitial-population\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003einitial-population-2-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eInitialPopulation2\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003edenominator\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003edenominator-2-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eDenominator2\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003edenominator-exclusion\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003edenominator-exclusions-2-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eDenominatorExclusions2\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\u003cb\u003ePopulation:\u003c/b\u003e\u003cbr/\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003etype:\u003c/b\u003e\u003cspan\u003enumerator\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003eIdentifier:\u003c/b\u003e\u003cbr/\u003e\u003cspan style\u003d\"padding-left: 25px;\"\u003e\u003cb\u003evalue: \u003c/b\u003e\u003cspan\u003enumerator-2-identifier\u003c/span\u003e\u003cbr/\u003e\u003c/span\u003e\u003c/p\u003e\u003cp style\u003d\"margin-bottom: 5px; padding-left: 25px;\"\u003e\u003cb\u003ecriteria: \u003c/b\u003e\u003cspan\u003eNumerator2\u003c/span\u003e\u003c/p\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "value": "exclusive-breastfeeding-measure"
+    }
+  ],
+  "version": "4.0.1",
+  "title": "Exclusive Breastfeeding Measure",
+  "status": "active",
+  "date": "2014-03-08",
+  "description": "Exclusive breastfeeding measure of outcomes for exclusive breastmilk feeding of newborns.",
+  "purpose": "Measure of newborns who were fed breast milk only since birth",
+  "topic": [
+    {
+      "text": "Exclusive Breastfeeding"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "citation": "American Academy of Pediatrics. (2005). Section on Breastfeeding. Policy Statement:Breastfeeding and the Use of Human Milk. Pediatrics.115:496-506."
+    },
+    {
+      "type": "documentation",
+      "citation": "American College of Obstetricians and Gynecologists. (Feb. 2007). Committee on Obstetric Practice and Committee on Health Care for Underserved Women. Breastfeeding: Maternal and Infant Aspects. ACOG Committee Opinion 361."
+    },
+    {
+      "type": "documentation",
+      "citation": "California Department of Public Health. (2006). Genetic Disease Branch. California In-Hospital Breastfeeding as Indicated on the Newborn Screening Test Form, Statewide, County and Hospital of Occurrence: Available at: http://www.cdph.ca.gov/data/statistics/Pages/BreastfeedingStatistics.aspx."
+    },
+    {
+      "type": "documentation",
+      "citation": "Centers for Disease Control and Prevention. (Aug 3, 2007). Breastfeeding trends and updated national health objectives for exclusive breastfeeding--United States birth years 2000-2004. MMWR - Morbidity \u0026 Mortality Weekly Report. 56(30):760-3."
+    },
+    {
+      "type": "documentation",
+      "citation": "Centers for Disease Control and Prevention. (2014). Division of Nutrition, Physical Activity and Obesity. Breastfeeding Report Card. Available at: http://www.cdc.gov/breastfeeding/pdf/2014breastfeedingreportcard.pdf"
+    },
+    {
+      "type": "documentation",
+      "citation": "Ip, S., Chung, M., Raman, G., et al. (2007). Breastfeeding and maternal and infant health outcomes in developed countries. Rockville, MD: US Department of Health and Human Services. Available at: http://www.ahrq.gov/downloads/pub/evidence/pdf/brfout/brfout.pdf"
+    },
+    {
+      "type": "documentation",
+      "citation": "Kramer, M.S. \u0026 Kakuma, R. (2002).Optimal duration of exclusive breastfeeding. [107 refs] Cochrane Database of Systematic Reviews. (1):CD003517."
+    },
+    {
+      "type": "documentation",
+      "citation": "Petrova, A., Hegyi, T., \u0026 Mehta, R. (2007). Maternal race/ethnicity and one-month exclusive breastfeeding in association with the in-hospital feeding modality. Breastfeeding Medicine. 2(2):92-8."
+    },
+    {
+      "type": "documentation",
+      "citation": "Shealy, K.R., Li, R., Benton-Davis, S., \u0026 Grummer-Strawn, L.M. (2005).The CDC guide to breastfeeding interventions. Atlanta, GA: US Department of Health and Human Services, CDC. Available at: http://www.cdc.gov/breastfeeding/pdf/breastfeeding_interventions.pdf."
+    },
+    {
+      "type": "documentation",
+      "citation": "Taveras, E.M., Li, R., Grummer-Strawn, L., Richardson, M., Marshall, R., Rego, V.H., Miroshnik, I., \u0026 Lieu, T.A. (2004). Opinions and practices of clinicians associated with continuation of exclusive breastfeeding. Pediatrics. 113(4):e283-90."
+    },
+    {
+      "type": "documentation",
+      "citation": "US Department of Health and Human Services. (2007). Healthy People 2010 Midcourse Review. Washington, DC: US Department of Health and Human Services. Available at: http://www.healthypeople.gov/2010/data/midcourse/?visit\u003d1."
+    },
+    {
+      "type": "documentation",
+      "citation": "World Health Organization. (1991). Indicators for assessing breastfeeding practices. Geneva, Switzerland: World Health Organization. Available at: http://whqlibdoc.who.int/hq/1991/WHO_CDD_SER_91.14.pdf?ua\u003d1."
+    },
+    {
+      "type": "successor",
+      "resource": "Measure/measure-exclusive-breastfeeding"
+    }
+  ],
+  "library": [
+    "Library/library-exclusive-breastfeeding-cqm-logic"
+  ],
+  "disclaimer": "These performance measures are not clinical guidelines and do not establish a standard of medical care, and have not been tested for all potential applications. The measures and specifications are provided without warranty.",
+  "scoring": {
+    "coding": [
+      {
+        "code": "proportion"
+      }
+    ]
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "code": "process"
+        }
+      ]
+    }
+  ],
+  "rationale": "Exclusive breast milk feeding for the first 6 months of neonatal life has long been the expressed goal of World Health Organization (WHO), Department of Health and Human Services (DHHS), American Academy of Pediatrics (AAP) and American College of Obstetricians and Gynecologists (ACOG). ACOG has recently reiterated its position (ACOG, 2007). A recent Cochrane review substantiates the benefits (Kramer et al., 2002). Much evidence has now focused on the prenatal and intrapartum period as critical for the success of exclusive (or any) BF (Centers for Disease Control and Prevention [CDC], 2007; Petrova et al., 2007; Shealy et al., 2005; Taveras et al., 2004). Exclusive breast milk feeding rate during birth hospital stay has been calculated by the California Department of Public Health for the last several years using newborn genetic disease testing data. Healthy People 2010 and the CDC have also been active in promoting this goal.",
+  "clinicalRecommendationStatement": "Exclusive breast milk feeding for the first 6 months of neonatal life can result in numerous long-term health benefits for both mother and newborn and is recommended by a number of national and international organizations. Evidence suggests that the prenatal and intrapartum period is critical for the success of exclusive (or any) breast feeding. Therefore, it is recommended that newborns are fed breast milk only from birth to discharge.",
+  "improvementNotation": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/measure-improvement-notation",
+        "code": "increase"
+      }
+    ]
+  },
+  "guidance": "A discharge to a designated cancer center or children\u0027s hospital should be captured as a discharge to an acute care facility. It is acceptable to calculate Gestational Age using the American College of Obstetricians and Gynecologists ReVITALize guidelines, which define Gestational Age as calculated using the best obstetrical Estimated Due Date (EDD) based on the formula: Gestational Age\u003d (280-(EDD-Reference Date))/7 where Reference Date is the date on which you are trying to determine gestational age. For PC-05, Reference Date is the Birth Date. Note however that the calculation may yield a non-whole number and gestational age should be rounded off to the nearest completed week. For example, an infant born on the 5th day of the 36th week (35 weeks and 5/7 days) is at a gestational age of 35 weeks, not 36 weeks.",
+  "group": [
+    {
+      "id": "PopulationGroup1",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "initial-population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "InitialPopulation1"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Denominator1"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator-exclusions"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "DenominatorExclusions1"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Numerator1"
+          }
+        }
+      ]
+    },
+    {
+      "id": "PopulationGroup2",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "initial-population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "InitialPopulation2"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Denominator2"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator-exclusion"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "DenominatorExclusions2"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Numerator2"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "resourceType": "CapabilityStatement",
+  "id": "phr",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n     \n      \u003cp\u003ePrototype Capability Statement for September 2013 Connectathon\u003c/p\u003e\n     \n      \u003cp\u003eThe server offers read and search support on the following resource types:\u003c/p\u003e\n     \n      \u003cul\u003e\n      \n        \u003cli\u003ePatient\u003c/li\u003e\n      \n        \u003cli\u003eDocumentReference\u003c/li\u003e\n      \n        \u003cli\u003eCondition\u003c/li\u003e\n      \n        \u003cli\u003eDiagnosticReport\u003c/li\u003e\n    \n      \u003c/ul\u003e\n    \n    \u003c/div\u003e"
+  },
+  "name": "PHR Template",
+  "status": "draft",
+  "date": "2013-06-18",
+  "publisher": "FHIR Project",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Prototype Capability Statement for September 2013 Connectathon",
+  "kind": "capability",
+  "software": {
+    "name": "ACME PHR Server"
+  },
+  "fhirVersion": "4.0.1",
+  "format": [
+    "json",
+    "xml"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "Protoype server Capability Statement for September 2013 Connectathon",
+      "security": {
+        "service": [
+          {
+            "text": "OAuth"
+          }
+        ],
+        "description": "We recommend that PHR servers use standard OAuth using a          standard 3rd party provider. We are not testing the ability to provide an          OAuth authentication/authorization service itself, and nor is providing          any security required for the connectathon at all"
+      },
+      "resource": [
+        {
+          "type": "Patient",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "search-type",
+              "documentation": "When a client searches patients with no search criteria, they get a list of all patients they have access too. Servers may elect to offer additional search parameters, but this is not required"
+            }
+          ]
+        },
+        {
+          "type": "DocumentReference",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "type": "token",
+              "documentation": "_id parameter always supported. For the connectathon, servers may elect which search parameters are supported"
+            }
+          ]
+        },
+        {
+          "type": "Condition",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "type": "token",
+              "documentation": "Standard _id parameter"
+            }
+          ]
+        },
+        {
+          "type": "DiagnosticReport",
+          "interaction": [
+            {
+              "code": "read"
+            },
+            {
+              "code": "search-type"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "_id",
+              "type": "token",
+              "documentation": "Standard _id parameter"
+            },
+            {
+              "name": "service",
+              "type": "token",
+              "documentation": "which diagnostic discipline/department created the report"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

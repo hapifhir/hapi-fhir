@@ -1,0 +1,25 @@
+{
+  "resourceType": "EvidenceVariable",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e[Put rendering here]\u003c/div\u003e"
+  },
+  "status": "draft",
+  "characteristic": [
+    {
+      "definitionCodeableConcept": {
+        "text": "Diabetic patients over 65"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

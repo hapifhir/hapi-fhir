@@ -1,0 +1,84 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "slotstatus",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSlotStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe free/busy status of the slot.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/slotstatus defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebusy\u003ca name\u003d\"slotstatus-busy\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBusy\u003c/td\u003e\u003ctd\u003eIndicates that the time interval is busy because one  or more events have been scheduled for that interval.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efree\u003ca name\u003d\"slotstatus-free\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree\u003c/td\u003e\u003ctd\u003eIndicates that the time interval is free for scheduling.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebusy-unavailable\u003ca name\u003d\"slotstatus-busy-unavailable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBusy (Unavailable)\u003c/td\u003e\u003ctd\u003eIndicates that the time interval is busy and that the interval cannot be scheduled.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebusy-tentative\u003ca name\u003d\"slotstatus-busy-tentative\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBusy (Tentative)\u003c/td\u003e\u003ctd\u003eIndicates that the time interval is busy because one or more events have been tentatively scheduled for that interval.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"slotstatus-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in error\u003c/td\u003e\u003ctd\u003eThis instance should not have been part of this patient\u0027s medical record.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/slotstatus",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.483"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SlotStatus",
+  "title": "SlotStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The free/busy status of the slot.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/slotstatus",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "busy",
+      "display": "Busy",
+      "definition": "Indicates that the time interval is busy because one  or more events have been scheduled for that interval."
+    },
+    {
+      "code": "free",
+      "display": "Free",
+      "definition": "Indicates that the time interval is free for scheduling."
+    },
+    {
+      "code": "busy-unavailable",
+      "display": "Busy (Unavailable)",
+      "definition": "Indicates that the time interval is busy and that the interval cannot be scheduled."
+    },
+    {
+      "code": "busy-tentative",
+      "display": "Busy (Tentative)",
+      "definition": "Indicates that the time interval is busy because one or more events have been tentatively scheduled for that interval."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in error",
+      "definition": "This instance should not have been part of this patient\u0027s medical record."
+    }
+  ]
+}

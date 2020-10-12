@@ -1,0 +1,114 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "assert-operator-codes",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAssertionOperatorType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of operator to use for assertion.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/assert-operator-codes defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eequals\u003ca name\u003d\"assert-operator-codes-equals\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eequals\u003c/td\u003e\u003ctd\u003eDefault value. Equals comparison.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotEquals\u003ca name\u003d\"assert-operator-codes-notEquals\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enotEquals\u003c/td\u003e\u003ctd\u003eNot equals comparison.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein\u003ca name\u003d\"assert-operator-codes-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ein\u003c/td\u003e\u003ctd\u003eCompare value within a known set of values.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotIn\u003ca name\u003d\"assert-operator-codes-notIn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enotIn\u003c/td\u003e\u003ctd\u003eCompare value not within a known set of values.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egreaterThan\u003ca name\u003d\"assert-operator-codes-greaterThan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003egreaterThan\u003c/td\u003e\u003ctd\u003eCompare value to be greater than a known value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elessThan\u003ca name\u003d\"assert-operator-codes-lessThan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003elessThan\u003c/td\u003e\u003ctd\u003eCompare value to be less than a known value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eempty\u003ca name\u003d\"assert-operator-codes-empty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eempty\u003c/td\u003e\u003ctd\u003eCompare value is empty.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotEmpty\u003ca name\u003d\"assert-operator-codes-notEmpty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enotEmpty\u003c/td\u003e\u003ctd\u003eCompare value is not empty.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econtains\u003ca name\u003d\"assert-operator-codes-contains\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003econtains\u003c/td\u003e\u003ctd\u003eCompare value string contains a known value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotContains\u003ca name\u003d\"assert-operator-codes-notContains\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enotContains\u003c/td\u003e\u003ctd\u003eCompare value string does not contain a known value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeval\u003ca name\u003d\"assert-operator-codes-eval\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eevaluate\u003c/td\u003e\u003ctd\u003eEvaluate the FHIRPath expression as a boolean condition.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/assert-operator-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.709"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AssertionOperatorType",
+  "title": "AssertionOperatorType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of operator to use for assertion.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/assert-operator-codes",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "equals",
+      "display": "equals",
+      "definition": "Default value. Equals comparison."
+    },
+    {
+      "code": "notEquals",
+      "display": "notEquals",
+      "definition": "Not equals comparison."
+    },
+    {
+      "code": "in",
+      "display": "in",
+      "definition": "Compare value within a known set of values."
+    },
+    {
+      "code": "notIn",
+      "display": "notIn",
+      "definition": "Compare value not within a known set of values."
+    },
+    {
+      "code": "greaterThan",
+      "display": "greaterThan",
+      "definition": "Compare value to be greater than a known value."
+    },
+    {
+      "code": "lessThan",
+      "display": "lessThan",
+      "definition": "Compare value to be less than a known value."
+    },
+    {
+      "code": "empty",
+      "display": "empty",
+      "definition": "Compare value is empty."
+    },
+    {
+      "code": "notEmpty",
+      "display": "notEmpty",
+      "definition": "Compare value is not empty."
+    },
+    {
+      "code": "contains",
+      "display": "contains",
+      "definition": "Compare value string contains a known value."
+    },
+    {
+      "code": "notContains",
+      "display": "notContains",
+      "definition": "Compare value string does not contain a known value."
+    },
+    {
+      "code": "eval",
+      "display": "evaluate",
+      "definition": "Evaluate the FHIRPath expression as a boolean condition."
+    }
+  ]
+}

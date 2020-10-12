@@ -1,0 +1,64 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "Resource-graphql",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExecute a graphql statement\u003c/h2\u003e\u003cp\u003eOPERATION: Execute a graphql statement\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/Resource-graphql\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eExecute a graphql statement on a since resource or against the entire system. See the \u003ca href\u003d\"graphql.html\"\u003eUsing GraphQL with FHIR\u003c/a\u003e page for further details.\u003c/p\u003e\n\u003cp\u003eFor the purposes of graphQL compatibility, this operation can also be invoked using a POST with the graphQL as the body, or a JSON body (see \u003ca href\u003d\"http://graphql.org/\"\u003egraphQL spec\u003c/a\u003e for details)\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/$graphql\u003c/p\u003e\u003cp\u003eURL: [base]/Resource/[id]/$graphql\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003equery\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eresult\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"binary.html\"\u003eBinary\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe content is always returned as application/json; this SHOULD be specified in the Accept header\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv/\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/Resource-graphql",
+  "version": "4.0.1",
+  "name": "Execute a graphql statement",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Execute a graphql statement on a since resource or against the entire system. See the [Using GraphQL with FHIR](graphql.html) page for further details.\n\nFor the purposes of graphQL compatibility, this operation can also be invoked using a POST with the graphQL as the body, or a JSON body (see [graphQL spec](http://graphql.org/) for details)",
+  "code": "graphql",
+  "resource": [
+    "Resource"
+  ],
+  "system": true,
+  "type": false,
+  "instance": true,
+  "parameter": [
+    {
+      "name": "query",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "type": "string"
+    },
+    {
+      "name": "result",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "The content is always returned as application/json; this SHOULD be specified in the Accept header",
+      "type": "Binary"
+    }
+  ]
+}

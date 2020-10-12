@@ -45,18 +45,6 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	@Autowired
 	private DaoConfig myDaoConfig;
 
-	@BeforeEach
-	public void backupDaoConfig() {
-		defaultPreloadBlobFromInputStream = myDaoConfig.isPreloadBlobFromInputStream();
-	}
-
-	@AfterEach
-	public void restoreDaoConfig() {
-		myDaoConfig.setPreloadBlobFromInputStream(defaultPreloadBlobFromInputStream);
-	}
-
-	boolean defaultPreloadBlobFromInputStream;
-
 	@Test
 	public void testStoreAndRetrieve() throws IOException {
 
@@ -74,7 +62,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 
 		myCaptureQueriesListener.clear();
 
@@ -128,7 +116,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 
 		myCaptureQueriesListener.clear();
 

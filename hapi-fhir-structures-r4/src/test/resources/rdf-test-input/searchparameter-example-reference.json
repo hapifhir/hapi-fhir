@@ -1,0 +1,44 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "example-reference",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-reference\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/SearchParameter/example-reference\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Example Search Parameter\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 23/10/2013\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Health Level Seven International (FHIR Infrastructure)\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Search by condition subject\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Need to search Condition by subject\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: subject\u003c/p\u003e\u003cp\u003e\u003cb\u003ebase\u003c/b\u003e: Condition\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: reference\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: Condition.subject\u003c/p\u003e\u003cp\u003e\u003cb\u003expathUsage\u003c/b\u003e: normal\u003c/p\u003e\u003cp\u003e\u003cb\u003etarget\u003c/b\u003e: Organization\u003c/p\u003e\u003cp\u003e\u003cb\u003emodifier\u003c/b\u003e: missing\u003c/p\u003e\u003cp\u003e\u003cb\u003echain\u003c/b\u003e: name, identifier\u003c/p\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/SearchParameter/example-reference",
+  "name": "Example Search Parameter",
+  "status": "draft",
+  "experimental": true,
+  "date": "2013-10-23",
+  "publisher": "Health Level Seven International (FHIR Infrastructure)",
+  "contact": [
+    {
+      "name": "[string]",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Search by condition subject",
+  "purpose": "Need to search Condition by subject",
+  "code": "subject",
+  "base": [
+    "Condition"
+  ],
+  "type": "reference",
+  "expression": "Condition.subject",
+  "xpathUsage": "normal",
+  "target": [
+    "Organization"
+  ],
+  "modifier": [
+    "missing"
+  ],
+  "chain": [
+    "name",
+    "identifier"
+  ]
+}

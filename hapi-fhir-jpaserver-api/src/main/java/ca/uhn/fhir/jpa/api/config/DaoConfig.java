@@ -80,6 +80,7 @@ public class DaoConfig {
 	 * @see #setMaximumSearchResultCountInTransaction(Integer)
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
+	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
@@ -126,6 +127,8 @@ public class DaoConfig {
 	private boolean myIndexContainedResources = true;
 	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
+
+	private Integer myMaximumTransactionBundleSize = DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
 	 * update setter javadoc if default changes
@@ -221,11 +224,6 @@ public class DaoConfig {
 	 * @since 5.1.0
 	 */
 	private boolean myLastNEnabled = false;
-
-	/**
-	 * @since 5.1.0
-	 */
-	private boolean myPreloadBlobFromInputStream = false;
 
 	/**
 	 * Constructor
@@ -658,6 +656,31 @@ public class DaoConfig {
 	 */
 	public void setMaximumSearchResultCountInTransaction(Integer theMaximumSearchResultCountInTransaction) {
 		myMaximumSearchResultCountInTransaction = theMaximumSearchResultCountInTransaction;
+	}
+
+	/**
+	 * Specifies the maximum number of resources permitted within a single transaction bundle.
+	 * If a transaction bundle is submitted with more than this number of resources, it will be
+	 * rejected with a PayloadTooLarge exception.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
+	 */
+	public Integer getMaximumTransactionBundleSize() {
+		return myMaximumTransactionBundleSize;
+	}
+
+	/**
+	 * Specifies the maximum number of resources permitted within a single transaction bundle.
+	 * If a transaction bundle is submitted with more than this number of resources, it will be
+	 * rejected with a PayloadTooLarge exception.
+	 * <p>
+	 * The default value is <code>null</code>, which means that there is no limit.
+	 * </p>
+	 */
+	public DaoConfig setMaximumTransactionBundleSize(Integer theMaximumTransactionBundleSize) {
+		myMaximumTransactionBundleSize = theMaximumTransactionBundleSize;
+		return this;
 	}
 
 	/**
@@ -2102,28 +2125,11 @@ public class DaoConfig {
 	 * </p>
 	 *
 	 * @since 5.1.0
+	 * @deprecated In 5.2.0 this setting no longer does anything
 	 */
-	public boolean isPreloadBlobFromInputStream() {
-		return myPreloadBlobFromInputStream;
-	}
-
-	/**
-	 * <p>
-	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
-	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
-	 * in advance.
-	 * </p>
-	 * <p>
-	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}.
-	 * </p>
-	 *
-	 * @since 5.1.0
-	 */
+	@Deprecated
 	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
-		myPreloadBlobFromInputStream = thePreloadBlobFromInputStream;
+		// ignore
 	}
 
 }

@@ -1,0 +1,138 @@
+{
+  "resourceType": "ValueSet",
+  "id": "template-status-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTemplateStatusCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe status indicates the level of maturity of the design and may be used to manage the use of the design.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"codesystem-tldc.html\"\u003e\u003ccode\u003eurn:oid:2.16.840.1.113883.3.1937.98.5.8\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-draft\"\u003edraft\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eDesign is under development (nascent)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-pending\"\u003epending\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnder pre-publication review\u003c/td\u003e\u003ctd\u003eDesign is completed and is being reviewed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-active\"\u003eactive\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eDesign has been deemed fit for the intended purpose and is published by the governance group\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-review\"\u003ereview\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Review\u003c/td\u003e\u003ctd\u003eDesign is active, but is under review. The review may result in a change to the design. The change may necessitate a new version to be created. This in turn may result in the prior version of the template to be retired. Alternatively, the review may result in a change to the design that does not require a new version to be created, or it may result in no change to the design at all\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-cancelled\"\u003ecancelled\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eA drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published in an active state\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-rejected\"\u003erejected\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRejected\u003c/td\u003e\u003ctd\u003eA previously drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published for consideration in a pending state\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-retired\"\u003eretired\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRetired\u003c/td\u003e\u003ctd\u003eA previously active design is discontinued from use. It should no longer be used for future designs, but for historical purposes may be used to process data previously recorded using this design. A newer design might or might not exist. The design is published in the retired state\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-tldc.html#tldc-terminated\"\u003eterminated\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTerminated\u003c/td\u003e\u003ctd\u003eA design is determined to be erroneous or not fit for the intended purpose and should no longer be used, even for historical purposes. No new designs can be developed for this template. The associated template no longer needs to be published, but if published, is shown in the terminated state\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/template-status-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.1937.98.11.8"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TemplateStatusCode",
+  "title": "TemplateStatusCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The status indicates the level of maturity of the design and may be used to manage the use of the design.",
+  "compose": {
+    "include": [
+      {
+        "system": "urn:oid:2.16.840.1.113883.3.1937.98.5.8",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Design is under development (nascent)"
+              }
+            ],
+            "code": "draft",
+            "display": "Draft"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Design is completed and is being reviewed"
+              }
+            ],
+            "code": "pending",
+            "display": "Under pre-publication review"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Design has been deemed fit for the intended purpose and is published by the governance group"
+              }
+            ],
+            "code": "active",
+            "display": "Active"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Design is active, but is under review. The review may result in a change to the design. The change may necessitate a new version to be created. This in turn may result in the prior version of the template to be retired. Alternatively, the review may result in a change to the design that does not require a new version to be created, or it may result in no change to the design at all"
+              }
+            ],
+            "code": "review",
+            "display": "In Review"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published in an active state"
+              }
+            ],
+            "code": "cancelled",
+            "display": "Cancelled"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A previously drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published for consideration in a pending state"
+              }
+            ],
+            "code": "rejected",
+            "display": "Rejected"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A previously active design is discontinued from use. It should no longer be used for future designs, but for historical purposes may be used to process data previously recorded using this design. A newer design might or might not exist. The design is published in the retired state"
+              }
+            ],
+            "code": "retired",
+            "display": "Retired"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A design is determined to be erroneous or not fit for the intended purpose and should no longer be used, even for historical purposes. No new designs can be developed for this template. The associated template no longer needs to be published, but if published, is shown in the terminated state"
+              }
+            ],
+            "code": "terminated",
+            "display": "Terminated"
+          }
+        ]
+      }
+    ]
+  }
+}

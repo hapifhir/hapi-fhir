@@ -1,0 +1,61 @@
+{
+  "resourceType": "AllergyIntolerance",
+  "id": "fishallergy",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eallergy is to fresh fish. Tolerates canned fish\u003c/p\u003e\n      \u003cp\u003erecordedDate:2015-08-06T00:00:00-06:00\u003c/p\u003e\n      \u003cp\u003esubstance:Fish - dietary (substance)\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://acme.com/ids/patients/risks",
+      "value": "49476535"
+    }
+  ],
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+        "code": "active",
+        "display": "Active"
+      }
+    ]
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+        "code": "confirmed",
+        "display": "Confirmed"
+      }
+    ]
+  },
+  "category": [
+    "food"
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "227037002",
+        "display": "Fish - dietary (substance)"
+      }
+    ],
+    "text": "Allergic to fresh fish. Tolerates canned fish"
+  },
+  "patient": {
+    "reference": "Patient/example"
+  },
+  "recordedDate": "2015-08-06T15:37:31-06:00",
+  "recorder": {
+    "reference": "Practitioner/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

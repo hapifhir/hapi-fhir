@@ -1,0 +1,83 @@
+{
+  "resourceType": "ValueSet",
+  "id": "servicerequest-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eService Request Category Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eAn example value set of SNOMED CT concepts that can classify a requested service\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis specification includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct  or info@snomed.org.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d108252007\"\u003e108252007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaboratory procedure\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d363679005\"\u003e363679005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImaging\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d409063005\"\u003e409063005\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCounselling\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d409073007\"\u003e409073007\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEducation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://browser.ihtsdotools.org/?perspective\u003dfull\u0026amp;conceptId1\u003d387713003\"\u003e387713003\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical procedure\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/servicerequest-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.434"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ServiceRequestCategoryCodes",
+  "title": "Service Request Category Codes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Orders and Observations Workgroup",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/orders/index.cfm"
+        }
+      ]
+    }
+  ],
+  "description": "An example value set of SNOMED CT concepts that can classify a requested service",
+  "copyright": "This specification includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct  or info@snomed.org.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "108252007",
+            "display": "Laboratory procedure"
+          },
+          {
+            "code": "363679005",
+            "display": "Imaging"
+          },
+          {
+            "code": "409063005",
+            "display": "Counselling"
+          },
+          {
+            "code": "409073007",
+            "display": "Education"
+          },
+          {
+            "code": "387713003",
+            "display": "Surgical procedure"
+          }
+        ]
+      }
+    ]
+  }
+}

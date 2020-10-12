@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
  * #%L
  * HAPI FHIR JPA API
@@ -24,15 +27,15 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class TranslationRequest {
 	private CodeableConcept myCodeableConcept;
 	private Long myResourceId;
 	private BooleanType myReverse;
+	private UriType myUrl;
+	private StringType myConceptMapVersion;
 	private UriType mySource;
 	private UriType myTarget;
 	private UriType myTargetSystem;
@@ -90,6 +93,24 @@ public class TranslationRequest {
 		return false;
 	}
 
+	public UriType getUrl() {
+		return myUrl;
+	}
+
+	public TranslationRequest setUrl(UriType theUrl) {
+		myUrl = theUrl;
+		return this;
+	}
+	
+	public StringType getConceptMapVersion() {
+		return myConceptMapVersion;
+	}
+
+	public TranslationRequest setConceptMapVersion(StringType theConceptMapVersion) {
+		myConceptMapVersion = theConceptMapVersion;
+		return this;
+	}
+	
 	public UriType getSource() {
 		return mySource;
 	}
@@ -130,6 +151,14 @@ public class TranslationRequest {
 				translationQuery.setResourceId(this.getResourceId());
 			}
 
+			if (this.hasUrl()) {
+				translationQuery.setUrl(this.getUrl());
+			}
+			
+			if (this.hasConceptMapVersion()) {
+				translationQuery.setConceptMapVersion(this.getConceptMapVersion());
+			}
+			
 			if (this.hasSource()) {
 				translationQuery.setSource(this.getSource());
 			}
@@ -154,6 +183,14 @@ public class TranslationRequest {
 
 	public boolean hasReverse() {
 		return myReverse != null;
+	}
+
+	public boolean hasUrl() {
+		return myUrl != null && myUrl.hasValue();
+	}
+
+	public boolean hasConceptMapVersion() {
+		return myConceptMapVersion != null && myConceptMapVersion.hasValue();
 	}
 
 	public boolean hasSource() {

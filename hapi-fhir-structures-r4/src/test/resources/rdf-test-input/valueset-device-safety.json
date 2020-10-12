@@ -1,0 +1,149 @@
+{
+  "resourceType": "ValueSet",
+  "id": "device-safety",
+  "meta": {
+    "lastUpdated": "2019-10-31T22:29:23.356+00:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDevice safety\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes used to identify medical devices safety characteristics. These codes are taken from the \u003ca href\u003d\"https://ncit.nci.nih.gov/ncitbrowser/pages/home.jsf\"\u003eNCI Thesaurus\u003c/a\u003e and are provided here as a suggestive example.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eMRI safety definitions reprinted, with permission, from F2503-08 Standard Practice for Marking Medical Devices and Other Items for Safety in the Magnetic Resonance Environment, copyright ASTM International, 100 Barr Harbor Drive, West Conshohocken, PA 19428.  See \u003ca href\u003d\"https://www.astm.org/Standards/F2503.htm\"\u003eASTM F2503\u003c/a\u003e.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ccode\u003eurn:oid:2.16.840.1.113883.3.26.1.1\u003c/code\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eC106046\u003c/td\u003e\u003ctd\u003eMagnetic Resonance Conditional\u003c/td\u003e\u003ctd\u003eA device with demonstrated safety in the MR environment within defined conditions. At a minimum, address the conditions of the static magnetic field, the switched gradient magnetic field and the radiofrequency fields. Additional conditions, including specific configurations of the item, may be required. See ASTM F2503\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eC106045\u003c/td\u003e\u003ctd\u003eMagnetic Resonance Safe\u003c/td\u003e\u003ctd\u003eThe device poses no known hazards resulting from exposure to any MR environment. MR Safe items are composed of materials that are electrically nonconductive, nonmetallic, and nonmagnetic. See ASTM F2503\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eC106047\u003c/td\u003e\u003ctd\u003eMagnetic Resonance Unsafe\u003c/td\u003e\u003ctd\u003eThe device which poses unacceptable risks to the patient, medical staff or other persons within the MR environment. See ASTM F2503\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eC113844\u003c/td\u003e\u003ctd\u003eLabeling does not Contain MRI Safety Information\u003c/td\u003e\u003ctd\u003eInformation on the safety of using a device in a magnetic resonance (MR) environment has not been provided in the labeling by the labeler.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eC101673\u003c/td\u003e\u003ctd\u003eLabeled as Containing Natural Rubber Latex\u003c/td\u003e\u003ctd\u003eThe device label indicates natural rubber latex as a component.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eC106038\u003c/td\u003e\u003ctd\u003eNot Made with Natural Rubber Latex\u003c/td\u003e\u003ctd\u003eThe composition of the materials of an item do not contain natural rubber latex.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/device-safety",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.213"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DeviceSafety",
+  "title": "Device safety",
+  "status": "draft",
+  "experimental": false,
+  "date": "2017-02-17T23:28:06+00:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes used to identify medical devices safety characteristics. These codes are taken from the [NCI Thesaurus](https://ncit.nci.nih.gov/ncitbrowser/pages/home.jsf) and are provided here as a suggestive example.",
+  "immutable": true,
+  "copyright": "MRI safety definitions reprinted, with permission, from F2503-08 Standard Practice for Marking Medical Devices and Other Items for Safety in the Magnetic Resonance Environment, copyright ASTM International, 100 Barr Harbor Drive, West Conshohocken, PA 19428.  See [ASTM F2503](https://www.astm.org/Standards/F2503.htm).",
+  "compose": {
+    "include": [
+      {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/valueset-systemName",
+            "valueString": "NCI Thesaurus"
+          }
+        ],
+        "system": "urn:oid:2.16.840.1.113883.3.26.1.1",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A device with demonstrated safety in the MR environment within defined conditions. At a minimum, address the conditions of the static magnetic field, the switched gradient magnetic field and the radiofrequency fields. Additional conditions, including specific configurations of the item, may be required. See ASTM F2503"
+              }
+            ],
+            "code": "C106046",
+            "display": "Magnetic Resonance Conditional",
+            "designation": [
+              {
+                "value": "MR Conditional"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The device poses no known hazards resulting from exposure to any MR environment. MR Safe items are composed of materials that are electrically nonconductive, nonmetallic, and nonmagnetic. See ASTM F2503"
+              }
+            ],
+            "code": "C106045",
+            "display": "Magnetic Resonance Safe",
+            "designation": [
+              {
+                "value": "MR Safe"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The device which poses unacceptable risks to the patient, medical staff or other persons within the MR environment. See ASTM F2503"
+              }
+            ],
+            "code": "C106047",
+            "display": "Magnetic Resonance Unsafe",
+            "designation": [
+              {
+                "value": "MR Unsafe"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Information on the safety of using a device in a magnetic resonance (MR) environment has not been provided in the labeling by the labeler."
+              }
+            ],
+            "code": "C113844",
+            "display": "Labeling does not Contain MRI Safety Information"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The device label indicates natural rubber latex as a component."
+              }
+            ],
+            "code": "C101673",
+            "display": "Labeled as Containing Natural Rubber Latex"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The composition of the materials of an item do not contain natural rubber latex."
+              }
+            ],
+            "code": "C106038",
+            "display": "Not Made with Natural Rubber Latex"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "questionnaireresponse-extensions-QuestionnaireResponse-item-subject",
+  "url": "http://hl7.org/fhir/SearchParameter/questionnaireresponse-extensions-QuestionnaireResponse-item-subject",
+  "version": "4.0.1",
+  "name": "item-subject",
+  "status": "draft",
+  "experimental": true,
+  "description": "Allows searching for QuestionnaireResponses by item value where the item has isSubject\u003dtrue",
+  "code": "item-subject",
+  "base": [
+    "QuestionnaireResponse"
+  ],
+  "type": "reference",
+  "expression": "QuestionnaireResponse.item.where(hasExtension(\u0027http://hl7.org/fhir/StructureDefinition/questionnaireresponse-isSubject\u0027)).answer.value.ofType(Reference)",
+  "xpathUsage": "normal"
+}

@@ -1,0 +1,401 @@
+{
+  "resourceType": "CapabilityStatement",
+  "id": "knowledge-repository",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eKnowledge Repository Service Conformance Statement\u003c/h2\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eBasic conformance statement for a Knowledge Repository Service. A server can support more functionality\n           than defined here, but this is the minimum amount\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003ctable\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eMode\u003c/td\u003e\n          \u003ctd\u003eSERVER\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eDescription\u003c/td\u003e\n          \u003ctd\u003eRESTful Knowledge Repository Server\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eTransaction\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSystem History\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSystem Search\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n      \u003ctable\u003e\n        \u003ctr\u003e\n          \u003cth\u003e\n            \u003cb\u003eResource Type\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eProfile\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eRead\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eV-Read\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eSearch\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eUpdate\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eUpdates\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eCreate\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eDelete\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eHistory\u003c/b\u003e\n          \u003c/th\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/knowledge-repository",
+  "name": "Knowledge Repository Service Conformance Statement",
+  "status": "draft",
+  "date": "2017-02-25",
+  "publisher": "HL7, Inc",
+  "contact": [
+    {
+      "name": "FHIR Project",
+      "telecom": [
+        {
+          "system": "other",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Basic conformance statement for a Knowledge Repository Service. A server can support more functionality    than defined here, but this is the minimum amount",
+  "kind": "capability",
+  "software": {
+    "name": "ACME Knowledge Repository Service"
+  },
+  "fhirVersion": "4.0.1",
+  "format": [
+    "json",
+    "xml"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "RESTful Knowledge Repository Service",
+      "security": {
+        "cors": true,
+        "service": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/restful-security-service",
+                "code": "Certificates"
+              }
+            ]
+          }
+        ]
+      },
+      "resource": [
+        {
+          "type": "Library",
+          "profile": "StructureDefinition/Library",
+          "interaction": [
+            {
+              "code": "read",
+              "documentation": "Read allows clients to get the logical definitions of the libraries"
+            },
+            {
+              "code": "search-type",
+              "documentation": "Search allows clients to filter libraries based on a provided search parameter"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-description",
+              "type": "string"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-identifier",
+              "type": "token"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-status",
+              "type": "token"
+            },
+            {
+              "name": "title",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-title",
+              "type": "string"
+            },
+            {
+              "name": "topic",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-topic",
+              "type": "token"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-version",
+              "type": "string"
+            },
+            {
+              "name": "composed-of",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-composed-of",
+              "type": "reference"
+            },
+            {
+              "name": "depends-on",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-depends-on",
+              "type": "reference"
+            },
+            {
+              "name": "derived-from",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-derived-from",
+              "type": "reference"
+            },
+            {
+              "name": "predecessor",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-predecessor",
+              "type": "reference"
+            },
+            {
+              "name": "successor",
+              "definition": "http://hl7.org/fhir/SearchParameter/Library-successor",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "type": "PlanDefinition",
+          "profile": "StructureDefinition/PlanDefinition",
+          "interaction": [
+            {
+              "code": "read",
+              "documentation": "Read allows clients to get the logical definitions of the plan definitions"
+            },
+            {
+              "code": "search-type",
+              "documentation": "Search allows clients to filter plan definitions based on a provided search parameter"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-description",
+              "type": "string"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-identifier",
+              "type": "token"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-status",
+              "type": "token"
+            },
+            {
+              "name": "title",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-title",
+              "type": "string"
+            },
+            {
+              "name": "topic",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-topic",
+              "type": "token"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-version",
+              "type": "string"
+            },
+            {
+              "name": "composed-of",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-composed-of",
+              "type": "reference"
+            },
+            {
+              "name": "depends-on",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-depends-on",
+              "type": "reference"
+            },
+            {
+              "name": "derived-from",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-derived-from",
+              "type": "reference"
+            },
+            {
+              "name": "predecessor",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-predecessor",
+              "type": "reference"
+            },
+            {
+              "name": "successor",
+              "definition": "http://hl7.org/fhir/SearchParameter/PlanDefinition-successor",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "type": "ActivityDefinition",
+          "profile": "StructureDefinition/ActivityDefinition",
+          "interaction": [
+            {
+              "code": "read",
+              "documentation": "Read allows clients to get the logical definitions of the activity definitions"
+            },
+            {
+              "code": "search-type",
+              "documentation": "Search allows clients to filter activity definitions based on a provided search parameter"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-description",
+              "type": "string"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-identifier",
+              "type": "token"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-status",
+              "type": "token"
+            },
+            {
+              "name": "title",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-title",
+              "type": "string"
+            },
+            {
+              "name": "topic",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-topic",
+              "type": "token"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-version",
+              "type": "string"
+            },
+            {
+              "name": "composed-of",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-composed-of",
+              "type": "reference"
+            },
+            {
+              "name": "depends-on",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-depends-on",
+              "type": "reference"
+            },
+            {
+              "name": "derived-from",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-derived-from",
+              "type": "reference"
+            },
+            {
+              "name": "predecessor",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-predecessor",
+              "type": "reference"
+            },
+            {
+              "name": "successor",
+              "definition": "http://hl7.org/fhir/SearchParameter/ActivityDefinition-successor",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "type": "Measure",
+          "profile": "StructureDefinition/Measure",
+          "interaction": [
+            {
+              "code": "read",
+              "documentation": "Read allows clients to get the logical definitions of the measures"
+            },
+            {
+              "code": "search-type",
+              "documentation": "Search allows clients to filter measures based on a provided search parameter"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "description",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-description",
+              "type": "string"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-identifier",
+              "type": "token"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-status",
+              "type": "token"
+            },
+            {
+              "name": "title",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-title",
+              "type": "string"
+            },
+            {
+              "name": "topic",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-topic",
+              "type": "token"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-version",
+              "type": "string"
+            },
+            {
+              "name": "composed-of",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-composed-of",
+              "type": "reference"
+            },
+            {
+              "name": "depends-on",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-depends-on",
+              "type": "reference"
+            },
+            {
+              "name": "derived-from",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-derived-from",
+              "type": "reference"
+            },
+            {
+              "name": "predecessor",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-predecessor",
+              "type": "reference"
+            },
+            {
+              "name": "successor",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-successor",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "type": "Questionnaire",
+          "profile": "StructureDefinition/Questionnaire",
+          "interaction": [
+            {
+              "code": "read",
+              "documentation": "Read allows clients to get the logical definitions of the measures"
+            },
+            {
+              "code": "search-type",
+              "documentation": "Search allows clients to filter measures based on a provided search parameter"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "code",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-code",
+              "type": "token"
+            },
+            {
+              "name": "context",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-context",
+              "type": "token"
+            },
+            {
+              "name": "date",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-date",
+              "type": "date"
+            },
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-identifier",
+              "type": "token"
+            },
+            {
+              "name": "publisher",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-publisher",
+              "type": "string"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-status",
+              "type": "token"
+            },
+            {
+              "name": "title",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-title",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/SearchParameter/Questionnaire-version",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "operation": [
+        {
+          "name": "data-requirements",
+          "definition": "OperationDefinition/Library-data-requirements"
+        }
+      ]
+    }
+  ]
+}

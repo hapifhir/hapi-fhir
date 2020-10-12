@@ -1,0 +1,72 @@
+{
+  "resourceType": "ChargeItemDefinition",
+  "id": "ebm",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: ebm\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://fhir.de/ChargeItemDefinition/kbv/ebm-30110\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 2-2018\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Allergologisch-diagnostischer Komplex zur Diagnostik und/oder zum Ausschluss einer (Kontakt-)Allergie vom Spättyp (Typ IV), einschl. Kosten\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffectivePeriod\u003c/b\u003e: 01/04/2018 --\u0026gt; 30/06/2018\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Allergologiediagnostik I \u003cspan\u003e(Details : {http://fhir.de/CodingSystem/kbv/ebm code \u002730110\u0027 \u003d \u002730110\u0027, given as \u0027Allergologiediagnostik I\u0027})\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eapplicability\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Excludes billing code 13250 for same Encounter\u003c/p\u003e\u003cp\u003e\u003cb\u003elanguage\u003c/b\u003e: text/cql\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: [some CQL expression]\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eapplicability\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Applies only once per Encounter\u003c/p\u003e\u003cp\u003e\u003cb\u003elanguage\u003c/b\u003e: text/CQL\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: [some CQL expression]\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epropertyGroup\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epriceComponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: base\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Gesamt (Euro) \u003cspan\u003e(Details : {http://fhir.de/CodeSystem/kbv/ebm-attribute code \u0027gesamt-euro\u0027 \u003d \u0027gesamt-euro\u0027, given as \u0027Gesamt (Euro)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eamount\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epriceComponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: informational\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Gesamt (Punkte) \u003cspan\u003e(Details : {http://fhir.de/CodeSystem/kbv/ebm-attribute code \u0027gesamt-punkte\u0027 \u003d \u0027gesamt-punkte\u0027, given as \u0027Gesamt (Punkte)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003efactor\u003c/b\u003e: 633\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://fhir.de/ChargeItemDefinition/kbv/ebm-30110",
+  "version": "2-2018",
+  "status": "active",
+  "description": "Allergologisch-diagnostischer Komplex zur Diagnostik und/oder zum Ausschluss einer (Kontakt-)Allergie vom Spättyp (Typ IV), einschl. Kosten",
+  "effectivePeriod": {
+    "start": "2018-04-01",
+    "end": "2018-06-30"
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://fhir.de/CodingSystem/kbv/ebm",
+        "code": "30110",
+        "display": "Allergologiediagnostik I"
+      }
+    ]
+  },
+  "applicability": [
+    {
+      "description": "Excludes billing code 13250 for same Encounter",
+      "language": "text/cql",
+      "expression": "[some CQL expression]"
+    },
+    {
+      "description": "Applies only once per Encounter",
+      "language": "text/CQL",
+      "expression": "[some CQL expression]"
+    }
+  ],
+  "propertyGroup": [
+    {
+      "priceComponent": [
+        {
+          "type": "base",
+          "code": {
+            "coding": [
+              {
+                "system": "http://fhir.de/CodeSystem/kbv/ebm-attribute",
+                "code": "gesamt-euro",
+                "display": "Gesamt (Euro)"
+              }
+            ]
+          },
+          "amount": {
+            "value": 67.44,
+            "currency": "EUR"
+          }
+        },
+        {
+          "type": "informational",
+          "code": {
+            "coding": [
+              {
+                "system": "http://fhir.de/CodeSystem/kbv/ebm-attribute",
+                "code": "gesamt-punkte",
+                "display": "Gesamt (Punkte)"
+              }
+            ]
+          },
+          "factor": 633
+        }
+      ]
+    }
+  ]
+}

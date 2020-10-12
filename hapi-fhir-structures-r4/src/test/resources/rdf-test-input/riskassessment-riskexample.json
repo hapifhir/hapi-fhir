@@ -1,0 +1,89 @@
+{
+  "resourceType": "RiskAssessment",
+  "id": "riskexample",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eRisk assessment for reference only\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://example.org",
+      "value": "risk-assessment-breastcancer1"
+    }
+  ],
+  "basedOn": {
+    "reference": "ImmunizationRecommendation/example"
+  },
+  "parent": {
+    "reference": "DiagnosticReport/example"
+  },
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://browser.ihtsdotools.org/",
+        "code": "709510001",
+        "display": "Assessment of risk for disease (procedure)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "encounter": {
+    "reference": "Encounter/example",
+    "display": "Encounter with patient @example"
+  },
+  "occurrenceDateTime": "2017-10-10",
+  "condition": {
+    "reference": "Condition/example"
+  },
+  "performer": {
+    "reference": "Practitioner/example"
+  },
+  "basis": [
+    {
+      "reference": "DiagnosticReport/example"
+    },
+    {
+      "reference": "Observation/example"
+    }
+  ],
+  "prediction": [
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.000368,
+      "whenRange": {
+        "low": {
+          "value": 54,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 57,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    }
+  ],
+  "note": [
+    {
+      "text": "This risk assessment is for reference only"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

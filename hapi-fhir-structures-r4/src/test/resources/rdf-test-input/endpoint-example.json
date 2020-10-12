@@ -1,0 +1,59 @@
+{
+  "resourceType": "Endpoint",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\tHealth Intersections CarePlan Hub\u003cbr/\u003e\n\t\t\tCarePlans can be uploaded to/from this loccation\n\t\t\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://example.org/enpoint-identifier",
+      "value": "epcp12"
+    }
+  ],
+  "status": "active",
+  "connectionType": {
+    "system": "http://terminology.hl7.org/CodeSystem/endpoint-connection-type",
+    "code": "hl7-fhir-rest"
+  },
+  "name": "Health Intersections CarePlan Hub",
+  "managingOrganization": {
+    "reference": "Organization/hl7"
+  },
+  "contact": [
+    {
+      "system": "email",
+      "value": "endpointmanager@example.org",
+      "use": "work"
+    }
+  ],
+  "period": {
+    "start": "2014-09-01"
+  },
+  "payloadType": [
+    {
+      "coding": [
+        {
+          "system": "http://hl7.org/fhir/resource-types",
+          "code": "CarePlan"
+        }
+      ]
+    }
+  ],
+  "payloadMimeType": [
+    "application/fhir+xml"
+  ],
+  "address": "http://fhir3.healthintersections.com.au/open/CarePlan",
+  "header": [
+    "bearer-code BASGS534s4"
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

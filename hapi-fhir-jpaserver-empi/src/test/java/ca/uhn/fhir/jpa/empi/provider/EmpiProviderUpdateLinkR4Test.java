@@ -102,7 +102,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myEmpiProviderR4.updateLink(myPatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("personId must have form Person/<id> where <id> is the id of the person", e.getMessage());
+			assertThat(e.getMessage(), endsWith(" must have form Person/<id> where <id> is the id of the person"));
 		}
 	}
 

@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "history-absent-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFamilyHistoryAbsentReason\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes describing the reason why a family member\u0027s history is not available.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/history-absent-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubject-unknown\u003ca name\u003d\"history-absent-reason-subject-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubject Unknown\u003c/td\u003e\u003ctd\u003ePatient does not know the subject, e.g. the biological parent of an adopted patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewithheld\u003ca name\u003d\"history-absent-reason-withheld\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformation Withheld\u003c/td\u003e\u003ctd\u003eThe patient withheld or refused to share the information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunable-to-obtain\u003ca name\u003d\"history-absent-reason-unable-to-obtain\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnable To Obtain\u003c/td\u003e\u003ctd\u003eInformation cannot be obtained; e.g. unconscious patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeferred\u003ca name\u003d\"history-absent-reason-deferred\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeferred\u003c/td\u003e\u003ctd\u003ePatient does not have the information now, but can provide the information at a later date.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/history-absent-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1094"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FamilyHistoryAbsentReason",
+  "title": "FamilyHistoryAbsentReason",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes describing the reason why a family member\u0027s history is not available.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/history-absent-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "subject-unknown",
+      "display": "Subject Unknown",
+      "definition": "Patient does not know the subject, e.g. the biological parent of an adopted patient."
+    },
+    {
+      "code": "withheld",
+      "display": "Information Withheld",
+      "definition": "The patient withheld or refused to share the information."
+    },
+    {
+      "code": "unable-to-obtain",
+      "display": "Unable To Obtain",
+      "definition": "Information cannot be obtained; e.g. unconscious patient."
+    },
+    {
+      "code": "deferred",
+      "display": "Deferred",
+      "definition": "Patient does not have the information now, but can provide the information at a later date."
+    }
+  ]
+}

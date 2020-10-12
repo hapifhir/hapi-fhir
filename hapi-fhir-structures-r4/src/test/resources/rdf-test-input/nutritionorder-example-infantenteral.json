@@ -1,0 +1,103 @@
+{
+  "resourceType": "NutritionOrder",
+  "id": "infantenteral",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: infantenteral\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 123\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003epatient\u003c/b\u003e: \u003ca\u003ePeter Chalmers\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eInpatient\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edateTime\u003c/b\u003e: 17/09/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003eorderer\u003c/b\u003e: \u003ca\u003eDr Adam Careful\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eenteralFormula\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebaseFormulaType\u003c/b\u003e: infant formula + iron \u003cspan\u003e(Details : {SNOMED CT code \u0027412414007\u0027 \u003d \u0027Infant formula + iron\u0027, given as \u0027infant formula + iron\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebaseFormulaProductName\u003c/b\u003e: Acme Infant Formula + Iron\u003c/p\u003e\u003cp\u003e\u003cb\u003eadditiveType\u003c/b\u003e: Carbohydrate \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/entformula-additive code \u0027carbohydrate\u0027 \u003d \u0027Carbohydrate\u0027, given as \u0027Carbohydrate\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eadditiveProductName\u003c/b\u003e: Acme High Carbohydrate Additive\u003c/p\u003e\u003cp\u003e\u003cb\u003ecaloricDensity\u003c/b\u003e: 20 calories per ounce\u003cspan\u003e (Details: UCUM code cal/[foz_us] \u003d \u0027cal/foz_us\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erouteofAdministration\u003c/b\u003e: Swallow, oral \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration code \u0027PO\u0027 \u003d \u0027Swallow, oral\u0027, given as \u0027Swallow, oral\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eAdministrations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eSchedule\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eQuantity\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eStarting 17/09/2014, Do Once per 3 hours\u003c/td\u003e\u003ctd\u003e4 ounces\u003cspan\u003e (Details: UCUM code [foz_us] \u003d \u0027foz_us\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003emaxVolumeToDeliver\u003c/b\u003e: 32 ounces\u003cspan\u003e (Details: UCUM code [foz_us] \u003d \u0027foz_us\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eadministrationInstruction\u003c/b\u003e: Add high calorie high carbohydrate additive to increase cal/oz from 24 cal/oz to 27 cal/oz.\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://www.acme.org/nutritionorders",
+      "value": "123"
+    }
+  ],
+  "status": "active",
+  "intent": "order",
+  "patient": {
+    "reference": "Patient/example",
+    "display": "Peter Chalmers"
+  },
+  "encounter": {
+    "reference": "Encounter/example",
+    "display": "Inpatient"
+  },
+  "dateTime": "2014-09-17",
+  "orderer": {
+    "reference": "Practitioner/example",
+    "display": "Dr Adam Careful"
+  },
+  "enteralFormula": {
+    "baseFormulaType": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "412414007",
+          "display": "infant formula + iron"
+        }
+      ]
+    },
+    "baseFormulaProductName": "Acme Infant Formula + Iron",
+    "additiveType": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/entformula-additive",
+          "code": "carbohydrate",
+          "display": "Carbohydrate"
+        }
+      ]
+    },
+    "additiveProductName": "Acme High Carbohydrate Additive",
+    "caloricDensity": {
+      "value": 20,
+      "unit": "calories per ounce",
+      "system": "http://unitsofmeasure.org",
+      "code": "cal/[foz_us]"
+    },
+    "routeofAdministration": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
+          "code": "PO",
+          "display": "Swallow, oral",
+          "userSelected": true
+        }
+      ]
+    },
+    "administration": [
+      {
+        "schedule": {
+          "repeat": {
+            "boundsPeriod": {
+              "start": "2014-09-17"
+            },
+            "frequency": 1,
+            "period": 3,
+            "periodUnit": "h"
+          }
+        },
+        "quantity": {
+          "value": 4,
+          "unit": "ounces",
+          "system": "http://unitsofmeasure.org",
+          "code": "[foz_us]"
+        }
+      }
+    ],
+    "maxVolumeToDeliver": {
+      "value": 32,
+      "unit": "ounces",
+      "system": "http://unitsofmeasure.org",
+      "code": "[foz_us]"
+    },
+    "administrationInstruction": "Add high calorie high carbohydrate additive to increase cal/oz from 24 cal/oz to 27 cal/oz."
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

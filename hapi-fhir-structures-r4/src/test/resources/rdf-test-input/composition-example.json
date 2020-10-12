@@ -1,0 +1,176 @@
+{
+  "resourceType": "Composition",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003eConsultation note for Henry Levin the 7th\u003c/p\u003e\n\t\t\t\u003cp\u003eManaged by Good Health Clinic\u003c/p\u003e\n\t\t\u003c/div\u003e"
+  },
+  "identifier": {
+    "system": "http://healthintersections.com.au/test",
+    "value": "1"
+  },
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "11488-4",
+        "display": "Consult note"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "LP173421-1",
+          "display": "Report"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/xcda",
+    "display": "Henry Levin the 7th"
+  },
+  "encounter": {
+    "reference": "Encounter/xcda"
+  },
+  "date": "2012-01-04T09:10:14Z",
+  "author": [
+    {
+      "reference": "Practitioner/xcda-author",
+      "display": "Harold Hippocrates, MD"
+    }
+  ],
+  "title": "Consultation Note",
+  "confidentiality": "N",
+  "attester": [
+    {
+      "mode": "legal",
+      "time": "2012-01-04T09:10:14Z",
+      "party": {
+        "reference": "Practitioner/xcda-author",
+        "display": "Harold Hippocrates, MD"
+      }
+    }
+  ],
+  "custodian": {
+    "reference": "Organization/2.16.840.1.113883.19.5",
+    "display": "Good Health Clinic"
+  },
+  "relatesTo": [
+    {
+      "code": "replaces",
+      "targetReference": {
+        "reference": "Composition/old-example"
+      }
+    },
+    {
+      "code": "appends",
+      "targetIdentifier": {
+        "system": "http://example.org/fhir/NamingSystem/document-ids",
+        "value": "ABC123"
+      }
+    }
+  ],
+  "event": [
+    {
+      "code": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+              "code": "HEALTHREC",
+              "display": "health record"
+            }
+          ]
+        }
+      ],
+      "period": {
+        "start": "2010-07-18",
+        "end": "2012-11-12"
+      },
+      "detail": [
+        {
+          "reference": "Observation/example"
+        }
+      ]
+    }
+  ],
+  "section": [
+    {
+      "title": "History of present illness",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "11348-0",
+            "display": "History of past illness Narrative"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\t\u003ctable\u003e\n\t\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\t\u003cb\u003eCode\u003c/b\u003e\n\t\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\t\u003cb\u003eDate\u003c/b\u003e\n\t\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\t\u003cb\u003eType\u003c/b\u003e\n\t\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\t\u003cb\u003eBodySite\u003c/b\u003e\n\t\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e\n\t\t\t\t\t\t\t\u003cb\u003eSeverity\u003c/b\u003e\n\t\t\t\t\t\t\u003c/td\u003e\n\t\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\t\u003ctd\u003eStroke\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e2010-07-18\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003eDiagnosis\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd/\u003e\n\t\t\t\t\t\t\u003ctd/\u003e\n\t\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\t\u003ctd\u003eBurnt Ear\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e2012-05-24\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003eDiagnosis\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003eLeft Ear\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd/\u003e\n\t\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\t\u003ctr\u003e\n\t\t\t\t\t\t\u003ctd\u003eAsthma\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003e2012-11-12\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd\u003eFinding\u003c/td\u003e\n\t\t\t\t\t\t\u003ctd/\u003e\n\t\t\t\t\t\t\u003ctd\u003eMild\u003c/td\u003e\n\t\t\t\t\t\u003c/tr\u003e\n\t\t\t\t\u003c/table\u003e\n\t\t\t\u003c/div\u003e"
+      },
+      "mode": "snapshot",
+      "orderedBy": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/list-order",
+            "code": "event-date",
+            "display": "Sorted by Event Date"
+          }
+        ]
+      },
+      "entry": [
+        {
+          "reference": "Condition/stroke"
+        },
+        {
+          "reference": "Condition/example"
+        },
+        {
+          "reference": "Condition/example2"
+        }
+      ]
+    },
+    {
+      "title": "History of family member diseases",
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "10157-6",
+            "display": "History of family member diseases Narrative"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\t\u003cp\u003eHistory of family member diseases - not available\u003c/p\u003e\n\t\t\t\u003c/div\u003e"
+      },
+      "mode": "snapshot",
+      "emptyReason": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/list-empty-reason",
+            "code": "withheld",
+            "display": "Information Withheld"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

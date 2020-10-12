@@ -1,0 +1,531 @@
+{
+  "resourceType": "CarePlan",
+  "id": "integrate",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003ePatient family is not ready to commit to goal setting at this time.  Goal setting will be addressed in the future\u003c/p\u003e\n      \u003ctable\u003e\n        \u003cthead\u003e\n          \u003ctr\u003e\n            \u003cth\u003eStart Date\u003c/th\u003e\n            \u003cth\u003eGoal\u003c/th\u003e\n            \u003cth\u003eAction Steps\u003c/th\u003e\n            \u003cth\u003eStatus\u003c/th\u003e\n            \u003cth\u003eDate Last Updated\u003c/th\u003e\n            \u003cth\u003eComments\u003c/th\u003e\n          \u003c/tr\u003e\n        \u003c/thead\u003e\n        \u003ctbody\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003eEve will lose weight and reduce her GERDS symptoms by improving her diet\u003c/td\u003e\n            \u003ctd\u003eEve will review photos of high and low density foods and share with her parents\u003c/td\u003e\n            \u003ctd\u003eNew Goal\u003c/td\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003e9/10/12 Eve eats one meal a day with her parents\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003eEve will lose weight and reduce her GERDS symptoms by improving her diet\u003c/td\u003e\n            \u003ctd\u003eEve will ask her dad to asist her to put the head of her bed on blocks\u003c/td\u003e\n            \u003ctd\u003eNew Goal\u003c/td\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003e9/10/12 Eve will sleep in her bed more often than the couch\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003eEve will improve her GERDS symptoms\u003c/td\u003e\n            \u003ctd\u003eEve will reduce her intake of coffee and chocolate\u003c/td\u003e\n            \u003ctd\u003eIn Process\u003c/td\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd/\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e27 Aug 2012\u003c/td\u003e\n            \u003ctd\u003eEve will increase her energy by being more active\u003c/td\u003e\n            \u003ctd\u003eEve will walk her friend\u0027s dog up and down a big hill 15-30 minutes 3 days a week\u003c/td\u003e\n            \u003ctd\u003eIn Process\u003c/td\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003e8/27/12 Eve would like to try for 5 days a week.  9/10/12 Eve is still walking the dogs.\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e23 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will increase her energy by being more active\u003c/td\u003e\n            \u003ctd\u003eEve will walk 3 blocks to her parents house twice a week\u003c/td\u003e\n            \u003ctd\u003eIn Process\u003c/td\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003e8/13/12 Eve walked 4 times the last week.  9/10/12 Eve did not walk to her parents the last week, but has plans to start again\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e23 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will set up her medications and take as prescribed\u003c/td\u003e\n            \u003ctd\u003eEve will us a calendar to check off after medications are taken\u003c/td\u003e\n            \u003ctd\u003eIn Process\u003c/td\u003e\n            \u003ctd\u003e13 Aug 2012\u003c/td\u003e\n            \u003ctd/\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e23 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will restart her light treatments\u003c/td\u003e\n            \u003ctd\u003eEve will use her lights MWF after her shower for 3 minutes\u003c/td\u003e\n            \u003ctd\u003eIn Process\u003c/td\u003e\n            \u003ctd\u003e27 Aug 2012\u003c/td\u003e\n            \u003ctd\u003e8/13/12 After restarting the vinegar soaks the psoriasis is improved and Eve plans to treat the remainder with light treatments.  She plans to start this week.  8/27/12 Since her skin is improved Eve has not been using the light treatment as often, maybe once a week.  She would like to increase to 3 times a week again\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e10 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will set up her medications and take as prescribed\u003c/td\u003e\n            \u003ctd\u003eEve will use a calendar of a chart to help her remember when to take her medications\u003c/td\u003e\n            \u003ctd\u003eIn Process\u003c/td\u003e\n            \u003ctd\u003e10 Sep 2012\u003c/td\u003e\n            \u003ctd\u003e7/23/12 Eve created a chart as a reminer to take the medications that do not fit in her pill box\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e23 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will increase her energy by being more active\u003c/td\u003e\n            \u003ctd\u003eEve will start using stretch bands and one step 2 days a week Mon/Wed 6-7am and maybe Friday afternoon\u003c/td\u003e\n            \u003ctd\u003eOn-Hold\u003c/td\u003e\n            \u003ctd\u003e23 Aug 2012\u003c/td\u003e\n            \u003ctd\u003e7/30/12 will be able to esume exercise.  8/13/12 Eve prefers to focus on walking at this time\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e10 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will set up her medications and take as prescribed\u003c/td\u003e\n            \u003ctd\u003eEve will match a printed medication worksheet with the medication bottles at home\u003c/td\u003e\n            \u003ctd\u003eCompleted\u003c/td\u003e\n            \u003ctd\u003e23 Jul 2012\u003c/td\u003e\n            \u003ctd/\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e10 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will set up her medications and take as prescribed\u003c/td\u003e\n            \u003ctd\u003eEve will get a medication box to sort her pills.  She will have one for scheduled medications and one for as needed\u003c/td\u003e\n            \u003ctd\u003eCompleted\u003c/td\u003e\n            \u003ctd\u003e16 Jul 2012\u003c/td\u003e\n            \u003ctd\u003e7/16/12 Eve now has some of her medications set up in pill packs by her pharmacist\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e23 Jul 2012\u003c/td\u003e\n            \u003ctd\u003eEve will increase her energy by being more active\u003c/td\u003e\n            \u003ctd\u003eEve will open \u0026quot;The Firm\u0026quot; DVD workout package and listen to it\u003c/td\u003e\n            \u003ctd\u003eDiscontinued\u003c/td\u003e\n            \u003ctd\u003e13 Aug 2012\u003c/td\u003e\n            \u003ctd\u003e7/30/12 Eve will be able to resume exercise on 7/30/12.  8/13/12 -hold until \u0026quot;less busy\u0026quot;\u003c/td\u003e\n          \u003c/tr\u003e\n        \u003c/tbody\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Condition",
+      "id": "p1",
+      "clinicalStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "code": "active"
+          }
+        ]
+      },
+      "verificationStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "confirmed"
+          }
+        ]
+      },
+      "code": {
+        "text": "GERDS"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Condition",
+      "id": "p2",
+      "clinicalStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "code": "active"
+          }
+        ]
+      },
+      "verificationStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "confirmed"
+          }
+        ]
+      },
+      "code": {
+        "text": "Obesity"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Condition",
+      "id": "p3",
+      "clinicalStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+            "code": "active"
+          }
+        ]
+      },
+      "verificationStatus": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "confirmed"
+          }
+        ]
+      },
+      "code": {
+        "text": "Psoriasis"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Goal",
+      "id": "g1",
+      "lifecycleStatus": "active",
+      "description": {
+        "text": "Eve will lose weight and reduce her GERDS symptoms by improving her diet"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Goal",
+      "id": "g2",
+      "lifecycleStatus": "active",
+      "description": {
+        "text": "Eve will improve her GERDS symptoms"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Goal",
+      "id": "g3",
+      "lifecycleStatus": "active",
+      "description": {
+        "text": "Eve will increase her energy by being more active"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Goal",
+      "id": "g4",
+      "lifecycleStatus": "active",
+      "description": {
+        "text": "Eve will set up her medications and take as prescribed"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    },
+    {
+      "resourceType": "Goal",
+      "id": "g5",
+      "lifecycleStatus": "active",
+      "description": {
+        "text": "Eve will restart her light treatments"
+      },
+      "subject": {
+        "reference": "Patient/1",
+        "display": "Eve Everywoman"
+      }
+    }
+  ],
+  "status": "active",
+  "intent": "plan",
+  "subject": {
+    "reference": "Patient/1",
+    "display": "Eve Everywoman"
+  },
+  "addresses": [
+    {
+      "reference": "#p1",
+      "display": "GERDS"
+    },
+    {
+      "reference": "#p2",
+      "display": "Obesity"
+    },
+    {
+      "reference": "#p3",
+      "display": "Psoriasis"
+    }
+  ],
+  "goal": [
+    {
+      "reference": "#g1"
+    },
+    {
+      "reference": "#g2"
+    },
+    {
+      "reference": "#g3"
+    },
+    {
+      "reference": "#g4"
+    },
+    {
+      "reference": "#g5"
+    }
+  ],
+  "activity": [
+    {
+      "progress": [
+        {
+          "time": "2012-09-10",
+          "text": "Eve eats one meal a day with her parents"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-09-10"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g1"
+          }
+        ],
+        "status": "not-started",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-09-10"
+        },
+        "description": "Eve will review photos of high and low density foods and share with her parents"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-09-10",
+          "text": "Eve will sleep in her bed more often than the couch"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-09-10"
+          }
+        ],
+        "kind": "CommunicationRequest",
+        "goal": [
+          {
+            "reference": "#g1"
+          }
+        ],
+        "status": "not-started",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-09-10"
+        },
+        "description": "Eve will ask her dad to asist her to put the head of her bed on blocks"
+      }
+    },
+    {
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-09-10"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g2"
+          }
+        ],
+        "status": "in-progress",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-09-10"
+        },
+        "description": "Eve will reduce her intake of coffee and chocolate"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-08-27",
+          "text": "Eve would like to try for 5 days a week."
+        },
+        {
+          "time": "2012-09-10",
+          "text": "Eve is still walking the dogs."
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-09-10"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g3"
+          }
+        ],
+        "status": "in-progress",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-08-27"
+        },
+        "description": "Eve will walk her friend\u0027s dog up and down a big hill 15-30 minutes 3 days a week"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-08-13",
+          "text": "Eve walked 4 times the last week."
+        },
+        {
+          "time": "2012-09-10",
+          "text": "Eve did not walk to her parents the last week, but has plans to start again"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-09-10"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g3"
+          }
+        ],
+        "status": "in-progress",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-23"
+        },
+        "description": "Eve will walk 3 blocks to her parents house twice a week"
+      }
+    },
+    {
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-08-13"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g4"
+          }
+        ],
+        "status": "in-progress",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-23"
+        },
+        "description": "Eve will use a calendar to check off after medications are taken"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-08-13",
+          "text": "After restarting the vinegar soaks the psoriasis is improved and Eve plans to treat the remainder with light treatments.  She plans to start this week."
+        },
+        {
+          "time": "2012-08-27",
+          "text": "Since her skin is improved Eve has not been using the light treatment as often, maybe once a week.  She would like to increase to 3 times a week again"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-08-27"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g5"
+          }
+        ],
+        "status": "in-progress",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-23"
+        },
+        "description": "Eve will use her lights MWF after her shower for 3 minutes"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-07-23",
+          "text": "Eve created a chart as a reminer to take the medications that do not fit in her pill box"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-09-10"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g4"
+          }
+        ],
+        "status": "in-progress",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-10"
+        },
+        "description": "Eve will use a calendar of a chart to help her remember when to take her medications"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-07-30",
+          "text": "Will be able to esume exercise."
+        },
+        {
+          "time": "2012-08-13",
+          "text": "Eve prefers to focus on walking at this time"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-08-23"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g3"
+          }
+        ],
+        "status": "on-hold",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-23"
+        },
+        "description": "Eve will start using stretch bands and one step 2 days a week Mon/Wed 6-7am and maybe Friday afternoon"
+      }
+    },
+    {
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-07-23"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g4"
+          }
+        ],
+        "status": "completed",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-10"
+        },
+        "description": "Eve will match a printed medication worksheet with the medication bottles at home"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-07-16",
+          "text": "Eve now has some of her medications set up in pill packs by her pharmacist"
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-07-16"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g4"
+          }
+        ],
+        "status": "completed",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-10"
+        },
+        "description": "Eve will get a medication box to sort her pills.  She will have one for scheduled medications and one for as needed"
+      }
+    },
+    {
+      "progress": [
+        {
+          "time": "2012-07-12",
+          "text": "Eve will be able to resume exercise on 7/30/12"
+        },
+        {
+          "time": "2012-08-13",
+          "text": "hold until \"less busy\""
+        }
+      ],
+      "detail": {
+        "extension": [
+          {
+            "url": "http://example.org/fhir/StructureDefinition/RevisionDate",
+            "valueDate": "2012-08-13"
+          }
+        ],
+        "goal": [
+          {
+            "reference": "#g3"
+          }
+        ],
+        "status": "on-hold",
+        "doNotPerform": false,
+        "scheduledPeriod": {
+          "start": "2012-07-23"
+        },
+        "description": "Eve will open \"The Firm\" DVD workout package and listen to it"
+      }
+    }
+  ],
+  "note": [
+    {
+      "text": "Patient family is not ready to commit to goal setting at this time.  Goal setting will be addressed in the future"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

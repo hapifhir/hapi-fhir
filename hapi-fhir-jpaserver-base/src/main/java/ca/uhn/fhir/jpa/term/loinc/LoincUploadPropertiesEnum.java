@@ -69,6 +69,8 @@ public enum LoincUploadPropertiesEnum {
 	LOINC_PART_FILE_DEFAULT("AccessoryFiles/PartFile/Part.csv"),
 
 	// Part link
+	LOINC_PART_LINK_FILE("loinc.part.link.file"),
+	LOINC_PART_LINK_FILE_DEFAULT("AccessoryFiles/PartFile/LoincPartLink.csv"),
 	LOINC_PART_LINK_FILE_PRIMARY("loinc.part.link.primary.file"),
 	LOINC_PART_LINK_FILE_PRIMARY_DEFAULT("AccessoryFiles/PartFile/LoincPartLink_Primary.csv"),
 	LOINC_PART_LINK_FILE_SUPPLEMENTARY("loinc.part.link.supplementary.file"),
@@ -96,6 +98,9 @@ public enum LoincUploadPropertiesEnum {
 	/*
 	 * OPTIONAL
 	 */
+	// This is the version identifier for the LOINC code system
+	LOINC_CODESYSTEM_VERSION("loinc.codesystem.version"),
+
 	// This is the version identifier for the answer list file
 	LOINC_ANSWERLIST_VERSION("loinc.answerlist.version"),
 

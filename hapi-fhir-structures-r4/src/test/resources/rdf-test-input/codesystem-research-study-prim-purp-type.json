@@ -1,0 +1,99 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "research-study-prim-purp-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eResearchStudyPrimaryPurposeType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes for the main intent of the study.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/research-study-prim-purp-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etreatment\u003ca name\u003d\"research-study-prim-purp-type-treatment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTreatment\u003c/td\u003e\u003ctd\u003eOne or more interventions are being evaluated for treating a disease, syndrome, or condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprevention\u003ca name\u003d\"research-study-prim-purp-type-prevention\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrevention\u003c/td\u003e\u003ctd\u003eOne or more interventions are being assessed for preventing the development of a specific disease or health condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediagnostic\u003ca name\u003d\"research-study-prim-purp-type-diagnostic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic\u003c/td\u003e\u003ctd\u003eOne or more interventions are being evaluated for identifying a disease or health condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esupportive-care\u003ca name\u003d\"research-study-prim-purp-type-supportive-care\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSupportive Care\u003c/td\u003e\u003ctd\u003eOne or more interventions are evaluated for maximizing comfort, minimizing side effects, or mitigating against a decline in the participant\u0027s health or function.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003escreening\u003ca name\u003d\"research-study-prim-purp-type-screening\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eScreening\u003c/td\u003e\u003ctd\u003eOne or more interventions are assessed or examined for identifying a condition, or risk factors for a condition, in people who are not yet known to have the condition or risk factor.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehealth-services-research\u003ca name\u003d\"research-study-prim-purp-type-health-services-research\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth Services Research\u003c/td\u003e\u003ctd\u003eOne or more interventions for evaluating the delivery, processes, management, organization, or financing of healthcare.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebasic-science\u003ca name\u003d\"research-study-prim-purp-type-basic-science\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBasic Science\u003c/td\u003e\u003ctd\u003eOne or more interventions for examining the basic mechanism of action (for example, physiology or biomechanics of an intervention).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edevice-feasibility\u003ca name\u003d\"research-study-prim-purp-type-device-feasibility\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDevice Feasibility\u003c/td\u003e\u003ctd\u003eAn intervention of a device product is being evaluated to determine the feasibility of the product or to test a prototype device and not health outcomes. Such studies are conducted to confirm the design and operating specifications of a device before beginning a full clinical trial.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "brr"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/research-study-prim-purp-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1250"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ResearchStudyPrimaryPurposeType",
+  "title": "ResearchStudyPrimaryPurposeType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes for the main intent of the study.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/research-study-prim-purp-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "treatment",
+      "display": "Treatment",
+      "definition": "One or more interventions are being evaluated for treating a disease, syndrome, or condition."
+    },
+    {
+      "code": "prevention",
+      "display": "Prevention",
+      "definition": "One or more interventions are being assessed for preventing the development of a specific disease or health condition."
+    },
+    {
+      "code": "diagnostic",
+      "display": "Diagnostic",
+      "definition": "One or more interventions are being evaluated for identifying a disease or health condition."
+    },
+    {
+      "code": "supportive-care",
+      "display": "Supportive Care",
+      "definition": "One or more interventions are evaluated for maximizing comfort, minimizing side effects, or mitigating against a decline in the participant\u0027s health or function."
+    },
+    {
+      "code": "screening",
+      "display": "Screening",
+      "definition": "One or more interventions are assessed or examined for identifying a condition, or risk factors for a condition, in people who are not yet known to have the condition or risk factor."
+    },
+    {
+      "code": "health-services-research",
+      "display": "Health Services Research",
+      "definition": "One or more interventions for evaluating the delivery, processes, management, organization, or financing of healthcare."
+    },
+    {
+      "code": "basic-science",
+      "display": "Basic Science",
+      "definition": "One or more interventions for examining the basic mechanism of action (for example, physiology or biomechanics of an intervention)."
+    },
+    {
+      "code": "device-feasibility",
+      "display": "Device Feasibility",
+      "definition": "An intervention of a device product is being evaluated to determine the feasibility of the product or to test a prototype device and not health outcomes. Such studies are conducted to confirm the design and operating specifications of a device before beginning a full clinical trial."
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "example2",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eFHIR-exanple-2 (http://hl7.org/fhir/ConceptMap/example2)\u003c/h2\u003e\n      \u003cp\u003eMapping from http://example.org/fhir/example1 to http://example.org/fhir/example2\u003c/p\u003e\n      \u003cp\u003eDRAFT (not intended for production usage). Published on 13/06/2012 by HL7, Inc (FHIR project team (example): \n        \u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e). \n      \u003c/p\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eAn example mapping\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003cbr/\u003e\n      \u003ctable class\u003d\"grid\"\u003e\n        \u003ctr\u003e\n          \u003ctd colspan\u003d\"2\"\u003e\n            \u003cb\u003eSource Concept Details\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eEquivalence\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd colspan\u003d\"1\"\u003e\n            \u003cb\u003eDestination Concept Details\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e from http://example.org/fhir/example1\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e from http://example.org/fhir/example3\n          \u003c/td\u003e\n          \u003ctd/\u003e\n          \u003ctd\u003e\n            \u003cb\u003eCode\u003c/b\u003e from http://example.org/fhir/example2\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003ecode\u003c/td\u003e\n          \u003ctd\u003esome-code\u003c/td\u003e\n          \u003ctd\u003e\n            \u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ecode2\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/example2",
+  "version": "4.0.1",
+  "name": "FHIR-exanple-2",
+  "title": "FHIR Example 2",
+  "status": "draft",
+  "experimental": true,
+  "date": "2012-06-13",
+  "publisher": "HL7, Inc",
+  "contact": [
+    {
+      "name": "FHIR project team (example)",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "An example mapping",
+  "purpose": "To illustrate mapping features",
+  "sourceUri": "http://example.org/fhir/example1",
+  "targetUri": "http://example.org/fhir/example2",
+  "group": [
+    {
+      "source": "http://example.org/fhir/example1",
+      "target": "http://example.org/fhir/example2",
+      "element": [
+        {
+          "code": "code",
+          "display": "Example Code",
+          "target": [
+            {
+              "code": "code2",
+              "display": "Some Example Code",
+              "equivalence": "equivalent",
+              "dependsOn": [
+                {
+                  "property": "http://example.org/fhir/property-value/example",
+                  "system": "http://example.org/fhir/example3",
+                  "value": "some-code",
+                  "display": "Something Coded"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "unmapped": {
+        "mode": "other-map",
+        "url": "http://example.org/fhir/ConceptMap/map2"
+      }
+    }
+  ]
+}

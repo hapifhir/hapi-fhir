@@ -1,0 +1,119 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "task-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTaskStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe current status of the task.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/task-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"task-status-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eThe task is not yet ready to be acted upon.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erequested\u003ca name\u003d\"task-status-requested\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRequested\u003c/td\u003e\u003ctd\u003eThe task is ready to be acted upon and action is sought.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereceived\u003ca name\u003d\"task-status-received\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReceived\u003c/td\u003e\u003ctd\u003eA potential performer has claimed ownership of the task and is evaluating whether to perform it.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccepted\u003ca name\u003d\"task-status-accepted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccepted\u003c/td\u003e\u003ctd\u003eThe potential performer has agreed to execute the task but has not yet started work.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erejected\u003ca name\u003d\"task-status-rejected\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRejected\u003c/td\u003e\u003ctd\u003eThe potential performer who claimed ownership of the task has decided not to execute it prior to performing any action.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eready\u003ca name\u003d\"task-status-ready\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReady\u003c/td\u003e\u003ctd\u003eThe task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"task-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe task was not completed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein-progress\u003ca name\u003d\"task-status-in-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Progress\u003c/td\u003e\u003ctd\u003eThe task has been started but is not yet complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-hold\u003ca name\u003d\"task-status-on-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Hold\u003c/td\u003e\u003ctd\u003eThe task has been started but work has been paused.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efailed\u003ca name\u003d\"task-status-failed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFailed\u003c/td\u003e\u003ctd\u003eThe task was attempted but could not be completed due to some error.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecompleted\u003ca name\u003d\"task-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eThe task has been completed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"task-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe task should never have existed and is retained only because of the possibility it may have used.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/task-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.791"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TaskStatus",
+  "title": "TaskStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The current status of the task.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/task-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "draft",
+      "display": "Draft",
+      "definition": "The task is not yet ready to be acted upon."
+    },
+    {
+      "code": "requested",
+      "display": "Requested",
+      "definition": "The task is ready to be acted upon and action is sought."
+    },
+    {
+      "code": "received",
+      "display": "Received",
+      "definition": "A potential performer has claimed ownership of the task and is evaluating whether to perform it."
+    },
+    {
+      "code": "accepted",
+      "display": "Accepted",
+      "definition": "The potential performer has agreed to execute the task but has not yet started work."
+    },
+    {
+      "code": "rejected",
+      "display": "Rejected",
+      "definition": "The potential performer who claimed ownership of the task has decided not to execute it prior to performing any action."
+    },
+    {
+      "code": "ready",
+      "display": "Ready",
+      "definition": "The task is ready to be performed, but no action has yet been taken.  Used in place of requested/received/accepted/rejected when request assignment and acceptance is a given."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The task was not completed."
+    },
+    {
+      "code": "in-progress",
+      "display": "In Progress",
+      "definition": "The task has been started but is not yet complete."
+    },
+    {
+      "code": "on-hold",
+      "display": "On Hold",
+      "definition": "The task has been started but work has been paused."
+    },
+    {
+      "code": "failed",
+      "display": "Failed",
+      "definition": "The task was attempted but could not be completed due to some error."
+    },
+    {
+      "code": "completed",
+      "display": "Completed",
+      "definition": "The task has been completed."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The task should never have existed and is retained only because of the possibility it may have used."
+    }
+  ]
+}

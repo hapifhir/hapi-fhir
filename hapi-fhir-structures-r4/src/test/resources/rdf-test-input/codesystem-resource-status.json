@@ -1,0 +1,191 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "resource-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCanonical Status Codes for FHIR Resources\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe master set of status codes used throughout FHIR. All status codes are mapped to one of these codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/resource-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eerror\u003ca name\u003d\"resource-status-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eerror\u003c/td\u003e\u003ctd\u003eThe resource was created in error, and should not be treated as valid (note: in many cases, for various data integrity related reasons, the information cannot be removed from the record)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproposed\u003ca name\u003d\"resource-status-proposed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eproposed\u003c/td\u003e\u003ctd\u003eThe resource describes an action or plan that is proposed, and not yet approved by the participants\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eplanned\u003ca name\u003d\"resource-status-planned\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eplanned\u003c/td\u003e\u003ctd\u003eThe resource describes a course of action that is planned and agreed/approved, but at the time of recording was still future\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"resource-status-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edraft\u003c/td\u003e\u003ctd\u003eThe information in the resource is still being prepared and edited\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erequested\u003ca name\u003d\"resource-status-requested\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003erequested\u003c/td\u003e\u003ctd\u003eA fulfiller has been asked to perform this action, but it has not yet occurred\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereceived\u003ca name\u003d\"resource-status-received\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereceived\u003c/td\u003e\u003ctd\u003eThe fulfiller has received the request, but not yet agreed to carry out the action\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeclined\u003ca name\u003d\"resource-status-declined\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edeclined\u003c/td\u003e\u003ctd\u003eThe fulfiller chose not to perform the action\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccepted\u003ca name\u003d\"resource-status-accepted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eaccepted\u003c/td\u003e\u003ctd\u003eThe fulfiller has decided to perform the action, and plans are in train to do this in the future\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003earrived\u003ca name\u003d\"resource-status-arrived\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003earrived\u003c/td\u003e\u003ctd\u003eThe pre-conditions for the action are all fulfilled, and it is imminent\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"resource-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eactive\u003c/td\u003e\u003ctd\u003eThe resource describes information that is currently valid or a process that is presently occuring\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esuspended\u003ca name\u003d\"resource-status-suspended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003esuspended\u003c/td\u003e\u003ctd\u003eThe process described/requested in this resource has been halted for some reason\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efailed\u003ca name\u003d\"resource-status-failed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003efailed\u003c/td\u003e\u003ctd\u003eThe process described/requested in the resource could not be completed, and no further action is planned\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereplaced\u003ca name\u003d\"resource-status-replaced\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereplaced\u003c/td\u003e\u003ctd\u003eThe information in this resource has been replaced by information in another resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomplete\u003ca name\u003d\"resource-status-complete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecomplete\u003c/td\u003e\u003ctd\u003eThe process described/requested in the resource has been completed, and no further action is planned\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einactive\u003ca name\u003d\"resource-status-inactive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einactive\u003c/td\u003e\u003ctd\u003eThe resource describes information that is no longer valid or a process that is stopped occurring\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eabandoned\u003ca name\u003d\"resource-status-abandoned\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eabandoned\u003c/td\u003e\u003ctd\u003eThe process described/requested in the resource did not complete - usually due to some workflow error, and no further action is planned\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"resource-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eunknown\u003c/td\u003e\u003ctd\u003eAuthoring system does not know the status\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunconfirmed\u003ca name\u003d\"resource-status-unconfirmed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eunconfirmed\u003c/td\u003e\u003ctd\u003eThe information in this resource is not yet approved\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econfirmed\u003ca name\u003d\"resource-status-confirmed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003econfirmed\u003c/td\u003e\u003ctd\u003eThe information in this resource is approved\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresolved\u003ca name\u003d\"resource-status-resolved\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eresolved\u003c/td\u003e\u003ctd\u003eThe issue identified by this resource is no longer of concern\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erefuted\u003ca name\u003d\"resource-status-refuted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003erefuted\u003c/td\u003e\u003ctd\u003eThis information has been ruled out by testing and evaluation\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edifferential\u003ca name\u003d\"resource-status-differential\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edifferential\u003c/td\u003e\u003ctd\u003ePotentially true?\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epartial\u003ca name\u003d\"resource-status-partial\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epartial\u003c/td\u003e\u003ctd\u003eThis information is still being assembled\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebusy-unavailable\u003ca name\u003d\"resource-status-busy-unavailable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebusy-unavailable\u003c/td\u003e\u003ctd\u003enot available at this time/location\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efree\u003ca name\u003d\"resource-status-free\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003efree\u003c/td\u003e\u003ctd\u003eFree for scheduling\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-target\u003ca name\u003d\"resource-status-on-target\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eon-target\u003c/td\u003e\u003ctd\u003eReady to act\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eahead-of-target\u003ca name\u003d\"resource-status-ahead-of-target\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eahead-of-target\u003c/td\u003e\u003ctd\u003eAhead of the planned timelines\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebehind-target\u003ca name\u003d\"resource-status-behind-target\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebehind-target\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-ready\u003ca name\u003d\"resource-status-not-ready\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enot-ready\u003c/td\u003e\u003ctd\u003eBehind the planned timelines\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransduc-discon\u003ca name\u003d\"resource-status-transduc-discon\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etransduc-discon\u003c/td\u003e\u003ctd\u003eThe device transducer is disconnected\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehw-discon\u003ca name\u003d\"resource-status-hw-discon\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehw-discon\u003c/td\u003e\u003ctd\u003eThe hardware is disconnected\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "mnm"
+    }
+  ],
+  "url": "http://hl7.org/fhir/resource-status",
+  "version": "4.0.1",
+  "name": "Canonical Status Codes for FHIR Resources",
+  "status": "draft",
+  "publisher": "FHIR Project",
+  "description": "The master set of status codes used throughout FHIR. All status codes are mapped to one of these codes.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/resource-status",
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "error",
+      "display": "error",
+      "definition": "The resource was created in error, and should not be treated as valid (note: in many cases, for various data integrity related reasons, the information cannot be removed from the record)"
+    },
+    {
+      "code": "proposed",
+      "display": "proposed",
+      "definition": "The resource describes an action or plan that is proposed, and not yet approved by the participants"
+    },
+    {
+      "code": "planned",
+      "display": "planned",
+      "definition": "The resource describes a course of action that is planned and agreed/approved, but at the time of recording was still future"
+    },
+    {
+      "code": "draft",
+      "display": "draft",
+      "definition": "The information in the resource is still being prepared and edited"
+    },
+    {
+      "code": "requested",
+      "display": "requested",
+      "definition": "A fulfiller has been asked to perform this action, but it has not yet occurred"
+    },
+    {
+      "code": "received",
+      "display": "received",
+      "definition": "The fulfiller has received the request, but not yet agreed to carry out the action"
+    },
+    {
+      "code": "declined",
+      "display": "declined",
+      "definition": "The fulfiller chose not to perform the action"
+    },
+    {
+      "code": "accepted",
+      "display": "accepted",
+      "definition": "The fulfiller has decided to perform the action, and plans are in train to do this in the future"
+    },
+    {
+      "code": "arrived",
+      "display": "arrived",
+      "definition": "The pre-conditions for the action are all fulfilled, and it is imminent"
+    },
+    {
+      "code": "active",
+      "display": "active",
+      "definition": "The resource describes information that is currently valid or a process that is presently occuring"
+    },
+    {
+      "code": "suspended",
+      "display": "suspended",
+      "definition": "The process described/requested in this resource has been halted for some reason"
+    },
+    {
+      "code": "failed",
+      "display": "failed",
+      "definition": "The process described/requested in the resource could not be completed, and no further action is planned"
+    },
+    {
+      "code": "replaced",
+      "display": "replaced",
+      "definition": "The information in this resource has been replaced by information in another resource"
+    },
+    {
+      "code": "complete",
+      "display": "complete",
+      "definition": "The process described/requested in the resource has been completed, and no further action is planned"
+    },
+    {
+      "code": "inactive",
+      "display": "inactive",
+      "definition": "The resource describes information that is no longer valid or a process that is stopped occurring"
+    },
+    {
+      "code": "abandoned",
+      "display": "abandoned",
+      "definition": "The process described/requested in the resource did not complete - usually due to some workflow error, and no further action is planned"
+    },
+    {
+      "code": "unknown",
+      "display": "unknown",
+      "definition": "Authoring system does not know the status"
+    },
+    {
+      "code": "unconfirmed",
+      "display": "unconfirmed",
+      "definition": "The information in this resource is not yet approved"
+    },
+    {
+      "code": "confirmed",
+      "display": "confirmed",
+      "definition": "The information in this resource is approved"
+    },
+    {
+      "code": "resolved",
+      "display": "resolved",
+      "definition": "The issue identified by this resource is no longer of concern"
+    },
+    {
+      "code": "refuted",
+      "display": "refuted",
+      "definition": "This information has been ruled out by testing and evaluation"
+    },
+    {
+      "code": "differential",
+      "display": "differential",
+      "definition": "Potentially true?"
+    },
+    {
+      "code": "partial",
+      "display": "partial",
+      "definition": "This information is still being assembled"
+    },
+    {
+      "code": "busy-unavailable",
+      "display": "busy-unavailable",
+      "definition": "not available at this time/location"
+    },
+    {
+      "code": "free",
+      "display": "free",
+      "definition": "Free for scheduling"
+    },
+    {
+      "code": "on-target",
+      "display": "on-target",
+      "definition": "Ready to act"
+    },
+    {
+      "code": "ahead-of-target",
+      "display": "ahead-of-target",
+      "definition": "Ahead of the planned timelines"
+    },
+    {
+      "code": "behind-target",
+      "display": "behind-target"
+    },
+    {
+      "code": "not-ready",
+      "display": "not-ready",
+      "definition": "Behind the planned timelines"
+    },
+    {
+      "code": "transduc-discon",
+      "display": "transduc-discon",
+      "definition": "The device transducer is disconnected"
+    },
+    {
+      "code": "hw-discon",
+      "display": "hw-discon",
+      "definition": "The hardware is disconnected"
+    }
+  ]
+}

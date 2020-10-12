@@ -1,0 +1,288 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Element",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ctable border\u003d\"0\" cellpadding\u003d\"0\" cellspacing\u003d\"0\" style\u003d\"border: 0px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003ctr style\u003d\"border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"The logical name of the element\"\u003eName\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Information about the use of the element\"\u003eFlags\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Minimum and Maximum # of times the the element can appear in the instance\"\u003eCard.\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"width: 100px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Reference to the type of the element\"\u003eType\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Additional information about the element\"\u003eDescription \u0026amp; Constraints\u003c/a\u003e\u003cspan style\u003d\"float: right\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e\u003c/a\u003e\u003c/span\u003e\u003c/th\u003e\u003c/tr\u003e\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPQfAOvGUf7ztuvPMf/78/fkl/Pbg+u8Rvjqteu2Pf3zxPz36Pz0z+vTmPzurPvuw/npofbjquvNefHVduuyN+uuMu3Oafbgjfnqvf/3zv/3xevPi+vRjP/20/bmsP///wD/ACH5BAEKAB8ALAAAAAAQABAAAAVl4CeOZGme5qCqqDg8jyVJaz1876DsmAQAgqDgltspMEhMJoMZ4iy6I1AooFCIv+wKybziALVAoAEjYLwDgGIpJhMslgxaLR4/3rMAWoBp32V5exg8Shl1ckRUQVaMVkQ2kCstKCEAOw\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Element\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"element-definitions.html#Element\" title\u003d\"Element : Base definition for all elements in a resource.\"\u003eElement\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"conformance-rules.html#constraints\" title\u003d\"This element has or is affected by some invariants\"\u003eI\u003c/a\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; border: 1px grey solid; font-weight: bold; color: black; background-color: #e6ffe6\" href\u003d\"versions.html#std-process\" title\u003d\"Standards Status \u003d Normative\"\u003eN\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003en/a\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eBase for all elements\u003cbr/\u003e\u003cspan style\u003d\"font-style: italic\" title\u003d\"ele-1\"\u003e+ Rule: All FHIR elements must have a @value or children\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"element-definitions.html#Element.id\" title\u003d\"Element.id : Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.\"\u003eid\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eUnique id for inter-element referencing\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAADdSURBVDjLY/j//z8DJZhhmBvw41KQ07dzbk5kG/Dtgu/Jb2fsT5JkwI+bqZw/rsfYA21v+XE97f+PS5H/vx5Ra/98QN7+824ZTiIMSJr580bW/x+3iv//etD9/+fdpv/fzwX+/3LY6P/n7TIzCRtwPYYZaPvGH7dKgAb0AA1o/v/tQsh/oO0bP26TZiYqDIB+1/1+wef/z3vN/3/erPr/5aAOyHZdogMRGPIe38/7gvz+Gej3z18OG/8H2u5BvAFn7GO/Htdv/3pAQejzXjkhoO3tH7dIxY7EpEwMBgAr6O5Q8udliwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Extension\" class\u003d\"hierarchy\"/\u003e \u003ca href\u003d\"element-definitions.html#Element.extension\" title\u003d\"Element.extension : May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.\"\u003eextension\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"extensibility.html#Extension\"\u003eExtension\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eAdditional content defined by implementations\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr\u003e\u003ctd colspan\u003d\"5\" class\u003d\"hierarchy\"\u003e\u003cbr/\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e Documentation for this format\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/Element",
+  "version": "4.0.1",
+  "name": "Element",
+  "status": "active",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 FHIR Standard",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Base StructureDefinition for Element Type: Base definition for all elements in a resource.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    }
+  ],
+  "kind": "complex-type",
+  "abstract": true,
+  "type": "Element",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Element",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+            "valueCode": "normative"
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+            "valueCode": "4.0.0"
+          }
+        ],
+        "path": "Element",
+        "short": "Base for all elements",
+        "definition": "Base definition for all elements in a resource.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Element",
+          "min": 0,
+          "max": "*"
+        },
+        "condition": [
+          "ele-1"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div"
+          }
+        ],
+        "isModifier": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Element.id",
+        "path": "Element.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Element.extension",
+        "path": "Element.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "Element",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+            "valueCode": "normative"
+          },
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+            "valueCode": "4.0.0"
+          }
+        ],
+        "path": "Element",
+        "short": "Base for all elements",
+        "definition": "Base definition for all elements in a resource.",
+        "min": 0,
+        "max": "*",
+        "condition": [
+          "ele-1"
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Element.id",
+        "path": "Element.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "Element.extension",
+        "path": "Element.extension",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "value",
+              "path": "url"
+            }
+          ],
+          "description": "Extensions are always sliced by (at least) url",
+          "rules": "open"
+        },
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      }
+    ]
+  }
+}

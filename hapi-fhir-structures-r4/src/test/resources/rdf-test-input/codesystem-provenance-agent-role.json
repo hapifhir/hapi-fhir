@@ -1,0 +1,119 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "provenance-agent-role",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eProvenance participant role\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe role that a provenance participant played\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/provenance-participant-role defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eenterer\u003ca name\u003d\"provenance-agent-role-enterer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnterer\u003c/td\u003e\u003ctd\u003eA person entering the data into the originating system\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eperformer\u003ca name\u003d\"provenance-agent-role-performer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePerformer\u003c/td\u003e\u003ctd\u003eA person, animal, organization or device that who actually and principally carries out the activity\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eauthor\u003ca name\u003d\"provenance-agent-role-author\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthor\u003c/td\u003e\u003ctd\u003eA party that originates the resource and therefore has responsibility for the information given in the resource and ownership of this resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003everifier\u003ca name\u003d\"provenance-agent-role-verifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVerifier\u003c/td\u003e\u003ctd\u003eA person who verifies the correctness and appropriateness of activity\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  legal\u003ca name\u003d\"provenance-agent-role-legal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLegal Authenticator\u003c/td\u003e\u003ctd\u003eThe person authenticated the content and accepted legal responsibility for its content\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eattester\u003ca name\u003d\"provenance-agent-role-attester\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttester\u003c/td\u003e\u003ctd\u003eA verifier who attests to the accuracy of the resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einformant\u003ca name\u003d\"provenance-agent-role-informant\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformant\u003c/td\u003e\u003ctd\u003eA person who reported information that contributed to the resource\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecustodian\u003ca name\u003d\"provenance-agent-role-custodian\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCustodian\u003c/td\u003e\u003ctd\u003eThe entity that is accountable for maintaining a true an accurate copy of the original record\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eassembler\u003ca name\u003d\"provenance-agent-role-assembler\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAssembler\u003c/td\u003e\u003ctd\u003eA device that operates independently of an author on custodian\u0027s algorithms for data extraction of existing information for purpose of generating a new artifact.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomposer\u003ca name\u003d\"provenance-agent-role-composer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComposer\u003c/td\u003e\u003ctd\u003eA device used by an author to record new information, which may also be used by the author to select existing information for aggregation with newly recorded information for the purpose of generating a new artifact.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/provenance-participant-role",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1306"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ProvenanceParticipantRole",
+  "title": "Provenance participant role",
+  "status": "draft",
+  "experimental": false,
+  "date": "2023-05-12T00:00:00+10:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The role that a provenance participant played",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/provenance-agent-role",
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "enterer",
+      "display": "Enterer",
+      "definition": "A person entering the data into the originating system"
+    },
+    {
+      "code": "performer",
+      "display": "Performer",
+      "definition": "A person, animal, organization or device that who actually and principally carries out the activity"
+    },
+    {
+      "code": "author",
+      "display": "Author",
+      "definition": "A party that originates the resource and therefore has responsibility for the information given in the resource and ownership of this resource"
+    },
+    {
+      "code": "verifier",
+      "display": "Verifier",
+      "definition": "A person who verifies the correctness and appropriateness of activity",
+      "concept": [
+        {
+          "code": "legal",
+          "display": "Legal Authenticator",
+          "definition": "The person authenticated the content and accepted legal responsibility for its content"
+        }
+      ]
+    },
+    {
+      "code": "attester",
+      "display": "Attester",
+      "definition": "A verifier who attests to the accuracy of the resource"
+    },
+    {
+      "code": "informant",
+      "display": "Informant",
+      "definition": "A person who reported information that contributed to the resource"
+    },
+    {
+      "code": "custodian",
+      "display": "Custodian",
+      "definition": "The entity that is accountable for maintaining a true an accurate copy of the original record"
+    },
+    {
+      "code": "assembler",
+      "display": "Assembler",
+      "definition": "A device that operates independently of an author on custodian\u0027s algorithms for data extraction of existing information for purpose of generating a new artifact."
+    },
+    {
+      "code": "composer",
+      "display": "Composer",
+      "definition": "A device used by an author to record new information, which may also be used by the author to select existing information for aggregation with newly recorded information for the purpose of generating a new artifact."
+    }
+  ]
+}

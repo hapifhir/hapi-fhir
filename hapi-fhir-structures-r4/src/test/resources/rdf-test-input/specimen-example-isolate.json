@@ -1,0 +1,97 @@
+{
+  "resourceType": "Specimen",
+  "id": "isolate",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: isolate\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eaccessionIdentifier\u003c/b\u003e: X352356-ISO1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: available\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Bacterial isolate specimen \u003cspan\u003e(Details : {SNOMED CT code \u0027429951000124103\u0027 \u003d \u0027Bacterial isolate specimen (specimen)\u0027, given as \u0027Bacterial isolate specimen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereceivedTime\u003c/b\u003e: 18/08/2015 7:03:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003eparent\u003c/b\u003e: id: stool; X352356; status: unavailable; Stool specimen \u003cspan\u003e(Details : {SNOMED CT code \u0027119339001\u0027 \u003d \u0027Stool specimen\u0027, given as \u0027Stool specimen\u0027})\u003c/span\u003e; receivedTime: 16/08/2015 7:03:00 AM\u003c/p\u003e\u003ch3\u003eCollections\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollector\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCollected[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMethod\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f202\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e16/08/2015 7:03:00 AM\u003c/td\u003e\u003ctd\u003ePlates, Blood Agar \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0488 code \u0027BAP\u0027 \u003d \u0027Plates, Blood Agar)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: Patient dropped off specimen\u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Specimen",
+      "id": "stool",
+      "accessionIdentifier": {
+        "system": "http://lab.acme.org/specimens/2015",
+        "value": "X352356"
+      },
+      "status": "unavailable",
+      "type": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "119339001",
+            "display": "Stool specimen"
+          }
+        ]
+      },
+      "subject": {
+        "reference": "Patient/example"
+      },
+      "receivedTime": "2015-08-16T07:03:00Z",
+      "collection": {
+        "collector": {
+          "display": "Patient"
+        },
+        "collectedDateTime": "2011-08-16T06:15:00Z",
+        "method": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0488",
+              "code": "LNV"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "accessionIdentifier": {
+    "system": "http://lab.acme.org/specimens/2011",
+    "value": "X352356-ISO1"
+  },
+  "status": "available",
+  "type": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "429951000124103",
+        "display": "Bacterial isolate specimen"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "receivedTime": "2015-08-18T07:03:00Z",
+  "parent": [
+    {
+      "reference": "#stool"
+    }
+  ],
+  "collection": {
+    "collector": {
+      "reference": "Practitioner/f202"
+    },
+    "collectedDateTime": "2015-08-16T07:03:00Z",
+    "method": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0488",
+          "code": "BAP"
+        }
+      ]
+    }
+  },
+  "note": [
+    {
+      "text": "Patient dropped off specimen"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

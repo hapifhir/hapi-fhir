@@ -1,0 +1,86 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "provenance-entity-role",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eProvenanceEntityRole\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eHow an entity was used in an activity.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/provenance-entity-role defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ederivation\u003ca name\u003d\"provenance-entity-role-derivation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDerivation\u003c/td\u003e\u003ctd\u003eA transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  revision\u003ca name\u003d\"provenance-entity-role-revision\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRevision\u003c/td\u003e\u003ctd\u003eA derivation for which the resulting entity is a revised version of some original.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  quotation\u003ca name\u003d\"provenance-entity-role-quotation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuotation\u003c/td\u003e\u003ctd\u003eThe repeat of (some or all of) an entity, such as text or image, by someone who might or might not be its original author.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  source\u003ca name\u003d\"provenance-entity-role-source\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSource\u003c/td\u003e\u003ctd\u003eA primary source for a topic refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic\u0027s study, without benefit from hindsight.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  removal\u003ca name\u003d\"provenance-entity-role-removal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRemoval\u003c/td\u003e\u003ctd\u003eA derivation for which the entity is removed from accessibility usually through the use of the Delete operation.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sec"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/provenance-entity-role",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.437"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ProvenanceEntityRole",
+  "title": "ProvenanceEntityRole",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "How an entity was used in an activity.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/provenance-entity-role",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "derivation",
+      "display": "Derivation",
+      "definition": "A transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.",
+      "concept": [
+        {
+          "code": "revision",
+          "display": "Revision",
+          "definition": "A derivation for which the resulting entity is a revised version of some original."
+        },
+        {
+          "code": "quotation",
+          "display": "Quotation",
+          "definition": "The repeat of (some or all of) an entity, such as text or image, by someone who might or might not be its original author."
+        },
+        {
+          "code": "source",
+          "display": "Source",
+          "definition": "A primary source for a topic refers to something produced by some agent with direct experience and knowledge about the topic, at the time of the topic\u0027s study, without benefit from hindsight."
+        },
+        {
+          "code": "removal",
+          "display": "Removal",
+          "definition": "A derivation for which the entity is removed from accessibility usually through the use of the Delete operation."
+        }
+      ]
+    }
+  ]
+}

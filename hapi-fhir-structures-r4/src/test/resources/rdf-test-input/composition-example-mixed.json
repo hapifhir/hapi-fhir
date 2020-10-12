@@ -1,0 +1,99 @@
+{
+  "resourceType": "Composition",
+  "id": "example-mixed",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-mixed\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Neonatal perinatal medicine Discharge summary \u003cspan\u003e(Details : {LOINC code \u002778418-1\u0027 \u003d \u0027Neonatal perinatal medicine Discharge summary\u0027, given as \u0027Neonatal perinatal medicine Discharge summary\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Report \u003cspan\u003e(Details : {LOINC code \u0027LP173421-1\u0027 \u003d \u0027Report\u0027, given as \u0027Report\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 30/10/2018 4:56:04 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthor\u003c/b\u003e: \u003ca\u003eHarold Hippocrates, MD\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Discharge Summary (Neonatal Service)\u003c/p\u003e\u003cp\u003e\u003cb\u003econfidentiality\u003c/b\u003e: N\u003c/p\u003e\u003ch3\u003eAttesters\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTime\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eParty\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003elegal\u003c/td\u003e\u003ctd\u003e04/01/2012 9:10:14 AM\u003c/td\u003e\u003ctd\u003e\u003ca\u003eHarold Hippocrates, MD\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003ecustodian\u003c/b\u003e: \u003ca\u003eGood Health Clinic\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "78418-1",
+        "display": "Neonatal perinatal medicine Discharge summary"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "LP173421-1",
+          "display": "Report"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/newborn",
+    "display": "Tahlia Smith"
+  },
+  "date": "2018-10-30T16:56:04+11:00",
+  "author": [
+    {
+      "reference": "Practitioner/xcda-author",
+      "display": "Harold Hippocrates, MD"
+    }
+  ],
+  "title": "Discharge Summary (Neonatal Service)",
+  "confidentiality": "N",
+  "attester": [
+    {
+      "mode": "legal",
+      "time": "2012-01-04T09:10:14Z",
+      "party": {
+        "reference": "Practitioner/xcda-author",
+        "display": "Harold Hippocrates, MD"
+      }
+    }
+  ],
+  "custodian": {
+    "reference": "Organization/2.16.840.1.113883.19.5",
+    "display": "Good Health Clinic"
+  },
+  "section": [
+    {
+      "title": "Child\u0027s Details",
+      "code": {
+        "coding": [
+          {
+            "system": "http://acme.org/codes/SectionType",
+            "code": "newborn",
+            "display": "New Born Details"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n        (snip)\n\t\t\t\u003c/div\u003e"
+      }
+    },
+    {
+      "title": "Mpther\u0027s Details",
+      "code": {
+        "coding": [
+          {
+            "system": "http://acme.org/codes/SectionType",
+            "code": "mother",
+            "display": "Mother\u0027s Details"
+          }
+        ]
+      },
+      "text": {
+        "status": "generated",
+        "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\t(snip)\n\t\t\t\u003c/div\u003e"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

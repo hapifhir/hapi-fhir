@@ -1,0 +1,455 @@
+{
+  "resourceType": "Bundle",
+  "id": "report",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "https://example.com/base/DiagnosticReport/report",
+      "resource": {
+        "resourceType": "DiagnosticReport",
+        "id": "report",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: report\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: comprehensive bone marrow report \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eEverywoman, Eve A, MRN: 123456789\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 02/01/2015 1:20:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 06/01/2015 1:20:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eMolecular Diagnostic Laboratory\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003especimen\u003c/b\u003e: \u003ca\u003eBone marrow ID: MLD45-Z4-1234\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eresult\u003c/b\u003e: \u003c/p\u003e\u003cul\u003e\u003cli\u003e\u003ca\u003eObservation/o1\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o2\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o3\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o4\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o5\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o6\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o7\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o8\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o9\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o10\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o11\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o12\u003c/a\u003e\u003c/li\u003e\u003cli\u003e\u003ca\u003eObservation/o13\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+        },
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/DiagnosticReport-geneticsAssessedCondition",
+            "valueReference": {
+              "reference": "Condition/c1"
+            }
+          }
+        ],
+        "status": "final",
+        "code": {
+          "text": "comprehensive bone marrow report"
+        },
+        "subject": {
+          "reference": "Patient/genetics-example1",
+          "display": "Everywoman, Eve A, MRN: 123456789"
+        },
+        "effectiveDateTime": "2015-01-02T13:20:10+01:00",
+        "issued": "2015-01-06T13:20:10+01:00",
+        "performer": [
+          {
+            "reference": "Practitioner/genetics-example1",
+            "display": "Molecular Diagnostic Laboratory"
+          }
+        ],
+        "specimen": [
+          {
+            "reference": "Specimen/genetics-example1",
+            "display": "Bone marrow ID: MLD45-Z4-1234"
+          }
+        ],
+        "result": [
+          {
+            "reference": "Observation/o1"
+          },
+          {
+            "reference": "Observation/o2"
+          },
+          {
+            "reference": "Observation/o3"
+          },
+          {
+            "reference": "Observation/o4"
+          },
+          {
+            "reference": "Observation/o5"
+          },
+          {
+            "reference": "Observation/o6"
+          },
+          {
+            "reference": "Observation/o7"
+          },
+          {
+            "reference": "Observation/o8"
+          },
+          {
+            "reference": "Observation/o9"
+          },
+          {
+            "reference": "Observation/o10"
+          },
+          {
+            "reference": "Observation/o11"
+          },
+          {
+            "reference": "Observation/o12"
+          },
+          {
+            "reference": "Observation/o13"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o1",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o1\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Leukocytes [#/volume] in Blood \u003cspan\u003e(Details : {LOINC code \u002726464-8\u0027 \u003d \u0027Leukocytes [#/volume] in Blood\u0027, given as \u0027Leukocytes [#/volume] in Blood\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 31.9 K/ul\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "26464-8",
+              "display": "Leukocytes [#/volume] in Blood"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 31.9,
+          "unit": "K/ul"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o2",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o2",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o2\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Hematocrit [Volume Fraction] of Blood \u003cspan\u003e(Details : {LOINC code \u002720570-8\u0027 \u003d \u0027Hematocrit [Volume Fraction] of Blood\u0027, given as \u0027Hematocrit [Volume Fraction] of Blood\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 27 %\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "20570-8",
+              "display": "Hematocrit [Volume Fraction] of Blood"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 27,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o3",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o3\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Platelets [#/volume] in Blood \u003cspan\u003e(Details : {LOINC code \u002726515-7\u0027 \u003d \u0027Platelets [#/volume] in Blood\u0027, given as \u0027Platelets [#/volume] in Blood\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 84 K/ul\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "26515-7",
+              "display": "Platelets [#/volume] in Blood"
+            }
+          ]
+        },
+        "valueQuantity": {
+          "value": 84,
+          "unit": "K/ul"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o4",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o4",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o4\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: NPM1 gene mutations found [Identifier] in Bone marrow by Molecular genetics method Nominal \u003cspan\u003e(Details : {LOINC code \u002775034-9\u0027 \u003d \u0027NPM1 gene mutations found [Identifier] in Bone marrow by Molecular genetics method Nominal\u0027, given as \u0027NPM1 gene mutations found [Identifier] in Bone marrow by Molecular genetics method Nominal\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Positive \u003cspan\u003e(Details : {SNOMED CT code \u002710828004\u0027 \u003d \u0027Positive\u0027, given as \u0027Positive\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75034-9",
+              "display": "NPM1 gene mutations found [Identifier] in Bone marrow by Molecular genetics method Nominal"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "10828004",
+              "display": "Positive"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o5",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o5",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o5\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: FLT3 gene mutation analysis in Bone marrow by Molecular genetics method Narrative \u003cspan\u003e(Details : {LOINC code \u002754447-8\u0027 \u003d \u0027FLT3 gene mutation analysis in Bone marrow by Molecular genetics method Narrative\u0027, given as \u0027FLT3 gene mutation analysis in Bone marrow by Molecular genetics method Narrative\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Negative \u003cspan\u003e(Details : {SNOMED CT code \u0027260385009\u0027 \u003d \u0027Negative\u0027, given as \u0027Negative\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "54447-8",
+              "display": "FLT3 gene mutation analysis in Bone marrow by Molecular genetics method Narrative"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "260385009",
+              "display": "Negative"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o6",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o6",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o6\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: KIT gene mutation analysis in Bone marrow by Molecular genetics method Narrative \u003cspan\u003e(Details : {LOINC code \u002755201-8\u0027 \u003d \u0027KIT gene mutation analysis in Blood or Tissue by Molecular genetics method Narrative\u0027, given as \u0027KIT gene mutation analysis in Bone marrow by Molecular genetics method Narrative\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Negative \u003cspan\u003e(Details : {SNOMED CT code \u0027260385009\u0027 \u003d \u0027Negative\u0027, given as \u0027Negative\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "55201-8",
+              "display": "KIT gene mutation analysis in Bone marrow by Molecular genetics method Narrative"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "260385009",
+              "display": "Negative"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o7",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o7",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o7\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Myeloblasts [#/volume] in Blood \u003cspan\u003e(Details : {LOINC code \u002730444-4\u0027 \u003d \u0027Myeloblasts [#/volume] in Blood\u0027, given as \u0027Myeloblasts [#/volume] in Blood\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Positive \u003cspan\u003e(Details : {SNOMED CT code \u002710828004\u0027 \u003d \u0027Positive\u0027, given as \u0027Positive\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "30444-4",
+              "display": "Myeloblasts [#/volume] in Blood"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "10828004",
+              "display": "Positive"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o8",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o8",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o8\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: CD4 Ag [Presence] in Tissue by Immune stain \u003cspan\u003e(Details : {LOINC code \u002747016-1\u0027 \u003d \u0027CD4 Ag [Presence] in Tissue by Immune stain\u0027, given as \u0027CD4 Ag [Presence] in Tissue by Immune stain\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Positive \u003cspan\u003e(Details : {SNOMED CT code \u002710828004\u0027 \u003d \u0027Positive\u0027, given as \u0027Positive\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "47016-1",
+              "display": "CD4 Ag [Presence] in Tissue by Immune stain"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "10828004",
+              "display": "Positive"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o9",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o9",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o9\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: CD13 Ag [Presence] in Tissue by Immune stain \u003cspan\u003e(Details : {LOINC code \u002749464-1\u0027 \u003d \u0027CD13 Ag [Presence] in Tissue by Immune stain\u0027, given as \u0027CD13 Ag [Presence] in Tissue by Immune stain\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Positive \u003cspan\u003e(Details : {SNOMED CT code \u002710828004\u0027 \u003d \u0027Positive\u0027, given as \u0027Positive\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "49464-1",
+              "display": "CD13 Ag [Presence] in Tissue by Immune stain"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "10828004",
+              "display": "Positive"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o10",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o10",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o10\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: CD2 Ag [Presence] in Tissue by Immune stain \u003cspan\u003e(Details : {LOINC code \u002749466-6\u0027 \u003d \u0027CD2 Ag [Presence] in Tissue by Immune stain\u0027, given as \u0027CD2 Ag [Presence] in Tissue by Immune stain\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Negative \u003cspan\u003e(Details : {SNOMED CT code \u0027260385009\u0027 \u003d \u0027Negative\u0027, given as \u0027Negative\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "49466-6",
+              "display": "CD2 Ag [Presence] in Tissue by Immune stain"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "260385009",
+              "display": "Negative"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o11",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o11",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o11\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Karyotype [Identifier] in Bone marrow Nominal \u003cspan\u003e(Details : {LOINC code \u002733893-9\u0027 \u003d \u0027Karyotype [Identifier] in Bone marrow Nominal\u0027, given as \u0027Karyotype [Identifier] in Bone marrow Nominal\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 46,XX[20] \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "33893-9",
+              "display": "Karyotype [Identifier] in Bone marrow Nominal"
+            }
+          ]
+        },
+        "valueCodeableConcept": {
+          "text": "46,XX[20]"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o12",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o12",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o12\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: MDS-associated genetic abnormalities \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Negative \u003cspan\u003e(Details : {SNOMED CT code \u0027260385009\u0027 \u003d \u0027Negative\u0027, given as \u0027Negative\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "text": "MDS-associated genetic abnormalities"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "260385009",
+              "display": "Negative"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "fullUrl": "https://example.com/base/Observation/o13",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "o13",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: o13\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: AML-associated genetic abnormalities \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Negative \u003cspan\u003e(Details : {SNOMED CT code \u0027260385009\u0027 \u003d \u0027Negative\u0027, given as \u0027Negative\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+        },
+        "status": "final",
+        "code": {
+          "text": "AML-associated genetic abnormalities"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "260385009",
+              "display": "Negative"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

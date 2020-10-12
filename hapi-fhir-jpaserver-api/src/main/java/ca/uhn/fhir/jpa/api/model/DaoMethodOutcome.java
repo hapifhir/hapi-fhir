@@ -28,12 +28,27 @@ public class DaoMethodOutcome extends MethodOutcome {
 
 	private IBasePersistedResource myEntity;
 	private IBaseResource myPreviousResource;
+	private boolean myNop;
 
 	/**
 	 * Constructor
 	 */
 	public DaoMethodOutcome() {
 		super();
+	}
+
+	/**
+	 * Was this a NO-OP - Typically because of an update to a resource that already matched the contents provided
+	 */
+	public boolean isNop() {
+		return myNop;
+	}
+
+	/**
+	 * Was this a NO-OP - Typically because of an update to a resource that already matched the contents provided
+	 */
+	public void setNop(boolean theNop) {
+		myNop = theNop;
 	}
 
 	public IBasePersistedResource getEntity() {

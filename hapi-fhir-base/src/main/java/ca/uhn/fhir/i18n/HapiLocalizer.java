@@ -40,9 +40,8 @@ public class HapiLocalizer {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HapiLocalizer.class);
 	private static boolean ourFailOnMissingMessage;
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<>();
-	private List<ResourceBundle> myBundle = new ArrayList<>();
+	private List<ResourceBundle> myBundle;
 	private final Map<String, String> myHardcodedMessages = new HashMap<>();
-	private String[] myBundleNames;
 	private Locale myLocale = Locale.getDefault();
 
 	public HapiLocalizer() {
@@ -50,8 +49,7 @@ public class HapiLocalizer {
 	}
 
 	public HapiLocalizer(String... theBundleNames) {
-		myBundleNames = theBundleNames;
-		init();
+		init(theBundleNames);
 		addMessage("hapi.version", VersionUtil.getVersion());
 	}
 
@@ -159,8 +157,9 @@ public class HapiLocalizer {
 		return new MessageFormat(pattern.toString());
 	}
 
-	protected void init() {
-		for (String nextName : myBundleNames) {
+	protected void init(String[] theBundleNames) {
+		myBundle = new ArrayList<>();
+		for (String nextName : theBundleNames) {
 			myBundle.add(ResourceBundle.getBundle(nextName));
 		}
 	}

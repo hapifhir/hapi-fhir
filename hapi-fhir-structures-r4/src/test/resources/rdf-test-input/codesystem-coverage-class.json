@@ -1,0 +1,121 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "coverage-class",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCoverage Class Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes Coverage Class codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eHL7 Inc.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/coverage-class defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egroup\u003ca name\u003d\"coverage-class-group\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGroup\u003c/td\u003e\u003ctd\u003eAn employee group\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubgroup\u003ca name\u003d\"coverage-class-subgroup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubGroup\u003c/td\u003e\u003ctd\u003eA sub-group of an employee group\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eplan\u003ca name\u003d\"coverage-class-plan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlan\u003c/td\u003e\u003ctd\u003eA specific suite of benefits.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubplan\u003ca name\u003d\"coverage-class-subplan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubPlan\u003c/td\u003e\u003ctd\u003eA subset of a specific suite of benefits.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclass\u003ca name\u003d\"coverage-class-class\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClass\u003c/td\u003e\u003ctd\u003eA class of benefits.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubclass\u003ca name\u003d\"coverage-class-subclass\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubClass\u003c/td\u003e\u003ctd\u003eA subset of a class of benefits.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esequence\u003ca name\u003d\"coverage-class-sequence\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSequence\u003c/td\u003e\u003ctd\u003eA sequence number associated with a short-term continuance of the coverage.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erxbin\u003ca name\u003d\"coverage-class-rxbin\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRX BIN\u003c/td\u003e\u003ctd\u003ePharmacy benefit manager\u0027s Business Identification Number.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erxpcn\u003ca name\u003d\"coverage-class-rxpcn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRX PCN\u003c/td\u003e\u003ctd\u003eA Pharmacy Benefit Manager specified Processor Control Number.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erxid\u003ca name\u003d\"coverage-class-rxid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRX Id\u003c/td\u003e\u003ctd\u003eA Pharmacy Benefit Manager specified Member ID.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erxgroup\u003ca name\u003d\"coverage-class-rxgroup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRX Group\u003c/td\u003e\u003ctd\u003eA Pharmacy Benefit Manager specified Group number.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/coverage-class",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1147"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CoverageClassCodes",
+  "title": "Coverage Class Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes Coverage Class codes.",
+  "copyright": "HL7 Inc.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/coverage-class",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "group",
+      "display": "Group",
+      "definition": "An employee group"
+    },
+    {
+      "code": "subgroup",
+      "display": "SubGroup",
+      "definition": "A sub-group of an employee group"
+    },
+    {
+      "code": "plan",
+      "display": "Plan",
+      "definition": "A specific suite of benefits."
+    },
+    {
+      "code": "subplan",
+      "display": "SubPlan",
+      "definition": "A subset of a specific suite of benefits."
+    },
+    {
+      "code": "class",
+      "display": "Class",
+      "definition": "A class of benefits."
+    },
+    {
+      "code": "subclass",
+      "display": "SubClass",
+      "definition": "A subset of a class of benefits."
+    },
+    {
+      "code": "sequence",
+      "display": "Sequence",
+      "definition": "A sequence number associated with a short-term continuance of the coverage."
+    },
+    {
+      "code": "rxbin",
+      "display": "RX BIN",
+      "definition": "Pharmacy benefit manager\u0027s Business Identification Number."
+    },
+    {
+      "code": "rxpcn",
+      "display": "RX PCN",
+      "definition": "A Pharmacy Benefit Manager specified Processor Control Number."
+    },
+    {
+      "code": "rxid",
+      "display": "RX Id",
+      "definition": "A Pharmacy Benefit Manager specified Member ID."
+    },
+    {
+      "code": "rxgroup",
+      "display": "RX Group",
+      "definition": "A Pharmacy Benefit Manager specified Group number."
+    }
+  ]
+}

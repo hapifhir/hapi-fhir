@@ -169,7 +169,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	}
 
 	@Override
-	public boolean matches(IQueryParameterType theParam, boolean theUseOrdinalDatesForDayComparison) {
+	public boolean matches(IQueryParameterType theParam) {
 		if (!(theParam instanceof NumberParam)) {
 			return false;
 		}

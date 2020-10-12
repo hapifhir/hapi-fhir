@@ -1,0 +1,36 @@
+{
+  "resourceType": "Subscription",
+  "id": "example-error",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e[Put rendering here]\u003c/div\u003e"
+  },
+  "status": "error",
+  "contact": [
+    {
+      "system": "phone",
+      "value": "ext 4123"
+    }
+  ],
+  "end": "2021-01-01T00:00:00Z",
+  "reason": "Monitor new neonatal function",
+  "criteria": "Observation?code\u003dhttp://loinc.org|1975-2",
+  "error": "Socket Error 10060 - can\u0027t connect to host",
+  "channel": {
+    "type": "rest-hook",
+    "endpoint": "https://biliwatch.com/customers/mount-auburn-miu/on-result",
+    "payload": "application/fhir+json",
+    "header": [
+      "Authorization: Bearer secret-token-abc-123"
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

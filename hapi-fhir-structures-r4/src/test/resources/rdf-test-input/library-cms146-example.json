@@ -1,0 +1,179 @@
+{
+  "resourceType": "Library",
+  "id": "library-cms146-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eLibrary/library-cms146-example\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eIdentifier: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003evalue: \u003c/b\u003e\n                  \u003cspan\u003eCMS146\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eVersion: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e2.0.0\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTitle: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eAppropriate Testing for Children with Pharyngitis\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eType: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode: \u003c/b\u003e\n                           \u003cspan\u003elogic-library\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003edraft\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eDescription: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eLogic for CMS 146: Appropriate Testing for Children with Pharyngitis\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eRelated: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edepends-on\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eResource: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eLibrary/library-quick-model-definition\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003ePatient\u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eCondition\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ecategory\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003ediagnosis\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003eclinicalStatus\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003econfirmed\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ecode\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.102.12.1011\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eCondition\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ecategory\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003ediagnosis\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003eclinicalStatus\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003econfirmed\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ecode\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.102.12.1012\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eEncounter\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003estatus\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003efinished\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003eclass\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003eambulatory\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003etype\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.101.12.1061\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eDiagnosticReport\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ediagnosis\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.198.12.1012\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eMedication\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ecode\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.196.12.1001\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eMedicationRequest\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003estatus\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003eactive\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003emedication.code\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.196.12.1001\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eMedicationStatement\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003estatus\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode:\u003c/b\u003e\n                           \u003cspan\u003ecompleted\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003emedication.code\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003e2.16.840.1.113883.3.464.1003.196.12.1001\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eContent: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003etext/cql\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eurl: \u003c/b\u003e\n                     \u003cspan\u003elibrary-cms146-example-content.cql\u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n      \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "value": "CMS146"
+    }
+  ],
+  "version": "2.0.0",
+  "title": "Appropriate Testing for Children with Pharyngitis",
+  "status": "draft",
+  "type": {
+    "coding": [
+      {
+        "code": "logic-library"
+      }
+    ]
+  },
+  "date": "2015-07-22",
+  "description": "Logic for CMS 146: Appropriate Testing for Children with Pharyngitis",
+  "relatedArtifact": [
+    {
+      "type": "depends-on",
+      "resource": "Library/library-quick-model-definition"
+    }
+  ],
+  "dataRequirement": [
+    {
+      "type": "Patient"
+    },
+    {
+      "type": "Condition",
+      "codeFilter": [
+        {
+          "path": "category",
+          "code": [
+            {
+              "code": "diagnosis"
+            }
+          ]
+        },
+        {
+          "path": "clinicalStatus",
+          "code": [
+            {
+              "code": "confirmed"
+            }
+          ]
+        },
+        {
+          "path": "code",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.102.12.1011"
+        }
+      ]
+    },
+    {
+      "type": "Condition",
+      "codeFilter": [
+        {
+          "path": "category",
+          "code": [
+            {
+              "code": "diagnosis"
+            }
+          ]
+        },
+        {
+          "path": "clinicalStatus",
+          "code": [
+            {
+              "code": "confirmed"
+            }
+          ]
+        },
+        {
+          "path": "code",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.102.12.1012"
+        }
+      ]
+    },
+    {
+      "type": "Encounter",
+      "codeFilter": [
+        {
+          "path": "status",
+          "code": [
+            {
+              "code": "finished"
+            }
+          ]
+        },
+        {
+          "path": "class",
+          "code": [
+            {
+              "code": "ambulatory"
+            }
+          ]
+        },
+        {
+          "path": "type",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.101.12.1061"
+        }
+      ]
+    },
+    {
+      "type": "DiagnosticReport",
+      "codeFilter": [
+        {
+          "path": "diagnosis",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.198.12.1012"
+        }
+      ]
+    },
+    {
+      "type": "Medication",
+      "codeFilter": [
+        {
+          "path": "code",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.196.12.1001"
+        }
+      ]
+    },
+    {
+      "type": "MedicationRequest",
+      "codeFilter": [
+        {
+          "path": "status",
+          "code": [
+            {
+              "code": "active"
+            }
+          ]
+        },
+        {
+          "path": "medication.code",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.196.12.1001"
+        }
+      ]
+    },
+    {
+      "type": "MedicationStatement",
+      "codeFilter": [
+        {
+          "path": "status",
+          "code": [
+            {
+              "code": "completed"
+            }
+          ]
+        },
+        {
+          "path": "medication.code",
+          "valueSet": "urn:oid:2.16.840.1.113883.3.464.1003.196.12.1001"
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "library-cms146-example-content.cql"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

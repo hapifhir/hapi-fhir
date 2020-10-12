@@ -1,0 +1,1762 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "SubstanceNucleicAcid",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ctable border\u003d\"0\" cellpadding\u003d\"0\" cellspacing\u003d\"0\" style\u003d\"border: 0px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003ctr style\u003d\"border: 1px #F0F0F0 solid; font-size: 11px; font-family: verdana; vertical-align: top;\"\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"The logical name of the element\"\u003eName\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Information about the use of the element\"\u003eFlags\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Minimum and Maximum # of times the the element can appear in the instance\"\u003eCard.\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"width: 100px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Reference to the type of the element\"\u003eType\u003c/a\u003e\u003c/th\u003e\u003cth style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Additional information about the element\"\u003eDescription \u0026amp; Constraints\u003c/a\u003e\u003cspan style\u003d\"float: right\"\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e\u003c/a\u003e\u003c/span\u003e\u003c/th\u003e\u003c/tr\u003e\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAACCElEQVQ4y4XTv2sUQRTA8e9Mzt3kjoOLSXFgZ6GJQlALCysLC89OsLTXv0VFxE4stRAEQUghSWEXuM4qMZpATsUD70dyMdnduZ15z2IvMV5IfDDNm5nPm59GVTkpms1mTVXvhxDuichlEZn03m+KyJL3/mWj0fiKqp7YVlZWXrfbbR2PTqeji4uLn1WVEqdECKFRr9eP5WdnZ/HeXwROB0TEA3S7XarVKiLC1tYW8/PzeO/5LxBCUABrLXEc02q1KJfLB30F0P144dPU9LVL1kwcrU06WP0ewhML4JwDYDgcHo7I87wAjNq5ypU3Z8arT8F5u/xejw52zmGM+Rcg1wyIcc/BTYCdBlODyh3ElA1AHMekaUoURURRBECWZSNgaGzBxxAU9jfQ9jrJr2dcbbXobRYHlQAzo9X1gDR9+KUArE6CwLefZD9WCW6P0uRZKreXqADkHXZ3dshzjwRholJH397AOXcTwHTfzQ1n7q6NnYEAy+DWQVNwKWQJ6vcx557Se7HAzIN1M9rCwVteA/rAYDRRICQgSZEr7WLYO3bzJVJGQBu0D74PkoHkoBnIHvjfkO9AGABmDHCjFWgH8i7kPQh9yEeYH4DfLhBJgA2A7BBQJ9uwXWY3rhJqFo1AaiB1CBngwKZQcqAeSFSduL9Akj7qPF64jnALS5VTPwdgPwwJ+uog9Qcx4kRZiPKqxgAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Resource\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid : Nucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction.\"\u003eSubstanceNucleicAcid\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; border: 1px grey solid; font-weight: bold; color: black; background-color: #fff5e6\" href\u003d\"versions.html#std-process\" title\u003d\"Standards Status \u003d Trial Use\"\u003eTU\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"/\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"domainresource.html\"\u003eDomainResource\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eNucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction\u003cbr/\u003eElements defined in Ancestors: \u003ca href\u003d\"resource.html#Resource\" title\u003d\"The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.\"\u003eid\u003c/a\u003e, \u003ca href\u003d\"resource.html#Resource\" title\u003d\"The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.\"\u003emeta\u003c/a\u003e, \u003ca href\u003d\"resource.html#Resource\" title\u003d\"A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.\"\u003eimplicitRules\u003c/a\u003e, \u003ca href\u003d\"resource.html#Resource\" title\u003d\"The base language in which the resource is written.\"\u003elanguage\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"A human-readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \u0026quot;clinically safe\u0026quot; for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.\"\u003etext\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.\"\u003econtained\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.\"\u003eextension\u003c/a\u003e, \u003ca href\u003d\"domainresource.html#DomainResource\" title\u003d\"May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).\"\u003emodifierExtension\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.sequenceType : The type of the sequence shall be specified based on a controlled vocabulary.\"\u003esequenceType\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.sequenceType\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe type of the sequence shall be specified based on a controlled vocabulary\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.numberOfSubunits : The number of linear sequences of nucleotides linked through phosphodiester bonds shall be described. Subunits would be strands of nucleic acids that are tightly associated typically through Watson-Crick base pairing. NOTE: If not specified in the reference source, the assumption is that there is 1 subunit.\"\u003enumberOfSubunits\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.numberOfSubunits\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe number of linear sequences of nucleotides linked through phosphodiester bonds shall be described. Subunits would be strands of nucleic acids that are tightly associated typically through Watson-Crick base pairing. NOTE: If not specified in the reference source, the assumption is that there is 1 subunit\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.areaOfHybridisation : The area of hybridisation shall be described if applicable for double stranded RNA or DNA. The number associated with the subunit followed by the number associated to the residue shall be specified in increasing order. The underscore “” shall be used as separator as follows: “Subunitnumber Residue”.\"\u003eareaOfHybridisation\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.areaOfHybridisation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe area of hybridisation shall be described if applicable for double stranded RNA or DNA. The number associated with the subunit followed by the number associated to the residue shall be specified in increasing order. The underscore “” shall be used as separator as follows: “Subunitnumber Residue”\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3XsQ0AQAgCQHdl/xn8jxvYWB3JlTR0VJLa+OltBwAAYP6EEQAAgCsPVYVAgIJrA/sAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.oligoNucleotideType : (TBC).\"\u003eoligoNucleotideType\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.oligoNucleotideType\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e(TBC)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPQfAOvGUf7ztuvPMf/78/fkl/Pbg+u8Rvjqteu2Pf3zxPz36Pz0z+vTmPzurPvuw/npofbjquvNefHVduuyN+uuMu3Oafbgjfnqvf/3zv/3xevPi+vRjP/20/bmsP///wD/ACH5BAEKAB8ALAAAAAAQABAAAAVl4CeOZGme5qCqqDg8jyVJaz1876DsmAQAgqDgltspMEhMJoMZ4iy6I1AooFCIv+wKybziALVAoAEjYLwDgGIpJhMslgxaLR4/3rMAWoBp32V5exg8Shl1ckRUQVaMVkQ2kCstKCEAOw\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Element\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit : Subunits are listed in order of decreasing length; sequences of the same length will be ordered by molecular weight; subunits that have identical sequences will be repeated multiple times.\"\u003esubunit\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"backboneelement.html\"\u003eBackboneElement\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eSubunits are listed in order of decreasing length; sequences of the same length will be ordered by molecular weight; subunits that have identical sequences will be repeated multiple times\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.subunit : Index of linear sequences of nucleic acids in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts.\"\u003esubunit\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.subunit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eIndex of linear sequences of nucleic acids in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.sequence : Actual nucleotide sequence notation from 5\u0027 to 3\u0027 end using standard single letter codes. In addition to the base sequence, sugar and type of phosphate or non-phosphate linkage should also be captured.\"\u003esequence\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.sequence\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eActual nucleotide sequence notation from 5\u0027 to 3\u0027 end using standard single letter codes. In addition to the base sequence, sugar and type of phosphate or non-phosphate linkage should also be captured\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.length : The length of the sequence shall be captured.\"\u003elength\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.length\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe length of the sequence shall be captured\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.sequenceAttachment : (TBC).\"\u003esequenceAttachment\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.sequenceAttachment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#Attachment\"\u003eAttachment\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e(TBC)\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.fivePrime : The nucleotide present at the 5’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the first position in the sequence. A separate representation would be redundant.\"\u003efivePrime\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.fivePrime\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe nucleotide present at the 5’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the first position in the sequence. A separate representation would be redundant\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.threePrime : The nucleotide present at the 3’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the last position in the sequence. A separate representation would be redundant.\"\u003ethreePrime\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.threePrime\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#CodeableConcept\"\u003eCodeableConcept\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe nucleotide present at the 3’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the last position in the sequence. A separate representation would be redundant\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPQfAOvGUf7ztuvPMf/78/fkl/Pbg+u8Rvjqteu2Pf3zxPz36Pz0z+vTmPzurPvuw/npofbjquvNefHVduuyN+uuMu3Oafbgjfnqvf/3zv/3xevPi+vRjP/20/bmsP///wD/ACH5BAEKAB8ALAAAAAAQABAAAAVl4CeOZGme5qCqqDg8jyVJaz1876DsmAQAgqDgltspMEhMJoMZ4iy6I1AooFCIv+wKybziALVAoAEjYLwDgGIpJhMslgxaLR4/3rMAWoBp32V5exg8Shl1ckRUQVaMVkQ2kCstKCEAOw\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Element\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.linkage : The linkages between sugar residues will also be captured.\"\u003elinkage\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.linkage\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"backboneelement.html\"\u003eBackboneElement\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe linkages between sugar residues will also be captured\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAK0lEQVR42u3QMREAAAgDMbzWvwZABSzpXcYuX0nq0q4//wAAwB8RAACAMwNgq0BWjZsKRgAAAABJRU5ErkJggg\u003d\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.linkage.connectivity : The entity that links the sugar residues together should also be captured for nearly all naturally occurring nucleic acid the linkage is a phosphate group. For many synthetic oligonucleotides phosphorothioate linkages are often seen. Linkage connectivity is assumed to be 3’-5’. If the linkage is either 3’-3’ or 5’-5’ this should be specified.\"\u003econnectivity\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.linkage.connectivity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe entity that links the sugar residues together should also be captured for nearly all naturally occurring nucleic acid the linkage is a phosphate group. For many synthetic oligonucleotides phosphorothioate linkages are often seen. Linkage connectivity is assumed to be 3’-5’. If the linkage is either 3’-3’ or 5’-5’ this should be specified\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAK0lEQVR42u3QMREAAAgDMbzWvwZABSzpXcYuX0nq0q4//wAAwB8RAACAMwNgq0BWjZsKRgAAAABJRU5ErkJggg\u003d\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.linkage.identifier : Each linkage will be registered as a fragment and have an ID.\"\u003eidentifier\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.linkage.identifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#Identifier\"\u003eIdentifier\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eEach linkage will be registered as a fragment and have an ID\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAK0lEQVR42u3QMREAAAgDMbzWvwZABSzpXcYuX0nq0q4//wAAwB8RAACAMwNgq0BWjZsKRgAAAABJRU5ErkJggg\u003d\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.linkage.name : Each linkage will be registered as a fragment and have at least one name. A single name shall be assigned to each linkage.\"\u003ename\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.linkage.name\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eEach linkage will be registered as a fragment and have at least one name. A single name shall be assigned to each linkage\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAALElEQVR42u3QwQkAMAwDsezq/WdIO4XJQwa9DTdJpulv258AAMANIgAAADUPYAVAgAJ//usAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzMPbYccAgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAMElEQVQ4y+3OQREAIBDDwAv+PQcFFN5MIyCzqHMKUGVCpMFLK97heq+gggoq+EiwAVjvMhFGmlEUAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.linkage.residueSite : Residues shall be captured as described in 5.3.6.8.3.\"\u003eresidueSite\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.linkage.residueSite\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eResidues shall be captured as described in 5.3.6.8.3\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAI0lEQVR42u3QIQEAAAACIL/6/4MvTAQOkLYBAAB4kAAAANwMad9AqkRjgNAAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPQfAOvGUf7ztuvPMf/78/fkl/Pbg+u8Rvjqteu2Pf3zxPz36Pz0z+vTmPzurPvuw/npofbjquvNefHVduuyN+uuMu3Oafbgjfnqvf/3zv/3xevPi+vRjP/20/bmsP///wD/ACH5BAEKAB8ALAAAAAAQABAAAAVl4CeOZGme5qCqqDg8jyVJaz1876DsmAQAgqDgltspMEhMJoMZ4iy6I1AooFCIv+wKybziALVAoAEjYLwDgGIpJhMslgxaLR4/3rMAWoBp32V5exg8Shl1ckRUQVaMVkQ2kCstKCEAOw\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Element\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.sugar : 5.3.6.8.1 Sugar ID (Mandatory).\"\u003esugar\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.sugar\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..*\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"backboneelement.html\"\u003eBackboneElement\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e5.3.6.8.1 Sugar ID (Mandatory)\u003cbr/\u003e\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3WsQkAQAgDQHfN/jO8Fs7wIFzg+pAqlaQumbxrnQEAgP3zRgAAAH5paoVAgEFM+GgAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,R0lGODlhEAAQAPZ/APrkusOiYvvfqbiXWaV2G+jGhdq1b8GgYf3v1frw3vTUlsWkZNewbcSjY/DQkad4Hb6dXv3u0f3v1ObEgfPTlerJiP3w1v79+e7OkPrfrfnjuNOtZPrpydaxa+/YrvvdpP779ZxvFPvnwKKBQaFyF/369M2vdaqHRPz58/HNh/vowufFhfroxO3OkPrluv779tK0e6JzGProwvrow9m4eOnIifPTlPDPkP78+Naxaf3v0/zowfXRi+bFhLWUVv379/rnwPvszv3rye3LiPvnv+3MjPDasKiIS/789/3x2f747eXDg+7Mifvu0tu7f+/QkfDTnPXWmPrjsvrjtPbPgrqZW+/QlPz48K2EMv36866OUPvowat8Ivvgq/Pbrvzgq/PguvrgrqN0Gda2evfYm9+7d/rpw9q6e/LSku/Rl/XVl/LSlfrkt+zVqe7Wqv3x1/bNffbOf59wFdS6if3u0vrqyP3owPvepfXQivDQkO/PkKh9K7STVf779P///wD/ACH5BAEKAH8ALAAAAAAQABAAAAemgH+CgxeFF4OIhBdKGwFChYl/hYwbdkoBPnaQkosbG3d3VEpSUlonUoY1Gzo6QkI8SrGxWBOFG4uySgY5ZWR3PFy2hnaWZXC/PHcPwkpJk1ShoHcxhQEXSUmtFy6+0iSFVResrjoTPDzdcoU+F65CduVU6KAhhQa3F8Tx8nchBoYuqoTLZoAKFRIhqGwqJAULFx0GYpBQeChRIR4TJm6KJMhQRUSBAAA7\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.sugar.identifier : The Substance ID of the sugar or sugar-like component that make up the nucleotide.\"\u003eidentifier\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.sugar.identifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#Identifier\"\u003eIdentifier\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe Substance ID of the sugar or sugar-like component that make up the nucleotide\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: #F7F7F7;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3WsQkAQAgDQHfN/jO8Fs7wIFzg+pAqlaQumbxrnQEAgP3zRgAAAH5paoVAgEFM+GgAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzI3XJ6V3QAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+2RsQ0AIAzDav7/2VzQwoCY4iWbZSmo1QGoUgNMghvWaIejPQW/CrrNCylIwcOCDYfLNRcNer4SAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: #F7F7F7; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.sugar.name : The name of the sugar or sugar-like component that make up the nucleotide.\"\u003ename\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.sugar.name\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: #F7F7F7; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe name of the sugar or sugar-like component that make up the nucleotide\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr style\u003d\"border: 0px #F0F0F0 solid; padding:0px; vertical-align: top; background-color: white;\"\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px; white-space: nowrap; background-image: url(data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAACCAYAAACg/LjIAAAAL0lEQVR42u3WQQkAMAwDwHqNfw1rVZRBL3ACklcqSV0yedc6AwDAN3/cCAAAwJYGdQVAgLmrCkUAAAAASUVORK5CYII\u003d)\" class\u003d\"hierarchy\"\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAWCAYAAAABxvaqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIs1vtcMQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAE0lEQVQI12P4//8/AxMDAwNdCABMPwMo2ctnoQAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzIZgEiYEgAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAIElEQVQ4y2P8//8/AyWAiYFCMGrAqAGjBowaMGoAAgAALL0DKYQ0DPIAAAAASUVORK5CYII\u003d\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAWCAYAAADJqhx8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3wYeFzME+lXFigAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAANklEQVQ4y+3OsRUAIAjEUOL+O8cJABttJM11/x1qZAGqRBEVcNIqdWj1efDqQbb3HwwwwEfABmQUHSPM9dtDAAAAAElFTkSuQmCC\" alt\u003d\".\" style\u003d\"background-color: inherit\" class\u003d\"hierarchy\"/\u003e\u003cimg src\u003d\"data: image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsTAAALEwEAmpwYAAAARklEQVQ4y2P8//8/AyWAhYFCMAgMuHjx4n+KXaCv+I0szW8WpCG8kFO1lGFKW/SIjAUYgxz/MzAwMDC+nqhDUTQyjuYFBgCNmhP4OvTRgwAAAABJRU5ErkJggg\u003d\u003d\" alt\u003d\".\" style\u003d\"background-color: white; background-color: inherit\" title\u003d\"Primitive Data Type\" class\u003d\"hierarchy\"/\u003e \u003cspan title\u003d\"SubstanceNucleicAcid.subunit.sugar.residueSite : The residues that contain a given sugar will be captured. The order of given residues will be captured in the 5‘-3‘direction consistent with the base sequences listed above.\"\u003eresidueSite\u003c/span\u003e\u003ca name\u003d\"SubstanceNucleicAcid.subunit.sugar.residueSite\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca style\u003d\"padding-left: 3px; padding-right: 3px; color: black; null\" href\u003d\"elementdefinition-definitions.html#ElementDefinition.isSummary\" title\u003d\"This element is included in summaries\"\u003eΣ\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e0..1\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd style\u003d\"vertical-align: top; text-align : left; background-color: white; border: 0px #F0F0F0 solid; padding:0px 4px 0px 4px\" class\u003d\"hierarchy\"\u003eThe residues that contain a given sugar will be captured. The order of given residues will be captured in the 5‘-3‘direction consistent with the base sequences listed above\u003c/td\u003e\u003c/tr\u003e\r\n\u003ctr\u003e\u003ctd colspan\u003d\"5\" class\u003d\"hierarchy\"\u003e\u003cbr/\u003e\u003ca href\u003d\"formats.html#table\" title\u003d\"Legend for this format\"\u003e\u003cimg src\u003d\"help16.png\" alt\u003d\"doco\" style\u003d\"background-color: inherit\"/\u003e Documentation for this format\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-category",
+      "valueString": "Specialized.Medication Definition"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-security-category",
+      "valueCode": "anonymous"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "brr"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/SubstanceNucleicAcid",
+  "version": "4.0.1",
+  "name": "SubstanceNucleicAcid",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Health Level Seven International (Biomedical Research and Regulation)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/rcrim/index.cfm"
+        }
+      ]
+    }
+  ],
+  "description": "Nucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "SubstanceNucleicAcid",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/DomainResource",
+  "derivation": "specialization",
+  "snapshot": {
+    "element": [
+      {
+        "id": "SubstanceNucleicAcid",
+        "path": "SubstanceNucleicAcid",
+        "short": "Nucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction",
+        "definition": "Nucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "SubstanceNucleicAcid",
+          "min": 0,
+          "max": "*"
+        },
+        "constraint": [
+          {
+            "key": "dom-2",
+            "severity": "error",
+            "human": "If the resource is contained in another resource, it SHALL NOT contain nested Resources",
+            "expression": "contained.contained.empty()",
+            "xpath": "not(parent::f:contained and f:contained)",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "key": "dom-3",
+            "severity": "error",
+            "human": "If the resource is contained in another resource, it SHALL be referred to from elsewhere in the resource or SHALL refer to the containing resource",
+            "expression": "contained.where(((\u0027#\u0027+id in (%resource.descendants().reference | %resource.descendants().as(canonical) | %resource.descendants().as(uri) | %resource.descendants().as(url))) or descendants().where(reference \u003d \u0027#\u0027).exists() or descendants().where(as(canonical) \u003d \u0027#\u0027).exists() or descendants().where(as(canonical) \u003d \u0027#\u0027).exists()).not()).trace(\u0027unmatched\u0027, id).empty()",
+            "xpath": "not(exists(for $id in f:contained/*/f:id/@value return $contained[not(parent::*/descendant::f:reference/@value\u003dconcat(\u0027#\u0027, $contained/*/id/@value) or descendant::f:reference[@value\u003d\u0027#\u0027])]))",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "key": "dom-4",
+            "severity": "error",
+            "human": "If a resource is contained in another resource, it SHALL NOT have a meta.versionId or a meta.lastUpdated",
+            "expression": "contained.meta.versionId.empty() and contained.meta.lastUpdated.empty()",
+            "xpath": "not(exists(f:contained/*/f:meta/f:versionId)) and not(exists(f:contained/*/f:meta/f:lastUpdated))",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "key": "dom-5",
+            "severity": "error",
+            "human": "If a resource is contained in another resource, it SHALL NOT have a security label",
+            "expression": "contained.meta.security.empty()",
+            "xpath": "not(exists(f:contained/*/f:meta/f:security))",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice",
+                "valueBoolean": true
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bestpractice-explanation",
+                "valueMarkdown": "When a resource has no narrative, only systems that fully understand the data can display the resource to a human safely. Including a human readable representation in the resource makes for a much more robust eco-system and cheaper handling of resources by intermediary systems. Some ecosystems restrict distribution of resources to only those systems that do fully understand the resources, and as a consequence implementers may believe that the narrative is superfluous. However experience shows that such eco-systems often open up to new participants over time."
+              }
+            ],
+            "key": "dom-6",
+            "severity": "warning",
+            "human": "A resource should have narrative for robust management",
+            "expression": "text.`div`.exists()",
+            "xpath": "exists(f:text/h:div)",
+            "source": "http://hl7.org/fhir/StructureDefinition/DomainResource"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Entity. Role, or Act"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.id",
+        "path": "SubstanceNucleicAcid.id",
+        "short": "Logical id of this artifact",
+        "definition": "The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes.",
+        "comment": "The only time that a resource does not have an id is when it is being submitted to the server using a create operation.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.meta",
+        "path": "SubstanceNucleicAcid.meta",
+        "short": "Metadata about the resource",
+        "definition": "The metadata about the resource. This is content that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.meta",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Meta"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.implicitRules",
+        "path": "SubstanceNucleicAcid.implicitRules",
+        "short": "A set of rules under which this content was created",
+        "definition": "A reference to a set of rules that were followed when the resource was constructed, and which must be understood when processing the content. Often, this is a reference to an implementation guide that defines the special rules along with other profiles etc.",
+        "comment": "Asserting this rule set restricts the content to be only understood by a limited set of trading partners. This inherently limits the usefulness of the data in the long term. However, the existing health eco-system is highly fractured, and not yet ready to define, collect, and exchange data in a generally computable sense. Wherever possible, implementers and/or specification writers should avoid using this element. Often, when used, the URL is a reference to an implementation guide that defines these special rules as part of it\u0027s narrative along with other profiles, value sets, etc.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.implicitRules",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element is labeled as a modifier because the implicit rules may provide additional knowledge about the resource that modifies it\u0027s meaning or interpretation",
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.language",
+        "path": "SubstanceNucleicAcid.language",
+        "short": "Language of the resource content",
+        "definition": "The base language in which the resource is written.",
+        "comment": "Language is provided to support indexing and accessibility (typically, services such as text to speech use the language tag). The html language tag in the narrative applies  to the narrative. The language tag on the resource may be used to specify the language of other presentations generated from the data in the resource. Not all the content has to be in the base language. The Resource.language should not be assumed to apply to the narrative automatically. If a language is specified, it should it also be specified on the div element in the html (see rules in HTML5 for information about the relationship between xml:lang and the html lang attribute).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Resource.language",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-maxValueSet",
+              "valueCanonical": "http://hl7.org/fhir/ValueSet/all-languages"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "Language"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-isCommonBinding",
+              "valueBoolean": true
+            }
+          ],
+          "strength": "preferred",
+          "description": "A human language.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/languages"
+        }
+      },
+      {
+        "id": "SubstanceNucleicAcid.text",
+        "path": "SubstanceNucleicAcid.text",
+        "short": "Text summary of the resource, for human interpretation",
+        "definition": "A human-readable narrative that contains a summary of the resource and can be used to represent the content of the resource to a human. The narrative need not encode all the structured data, but is required to contain sufficient detail to make it \"clinically safe\" for a human to just read the narrative. Resource definitions may define what content should be represented in the narrative to ensure clinical safety.",
+        "comment": "Contained resources do not have narrative. Resources that are not contained SHOULD have a narrative. In some cases, a resource may only have text with little or no additional discrete data (as long as all minOccurs\u003d1 elements are satisfied).  This may be necessary for data from legacy systems where information is captured as a \"text blob\" or where text is additionally entered raw or narrated and encoded information is added later.",
+        "alias": [
+          "narrative",
+          "html",
+          "xhtml",
+          "display"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "DomainResource.text",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Narrative"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "Act.text?"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.contained",
+        "path": "SubstanceNucleicAcid.contained",
+        "short": "Contained, inline Resources",
+        "definition": "These resources do not have an independent existence apart from the resource that contains them - they cannot be identified independently, and nor can they have their own independent transaction scope.",
+        "comment": "This should never be done when the content can be identified properly, as once identification is lost, it is extremely difficult (and context dependent) to restore it again. Contained resources may have profiles and tags In their meta elements, but SHALL NOT have security labels.",
+        "alias": [
+          "inline resources",
+          "anonymous resources",
+          "contained resources"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "DomainResource.contained",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Resource"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.extension",
+        "path": "SubstanceNucleicAcid.extension",
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the resource. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "DomainResource.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.modifierExtension",
+        "path": "SubstanceNucleicAcid.modifierExtension",
+        "short": "Extensions that cannot be ignored",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the resource and that modifies the understanding of the element that contains it and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer is allowed to define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "DomainResource.modifierExtension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the resource that contains them",
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.sequenceType",
+        "path": "SubstanceNucleicAcid.sequenceType",
+        "short": "The type of the sequence shall be specified based on a controlled vocabulary",
+        "definition": "The type of the sequence shall be specified based on a controlled vocabulary.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.sequenceType",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.numberOfSubunits",
+        "path": "SubstanceNucleicAcid.numberOfSubunits",
+        "short": "The number of linear sequences of nucleotides linked through phosphodiester bonds shall be described. Subunits would be strands of nucleic acids that are tightly associated typically through Watson-Crick base pairing. NOTE: If not specified in the reference source, the assumption is that there is 1 subunit",
+        "definition": "The number of linear sequences of nucleotides linked through phosphodiester bonds shall be described. Subunits would be strands of nucleic acids that are tightly associated typically through Watson-Crick base pairing. NOTE: If not specified in the reference source, the assumption is that there is 1 subunit.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.numberOfSubunits",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.areaOfHybridisation",
+        "path": "SubstanceNucleicAcid.areaOfHybridisation",
+        "short": "The area of hybridisation shall be described if applicable for double stranded RNA or DNA. The number associated with the subunit followed by the number associated to the residue shall be specified in increasing order. The underscore “” shall be used as separator as follows: “Subunitnumber Residue”",
+        "definition": "The area of hybridisation shall be described if applicable for double stranded RNA or DNA. The number associated with the subunit followed by the number associated to the residue shall be specified in increasing order. The underscore “” shall be used as separator as follows: “Subunitnumber Residue”.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.areaOfHybridisation",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.oligoNucleotideType",
+        "path": "SubstanceNucleicAcid.oligoNucleotideType",
+        "short": "(TBC)",
+        "definition": "(TBC).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.oligoNucleotideType",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit",
+        "path": "SubstanceNucleicAcid.subunit",
+        "short": "Subunits are listed in order of decreasing length; sequences of the same length will be ordered by molecular weight; subunits that have identical sequences will be repeated multiple times",
+        "definition": "Subunits are listed in order of decreasing length; sequences of the same length will be ordered by molecular weight; subunits that have identical sequences will be repeated multiple times.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.id",
+        "path": "SubstanceNucleicAcid.subunit.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.extension",
+        "path": "SubstanceNucleicAcid.subunit.extension",
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.modifierExtension",
+        "path": "SubstanceNucleicAcid.subunit.modifierExtension",
+        "short": "Extensions that cannot be ignored even if unrecognized",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+        "alias": [
+          "extensions",
+          "user content",
+          "modifiers"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "BackboneElement.modifierExtension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.subunit",
+        "path": "SubstanceNucleicAcid.subunit.subunit",
+        "short": "Index of linear sequences of nucleic acids in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts",
+        "definition": "Index of linear sequences of nucleic acids in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.subunit",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sequence",
+        "path": "SubstanceNucleicAcid.subunit.sequence",
+        "short": "Actual nucleotide sequence notation from 5\u0027 to 3\u0027 end using standard single letter codes. In addition to the base sequence, sugar and type of phosphate or non-phosphate linkage should also be captured",
+        "definition": "Actual nucleotide sequence notation from 5\u0027 to 3\u0027 end using standard single letter codes. In addition to the base sequence, sugar and type of phosphate or non-phosphate linkage should also be captured.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.sequence",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.length",
+        "path": "SubstanceNucleicAcid.subunit.length",
+        "short": "The length of the sequence shall be captured",
+        "definition": "The length of the sequence shall be captured.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.length",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sequenceAttachment",
+        "path": "SubstanceNucleicAcid.subunit.sequenceAttachment",
+        "short": "(TBC)",
+        "definition": "(TBC).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.sequenceAttachment",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Attachment"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.fivePrime",
+        "path": "SubstanceNucleicAcid.subunit.fivePrime",
+        "short": "The nucleotide present at the 5’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the first position in the sequence. A separate representation would be redundant",
+        "definition": "The nucleotide present at the 5’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the first position in the sequence. A separate representation would be redundant.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.fivePrime",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.threePrime",
+        "path": "SubstanceNucleicAcid.subunit.threePrime",
+        "short": "The nucleotide present at the 3’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the last position in the sequence. A separate representation would be redundant",
+        "definition": "The nucleotide present at the 3’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the last position in the sequence. A separate representation would be redundant.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.threePrime",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage",
+        "path": "SubstanceNucleicAcid.subunit.linkage",
+        "short": "The linkages between sugar residues will also be captured",
+        "definition": "The linkages between sugar residues will also be captured.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.linkage",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.id",
+        "path": "SubstanceNucleicAcid.subunit.linkage.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.extension",
+        "path": "SubstanceNucleicAcid.subunit.linkage.extension",
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.modifierExtension",
+        "path": "SubstanceNucleicAcid.subunit.linkage.modifierExtension",
+        "short": "Extensions that cannot be ignored even if unrecognized",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+        "alias": [
+          "extensions",
+          "user content",
+          "modifiers"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "BackboneElement.modifierExtension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.connectivity",
+        "path": "SubstanceNucleicAcid.subunit.linkage.connectivity",
+        "short": "The entity that links the sugar residues together should also be captured for nearly all naturally occurring nucleic acid the linkage is a phosphate group. For many synthetic oligonucleotides phosphorothioate linkages are often seen. Linkage connectivity is assumed to be 3’-5’. If the linkage is either 3’-3’ or 5’-5’ this should be specified",
+        "definition": "The entity that links the sugar residues together should also be captured for nearly all naturally occurring nucleic acid the linkage is a phosphate group. For many synthetic oligonucleotides phosphorothioate linkages are often seen. Linkage connectivity is assumed to be 3’-5’. If the linkage is either 3’-3’ or 5’-5’ this should be specified.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.linkage.connectivity",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.identifier",
+        "path": "SubstanceNucleicAcid.subunit.linkage.identifier",
+        "short": "Each linkage will be registered as a fragment and have an ID",
+        "definition": "Each linkage will be registered as a fragment and have an ID.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.linkage.identifier",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.name",
+        "path": "SubstanceNucleicAcid.subunit.linkage.name",
+        "short": "Each linkage will be registered as a fragment and have at least one name. A single name shall be assigned to each linkage",
+        "definition": "Each linkage will be registered as a fragment and have at least one name. A single name shall be assigned to each linkage.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.linkage.name",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.residueSite",
+        "path": "SubstanceNucleicAcid.subunit.linkage.residueSite",
+        "short": "Residues shall be captured as described in 5.3.6.8.3",
+        "definition": "Residues shall be captured as described in 5.3.6.8.3.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.linkage.residueSite",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar",
+        "path": "SubstanceNucleicAcid.subunit.sugar",
+        "short": "5.3.6.8.1 Sugar ID (Mandatory)",
+        "definition": "5.3.6.8.1 Sugar ID (Mandatory).",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.sugar",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.id",
+        "path": "SubstanceNucleicAcid.subunit.sugar.id",
+        "representation": [
+          "xmlAttr"
+        ],
+        "short": "Unique id for inter-element referencing",
+        "definition": "Unique id for the element within a resource (for internal references). This may be any string value that does not contain spaces.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Element.id",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fhir-type",
+                "valueUrl": "string"
+              }
+            ],
+            "code": "http://hl7.org/fhirpath/System.String"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.extension",
+        "path": "SubstanceNucleicAcid.subunit.sugar.extension",
+        "short": "Additional content defined by implementations",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element. To make the use of extensions safe and manageable, there is a strict set of governance  applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension.",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "alias": [
+          "extensions",
+          "user content"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Element.extension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "n/a"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.modifierExtension",
+        "path": "SubstanceNucleicAcid.subunit.sugar.modifierExtension",
+        "short": "Extensions that cannot be ignored even if unrecognized",
+        "definition": "May be used to represent additional information that is not part of the basic definition of the element and that modifies the understanding of the element in which it is contained and/or the understanding of the containing element\u0027s descendants. Usually modifier elements provide negation or qualification. To make the use of extensions safe and manageable, there is a strict set of governance applied to the definition and use of extensions. Though any implementer can define an extension, there is a set of requirements that SHALL be met as part of the definition of the extension. Applications processing a resource are required to check for modifier extensions.\n\nModifier extensions SHALL NOT change the meaning of any elements on Resource or DomainResource (including cannot change the meaning of modifierExtension itself).",
+        "comment": "There can be no stigma associated with the use of extensions by any application, project, or standard - regardless of the institution or jurisdiction that uses or defines the extensions.  The use of extensions is what allows the FHIR specification to retain a core level of simplicity for everyone.",
+        "requirements": "Modifier extensions allow for extensions that *cannot* be safely ignored to be clearly distinguished from the vast majority of extensions which can be safely ignored.  This promotes interoperability by eliminating the need for implementers to prohibit the presence of extensions. For further information, see the [definition of modifier extensions](extensibility.html#modifierExtension).",
+        "alias": [
+          "extensions",
+          "user content",
+          "modifiers"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "BackboneElement.modifierExtension",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Extension"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "ext-1",
+            "severity": "error",
+            "human": "Must have either extensions or value[x], not both",
+            "expression": "extension.exists() !\u003d value.exists()",
+            "xpath": "exists(f:extension)!\u003dexists(f:*[starts-with(local-name(.), \"value\")])",
+            "source": "http://hl7.org/fhir/StructureDefinition/Extension"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "Modifier extensions are expected to modify the meaning or interpretation of the element that contains them",
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": "N/A"
+          }
+        ]
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.identifier",
+        "path": "SubstanceNucleicAcid.subunit.sugar.identifier",
+        "short": "The Substance ID of the sugar or sugar-like component that make up the nucleotide",
+        "definition": "The Substance ID of the sugar or sugar-like component that make up the nucleotide.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.sugar.identifier",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.name",
+        "path": "SubstanceNucleicAcid.subunit.sugar.name",
+        "short": "The name of the sugar or sugar-like component that make up the nucleotide",
+        "definition": "The name of the sugar or sugar-like component that make up the nucleotide.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.sugar.name",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.residueSite",
+        "path": "SubstanceNucleicAcid.subunit.sugar.residueSite",
+        "short": "The residues that contain a given sugar will be captured. The order of given residues will be captured in the 5‘-3‘direction consistent with the base sequences listed above",
+        "definition": "The residues that contain a given sugar will be captured. The order of given residues will be captured in the 5‘-3‘direction consistent with the base sequences listed above.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "SubstanceNucleicAcid.subunit.sugar.residueSite",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      }
+    ]
+  },
+  "differential": {
+    "element": [
+      {
+        "id": "SubstanceNucleicAcid",
+        "path": "SubstanceNucleicAcid",
+        "short": "Nucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction",
+        "definition": "Nucleic acids are defined by three distinct elements: the base, sugar and linkage. Individual substance/moiety IDs will be created for each of these elements. The nucleotide sequence will be always entered in the 5’-3’ direction.",
+        "min": 0,
+        "max": "*"
+      },
+      {
+        "id": "SubstanceNucleicAcid.sequenceType",
+        "path": "SubstanceNucleicAcid.sequenceType",
+        "short": "The type of the sequence shall be specified based on a controlled vocabulary",
+        "definition": "The type of the sequence shall be specified based on a controlled vocabulary.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.numberOfSubunits",
+        "path": "SubstanceNucleicAcid.numberOfSubunits",
+        "short": "The number of linear sequences of nucleotides linked through phosphodiester bonds shall be described. Subunits would be strands of nucleic acids that are tightly associated typically through Watson-Crick base pairing. NOTE: If not specified in the reference source, the assumption is that there is 1 subunit",
+        "definition": "The number of linear sequences of nucleotides linked through phosphodiester bonds shall be described. Subunits would be strands of nucleic acids that are tightly associated typically through Watson-Crick base pairing. NOTE: If not specified in the reference source, the assumption is that there is 1 subunit.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.areaOfHybridisation",
+        "path": "SubstanceNucleicAcid.areaOfHybridisation",
+        "short": "The area of hybridisation shall be described if applicable for double stranded RNA or DNA. The number associated with the subunit followed by the number associated to the residue shall be specified in increasing order. The underscore “” shall be used as separator as follows: “Subunitnumber Residue”",
+        "definition": "The area of hybridisation shall be described if applicable for double stranded RNA or DNA. The number associated with the subunit followed by the number associated to the residue shall be specified in increasing order. The underscore “” shall be used as separator as follows: “Subunitnumber Residue”.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.oligoNucleotideType",
+        "path": "SubstanceNucleicAcid.oligoNucleotideType",
+        "short": "(TBC)",
+        "definition": "(TBC).",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit",
+        "path": "SubstanceNucleicAcid.subunit",
+        "short": "Subunits are listed in order of decreasing length; sequences of the same length will be ordered by molecular weight; subunits that have identical sequences will be repeated multiple times",
+        "definition": "Subunits are listed in order of decreasing length; sequences of the same length will be ordered by molecular weight; subunits that have identical sequences will be repeated multiple times.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.subunit",
+        "path": "SubstanceNucleicAcid.subunit.subunit",
+        "short": "Index of linear sequences of nucleic acids in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts",
+        "definition": "Index of linear sequences of nucleic acids in order of decreasing length. Sequences of the same length will be ordered by molecular weight. Subunits that have identical sequences will be repeated and have sequential subscripts.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sequence",
+        "path": "SubstanceNucleicAcid.subunit.sequence",
+        "short": "Actual nucleotide sequence notation from 5\u0027 to 3\u0027 end using standard single letter codes. In addition to the base sequence, sugar and type of phosphate or non-phosphate linkage should also be captured",
+        "definition": "Actual nucleotide sequence notation from 5\u0027 to 3\u0027 end using standard single letter codes. In addition to the base sequence, sugar and type of phosphate or non-phosphate linkage should also be captured.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.length",
+        "path": "SubstanceNucleicAcid.subunit.length",
+        "short": "The length of the sequence shall be captured",
+        "definition": "The length of the sequence shall be captured.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "integer"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sequenceAttachment",
+        "path": "SubstanceNucleicAcid.subunit.sequenceAttachment",
+        "short": "(TBC)",
+        "definition": "(TBC).",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Attachment"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.fivePrime",
+        "path": "SubstanceNucleicAcid.subunit.fivePrime",
+        "short": "The nucleotide present at the 5’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the first position in the sequence. A separate representation would be redundant",
+        "definition": "The nucleotide present at the 5’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the first position in the sequence. A separate representation would be redundant.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.threePrime",
+        "path": "SubstanceNucleicAcid.subunit.threePrime",
+        "short": "The nucleotide present at the 3’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the last position in the sequence. A separate representation would be redundant",
+        "definition": "The nucleotide present at the 3’ terminal shall be specified based on a controlled vocabulary. Since the sequence is represented from the 5\u0027 to the 3\u0027 end, the 5’ prime nucleotide is the letter at the last position in the sequence. A separate representation would be redundant.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage",
+        "path": "SubstanceNucleicAcid.subunit.linkage",
+        "short": "The linkages between sugar residues will also be captured",
+        "definition": "The linkages between sugar residues will also be captured.",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.connectivity",
+        "path": "SubstanceNucleicAcid.subunit.linkage.connectivity",
+        "short": "The entity that links the sugar residues together should also be captured for nearly all naturally occurring nucleic acid the linkage is a phosphate group. For many synthetic oligonucleotides phosphorothioate linkages are often seen. Linkage connectivity is assumed to be 3’-5’. If the linkage is either 3’-3’ or 5’-5’ this should be specified",
+        "definition": "The entity that links the sugar residues together should also be captured for nearly all naturally occurring nucleic acid the linkage is a phosphate group. For many synthetic oligonucleotides phosphorothioate linkages are often seen. Linkage connectivity is assumed to be 3’-5’. If the linkage is either 3’-3’ or 5’-5’ this should be specified.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.identifier",
+        "path": "SubstanceNucleicAcid.subunit.linkage.identifier",
+        "short": "Each linkage will be registered as a fragment and have an ID",
+        "definition": "Each linkage will be registered as a fragment and have an ID.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.name",
+        "path": "SubstanceNucleicAcid.subunit.linkage.name",
+        "short": "Each linkage will be registered as a fragment and have at least one name. A single name shall be assigned to each linkage",
+        "definition": "Each linkage will be registered as a fragment and have at least one name. A single name shall be assigned to each linkage.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.linkage.residueSite",
+        "path": "SubstanceNucleicAcid.subunit.linkage.residueSite",
+        "short": "Residues shall be captured as described in 5.3.6.8.3",
+        "definition": "Residues shall be captured as described in 5.3.6.8.3.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar",
+        "path": "SubstanceNucleicAcid.subunit.sugar",
+        "short": "5.3.6.8.1 Sugar ID (Mandatory)",
+        "definition": "5.3.6.8.1 Sugar ID (Mandatory).",
+        "min": 0,
+        "max": "*",
+        "type": [
+          {
+            "code": "BackboneElement"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.identifier",
+        "path": "SubstanceNucleicAcid.subunit.sugar.identifier",
+        "short": "The Substance ID of the sugar or sugar-like component that make up the nucleotide",
+        "definition": "The Substance ID of the sugar or sugar-like component that make up the nucleotide.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.name",
+        "path": "SubstanceNucleicAcid.subunit.sugar.name",
+        "short": "The name of the sugar or sugar-like component that make up the nucleotide",
+        "definition": "The name of the sugar or sugar-like component that make up the nucleotide.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      },
+      {
+        "id": "SubstanceNucleicAcid.subunit.sugar.residueSite",
+        "path": "SubstanceNucleicAcid.subunit.sugar.residueSite",
+        "short": "The residues that contain a given sugar will be captured. The order of given residues will be captured in the 5‘-3‘direction consistent with the base sequences listed above",
+        "definition": "The residues that contain a given sugar will be captured. The order of given residues will be captured in the 5‘-3‘direction consistent with the base sequences listed above.",
+        "min": 0,
+        "max": "1",
+        "type": [
+          {
+            "code": "string"
+          }
+        ],
+        "isSummary": true
+      }
+    ]
+  }
+}

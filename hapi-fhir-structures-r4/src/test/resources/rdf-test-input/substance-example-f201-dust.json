@@ -1,0 +1,26 @@
+{
+  "resourceType": "Substance",
+  "id": "f201",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f201\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: House dust allergen \u003cspan\u003e(Details : {SNOMED CT code \u0027406466009\u0027 \u003d \u0027House dust allergen\u0027, given as \u0027House dust allergen\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "406466009",
+        "display": "House dust allergen"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

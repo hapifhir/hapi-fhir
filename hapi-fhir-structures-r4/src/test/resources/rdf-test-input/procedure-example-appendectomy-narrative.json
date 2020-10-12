@@ -1,0 +1,21 @@
+{
+  "resourceType": "Procedure",
+  "id": "appendectomy-narrative",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eRoutine Appendectomy in April 2013 performed by Dr Cecil Surgeon\u003c/div\u003e"
+  },
+  "status": "completed",
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

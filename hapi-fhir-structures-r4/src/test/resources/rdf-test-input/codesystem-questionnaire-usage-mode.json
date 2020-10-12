@@ -1,0 +1,70 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "questionnaire-usage-mode",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eQuestionnaireItemUsageMode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the modes of usage of a questionnaire that should enable a particular questionnaire item.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/questionnaire-usage-mode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecapture-display\u003ca name\u003d\"questionnaire-usage-mode-capture-display\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCapture \u0026amp; Display\u003c/td\u003e\u003ctd\u003eRender the item regardless of usage mode.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecapture\u003ca name\u003d\"questionnaire-usage-mode-capture\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCapture Only\u003c/td\u003e\u003ctd\u003eRender the item only when capturing data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisplay\u003ca name\u003d\"questionnaire-usage-mode-display\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisplay Only\u003c/td\u003e\u003ctd\u003eRender the item only when displaying a completed form.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisplay-non-empty\u003ca name\u003d\"questionnaire-usage-mode-display-non-empty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisplay when Answered\u003c/td\u003e\u003ctd\u003eRender the item only when displaying a completed form and the item has been answered (or has child items that have been answered).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecapture-display-non-empty\u003ca name\u003d\"questionnaire-usage-mode-capture-display-non-empty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCapture or, if answered, Display\u003c/td\u003e\u003ctd\u003eRender the item when capturing data or when displaying a completed form and the item has been answered (or has child items that have been answered).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/questionnaire-usage-mode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1274"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "QuestionnaireItemUsageMode",
+  "title": "QuestionnaireItemUsageMode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Identifies the modes of usage of a questionnaire that should enable a particular questionnaire item.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-usage-mode",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "capture-display",
+      "display": "Capture \u0026 Display",
+      "definition": "Render the item regardless of usage mode."
+    },
+    {
+      "code": "capture",
+      "display": "Capture Only",
+      "definition": "Render the item only when capturing data."
+    },
+    {
+      "code": "display",
+      "display": "Display Only",
+      "definition": "Render the item only when displaying a completed form."
+    },
+    {
+      "code": "display-non-empty",
+      "display": "Display when Answered",
+      "definition": "Render the item only when displaying a completed form and the item has been answered (or has child items that have been answered)."
+    },
+    {
+      "code": "capture-display-non-empty",
+      "display": "Capture or, if answered, Display",
+      "definition": "Render the item when capturing data or when displaying a completed form and the item has been answered (or has child items that have been answered)."
+    }
+  ]
+}

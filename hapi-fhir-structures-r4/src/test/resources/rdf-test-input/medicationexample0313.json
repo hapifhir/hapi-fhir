@@ -1,0 +1,73 @@
+{
+  "resourceType": "Medication",
+  "id": "med0313",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: med0313\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Lorazepam 2mg/ml injection solution 1ml vial (product) \u003cspan\u003e(Details : {SNOMED CT code \u0027400621001\u0027 \u003d \u0027Lorazepam 2mg/mL injection solution 1mL vial\u0027, given as \u0027Lorazepam 2mg/ml injection solution 1ml vial (product)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eform\u003c/b\u003e: Injection solution (qualifier value) \u003cspan\u003e(Details : {SNOMED CT code \u0027385219001\u0027 \u003d \u0027Injection solution\u0027, given as \u0027Injection solution (qualifier value)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eamount\u003c/b\u003e: 1 ml\u003cspan\u003e (Details: UCUM code ml \u003d \u0027ml\u0027)\u003c/span\u003e/1 vial\u003cspan\u003e (Details: http://terminology.hl7.org/CodeSystem/medicationknowledge-package-type code vial \u003d \u0027Vial\u0027)\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eIngredients\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eItem[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrength\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eLorazepam (substance) \u003cspan\u003e(Details : {SNOMED CT code \u0027387106007\u0027 \u003d \u0027Lorazepam\u0027, given as \u0027Lorazepam (substance)\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e2 mg\u003cspan\u003e (Details: UCUM code mg \u003d \u0027mg\u0027)\u003c/span\u003e/1 mL\u003cspan\u003e (Details: UCUM code mL \u003d \u0027mL\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "400621001",
+        "display": "Lorazepam 2mg/ml injection solution 1ml vial (product)"
+      }
+    ]
+  },
+  "form": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "385219001",
+        "display": "Injection solution (qualifier value)"
+      }
+    ]
+  },
+  "amount": {
+    "numerator": {
+      "value": 1,
+      "unit": "ml",
+      "system": "http://unitsofmeasure.org",
+      "code": "ml"
+    },
+    "denominator": {
+      "value": 1,
+      "system": "http://terminology.hl7.org/CodeSystem/medicationknowledge-package-type",
+      "code": "vial"
+    }
+  },
+  "ingredient": [
+    {
+      "itemCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "387106007",
+            "display": "Lorazepam (substance)"
+          }
+        ]
+      },
+      "strength": {
+        "numerator": {
+          "value": 2,
+          "system": "http://unitsofmeasure.org",
+          "code": "mg"
+        },
+        "denominator": {
+          "value": 1,
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

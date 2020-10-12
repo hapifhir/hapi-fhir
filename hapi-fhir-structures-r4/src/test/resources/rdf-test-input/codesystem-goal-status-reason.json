@@ -1,0 +1,88 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "goal-status-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGoal status reason\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eExample codes indicating the reason for a current status.  Note that these are in no way complete and might not even be appropriate for some uses.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/goal-status-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esurgery\u003ca name\u003d\"goal-status-reason-surgery\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgery\u003c/td\u003e\u003ctd\u003eGoal suspended or ended because of a surgical procedure.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elife-event\u003ca name\u003d\"goal-status-reason-life-event\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLife Event\u003c/td\u003e\u003ctd\u003eGoal suspended or ended because of a significant life event (marital change, bereavement, etc.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereplaced\u003ca name\u003d\"goal-status-reason-replaced\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReplaced\u003c/td\u003e\u003ctd\u003eGoal has been superseded by a new goal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatient-request\u003ca name\u003d\"goal-status-reason-patient-request\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient Request\u003c/td\u003e\u003ctd\u003ePatient wishes the goal to be set aside, at least temporarily.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etemp-not-attainable\u003ca name\u003d\"goal-status-reason-temp-not-attainable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGoal Not Attainable Temporarily\u003c/td\u003e\u003ctd\u003eGoal cannot be reached temporarily.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epermanent-not-attainable\u003ca name\u003d\"goal-status-reason-permanent-not-attainable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGoal Not Attainable Permanently\u003c/td\u003e\u003ctd\u003eGoal cannot be reached permanently.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efinancial-barrier\u003ca name\u003d\"goal-status-reason-financial-barrier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFinancial Reason\u003c/td\u003e\u003ctd\u003eGoal cannot be reached due to financial barrier or reason.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elack-of-transportation\u003ca name\u003d\"goal-status-reason-lack-of-transportation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLack Of Transportation\u003c/td\u003e\u003ctd\u003eGoal cannot be reached due to a lack of transportation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elack-of-social-support\u003ca name\u003d\"goal-status-reason-lack-of-social-support\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLack Of Social Support\u003c/td\u003e\u003ctd\u003eGoal cannot be reached due to a lack of social support.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/goal-status-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.278"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GoalStatusReason",
+  "title": "Goal status reason",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 International - Patient Care WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/patientcare/"
+        }
+      ]
+    }
+  ],
+  "description": "Example codes indicating the reason for a current status.  Note that these are in no way complete and might not even be appropriate for some uses.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/goal-status-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "surgery",
+      "display": "Surgery",
+      "definition": "Goal suspended or ended because of a surgical procedure."
+    },
+    {
+      "code": "life-event",
+      "display": "Life Event",
+      "definition": "Goal suspended or ended because of a significant life event (marital change, bereavement, etc.)."
+    },
+    {
+      "code": "replaced",
+      "display": "Replaced",
+      "definition": "Goal has been superseded by a new goal."
+    },
+    {
+      "code": "patient-request",
+      "display": "Patient Request",
+      "definition": "Patient wishes the goal to be set aside, at least temporarily."
+    },
+    {
+      "code": "temp-not-attainable",
+      "display": "Goal Not Attainable Temporarily",
+      "definition": "Goal cannot be reached temporarily."
+    },
+    {
+      "code": "permanent-not-attainable",
+      "display": "Goal Not Attainable Permanently",
+      "definition": "Goal cannot be reached permanently."
+    },
+    {
+      "code": "financial-barrier",
+      "display": "Financial Reason",
+      "definition": "Goal cannot be reached due to financial barrier or reason."
+    },
+    {
+      "code": "lack-of-transportation",
+      "display": "Lack Of Transportation",
+      "definition": "Goal cannot be reached due to a lack of transportation."
+    },
+    {
+      "code": "lack-of-social-support",
+      "display": "Lack Of Social Support",
+      "definition": "Goal cannot be reached due to a lack of social support."
+    }
+  ]
+}

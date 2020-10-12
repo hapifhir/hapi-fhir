@@ -1,0 +1,71 @@
+{
+  "resourceType": "Practitioner",
+  "id": "f001",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f001\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 938273695 (OFFICIAL), 129IDH4OP733 (USUAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Eric van den broek (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 0205568263(WORK), E.M.vandenbroek@bmc.nl(WORK), fax: 0205664440(WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: Galapagosweg 91 Den Burg 9105 PZ NLD (WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: male\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 07/12/1975\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "urn:oid:2.16.528.1.1007.3.1",
+      "value": "938273695"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+      "value": "129IDH4OP733"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "van den broek",
+      "given": [
+        "Eric"
+      ],
+      "suffix": [
+        "MD"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "0205568263",
+      "use": "work"
+    },
+    {
+      "system": "email",
+      "value": "E.M.vandenbroek@bmc.nl",
+      "use": "work"
+    },
+    {
+      "system": "fax",
+      "value": "0205664440",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "use": "work",
+      "line": [
+        "Galapagosweg 91"
+      ],
+      "city": "Den Burg",
+      "postalCode": "9105 PZ",
+      "country": "NLD"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1975-12-07",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

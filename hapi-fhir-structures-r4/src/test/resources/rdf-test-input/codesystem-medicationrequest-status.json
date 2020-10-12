@@ -1,0 +1,97 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "medicationrequest-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMedicationrequest  status\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMedicationRequest Status Codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/CodeSystem/medicationrequest-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"medicationrequest-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eThe prescription is \u0027actionable\u0027, but not all actions that are implied by it have occurred yet.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-hold\u003ca name\u003d\"medicationrequest-status-on-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Hold\u003c/td\u003e\u003ctd\u003eActions implied by the prescription are to be temporarily halted, but are expected to continue later.  May also be called \u0027suspended\u0027.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"medicationrequest-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe prescription has been withdrawn before any administrations have occurred\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecompleted\u003ca name\u003d\"medicationrequest-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eAll actions that are implied by the prescription have occurred.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"medicationrequest-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eSome of the actions that are implied by the medication request may have occurred.  For example, the medication may have been dispensed and the patient may have taken some of the medication.  Clinical decision support systems should take this status into account\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estopped\u003ca name\u003d\"medicationrequest-status-stopped\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStopped\u003c/td\u003e\u003ctd\u003eActions implied by the prescription are to be permanently halted, before all of the administrations occurred. This should not be used if the original order was entered in error\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"medicationrequest-status-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eThe prescription is not yet \u0027actionable\u0027, e.g. it is a work in progress, requires sign-off, verification or needs to be run through decision support process.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"medicationrequest-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \u0027other\u0027 - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/CodeSystem/medicationrequest-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1377"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "medicationrequest Status",
+  "title": "Medicationrequest  status",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "MedicationRequest Status Codes",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/medicationrequest-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "active",
+      "display": "Active",
+      "definition": "The prescription is \u0027actionable\u0027, but not all actions that are implied by it have occurred yet."
+    },
+    {
+      "code": "on-hold",
+      "display": "On Hold",
+      "definition": "Actions implied by the prescription are to be temporarily halted, but are expected to continue later.  May also be called \u0027suspended\u0027."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The prescription has been withdrawn before any administrations have occurred"
+    },
+    {
+      "code": "completed",
+      "display": "Completed",
+      "definition": "All actions that are implied by the prescription have occurred."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "Some of the actions that are implied by the medication request may have occurred.  For example, the medication may have been dispensed and the patient may have taken some of the medication.  Clinical decision support systems should take this status into account"
+    },
+    {
+      "code": "stopped",
+      "display": "Stopped",
+      "definition": "Actions implied by the prescription are to be permanently halted, before all of the administrations occurred. This should not be used if the original order was entered in error"
+    },
+    {
+      "code": "draft",
+      "display": "Draft",
+      "definition": "The prescription is not yet \u0027actionable\u0027, e.g. it is a work in progress, requires sign-off, verification or needs to be run through decision support process."
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \u0027other\u0027 - one of the listed statuses is presumed to apply, but the authoring/source system does not know which."
+    }
+  ]
+}

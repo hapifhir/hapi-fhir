@@ -1,0 +1,114 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "permitted-data-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eObservationDataType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003ePermitted data type for observation value.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/permitted-data-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eQuantity\u003ca name\u003d\"permitted-data-type-Quantity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuantity\u003c/td\u003e\u003ctd\u003eA measured amount.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCodeableConcept\u003ca name\u003d\"permitted-data-type-CodeableConcept\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCodeableConcept\u003c/td\u003e\u003ctd\u003eA coded concept from a reference terminology and/or text.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estring\u003ca name\u003d\"permitted-data-type-string\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003estring\u003c/td\u003e\u003ctd\u003eA sequence of Unicode characters.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eboolean\u003ca name\u003d\"permitted-data-type-boolean\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eboolean\u003c/td\u003e\u003ctd\u003etrue or false.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einteger\u003ca name\u003d\"permitted-data-type-integer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einteger\u003c/td\u003e\u003ctd\u003eA signed integer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRange\u003ca name\u003d\"permitted-data-type-Range\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRange\u003c/td\u003e\u003ctd\u003eA set of values bounded by low and high.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRatio\u003ca name\u003d\"permitted-data-type-Ratio\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRatio\u003c/td\u003e\u003ctd\u003eA ratio of two Quantity values - a numerator and a denominator.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSampledData\u003ca name\u003d\"permitted-data-type-SampledData\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSampledData\u003c/td\u003e\u003ctd\u003eA series of measurements taken by a device.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etime\u003ca name\u003d\"permitted-data-type-time\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etime\u003c/td\u003e\u003ctd\u003eA time during the day, in the format hh:mm:ss.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edateTime\u003ca name\u003d\"permitted-data-type-dateTime\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edateTime\u003c/td\u003e\u003ctd\u003eA date, date-time or partial date (e.g. just year or year + month) as used in human communication.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePeriod\u003ca name\u003d\"permitted-data-type-Period\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePeriod\u003c/td\u003e\u003ctd\u003eA time range defined by start and end date/time.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://hl7.org/fhir/permitted-data-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1332"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ObservationDataType",
+  "title": "ObservationDataType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Permitted data type for observation value.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/permitted-data-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "Quantity",
+      "display": "Quantity",
+      "definition": "A measured amount."
+    },
+    {
+      "code": "CodeableConcept",
+      "display": "CodeableConcept",
+      "definition": "A coded concept from a reference terminology and/or text."
+    },
+    {
+      "code": "string",
+      "display": "string",
+      "definition": "A sequence of Unicode characters."
+    },
+    {
+      "code": "boolean",
+      "display": "boolean",
+      "definition": "true or false."
+    },
+    {
+      "code": "integer",
+      "display": "integer",
+      "definition": "A signed integer."
+    },
+    {
+      "code": "Range",
+      "display": "Range",
+      "definition": "A set of values bounded by low and high."
+    },
+    {
+      "code": "Ratio",
+      "display": "Ratio",
+      "definition": "A ratio of two Quantity values - a numerator and a denominator."
+    },
+    {
+      "code": "SampledData",
+      "display": "SampledData",
+      "definition": "A series of measurements taken by a device."
+    },
+    {
+      "code": "time",
+      "display": "time",
+      "definition": "A time during the day, in the format hh:mm:ss."
+    },
+    {
+      "code": "dateTime",
+      "display": "dateTime",
+      "definition": "A date, date-time or partial date (e.g. just year or year + month) as used in human communication."
+    },
+    {
+      "code": "Period",
+      "display": "Period",
+      "definition": "A time range defined by start and end date/time."
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "service-provision-conditions",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eServiceProvisionConditions\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe code(s) that detail the conditions under which the healthcare service is available/offered.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/service-provision-conditions defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efree\u003ca name\u003d\"service-provision-conditions-free\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFree\u003c/td\u003e\u003ctd\u003eThis service is available for no patient cost.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisc\u003ca name\u003d\"service-provision-conditions-disc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiscounts Available\u003c/td\u003e\u003ctd\u003eThere are discounts available on this service for qualifying patients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecost\u003ca name\u003d\"service-provision-conditions-cost\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFees apply\u003c/td\u003e\u003ctd\u003eFees apply for this service.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/service-provision-conditions",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1143"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ServiceProvisionConditions",
+  "title": "ServiceProvisionConditions",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The code(s) that detail the conditions under which the healthcare service is available/offered.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/service-provision-conditions",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "free",
+      "display": "Free",
+      "definition": "This service is available for no patient cost."
+    },
+    {
+      "code": "disc",
+      "display": "Discounts Available",
+      "definition": "There are discounts available on this service for qualifying patients."
+    },
+    {
+      "code": "cost",
+      "display": "Fees apply",
+      "definition": "Fees apply for this service."
+    }
+  ]
+}

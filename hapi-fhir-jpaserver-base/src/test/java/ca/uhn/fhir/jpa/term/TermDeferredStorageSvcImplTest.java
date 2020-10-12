@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -54,7 +53,6 @@ public class TermDeferredStorageSvcImplTest {
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
-		svc.setDaoConfigForUnitTest(new DaoConfig());
 
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
@@ -78,7 +76,6 @@ public class TermDeferredStorageSvcImplTest {
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
-		svc.setDaoConfigForUnitTest(new DaoConfig());
 
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.empty());
 		svc.setCodeSystemVersionDaoForUnitTest(myTermCodeSystemVersionDao);
@@ -104,7 +101,6 @@ public class TermDeferredStorageSvcImplTest {
 		TermDeferredStorageSvcImpl svc = new TermDeferredStorageSvcImpl();
 		svc.setTransactionManagerForUnitTest(myTxManager);
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
-		svc.setDaoConfigForUnitTest(new DaoConfig());
 
 		// Simulate the case where an exception is thrown despite a valid code system version.
 		when(myTermCodeSystemVersionDao.findById(anyLong())).thenReturn(Optional.of(myTermCodeSystemVersion));
@@ -129,7 +125,6 @@ public class TermDeferredStorageSvcImplTest {
 		svc.setTransactionManagerForUnitTest(myTxManager);
 		svc.setCodeSystemStorageSvcForUnitTest(myTermConceptStorageSvc);
 		svc.setConceptDaoForUnitTest(myConceptDao);
-		svc.setDaoConfigForUnitTest(new DaoConfig());
 		svc.setProcessDeferred(true);
 		svc.addConceptLinkToStorageQueue(conceptLink);
 		svc.saveDeferred();

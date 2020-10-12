@@ -1,0 +1,70 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "abstract-types",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAbstractType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA list of the base types defined by this version of the FHIR specification - types that are defined, but for which only specializations actually are created.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/abstract-types defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eType\u003ca name\u003d\"abstract-types-Type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eType\u003c/td\u003e\u003ctd\u003eA place holder that means any kind of data type\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAny\u003ca name\u003d\"abstract-types-Any\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAny\u003c/td\u003e\u003ctd\u003eA place holder that means any kind of resource\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-special-status",
+      "valueString": "This Code System is normative - it is generated based on the information defined in this specification. The definition will remain fixed  across versions, but the actual contents will change from version to version"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/abstract-types",
+  "version": "4.0.1",
+  "name": "AbstractType",
+  "title": "AbstractType",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A list of the base types defined by this version of the FHIR specification - types that are defined, but for which only specializations actually are created.",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "Type",
+      "display": "Type",
+      "definition": "A place holder that means any kind of data type"
+    },
+    {
+      "code": "Any",
+      "display": "Any",
+      "definition": "A place holder that means any kind of resource"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "financial-taskcode",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFinancial Task Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes Financial Task codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/financialtaskcode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancel\u003ca name\u003d\"financial-taskcode-cancel\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancel\u003c/td\u003e\u003ctd\u003eCancel or reverse a resource, such as a claim or preauthorization, which is in-process or complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epoll\u003ca name\u003d\"financial-taskcode-poll\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePoll\u003c/td\u003e\u003ctd\u003eRetrieve selected or all queued resources or messages.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erelease\u003ca name\u003d\"financial-taskcode-release\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelease\u003c/td\u003e\u003ctd\u003eRelease any reserved funds or material obligations associated with a resource. For example, any unused but reserved funds or treatment allowance associated with a preauthorization once treatment is complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereprocess\u003ca name\u003d\"financial-taskcode-reprocess\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReprocess\u003c/td\u003e\u003ctd\u003eIndication that the processing of a resource, such as a claim, for some or all of the required work is now being requested.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estatus\u003ca name\u003d\"financial-taskcode-status\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStatus check\u003c/td\u003e\u003ctd\u003eCheck on the processing status of a resource such as the adjudication of a claim.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/financialtaskcode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1390"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FinancialTaskCodes",
+  "title": "Financial Task Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes Financial Task codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/financial-taskcode",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "cancel",
+      "display": "Cancel",
+      "definition": "Cancel or reverse a resource, such as a claim or preauthorization, which is in-process or complete."
+    },
+    {
+      "code": "poll",
+      "display": "Poll",
+      "definition": "Retrieve selected or all queued resources or messages."
+    },
+    {
+      "code": "release",
+      "display": "Release",
+      "definition": "Release any reserved funds or material obligations associated with a resource. For example, any unused but reserved funds or treatment allowance associated with a preauthorization once treatment is complete."
+    },
+    {
+      "code": "reprocess",
+      "display": "Reprocess",
+      "definition": "Indication that the processing of a resource, such as a claim, for some or all of the required work is now being requested."
+    },
+    {
+      "code": "status",
+      "display": "Status check",
+      "definition": "Check on the processing status of a resource such as the adjudication of a claim."
+    }
+  ]
+}

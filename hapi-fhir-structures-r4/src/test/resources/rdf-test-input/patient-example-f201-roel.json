@@ -1,0 +1,150 @@
+{
+  "resourceType": "Patient",
+  "id": "f201",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f201\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: BSN \u003d 123456789 (OFFICIAL), BSN \u003d 123456789 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eactive\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Roel(OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: +31612345678(MOBILE), ph: +31201234567(HOME)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: male\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 13/03/1960\u003c/p\u003e\u003cp\u003e\u003cb\u003edeceased\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: Bos en Lommerplein 280 Amsterdam 1055RW NLD (HOME)\u003c/p\u003e\u003cp\u003e\u003cb\u003emaritalStatus\u003c/b\u003e: Legally married \u003cspan\u003e(Details : {SNOMED CT code \u002736629006\u0027 \u003d \u0027Legal marriage\u0027, given as \u0027Legally married\u0027}; {http://terminology.hl7.org/CodeSystem/v3-MaritalStatus code \u0027M\u0027 \u003d \u0027Married)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emultipleBirth\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003ephoto\u003c/b\u003e: \u003c/p\u003e\u003ch3\u003eContacts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRelationship\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTelecom\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eWife \u003cspan\u003e(Details : {SNOMED CT code \u0027127850001\u0027 \u003d \u0027Wife\u0027, given as \u0027Wife\u0027}; {http://terminology.hl7.org/CodeSystem/v2-0131 code \u0027N\u0027 \u003d \u0027Next-of-Kin; {http://terminology.hl7.org/CodeSystem/v3-RoleCode code \u0027WIFE\u0027 \u003d \u0027wife)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eAriadne Bor-Jansma\u003c/td\u003e\u003ctd\u003eph: +31201234567(HOME)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eCommunications\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLanguage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePreferred\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eDutch \u003cspan\u003e(Details : {urn:ietf:bcp:47 code \u0027nl-NL\u0027 \u003d \u0027Dutch (Region\u003dNetherlands)\u0027, given as \u0027Dutch\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003emanagingOrganization\u003c/b\u003e: \u003ca\u003eAUMC\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "text": "BSN"
+      },
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+      "value": "123456789"
+    },
+    {
+      "use": "official",
+      "type": {
+        "text": "BSN"
+      },
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+      "value": "123456789"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "text": "Roel",
+      "family": "Bor",
+      "given": [
+        "Roelof Olaf"
+      ],
+      "prefix": [
+        "Drs."
+      ],
+      "suffix": [
+        "PDEng."
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "+31612345678",
+      "use": "mobile"
+    },
+    {
+      "system": "phone",
+      "value": "+31201234567",
+      "use": "home"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1960-03-13",
+  "deceasedBoolean": false,
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "Bos en Lommerplein 280"
+      ],
+      "city": "Amsterdam",
+      "postalCode": "1055RW",
+      "country": "NLD"
+    }
+  ],
+  "maritalStatus": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "36629006",
+        "display": "Legally married"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+        "code": "M"
+      }
+    ]
+  },
+  "multipleBirthBoolean": false,
+  "photo": [
+    {
+      "contentType": "image/jpeg",
+      "url": "Binary/f006"
+    }
+  ],
+  "contact": [
+    {
+      "relationship": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "127850001",
+              "display": "Wife"
+            },
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0131",
+              "code": "N"
+            },
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+              "code": "WIFE"
+            }
+          ]
+        }
+      ],
+      "name": {
+        "use": "usual",
+        "text": "Ariadne Bor-Jansma"
+      },
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "+31201234567",
+          "use": "home"
+        }
+      ]
+    }
+  ],
+  "communication": [
+    {
+      "language": {
+        "coding": [
+          {
+            "system": "urn:ietf:bcp:47",
+            "code": "nl-NL",
+            "display": "Dutch"
+          }
+        ]
+      },
+      "preferred": true
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/f201",
+    "display": "AUMC"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

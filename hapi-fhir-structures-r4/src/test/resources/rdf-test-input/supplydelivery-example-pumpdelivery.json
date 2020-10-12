@@ -1,0 +1,40 @@
+{
+  "resourceType": "SupplyDelivery",
+  "id": "pumpdelivery",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e[Put rendering here]\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "value": "98398459409",
+      "assigner": {
+        "display": "SupplierDeliveryNr"
+      }
+    }
+  ],
+  "status": "in-progress",
+  "patient": {
+    "display": "Mr. Belpit"
+  },
+  "supplier": {
+    "display": "ACME distribution"
+  },
+  "destination": {
+    "display": "Home care dept"
+  },
+  "receiver": [
+    {
+      "display": "Nurse Smith"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

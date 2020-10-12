@@ -1,0 +1,59 @@
+{
+  "resourceType": "PaymentNotice",
+  "id": "77654",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the PaymentNotice\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://benefitsinc.com/paymentnotice",
+      "value": "776543"
+    }
+  ],
+  "status": "active",
+  "request": {
+    "reference": "http://benefitsinc.com/fhir/claim/12345"
+  },
+  "response": {
+    "reference": "http://benefitsinc.com/fhir/claimresponse/CR12345"
+  },
+  "created": "2014-08-16",
+  "provider": {
+    "reference": "Organization/1"
+  },
+  "payment": {
+    "reference": "PaymentReconciliation/ER2500"
+  },
+  "paymentDate": "2014-08-15",
+  "payee": {
+    "reference": "Organization/1"
+  },
+  "recipient": {
+    "identifier": {
+      "system": "http://regulators.gov",
+      "value": "AB123"
+    }
+  },
+  "amount": {
+    "value": 12500.00,
+    "currency": "USD"
+  },
+  "paymentStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/paymentstatus",
+        "code": "paid"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

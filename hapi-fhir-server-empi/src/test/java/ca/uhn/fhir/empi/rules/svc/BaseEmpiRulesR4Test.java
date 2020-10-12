@@ -6,13 +6,14 @@ import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
 import ca.uhn.fhir.empi.rules.json.EmpiFilterSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiResourceSearchParamJson;
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
-import ca.uhn.fhir.empi.rules.metric.EmpiMetricEnum;
+import ca.uhn.fhir.empi.rules.json.EmpiSimilarityJson;
+import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 
 public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN = "patient-given";
-	public static final String PATIENT_LAST = "patient-last";
+	public static final String PATIENT_FAMILY = "patient-last";
 
 	public static final double NAME_THRESHOLD = 0.8;
 	protected EmpiFieldMatchJson myGivenNameMatchField;
@@ -24,9 +25,8 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 			.setName(PATIENT_GIVEN)
 			.setResourceType("Patient")
 			.setResourcePath("name.given")
-			.setMetric(EmpiMetricEnum.COSINE)
-			.setMatchThreshold(NAME_THRESHOLD);
-		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_LAST);
+			.setSimilarity(new EmpiSimilarityJson().setAlgorithm(EmpiSimilarityEnum.COSINE).setMatchThreshold(NAME_THRESHOLD));
+		myBothNameFields = String.join(",", PATIENT_GIVEN, PATIENT_FAMILY);
 	}
 
 	protected EmpiRulesJson buildActiveBirthdateIdRules() {
@@ -44,11 +44,10 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 
 
 		EmpiFieldMatchJson lastNameMatchField = new EmpiFieldMatchJson()
-			.setName(PATIENT_LAST)
+			.setName(PATIENT_FAMILY)
 			.setResourceType("Patient")
 			.setResourcePath("name.family")
-			.setMetric(EmpiMetricEnum.JARO_WINKLER)
-			.setMatchThreshold(NAME_THRESHOLD);
+			.setSimilarity(new EmpiSimilarityJson().setAlgorithm(EmpiSimilarityEnum.JARO_WINKLER).setMatchThreshold(NAME_THRESHOLD));
 
 		EmpiRulesJson retval = new EmpiRulesJson();
 		retval.setVersion("test version");

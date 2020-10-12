@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CODESYSTEM_VERSION;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_CONCEPTMAP_VERSION;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.trim;
 
@@ -75,6 +77,9 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 		String extCodeSystemVersion = trim(theRecord.get("ExtCodeSystemVersion"));
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
+		// ConceptMap version from properties files
+		String loincPartMapVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		
 		Enumerations.ConceptMapEquivalence equivalence;
 		switch (trim(defaultString(mapType))) {
 			case "":
@@ -125,13 +130,22 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 				loincPartMapName = "Unknown Mapping";
 				break;
 		}
+		String conceptMapId;
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		if (codeSystemVersionId != null) {
+			conceptMapId = loincPartMapId + "-" + codeSystemVersionId;
+		} else {
+			conceptMapId = loincPartMapId;
+		}
 
 		addConceptMapEntry(
 			new ConceptMapping()
-				.setConceptMapId(loincPartMapId)
+				.setConceptMapId(conceptMapId)
 				.setConceptMapUri(loincPartMapUri)
+				.setConceptMapVersion(loincPartMapVersion)
 				.setConceptMapName(loincPartMapName)
 				.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+				.setSourceCodeSystemVersion(codeSystemVersionId)
 				.setSourceCode(partNumber)
 				.setSourceDisplay(partName)
 				.setTargetCodeSystem(extCodeSystem)

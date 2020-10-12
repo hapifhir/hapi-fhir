@@ -1,0 +1,88 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "list-item-flag",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePatient Medicine Change Types\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eExample Item Flags for the List Resource. In this case, these are the kind of flags that would be used on a medication list at the end of a consultation.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eCopyright © 2012-2013 National E-Health Transition Authority Ltd : This document contains information which is protected by copyright. All Rights Reserved. No part of this work may be reproduced or used in any form or by any means--graphic, electronic, or mechanical, including photocopying,  recording, taping, or information storage and retrieval systems--without the permission of NEHTA. All copies of this  document must include the copyright and other information contained on this page.  Revision 1  Telephone: 1300 901 001 or email: servicedesk@nehta.gov.au  Disclaimer: The National E-Health Transition Authority Ltd (NEHTA) makes the information and other material (\u0027Information\u0027) in  this document available in good faith but without any representation or warranty as to its accuracy or completeness.  NEHTA cannot accept any responsibility for the consequences of any use of the Information. As the Information is of a  general nature only, it is up to any person using or relying on the Information to ensure that it is accurate, complete  and suitable for the circumstances of its use.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system urn:oid:1.2.36.1.2001.1001.101.104.16592 defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e01\u003ca name\u003d\"list-item-flag-01\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnchanged\u003c/td\u003e\u003ctd\u003eNo change has been made to the status of this medicine item.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e02\u003ca name\u003d\"list-item-flag-02\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChanged\u003c/td\u003e\u003ctd\u003eThe medicine item has changed. The change may be described in an extension (not defined yet)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e03\u003ca name\u003d\"list-item-flag-03\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe prescription for this medicine item was cancelled by an authorized health care provider. The patient may be advised to complete the course of the prescribed medicine. This advice is a clinical decision made based on assessment of the patient\u0027s clinical condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e04\u003ca name\u003d\"list-item-flag-04\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrescribed\u003c/td\u003e\u003ctd\u003eA new medicine item has been prescribed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e05\u003ca name\u003d\"list-item-flag-05\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeased\u003c/td\u003e\u003ctd\u003eAdministration of this medication item that the patient is currently taking is stopped or recommended to be stopped (i.e. instructed to be ceased by a health care provider). This cessation is anticipated to be permanent. The Change Description should describe the reason for cessation. Example uses: the medication in question is considered ineffective or has caused serious adverse effects. This value applies both to the cessation of a medication that is prescribed by another healthcare provider or patient self-administration of OTC medicines.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e06\u003ca name\u003d\"list-item-flag-06\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuspended\u003c/td\u003e\u003ctd\u003eAdministration of this medication item that the patient is currently taking is on hold, or instructed or recommended by a health care provider to be temporarily stopped, or subject to clinical review (i.e. the stop may be temporary or permanent depending on the outcome of clinical review), or temporarily suspended as a pre-requisite to certain surgical or diagnostic procedures.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "urn:oid:1.2.36.1.2001.1001.101.104.16592",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.321"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PatientMedicineChangeTypes",
+  "title": "Patient Medicine Change Types",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "National E-Health Transition Authority Ltd (NEHTA)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.nehta.gov.au"
+        }
+      ]
+    }
+  ],
+  "description": "Example Item Flags for the List Resource. In this case, these are the kind of flags that would be used on a medication list at the end of a consultation.",
+  "copyright": " Copyright © 2012-2013 National E-Health Transition Authority Ltd : This document contains information which is protected by copyright. All Rights Reserved. No part of this work may be reproduced or used in any form or by any means--graphic, electronic, or mechanical, including photocopying,  recording, taping, or information storage and retrieval systems--without the permission of NEHTA. All copies of this  document must include the copyright and other information contained on this page.  Revision 1  Telephone: 1300 901 001 or email: servicedesk@nehta.gov.au  Disclaimer: The National E-Health Transition Authority Ltd (NEHTA) makes the information and other material (\u0027Information\u0027) in  this document available in good faith but without any representation or warranty as to its accuracy or completeness.  NEHTA cannot accept any responsibility for the consequences of any use of the Information. As the Information is of a  general nature only, it is up to any person using or relying on the Information to ensure that it is accurate, complete  and suitable for the circumstances of its use.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/list-item-flag",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "01",
+      "display": "Unchanged",
+      "definition": "No change has been made to the status of this medicine item."
+    },
+    {
+      "code": "02",
+      "display": "Changed",
+      "definition": "The medicine item has changed. The change may be described in an extension (not defined yet)"
+    },
+    {
+      "code": "03",
+      "display": "Cancelled",
+      "definition": "The prescription for this medicine item was cancelled by an authorized health care provider. The patient may be advised to complete the course of the prescribed medicine. This advice is a clinical decision made based on assessment of the patient\u0027s clinical condition."
+    },
+    {
+      "code": "04",
+      "display": "Prescribed",
+      "definition": "A new medicine item has been prescribed"
+    },
+    {
+      "code": "05",
+      "display": "Ceased",
+      "definition": "Administration of this medication item that the patient is currently taking is stopped or recommended to be stopped (i.e. instructed to be ceased by a health care provider). This cessation is anticipated to be permanent. The Change Description should describe the reason for cessation. Example uses: the medication in question is considered ineffective or has caused serious adverse effects. This value applies both to the cessation of a medication that is prescribed by another healthcare provider or patient self-administration of OTC medicines."
+    },
+    {
+      "code": "06",
+      "display": "Suspended",
+      "definition": "Administration of this medication item that the patient is currently taking is on hold, or instructed or recommended by a health care provider to be temporarily stopped, or subject to clinical review (i.e. the stop may be temporary or permanent depending on the outcome of clinical review), or temporarily suspended as a pre-requisite to certain surgical or diagnostic procedures."
+    }
+  ]
+}

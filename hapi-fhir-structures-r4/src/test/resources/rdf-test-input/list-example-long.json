@@ -1,0 +1,1297 @@
+{
+  "resourceType": "List",
+  "id": "long",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: long\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: current\u003c/p\u003e\u003cp\u003e\u003cb\u003emode\u003c/b\u003e: changes\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 21/02/2018 12:17:00 PM\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/pat1\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/pat2\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/pat3\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/pat4\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/1\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/2\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/3\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/4\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/5\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/6\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/7\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/8\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/9\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/10\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/11\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/12\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/71\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/72\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/73\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/74\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/75\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/76\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/77\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/78\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/79\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/80\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/81\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/82\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/83\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/84\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/85\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/86\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/87\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/88\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/89\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/90\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/91\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/92\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/93\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/94\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/95\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/96\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/97\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/98\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/99\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/100\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/101\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/102\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/103\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/104\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/105\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/106\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/107\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/108\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/109\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/110\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/111\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/112\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/113\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/114\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/115\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/116\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/117\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/118\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/119\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/120\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/121\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/122\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/123\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/124\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/125\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/126\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/127\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/128\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/129\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/130\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/131\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/132\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/133\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/134\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/135\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/136\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/137\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/138\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/139\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/140\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/141\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/142\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/143\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/144\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/145\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/146\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/147\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/148\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/149\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/150\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/151\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/152\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/153\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/154\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/155\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/156\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/157\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/158\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/159\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/160\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/161\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/162\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/163\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/164\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/165\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/166\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/167\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/168\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/169\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/170\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/171\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/172\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/173\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/174\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/175\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/176\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/177\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/178\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/179\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/180\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/181\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/182\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/183\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/184\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/185\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/186\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/187\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/188\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/189\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/190\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/191\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/192\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/193\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/194\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/195\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/196\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/197\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/198\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/199\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/200\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/201\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/202\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/203\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/204\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/205\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/206\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/207\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/208\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/209\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/210\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/211\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/212\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/213\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/214\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/215\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/216\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/217\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/218\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/219\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/220\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/221\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/222\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/223\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/224\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/225\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/226\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/227\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/228\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/229\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/230\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/231\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/232\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/233\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/234\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/235\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/236\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/237\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/238\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/239\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/240\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/241\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/242\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/243\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/244\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/245\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/246\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/247\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/248\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/249\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/250\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/251\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/252\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/253\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/254\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/255\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/256\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/257\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/258\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/259\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/260\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/261\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/262\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/263\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/264\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/265\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/266\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/267\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/268\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/269\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/270\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/271\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/272\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/273\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/274\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/275\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/276\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/277\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/278\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/279\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/280\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/281\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/282\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/283\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/284\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/285\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/286\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/287\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/288\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/289\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/290\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/291\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/292\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/293\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/294\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/295\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/xcda\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/xds\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/animal\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/dicom\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/ihe-pcd\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/f001\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/f201\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/glossy\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/proband\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/genetics-example1\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/ch-example\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/newborn\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentry\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e: \u003ca\u003ePatient/mom\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "status": "current",
+  "mode": "changes",
+  "date": "2018-02-21T12:17:00+11:00",
+  "entry": [
+    {
+      "item": {
+        "reference": "Patient/example"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/pat1"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/pat2"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/pat3"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/pat4"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/1"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/2"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/3"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/4"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/5"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/6"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/7"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/8"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/9"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/10"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/11"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/12"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/71"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/72"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/73"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/74"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/75"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/76"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/77"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/78"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/79"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/80"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/81"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/82"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/83"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/84"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/85"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/86"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/87"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/88"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/89"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/90"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/91"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/92"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/93"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/94"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/95"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/96"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/97"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/98"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/99"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/100"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/101"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/102"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/103"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/104"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/105"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/106"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/107"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/108"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/109"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/110"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/111"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/112"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/113"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/114"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/115"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/116"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/117"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/118"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/119"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/120"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/121"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/122"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/123"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/124"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/125"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/126"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/127"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/128"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/129"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/130"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/131"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/132"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/133"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/134"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/135"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/136"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/137"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/138"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/139"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/140"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/141"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/142"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/143"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/144"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/145"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/146"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/147"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/148"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/149"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/150"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/151"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/152"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/153"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/154"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/155"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/156"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/157"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/158"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/159"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/160"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/161"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/162"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/163"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/164"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/165"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/166"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/167"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/168"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/169"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/170"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/171"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/172"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/173"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/174"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/175"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/176"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/177"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/178"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/179"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/180"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/181"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/182"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/183"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/184"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/185"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/186"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/187"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/188"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/189"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/190"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/191"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/192"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/193"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/194"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/195"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/196"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/197"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/198"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/199"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/200"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/201"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/202"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/203"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/204"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/205"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/206"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/207"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/208"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/209"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/210"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/211"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/212"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/213"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/214"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/215"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/216"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/217"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/218"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/219"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/220"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/221"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/222"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/223"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/224"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/225"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/226"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/227"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/228"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/229"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/230"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/231"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/232"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/233"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/234"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/235"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/236"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/237"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/238"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/239"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/240"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/241"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/242"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/243"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/244"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/245"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/246"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/247"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/248"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/249"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/250"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/251"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/252"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/253"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/254"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/255"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/256"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/257"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/258"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/259"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/260"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/261"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/262"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/263"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/264"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/265"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/266"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/267"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/268"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/269"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/270"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/271"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/272"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/273"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/274"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/275"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/276"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/277"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/278"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/279"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/280"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/281"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/282"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/283"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/284"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/285"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/286"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/287"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/288"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/289"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/290"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/291"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/292"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/293"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/294"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/295"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/xcda"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/xds"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/animal"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/dicom"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/ihe-pcd"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/f001"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/f201"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/glossy"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/proband"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/genetics-example1"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/ch-example"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/newborn"
+      }
+    },
+    {
+      "item": {
+        "reference": "Patient/mom"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

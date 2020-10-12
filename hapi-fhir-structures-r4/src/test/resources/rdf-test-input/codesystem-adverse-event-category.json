@@ -1,0 +1,131 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "adverse-event-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAdverseEventCategory\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eOverall categorization of the event, e.g. product-related or situational.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/adverse-event-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproduct-problem\u003ca name\u003d\"adverse-event-category-product-problem\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProduct Problem\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a product problem.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproduct-quality\u003ca name\u003d\"adverse-event-category-product-quality\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProduct Quality\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to product quality.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproduct-use-error\u003ca name\u003d\"adverse-event-category-product-use-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProduct Use Error\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a product use error.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wrong-dose\u003ca name\u003d\"adverse-event-category-wrong-dose\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWrong Dose\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a wrong dose.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  incorrect-prescribing-information\u003ca name\u003d\"adverse-event-category-incorrect-prescribing-information\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIncorrect Prescribing Information\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to incorrect perscribing information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wrong-technique\u003ca name\u003d\"adverse-event-category-wrong-technique\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWrong Technique\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a wrong technique.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wrong-route-of-administration\u003ca name\u003d\"adverse-event-category-wrong-route-of-administration\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWrong Route of Administration\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a wrong route of administration.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wrong-rate\u003ca name\u003d\"adverse-event-category-wrong-rate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWrong Rate\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a wrong rate.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wrong-duration\u003ca name\u003d\"adverse-event-category-wrong-duration\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWrong Duration\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a wrong duration.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  wrong-time\u003ca name\u003d\"adverse-event-category-wrong-time\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWrong Time\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a wrong time.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  expired-drug\u003ca name\u003d\"adverse-event-category-expired-drug\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExpired Drug\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to an expired drug.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedical-device-use-error\u003ca name\u003d\"adverse-event-category-medical-device-use-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical Device Use Error\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a medical device use error.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproblem-different-manufacturer\u003ca name\u003d\"adverse-event-category-problem-different-manufacturer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProblem with Different Manufacturer of Same Medicine\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to a problem with a different manufacturer of the same medication.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunsafe-physical-environment\u003ca name\u003d\"adverse-event-category-unsafe-physical-environment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnsafe Physical Environment\u003c/td\u003e\u003ctd\u003eThe adverse event pertains to an unsafe physical environment.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/adverse-event-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1251"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AdverseEventCategory",
+  "title": "AdverseEventCategory",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Overall categorization of the event, e.g. product-related or situational.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/adverse-event-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "product-problem",
+      "display": "Product Problem",
+      "definition": "The adverse event pertains to a product problem."
+    },
+    {
+      "code": "product-quality",
+      "display": "Product Quality",
+      "definition": "The adverse event pertains to product quality."
+    },
+    {
+      "code": "product-use-error",
+      "display": "Product Use Error",
+      "definition": "The adverse event pertains to a product use error.",
+      "concept": [
+        {
+          "code": "wrong-dose",
+          "display": "Wrong Dose",
+          "definition": "The adverse event pertains to a wrong dose."
+        },
+        {
+          "code": "incorrect-prescribing-information",
+          "display": "Incorrect Prescribing Information",
+          "definition": "The adverse event pertains to incorrect perscribing information."
+        },
+        {
+          "code": "wrong-technique",
+          "display": "Wrong Technique",
+          "definition": "The adverse event pertains to a wrong technique."
+        },
+        {
+          "code": "wrong-route-of-administration",
+          "display": "Wrong Route of Administration",
+          "definition": "The adverse event pertains to a wrong route of administration."
+        },
+        {
+          "code": "wrong-rate",
+          "display": "Wrong Rate",
+          "definition": "The adverse event pertains to a wrong rate."
+        },
+        {
+          "code": "wrong-duration",
+          "display": "Wrong Duration",
+          "definition": "The adverse event pertains to a wrong duration."
+        },
+        {
+          "code": "wrong-time",
+          "display": "Wrong Time",
+          "definition": "The adverse event pertains to a wrong time."
+        },
+        {
+          "code": "expired-drug",
+          "display": "Expired Drug",
+          "definition": "The adverse event pertains to an expired drug."
+        }
+      ]
+    },
+    {
+      "code": "medical-device-use-error",
+      "display": "Medical Device Use Error",
+      "definition": "The adverse event pertains to a medical device use error."
+    },
+    {
+      "code": "problem-different-manufacturer",
+      "display": "Problem with Different Manufacturer of Same Medicine",
+      "definition": "The adverse event pertains to a problem with a different manufacturer of the same medication."
+    },
+    {
+      "code": "unsafe-physical-environment",
+      "display": "Unsafe Physical Environment",
+      "definition": "The adverse event pertains to an unsafe physical environment."
+    }
+  ]
+}

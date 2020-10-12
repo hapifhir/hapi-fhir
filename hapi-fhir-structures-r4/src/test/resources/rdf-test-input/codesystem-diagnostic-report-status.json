@@ -1,0 +1,113 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "diagnostic-report-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDiagnosticReportStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe status of the diagnostic report.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/diagnostic-report-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eregistered\u003ca name\u003d\"diagnostic-report-status-registered\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRegistered\u003c/td\u003e\u003ctd\u003eThe existence of the report is registered, but there is nothing yet available.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epartial\u003ca name\u003d\"diagnostic-report-status-partial\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePartial\u003c/td\u003e\u003ctd\u003eThis is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  preliminary\u003ca name\u003d\"diagnostic-report-status-preliminary\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePreliminary\u003c/td\u003e\u003ctd\u003eVerified early results are available, but not all  results are final.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efinal\u003ca name\u003d\"diagnostic-report-status-final\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFinal\u003c/td\u003e\u003ctd\u003eThe report is complete and verified by an authorized person.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eamended\u003ca name\u003d\"diagnostic-report-status-amended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmended\u003c/td\u003e\u003ctd\u003eSubsequent to being final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  corrected\u003ca name\u003d\"diagnostic-report-status-corrected\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCorrected\u003c/td\u003e\u003ctd\u003eSubsequent to being final, the report has been modified  to correct an error in the report or referenced results.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  appended\u003ca name\u003d\"diagnostic-report-status-appended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppended\u003c/td\u003e\u003ctd\u003eSubsequent to being final, the report has been modified by adding new content. The existing content is unchanged.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"diagnostic-report-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe report is unavailable because the measurement was not started or not completed (also sometimes called \u0026quot;aborted\u0026quot;).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"diagnostic-report-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \u0026quot;cancelled\u0026quot; rather than \u0026quot;entered-in-error\u0026quot;.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"diagnostic-report-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \u0026quot;other\u0026quot; - one of the listed statuses is presumed to apply, but the authoring/source system does not know which.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/diagnostic-report-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.236"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DiagnosticReportStatus",
+  "title": "DiagnosticReportStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The status of the diagnostic report.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/diagnostic-report-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "registered",
+      "display": "Registered",
+      "definition": "The existence of the report is registered, but there is nothing yet available."
+    },
+    {
+      "code": "partial",
+      "display": "Partial",
+      "definition": "This is a partial (e.g. initial, interim or preliminary) report: data in the report may be incomplete or unverified.",
+      "concept": [
+        {
+          "code": "preliminary",
+          "display": "Preliminary",
+          "definition": "Verified early results are available, but not all  results are final."
+        }
+      ]
+    },
+    {
+      "code": "final",
+      "display": "Final",
+      "definition": "The report is complete and verified by an authorized person."
+    },
+    {
+      "code": "amended",
+      "display": "Amended",
+      "definition": "Subsequent to being final, the report has been modified.  This includes any change in the results, diagnosis, narrative text, or other content of a report that has been issued.",
+      "concept": [
+        {
+          "code": "corrected",
+          "display": "Corrected",
+          "definition": "Subsequent to being final, the report has been modified  to correct an error in the report or referenced results."
+        },
+        {
+          "code": "appended",
+          "display": "Appended",
+          "definition": "Subsequent to being final, the report has been modified by adding new content. The existing content is unchanged."
+        }
+      ]
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The report is unavailable because the measurement was not started or not completed (also sometimes called \"aborted\")."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The report has been withdrawn following a previous final release.  This electronic record should never have existed, though it is possible that real-world decisions were based on it. (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".)."
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The authoring/source system does not know which of the status values currently applies for this observation. Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which."
+    }
+  ]
+}

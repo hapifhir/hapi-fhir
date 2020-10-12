@@ -1,0 +1,140 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "referencerange-meaning",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eObservation Reference Range Meaning Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines a set of codes that can be used to indicate the meaning/use of a reference range for a particular target population.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eProperties\u003c/b\u003e\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eURL\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eabstract\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003eTrue if an element is considered \u0027abstract\u0027 - in otherwords, the code is not for use as a real concept\u003c/td\u003e\u003ctd\u003eboolean\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/referencerange-meaning defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etype\u003ca name\u003d\"referencerange-meaning-type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eType\u003c/td\u003e\u003ctd\u003eGeneral types of reference range.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  normal\u003ca name\u003d\"referencerange-meaning-normal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNormal Range\u003c/td\u003e\u003ctd\u003eValues expected for a normal member of the relevant control population being measured. Typically each results producer such as a laboratory has specific normal ranges and they are usually defined as within two standard deviations from the mean and account for 95.45% of this population.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  recommended\u003ca name\u003d\"referencerange-meaning-recommended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRecommended Range\u003c/td\u003e\u003ctd\u003eThe range that is recommended by a relevant professional body.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  treatment\u003ca name\u003d\"referencerange-meaning-treatment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTreatment Range\u003c/td\u003e\u003ctd\u003eThe range at which treatment would/should be considered.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  therapeutic\u003ca name\u003d\"referencerange-meaning-therapeutic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTherapeutic Desired Level\u003c/td\u003e\u003ctd\u003eThe optimal range for best therapeutic outcomes.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e3\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e    pre\u003ca name\u003d\"referencerange-meaning-pre\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePre Therapeutic Desired Level\u003c/td\u003e\u003ctd\u003eThe optimal range for best therapeutic outcomes for a specimen taken immediately before administration.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e3\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e    post\u003ca name\u003d\"referencerange-meaning-post\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePost Therapeutic Desired Level\u003c/td\u003e\u003ctd\u003eThe optimal range for best therapeutic outcomes for a specimen taken immediately after administration.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eendocrine\u003ca name\u003d\"referencerange-meaning-endocrine\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEndocrine\u003c/td\u003e\u003ctd\u003eEndocrine related states that change the expected value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  pre-puberty\u003ca name\u003d\"referencerange-meaning-pre-puberty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePre-Puberty\u003c/td\u003e\u003ctd\u003eAn expected range in an individual prior to puberty.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  follicular\u003ca name\u003d\"referencerange-meaning-follicular\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFollicular Stage\u003c/td\u003e\u003ctd\u003eAn expected range in an individual during the follicular stage of the cycle.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  midcycle\u003ca name\u003d\"referencerange-meaning-midcycle\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMidCycle\u003c/td\u003e\u003ctd\u003eAn expected range in an individual during the midcycle stage of the cycle.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  luteal\u003ca name\u003d\"referencerange-meaning-luteal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLuteal\u003c/td\u003e\u003ctd\u003eAn expected range in an individual during the luteal stage of the cycle.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  postmenopausal\u003ca name\u003d\"referencerange-meaning-postmenopausal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePost-Menopause\u003c/td\u003e\u003ctd\u003eAn expected range in an individual post-menopause.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/referencerange-meaning",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1124"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ObservationReferenceRangeMeaningCodes",
+  "title": "Observation Reference Range Meaning Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines a set of codes that can be used to indicate the meaning/use of a reference range for a particular target population.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/referencerange-meaning",
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "property": [
+    {
+      "code": "abstract",
+      "description": "True if an element is considered \u0027abstract\u0027 - in otherwords, the code is not for use as a real concept",
+      "type": "boolean"
+    }
+  ],
+  "concept": [
+    {
+      "code": "type",
+      "display": "Type",
+      "definition": "General types of reference range.",
+      "property": [
+        {
+          "code": "abstract",
+          "valueBoolean": true
+        }
+      ],
+      "concept": [
+        {
+          "code": "normal",
+          "display": "Normal Range",
+          "definition": "Values expected for a normal member of the relevant control population being measured. Typically each results producer such as a laboratory has specific normal ranges and they are usually defined as within two standard deviations from the mean and account for 95.45% of this population."
+        },
+        {
+          "code": "recommended",
+          "display": "Recommended Range",
+          "definition": "The range that is recommended by a relevant professional body."
+        },
+        {
+          "code": "treatment",
+          "display": "Treatment Range",
+          "definition": "The range at which treatment would/should be considered."
+        },
+        {
+          "code": "therapeutic",
+          "display": "Therapeutic Desired Level",
+          "definition": "The optimal range for best therapeutic outcomes.",
+          "concept": [
+            {
+              "code": "pre",
+              "display": "Pre Therapeutic Desired Level",
+              "definition": "The optimal range for best therapeutic outcomes for a specimen taken immediately before administration."
+            },
+            {
+              "code": "post",
+              "display": "Post Therapeutic Desired Level",
+              "definition": "The optimal range for best therapeutic outcomes for a specimen taken immediately after administration."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "endocrine",
+      "display": "Endocrine",
+      "definition": "Endocrine related states that change the expected value.",
+      "property": [
+        {
+          "code": "abstract",
+          "valueBoolean": true
+        }
+      ],
+      "concept": [
+        {
+          "code": "pre-puberty",
+          "display": "Pre-Puberty",
+          "definition": "An expected range in an individual prior to puberty."
+        },
+        {
+          "code": "follicular",
+          "display": "Follicular Stage",
+          "definition": "An expected range in an individual during the follicular stage of the cycle."
+        },
+        {
+          "code": "midcycle",
+          "display": "MidCycle",
+          "definition": "An expected range in an individual during the midcycle stage of the cycle."
+        },
+        {
+          "code": "luteal",
+          "display": "Luteal",
+          "definition": "An expected range in an individual during the luteal stage of the cycle."
+        },
+        {
+          "code": "postmenopausal",
+          "display": "Post-Menopause",
+          "definition": "An expected range in an individual post-menopause."
+        }
+      ]
+    }
+  ]
+}

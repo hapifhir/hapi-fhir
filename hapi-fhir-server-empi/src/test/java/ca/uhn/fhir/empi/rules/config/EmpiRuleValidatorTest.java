@@ -42,17 +42,7 @@ public class EmpiRuleValidatorTest extends BaseR4Test {
 			setEmpiRuleJson("bad-rules-missing-threshold.json");
 			fail();
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), is("MatchField given-name metric COSINE requires a matchThreshold"));
-		}
-	}
-
-	@Test
-	public void testMatcherUnusedThreshold() throws IOException {
-		try {
-			setEmpiRuleJson("bad-rules-unused-threshold.json");
-			fail();
-		} catch (ConfigurationException e) {
-			assertThat(e.getMessage(), is("MatchField given-name metric STRING should not have a matchThreshold"));
+			assertThat(e.getMessage(), is("MatchField given-name similarity COSINE requires a matchThreshold"));
 		}
 	}
 

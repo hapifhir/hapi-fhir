@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IJpaDao;
@@ -54,6 +55,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
@@ -66,6 +68,7 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -124,6 +127,8 @@ public abstract class BaseTransactionProcessor {
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private HapiTransactionService myHapiTransactionService;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	@PostConstruct
 	public void start() {
@@ -342,7 +347,15 @@ public abstract class BaseTransactionProcessor {
 			throw new InvalidRequestException("Unable to process transaction where incoming Bundle.type = " + transactionType);
 		}
 
-		ourLog.debug("Beginning {} with {} resources", theActionName, myVersionAdapter.getEntries(theRequest).size());
+		int numberOfEntries = myVersionAdapter.getEntries(theRequest).size();
+
+		if (myDaoConfig.getMaximumTransactionBundleSize() != null && numberOfEntries > myDaoConfig.getMaximumTransactionBundleSize()) {
+			throw new PayloadTooLargeException("Transaction Bundle Too large.  Transaction bundle contains " +
+				numberOfEntries +
+				" which exceedes the maximum permitted transaction bundle size of " + myDaoConfig.getMaximumTransactionBundleSize());
+		}
+
+		ourLog.debug("Beginning {} with {} resources", theActionName, numberOfEntries);
 
 		final TransactionDetails transactionDetails = new TransactionDetails();
 		final StopWatch transactionStopWatch = new StopWatch();
@@ -350,7 +363,7 @@ public abstract class BaseTransactionProcessor {
 		List<IBase> requestEntries = myVersionAdapter.getEntries(theRequest);
 
 		// Do all entries have a verb?
-		for (int i = 0; i < myVersionAdapter.getEntries(theRequest).size(); i++) {
+		for (int i = 0; i < numberOfEntries; i++) {
 			IBase nextReqEntry = requestEntries.get(i);
 			String verb = myVersionAdapter.getEntryRequestVerb(myContext, nextReqEntry);
 			if (verb == null || !isValidVerb(verb)) {
@@ -528,9 +541,11 @@ public abstract class BaseTransactionProcessor {
 	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
-		if (theRequest != null) {
-			theRequest.startDeferredOperationCallback();
-		}
+		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED,
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,
+			Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED
+		);
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
@@ -968,11 +983,19 @@ public abstract class BaseTransactionProcessor {
 				}
 				ourLog.debug("Placeholder resource ID \"{}\" was replaced with permanent ID \"{}\"", next, replacement);
 			}
+
+			ListMultimap<Pointcut, HookParams> deferredBroadcastEvents = theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
+			for (Map.Entry<Pointcut, HookParams> nextEntry : deferredBroadcastEvents.entries()) {
+				Pointcut nextPointcut = nextEntry.getKey();
+				HookParams nextParams = nextEntry.getValue();
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, nextPointcut, nextParams);
+			}
+
 			return entriesToProcess;
 
 		} finally {
-			if (theRequest != null) {
-				theRequest.stopDeferredRequestOperationCallbackAndRunDeferredItems();
+			if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
+				theTransactionDetails.endAcceptingDeferredInterceptorBroadcasts();
 			}
 		}
 	}

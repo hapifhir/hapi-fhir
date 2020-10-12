@@ -1,0 +1,104 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "encounter-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEncounterStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCurrent state of the encounter.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/encounter-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eplanned\u003ca name\u003d\"encounter-status-planned\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlanned\u003c/td\u003e\u003ctd\u003eThe Encounter has not yet started.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003earrived\u003ca name\u003d\"encounter-status-arrived\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArrived\u003c/td\u003e\u003ctd\u003eThe Patient is present for the encounter, however is not currently meeting with a practitioner.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etriaged\u003ca name\u003d\"encounter-status-triaged\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTriaged\u003c/td\u003e\u003ctd\u003eThe patient has been assessed for the priority of their treatment based on the severity of their condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein-progress\u003ca name\u003d\"encounter-status-in-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Progress\u003c/td\u003e\u003ctd\u003eThe Encounter has begun and the patient is present / the practitioner and the patient are meeting.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eonleave\u003ca name\u003d\"encounter-status-onleave\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Leave\u003c/td\u003e\u003ctd\u003eThe Encounter has begun, but the patient is temporarily on leave.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efinished\u003ca name\u003d\"encounter-status-finished\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFinished\u003c/td\u003e\u003ctd\u003eThe Encounter has ended.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"encounter-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe Encounter has ended before it has begun.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"encounter-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThis instance should not have been part of this patient\u0027s medical record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"encounter-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe encounter status is unknown. Note that \u0026quot;unknown\u0026quot; is a value of last resort and every attempt should be made to provide a meaningful value other than \u0026quot;unknown\u0026quot;.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/encounter-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.247"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EncounterStatus",
+  "title": "EncounterStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Current state of the encounter.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/encounter-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "planned",
+      "display": "Planned",
+      "definition": "The Encounter has not yet started."
+    },
+    {
+      "code": "arrived",
+      "display": "Arrived",
+      "definition": "The Patient is present for the encounter, however is not currently meeting with a practitioner."
+    },
+    {
+      "code": "triaged",
+      "display": "Triaged",
+      "definition": "The patient has been assessed for the priority of their treatment based on the severity of their condition."
+    },
+    {
+      "code": "in-progress",
+      "display": "In Progress",
+      "definition": "The Encounter has begun and the patient is present / the practitioner and the patient are meeting."
+    },
+    {
+      "code": "onleave",
+      "display": "On Leave",
+      "definition": "The Encounter has begun, but the patient is temporarily on leave."
+    },
+    {
+      "code": "finished",
+      "display": "Finished",
+      "definition": "The Encounter has ended."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The Encounter has ended before it has begun."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "This instance should not have been part of this patient\u0027s medical record."
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The encounter status is unknown. Note that \"unknown\" is a value of last resort and every attempt should be made to provide a meaningful value other than \"unknown\"."
+    }
+  ]
+}
