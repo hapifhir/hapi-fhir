@@ -670,6 +670,10 @@
 		<developer>
 			<id>abrsystematic</id>
 		</developer>
+		<developer>
+			<id>joshdcollins</id>
+			<name>Josh Collins</name>
+		</developer>
 	</developers>
 
 	<licenses>
