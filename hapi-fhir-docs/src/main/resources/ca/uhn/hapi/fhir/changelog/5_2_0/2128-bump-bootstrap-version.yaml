@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2128
+title: "The version of Bootstrap used by the Testpage Overlay project has been upgraded from 
+   **3.4.0** to **4.5.2**. Note that this is a major release upgrade, so any overlay implementations
+   may require some modification to deal with changes to the Bootstrap framework."
