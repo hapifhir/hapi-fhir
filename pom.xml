@@ -673,6 +673,12 @@
 		<developer>
 			<id>joshdcollins</id>
 			<name>Josh Collins</name>
+			<organization>Janeiro Digital</organization>
+		</developer>
+		<developer>
+			<id>ericprud</id>
+			<name>Eric Prud'hommeaux</name>
+			<organization>Janeiro Digital</organization>
 		</developer>
 	</developers>
 
