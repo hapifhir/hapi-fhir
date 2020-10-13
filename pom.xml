@@ -1585,20 +1585,14 @@
 				<version>${thymeleaf-version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars</groupId>
+				<groupId>org.webjars.npm</groupId>
 				<artifactId>bootstrap</artifactId>
-				<version>3.4.0</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.webjars</groupId>
-						<artifactId>jquery</artifactId>
-					</exclusion>
-				</exclusions>
+				<version>4.5.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
-				<version>4.17.43</version>
+				<version>4.17.47</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
@@ -1635,6 +1629,11 @@
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>moment</artifactId>
 				<version>2.27.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.webjars.npm</groupId>
+				<artifactId>popper.js</artifactId>
+				<version>1.16.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
