@@ -1,0 +1,10 @@
+---
+type: add
+issue: 2131
+title: "A new _expunge parameter has been added to the DELETE operation when deleting multiple resources via a URL.  For
+example DELETE http://www.example.com:8000/Observation?_expunge=true or
+DELETE http://www.example.com:8000/Observation?status=cancelled&_expunge=true.  When the _expunge parameter is provided to DELETE
+then the matched resources and all of their history will be both deleted and expunged from the database.  This will
+perform considerably faster than doing the delete and expunge separately.  Note that Expunge must be enabled on the
+server for this to work."
+
