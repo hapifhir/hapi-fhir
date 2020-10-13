@@ -1,0 +1,25 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "appendectomy-narrative",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003eDate: 2013-03-16\u003c/p\u003e\n\t\t\t\u003cp\u003ePatient:: Paula Patient\u003c/p\u003e\n\t\t\t\u003cp\u003eOrdered by: Angela Care, MD\u003c/p\u003e\n\t\t\t\u003cp\u003eProcedure: Routine Appendectomy\u003c/p\u003e\n\t\t\t\u003cp\u003eSurgeon: Dr Cecil Surgeon\u003c/p\u003e\n\t\t\u003c/div\u003e"
+  },
+  "status": "completed",
+  "intent": "order",
+  "code": {
+    "text": "Appendectomy"
+  },
+  "subject": {
+    "display": "Paula Patient"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

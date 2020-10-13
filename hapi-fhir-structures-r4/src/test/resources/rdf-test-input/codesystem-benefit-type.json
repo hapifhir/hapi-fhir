@@ -1,0 +1,118 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "benefit-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eBenefit Type Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes a smattering of Benefit type codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/benefit-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebenefit\u003ca name\u003d\"benefit-type-benefit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBenefit\u003c/td\u003e\u003ctd\u003eMaximum benefit allowable.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edeductible\u003ca name\u003d\"benefit-type-deductible\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeductible\u003c/td\u003e\u003ctd\u003eCost to be incurred before benefits are applied\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evisit\u003ca name\u003d\"benefit-type-visit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVisit\u003c/td\u003e\u003ctd\u003eService visit\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eroom\u003ca name\u003d\"benefit-type-room\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRoom\u003c/td\u003e\u003ctd\u003eType of room\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecopay\u003ca name\u003d\"benefit-type-copay\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCopayment per service\u003c/td\u003e\u003ctd\u003eCopayment per service\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecopay-percent\u003ca name\u003d\"benefit-type-copay-percent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCopayment Percent per service\u003c/td\u003e\u003ctd\u003eCopayment percentage per service\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecopay-maximum\u003ca name\u003d\"benefit-type-copay-maximum\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCopayment maximum per service\u003c/td\u003e\u003ctd\u003eCopayment maximum per service\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evision-exam\u003ca name\u003d\"benefit-type-vision-exam\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVision Exam\u003c/td\u003e\u003ctd\u003eVision Exam\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evision-glasses\u003ca name\u003d\"benefit-type-vision-glasses\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVision Glasses\u003c/td\u003e\u003ctd\u003eFrames and lenses\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evision-contacts\u003ca name\u003d\"benefit-type-vision-contacts\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVision Contacts Coverage\u003c/td\u003e\u003ctd\u003eContact Lenses\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedical-primarycare\u003ca name\u003d\"benefit-type-medical-primarycare\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical Primary Health Coverage\u003c/td\u003e\u003ctd\u003eMedical Primary Health Coverage\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epharmacy-dispense\u003ca name\u003d\"benefit-type-pharmacy-dispense\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePharmacy Dispense Coverage\u003c/td\u003e\u003ctd\u003ePharmacy Dispense Coverage\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/benefit-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1176"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "BenefitTypeCodes",
+  "title": "Benefit Type Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes a smattering of Benefit type codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/benefit-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "benefit",
+      "display": "Benefit",
+      "definition": "Maximum benefit allowable."
+    },
+    {
+      "code": "deductible",
+      "display": "Deductible",
+      "definition": "Cost to be incurred before benefits are applied"
+    },
+    {
+      "code": "visit",
+      "display": "Visit",
+      "definition": "Service visit"
+    },
+    {
+      "code": "room",
+      "display": "Room",
+      "definition": "Type of room"
+    },
+    {
+      "code": "copay",
+      "display": "Copayment per service",
+      "definition": "Copayment per service"
+    },
+    {
+      "code": "copay-percent",
+      "display": "Copayment Percent per service",
+      "definition": "Copayment percentage per service"
+    },
+    {
+      "code": "copay-maximum",
+      "display": "Copayment maximum per service",
+      "definition": "Copayment maximum per service"
+    },
+    {
+      "code": "vision-exam",
+      "display": "Vision Exam",
+      "definition": "Vision Exam"
+    },
+    {
+      "code": "vision-glasses",
+      "display": "Vision Glasses",
+      "definition": "Frames and lenses"
+    },
+    {
+      "code": "vision-contacts",
+      "display": "Vision Contacts Coverage",
+      "definition": "Contact Lenses"
+    },
+    {
+      "code": "medical-primarycare",
+      "display": "Medical Primary Health Coverage",
+      "definition": "Medical Primary Health Coverage"
+    },
+    {
+      "code": "pharmacy-dispense",
+      "display": "Pharmacy Dispense Coverage",
+      "definition": "Pharmacy Dispense Coverage"
+    }
+  ]
+}

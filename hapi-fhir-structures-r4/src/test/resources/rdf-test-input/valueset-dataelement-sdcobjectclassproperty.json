@@ -1,0 +1,59 @@
+{
+  "resourceType": "ValueSet",
+  "id": "dataelement-sdcobjectclassproperty",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDataElement SDC Object Class\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe allowed codes for identifying the ISO 11179 ObjectClass Property for a particular data element if intended for registration/use within the U.S. Structured Data Capture (SDC) project.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes content from LOINC®, which is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use. This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"http://www.snomed.org/\"\u003e\u003ccode\u003ehttp://snomed.info/sct\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"http://loinc.org\"\u003e\u003ccode\u003ehttp://loinc.org\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"http://www.nlm.nih.gov/research/umls/rxnorm\"\u003e\u003ccode\u003ehttp://www.nlm.nih.gov/research/umls/rxnorm\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/dataelement-sdcobjectclassproperty",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.911"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DataElementSDCObjectClass",
+  "title": "DataElement SDC Object Class",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Office of the National Coordinator for Health IT",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://healthit.gov"
+        }
+      ]
+    }
+  ],
+  "description": "The allowed codes for identifying the ISO 11179 ObjectClass Property for a particular data element if intended for registration/use within the U.S. Structured Data Capture (SDC) project.",
+  "copyright": "This value set includes content from LOINC®, which is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use. This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct"
+      },
+      {
+        "system": "http://loinc.org"
+      },
+      {
+        "system": "http://www.nlm.nih.gov/research/umls/rxnorm"
+      }
+    ]
+  }
+}

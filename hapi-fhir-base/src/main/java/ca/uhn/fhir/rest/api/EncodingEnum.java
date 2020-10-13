@@ -61,6 +61,12 @@ public enum EncodingEnum {
 	public static final String JSON_PLAIN_STRING = "json";
 
 	/**
+	 * "rdf"
+	 */
+	public static final String RDF_PLAIN_STRING = "rdf";
+
+
+	/**
 	 * "xml"
 	 */
 	public static final String XML_PLAIN_STRING = "xml";
@@ -96,14 +102,18 @@ public enum EncodingEnum {
 		 */
 		ourContentTypeToEncoding.put("application/json", JSON);
 		ourContentTypeToEncoding.put("application/xml", XML);
+		ourContentTypeToEncoding.put("application/fhir+turtle", RDF);
+		ourContentTypeToEncoding.put("application/x-turtle", RDF);
 		ourContentTypeToEncoding.put("text/json", JSON);
 		ourContentTypeToEncoding.put("text/xml", XML);
+		ourContentTypeToEncoding.put("text/turtle", RDF);
 
 		/*
 		 * Plain values, used for parameter values
 		 */
 		ourContentTypeToEncoding.put(JSON_PLAIN_STRING, JSON);
 		ourContentTypeToEncoding.put(XML_PLAIN_STRING, XML);
+		ourContentTypeToEncoding.put(RDF_PLAIN_STRING, RDF);
 
 		ourContentTypeToEncodingLegacy = Collections.unmodifiableMap(ourContentTypeToEncodingLegacy);
 

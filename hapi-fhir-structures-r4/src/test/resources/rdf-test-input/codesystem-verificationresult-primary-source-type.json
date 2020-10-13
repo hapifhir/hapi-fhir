@@ -1,0 +1,110 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "verificationresult-primary-source-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePrimary-source-type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eType of the validation primary source\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/primary-source-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elic-board\u003ca name\u003d\"verificationresult-primary-source-type-lic-board\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLicense Board\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprim\u003ca name\u003d\"verificationresult-primary-source-type-prim\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrimary Education\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econt-ed\u003ca name\u003d\"verificationresult-primary-source-type-cont-ed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContinuing Education\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epost-serv\u003ca name\u003d\"verificationresult-primary-source-type-post-serv\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePostal Service\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erel-own\u003ca name\u003d\"verificationresult-primary-source-type-rel-own\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelationship owner\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereg-auth\u003ca name\u003d\"verificationresult-primary-source-type-reg-auth\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRegistration Authority\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elegal\u003ca name\u003d\"verificationresult-primary-source-type-legal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLegal source\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eissuer\u003ca name\u003d\"verificationresult-primary-source-type-issuer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIssuing source\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eauth-source\u003ca name\u003d\"verificationresult-primary-source-type-auth-source\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthoritative source\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/primary-source-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.1.893"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "primary-source-type",
+  "title": "Primary-source-type",
+  "status": "draft",
+  "experimental": false,
+  "date": "2018-06-05T14:06:02+00:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Type of the validation primary source",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/verificationresult-primary-source-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "lic-board",
+      "display": "License Board"
+    },
+    {
+      "code": "prim",
+      "display": "Primary Education"
+    },
+    {
+      "code": "cont-ed",
+      "display": "Continuing Education"
+    },
+    {
+      "code": "post-serv",
+      "display": "Postal Service"
+    },
+    {
+      "code": "rel-own",
+      "display": "Relationship owner"
+    },
+    {
+      "code": "reg-auth",
+      "display": "Registration Authority"
+    },
+    {
+      "code": "legal",
+      "display": "Legal source"
+    },
+    {
+      "code": "issuer",
+      "display": "Issuing source"
+    },
+    {
+      "code": "auth-source",
+      "display": "Authoritative source"
+    }
+  ]
+}

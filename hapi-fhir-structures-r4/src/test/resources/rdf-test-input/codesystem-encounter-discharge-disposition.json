@@ -1,0 +1,112 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "encounter-discharge-disposition",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDischarge disposition\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines a set of codes that can be used to where the patient left the hospital.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/discharge-disposition defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehome\u003ca name\u003d\"encounter-discharge-disposition-home\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHome\u003c/td\u003e\u003ctd\u003eThe patient was dicharged and has indicated that they are going to return home afterwards.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ealt-home\u003ca name\u003d\"encounter-discharge-disposition-alt-home\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAlternative home\u003c/td\u003e\u003ctd\u003eThe patient was discharged and has indicated that they are going to return home afterwards, but not the patient\u0027s home - e.g. a family member\u0027s home.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother-hcf\u003ca name\u003d\"encounter-discharge-disposition-other-hcf\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther healthcare facility\u003c/td\u003e\u003ctd\u003eThe patient was transferred to another healthcare facility.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehosp\u003ca name\u003d\"encounter-discharge-disposition-hosp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospice\u003c/td\u003e\u003ctd\u003eThe patient has been discharged into palliative care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elong\u003ca name\u003d\"encounter-discharge-disposition-long\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLong-term care\u003c/td\u003e\u003ctd\u003eThe patient has been discharged into long-term care where is likely to be monitored through an ongoing episode-of-care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaadvice\u003ca name\u003d\"encounter-discharge-disposition-aadvice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLeft against advice\u003c/td\u003e\u003ctd\u003eThe patient self discharged against medical advice.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexp\u003ca name\u003d\"encounter-discharge-disposition-exp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExpired\u003c/td\u003e\u003ctd\u003eThe patient has deceased during this encounter.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epsy\u003ca name\u003d\"encounter-discharge-disposition-psy\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePsychiatric hospital\u003c/td\u003e\u003ctd\u003eThe patient has been transferred to a psychiatric facility.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erehab\u003ca name\u003d\"encounter-discharge-disposition-rehab\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRehabilitation\u003c/td\u003e\u003ctd\u003eThe patient was discharged and is to receive post acute care rehabilitation services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esnf\u003ca name\u003d\"encounter-discharge-disposition-snf\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSkilled nursing facility\u003c/td\u003e\u003ctd\u003eThe patient has been discharged to a skilled nursing facility for the patient to receive additional care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoth\u003ca name\u003d\"encounter-discharge-disposition-oth\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOther\u003c/td\u003e\u003ctd\u003eThe discharge disposition has not otherwise defined.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/discharge-disposition",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1093"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DischargeDisposition",
+  "title": "Discharge disposition",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines a set of codes that can be used to where the patient left the hospital.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/encounter-discharge-disposition",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "home",
+      "display": "Home",
+      "definition": "The patient was dicharged and has indicated that they are going to return home afterwards."
+    },
+    {
+      "code": "alt-home",
+      "display": "Alternative home",
+      "definition": "The patient was discharged and has indicated that they are going to return home afterwards, but not the patient\u0027s home - e.g. a family member\u0027s home."
+    },
+    {
+      "code": "other-hcf",
+      "display": "Other healthcare facility",
+      "definition": "The patient was transferred to another healthcare facility."
+    },
+    {
+      "code": "hosp",
+      "display": "Hospice",
+      "definition": "The patient has been discharged into palliative care."
+    },
+    {
+      "code": "long",
+      "display": "Long-term care",
+      "definition": "The patient has been discharged into long-term care where is likely to be monitored through an ongoing episode-of-care."
+    },
+    {
+      "code": "aadvice",
+      "display": "Left against advice",
+      "definition": "The patient self discharged against medical advice."
+    },
+    {
+      "code": "exp",
+      "display": "Expired",
+      "definition": "The patient has deceased during this encounter."
+    },
+    {
+      "code": "psy",
+      "display": "Psychiatric hospital",
+      "definition": "The patient has been transferred to a psychiatric facility."
+    },
+    {
+      "code": "rehab",
+      "display": "Rehabilitation",
+      "definition": "The patient was discharged and is to receive post acute care rehabilitation services."
+    },
+    {
+      "code": "snf",
+      "display": "Skilled nursing facility",
+      "definition": "The patient has been discharged to a skilled nursing facility for the patient to receive additional care."
+    },
+    {
+      "code": "oth",
+      "display": "Other",
+      "definition": "The discharge disposition has not otherwise defined."
+    }
+  ]
+}

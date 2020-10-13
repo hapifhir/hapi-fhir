@@ -1,0 +1,63 @@
+{
+  "resourceType": "ValueSet",
+  "id": "language-preference-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eLanguage preference type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines the set of codes for describing the type or mode of the patient\u0027s preferred language.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"codesystem-language-preference-type.html\"\u003e\u003ccode\u003ehttp://hl7.org/fhir/language-preference-type\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-language-preference-type.html#language-preference-type-verbal\"\u003everbal\u003c/a\u003e\u003c/td\u003e\u003ctd\u003everbal\u003c/td\u003e\u003ctd\u003eThe patient prefers to verbally communicate with the associated language.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-language-preference-type.html#language-preference-type-written\"\u003ewritten\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ewritten\u003c/td\u003e\u003ctd\u003eThe patient prefers to communicate in writing with the associated language.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/language-preference-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.1022"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "LanguagePreferenceType",
+  "title": "Language preference type",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines the set of codes for describing the type or mode of the patient\u0027s preferred language.",
+  "immutable": true,
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/language-preference-type",
+        "concept": [
+          {
+            "code": "verbal",
+            "display": "verbal"
+          },
+          {
+            "code": "written",
+            "display": "written"
+          }
+        ]
+      }
+    ]
+  }
+}

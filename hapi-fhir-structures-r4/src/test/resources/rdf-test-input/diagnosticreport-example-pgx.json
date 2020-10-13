@@ -1,0 +1,59 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "example-pgx",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-pgx\u003c/p\u003e\u003cp\u003e\u003cb\u003ebasedOn\u003c/b\u003e: \u003ca\u003eServiceRequest/example-pgx\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Pharmacogenetics Report \u003cspan\u003e(Details : {https://system/PGxReport code \u0027PGxReport\u0027 \u003d \u0027PGxReport\u0027, given as \u0027Pharmacogenetics Report\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eBob Smith\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 15/10/2016 12:34:56 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 20/10/2016 2:00:05 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eOrganization/4829\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eresult\u003c/b\u003e: \u003ca\u003eObservation/example-phenotype\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epresentedForm\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "basedOn": [
+    {
+      "reference": "ServiceRequest/example-pgx"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "https://system/PGxReport",
+        "code": "PGxReport",
+        "display": "Pharmacogenetics Report"
+      }
+    ],
+    "text": "Pharmacogenetics Report"
+  },
+  "subject": {
+    "reference": "Patient/899962",
+    "display": "Bob Smith"
+  },
+  "effectiveDateTime": "2016-10-15T12:34:56+11:00",
+  "issued": "2016-10-20T14:00:05+11:00",
+  "performer": [
+    {
+      "reference": "Organization/4829"
+    }
+  ],
+  "result": [
+    {
+      "reference": "Observation/example-phenotype"
+    }
+  ],
+  "presentedForm": [
+    {
+      "contentType": "application/pdf",
+      "language": "en",
+      "data": "cGRmSW5CYXNlNjRCaW5hcnk\u003d",
+      "hash": "571ef9c5655840f324e679072ed62b1b95eef8a0",
+      "title": "Pharmacogenetics Report",
+      "creation": "2016-10-20T20:00:00+11:00"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

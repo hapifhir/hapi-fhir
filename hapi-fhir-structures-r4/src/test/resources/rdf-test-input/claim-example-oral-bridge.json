@@ -1,0 +1,335 @@
+{
+  "resourceType": "Claim",
+  "id": "100156",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the Oral Health Claim\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Device",
+      "id": "device-bridge"
+    },
+    {
+      "resourceType": "ServiceRequest",
+      "id": "referral",
+      "status": "active",
+      "intent": "order",
+      "subject": {
+        "reference": "Patient/1"
+      }
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://happyvalley.com/claim",
+      "value": "123466"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "oral"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "Patient/1"
+  },
+  "created": "2014-08-16",
+  "insurer": {
+    "reference": "Organization/2"
+  },
+  "provider": {
+    "reference": "Organization/1"
+  },
+  "priority": {
+    "coding": [
+      {
+        "code": "normal"
+      }
+    ]
+  },
+  "related": [
+    {
+      "claim": {
+        "reference": "Claim/100151"
+      },
+      "relationship": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/ex-relatedclaimrelationship",
+            "code": "associated"
+          }
+        ]
+      },
+      "reference": {
+        "value": "CASE156746B"
+      }
+    }
+  ],
+  "payee": {
+    "type": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/payeetype",
+          "code": "other"
+        }
+      ]
+    },
+    "party": {
+      "reference": "RelatedPerson/peter"
+    }
+  },
+  "referral": {
+    "reference": "#referral"
+  },
+  "careTeam": [
+    {
+      "sequence": 1,
+      "provider": {
+        "reference": "Practitioner/example"
+      }
+    }
+  ],
+  "supportingInfo": [
+    {
+      "sequence": 1,
+      "category": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/claiminformationcategory",
+            "code": "prosthesis"
+          }
+        ]
+      },
+      "code": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/ex-oralprostho",
+            "code": "2",
+            "display": "Maryland Bridge"
+          }
+        ]
+      },
+      "timingDate": "2001-04-07"
+    }
+  ],
+  "procedure": [
+    {
+      "sequence": 1,
+      "date": "2014-07-04",
+      "procedureCodeableConcept": {
+        "text": "Resection of gum to increase exposed tooth."
+      }
+    }
+  ],
+  "insurance": [
+    {
+      "sequence": 1,
+      "focal": true,
+      "coverage": {
+        "reference": "Coverage/9876B1"
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "careTeamSequence": [
+        1
+      ],
+      "informationSequence": [
+        1
+      ],
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/oralservicecodes",
+            "code": "67221",
+            "display": "Maryland Bridge"
+          }
+        ]
+      },
+      "servicedDate": "2014-08-16",
+      "locationCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/ex-serviceplace",
+            "code": "11"
+          }
+        ]
+      },
+      "unitPrice": {
+        "value": 1400.00,
+        "currency": "USD"
+      },
+      "factor": 0.75,
+      "net": {
+        "value": 1050.00,
+        "currency": "USD"
+      },
+      "udi": [
+        {
+          "reference": "#device-bridge"
+        }
+      ],
+      "bodySite": {
+        "coding": [
+          {
+            "system": "http://fdi.org/fhir/oraltoothcodes",
+            "code": "01"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 2,
+      "careTeamSequence": [
+        1
+      ],
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/oralservicecodes",
+            "code": "21211"
+          }
+        ]
+      },
+      "servicedDate": "2014-08-16",
+      "locationCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/ex-serviceplace",
+            "code": "11"
+          }
+        ]
+      },
+      "unitPrice": {
+        "value": 105.00,
+        "currency": "USD"
+      },
+      "net": {
+        "value": 105.00,
+        "currency": "USD"
+      },
+      "bodySite": {
+        "coding": [
+          {
+            "system": "http://fdi.org/fhir/oraltoothcodes",
+            "code": "21"
+          }
+        ]
+      },
+      "subSite": [
+        {
+          "coding": [
+            {
+              "system": "http://fdi.org/fhir/oralsurfacecodes",
+              "code": "L"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "careTeamSequence": [
+        1
+      ],
+      "procedureSequence": [
+        1
+      ],
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/oralservicecodes",
+            "code": "27211"
+          }
+        ]
+      },
+      "servicedDate": "2014-08-16",
+      "locationCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/ex-serviceplace",
+            "code": "11"
+          }
+        ]
+      },
+      "unitPrice": {
+        "value": 1100.00,
+        "currency": "USD"
+      },
+      "net": {
+        "value": 1100.00,
+        "currency": "USD"
+      },
+      "bodySite": {
+        "coding": [
+          {
+            "system": "http://fdi.org/fhir/oraltoothcodes",
+            "code": "24"
+          }
+        ]
+      },
+      "detail": [
+        {
+          "sequence": 1,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://example.org/fhir/oralservicecodes",
+                "code": "27211"
+              }
+            ]
+          },
+          "unitPrice": {
+            "value": 1000.00,
+            "currency": "USD"
+          },
+          "factor": 0.75,
+          "net": {
+            "value": 750.00,
+            "currency": "USD"
+          }
+        },
+        {
+          "sequence": 2,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://example.org/fhir/oralservicecodes",
+                "code": "lab"
+              }
+            ]
+          },
+          "unitPrice": {
+            "value": 350.00,
+            "currency": "USD"
+          },
+          "net": {
+            "value": 350.00,
+            "currency": "USD"
+          }
+        }
+      ]
+    }
+  ],
+  "total": {
+    "value": 2255.00,
+    "currency": "USD"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

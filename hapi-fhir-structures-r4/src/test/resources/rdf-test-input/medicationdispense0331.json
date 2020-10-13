@@ -1,0 +1,111 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "meddisp0331",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: meddisp0331\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: in-progress\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: Coumadin 2mg tablet. Generated Summary: id: med0352; Coumadin 2mg tablet \u003cspan\u003e(Details : {http://hl7.org/fhir/sid/ndc code \u00270056-0170-70\u0027 \u003d \u0027n/a\u0027, given as \u0027Coumadin 2mg tablet\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f006\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eauthorizingPrescription\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0331\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Daily Fill \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ActCode code \u0027DF\u0027 \u003d \u0027Daily Fill\u0027, given as \u0027Daily Fill\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 1 415818006\u003cspan\u003e (Details: SNOMED CT code 415818006 \u003d \u0027Vial\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edaysSupply\u003c/b\u003e: 1 Day\u003cspan\u003e (Details: UCUM code d \u003d \u0027d\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenPrepared\u003c/b\u003e: 15/01/2015 10:20:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0352",
+      "code": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/ndc",
+            "code": "0056-0170-70",
+            "display": "Coumadin 2mg tablet"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "in-progress",
+  "medicationReference": {
+    "reference": "#med0352",
+    "display": "Coumadin 2mg tablet"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f006"
+      }
+    }
+  ],
+  "authorizingPrescription": [
+    {
+      "reference": "MedicationRequest/medrx0331"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "DF",
+        "display": "Daily Fill"
+      }
+    ]
+  },
+  "quantity": {
+    "value": 1,
+    "system": "http://snomed.info/sct",
+    "code": "415818006"
+  },
+  "daysSupply": {
+    "value": 1,
+    "unit": "Day",
+    "system": "http://unitsofmeasure.org",
+    "code": "d"
+  },
+  "whenPrepared": "2015-01-15T10:20:00Z",
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "7mg (\u003done 5mg tablet PLUS one 2mg tablet) once daily",
+      "additionalInstruction": [
+        {
+          "text": "Take along with one 2mg Coumadin tablet for a total daily dose of 7mg as prescribed by physician"
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 1,
+          "periodUnit": "d"
+        }
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 2,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

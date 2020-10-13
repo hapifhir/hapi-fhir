@@ -1,0 +1,67 @@
+{
+  "resourceType": "ValueSet",
+  "id": "action-participant-role",
+  "meta": {
+    "lastUpdated": "2019-10-31T15:29:23.356-07:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eAction Participant Role\u003c/h2\u003e\n      \u003cp\u003eEither a practitioner role or a relationship type.\u003c/p\u003e\n      \u003cp\u003eThis value set includes codes from the following value sets:\u003c/p\u003e\n      \u003cul\u003e\n        \u003cli\u003eInclude all codes defined in\n          \u003ca href\u003d\"valueset-practitioner-role.html\"\u003ehttp://hl7.org/fhir/ValueSet/practitioner-role\u003c/a\u003e\n        \u003c/li\u003e\n        \u003cli\u003eInclude all codes defined in\n          \u003ca href\u003d\"valueset-relatedperson-relationshiptype.html\"\u003ehttp://hl7.org/fhir/ValueSet/relatedperson-relationshiptype\u003c/a\u003e\n        \u003c/li\u003e\n      \u003c/ul\u003e\n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/action-participant-role",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.796"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ActionParticipantRole",
+  "title": "Action participant role",
+  "status": "draft",
+  "experimental": false,
+  "date": "2017-02-15T16:33:00.000-07:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "other",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Either a practitioner role or a relationship type.",
+  "compose": {
+    "include": [
+      {
+        "valueSet": [
+          "http://hl7.org/fhir/ValueSet/practitioner-role",
+          "http://hl7.org/fhir/ValueSet/relatedperson-relationshiptype"
+        ]
+      }
+    ]
+  }
+}

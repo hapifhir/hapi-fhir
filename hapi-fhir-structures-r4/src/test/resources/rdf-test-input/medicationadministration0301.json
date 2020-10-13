@@ -1,0 +1,143 @@
+{
+  "resourceType": "MedicationAdministration",
+  "id": "medadmin0301",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: medadmin0301\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: in-progress\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: id: med0301; Vancomycin Hydrochloride (VANCOMYCIN HYDROCHLORIDE) \u003cspan\u003e(Details : {http://hl7.org/fhir/sid/ndc code \u00270069-2587-10\u0027 \u003d \u0027n/a\u0027, given as \u0027Vancomycin Hydrochloride (VANCOMYCIN HYDROCHLORIDE)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003econtext\u003c/b\u003e: \u003ca\u003eencounter who leads to this prescription\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 15/01/2015 2:30:00 PM --\u0026gt; (ongoing)\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePatrick Pump\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Given as Ordered \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/reason-medication-given code \u0027b\u0027 \u003d \u0027Given as Ordered\u0027, given as \u0027Given as Ordered\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erequest\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0318\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eDosages\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eText\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRoute\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMethod\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDose\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e500mg IV q6h x 3 days\u003c/td\u003e\u003ctd\u003eIntravenous route (qualifier value) \u003cspan\u003e(Details : {SNOMED CT code \u002747625008\u0027 \u003d \u0027Intravenous route\u0027, given as \u0027Intravenous route (qualifier value)\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eIV Push \u003cspan\u003e(Details )\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e500 mg\u003cspan\u003e (Details: UCUM code mg \u003d \u0027mg\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eeventHistory\u003c/b\u003e: Author\u0027s Signature. Generated Summary: id: signature; recorded: 01/02/2017 5:23:07 PM; \u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0301",
+      "code": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/sid/ndc",
+            "code": "0069-2587-10",
+            "display": "Vancomycin Hydrochloride (VANCOMYCIN HYDROCHLORIDE)"
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "Provenance",
+      "id": "signature",
+      "target": [
+        {
+          "reference": "ServiceRequest/physiotherapy"
+        }
+      ],
+      "recorded": "2017-02-01T17:23:07Z",
+      "agent": [
+        {
+          "role": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                  "code": "AUT"
+                }
+              ]
+            }
+          ],
+          "who": {
+            "reference": "Practitioner/example",
+            "display": "Dr Adam Careful"
+          }
+        }
+      ],
+      "signature": [
+        {
+          "type": [
+            {
+              "system": "urn:iso-astm:E1762-95:2013",
+              "code": "1.2.840.10065.1.12.1.1",
+              "display": "Author\u0027s Signature"
+            }
+          ],
+          "when": "2017-02-01T17:23:07Z",
+          "who": {
+            "reference": "Practitioner/example",
+            "display": "Dr Adam Careful"
+          },
+          "targetFormat": "application/fhir+xml",
+          "sigFormat": "application/signature+xml",
+          "data": "dGhpcyBibG9iIGlzIHNuaXBwZWQ\u003d"
+        }
+      ]
+    }
+  ],
+  "status": "in-progress",
+  "medicationReference": {
+    "reference": "#med0301"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "context": {
+    "reference": "Encounter/f001",
+    "display": "encounter who leads to this prescription"
+  },
+  "effectivePeriod": {
+    "start": "2015-01-15T14:30:00+01:00"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f007",
+        "display": "Patrick Pump"
+      }
+    }
+  ],
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/reason-medication-given",
+          "code": "b",
+          "display": "Given as Ordered"
+        }
+      ]
+    }
+  ],
+  "request": {
+    "reference": "MedicationRequest/medrx0318"
+  },
+  "dosage": {
+    "text": "500mg IV q6h x 3 days",
+    "route": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "47625008",
+          "display": "Intravenous route (qualifier value)"
+        }
+      ]
+    },
+    "method": {
+      "text": "IV Push"
+    },
+    "dose": {
+      "value": 500,
+      "unit": "mg",
+      "system": "http://unitsofmeasure.org",
+      "code": "mg"
+    }
+  },
+  "eventHistory": [
+    {
+      "reference": "#signature",
+      "display": "Author\u0027s Signature"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

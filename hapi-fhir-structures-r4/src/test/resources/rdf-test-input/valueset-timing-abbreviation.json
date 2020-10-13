@@ -1,0 +1,218 @@
+{
+  "resourceType": "ValueSet",
+  "id": "timing-abbreviation",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTimingAbbreviation\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCode for a known / defined timing pattern.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/GTSAbbreviation/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-BID\"\u003eBID\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBID\u003c/td\u003e\u003ctd\u003eTwo times a day at institution specified time\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-TID\"\u003eTID\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTID\u003c/td\u003e\u003ctd\u003eThree times a day at institution specified time\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-QID\"\u003eQID\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQID\u003c/td\u003e\u003ctd\u003eFour times a day at institution specified time\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-AM\"\u003eAM\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAM\u003c/td\u003e\u003ctd\u003eEvery morning at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-PM\"\u003ePM\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePM\u003c/td\u003e\u003ctd\u003eEvery afternoon at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-QD\"\u003eQD\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQD\u003c/td\u003e\u003ctd\u003eEvery Day at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-QOD\"\u003eQOD\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQOD\u003c/td\u003e\u003ctd\u003eEvery Other Day at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-Q1H\"\u003eQ1H\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eevery hour\u003c/td\u003e\u003ctd\u003eEvery hour at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-Q2H\"\u003eQ2H\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eevery 2 hours\u003c/td\u003e\u003ctd\u003eEvery 2 hours at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-Q3H\"\u003eQ3H\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eevery 3 hours\u003c/td\u003e\u003ctd\u003eEvery 3 hours at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-Q4H\"\u003eQ4H\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQ4H\u003c/td\u003e\u003ctd\u003eEvery 4 hours at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-Q6H\"\u003eQ6H\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQ6H\u003c/td\u003e\u003ctd\u003eEvery 6 Hours  at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-Q8H\"\u003eQ8H\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eevery 8 hours\u003c/td\u003e\u003ctd\u003eEvery 8 hours at institution specified times\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-BED\"\u003eBED\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eat bedtime\u003c/td\u003e\u003ctd\u003eAt bedtime (institution specified time)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-WK\"\u003eWK\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eweekly\u003c/td\u003e\u003ctd\u003eWeekly at institution specified time\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/GTSAbbreviation/cs.html#v3-GTSAbbreviation-MO\"\u003eMO\u003c/a\u003e\u003c/td\u003e\u003ctd\u003emonthly\u003c/td\u003e\u003ctd\u003eMonthly at institution specified time\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/timing-abbreviation",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.78"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "TimingAbbreviation",
+  "title": "TimingAbbreviation",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Code for a known / defined timing pattern.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-GTSAbbreviation",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Two times a day at institution specified time"
+              }
+            ],
+            "code": "BID",
+            "display": "BID"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Three times a day at institution specified time"
+              }
+            ],
+            "code": "TID",
+            "display": "TID"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Four times a day at institution specified time"
+              }
+            ],
+            "code": "QID",
+            "display": "QID"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every morning at institution specified times"
+              }
+            ],
+            "code": "AM",
+            "display": "AM"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every afternoon at institution specified times"
+              }
+            ],
+            "code": "PM",
+            "display": "PM"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every Day at institution specified times"
+              }
+            ],
+            "code": "QD",
+            "display": "QD"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every Other Day at institution specified times"
+              }
+            ],
+            "code": "QOD",
+            "display": "QOD"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every hour at institution specified times"
+              }
+            ],
+            "code": "Q1H",
+            "display": "every hour"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every 2 hours at institution specified times"
+              }
+            ],
+            "code": "Q2H",
+            "display": "every 2 hours"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every 3 hours at institution specified times"
+              }
+            ],
+            "code": "Q3H",
+            "display": "every 3 hours"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every 4 hours at institution specified times"
+              }
+            ],
+            "code": "Q4H",
+            "display": "Q4H"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every 6 Hours  at institution specified times"
+              }
+            ],
+            "code": "Q6H",
+            "display": "Q6H"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Every 8 hours at institution specified times"
+              }
+            ],
+            "code": "Q8H",
+            "display": "every 8 hours"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "At bedtime (institution specified time)"
+              }
+            ],
+            "code": "BED",
+            "display": "at bedtime"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Weekly at institution specified time"
+              }
+            ],
+            "code": "WK",
+            "display": "weekly"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Monthly at institution specified time"
+              }
+            ],
+            "code": "MO",
+            "display": "monthly"
+          }
+        ]
+      }
+    ]
+  }
+}

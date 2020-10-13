@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "consent-data-meaning",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConsentDataMeaning\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eHow a resource reference is interpreted when testing consent restrictions.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/consent-data-meaning defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einstance\u003ca name\u003d\"consent-data-meaning-instance\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInstance\u003c/td\u003e\u003ctd\u003eThe consent applies directly to the instance of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erelated\u003ca name\u003d\"consent-data-meaning-related\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelated\u003c/td\u003e\u003ctd\u003eThe consent applies directly to the instance of the resource and instances it refers to.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edependents\u003ca name\u003d\"consent-data-meaning-dependents\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDependents\u003c/td\u003e\u003ctd\u003eThe consent applies directly to the instance of the resource and instances that refer to it.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eauthoredby\u003ca name\u003d\"consent-data-meaning-authoredby\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthoredBy\u003c/td\u003e\u003ctd\u003eThe consent applies to instances of resources that are authored by.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cbcc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/consent-data-meaning",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.760"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ConsentDataMeaning",
+  "title": "ConsentDataMeaning",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "How a resource reference is interpreted when testing consent restrictions.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/consent-data-meaning",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "instance",
+      "display": "Instance",
+      "definition": "The consent applies directly to the instance of the resource."
+    },
+    {
+      "code": "related",
+      "display": "Related",
+      "definition": "The consent applies directly to the instance of the resource and instances it refers to."
+    },
+    {
+      "code": "dependents",
+      "display": "Dependents",
+      "definition": "The consent applies directly to the instance of the resource and instances that refer to it."
+    },
+    {
+      "code": "authoredby",
+      "display": "AuthoredBy",
+      "definition": "The consent applies to instances of resources that are authored by."
+    }
+  ]
+}

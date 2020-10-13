@@ -1,0 +1,234 @@
+{
+  "resourceType": "ValueSet",
+  "id": "doc-section-codes",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDocument Section Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDocument section codes (LOINC codes used in CCDA sections).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://loinc.org\"\u003e\u003ccode\u003ehttp://loinc.org\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10154-3.html\"\u003e10154-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChief complaint Narrative - Reported\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10157-6.html\"\u003e10157-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of family member diseases Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10160-0.html\"\u003e10160-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of medication use Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10164-2.html\"\u003e10164-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of present illness Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10183-2.html\"\u003e10183-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital discharge medications Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10184-0.html\"\u003e10184-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital discharge physical findings Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10187-3.html\"\u003e10187-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReview of systems Narrative - Reported\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10210-3.html\"\u003e10210-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhysical findings of General status Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10216-0.html\"\u003e10216-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note fluids Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10218-6.html\"\u003e10218-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note postoperative diagnosis Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10218-6.html\"\u003e10218-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note postoperative diagnosis Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10223-6.html\"\u003e10223-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note surgical procedure Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/10222-8.html\"\u003e10222-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note surgical complications [interpretation] Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11329-0.html\"\u003e11329-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory general Narrative - Reported\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11348-0.html\"\u003e11348-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of past illness Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11369-6.html\"\u003e11369-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of immunization Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/57852-6.html\"\u003e57852-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProblem list Narrative - Reported\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11493-4.html\"\u003e11493-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital discharge studies summary Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11535-2.html\"\u003e11535-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital discharge Dx Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/11537-8.html\"\u003e11537-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical drains Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/18776-5.html\"\u003e18776-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlan of treatment (narrative)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/18841-7.html\"\u003e18841-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital consultations Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29299-5.html\"\u003e29299-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReason for visit Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29545-1.html\"\u003e29545-1\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhysical findings Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29549-3.html\"\u003e29549-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedication administered Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29554-3.html\"\u003e29554-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29762-2.html\"\u003e29762-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSocial history Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/30954-2.html\"\u003e30954-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelevant diagnostic tests/laboratory data Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/42344-2.html\"\u003e42344-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDischarge diet (narrative)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/42346-7.html\"\u003e42346-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedications on admission (narrative)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/42348-3.html\"\u003e42348-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdvance directives (narrative)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/42349-1.html\"\u003e42349-1\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReason for referral (narrative)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/46240-8.html\"\u003e46240-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of hospitalizations+History of outpatient visits Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/46241-6.html\"\u003e46241-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital admission diagnosis Narrative - Reported\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/46264-8.html\"\u003e46264-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of medical device use\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47420-5.html\"\u003e47420-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFunctional status assessment note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/47519-4.html\"\u003e47519-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistory of Procedures Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/48765-2.html\"\u003e48765-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAllergies and adverse reactions Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/48768-6.html\"\u003e48768-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePayment sources Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/51848-0.html\"\u003e51848-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEvaluation note\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/55109-3.html\"\u003e55109-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComplications Document\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/55122-6.html\"\u003e55122-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSurgical operation note implants Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59768-2.html\"\u003e59768-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure indications [interpretation] Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59769-0.html\"\u003e59769-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePostprocedure diagnosis Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59770-8.html\"\u003e59770-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure estimated blood loss Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59771-6.html\"\u003e59771-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure implants Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59772-4.html\"\u003e59772-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlanned procedure Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59773-2.html\"\u003e59773-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure specimens taken Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59775-7.html\"\u003e59775-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure disposition Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/59776-5.html\"\u003e59776-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcedure findings Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/61149-1.html\"\u003e61149-1\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eObjective Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/61150-9.html\"\u003e61150-9\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubjective Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/61150-9.html\"\u003e61150-9\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubjective Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/69730-0.html\"\u003e69730-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInstructions\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8648-8.html\"\u003e8648-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital course Narrative\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8653-8.html\"\u003e8653-8\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospital Discharge instructions\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8716-3.html\"\u003e8716-3\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVital signs\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/doc-section-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.237"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DocumentSectionCodes",
+  "title": "Document Section Codes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Document section codes (LOINC codes used in CCDA sections).",
+  "copyright": "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "10154-3"
+          },
+          {
+            "code": "10157-6"
+          },
+          {
+            "code": "10160-0"
+          },
+          {
+            "code": "10164-2"
+          },
+          {
+            "code": "10183-2"
+          },
+          {
+            "code": "10184-0"
+          },
+          {
+            "code": "10187-3"
+          },
+          {
+            "code": "10210-3"
+          },
+          {
+            "code": "10216-0"
+          },
+          {
+            "code": "10218-6"
+          },
+          {
+            "code": "10218-6"
+          },
+          {
+            "code": "10223-6"
+          },
+          {
+            "code": "10222-8"
+          },
+          {
+            "code": "11329-0"
+          },
+          {
+            "code": "11348-0"
+          },
+          {
+            "code": "11369-6"
+          },
+          {
+            "code": "57852-6"
+          },
+          {
+            "code": "11493-4"
+          },
+          {
+            "code": "11535-2"
+          },
+          {
+            "code": "11537-8"
+          },
+          {
+            "code": "18776-5"
+          },
+          {
+            "code": "18841-7"
+          },
+          {
+            "code": "29299-5"
+          },
+          {
+            "code": "29545-1"
+          },
+          {
+            "code": "29549-3"
+          },
+          {
+            "code": "29554-3"
+          },
+          {
+            "code": "29762-2"
+          },
+          {
+            "code": "30954-2"
+          },
+          {
+            "code": "42344-2"
+          },
+          {
+            "code": "42346-7"
+          },
+          {
+            "code": "42348-3"
+          },
+          {
+            "code": "42349-1"
+          },
+          {
+            "code": "46240-8"
+          },
+          {
+            "code": "46241-6"
+          },
+          {
+            "code": "46264-8"
+          },
+          {
+            "code": "47420-5"
+          },
+          {
+            "code": "47519-4"
+          },
+          {
+            "code": "48765-2"
+          },
+          {
+            "code": "48768-6"
+          },
+          {
+            "code": "51848-0"
+          },
+          {
+            "code": "55109-3"
+          },
+          {
+            "code": "55122-6"
+          },
+          {
+            "code": "59768-2"
+          },
+          {
+            "code": "59769-0"
+          },
+          {
+            "code": "59770-8"
+          },
+          {
+            "code": "59771-6"
+          },
+          {
+            "code": "59772-4"
+          },
+          {
+            "code": "59773-2"
+          },
+          {
+            "code": "59775-7"
+          },
+          {
+            "code": "59776-5"
+          },
+          {
+            "code": "61149-1"
+          },
+          {
+            "code": "61150-9"
+          },
+          {
+            "code": "61150-9"
+          },
+          {
+            "code": "69730-0"
+          },
+          {
+            "code": "8648-8"
+          },
+          {
+            "code": "8653-8"
+          },
+          {
+            "code": "8716-3"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1037 @@
+{
+  "resourceType": "ValueSet",
+  "id": "iso3166-1-2",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eIso 3166 Part 1: 2 Letter Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines the ISO 3166 Part 1 2-letter codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ccode\u003eurn:iso:std:iso:3166\u003c/code\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAD\u003c/td\u003e\u003ctd\u003eAndorra\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAE\u003c/td\u003e\u003ctd\u003eUnited Arab Emirates\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAF\u003c/td\u003e\u003ctd\u003eAfghanistan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAG\u003c/td\u003e\u003ctd\u003eAntigua and Barbuda\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAI\u003c/td\u003e\u003ctd\u003eAnguilla\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAL\u003c/td\u003e\u003ctd\u003eAlbania\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAM\u003c/td\u003e\u003ctd\u003eArmenia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAO\u003c/td\u003e\u003ctd\u003eAngola\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAQ\u003c/td\u003e\u003ctd\u003eAntarctica\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAR\u003c/td\u003e\u003ctd\u003eArgentina\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAS\u003c/td\u003e\u003ctd\u003eAmerican Samoa\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAT\u003c/td\u003e\u003ctd\u003eAustria\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAU\u003c/td\u003e\u003ctd\u003eAustralia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAW\u003c/td\u003e\u003ctd\u003eAruba\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAX\u003c/td\u003e\u003ctd\u003eÅland Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eAZ\u003c/td\u003e\u003ctd\u003eAzerbaijan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBA\u003c/td\u003e\u003ctd\u003eBosnia and Herzegovina\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBB\u003c/td\u003e\u003ctd\u003eBarbados\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBD\u003c/td\u003e\u003ctd\u003eBangladesh\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBE\u003c/td\u003e\u003ctd\u003eBelgium\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBF\u003c/td\u003e\u003ctd\u003eBurkina Faso\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBG\u003c/td\u003e\u003ctd\u003eBulgaria\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBH\u003c/td\u003e\u003ctd\u003eBahrain\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBI\u003c/td\u003e\u003ctd\u003eBurundi\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBJ\u003c/td\u003e\u003ctd\u003eBenin\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBL\u003c/td\u003e\u003ctd\u003eSaint Barthélemy\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBM\u003c/td\u003e\u003ctd\u003eBermuda\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBN\u003c/td\u003e\u003ctd\u003eBrunei Darussalam\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBO\u003c/td\u003e\u003ctd\u003eBolivia, Plurinational State of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBQ\u003c/td\u003e\u003ctd\u003eBonaire, Sint Eustatius and Saba\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBR\u003c/td\u003e\u003ctd\u003eBrazil\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBS\u003c/td\u003e\u003ctd\u003eBahamas\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBT\u003c/td\u003e\u003ctd\u003eBhutan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBV\u003c/td\u003e\u003ctd\u003eBouvet Island\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBW\u003c/td\u003e\u003ctd\u003eBotswana\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBY\u003c/td\u003e\u003ctd\u003eBelarus\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eBZ\u003c/td\u003e\u003ctd\u003eBelize\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCA\u003c/td\u003e\u003ctd\u003eCanada\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCC\u003c/td\u003e\u003ctd\u003eCocos (Keeling) Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCD\u003c/td\u003e\u003ctd\u003eCongo, the Democratic Republic of the\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCF\u003c/td\u003e\u003ctd\u003eCentral African Republic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCG\u003c/td\u003e\u003ctd\u003eCongo\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCH\u003c/td\u003e\u003ctd\u003eSwitzerland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCI\u003c/td\u003e\u003ctd\u003eCôte d\u0027\u0027Ivoire\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCK\u003c/td\u003e\u003ctd\u003eCook Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCL\u003c/td\u003e\u003ctd\u003eChile\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCM\u003c/td\u003e\u003ctd\u003eCameroon\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCN\u003c/td\u003e\u003ctd\u003eChina\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCO\u003c/td\u003e\u003ctd\u003eColombia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCR\u003c/td\u003e\u003ctd\u003eCosta Rica\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCU\u003c/td\u003e\u003ctd\u003eCuba\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCV\u003c/td\u003e\u003ctd\u003eCabo Verde\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCW\u003c/td\u003e\u003ctd\u003eCuraçao\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCX\u003c/td\u003e\u003ctd\u003eChristmas Island\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCY\u003c/td\u003e\u003ctd\u003eCyprus\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eCZ\u003c/td\u003e\u003ctd\u003eCzechia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eDE\u003c/td\u003e\u003ctd\u003eGermany\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eDJ\u003c/td\u003e\u003ctd\u003eDjibouti\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eDK\u003c/td\u003e\u003ctd\u003eDenmark\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eDM\u003c/td\u003e\u003ctd\u003eDominica\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eDO\u003c/td\u003e\u003ctd\u003eDominican Republic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eDZ\u003c/td\u003e\u003ctd\u003eAlgeria\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eEC\u003c/td\u003e\u003ctd\u003eEcuador\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eEE\u003c/td\u003e\u003ctd\u003eEstonia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eEG\u003c/td\u003e\u003ctd\u003eEgypt\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eEH\u003c/td\u003e\u003ctd\u003eWestern Sahara\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eER\u003c/td\u003e\u003ctd\u003eEritrea\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eES\u003c/td\u003e\u003ctd\u003eSpain\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eET\u003c/td\u003e\u003ctd\u003eEthiopia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eFI\u003c/td\u003e\u003ctd\u003eFinland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eFJ\u003c/td\u003e\u003ctd\u003eFiji\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eFK\u003c/td\u003e\u003ctd\u003eFalkland Islands (Malvinas)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eFM\u003c/td\u003e\u003ctd\u003eMicronesia, Federated States of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eFO\u003c/td\u003e\u003ctd\u003eFaroe Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eFR\u003c/td\u003e\u003ctd\u003eFrance\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGA\u003c/td\u003e\u003ctd\u003eGabon\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGB\u003c/td\u003e\u003ctd\u003eUnited Kingdom of Great Britain and Northern Ireland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGD\u003c/td\u003e\u003ctd\u003eGrenada\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGE\u003c/td\u003e\u003ctd\u003eGeorgia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGF\u003c/td\u003e\u003ctd\u003eFrench Guiana\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGG\u003c/td\u003e\u003ctd\u003eGuernsey\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGH\u003c/td\u003e\u003ctd\u003eGhana\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGI\u003c/td\u003e\u003ctd\u003eGibraltar\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGL\u003c/td\u003e\u003ctd\u003eGreenland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGM\u003c/td\u003e\u003ctd\u003eGambia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGN\u003c/td\u003e\u003ctd\u003eGuinea\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGP\u003c/td\u003e\u003ctd\u003eGuadeloupe\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGQ\u003c/td\u003e\u003ctd\u003eEquatorial Guinea\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGR\u003c/td\u003e\u003ctd\u003eGreece\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGS\u003c/td\u003e\u003ctd\u003eSouth Georgia and the South Sandwich Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGT\u003c/td\u003e\u003ctd\u003eGuatemala\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGU\u003c/td\u003e\u003ctd\u003eGuam\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGW\u003c/td\u003e\u003ctd\u003eGuinea-Bissau\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eGY\u003c/td\u003e\u003ctd\u003eGuyana\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eHK\u003c/td\u003e\u003ctd\u003eHong Kong\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eHM\u003c/td\u003e\u003ctd\u003eHeard Island and McDonald Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eHN\u003c/td\u003e\u003ctd\u003eHonduras\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eHR\u003c/td\u003e\u003ctd\u003eCroatia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eHT\u003c/td\u003e\u003ctd\u003eHaiti\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eHU\u003c/td\u003e\u003ctd\u003eHungary\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eID\u003c/td\u003e\u003ctd\u003eIndonesia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIE\u003c/td\u003e\u003ctd\u003eIreland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIL\u003c/td\u003e\u003ctd\u003eIsrael\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIM\u003c/td\u003e\u003ctd\u003eIsle of Man\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eIndia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIO\u003c/td\u003e\u003ctd\u003eBritish Indian Ocean Territory\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIQ\u003c/td\u003e\u003ctd\u003eIraq\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIR\u003c/td\u003e\u003ctd\u003eIran, Islamic Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIS\u003c/td\u003e\u003ctd\u003eIceland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIT\u003c/td\u003e\u003ctd\u003eItaly\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eJE\u003c/td\u003e\u003ctd\u003eJersey\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eJM\u003c/td\u003e\u003ctd\u003eJamaica\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eJO\u003c/td\u003e\u003ctd\u003eJordan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eJP\u003c/td\u003e\u003ctd\u003eJapan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKE\u003c/td\u003e\u003ctd\u003eKenya\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKG\u003c/td\u003e\u003ctd\u003eKyrgyzstan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKH\u003c/td\u003e\u003ctd\u003eCambodia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKI\u003c/td\u003e\u003ctd\u003eKiribati\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKM\u003c/td\u003e\u003ctd\u003eComoros\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKN\u003c/td\u003e\u003ctd\u003eSaint Kitts and Nevis\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKP\u003c/td\u003e\u003ctd\u003eKorea, Democratic People\u0027\u0027s Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKR\u003c/td\u003e\u003ctd\u003eKorea, Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKW\u003c/td\u003e\u003ctd\u003eKuwait\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKY\u003c/td\u003e\u003ctd\u003eCayman Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eKZ\u003c/td\u003e\u003ctd\u003eKazakhstan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLA\u003c/td\u003e\u003ctd\u003eLao People\u0027\u0027s Democratic Republic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLB\u003c/td\u003e\u003ctd\u003eLebanon\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLC\u003c/td\u003e\u003ctd\u003eSaint Lucia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLI\u003c/td\u003e\u003ctd\u003eLiechtenstein\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLK\u003c/td\u003e\u003ctd\u003eSri Lanka\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLR\u003c/td\u003e\u003ctd\u003eLiberia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLS\u003c/td\u003e\u003ctd\u003eLesotho\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLT\u003c/td\u003e\u003ctd\u003eLithuania\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLU\u003c/td\u003e\u003ctd\u003eLuxembourg\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLV\u003c/td\u003e\u003ctd\u003eLatvia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eLY\u003c/td\u003e\u003ctd\u003eLibya\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMA\u003c/td\u003e\u003ctd\u003eMorocco\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMC\u003c/td\u003e\u003ctd\u003eMonaco\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMD\u003c/td\u003e\u003ctd\u003eMoldova, Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eME\u003c/td\u003e\u003ctd\u003eMontenegro\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMF\u003c/td\u003e\u003ctd\u003eSaint Martin (French part)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMG\u003c/td\u003e\u003ctd\u003eMadagascar\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMH\u003c/td\u003e\u003ctd\u003eMarshall Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMK\u003c/td\u003e\u003ctd\u003eMacedonia, the former Yugoslav Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eML\u003c/td\u003e\u003ctd\u003eMali\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMM\u003c/td\u003e\u003ctd\u003eMyanmar\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMN\u003c/td\u003e\u003ctd\u003eMongolia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMO\u003c/td\u003e\u003ctd\u003eMacao\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMP\u003c/td\u003e\u003ctd\u003eNorthern Mariana Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMQ\u003c/td\u003e\u003ctd\u003eMartinique\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMR\u003c/td\u003e\u003ctd\u003eMauritania\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMS\u003c/td\u003e\u003ctd\u003eMontserrat\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMT\u003c/td\u003e\u003ctd\u003eMalta\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMU\u003c/td\u003e\u003ctd\u003eMauritius\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMV\u003c/td\u003e\u003ctd\u003eMaldives\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMW\u003c/td\u003e\u003ctd\u003eMalawi\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMX\u003c/td\u003e\u003ctd\u003eMexico\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMY\u003c/td\u003e\u003ctd\u003eMalaysia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eMZ\u003c/td\u003e\u003ctd\u003eMozambique\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNA\u003c/td\u003e\u003ctd\u003eNamibia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNC\u003c/td\u003e\u003ctd\u003eNew Caledonia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNE\u003c/td\u003e\u003ctd\u003eNiger\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNF\u003c/td\u003e\u003ctd\u003eNorfolk Island\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNG\u003c/td\u003e\u003ctd\u003eNigeria\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNI\u003c/td\u003e\u003ctd\u003eNicaragua\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNL\u003c/td\u003e\u003ctd\u003eNetherlands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNO\u003c/td\u003e\u003ctd\u003eNorway\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNP\u003c/td\u003e\u003ctd\u003eNepal\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNR\u003c/td\u003e\u003ctd\u003eNauru\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNU\u003c/td\u003e\u003ctd\u003eNiue\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eNZ\u003c/td\u003e\u003ctd\u003eNew Zealand\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOM\u003c/td\u003e\u003ctd\u003eOman\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePA\u003c/td\u003e\u003ctd\u003ePanama\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePE\u003c/td\u003e\u003ctd\u003ePeru\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePF\u003c/td\u003e\u003ctd\u003eFrench Polynesia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePG\u003c/td\u003e\u003ctd\u003ePapua New Guinea\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePH\u003c/td\u003e\u003ctd\u003ePhilippines\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePK\u003c/td\u003e\u003ctd\u003ePakistan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePL\u003c/td\u003e\u003ctd\u003ePoland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePM\u003c/td\u003e\u003ctd\u003eSaint Pierre and Miquelon\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePN\u003c/td\u003e\u003ctd\u003ePitcairn\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePR\u003c/td\u003e\u003ctd\u003ePuerto Rico\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePS\u003c/td\u003e\u003ctd\u003ePalestine, State of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePT\u003c/td\u003e\u003ctd\u003ePortugal\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePW\u003c/td\u003e\u003ctd\u003ePalau\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ePY\u003c/td\u003e\u003ctd\u003eParaguay\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eQA\u003c/td\u003e\u003ctd\u003eQatar\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eRE\u003c/td\u003e\u003ctd\u003eRéunion\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eRO\u003c/td\u003e\u003ctd\u003eRomania\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eRS\u003c/td\u003e\u003ctd\u003eSerbia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eRU\u003c/td\u003e\u003ctd\u003eRussian Federation\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eRW\u003c/td\u003e\u003ctd\u003eRwanda\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSA\u003c/td\u003e\u003ctd\u003eSaudi Arabia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSB\u003c/td\u003e\u003ctd\u003eSolomon Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSC\u003c/td\u003e\u003ctd\u003eSeychelles\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSD\u003c/td\u003e\u003ctd\u003eSudan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSE\u003c/td\u003e\u003ctd\u003eSweden\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSG\u003c/td\u003e\u003ctd\u003eSingapore\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSH\u003c/td\u003e\u003ctd\u003eSaint Helena, Ascension and Tristan da Cunha\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSI\u003c/td\u003e\u003ctd\u003eSlovenia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSJ\u003c/td\u003e\u003ctd\u003eSvalbard and Jan Mayen\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSK\u003c/td\u003e\u003ctd\u003eSlovakia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSL\u003c/td\u003e\u003ctd\u003eSierra Leone\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSM\u003c/td\u003e\u003ctd\u003eSan Marino\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSN\u003c/td\u003e\u003ctd\u003eSenegal\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSO\u003c/td\u003e\u003ctd\u003eSomalia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSR\u003c/td\u003e\u003ctd\u003eSuriname\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSS\u003c/td\u003e\u003ctd\u003eSouth Sudan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eST\u003c/td\u003e\u003ctd\u003eSao Tome and Principe\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSV\u003c/td\u003e\u003ctd\u003eEl Salvador\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSX\u003c/td\u003e\u003ctd\u003eSint Maarten (Dutch part)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSY\u003c/td\u003e\u003ctd\u003eSyrian Arab Republic\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eSZ\u003c/td\u003e\u003ctd\u003eSwaziland\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTC\u003c/td\u003e\u003ctd\u003eTurks and Caicos Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTD\u003c/td\u003e\u003ctd\u003eChad\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTF\u003c/td\u003e\u003ctd\u003eFrench Southern Territories\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTG\u003c/td\u003e\u003ctd\u003eTogo\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTH\u003c/td\u003e\u003ctd\u003eThailand\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTJ\u003c/td\u003e\u003ctd\u003eTajikistan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTK\u003c/td\u003e\u003ctd\u003eTokelau\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTL\u003c/td\u003e\u003ctd\u003eTimor-Leste\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTM\u003c/td\u003e\u003ctd\u003eTurkmenistan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTN\u003c/td\u003e\u003ctd\u003eTunisia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTO\u003c/td\u003e\u003ctd\u003eTonga\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTR\u003c/td\u003e\u003ctd\u003eTurkey\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTT\u003c/td\u003e\u003ctd\u003eTrinidad and Tobago\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTV\u003c/td\u003e\u003ctd\u003eTuvalu\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTW\u003c/td\u003e\u003ctd\u003eTaiwan, Province of China\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eTZ\u003c/td\u003e\u003ctd\u003eTanzania, United Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eUA\u003c/td\u003e\u003ctd\u003eUkraine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eUG\u003c/td\u003e\u003ctd\u003eUganda\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eUM\u003c/td\u003e\u003ctd\u003eUnited States Minor Outlying Islands\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eUS\u003c/td\u003e\u003ctd\u003eUnited States of America\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eUY\u003c/td\u003e\u003ctd\u003eUruguay\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eUZ\u003c/td\u003e\u003ctd\u003eUzbekistan\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVA\u003c/td\u003e\u003ctd\u003eHoly See\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVC\u003c/td\u003e\u003ctd\u003eSaint Vincent and the Grenadines\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVE\u003c/td\u003e\u003ctd\u003eVenezuela, Bolivarian Republic of\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVG\u003c/td\u003e\u003ctd\u003eVirgin Islands, British\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVI\u003c/td\u003e\u003ctd\u003eVirgin Islands,\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVN\u003c/td\u003e\u003ctd\u003eViet Nam\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eVU\u003c/td\u003e\u003ctd\u003eVanuatu\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eWF\u003c/td\u003e\u003ctd\u003eWallis and Futuna\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eWS\u003c/td\u003e\u003ctd\u003eSamoa\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eYE\u003c/td\u003e\u003ctd\u003eYemen\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eYT\u003c/td\u003e\u003ctd\u003eMayotte\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eZA\u003c/td\u003e\u003ctd\u003eSouth Africa\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eZM\u003c/td\u003e\u003ctd\u003eZambia\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eZW\u003c/td\u003e\u003ctd\u003eZimbabwe\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/iso3166-1-2",
+  "version": "4.0.1",
+  "name": "Iso3166-1-2",
+  "title": "Iso 3166 Part 1: 2 Letter Codes",
+  "status": "active",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines the ISO 3166 Part 1 2-letter codes",
+  "compose": {
+    "include": [
+      {
+        "system": "urn:iso:std:iso:3166",
+        "concept": [
+          {
+            "code": "AD",
+            "display": "Andorra"
+          },
+          {
+            "code": "AE",
+            "display": "United Arab Emirates"
+          },
+          {
+            "code": "AF",
+            "display": "Afghanistan"
+          },
+          {
+            "code": "AG",
+            "display": "Antigua and Barbuda"
+          },
+          {
+            "code": "AI",
+            "display": "Anguilla"
+          },
+          {
+            "code": "AL",
+            "display": "Albania"
+          },
+          {
+            "code": "AM",
+            "display": "Armenia"
+          },
+          {
+            "code": "AO",
+            "display": "Angola"
+          },
+          {
+            "code": "AQ",
+            "display": "Antarctica"
+          },
+          {
+            "code": "AR",
+            "display": "Argentina"
+          },
+          {
+            "code": "AS",
+            "display": "American Samoa"
+          },
+          {
+            "code": "AT",
+            "display": "Austria"
+          },
+          {
+            "code": "AU",
+            "display": "Australia"
+          },
+          {
+            "code": "AW",
+            "display": "Aruba"
+          },
+          {
+            "code": "AX",
+            "display": "Åland Islands"
+          },
+          {
+            "code": "AZ",
+            "display": "Azerbaijan"
+          },
+          {
+            "code": "BA",
+            "display": "Bosnia and Herzegovina"
+          },
+          {
+            "code": "BB",
+            "display": "Barbados"
+          },
+          {
+            "code": "BD",
+            "display": "Bangladesh"
+          },
+          {
+            "code": "BE",
+            "display": "Belgium"
+          },
+          {
+            "code": "BF",
+            "display": "Burkina Faso"
+          },
+          {
+            "code": "BG",
+            "display": "Bulgaria"
+          },
+          {
+            "code": "BH",
+            "display": "Bahrain"
+          },
+          {
+            "code": "BI",
+            "display": "Burundi"
+          },
+          {
+            "code": "BJ",
+            "display": "Benin"
+          },
+          {
+            "code": "BL",
+            "display": "Saint Barthélemy"
+          },
+          {
+            "code": "BM",
+            "display": "Bermuda"
+          },
+          {
+            "code": "BN",
+            "display": "Brunei Darussalam"
+          },
+          {
+            "code": "BO",
+            "display": "Bolivia, Plurinational State of"
+          },
+          {
+            "code": "BQ",
+            "display": "Bonaire, Sint Eustatius and Saba"
+          },
+          {
+            "code": "BR",
+            "display": "Brazil"
+          },
+          {
+            "code": "BS",
+            "display": "Bahamas"
+          },
+          {
+            "code": "BT",
+            "display": "Bhutan"
+          },
+          {
+            "code": "BV",
+            "display": "Bouvet Island"
+          },
+          {
+            "code": "BW",
+            "display": "Botswana"
+          },
+          {
+            "code": "BY",
+            "display": "Belarus"
+          },
+          {
+            "code": "BZ",
+            "display": "Belize"
+          },
+          {
+            "code": "CA",
+            "display": "Canada"
+          },
+          {
+            "code": "CC",
+            "display": "Cocos (Keeling) Islands"
+          },
+          {
+            "code": "CD",
+            "display": "Congo, the Democratic Republic of the"
+          },
+          {
+            "code": "CF",
+            "display": "Central African Republic"
+          },
+          {
+            "code": "CG",
+            "display": "Congo"
+          },
+          {
+            "code": "CH",
+            "display": "Switzerland"
+          },
+          {
+            "code": "CI",
+            "display": "Côte d\u0027\u0027Ivoire"
+          },
+          {
+            "code": "CK",
+            "display": "Cook Islands"
+          },
+          {
+            "code": "CL",
+            "display": "Chile"
+          },
+          {
+            "code": "CM",
+            "display": "Cameroon"
+          },
+          {
+            "code": "CN",
+            "display": "China"
+          },
+          {
+            "code": "CO",
+            "display": "Colombia"
+          },
+          {
+            "code": "CR",
+            "display": "Costa Rica"
+          },
+          {
+            "code": "CU",
+            "display": "Cuba"
+          },
+          {
+            "code": "CV",
+            "display": "Cabo Verde"
+          },
+          {
+            "code": "CW",
+            "display": "Curaçao"
+          },
+          {
+            "code": "CX",
+            "display": "Christmas Island"
+          },
+          {
+            "code": "CY",
+            "display": "Cyprus"
+          },
+          {
+            "code": "CZ",
+            "display": "Czechia"
+          },
+          {
+            "code": "DE",
+            "display": "Germany"
+          },
+          {
+            "code": "DJ",
+            "display": "Djibouti"
+          },
+          {
+            "code": "DK",
+            "display": "Denmark"
+          },
+          {
+            "code": "DM",
+            "display": "Dominica"
+          },
+          {
+            "code": "DO",
+            "display": "Dominican Republic"
+          },
+          {
+            "code": "DZ",
+            "display": "Algeria"
+          },
+          {
+            "code": "EC",
+            "display": "Ecuador"
+          },
+          {
+            "code": "EE",
+            "display": "Estonia"
+          },
+          {
+            "code": "EG",
+            "display": "Egypt"
+          },
+          {
+            "code": "EH",
+            "display": "Western Sahara"
+          },
+          {
+            "code": "ER",
+            "display": "Eritrea"
+          },
+          {
+            "code": "ES",
+            "display": "Spain"
+          },
+          {
+            "code": "ET",
+            "display": "Ethiopia"
+          },
+          {
+            "code": "FI",
+            "display": "Finland"
+          },
+          {
+            "code": "FJ",
+            "display": "Fiji"
+          },
+          {
+            "code": "FK",
+            "display": "Falkland Islands (Malvinas)"
+          },
+          {
+            "code": "FM",
+            "display": "Micronesia, Federated States of"
+          },
+          {
+            "code": "FO",
+            "display": "Faroe Islands"
+          },
+          {
+            "code": "FR",
+            "display": "France"
+          },
+          {
+            "code": "GA",
+            "display": "Gabon"
+          },
+          {
+            "code": "GB",
+            "display": "United Kingdom of Great Britain and Northern Ireland"
+          },
+          {
+            "code": "GD",
+            "display": "Grenada"
+          },
+          {
+            "code": "GE",
+            "display": "Georgia"
+          },
+          {
+            "code": "GF",
+            "display": "French Guiana"
+          },
+          {
+            "code": "GG",
+            "display": "Guernsey"
+          },
+          {
+            "code": "GH",
+            "display": "Ghana"
+          },
+          {
+            "code": "GI",
+            "display": "Gibraltar"
+          },
+          {
+            "code": "GL",
+            "display": "Greenland"
+          },
+          {
+            "code": "GM",
+            "display": "Gambia"
+          },
+          {
+            "code": "GN",
+            "display": "Guinea"
+          },
+          {
+            "code": "GP",
+            "display": "Guadeloupe"
+          },
+          {
+            "code": "GQ",
+            "display": "Equatorial Guinea"
+          },
+          {
+            "code": "GR",
+            "display": "Greece"
+          },
+          {
+            "code": "GS",
+            "display": "South Georgia and the South Sandwich Islands"
+          },
+          {
+            "code": "GT",
+            "display": "Guatemala"
+          },
+          {
+            "code": "GU",
+            "display": "Guam"
+          },
+          {
+            "code": "GW",
+            "display": "Guinea-Bissau"
+          },
+          {
+            "code": "GY",
+            "display": "Guyana"
+          },
+          {
+            "code": "HK",
+            "display": "Hong Kong"
+          },
+          {
+            "code": "HM",
+            "display": "Heard Island and McDonald Islands"
+          },
+          {
+            "code": "HN",
+            "display": "Honduras"
+          },
+          {
+            "code": "HR",
+            "display": "Croatia"
+          },
+          {
+            "code": "HT",
+            "display": "Haiti"
+          },
+          {
+            "code": "HU",
+            "display": "Hungary"
+          },
+          {
+            "code": "ID",
+            "display": "Indonesia"
+          },
+          {
+            "code": "IE",
+            "display": "Ireland"
+          },
+          {
+            "code": "IL",
+            "display": "Israel"
+          },
+          {
+            "code": "IM",
+            "display": "Isle of Man"
+          },
+          {
+            "code": "IN",
+            "display": "India"
+          },
+          {
+            "code": "IO",
+            "display": "British Indian Ocean Territory"
+          },
+          {
+            "code": "IQ",
+            "display": "Iraq"
+          },
+          {
+            "code": "IR",
+            "display": "Iran, Islamic Republic of"
+          },
+          {
+            "code": "IS",
+            "display": "Iceland"
+          },
+          {
+            "code": "IT",
+            "display": "Italy"
+          },
+          {
+            "code": "JE",
+            "display": "Jersey"
+          },
+          {
+            "code": "JM",
+            "display": "Jamaica"
+          },
+          {
+            "code": "JO",
+            "display": "Jordan"
+          },
+          {
+            "code": "JP",
+            "display": "Japan"
+          },
+          {
+            "code": "KE",
+            "display": "Kenya"
+          },
+          {
+            "code": "KG",
+            "display": "Kyrgyzstan"
+          },
+          {
+            "code": "KH",
+            "display": "Cambodia"
+          },
+          {
+            "code": "KI",
+            "display": "Kiribati"
+          },
+          {
+            "code": "KM",
+            "display": "Comoros"
+          },
+          {
+            "code": "KN",
+            "display": "Saint Kitts and Nevis"
+          },
+          {
+            "code": "KP",
+            "display": "Korea, Democratic People\u0027\u0027s Republic of"
+          },
+          {
+            "code": "KR",
+            "display": "Korea, Republic of"
+          },
+          {
+            "code": "KW",
+            "display": "Kuwait"
+          },
+          {
+            "code": "KY",
+            "display": "Cayman Islands"
+          },
+          {
+            "code": "KZ",
+            "display": "Kazakhstan"
+          },
+          {
+            "code": "LA",
+            "display": "Lao People\u0027\u0027s Democratic Republic"
+          },
+          {
+            "code": "LB",
+            "display": "Lebanon"
+          },
+          {
+            "code": "LC",
+            "display": "Saint Lucia"
+          },
+          {
+            "code": "LI",
+            "display": "Liechtenstein"
+          },
+          {
+            "code": "LK",
+            "display": "Sri Lanka"
+          },
+          {
+            "code": "LR",
+            "display": "Liberia"
+          },
+          {
+            "code": "LS",
+            "display": "Lesotho"
+          },
+          {
+            "code": "LT",
+            "display": "Lithuania"
+          },
+          {
+            "code": "LU",
+            "display": "Luxembourg"
+          },
+          {
+            "code": "LV",
+            "display": "Latvia"
+          },
+          {
+            "code": "LY",
+            "display": "Libya"
+          },
+          {
+            "code": "MA",
+            "display": "Morocco"
+          },
+          {
+            "code": "MC",
+            "display": "Monaco"
+          },
+          {
+            "code": "MD",
+            "display": "Moldova, Republic of"
+          },
+          {
+            "code": "ME",
+            "display": "Montenegro"
+          },
+          {
+            "code": "MF",
+            "display": "Saint Martin (French part)"
+          },
+          {
+            "code": "MG",
+            "display": "Madagascar"
+          },
+          {
+            "code": "MH",
+            "display": "Marshall Islands"
+          },
+          {
+            "code": "MK",
+            "display": "Macedonia, the former Yugoslav Republic of"
+          },
+          {
+            "code": "ML",
+            "display": "Mali"
+          },
+          {
+            "code": "MM",
+            "display": "Myanmar"
+          },
+          {
+            "code": "MN",
+            "display": "Mongolia"
+          },
+          {
+            "code": "MO",
+            "display": "Macao"
+          },
+          {
+            "code": "MP",
+            "display": "Northern Mariana Islands"
+          },
+          {
+            "code": "MQ",
+            "display": "Martinique"
+          },
+          {
+            "code": "MR",
+            "display": "Mauritania"
+          },
+          {
+            "code": "MS",
+            "display": "Montserrat"
+          },
+          {
+            "code": "MT",
+            "display": "Malta"
+          },
+          {
+            "code": "MU",
+            "display": "Mauritius"
+          },
+          {
+            "code": "MV",
+            "display": "Maldives"
+          },
+          {
+            "code": "MW",
+            "display": "Malawi"
+          },
+          {
+            "code": "MX",
+            "display": "Mexico"
+          },
+          {
+            "code": "MY",
+            "display": "Malaysia"
+          },
+          {
+            "code": "MZ",
+            "display": "Mozambique"
+          },
+          {
+            "code": "NA",
+            "display": "Namibia"
+          },
+          {
+            "code": "NC",
+            "display": "New Caledonia"
+          },
+          {
+            "code": "NE",
+            "display": "Niger"
+          },
+          {
+            "code": "NF",
+            "display": "Norfolk Island"
+          },
+          {
+            "code": "NG",
+            "display": "Nigeria"
+          },
+          {
+            "code": "NI",
+            "display": "Nicaragua"
+          },
+          {
+            "code": "NL",
+            "display": "Netherlands"
+          },
+          {
+            "code": "NO",
+            "display": "Norway"
+          },
+          {
+            "code": "NP",
+            "display": "Nepal"
+          },
+          {
+            "code": "NR",
+            "display": "Nauru"
+          },
+          {
+            "code": "NU",
+            "display": "Niue"
+          },
+          {
+            "code": "NZ",
+            "display": "New Zealand"
+          },
+          {
+            "code": "OM",
+            "display": "Oman"
+          },
+          {
+            "code": "PA",
+            "display": "Panama"
+          },
+          {
+            "code": "PE",
+            "display": "Peru"
+          },
+          {
+            "code": "PF",
+            "display": "French Polynesia"
+          },
+          {
+            "code": "PG",
+            "display": "Papua New Guinea"
+          },
+          {
+            "code": "PH",
+            "display": "Philippines"
+          },
+          {
+            "code": "PK",
+            "display": "Pakistan"
+          },
+          {
+            "code": "PL",
+            "display": "Poland"
+          },
+          {
+            "code": "PM",
+            "display": "Saint Pierre and Miquelon"
+          },
+          {
+            "code": "PN",
+            "display": "Pitcairn"
+          },
+          {
+            "code": "PR",
+            "display": "Puerto Rico"
+          },
+          {
+            "code": "PS",
+            "display": "Palestine, State of"
+          },
+          {
+            "code": "PT",
+            "display": "Portugal"
+          },
+          {
+            "code": "PW",
+            "display": "Palau"
+          },
+          {
+            "code": "PY",
+            "display": "Paraguay"
+          },
+          {
+            "code": "QA",
+            "display": "Qatar"
+          },
+          {
+            "code": "RE",
+            "display": "Réunion"
+          },
+          {
+            "code": "RO",
+            "display": "Romania"
+          },
+          {
+            "code": "RS",
+            "display": "Serbia"
+          },
+          {
+            "code": "RU",
+            "display": "Russian Federation"
+          },
+          {
+            "code": "RW",
+            "display": "Rwanda"
+          },
+          {
+            "code": "SA",
+            "display": "Saudi Arabia"
+          },
+          {
+            "code": "SB",
+            "display": "Solomon Islands"
+          },
+          {
+            "code": "SC",
+            "display": "Seychelles"
+          },
+          {
+            "code": "SD",
+            "display": "Sudan"
+          },
+          {
+            "code": "SE",
+            "display": "Sweden"
+          },
+          {
+            "code": "SG",
+            "display": "Singapore"
+          },
+          {
+            "code": "SH",
+            "display": "Saint Helena, Ascension and Tristan da Cunha"
+          },
+          {
+            "code": "SI",
+            "display": "Slovenia"
+          },
+          {
+            "code": "SJ",
+            "display": "Svalbard and Jan Mayen"
+          },
+          {
+            "code": "SK",
+            "display": "Slovakia"
+          },
+          {
+            "code": "SL",
+            "display": "Sierra Leone"
+          },
+          {
+            "code": "SM",
+            "display": "San Marino"
+          },
+          {
+            "code": "SN",
+            "display": "Senegal"
+          },
+          {
+            "code": "SO",
+            "display": "Somalia"
+          },
+          {
+            "code": "SR",
+            "display": "Suriname"
+          },
+          {
+            "code": "SS",
+            "display": "South Sudan"
+          },
+          {
+            "code": "ST",
+            "display": "Sao Tome and Principe"
+          },
+          {
+            "code": "SV",
+            "display": "El Salvador"
+          },
+          {
+            "code": "SX",
+            "display": "Sint Maarten (Dutch part)"
+          },
+          {
+            "code": "SY",
+            "display": "Syrian Arab Republic"
+          },
+          {
+            "code": "SZ",
+            "display": "Swaziland"
+          },
+          {
+            "code": "TC",
+            "display": "Turks and Caicos Islands"
+          },
+          {
+            "code": "TD",
+            "display": "Chad"
+          },
+          {
+            "code": "TF",
+            "display": "French Southern Territories"
+          },
+          {
+            "code": "TG",
+            "display": "Togo"
+          },
+          {
+            "code": "TH",
+            "display": "Thailand"
+          },
+          {
+            "code": "TJ",
+            "display": "Tajikistan"
+          },
+          {
+            "code": "TK",
+            "display": "Tokelau"
+          },
+          {
+            "code": "TL",
+            "display": "Timor-Leste"
+          },
+          {
+            "code": "TM",
+            "display": "Turkmenistan"
+          },
+          {
+            "code": "TN",
+            "display": "Tunisia"
+          },
+          {
+            "code": "TO",
+            "display": "Tonga"
+          },
+          {
+            "code": "TR",
+            "display": "Turkey"
+          },
+          {
+            "code": "TT",
+            "display": "Trinidad and Tobago"
+          },
+          {
+            "code": "TV",
+            "display": "Tuvalu"
+          },
+          {
+            "code": "TW",
+            "display": "Taiwan, Province of China"
+          },
+          {
+            "code": "TZ",
+            "display": "Tanzania, United Republic of"
+          },
+          {
+            "code": "UA",
+            "display": "Ukraine"
+          },
+          {
+            "code": "UG",
+            "display": "Uganda"
+          },
+          {
+            "code": "UM",
+            "display": "United States Minor Outlying Islands"
+          },
+          {
+            "code": "US",
+            "display": "United States of America"
+          },
+          {
+            "code": "UY",
+            "display": "Uruguay"
+          },
+          {
+            "code": "UZ",
+            "display": "Uzbekistan"
+          },
+          {
+            "code": "VA",
+            "display": "Holy See"
+          },
+          {
+            "code": "VC",
+            "display": "Saint Vincent and the Grenadines"
+          },
+          {
+            "code": "VE",
+            "display": "Venezuela, Bolivarian Republic of"
+          },
+          {
+            "code": "VG",
+            "display": "Virgin Islands, British"
+          },
+          {
+            "code": "VI",
+            "display": "Virgin Islands,"
+          },
+          {
+            "code": "VN",
+            "display": "Viet Nam"
+          },
+          {
+            "code": "VU",
+            "display": "Vanuatu"
+          },
+          {
+            "code": "WF",
+            "display": "Wallis and Futuna"
+          },
+          {
+            "code": "WS",
+            "display": "Samoa"
+          },
+          {
+            "code": "YE",
+            "display": "Yemen"
+          },
+          {
+            "code": "YT",
+            "display": "Mayotte"
+          },
+          {
+            "code": "ZA",
+            "display": "South Africa"
+          },
+          {
+            "code": "ZM",
+            "display": "Zambia"
+          },
+          {
+            "code": "ZW",
+            "display": "Zimbabwe"
+          }
+        ]
+      }
+    ]
+  }
+}

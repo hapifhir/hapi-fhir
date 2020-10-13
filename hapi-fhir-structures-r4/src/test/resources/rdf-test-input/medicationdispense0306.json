@@ -1,0 +1,250 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "meddisp0306",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: meddisp0306\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: in-progress\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: Alemtuzumab 10mg/ml (Lemtrada). Generated Summary: id: med0303; Alemtuzumab 10mg/ml (Lemtrada) \u003cspan\u003e(Details : {RxNorm code \u00271594660\u0027 \u003d \u0027alemtuzumab 10 MG/ML [Lemtrada]\u0027, given as \u0027Alemtuzumab 10mg/ml (Lemtrada)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f006\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eauthorizingPrescription\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0317\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Daily Fill \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ActCode code \u0027DF\u0027 \u003d \u0027Daily Fill\u0027, given as \u0027Daily Fill\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 5 415818006\u003cspan\u003e (Details: SNOMED CT code 415818006 \u003d \u0027Vial\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edaysSupply\u003c/b\u003e: 7 Day\u003cspan\u003e (Details: UCUM code d \u003d \u0027d\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenPrepared\u003c/b\u003e: 15/01/2015 10:20:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: , , \u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0303",
+      "code": {
+        "coding": [
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "1594660",
+            "display": "Alemtuzumab 10mg/ml (Lemtrada)"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "in-progress",
+  "medicationReference": {
+    "reference": "#med0303",
+    "display": "Alemtuzumab 10mg/ml (Lemtrada)"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f006"
+      }
+    }
+  ],
+  "authorizingPrescription": [
+    {
+      "reference": "MedicationRequest/medrx0317"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "DF",
+        "display": "Daily Fill"
+      }
+    ]
+  },
+  "quantity": {
+    "value": 5,
+    "system": "http://snomed.info/sct",
+    "code": "415818006"
+  },
+  "daysSupply": {
+    "value": 7,
+    "unit": "Day",
+    "system": "http://unitsofmeasure.org",
+    "code": "d"
+  },
+  "whenPrepared": "2015-01-15T10:20:00Z",
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "Rapid daily-dose escalation, until tolerated, from 3 mg/d, and then 10 mg/d, to the recommended maintenance dose of 30 mg IV over 120 min, 3 times per wk on alternate days for up to 12 wk",
+      "additionalInstruction": [
+        {
+          "text": "Rapidly increase dose until tolerated"
+        },
+        {
+          "text": "Administer on alternate days"
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "duration": 12,
+          "durationUnit": "wk",
+          "frequency": 3,
+          "period": 1,
+          "periodUnit": "wk"
+        }
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "47625008",
+            "display": "Intravenous route (qualifier value)"
+          }
+        ]
+      },
+      "method": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "422145002",
+            "display": "Inject - dosing instruction imperative (qualifier value)"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "calculated",
+                "display": "Calculated"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 3,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ]
+    },
+    {
+      "sequence": 2,
+      "text": "Rapid daily-dose escalation, until tolerated, from 3 mg/d, and then 10 mg/d, to the recommended maintenance dose of 30 mg IV over 120 min, 3 times per wk on alternate days for up to 12 wk",
+      "additionalInstruction": [
+        {
+          "text": "Rapidly increase dose until tolerated"
+        },
+        {
+          "text": "Administer on alternate days"
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "duration": 12,
+          "durationUnit": "wk",
+          "frequency": 3,
+          "period": 1,
+          "periodUnit": "wk"
+        }
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "47625008",
+            "display": "Intravenous route (qualifier value)"
+          }
+        ]
+      },
+      "method": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "422145002",
+            "display": "Inject - dosing instruction imperative (qualifier value)"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "calculated",
+                "display": "Calculated"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 10,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "text": "Rapid daily-dose escalation, until tolerated, from 3 mg/d, and then 10 mg/d, to the recommended maintenance dose of 30 mg IV over 120 min, 3 times per wk on alternate days for up to 12 wk",
+      "additionalInstruction": [
+        {
+          "text": "Rapidly increase dose until tolerated"
+        },
+        {
+          "text": "Administer on alternate days"
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "duration": 12,
+          "durationUnit": "wk",
+          "frequency": 3,
+          "period": 1,
+          "periodUnit": "wk"
+        }
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "47625008",
+            "display": "Intravenous route (qualifier value)"
+          }
+        ]
+      },
+      "method": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "422145002",
+            "display": "Inject - dosing instruction imperative (qualifier value)"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "calculated",
+                "display": "Calculated"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 30,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

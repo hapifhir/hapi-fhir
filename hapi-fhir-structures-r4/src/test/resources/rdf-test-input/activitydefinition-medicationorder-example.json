@@ -1,0 +1,314 @@
+{
+  "resourceType": "ActivityDefinition",
+  "id": "citalopramPrescription",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: citalopramPrescription\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://motivemi.com/artifacts/ActivityDefinition/citalopramPrescription\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: citalopramPrescription (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 1.0.0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: CitalopramPrescription\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Citalopram Prescription\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 15/08/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Motive Medical Intelligence\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Citalopram 20 mg tablet 1 tablet oral 1 time daily now (30 table; 3 refills\u003c/p\u003e\u003cp\u003e\u003cb\u003euseContext\u003c/b\u003e: , , , , , , \u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Defines a guideline supported prescription for the treatment of depressive disorders\u003c/p\u003e\u003cp\u003e\u003cb\u003eusage\u003c/b\u003e: This activity definition is used as part of various suicide risk order sets\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: © Copyright 2016 Motive Medical Intelligence. All rights reserved.\u003c/p\u003e\u003cp\u003e\u003cb\u003eapprovalDate\u003c/b\u003e: 12/03/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003elastReviewDate\u003c/b\u003e: 15/08/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffectivePeriod\u003c/b\u003e: 01/01/2016 --\u0026gt; 31/12/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003etopic\u003c/b\u003e: Mental Health Treatment \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthor\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003erelatedArtifact\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: MedicationRequest\u003c/p\u003e\u003cp\u003e\u003cb\u003eproduct\u003c/b\u003e: id: citalopramMedication; citalopram \u003cspan\u003e(Details : {RxNorm code \u0027200371\u0027 \u003d \u0027citalopram 20 MG Oral Tablet)\u003c/span\u003e; Tablet dose form \u003cspan\u003e(Details : {SNOMED CT code \u0027385055001\u0027 \u003d \u0027Tablet\u0027, given as \u0027Tablet dose form\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edosage\u003c/b\u003e: \u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: dispenseRequest.numberOfRepeatsAllowed\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: dispenseRequest.quantity\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "citalopramMedication",
+      "code": {
+        "coding": [
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "200371"
+          }
+        ],
+        "text": "citalopram"
+      },
+      "form": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "385055001",
+            "display": "Tablet dose form"
+          }
+        ],
+        "text": "Tablet dose form"
+      },
+      "ingredient": [
+        {
+          "itemReference": {
+            "reference": "#citalopramSubstance"
+          },
+          "strength": {
+            "numerator": {
+              "value": 20,
+              "unit": "mg"
+            },
+            "denominator": {
+              "value": 1,
+              "unit": "{tbl}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "resourceType": "Substance",
+      "id": "citalopramSubstance",
+      "code": {
+        "coding": [
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "2556"
+          }
+        ],
+        "text": "citalopram"
+      }
+    }
+  ],
+  "url": "http://motivemi.com/artifacts/ActivityDefinition/citalopramPrescription",
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://motivemi.com",
+      "value": "citalopramPrescription"
+    }
+  ],
+  "version": "1.0.0",
+  "name": "CitalopramPrescription",
+  "title": "Citalopram Prescription",
+  "status": "active",
+  "experimental": true,
+  "date": "2015-08-15",
+  "publisher": "Motive Medical Intelligence",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "415-362-4007",
+          "use": "work"
+        },
+        {
+          "system": "email",
+          "value": "info@motivemi.com",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Citalopram 20 mg tablet 1 tablet oral 1 time daily now (30 table; 3 refills",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "age"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "https://meshb.nlm.nih.gov",
+            "code": "D000328",
+            "display": "Adult"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "87512008",
+            "display": "Mild major depression"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "40379007",
+            "display": "Major depression, recurrent, mild"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "225444004",
+            "display": "At risk for suicide (finding)"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "306206005",
+            "display": "Referral to service (procedure)"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "user"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "309343006",
+            "display": "Physician"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "venue"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "440655000",
+            "display": "Outpatient environment"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Defines a guideline supported prescription for the treatment of depressive disorders",
+  "usage": "This activity definition is used as part of various suicide risk order sets",
+  "copyright": "© Copyright 2016 Motive Medical Intelligence. All rights reserved.",
+  "approvalDate": "2016-03-12",
+  "lastReviewDate": "2016-08-15",
+  "effectivePeriod": {
+    "start": "2016-01-01",
+    "end": "2017-12-31"
+  },
+  "topic": [
+    {
+      "text": "Mental Health Treatment"
+    }
+  ],
+  "author": [
+    {
+      "name": "Motive Medical Intelligence",
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "415-362-4007",
+          "use": "work"
+        },
+        {
+          "system": "email",
+          "value": "info@motivemi.com",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "citation",
+      "display": "Practice Guideline for the Treatment of Patients with Major Depressive Disorder",
+      "url": "http://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/mdd.pdf"
+    },
+    {
+      "type": "composed-of",
+      "resource": "#citalopramMedication"
+    }
+  ],
+  "kind": "MedicationRequest",
+  "productReference": {
+    "reference": "#citalopramMedication"
+  },
+  "dosage": [
+    {
+      "text": "1 tablet oral 1 time daily",
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 1,
+          "periodUnit": "d"
+        }
+      },
+      "route": {
+        "coding": [
+          {
+            "code": "26643006",
+            "display": "Oral route (qualifier value)"
+          }
+        ],
+        "text": "Oral route (qualifier value)"
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 1,
+            "unit": "{tbl}"
+          }
+        }
+      ]
+    }
+  ],
+  "dynamicValue": [
+    {
+      "path": "dispenseRequest.numberOfRepeatsAllowed",
+      "expression": {
+        "description": "dispenseRequest.numberOfRepeatsAllowed is three (3)",
+        "language": "text/cql",
+        "expression": "3"
+      }
+    },
+    {
+      "path": "dispenseRequest.quantity",
+      "expression": {
+        "description": "dispenseRequest.quantity is thirty (30) tablets",
+        "language": "text/cql",
+        "expression": "30 \u0027{tbl}\u0027"
+      }
+    }
+  ]
+}

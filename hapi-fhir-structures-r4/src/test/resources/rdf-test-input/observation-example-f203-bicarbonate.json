@@ -1,0 +1,92 @@
+{
+  "resourceType": "Observation",
+  "id": "f203",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f203\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 1304-03720-Bicarbonate\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Bicarbonate [Moles/?volume] in Serum \u003cspan\u003e(Details : {LOINC code \u00271963-8\u0027 \u003d \u0027Bicarbonate [Moles/volume] in Serum\u0027, given as \u0027Bicarbonate [Moles/?volume] in Serum\u0027}; {SNOMED CT code \u0027365722008\u0027 \u003d \u0027Bicarbonate level - finding\u0027, given as \u0027Bicarbonate level\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 04/04/2013 2:34:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eLuigi Maas\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 28 mmol/L\u003cspan\u003e (Details: SNOMED CT code 258813002 \u003d \u0027mM\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Serum bicarbonate level normal \u003cspan\u003e(Details : {SNOMED CT code \u0027166698001\u0027 \u003d \u0027Serum bicarbonate level normal\u0027, given as \u0027Serum bicarbonate level normal\u0027}; {http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation code \u0027N\u0027 \u003d \u0027Normal)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emethod\u003c/b\u003e: enzymatic method \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eReferenceRanges\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLow\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eHigh\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e22\u003c/td\u003e\u003ctd\u003e29\u003c/td\u003e\u003ctd\u003eNormal Range \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/referencerange-meaning code \u0027normal\u0027 \u003d \u0027Normal Range\u0027, given as \u0027Normal Range\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "https://intranet.aumc.nl/labvalues",
+      "value": "1304-03720-Bicarbonate"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "1963-8",
+        "display": "Bicarbonate [Moles/?volume] in Serum"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "365722008",
+        "display": "Bicarbonate level"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "issued": "2013-04-04T14:34:00+01:00",
+  "performer": [
+    {
+      "reference": "Practitioner/f202",
+      "display": "Luigi Maas"
+    }
+  ],
+  "valueQuantity": {
+    "value": 28,
+    "unit": "mmol/L",
+    "system": "http://snomed.info/sct",
+    "code": "258813002"
+  },
+  "interpretation": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "166698001",
+          "display": "Serum bicarbonate level normal"
+        },
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+          "code": "N"
+        }
+      ]
+    }
+  ],
+  "method": {
+    "text": "enzymatic method"
+  },
+  "referenceRange": [
+    {
+      "low": {
+        "value": 22
+      },
+      "high": {
+        "value": 29
+      },
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/referencerange-meaning",
+            "code": "normal",
+            "display": "Normal Range"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

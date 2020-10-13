@@ -1,0 +1,88 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "codesystem-content-mode",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCodeSystemContentMode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe extent of the content of the code system (the concepts and codes it defines) are represented in a code system resource.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/codesystem-content-mode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-present\u003ca name\u003d\"codesystem-content-mode-not-present\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Present\u003c/td\u003e\u003ctd\u003eNone of the concepts defined by the code system are included in the code system resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexample\u003ca name\u003d\"codesystem-content-mode-example\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExample\u003c/td\u003e\u003ctd\u003eA few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there\u0027s no process to make it workable: it\u0027s not intended to be workable.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efragment\u003ca name\u003d\"codesystem-content-mode-fragment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFragment\u003c/td\u003e\u003ctd\u003eA subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governance of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation. Fragments are also known as partitions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomplete\u003ca name\u003d\"codesystem-content-mode-complete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComplete\u003c/td\u003e\u003ctd\u003eAll the concepts defined by the code system are included in the code system resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esupplement\u003ca name\u003d\"codesystem-content-mode-supplement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSupplement\u003c/td\u003e\u003ctd\u003eThe resource doesn\u0027t define any new concepts; it just provides additional designations and properties to another code system.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/codesystem-content-mode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.783"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CodeSystemContentMode",
+  "title": "CodeSystemContentMode",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The extent of the content of the code system (the concepts and codes it defines) are represented in a code system resource.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/codesystem-content-mode",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "not-present",
+      "display": "Not Present",
+      "definition": "None of the concepts defined by the code system are included in the code system resource."
+    },
+    {
+      "code": "example",
+      "display": "Example",
+      "definition": "A few representative concepts are included in the code system resource. There is no useful intent in the subset choice and there\u0027s no process to make it workable: it\u0027s not intended to be workable."
+    },
+    {
+      "code": "fragment",
+      "display": "Fragment",
+      "definition": "A subset of the code system concepts are included in the code system resource. This is a curated subset released for a specific purpose under the governance of the code system steward, and that the intent, bounds and consequences of the fragmentation are clearly defined in the fragment or the code system documentation. Fragments are also known as partitions."
+    },
+    {
+      "code": "complete",
+      "display": "Complete",
+      "definition": "All the concepts defined by the code system are included in the code system resource."
+    },
+    {
+      "code": "supplement",
+      "display": "Supplement",
+      "definition": "The resource doesn\u0027t define any new concepts; it just provides additional designations and properties to another code system."
+    }
+  ]
+}

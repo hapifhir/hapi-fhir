@@ -1,0 +1,165 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "hl7-work-group",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eHL7Workgroup\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eAn HL7 administrative unit that owns artifacts in the FHIR specification.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/hl7-work-group defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecbcc\u003ca name\u003d\"hl7-work-group-cbcc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunity Based Collaborative Care\u003c/td\u003e\u003ctd\u003eCommunity Based Collaborative Care (http://www.hl7.org/Special/committees/cbcc/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecds\u003ca name\u003d\"hl7-work-group-cds\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Decision Support\u003c/td\u003e\u003ctd\u003eClinical Decision Support (http://www.hl7.org/Special/committees/dss/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecqi\u003ca name\u003d\"hl7-work-group-cqi\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Quality Information\u003c/td\u003e\u003ctd\u003eClinical Quality Information (http://www.hl7.org/Special/committees/cqi/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecg\u003ca name\u003d\"hl7-work-group-cg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClinical Genomics\u003c/td\u003e\u003ctd\u003eClinical Genomics (http://www.hl7.org/Special/committees/clingenomics/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edev\u003ca name\u003d\"hl7-work-group-dev\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth Care Devices\u003c/td\u003e\u003ctd\u003eHealth Care Devices (http://www.hl7.org/Special/committees/healthcaredevices/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eehr\u003ca name\u003d\"hl7-work-group-ehr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eElectronic Health Records\u003c/td\u003e\u003ctd\u003eElectronic Health Records (http://www.hl7.org/special/committees/ehr/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efhir\u003ca name\u003d\"hl7-work-group-fhir\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFHIR Infrastructure\u003c/td\u003e\u003ctd\u003eFHIR Infrastructure (http://www.hl7.org/Special/committees/fiwg/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efm\u003ca name\u003d\"hl7-work-group-fm\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFinancial Management\u003c/td\u003e\u003ctd\u003eFinancial Management (http://www.hl7.org/Special/committees/fm/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehsi\u003ca name\u003d\"hl7-work-group-hsi\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealth Standards Integration\u003c/td\u003e\u003ctd\u003eHealth Standards Integration (http://www.hl7.org/Special/committees/hsi/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eii\u003ca name\u003d\"hl7-work-group-ii\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImaging Integration\u003c/td\u003e\u003ctd\u003eImaging Integration (http://www.hl7.org/Special/committees/imagemgt/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einm\u003ca name\u003d\"hl7-work-group-inm\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInfrastructure And Messaging\u003c/td\u003e\u003ctd\u003eInfrastructure And Messaging (http://www.hl7.org/special/committees/inm/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eits\u003ca name\u003d\"hl7-work-group-its\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImplementable Technology Specifications\u003c/td\u003e\u003ctd\u003eImplementable Technology Specifications (http://www.hl7.org/special/committees/xml/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emnm\u003ca name\u003d\"hl7-work-group-mnm\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eModeling and Methodology\u003c/td\u003e\u003ctd\u003eModeling and Methodology (http://www.hl7.org/Special/committees/mnm/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoo\u003ca name\u003d\"hl7-work-group-oo\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOrders and Observations\u003c/td\u003e\u003ctd\u003eOrders and Observations (http://www.hl7.org/Special/committees/orders/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epa\u003ca name\u003d\"hl7-work-group-pa\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient Administration\u003c/td\u003e\u003ctd\u003ePatient Administration (http://www.hl7.org/Special/committees/pafm/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epc\u003ca name\u003d\"hl7-work-group-pc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient Care\u003c/td\u003e\u003ctd\u003ePatient Care (http://www.hl7.org/Special/committees/patientcare/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epher\u003ca name\u003d\"hl7-work-group-pher\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePublic Health and Emergency Response\u003c/td\u003e\u003ctd\u003ePublic Health and Emergency Response (http://www.hl7.org/Special/committees/pher/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephx\u003ca name\u003d\"hl7-work-group-phx\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePharmacy\u003c/td\u003e\u003ctd\u003ePharmacy (http://www.hl7.org/Special/committees/medication/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebrr\u003ca name\u003d\"hl7-work-group-brr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBiomedical Research and Regulation\u003c/td\u003e\u003ctd\u003eBiomedical Research and Regulation (http://www.hl7.org/Special/committees/rcrim/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esd\u003ca name\u003d\"hl7-work-group-sd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStructured Documents\u003c/td\u003e\u003ctd\u003eStructured Documents (http://www.hl7.org/Special/committees/structure/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esec\u003ca name\u003d\"hl7-work-group-sec\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity\u003c/td\u003e\u003ctd\u003eSecurity (http://www.hl7.org/Special/committees/secure/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eus\u003ca name\u003d\"hl7-work-group-us\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUS Realm Taskforce\u003c/td\u003e\u003ctd\u003eUS Realm Taskforce (http://www.hl7.org/Special/committees/usrealm/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evocab\u003ca name\u003d\"hl7-work-group-vocab\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVocabulary\u003c/td\u003e\u003ctd\u003eVocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaid\u003ca name\u003d\"hl7-work-group-aid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApplication Implementation and Design\u003c/td\u003e\u003ctd\u003eApplication Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/hl7-work-group",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1277"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "HL7Workgroup",
+  "title": "HL7Workgroup",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "An HL7 administrative unit that owns artifacts in the FHIR specification.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/hl7-work-group",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "cbcc",
+      "display": "Community Based Collaborative Care",
+      "definition": "Community Based Collaborative Care (http://www.hl7.org/Special/committees/cbcc/index.cfm)."
+    },
+    {
+      "code": "cds",
+      "display": "Clinical Decision Support",
+      "definition": "Clinical Decision Support (http://www.hl7.org/Special/committees/dss/index.cfm)."
+    },
+    {
+      "code": "cqi",
+      "display": "Clinical Quality Information",
+      "definition": "Clinical Quality Information (http://www.hl7.org/Special/committees/cqi/index.cfm)."
+    },
+    {
+      "code": "cg",
+      "display": "Clinical Genomics",
+      "definition": "Clinical Genomics (http://www.hl7.org/Special/committees/clingenomics/index.cfm)."
+    },
+    {
+      "code": "dev",
+      "display": "Health Care Devices",
+      "definition": "Health Care Devices (http://www.hl7.org/Special/committees/healthcaredevices/index.cfm)."
+    },
+    {
+      "code": "ehr",
+      "display": "Electronic Health Records",
+      "definition": "Electronic Health Records (http://www.hl7.org/special/committees/ehr/index.cfm)."
+    },
+    {
+      "code": "fhir",
+      "display": "FHIR Infrastructure",
+      "definition": "FHIR Infrastructure (http://www.hl7.org/Special/committees/fiwg/index.cfm)."
+    },
+    {
+      "code": "fm",
+      "display": "Financial Management",
+      "definition": "Financial Management (http://www.hl7.org/Special/committees/fm/index.cfm)."
+    },
+    {
+      "code": "hsi",
+      "display": "Health Standards Integration",
+      "definition": "Health Standards Integration (http://www.hl7.org/Special/committees/hsi/index.cfm)."
+    },
+    {
+      "code": "ii",
+      "display": "Imaging Integration",
+      "definition": "Imaging Integration (http://www.hl7.org/Special/committees/imagemgt/index.cfm)."
+    },
+    {
+      "code": "inm",
+      "display": "Infrastructure And Messaging",
+      "definition": "Infrastructure And Messaging (http://www.hl7.org/special/committees/inm/index.cfm)."
+    },
+    {
+      "code": "its",
+      "display": "Implementable Technology Specifications",
+      "definition": "Implementable Technology Specifications (http://www.hl7.org/special/committees/xml/index.cfm)."
+    },
+    {
+      "code": "mnm",
+      "display": "Modeling and Methodology",
+      "definition": "Modeling and Methodology (http://www.hl7.org/Special/committees/mnm/index.cfm)."
+    },
+    {
+      "code": "oo",
+      "display": "Orders and Observations",
+      "definition": "Orders and Observations (http://www.hl7.org/Special/committees/orders/index.cfm)."
+    },
+    {
+      "code": "pa",
+      "display": "Patient Administration",
+      "definition": "Patient Administration (http://www.hl7.org/Special/committees/pafm/index.cfm)."
+    },
+    {
+      "code": "pc",
+      "display": "Patient Care",
+      "definition": "Patient Care (http://www.hl7.org/Special/committees/patientcare/index.cfm)."
+    },
+    {
+      "code": "pher",
+      "display": "Public Health and Emergency Response",
+      "definition": "Public Health and Emergency Response (http://www.hl7.org/Special/committees/pher/index.cfm)."
+    },
+    {
+      "code": "phx",
+      "display": "Pharmacy",
+      "definition": "Pharmacy (http://www.hl7.org/Special/committees/medication/index.cfm)."
+    },
+    {
+      "code": "brr",
+      "display": "Biomedical Research and Regulation",
+      "definition": "Biomedical Research and Regulation (http://www.hl7.org/Special/committees/rcrim/index.cfm)."
+    },
+    {
+      "code": "sd",
+      "display": "Structured Documents",
+      "definition": "Structured Documents (http://www.hl7.org/Special/committees/structure/index.cfm)."
+    },
+    {
+      "code": "sec",
+      "display": "Security",
+      "definition": "Security (http://www.hl7.org/Special/committees/secure/index.cfm)."
+    },
+    {
+      "code": "us",
+      "display": "US Realm Taskforce",
+      "definition": "US Realm Taskforce (http://www.hl7.org/Special/committees/usrealm/index.cfm)."
+    },
+    {
+      "code": "vocab",
+      "display": "Vocabulary",
+      "definition": "Vocabulary (http://www.hl7.org/Special/committees/Vocab/index.cfm)."
+    },
+    {
+      "code": "aid",
+      "display": "Application Implementation and Design",
+      "definition": "Application Implementation and Design (http://www.hl7.org/Special/committees/java/index.cfm)."
+    }
+  ]
+}

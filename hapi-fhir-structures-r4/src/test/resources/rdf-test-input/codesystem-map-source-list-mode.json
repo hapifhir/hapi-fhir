@@ -1,0 +1,84 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "map-source-list-mode",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eStructureMapSourceListMode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eIf field is a list, how to manage the source.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/map-source-list-mode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efirst\u003ca name\u003d\"map-source-list-mode-first\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFirst\u003c/td\u003e\u003ctd\u003eOnly process this rule for the first in the list.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot_first\u003ca name\u003d\"map-source-list-mode-not_first\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAll but the first\u003c/td\u003e\u003ctd\u003eProcess this rule for all but the first.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elast\u003ca name\u003d\"map-source-list-mode-last\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLast\u003c/td\u003e\u003ctd\u003eOnly process this rule for the last in the list.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot_last\u003ca name\u003d\"map-source-list-mode-not_last\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAll but the last\u003c/td\u003e\u003ctd\u003eProcess this rule for all but the last.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eonly_one\u003ca name\u003d\"map-source-list-mode-only_one\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnforce only one\u003c/td\u003e\u003ctd\u003eOnly process this rule is there is only item.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/map-source-list-mode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.684"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "StructureMapSourceListMode",
+  "title": "StructureMapSourceListMode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "If field is a list, how to manage the source.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/map-source-list-mode",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "first",
+      "display": "First",
+      "definition": "Only process this rule for the first in the list."
+    },
+    {
+      "code": "not_first",
+      "display": "All but the first",
+      "definition": "Process this rule for all but the first."
+    },
+    {
+      "code": "last",
+      "display": "Last",
+      "definition": "Only process this rule for the last in the list."
+    },
+    {
+      "code": "not_last",
+      "display": "All but the last",
+      "definition": "Process this rule for all but the last."
+    },
+    {
+      "code": "only_one",
+      "display": "Enforce only one",
+      "definition": "Only process this rule is there is only item."
+    }
+  ]
+}

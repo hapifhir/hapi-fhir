@@ -1,0 +1,334 @@
+{
+  "resourceType": "CoverageEligibilityResponse",
+  "id": "E2501",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the CoverageEligibilityResponse.\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://www.BenefitsInc.com/fhir/coverageeligibilityresponse",
+      "value": "881234"
+    }
+  ],
+  "status": "active",
+  "purpose": [
+    "validation",
+    "benefits"
+  ],
+  "patient": {
+    "reference": "Patient/pat1"
+  },
+  "servicedDate": "2014-09-17",
+  "created": "2014-08-16",
+  "request": {
+    "reference": "http://www.BenefitsInc.com/fhir/coverageeligibilityresponse/225476332402"
+  },
+  "outcome": "complete",
+  "disposition": "Policy is currently in-force.",
+  "insurer": {
+    "reference": "Organization/2"
+  },
+  "insurance": [
+    {
+      "coverage": {
+        "reference": "Coverage/9876B1"
+      },
+      "inforce": true,
+      "item": [
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+                "code": "30",
+                "display": "Health Benefit Plan Coverage"
+              }
+            ]
+          },
+          "network": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-network",
+                "code": "in"
+              }
+            ]
+          },
+          "unit": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-unit",
+                "code": "individual"
+              }
+            ]
+          },
+          "term": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-term",
+                "code": "annual"
+              }
+            ]
+          },
+          "benefit": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "allowedMoney": {
+                "value": 500000,
+                "currency": "SAR"
+              }
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "copay-maximum"
+                  }
+                ]
+              },
+              "allowedMoney": {
+                "value": 100,
+                "currency": "SAR"
+              }
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "copay-percent"
+                  }
+                ]
+              },
+              "allowedUnsignedInt": 20
+            }
+          ]
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+                "code": "69",
+                "display": "Maternity"
+              }
+            ]
+          },
+          "network": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-network",
+                "code": "in"
+              }
+            ]
+          },
+          "unit": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-unit",
+                "code": "individual"
+              }
+            ]
+          },
+          "term": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-term",
+                "code": "annual"
+              }
+            ]
+          },
+          "benefit": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "allowedMoney": {
+                "value": 15000,
+                "currency": "SAR"
+              }
+            }
+          ]
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+                "code": "F3",
+                "display": "Dental Coverage"
+              }
+            ]
+          },
+          "network": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-network",
+                "code": "in"
+              }
+            ]
+          },
+          "unit": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-unit",
+                "code": "individual"
+              }
+            ]
+          },
+          "term": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-term",
+                "code": "annual"
+              }
+            ]
+          },
+          "benefit": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "allowedMoney": {
+                "value": 2000,
+                "currency": "SAR"
+              }
+            }
+          ]
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+                "code": "F6",
+                "display": "Vision Coverage"
+              }
+            ]
+          },
+          "network": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-network",
+                "code": "in"
+              }
+            ]
+          },
+          "unit": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-unit",
+                "code": "individual"
+              }
+            ]
+          },
+          "term": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-term",
+                "code": "annual"
+              }
+            ]
+          },
+          "benefit": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "allowedMoney": {
+                "value": 400,
+                "currency": "SAR"
+              }
+            }
+          ]
+        },
+        {
+          "category": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/ex-benefitcategory",
+                "code": "49",
+                "display": "Hospital Room and Board"
+              }
+            ]
+          },
+          "network": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-network",
+                "code": "in"
+              }
+            ]
+          },
+          "unit": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-unit",
+                "code": "individual"
+              }
+            ]
+          },
+          "term": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/benefit-term",
+                "code": "day"
+              }
+            ]
+          },
+          "benefit": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "room"
+                  }
+                ]
+              },
+              "allowedString": "shared"
+            },
+            {
+              "type": {
+                "coding": [
+                  {
+                    "code": "benefit"
+                  }
+                ]
+              },
+              "allowedMoney": {
+                "value": 600,
+                "currency": "SAR"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

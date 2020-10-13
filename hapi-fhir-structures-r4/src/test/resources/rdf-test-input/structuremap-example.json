@@ -1,0 +1,77 @@
+{
+  "resourceType": "StructureMap",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/StructureMap/example\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: urn:oid:37843577-95fb-4adb-84c0-8837188a7bf3\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 0.1\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: ExampleMap\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Example Map\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 09/03/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 FHIR Standard\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Example Structure Map\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: Oceania \u003cspan\u003e(Details : {http://unstats.un.org/unsd/methods/m49/m49.htm code \u0027009\u0027 \u003d \u0027Oceania\u0027, given as \u0027Oceania\u0027})\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003egroup\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Examples\u003c/p\u003e\u003cp\u003e\u003cb\u003etypeMode\u003c/b\u003e: none\u003c/p\u003e\u003cp\u003e\u003cb\u003edocumentation\u003c/b\u003e: test -\u0026gt; testValue\u003c/p\u003e\u003ch3\u003eInputs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMode\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etest\u003c/td\u003e\u003ctd\u003esource\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003erule\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: rule1\u003c/p\u003e\u003ch3\u003eSources\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eContext\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eElement\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eVariable\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eSource\u003c/td\u003e\u003ctd\u003eSourceClassA\u003c/td\u003e\u003ctd\u003etest\u003c/td\u003e\u003ctd\u003et\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eTargets\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eContext\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eContextType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eElement\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTransform\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eDestination\u003c/td\u003e\u003ctd\u003evariable\u003c/td\u003e\u003ctd\u003etestValue\u003c/td\u003e\u003ctd\u003ecopy\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/StructureMap/example",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:37843577-95fb-4adb-84c0-8837188a7bf3"
+    }
+  ],
+  "version": "0.1",
+  "name": "ExampleMap",
+  "title": "Example Map",
+  "status": "draft",
+  "date": "2017-03-09",
+  "publisher": "HL7 FHIR Standard",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Example Structure Map",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+          "code": "009",
+          "display": "Oceania"
+        }
+      ]
+    }
+  ],
+  "group": [
+    {
+      "name": "Examples",
+      "typeMode": "none",
+      "documentation": "test -\u003e testValue",
+      "input": [
+        {
+          "name": "test",
+          "mode": "source"
+        }
+      ],
+      "rule": [
+        {
+          "name": "rule1",
+          "source": [
+            {
+              "context": "Source",
+              "type": "SourceClassA",
+              "element": "test",
+              "variable": "t"
+            }
+          ],
+          "target": [
+            {
+              "context": "Destination",
+              "contextType": "variable",
+              "element": "testValue",
+              "transform": "copy"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

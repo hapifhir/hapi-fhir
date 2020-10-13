@@ -1,0 +1,197 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "questionnaire-item-control",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eQuestionnaire Item UI Control Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eStarter set of user interface control/display mechanisms that might be used when rendering an item in a questionnaire.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eProperties\u003c/b\u003e\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eURL\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eabstract\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003eTrue if an element is considered \u0027abstract\u0027 - that is the code is not for use as a real concept\u003c/td\u003e\u003ctd\u003eboolean\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003eThis code system http://hl7.org/fhir/questionnaire-item-control defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egroup\u003ca name\u003d\"questionnaire-item-control-group\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003eUI controls relevant to organizing groups of questions\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  list\u003ca name\u003d\"questionnaire-item-control-list\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eList\u003c/td\u003e\u003ctd\u003eQuestions within the group should be listed sequentially\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  table\u003ca name\u003d\"questionnaire-item-control-table\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVertical Answer Table\u003c/td\u003e\u003ctd\u003eQuestions within the group are rows in the table with possible answers as columns.  Used for \u0027choice\u0027 questions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  htable\u003ca name\u003d\"questionnaire-item-control-htable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHorizontal Answer Table\u003c/td\u003e\u003ctd\u003eQuestions within the group are columns in the table with possible answers as rows.  Used for \u0027choice\u0027 questions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  gtable\u003ca name\u003d\"questionnaire-item-control-gtable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGroup Table\u003c/td\u003e\u003ctd\u003eQuestions within the group are columns in the table with each group repetition as a row.  Used for single-answer questions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  atable\u003ca name\u003d\"questionnaire-item-control-atable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAnswer Table\u003c/td\u003e\u003ctd\u003eThis table has one row - for the question.  Permitted answers are columns.  Used for choice questions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  header\u003ca name\u003d\"questionnaire-item-control-header\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHeader\u003c/td\u003e\u003ctd\u003eThe group is to be continuously visible at the top of the questionnaire\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  footer\u003ca name\u003d\"questionnaire-item-control-footer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFooter\u003c/td\u003e\u003ctd\u003eThe group is to be continuously visible at the bottom of the questionnaire\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etext\u003ca name\u003d\"questionnaire-item-control-text\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003eUI controls relevant to rendering questionnaire text items\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  inline\u003ca name\u003d\"questionnaire-item-control-inline\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn-line\u003c/td\u003e\u003ctd\u003eText is displayed as a paragraph in a sequential position between sibling items (default behavior)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  prompt\u003ca name\u003d\"questionnaire-item-control-prompt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrompt\u003c/td\u003e\u003ctd\u003eText is displayed immediately below or within the answer-entry area of the containing question item (typically as a guide for what to enter)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  unit\u003ca name\u003d\"questionnaire-item-control-unit\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnit\u003c/td\u003e\u003ctd\u003eText is displayed adjacent (horizontally or vertically) to the answer space for the parent question, typically to indicate a unit of measure\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  lower\u003ca name\u003d\"questionnaire-item-control-lower\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLower-bound\u003c/td\u003e\u003ctd\u003eText is displayed to the left of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the \u0027lower\u0027 bound.  E.g. \u0027Strongly disagree\u0027\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  upper\u003ca name\u003d\"questionnaire-item-control-upper\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUpper-bound\u003c/td\u003e\u003ctd\u003eText is displayed to the right of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the \u0027upper\u0027 bound.  E.g. \u0027Strongly agree\u0027\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  flyover\u003ca name\u003d\"questionnaire-item-control-flyover\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFly-over\u003c/td\u003e\u003ctd\u003eText is temporarily visible over top of an item if the mouse is positioned over top of the text for the containing item\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  help\u003ca name\u003d\"questionnaire-item-control-help\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHelp-Button\u003c/td\u003e\u003ctd\u003eText is displayed in a dialog box or similar control if invoked by pushing a button or some other UI-appropriate action to request \u0027help\u0027 for a question, group or the questionnaire as a whole (depending what the text is nested within)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003equestion\u003ca name\u003d\"questionnaire-item-control-question\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003eUI controls relevant to capturing question data\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  autocomplete\u003ca name\u003d\"questionnaire-item-control-autocomplete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuto-complete\u003c/td\u003e\u003ctd\u003eA control which provides a list of potential matches based on text entered into a control.  Used for large choice sets where text-matching is an appropriate discovery mechanism.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  drop-down\u003ca name\u003d\"questionnaire-item-control-drop-down\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrop down\u003c/td\u003e\u003ctd\u003eA control where an item (or multiple items) can be selected from a list that is only displayed when the user is editing the field.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  check-box\u003ca name\u003d\"questionnaire-item-control-check-box\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCheck-box\u003c/td\u003e\u003ctd\u003eA control where choices are listed with a box beside them.  The box can be toggled to select or de-select a given choice.  Multiple selections may be possible.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  lookup\u003ca name\u003d\"questionnaire-item-control-lookup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLookup\u003c/td\u003e\u003ctd\u003eA control where editing an item spawns a separate dialog box or screen permitting a user to navigate, filter or otherwise discover an appropriate match.  Useful for large choice sets where text matching is not an appropriate discovery mechanism.  Such screens must generally be tuned for the specific choice list structure.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  radio-button\u003ca name\u003d\"questionnaire-item-control-radio-button\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRadio Button\u003c/td\u003e\u003ctd\u003eA control where choices are listed with a button beside them.  The button can be toggled to select or de-select a given choice.  Selecting one item deselects all others.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  slider\u003ca name\u003d\"questionnaire-item-control-slider\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSlider\u003c/td\u003e\u003ctd\u003eA control where an axis is displayed between the high and low values and the control can be visually manipulated to select a value anywhere on the axis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  spinner\u003ca name\u003d\"questionnaire-item-control-spinner\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpinner\u003c/td\u003e\u003ctd\u003eA control where a list of numeric or other ordered values can be scrolled through via arrows.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  text-box\u003ca name\u003d\"questionnaire-item-control-text-box\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eText Box\u003c/td\u003e\u003ctd\u003eA control where a user can type in their answer freely.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/questionnaire-item-control",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.932"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "QuestionnaireItemUIControlCodes",
+  "title": "Questionnaire Item UI Control Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 International - Patient Care WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/patientcare"
+        }
+      ]
+    }
+  ],
+  "description": "Starter set of user interface control/display mechanisms that might be used when rendering an item in a questionnaire.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-item-control",
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "property": [
+    {
+      "code": "abstract",
+      "description": "True if an element is considered \u0027abstract\u0027 - that is the code is not for use as a real concept",
+      "type": "boolean"
+    }
+  ],
+  "concept": [
+    {
+      "code": "group",
+      "definition": "UI controls relevant to organizing groups of questions",
+      "property": [
+        {
+          "code": "abstract",
+          "valueBoolean": true
+        }
+      ],
+      "concept": [
+        {
+          "code": "list",
+          "display": "List",
+          "definition": "Questions within the group should be listed sequentially"
+        },
+        {
+          "code": "table",
+          "display": "Vertical Answer Table",
+          "definition": "Questions within the group are rows in the table with possible answers as columns.  Used for \u0027choice\u0027 questions."
+        },
+        {
+          "code": "htable",
+          "display": "Horizontal Answer Table",
+          "definition": "Questions within the group are columns in the table with possible answers as rows.  Used for \u0027choice\u0027 questions."
+        },
+        {
+          "code": "gtable",
+          "display": "Group Table",
+          "definition": "Questions within the group are columns in the table with each group repetition as a row.  Used for single-answer questions."
+        },
+        {
+          "code": "atable",
+          "display": "Answer Table",
+          "definition": "This table has one row - for the question.  Permitted answers are columns.  Used for choice questions."
+        },
+        {
+          "code": "header",
+          "display": "Header",
+          "definition": "The group is to be continuously visible at the top of the questionnaire"
+        },
+        {
+          "code": "footer",
+          "display": "Footer",
+          "definition": "The group is to be continuously visible at the bottom of the questionnaire"
+        }
+      ]
+    },
+    {
+      "code": "text",
+      "definition": "UI controls relevant to rendering questionnaire text items",
+      "property": [
+        {
+          "code": "abstract",
+          "valueBoolean": true
+        }
+      ],
+      "concept": [
+        {
+          "code": "inline",
+          "display": "In-line",
+          "definition": "Text is displayed as a paragraph in a sequential position between sibling items (default behavior)"
+        },
+        {
+          "code": "prompt",
+          "display": "Prompt",
+          "definition": "Text is displayed immediately below or within the answer-entry area of the containing question item (typically as a guide for what to enter)"
+        },
+        {
+          "code": "unit",
+          "display": "Unit",
+          "definition": "Text is displayed adjacent (horizontally or vertically) to the answer space for the parent question, typically to indicate a unit of measure"
+        },
+        {
+          "code": "lower",
+          "display": "Lower-bound",
+          "definition": "Text is displayed to the left of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the \u0027lower\u0027 bound.  E.g. \u0027Strongly disagree\u0027"
+        },
+        {
+          "code": "upper",
+          "display": "Upper-bound",
+          "definition": "Text is displayed to the right of the set of answer choices or a scaling control for the parent question item to indicate the meaning of the \u0027upper\u0027 bound.  E.g. \u0027Strongly agree\u0027"
+        },
+        {
+          "code": "flyover",
+          "display": "Fly-over",
+          "definition": "Text is temporarily visible over top of an item if the mouse is positioned over top of the text for the containing item"
+        },
+        {
+          "code": "help",
+          "display": "Help-Button",
+          "definition": "Text is displayed in a dialog box or similar control if invoked by pushing a button or some other UI-appropriate action to request \u0027help\u0027 for a question, group or the questionnaire as a whole (depending what the text is nested within)"
+        }
+      ]
+    },
+    {
+      "code": "question",
+      "definition": "UI controls relevant to capturing question data",
+      "property": [
+        {
+          "code": "abstract",
+          "valueBoolean": true
+        }
+      ],
+      "concept": [
+        {
+          "code": "autocomplete",
+          "display": "Auto-complete",
+          "definition": "A control which provides a list of potential matches based on text entered into a control.  Used for large choice sets where text-matching is an appropriate discovery mechanism."
+        },
+        {
+          "code": "drop-down",
+          "display": "Drop down",
+          "definition": "A control where an item (or multiple items) can be selected from a list that is only displayed when the user is editing the field."
+        },
+        {
+          "code": "check-box",
+          "display": "Check-box",
+          "definition": "A control where choices are listed with a box beside them.  The box can be toggled to select or de-select a given choice.  Multiple selections may be possible."
+        },
+        {
+          "code": "lookup",
+          "display": "Lookup",
+          "definition": "A control where editing an item spawns a separate dialog box or screen permitting a user to navigate, filter or otherwise discover an appropriate match.  Useful for large choice sets where text matching is not an appropriate discovery mechanism.  Such screens must generally be tuned for the specific choice list structure."
+        },
+        {
+          "code": "radio-button",
+          "display": "Radio Button",
+          "definition": "A control where choices are listed with a button beside them.  The button can be toggled to select or de-select a given choice.  Selecting one item deselects all others."
+        },
+        {
+          "code": "slider",
+          "display": "Slider",
+          "definition": "A control where an axis is displayed between the high and low values and the control can be visually manipulated to select a value anywhere on the axis."
+        },
+        {
+          "code": "spinner",
+          "display": "Spinner",
+          "definition": "A control where a list of numeric or other ordered values can be scrolled through via arrows."
+        },
+        {
+          "code": "text-box",
+          "display": "Text Box",
+          "definition": "A control where a user can type in their answer freely."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/us/daf\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Data Access Framework (DAF)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 01/01/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: ONC / HL7 Joint project\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: The Data Access Framework (DAF) Initiative leverages the HL7 FHIR standards to standardize access to Meaningful Use Stage 2 structured information both within the organization and from external organizations\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: Published by ONC under the standard FHIR license (CC0)\u003c/p\u003e\u003cp\u003e\u003cb\u003epackageId\u003c/b\u003e: hl7.fhir.us.daf\u003c/p\u003e\u003cp\u003e\u003cb\u003elicense\u003c/b\u003e: CC0-1.0\u003c/p\u003e\u003cp\u003e\u003cb\u003efhirVersion\u003c/b\u003e: 4.0.1\u003c/p\u003e\u003ch3\u003eDependsOns\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eUri\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/ImplementationGuide/uscore\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eGlobals\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eProfile\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/us/core/StructureDefinition/patient\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edefinition\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eGroupings\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etest\u003c/td\u003e\u003ctd\u003eBase package (not broken up into multiple packages)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eResources\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReference\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExample[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePatient/test\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTest Example\u003c/td\u003e\u003ctd\u003eA test example to show how an implementation guide works\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/us/core/StructureDefinition/patient\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003epage\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: \u003ca\u003epatient-example.html\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Example Patient Page\u003c/p\u003e\u003cp\u003e\u003cb\u003egeneration\u003c/b\u003e: html\u003c/p\u003e\u003ch3\u003ePages\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003ch3\u003eParameters\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValue\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eapply\u003c/td\u003e\u003ctd\u003eversion\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003emanifest\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erendering\u003c/b\u003e: \u003ca\u003ehttp://hl7.org/fhir/us/daf\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eResources\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReference\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExample[x]\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRelativePath\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePatient/test\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/us/core/StructureDefinition/patient\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003epatient-test.html#patient-test\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003ePages\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTitle\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAnchor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003epatient-test.html\u003c/td\u003e\u003ctd\u003eTest Patient Example\u003c/td\u003e\u003ctd\u003epatient-test\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eimage\u003c/b\u003e: fhir.png\u003c/p\u003e\u003cp\u003e\u003cb\u003eother\u003c/b\u003e: fhir.css\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/us/daf",
+  "version": "0",
+  "name": "Data Access Framework (DAF)",
+  "status": "draft",
+  "experimental": false,
+  "date": "2015-01-01",
+  "publisher": "ONC / HL7 Joint project",
+  "contact": [
+    {
+      "name": "ONC",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.healthit.gov"
+        }
+      ]
+    },
+    {
+      "name": "HL7",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "The Data Access Framework (DAF) Initiative leverages the HL7 FHIR standards to standardize access to Meaningful Use Stage 2 structured information both within the organization and from external organizations",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "copyright": "Published by ONC under the standard FHIR license (CC0)",
+  "packageId": "hl7.fhir.us.daf",
+  "license": "CC0-1.0",
+  "fhirVersion": [
+    "4.0.1"
+  ],
+  "dependsOn": [
+    {
+      "uri": "http://hl7.org/fhir/ImplementationGuide/uscore"
+    }
+  ],
+  "global": [
+    {
+      "type": "Patient",
+      "profile": "http://hl7.org/fhir/us/core/StructureDefinition/patient"
+    }
+  ],
+  "definition": {
+    "grouping": [
+      {
+        "name": "test",
+        "description": "Base package (not broken up into multiple packages)"
+      }
+    ],
+    "resource": [
+      {
+        "reference": {
+          "reference": "Patient/test"
+        },
+        "name": "Test Example",
+        "description": "A test example to show how an implementation guide works",
+        "exampleCanonical": "http://hl7.org/fhir/us/core/StructureDefinition/patient"
+      }
+    ],
+    "page": {
+      "nameUrl": "patient-example.html",
+      "title": "Example Patient Page",
+      "generation": "html",
+      "page": [
+        {
+          "nameUrl": "list.html",
+          "title": "Value Set Page",
+          "generation": "html"
+        }
+      ]
+    },
+    "parameter": [
+      {
+        "code": "apply",
+        "value": "version"
+      }
+    ]
+  },
+  "manifest": {
+    "rendering": "http://hl7.org/fhir/us/daf",
+    "resource": [
+      {
+        "reference": {
+          "reference": "Patient/test"
+        },
+        "exampleCanonical": "http://hl7.org/fhir/us/core/StructureDefinition/patient",
+        "relativePath": "patient-test.html#patient-test"
+      }
+    ],
+    "page": [
+      {
+        "name": "patient-test.html",
+        "title": "Test Patient Example",
+        "anchor": [
+          "patient-test",
+          "tx",
+          "uml"
+        ]
+      }
+    ],
+    "image": [
+      "fhir.png"
+    ],
+    "other": [
+      "fhir.css"
+    ]
+  }
+}

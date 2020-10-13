@@ -1,0 +1,67 @@
+{
+  "resourceType": "ValueSet",
+  "id": "name-v3-representation",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eNameRepresentationUse\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA set of codes for each different representation of a name.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/EntityNameUse/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-EntityNameUse\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNameUse/cs.html#v3-EntityNameUse-ABC\"\u003eABC\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAlphabetic\u003c/td\u003e\u003ctd\u003eAlphabetic transcription of name (Japanese: romaji)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNameUse/cs.html#v3-EntityNameUse-IDE\"\u003eIDE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIdeographic\u003c/td\u003e\u003ctd\u003eIdeographic representation of name (e.g., Japanese kanji, Chinese characters)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/EntityNameUse/cs.html#v3-EntityNameUse-SYL\"\u003eSYL\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSyllabic\u003c/td\u003e\u003ctd\u003eSyllabic transcription of name (e.g., Japanese kana, Korean hangul)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/name-v3-representation",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.909"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "NameRepresentationUse",
+  "title": "NameRepresentationUse",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A set of codes for each different representation of a name.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-EntityNameUse",
+        "concept": [
+          {
+            "code": "ABC"
+          },
+          {
+            "code": "IDE"
+          },
+          {
+            "code": "SYL"
+          }
+        ]
+      }
+    ]
+  }
+}

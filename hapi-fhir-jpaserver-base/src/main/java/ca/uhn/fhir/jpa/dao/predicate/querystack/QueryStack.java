@@ -87,7 +87,19 @@ public class QueryStack {
 	 */
 	public void pushResourceTableQuery() {
 		assert myQueryRootStack.isEmpty();
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false, mySearchParameterMap, myResourceType, myRequestPartitionId));
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false, false, mySearchParameterMap, myResourceType, myRequestPartitionId));
+	}
+
+	/**
+	 * Add a new <code>select DISTINCT RES_ID from HFJ_RESOURCE</code> to the stack. All predicates added to the {@literal QueryRootStack}
+	 * will be added to this select clause until {@link #pop()} is called.
+	 * <p>
+	 * This method must only be called when the stack is empty.
+	 * </p>
+	 */
+	public void pushResourceTableDistinctQuery() {
+		assert myQueryRootStack.isEmpty();
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, true, false, mySearchParameterMap, myResourceType, myRequestPartitionId));
 	}
 
 	/**
@@ -99,7 +111,7 @@ public class QueryStack {
 	 */
 	public void pushResourceTableCountQuery() {
 		assert myQueryRootStack.isEmpty();
-		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, true, mySearchParameterMap, myResourceType, myRequestPartitionId));
+		myQueryRootStack.push(new QueryRootEntryResourceTable(myCriteriaBuilder, false, true, mySearchParameterMap, myResourceType, myRequestPartitionId));
 	}
 
 	/**

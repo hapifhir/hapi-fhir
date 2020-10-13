@@ -1,0 +1,114 @@
+{
+  "resourceType": "Contract",
+  "id": "pcd-example-notThem",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eThe following scenario is based on existing\n      jurisdictional policy and are realized in existing systems in Canada. The default policy is\n      one of implied consent for the provision of care, so these scenarios all deal with withdrawal\n      or withholding consent for that purpose. In other jurisdictions, where an express consent\n      model is used (Opt-In), these would examples would contain the phrase \u0026quot;consent to\u0026quot; rather than\n      \u0026quot;withhold\u0026quot; or \u0026quot;withdraw\u0026quot; consent for. \u003cp\u003e specific to use-case 4) Withhold or withdraw consent\n        for disclosure to a specific provider agent (an individual within an organization) \u003c/p\u003e\u003cp\u003e\n        Patient \u0026quot;P. van de Heuvel\u0026quot; ex-spouse, Bill T Lookafter is a Nurse that is employed by Good\n        Health Hospital. P. realizes that she may receive treatment at GHH, however she does not\n        want her ex-spouse to have any access to her IIHI. She indicates that she would like to\n        withdraw/withhold consent to disclose any instance of her health information to her\n        ex-spouse as a result of his employment at Good Health Clinic. \u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "issued": "2015-11-18",
+  "subject": [
+    {
+      "reference": "Patient/f001",
+      "display": "P. van de Heuvel"
+    }
+  ],
+  "authority": [
+    {
+      "reference": "Organization/3",
+      "display": "Michigan Health"
+    }
+  ],
+  "domain": [
+    {
+      "reference": "Location/ukp",
+      "display": "UK Pharmacies"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "57016-8"
+      }
+    ]
+  },
+  "subType": [
+    {
+      "coding": [
+        {
+          "system": "http://www.infoway-inforoute.ca.org/Consent-subtype-codes",
+          "code": "Opt-In",
+          "display": "Default Authorization with exceptions."
+        }
+      ]
+    }
+  ],
+  "term": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/consent-term-type-codes",
+            "code": "withhold-from",
+            "display": "Withhold all data from specified actor entity."
+          }
+        ]
+      },
+      "offer": {
+        "topic": {
+          "reference": "Practitioner/f204",
+          "display": "Fictive Nurse"
+        },
+        "text": "Withhold this order and any results or related objects from specified nurse provider."
+      }
+    }
+  ],
+  "signer": [
+    {
+      "type": {
+        "system": "http://terminology.hl7.org/CodeSystem/contractsignertypecodes",
+        "code": "COVPTY"
+      },
+      "party": {
+        "reference": "Patient/f001"
+      },
+      "signature": [
+        {
+          "type": [
+            {
+              "system": "urn:iso-astm:E1762-95:2013",
+              "code": "1.2.840.10065.1.12.1.1"
+            }
+          ],
+          "when": "2013-06-08T10:57:34-07:00",
+          "who": {
+            "reference": "Patient/f001"
+          }
+        }
+      ]
+    }
+  ],
+  "friendly": [
+    {
+      "contentAttachment": {
+        "title": "The terms of the consent in friendly consumer speak."
+      }
+    }
+  ],
+  "legal": [
+    {
+      "contentAttachment": {
+        "title": "The terms of the consent in lawyer speak."
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

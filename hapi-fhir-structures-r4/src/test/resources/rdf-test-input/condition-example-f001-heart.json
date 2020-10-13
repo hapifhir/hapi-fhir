@@ -1,0 +1,102 @@
+{
+  "resourceType": "Condition",
+  "id": "f001",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f001\u003c/p\u003e\u003cp\u003e\u003cb\u003eclinicalStatus\u003c/b\u003e: Active \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-clinical code \u0027active\u0027 \u003d \u0027Active)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003everificationStatus\u003c/b\u003e: Confirmed \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-ver-status code \u0027confirmed\u0027 \u003d \u0027Confirmed)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: diagnosis \u003cspan\u003e(Details : {SNOMED CT code \u0027439401001\u0027 \u003d \u0027Diagnosis\u0027, given as \u0027diagnosis\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eseverity\u003c/b\u003e: Moderate \u003cspan\u003e(Details : {SNOMED CT code \u00276736007\u0027 \u003d \u0027Moderate\u0027, given as \u0027Moderate\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Heart valve disorder \u003cspan\u003e(Details : {SNOMED CT code \u0027368009\u0027 \u003d \u0027Heart valve disorder\u0027, given as \u0027Heart valve disorder\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: heart structure \u003cspan\u003e(Details : {SNOMED CT code \u002740768004\u0027 \u003d \u0027Left thorax\u0027, given as \u0027Left thorax\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eP. van de Heuvel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eEncounter/f001\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eonset\u003c/b\u003e: 05/08/2011\u003c/p\u003e\u003cp\u003e\u003cb\u003erecordedDate\u003c/b\u003e: 05/10/2011\u003c/p\u003e\u003cp\u003e\u003cb\u003easserter\u003c/b\u003e: \u003ca\u003eP. van de Heuvel\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eEvidences\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eCardiac chest pain \u003cspan\u003e(Details : {SNOMED CT code \u0027426396005\u0027 \u003d \u0027Cardiac chest pain\u0027, given as \u0027Cardiac chest pain\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active"
+      }
+    ]
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+        "code": "confirmed"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "439401001",
+          "display": "diagnosis"
+        }
+      ]
+    }
+  ],
+  "severity": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "6736007",
+        "display": "Moderate"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "368009",
+        "display": "Heart valve disorder"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "40768004",
+          "display": "Left thorax"
+        }
+      ],
+      "text": "heart structure"
+    }
+  ],
+  "subject": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "encounter": {
+    "reference": "Encounter/f001"
+  },
+  "onsetDateTime": "2011-08-05",
+  "recordedDate": "2011-10-05",
+  "asserter": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "evidence": [
+    {
+      "code": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "426396005",
+              "display": "Cardiac chest pain"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

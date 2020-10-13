@@ -1,0 +1,92 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "substance-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSubstance Category Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eSubstance category codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/substance-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eallergen\u003ca name\u003d\"substance-category-allergen\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAllergen\u003c/td\u003e\u003ctd\u003eA substance that causes an allergic reaction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebiological\u003ca name\u003d\"substance-category-biological\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBiological Substance\u003c/td\u003e\u003ctd\u003eA substance that is produced by or extracted from a biological source.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebody\u003ca name\u003d\"substance-category-body\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBody Substance\u003c/td\u003e\u003ctd\u003eA substance that comes directly from a human or an animal (e.g. blood, urine, feces, tears, etc.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003echemical\u003ca name\u003d\"substance-category-chemical\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChemical\u003c/td\u003e\u003ctd\u003eAny organic or inorganic substance of a particular molecular identity, including -- (i) any combination of such substances occurring in whole or in part as a result of a chemical reaction or occurring in nature and (ii) any element or uncombined radical (http://www.epa.gov/opptintr/import-export/pubs/importguide.pdf).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efood\u003ca name\u003d\"substance-category-food\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDietary Substance\u003c/td\u003e\u003ctd\u003eA food, dietary ingredient, or dietary supplement for human or animal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edrug\u003ca name\u003d\"substance-category-drug\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrug or Medicament\u003c/td\u003e\u003ctd\u003eA substance intended for use in the diagnosis, cure, mitigation, treatment, or prevention of disease in man or other animals (Federal Food Drug and Cosmetic Act).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ematerial\u003ca name\u003d\"substance-category-material\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaterial\u003c/td\u003e\u003ctd\u003eA finished product which is not normally ingested, absorbed or injected (e.g. steel, iron, wood, plastic and paper).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/substance-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1138"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SubstanceCategoryCodes",
+  "title": "Substance Category Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "HL7 Orders and Observations Workgroup",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/orders/index.cfm"
+        }
+      ]
+    }
+  ],
+  "description": "Substance category codes",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/substance-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "allergen",
+      "display": "Allergen",
+      "definition": "A substance that causes an allergic reaction."
+    },
+    {
+      "code": "biological",
+      "display": "Biological Substance",
+      "definition": "A substance that is produced by or extracted from a biological source."
+    },
+    {
+      "code": "body",
+      "display": "Body Substance",
+      "definition": "A substance that comes directly from a human or an animal (e.g. blood, urine, feces, tears, etc.)."
+    },
+    {
+      "code": "chemical",
+      "display": "Chemical",
+      "definition": "Any organic or inorganic substance of a particular molecular identity, including -- (i) any combination of such substances occurring in whole or in part as a result of a chemical reaction or occurring in nature and (ii) any element or uncombined radical (http://www.epa.gov/opptintr/import-export/pubs/importguide.pdf)."
+    },
+    {
+      "code": "food",
+      "display": "Dietary Substance",
+      "definition": "A food, dietary ingredient, or dietary supplement for human or animal."
+    },
+    {
+      "code": "drug",
+      "display": "Drug or Medicament",
+      "definition": "A substance intended for use in the diagnosis, cure, mitigation, treatment, or prevention of disease in man or other animals (Federal Food Drug and Cosmetic Act)."
+    },
+    {
+      "code": "material",
+      "display": "Material",
+      "definition": "A finished product which is not normally ingested, absorbed or injected (e.g. steel, iron, wood, plastic and paper)."
+    }
+  ]
+}

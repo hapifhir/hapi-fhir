@@ -1,0 +1,60 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "expansion-parameter-source",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExpansionParameterSource\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDeclares what the source of a parameter is.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/expansion-parameter-source defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einput\u003ca name\u003d\"expansion-parameter-source-input\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClient Input\u003c/td\u003e\u003ctd\u003eThe parameter was supplied by the client in the $expand request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eserver\u003ca name\u003d\"expansion-parameter-source-server\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eServer Engine\u003c/td\u003e\u003ctd\u003eThe parameter was added by the expansion engine on the server.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecodesystem\u003ca name\u003d\"expansion-parameter-source-codesystem\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCode System\u003c/td\u003e\u003ctd\u003eThe parameter was added from one the code systems used in the $expand operation.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/expansion-parameter-source",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1279"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ExpansionParameterSource",
+  "title": "ExpansionParameterSource",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Declares what the source of a parameter is.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/expansion-parameter-source",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "input",
+      "display": "Client Input",
+      "definition": "The parameter was supplied by the client in the $expand request."
+    },
+    {
+      "code": "server",
+      "display": "Server Engine",
+      "definition": "The parameter was added by the expansion engine on the server."
+    },
+    {
+      "code": "codesystem",
+      "display": "Code System",
+      "definition": "The parameter was added from one the code systems used in the $expand operation."
+    }
+  ]
+}

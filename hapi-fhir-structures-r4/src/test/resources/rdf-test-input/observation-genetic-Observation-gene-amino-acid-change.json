@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "observation-genetic-Observation-gene-amino-acid-change",
+  "url": "http://hl7.org/fhir/SearchParameter/observation-genetic-Observation-gene-amino-acid-change",
+  "version": "4.0.1",
+  "name": "gene-amino-acid-change",
+  "status": "draft",
+  "experimental": true,
+  "description": "HGNC gene symbol and HGVS Protein change",
+  "code": "gene-amino-acid-change",
+  "base": [
+    "Observation"
+  ],
+  "type": "string",
+  "expression": "Observation.extension(\u0027http://hl7.org/fhir/StructureDefinition/observation-geneticsAminoAcidChangeName\u0027)",
+  "xpathUsage": "normal"
+}

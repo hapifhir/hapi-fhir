@@ -1,0 +1,107 @@
+{
+  "resourceType": "Observation",
+  "id": "alcohol-type",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: alcohol-type\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Social History \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027social-history\u0027 \u003d \u0027Social History\u0027, given as \u0027Social History\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Type of alcohol consumed \u003cspan\u003e(Details : {http://acme-rehab.org code \u0027alcohol-type\u0027 \u003d \u0027alcohol-type\u0027, given as \u0027Type of alcohol consumed\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePeter James Chalmers\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 11/12/2014 4:44:16 AM\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: alcohol-type \u003cspan\u003e(Details : {http://acme-rehab.org code \u0027alcohol-type\u0027 \u003d \u0027alcohol-type)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Wine \u003cspan\u003e(Details : {SNOMED CT code \u002735748005\u0027 \u003d \u0027Wine\u0027, given as \u0027Wine (substance)\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: alcohol-type \u003cspan\u003e(Details : {http://acme-rehab.org code \u0027alcohol-type\u0027 \u003d \u0027alcohol-type)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Beer \u003cspan\u003e(Details : {SNOMED CT code \u002753410008\u0027 \u003d \u0027Beer\u0027, given as \u0027Beer (substance)\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: alcohol-type \u003cspan\u003e(Details : {http://acme-rehab.org code \u0027alcohol-type\u0027 \u003d \u0027alcohol-type)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: Liquor \u003cspan\u003e(Details : {SNOMED CT code \u00276524003\u0027 \u003d \u0027Distilled spirits\u0027, given as \u0027 Distilled spirits (substance)\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "social-history",
+          "display": "Social History"
+        }
+      ],
+      "text": "Social History"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://acme-rehab.org",
+        "code": "alcohol-type",
+        "display": "Type of alcohol consumed"
+      }
+    ],
+    "text": "Type of alcohol consumed"
+  },
+  "subject": {
+    "reference": "Patient/example",
+    "display": "Peter James Chalmers"
+  },
+  "effectiveDateTime": "2014-12-11T04:44:16Z",
+  "component": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://acme-rehab.org",
+            "code": "alcohol-type"
+          }
+        ]
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "35748005",
+            "display": "Wine (substance)"
+          }
+        ],
+        "text": "Wine"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://acme-rehab.org",
+            "code": "alcohol-type"
+          }
+        ]
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "53410008",
+            "display": "Beer (substance)"
+          }
+        ],
+        "text": "Beer"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://acme-rehab.org",
+            "code": "alcohol-type"
+          }
+        ]
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "6524003",
+            "display": " Distilled spirits (substance)"
+          }
+        ],
+        "text": "Liquor"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

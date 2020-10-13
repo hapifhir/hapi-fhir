@@ -1,0 +1,243 @@
+{
+  "resourceType": "Library",
+  "id": "suiciderisk-orderset-logic",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eId: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eLibrary/mmi-suiciderisk-orderset-logic\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eIdentifier: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cb\u003evalue: \u003c/b\u003e\n                  \u003cspan\u003eSuicideRiskLogic\u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eVersion: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e1.0.0\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTitle: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eSuicide Risk Order Set Logic\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eType: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ecode: \u003c/b\u003e\n                           \u003cspan\u003elogic-library\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eStatus: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003edraft\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eDescription: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003eLogic for Suicide Risk Order Sets\u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eTopic: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-right: 25px;\"\u003e\n                  \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                     \u003cb\u003etext: \u003c/b\u003e\n                     \u003cspan\u003eSuicide Risk Order Set Logic\u003c/span\u003e\n                  \u003c/span\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003cp/\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eRelated: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edepends-on\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eResource: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eLibrary/library-fhir-model-definition\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eRelated: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edepends-on\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eResource: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eLibrary/library-fhir-helpers\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003edisplay: \u003c/b\u003e\n                           \u003cspan\u003eFHIRHelpers\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eRelated: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edepends-on\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eResource: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003ehttp://nucc.org/provider-taxonomy\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eRelated: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003edepends-on\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eResource: \u003c/b\u003e\n                     \u003cbr/\u003e\n                     \u003cspan\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003ereference: \u003c/b\u003e\n                           \u003cspan\u003eValueSet/1.2.3.4.5\u003c/span\u003e\n                           \u003cbr/\u003e\n                        \u003c/span\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003edisplay: \u003c/b\u003e\n                           \u003cspan\u003eSuicide Risk Assessment\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eParameter: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003ename: \u003c/b\u003e\n                     \u003cspan\u003ePatient\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cb\u003euse: \u003c/b\u003e\n                  \u003cspan\u003ein\u003c/span\u003e\n                  \u003cbr/\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eminimum cardinality: \u003c/b\u003e\n                     \u003cspan\u003e1\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003emaximum cardinality: \u003c/b\u003e\n                     \u003cspan\u003e1\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cb\u003etype: \u003c/b\u003e\n                  \u003cspan\u003ePatient\u003c/span\u003e\n                  \u003cbr/\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"/\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eParameter: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003ename: \u003c/b\u003e\n                     \u003cspan\u003eEncounter\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cb\u003euse: \u003c/b\u003e\n                  \u003cspan\u003ein\u003c/span\u003e\n                  \u003cbr/\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eminimum cardinality: \u003c/b\u003e\n                     \u003cspan\u003e1\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003emaximum cardinality: \u003c/b\u003e\n                     \u003cspan\u003e1\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cb\u003etype: \u003c/b\u003e\n                  \u003cspan\u003eEncounter\u003c/span\u003e\n                  \u003cbr/\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"/\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eParameter: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr style\u003d\"vertical-align: top;\"\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003ename: \u003c/b\u003e\n                     \u003cspan\u003ePractitioner\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cb\u003euse: \u003c/b\u003e\n                  \u003cspan\u003ein\u003c/span\u003e\n                  \u003cbr/\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003eminimum cardinality: \u003c/b\u003e\n                     \u003cspan\u003e1\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cspan\u003e\n                     \u003cb\u003emaximum cardinality: \u003c/b\u003e\n                     \u003cspan\u003e1\u003c/span\u003e\n                     \u003cbr/\u003e\n                  \u003c/span\u003e\n                  \u003cb\u003etype: \u003c/b\u003e\n                  \u003cspan\u003ePractitioner\u003c/span\u003e\n                  \u003cbr/\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"/\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eData Requirements: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cdiv\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003etype: \u003c/b\u003e\n                        \u003cspan\u003eRiskAssessment\u003c/span\u003e\n                     \u003c/p\u003e\n                     \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                        \u003cb\u003ecode filter:\u003c/b\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003epath: \u003c/b\u003e\n                           \u003cspan\u003ecode\u003c/span\u003e\n                        \u003c/span\u003e\n                        \u003cbr/\u003e\n                        \u003cspan style\u003d\"padding-left: 25px;\"\u003e\n                           \u003cb\u003evalueset: \u003c/b\u003e\n                           \u003cspan\u003eSuicide Risk Assessment\u003c/span\u003e\n                        \u003c/span\u003e\n                     \u003c/p\u003e\n                  \u003c/div\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n         \u003ctable class\u003d\"grid dict\"\u003e\n            \u003ctr\u003e\n               \u003ctd\u003e\n                  \u003cb\u003eContent: \u003c/b\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n            \u003ctr\u003e\n               \u003ctd style\u003d\"padding-left: 25px; padding-right: 25px;\"\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003etype: \u003c/b\u003e\n                     \u003cspan\u003etext/cql\u003c/span\u003e\n                  \u003c/p\u003e\n                  \u003cp style\u003d\"margin-bottom: 5px;\"\u003e\n                     \u003cb\u003eurl: \u003c/b\u003e\n                     \u003cspan\u003elibrary-mmi-suiciderisk-orderset-logic-content.cql\u003c/span\u003e\n                  \u003c/p\u003e\n               \u003c/td\u003e\n            \u003c/tr\u003e\n         \u003c/table\u003e\n      \u003c/div\u003e"
+  },
+  "url": "http://motivemi.com/artifacts/Library/suiciderisk-orderset-logic",
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://motivemi.com/artifacts",
+      "value": "mmi:suiciderisk-orderset-logic"
+    }
+  ],
+  "version": "1.0.0",
+  "name": "SuicideRiskOrderSetLogic",
+  "title": "Suicide Risk Order Set Logic",
+  "status": "active",
+  "experimental": true,
+  "type": {
+    "coding": [
+      {
+        "code": "logic-library"
+      }
+    ]
+  },
+  "date": "2015-07-22",
+  "publisher": "Motive Medical Intelligence",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "415-362-4007",
+          "use": "work"
+        },
+        {
+          "system": "email",
+          "value": "info@motivemi.com",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "Logic for Suicide Risk Order Sets",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "age"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "https://meshb.nlm.nih.gov",
+            "code": "D000328",
+            "display": "Adult"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "87512008",
+            "display": "Mild major depression"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "40379007",
+            "display": "Major depression, recurrent, mild"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "225444004",
+            "display": "At risk for suicide (finding)"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "user"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "309343006",
+            "display": "Physician"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "venue"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "440655000",
+            "display": "Outpatient environment"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US"
+        }
+      ]
+    }
+  ],
+  "purpose": "Defines a referral to a mental-health integrated care program for use in suicide risk order sets. The definition is independent of the order set in which it appears to allow reuse of the general definition of the referrral.",
+  "usage": "This activity definition is used as the definition of a referral request within various suicide risk order sets. Elements that apply universally are defined here, while elements that apply to the specific setting of a referral within a particular order set are defined in the order set.",
+  "copyright": "© Copyright 2016 Motive Medical Intelligence. All rights reserved.",
+  "approvalDate": "2016-03-12",
+  "lastReviewDate": "2016-08-15",
+  "effectivePeriod": {
+    "start": "2016-01-01",
+    "end": "2017-12-31"
+  },
+  "topic": [
+    {
+      "text": "Suicide Risk Order Set Logic"
+    }
+  ],
+  "author": [
+    {
+      "name": "Motive Medical Intelligence",
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "415-362-4007",
+          "use": "work"
+        },
+        {
+          "system": "email",
+          "value": "info@motivemi.com",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "citation",
+      "display": "Practice Guideline for the Treatment of Patients with Major Depressive Disorder",
+      "url": "http://psychiatryonline.org/pb/assets/raw/sitewide/practice_guidelines/guidelines/mdd.pdf"
+    },
+    {
+      "type": "depends-on",
+      "resource": "Library/library-fhir-model-definition"
+    },
+    {
+      "type": "depends-on",
+      "resource": "Library/library-fhir-helpers"
+    },
+    {
+      "type": "depends-on",
+      "resource": "http://nucc.org/provider-taxonomy"
+    },
+    {
+      "type": "depends-on",
+      "resource": "ValueSet/1.2.3.4.5"
+    }
+  ],
+  "parameter": [
+    {
+      "name": "Patient",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "type": "Patient"
+    },
+    {
+      "name": "Encounter",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "type": "Encounter"
+    },
+    {
+      "name": "Practitioner",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "type": "Practitioner"
+    }
+  ],
+  "dataRequirement": [
+    {
+      "type": "RiskAssessment",
+      "codeFilter": [
+        {
+          "path": "code",
+          "valueSet": "http://example.org/valueset/1.2.3.4.5"
+        }
+      ]
+    }
+  ],
+  "content": [
+    {
+      "contentType": "text/cql",
+      "url": "library-mmi-suiciderisk-orderset-logic-content.cql"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "signature-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSignature Type Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe Digital Signature Purposes, an indication of the reason an entity signs a document. This is included in the signed information and can be used when determining accountability for various actions concerning the document. Examples include: author, transcriptionist/recorder, and witness.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThese codes are excerpted from ASTM Standard, E1762-95(2013) - Standard Guide for Electronic Authentication of Health Care Information, Copyright by ASTM International, 100 Barr Harbor Drive, West Conshohocken, PA 19428. Copies of this standard are available through the ASTM Web Site at www.astm.org.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system urn:iso-astm:E1762-95:2013 defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.1\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthor\u0027s Signature\u003c/td\u003e\u003ctd\u003ethe signature of the primary or sole author of a health information document. There can be only one primary author of a health information document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.2\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoauthor\u0027s Signature\u003c/td\u003e\u003ctd\u003ethe signature of a health information document coauthor. There can be multiple coauthors of a health information document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.3\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCo-participant\u0027s Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual who is a participant in the health information document but is not an author or coauthor. (Example a surgeon who is required by institutional, regulatory, or legal rules to sign an operative report, but who was not involved in the authorship of that report.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.4\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.464\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTranscriptionist/Recorder Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual who has transcribed a dictated document or recorded written text into a digital machine readable format.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.5\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVerification Signature\u003c/td\u003e\u003ctd\u003ea signature verifying the information contained in a document. (Example a physician is required to countersign a verbal order that has previously been recorded in the medical record by a registered nurse who has carried out the verbal order.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.6\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.466\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eValidation Signature\u003c/td\u003e\u003ctd\u003ea signature validating a health information document for inclusion in the patient record. (Example a medical student or resident is credentialed to perform history or physical examinations and to write progress notes. The attending physician signs the history and physical examination to validate the entry for inclusion in the patient\u0027s medical record.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.7\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.467\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsent Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual consenting to what is described in a health information document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.8\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.468\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSignature Witness Signature\u003c/td\u003e\u003ctd\u003ethe signature of a witness to any other signature.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.9\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.469\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEvent Witness Signature\u003c/td\u003e\u003ctd\u003ethe signature of a witness to an event. (Example the witness has observed a procedure and is attesting to this fact.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.10\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4610\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIdentity Witness Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual who has witnessed another individual who is known to them signing a document. (Example the identity witness is a notary public.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.11\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4611\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsent Witness Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual who has witnessed the health care provider counselling a patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.12\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4612\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInterpreter Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual who has translated health care information during an event or the obtaining of consent to a treatment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.13\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4613\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReview Signature\u003c/td\u003e\u003ctd\u003ethe signature of a person, device, or algorithm that has reviewed or filtered data for inclusion into the patient record. ( Examples: (1) a medical records clerk who scans a document for inclusion in the medical record, enters header information, or catalogues and classifies the data, or a combination thereof; (2) a gateway that receives data from another computer system and interprets that data or changes its format, or both, before entering it into the patient record.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.14\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4614\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSource Signature\u003c/td\u003e\u003ctd\u003ethe signature of an automated data source. (Examples: (1) the signature for an image that is generated by a device for inclusion in the patient record; (2) the signature for an ECG derived by an ECG system for inclusion in the patient record; (3) the data from a biomedical monitoring device or system that is for inclusion in the patient record.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.15\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4615\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAddendum Signature\u003c/td\u003e\u003ctd\u003ethe signature on a new amended document of an individual who has corrected, edited, or amended an original health information document. An addendum signature can either be a signature type or a signature sub-type (see 8.1). Any document with an addendum signature shall have a companion document that is the original document with its original, unaltered content, and original signatures. The original document shall be referenced via an attribute in the new document, which contains, for example, the digest of the old document. Whether the original, unaltered, document is always displayed with the addended document is a local matter, but the original, unaltered, document must remain as part of the patient record and be retrievable on demand.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.16\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4616\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eModification Signature\u003c/td\u003e\u003ctd\u003ethe signature on an original document of an individual who has generated a new amended document. This (original) document shall reference the new document via an additional signature purpose. This is the inverse of an addendum signature and provides a pointer from the original to the amended document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.17\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4617\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdministrative (Error/Edit) Signature\u003c/td\u003e\u003ctd\u003ethe signature of an individual who is certifying that the document is invalidated by an error(s), or is placed in the wrong chart. An administrative (error/edit) signature must include an addendum to the document and therefore shall have an addendum signature sub-type (see 8.1). This signature is reserved for the highest health information system administrative classification, since it is a statement that the entire document is invalidated by the error and that the document should no longer be used for patient care, although for legal reasons the document must remain part of the permanent patient record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1.2.840.10065.1.12.1.18\u003ca name\u003d\"signature-type-1.462.46840.4610065.461.4612.461.4618\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTimestamp Signature\u003c/td\u003e\u003ctd\u003ethe signature by an entity or device trusted to provide accurate timestamps. This timestamp might be provided, for example, in the signature time attribute.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "urn:iso-astm:E1762-95:2013",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.64"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SignatureTypeCodes",
+  "title": "Signature Type Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "ASTM",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.astm.org/"
+        }
+      ]
+    }
+  ],
+  "description": "The Digital Signature Purposes, an indication of the reason an entity signs a document. This is included in the signed information and can be used when determining accountability for various actions concerning the document. Examples include: author, transcriptionist/recorder, and witness.",
+  "copyright": "These codes are excerpted from ASTM Standard, E1762-95(2013) - Standard Guide for Electronic Authentication of Health Care Information, Copyright by ASTM International, 100 Barr Harbor Drive, West Conshohocken, PA 19428. Copies of this standard are available through the ASTM Web Site at www.astm.org.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/signature-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "1.2.840.10065.1.12.1.1",
+      "display": "Author\u0027s Signature",
+      "definition": "the signature of the primary or sole author of a health information document. There can be only one primary author of a health information document."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.2",
+      "display": "Coauthor\u0027s Signature",
+      "definition": "the signature of a health information document coauthor. There can be multiple coauthors of a health information document."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.3",
+      "display": "Co-participant\u0027s Signature",
+      "definition": "the signature of an individual who is a participant in the health information document but is not an author or coauthor. (Example a surgeon who is required by institutional, regulatory, or legal rules to sign an operative report, but who was not involved in the authorship of that report.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.4",
+      "display": "Transcriptionist/Recorder Signature",
+      "definition": "the signature of an individual who has transcribed a dictated document or recorded written text into a digital machine readable format."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.5",
+      "display": "Verification Signature",
+      "definition": "a signature verifying the information contained in a document. (Example a physician is required to countersign a verbal order that has previously been recorded in the medical record by a registered nurse who has carried out the verbal order.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.6",
+      "display": "Validation Signature",
+      "definition": "a signature validating a health information document for inclusion in the patient record. (Example a medical student or resident is credentialed to perform history or physical examinations and to write progress notes. The attending physician signs the history and physical examination to validate the entry for inclusion in the patient\u0027s medical record.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.7",
+      "display": "Consent Signature",
+      "definition": "the signature of an individual consenting to what is described in a health information document."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.8",
+      "display": "Signature Witness Signature",
+      "definition": "the signature of a witness to any other signature."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.9",
+      "display": "Event Witness Signature",
+      "definition": "the signature of a witness to an event. (Example the witness has observed a procedure and is attesting to this fact.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.10",
+      "display": "Identity Witness Signature",
+      "definition": "the signature of an individual who has witnessed another individual who is known to them signing a document. (Example the identity witness is a notary public.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.11",
+      "display": "Consent Witness Signature",
+      "definition": "the signature of an individual who has witnessed the health care provider counselling a patient."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.12",
+      "display": "Interpreter Signature",
+      "definition": "the signature of an individual who has translated health care information during an event or the obtaining of consent to a treatment."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.13",
+      "display": "Review Signature",
+      "definition": "the signature of a person, device, or algorithm that has reviewed or filtered data for inclusion into the patient record. ( Examples: (1) a medical records clerk who scans a document for inclusion in the medical record, enters header information, or catalogues and classifies the data, or a combination thereof; (2) a gateway that receives data from another computer system and interprets that data or changes its format, or both, before entering it into the patient record.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.14",
+      "display": "Source Signature",
+      "definition": "the signature of an automated data source. (Examples: (1) the signature for an image that is generated by a device for inclusion in the patient record; (2) the signature for an ECG derived by an ECG system for inclusion in the patient record; (3) the data from a biomedical monitoring device or system that is for inclusion in the patient record.)"
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.15",
+      "display": "Addendum Signature",
+      "definition": "the signature on a new amended document of an individual who has corrected, edited, or amended an original health information document. An addendum signature can either be a signature type or a signature sub-type (see 8.1). Any document with an addendum signature shall have a companion document that is the original document with its original, unaltered content, and original signatures. The original document shall be referenced via an attribute in the new document, which contains, for example, the digest of the old document. Whether the original, unaltered, document is always displayed with the addended document is a local matter, but the original, unaltered, document must remain as part of the patient record and be retrievable on demand."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.16",
+      "display": "Modification Signature",
+      "definition": "the signature on an original document of an individual who has generated a new amended document. This (original) document shall reference the new document via an additional signature purpose. This is the inverse of an addendum signature and provides a pointer from the original to the amended document."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.17",
+      "display": "Administrative (Error/Edit) Signature",
+      "definition": "the signature of an individual who is certifying that the document is invalidated by an error(s), or is placed in the wrong chart. An administrative (error/edit) signature must include an addendum to the document and therefore shall have an addendum signature sub-type (see 8.1). This signature is reserved for the highest health information system administrative classification, since it is a statement that the entire document is invalidated by the error and that the document should no longer be used for patient care, although for legal reasons the document must remain part of the permanent patient record."
+    },
+    {
+      "code": "1.2.840.10065.1.12.1.18",
+      "display": "Timestamp Signature",
+      "definition": "the signature by an entity or device trusted to provide accurate timestamps. This timestamp might be provided, for example, in the signature time attribute."
+    }
+  ]
+}

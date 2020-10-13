@@ -1,0 +1,122 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "medicationrequest-status-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMedication request  status  reason  codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMedicationRequest Status Reason Codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/medicationrequest-status-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ealtchoice\u003ca name\u003d\"medicationrequest-status-reason-altchoice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTry another treatment first\u003c/td\u003e\u003ctd\u003eThis therapy has been ordered as a backup to a preferred therapy. This order will be released when and if the preferred therapy is unsuccessful.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclarif\u003ca name\u003d\"medicationrequest-status-reason-clarif\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrescription requires clarification\u003c/td\u003e\u003ctd\u003eClarification is required before the order can be acted upon.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edrughigh\u003ca name\u003d\"medicationrequest-status-reason-drughigh\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrug level too high\u003c/td\u003e\u003ctd\u003eThe current level of the medication in the patient\u0027s system is too high. The medication is suspended to allow the level to subside to a safer level.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehospadm\u003ca name\u003d\"medicationrequest-status-reason-hospadm\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdmission to hospital\u003c/td\u003e\u003ctd\u003eThe patient has been admitted to a care facility and their community medications are suspended until hospital discharge.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elabint\u003ca name\u003d\"medicationrequest-status-reason-labint\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLab interference issues\u003c/td\u003e\u003ctd\u003eThe therapy would interfere with a planned lab test and the therapy is being withdrawn until the test is completed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enon-avail\u003ca name\u003d\"medicationrequest-status-reason-non-avail\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient not available\u003c/td\u003e\u003ctd\u003ePatient not available for a period of time due to a scheduled therapy, leave of absence or other reason.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epreg\u003ca name\u003d\"medicationrequest-status-reason-preg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eParent is pregnant/breast feeding\u003c/td\u003e\u003ctd\u003eThe patient is pregnant or breast feeding. The therapy will be resumed when the pregnancy is complete and the patient is no longer breastfeeding.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esalg\u003ca name\u003d\"medicationrequest-status-reason-salg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAllergy\u003c/td\u003e\u003ctd\u003eThe patient is believed to be allergic to a substance that is part of the therapy and the therapy is being temporarily withdrawn to confirm.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esddi\u003ca name\u003d\"medicationrequest-status-reason-sddi\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrug interacts with another drug\u003c/td\u003e\u003ctd\u003eThe drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esdupther\u003ca name\u003d\"medicationrequest-status-reason-sdupther\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDuplicate therapy\u003c/td\u003e\u003ctd\u003eThe drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esintol\u003ca name\u003d\"medicationrequest-status-reason-sintol\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuspected intolerance\u003c/td\u003e\u003ctd\u003eThe drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esurg\u003ca name\u003d\"medicationrequest-status-reason-surg\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient scheduled for surgery.\u003c/td\u003e\u003ctd\u003eThe drug is contraindicated for patients receiving surgery and the patient is scheduled to be admitted for surgery in the near future. The drug will be resumed when the patient has sufficiently recovered from the surgery.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewashout\u003ca name\u003d\"medicationrequest-status-reason-washout\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWaiting for old drug to wash out\u003c/td\u003e\u003ctd\u003eThe patient was previously receiving a medication contraindicated with the current medication. The current medication will remain on hold until the prior medication has been cleansed from their system.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/medicationrequest-status-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1325"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "medicationRequest Status Reason Codes",
+  "title": "Medication request  status  reason  codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "MedicationRequest Status Reason Codes",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/medicationrequest-status-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "altchoice",
+      "display": "Try another treatment first",
+      "definition": "This therapy has been ordered as a backup to a preferred therapy. This order will be released when and if the preferred therapy is unsuccessful."
+    },
+    {
+      "code": "clarif",
+      "display": "Prescription requires clarification",
+      "definition": "Clarification is required before the order can be acted upon."
+    },
+    {
+      "code": "drughigh",
+      "display": "Drug level too high",
+      "definition": "The current level of the medication in the patient\u0027s system is too high. The medication is suspended to allow the level to subside to a safer level."
+    },
+    {
+      "code": "hospadm",
+      "display": "Admission to hospital",
+      "definition": "The patient has been admitted to a care facility and their community medications are suspended until hospital discharge."
+    },
+    {
+      "code": "labint",
+      "display": "Lab interference issues",
+      "definition": "The therapy would interfere with a planned lab test and the therapy is being withdrawn until the test is completed."
+    },
+    {
+      "code": "non-avail",
+      "display": "Patient not available",
+      "definition": "Patient not available for a period of time due to a scheduled therapy, leave of absence or other reason."
+    },
+    {
+      "code": "preg",
+      "display": "Parent is pregnant/breast feeding",
+      "definition": "The patient is pregnant or breast feeding. The therapy will be resumed when the pregnancy is complete and the patient is no longer breastfeeding."
+    },
+    {
+      "code": "salg",
+      "display": "Allergy",
+      "definition": "The patient is believed to be allergic to a substance that is part of the therapy and the therapy is being temporarily withdrawn to confirm."
+    },
+    {
+      "code": "sddi",
+      "display": "Drug interacts with another drug",
+      "definition": "The drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete."
+    },
+    {
+      "code": "sdupther",
+      "display": "Duplicate therapy",
+      "definition": "The drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete."
+    },
+    {
+      "code": "sintol",
+      "display": "Suspected intolerance",
+      "definition": "The drug interacts with a short-term treatment that is more urgently required. This order will be resumed when the short-term treatment is complete."
+    },
+    {
+      "code": "surg",
+      "display": "Patient scheduled for surgery.",
+      "definition": "The drug is contraindicated for patients receiving surgery and the patient is scheduled to be admitted for surgery in the near future. The drug will be resumed when the patient has sufficiently recovered from the surgery."
+    },
+    {
+      "code": "washout",
+      "display": "Waiting for old drug to wash out",
+      "definition": "The patient was previously receiving a medication contraindicated with the current medication. The current medication will remain on hold until the prior medication has been cleansed from their system."
+    }
+  ]
+}

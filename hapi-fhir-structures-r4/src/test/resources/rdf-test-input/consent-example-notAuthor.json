@@ -1,0 +1,74 @@
+{
+  "resourceType": "Consent",
+  "id": "consent-example-notAuthor",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eThe following scenario is based on existing jurisdictional policy and are realized in existing systems in Canada. \n\tThe default policy is one of implied consent for the provision of care, so these scenarios all deal with withdrawal or withholding consent for that purpose. \n\tIn other jurisdictions, where an express consent model is used (Opt-In), these would examples would contain the phrase \u0026quot;consent to\u0026quot; rather \n\tthan \u0026quot;withhold\u0026quot; or \u0026quot;withdraw\u0026quot; consent for.\n    \u003cp\u003e\n\tspecific to use-case 5) Withhold or withdraw consent for disclosure of records that were authored by a specific organization (or service delivery location).  \n\t\u003c/p\u003e\u003cp\u003e\n    Patient \u0026quot;P. van de Heuvel\u0026quot; wishes to have all of the PHI collected at the Good Health Psychiatric Hospital \n   restricted from disclosure to every provider.\n   \u003c/p\u003e\n   \u003c/div\u003e"
+  },
+  "status": "active",
+  "scope": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/consentscope",
+        "code": "patient-privacy"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "59284-0"
+        }
+      ]
+    }
+  ],
+  "patient": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "dateTime": "2015-11-18",
+  "organization": [
+    {
+      "reference": "Organization/f001"
+    }
+  ],
+  "sourceAttachment": {
+    "title": "The terms of the consent in lawyer speak."
+  },
+  "policyRule": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "OPTIN"
+      }
+    ]
+  },
+  "provision": {
+    "actor": [
+      {
+        "role": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+              "code": "CST"
+            }
+          ]
+        },
+        "reference": {
+          "reference": "Organization/f001"
+        }
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

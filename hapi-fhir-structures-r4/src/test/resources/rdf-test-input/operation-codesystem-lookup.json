@@ -1,0 +1,293 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "CodeSystem-lookup",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConcept Look Up \u0026amp; Decomposition\u003c/h2\u003e\u003cp\u003eOPERATION: Concept Look Up \u0026amp; Decomposition\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/CodeSystem-lookup\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eGiven a code/system, or a Coding, get additional details about the concept, including definition, status, designations, and properties. One of the products of this operation is a full decomposition of a code from a structured terminology.\u003c/p\u003e\n\u003cp\u003eWhen invoking this operation, a client SHALL provide both a system and a code, either using the system+code parameters, or in the coding parameter. Other parameters are optional\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/CodeSystem/$lookup\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003ecode\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe code that is to be located. If a code is provided, a system must be provided\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003esystem\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#uri\"\u003euri\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe system for the code that is to be located\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eversion\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe version of the system, if one was provided in the source data\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003ecoding\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA coding to look up\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003edate\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe date for which the information should be returned. Normally, this is the current conditions (which is the default value) but under some circumstances, systems need to acccess this information as it would have been in the past. A typical example of this would be where code selection is constrained to the set of codes that were available when the patient was treated, not when the record is being edited. Note that which date is appropriate is a matter for implementation policy.\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003edisplayLanguage\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe requested language for display (see $expand.displayLanguage)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eproperty\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA property that the client wishes to be returned in the output. If no properties are specified, the server chooses what to return. The following properties are defined for all code systems: url, name, version (code system info) and code information: display, definition, designation, parent and child, and for designations, lang.X where X is a designation language code. Some of the properties are returned explicit in named parameters (when the names match), and the rest (except for lang.X) in the property parameter group\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ename\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA display name for the code system\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eversion\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe version that these details are based on\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003edisplay\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe preferred display for this concept\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003edesignation\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eAdditional representations for this concept\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003edesignation.language\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe language this designation is defined for\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003edesignation.use\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA code that details how this designation would be used\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003edesignation.value\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe text value for this designation\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eOne or more properties that contain additional information about the code, including status. For complex terminologies (e.g. SNOMED CT, LOINC, medications), these properties serve to decompose the code\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the property returned\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.value\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#decimal\"\u003edecimal\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe value of the property returned\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.description\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eHuman Readable representation of the property value (e.g. display for a code)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.subproperty\u003c/td\u003e\u003ctd\u003e0..*\u003c/td\u003e\u003ctd\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eNested Properties (mainly used for SNOMED CT decomposition, for relationship Groups)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.subproperty.code\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIdentifies the sub-property returned\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.subproperty.value\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#code\"\u003ecode\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#Coding\"\u003eCoding\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#integer\"\u003einteger\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#dateTime\"\u003edateTime\u003c/a\u003e | \u003ca href\u003d\"datatypes.html#decimal\"\u003edecimal\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe value of the sub-property returned\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eproperty.subproperty.description\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#string\"\u003estring\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eHuman Readable representation of the property value (e.g. display for a code)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eNote that the $lookup operation is more than just a code system search  - the server finds the concept, and gathers the return information from the underlying code system definitions.\u003c/p\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.1"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/CodeSystem-lookup",
+  "version": "4.0.1",
+  "name": "Concept Look Up \u0026 Decomposition",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Given a code/system, or a Coding, get additional details about the concept, including definition, status, designations, and properties. One of the products of this operation is a full decomposition of a code from a structured terminology.\n\nWhen invoking this operation, a client SHALL provide both a system and a code, either using the system+code parameters, or in the coding parameter. Other parameters are optional",
+  "code": "lookup",
+  "comment": "Note that the $lookup operation is more than just a code system search  - the server finds the concept, and gathers the return information from the underlying code system definitions.",
+  "resource": [
+    "CodeSystem"
+  ],
+  "system": false,
+  "type": true,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "code",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The code that is to be located. If a code is provided, a system must be provided",
+      "type": "code"
+    },
+    {
+      "name": "system",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The system for the code that is to be located",
+      "type": "uri"
+    },
+    {
+      "name": "version",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The version of the system, if one was provided in the source data",
+      "type": "string"
+    },
+    {
+      "name": "coding",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "A coding to look up",
+      "type": "Coding"
+    },
+    {
+      "name": "date",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The date for which the information should be returned. Normally, this is the current conditions (which is the default value) but under some circumstances, systems need to acccess this information as it would have been in the past. A typical example of this would be where code selection is constrained to the set of codes that were available when the patient was treated, not when the record is being edited. Note that which date is appropriate is a matter for implementation policy.",
+      "type": "dateTime"
+    },
+    {
+      "name": "displayLanguage",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "The requested language for display (see $expand.displayLanguage)",
+      "type": "code"
+    },
+    {
+      "name": "property",
+      "use": "in",
+      "min": 0,
+      "max": "*",
+      "documentation": "A property that the client wishes to be returned in the output. If no properties are specified, the server chooses what to return. The following properties are defined for all code systems: url, name, version (code system info) and code information: display, definition, designation, parent and child, and for designations, lang.X where X is a designation language code. Some of the properties are returned explicit in named parameters (when the names match), and the rest (except for lang.X) in the property parameter group",
+      "type": "code"
+    },
+    {
+      "name": "name",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "A display name for the code system",
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "The version that these details are based on",
+      "type": "string"
+    },
+    {
+      "name": "display",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "The preferred display for this concept",
+      "type": "string"
+    },
+    {
+      "name": "designation",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "documentation": "Additional representations for this concept",
+      "part": [
+        {
+          "name": "language",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "The language this designation is defined for",
+          "type": "code"
+        },
+        {
+          "name": "use",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "A code that details how this designation would be used",
+          "type": "Coding"
+        },
+        {
+          "name": "value",
+          "use": "out",
+          "min": 1,
+          "max": "1",
+          "documentation": "The text value for this designation",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "property",
+      "use": "out",
+      "min": 0,
+      "max": "*",
+      "documentation": "One or more properties that contain additional information about the code, including status. For complex terminologies (e.g. SNOMED CT, LOINC, medications), these properties serve to decompose the code",
+      "part": [
+        {
+          "name": "code",
+          "use": "out",
+          "min": 1,
+          "max": "1",
+          "documentation": "Identifies the property returned",
+          "type": "code"
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "code"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "Coding"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "string"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "integer"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "boolean"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "dateTime"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+              "valueUri": "decimal"
+            }
+          ],
+          "name": "value",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "The value of the property returned",
+          "type": "Element"
+        },
+        {
+          "name": "description",
+          "use": "out",
+          "min": 0,
+          "max": "1",
+          "documentation": "Human Readable representation of the property value (e.g. display for a code)",
+          "type": "string"
+        },
+        {
+          "name": "subproperty",
+          "use": "out",
+          "min": 0,
+          "max": "*",
+          "documentation": "Nested Properties (mainly used for SNOMED CT decomposition, for relationship Groups)",
+          "part": [
+            {
+              "name": "code",
+              "use": "out",
+              "min": 1,
+              "max": "1",
+              "documentation": "Identifies the sub-property returned",
+              "type": "code"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "code"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "Coding"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "string"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "integer"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "boolean"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "dateTime"
+                },
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/operationdefinition-allowed-type",
+                  "valueUri": "decimal"
+                }
+              ],
+              "name": "value",
+              "use": "out",
+              "min": 1,
+              "max": "1",
+              "documentation": "The value of the sub-property returned",
+              "type": "Element"
+            },
+            {
+              "name": "description",
+              "use": "out",
+              "min": 0,
+              "max": "1",
+              "documentation": "Human Readable representation of the property value (e.g. display for a code)",
+              "type": "string"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

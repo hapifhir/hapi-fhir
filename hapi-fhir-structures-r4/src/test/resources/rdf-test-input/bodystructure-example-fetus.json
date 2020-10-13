@@ -1,0 +1,37 @@
+{
+  "resourceType": "BodyStructure",
+  "id": "fetus",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: fetus\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 12345\u003c/p\u003e\u003cp\u003e\u003cb\u003elocation\u003c/b\u003e: Fetus \u003cspan\u003e(Details : {SNOMED CT code \u002783418008\u0027 \u003d \u0027Fetus\u0027, given as \u0027Entire fetus (body structure)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: EDD 1/1/2017 confirmation by LMP\u003c/p\u003e\u003cp\u003e\u003cb\u003epatient\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://goodhealth.org/bodystructure/identifiers",
+      "value": "12345"
+    }
+  ],
+  "location": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "83418008",
+        "display": "Entire fetus (body structure)"
+      }
+    ],
+    "text": "Fetus"
+  },
+  "description": "EDD 1/1/2017 confirmation by LMP",
+  "patient": {
+    "reference": "Patient/example"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

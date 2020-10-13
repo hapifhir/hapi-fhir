@@ -1,0 +1,53 @@
+{
+  "resourceType": "ValueSet",
+  "id": "provider-taxonomy",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003e\n        This value set includes all possible NUCC Health Care Provider Taxonomy codes.\n      \u003c/p\u003e\n      \u003cp\u003e \n        The NUCC Health Care Provider Taxonomy codes are copyright © 2017, American Medical Association.\n     \u003c/p\u003e\n    \n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/provider-taxonomy",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.51"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "Provider Taxonomy Codes",
+  "title": "ProviderTaxonomy",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "NUCC Healthcare Provider Taxonomy codes",
+  "copyright": "This value set includes content from NUCC Health Care Provider Taxonomy Code Set for providers which is copyright © 2016+ American Medical Association. For commercial use, including sales or licensing, a license must be obtained",
+  "compose": {
+    "include": [
+      {
+        "system": "http://nucc.org/provider-taxonomy"
+      }
+    ]
+  }
+}

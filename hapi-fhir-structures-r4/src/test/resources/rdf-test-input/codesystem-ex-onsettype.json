@@ -1,0 +1,59 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "ex-onsettype",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExample Onset Type (Reason) Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes example Onset Type codes which are used to identify the event for which the onset, starting date, is required.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/ex-onsettype defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elxm\u003ca name\u003d\"ex-onsettype-lxm\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLast Exam\u003c/td\u003e\u003ctd\u003eDate of last examination.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esym\u003ca name\u003d\"ex-onsettype-sym\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStart of Symptoms\u003c/td\u003e\u003ctd\u003eDate when symptoms were first noticed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elmn\u003ca name\u003d\"ex-onsettype-lmn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLast Menstruation\u003c/td\u003e\u003ctd\u003eStart date of last menstruation.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ex-onsettype",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.579"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ExampleOnsetType(Reason)Codes",
+  "title": "Example Onset Type (Reason) Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes example Onset Type codes which are used to identify the event for which the onset, starting date, is required.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/ex-onsettype",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "lxm",
+      "display": "Last Exam",
+      "definition": "Date of last examination."
+    },
+    {
+      "code": "sym",
+      "display": "Start of Symptoms",
+      "definition": "Date when symptoms were first noticed."
+    },
+    {
+      "code": "lmn",
+      "display": "Last Menstruation",
+      "definition": "Start date of last menstruation."
+    }
+  ]
+}

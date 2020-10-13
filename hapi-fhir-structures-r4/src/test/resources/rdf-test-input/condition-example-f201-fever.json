@@ -1,0 +1,119 @@
+{
+  "resourceType": "Condition",
+  "id": "f201",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f201\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 12345\u003c/p\u003e\u003cp\u003e\u003cb\u003eclinicalStatus\u003c/b\u003e: Resolved \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-clinical code \u0027resolved\u0027 \u003d \u0027Resolved)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003everificationStatus\u003c/b\u003e: Confirmed \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-ver-status code \u0027confirmed\u0027 \u003d \u0027Confirmed)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Problem \u003cspan\u003e(Details : {SNOMED CT code \u002755607006\u0027 \u003d \u0027Problem\u0027, given as \u0027Problem\u0027}; {http://terminology.hl7.org/CodeSystem/condition-category code \u0027problem-list-item\u0027 \u003d \u0027Problem List Item)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eseverity\u003c/b\u003e: Mild \u003cspan\u003e(Details : {SNOMED CT code \u0027255604002\u0027 \u003d \u0027Mild\u0027, given as \u0027Mild\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Fever \u003cspan\u003e(Details : {SNOMED CT code \u0027386661006\u0027 \u003d \u0027Fever\u0027, given as \u0027Fever\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: Entire body as a whole \u003cspan\u003e(Details : {SNOMED CT code \u002738266002\u0027 \u003d \u0027Body as a whole\u0027, given as \u0027Entire body as a whole\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eEncounter/f201\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eonset\u003c/b\u003e: 02/04/2013\u003c/p\u003e\u003cp\u003e\u003cb\u003eabatement\u003c/b\u003e: around April 9, 2013\u003c/p\u003e\u003cp\u003e\u003cb\u003erecordedDate\u003c/b\u003e: 04/04/2013\u003c/p\u003e\u003cp\u003e\u003cb\u003erecorder\u003c/b\u003e: \u003ca\u003ePractitioner/f201\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003easserter\u003c/b\u003e: \u003ca\u003ePractitioner/f201\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eEvidences\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDetail\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003edegrees C \u003cspan\u003e(Details : {SNOMED CT code \u0027258710007\u0027 \u003d \u0027degrees C\u0027, given as \u0027degrees C\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003eTemperature\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "value": "12345"
+    }
+  ],
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "resolved"
+      }
+    ]
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+        "code": "confirmed"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "55607006",
+          "display": "Problem"
+        },
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "problem-list-item"
+        }
+      ]
+    }
+  ],
+  "severity": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "255604002",
+        "display": "Mild"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "386661006",
+        "display": "Fever"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "38266002",
+          "display": "Entire body as a whole"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "encounter": {
+    "reference": "Encounter/f201"
+  },
+  "onsetDateTime": "2013-04-02",
+  "abatementString": "around April 9, 2013",
+  "recordedDate": "2013-04-04",
+  "recorder": {
+    "reference": "Practitioner/f201"
+  },
+  "asserter": {
+    "reference": "Practitioner/f201"
+  },
+  "evidence": [
+    {
+      "code": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "258710007",
+              "display": "degrees C"
+            }
+          ]
+        }
+      ],
+      "detail": [
+        {
+          "reference": "Observation/f202",
+          "display": "Temperature"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,163 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "data-absent-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDataAbsentReason\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eUsed to specify why the normally expected content of the data element is missing.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/data-absent-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eComments\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"data-absent-reason-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe value is expected to exist but is not known.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  asked-unknown\u003ca name\u003d\"data-absent-reason-asked-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAsked But Unknown\u003c/td\u003e\u003ctd\u003eThe source was asked but does not know the value.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  temp-unknown\u003ca name\u003d\"data-absent-reason-temp-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTemporarily Unknown\u003c/td\u003e\u003ctd\u003eThere is reason to expect (from the workflow) that the value may become known.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  not-asked\u003ca name\u003d\"data-absent-reason-not-asked\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Asked\u003c/td\u003e\u003ctd\u003eThe workflow didn\u0027t lead to this value being known.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  asked-declined\u003ca name\u003d\"data-absent-reason-asked-declined\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAsked But Declined\u003c/td\u003e\u003ctd\u003eThe source was asked but declined to answer.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emasked\u003ca name\u003d\"data-absent-reason-masked\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMasked\u003c/td\u003e\u003ctd\u003eThe information is not available due to security, privacy or related reasons.\u003c/td\u003e\u003ctd\u003eUsing \u0026quot;masked\u0026quot; may be breach of security or confidentiality, but there are times when its use is required to support alternate workflows for gaining access to denied information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-applicable\u003ca name\u003d\"data-absent-reason-not-applicable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Applicable\u003c/td\u003e\u003ctd\u003eThere is no proper value for this element (e.g. last menstrual period for a male).\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunsupported\u003ca name\u003d\"data-absent-reason-unsupported\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnsupported\u003c/td\u003e\u003ctd\u003eThe source system wasn\u0027t capable of supporting this element.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eas-text\u003ca name\u003d\"data-absent-reason-as-text\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAs Text\u003c/td\u003e\u003ctd\u003eThe content of the data is represented in the resource narrative.\u003c/td\u003e\u003ctd\u003eIt may be linked by internal references (e.g. xml:id). This usually implies that the value could not be represented in the correct format - this may be due to system limitations, or this particular data value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eerror\u003ca name\u003d\"data-absent-reason-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eError\u003c/td\u003e\u003ctd\u003eSome system or workflow process error means that the information is not available.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  not-a-number\u003ca name\u003d\"data-absent-reason-not-a-number\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot a Number (NaN)\u003c/td\u003e\u003ctd\u003eThe numeric value is undefined or unrepresentable due to a floating point processing error.\u003c/td\u003e\u003ctd\u003eThis is sometimes an output value from measuring devices.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  negative-infinity\u003ca name\u003d\"data-absent-reason-negative-infinity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNegative Infinity (NINF)\u003c/td\u003e\u003ctd\u003eThe numeric value is excessively low and unrepresentable due to a floating point processing error.\u003c/td\u003e\u003ctd\u003eThis is sometimes an output value from measuring devices.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  positive-infinity\u003ca name\u003d\"data-absent-reason-positive-infinity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePositive Infinity (PINF)\u003c/td\u003e\u003ctd\u003eThe numeric value is excessively high and unrepresentable due to a floating point processing error.\u003c/td\u003e\u003ctd\u003eThis is sometimes an output value from measuring devices.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-performed\u003ca name\u003d\"data-absent-reason-not-performed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Performed\u003c/td\u003e\u003ctd\u003eThe value is not available because the observation procedure (test, etc.) was not performed.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-permitted\u003ca name\u003d\"data-absent-reason-not-permitted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Permitted\u003c/td\u003e\u003ctd\u003eThe value is not permitted in this context (e.g. due to profiles, or the base data types).\u003c/td\u003e\u003ctd\u003eThis is most often associated with required bindings that do not include the actual code used, but may be used with other data types.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1048"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DataAbsentReason",
+  "title": "DataAbsentReason",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "Used to specify why the normally expected content of the data element is missing.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/data-absent-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The value is expected to exist but is not known.",
+      "concept": [
+        {
+          "code": "asked-unknown",
+          "display": "Asked But Unknown",
+          "definition": "The source was asked but does not know the value."
+        },
+        {
+          "code": "temp-unknown",
+          "display": "Temporarily Unknown",
+          "definition": "There is reason to expect (from the workflow) that the value may become known."
+        },
+        {
+          "code": "not-asked",
+          "display": "Not Asked",
+          "definition": "The workflow didn\u0027t lead to this value being known."
+        },
+        {
+          "code": "asked-declined",
+          "display": "Asked But Declined",
+          "definition": "The source was asked but declined to answer."
+        }
+      ]
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "Using \"masked\" may be breach of security or confidentiality, but there are times when its use is required to support alternate workflows for gaining access to denied information."
+        }
+      ],
+      "code": "masked",
+      "display": "Masked",
+      "definition": "The information is not available due to security, privacy or related reasons."
+    },
+    {
+      "code": "not-applicable",
+      "display": "Not Applicable",
+      "definition": "There is no proper value for this element (e.g. last menstrual period for a male)."
+    },
+    {
+      "code": "unsupported",
+      "display": "Unsupported",
+      "definition": "The source system wasn\u0027t capable of supporting this element."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "It may be linked by internal references (e.g. xml:id). This usually implies that the value could not be represented in the correct format - this may be due to system limitations, or this particular data value."
+        }
+      ],
+      "code": "as-text",
+      "display": "As Text",
+      "definition": "The content of the data is represented in the resource narrative."
+    },
+    {
+      "code": "error",
+      "display": "Error",
+      "definition": "Some system or workflow process error means that the information is not available.",
+      "concept": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+              "valueString": "This is sometimes an output value from measuring devices."
+            }
+          ],
+          "code": "not-a-number",
+          "display": "Not a Number (NaN)",
+          "definition": "The numeric value is undefined or unrepresentable due to a floating point processing error."
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+              "valueString": "This is sometimes an output value from measuring devices."
+            }
+          ],
+          "code": "negative-infinity",
+          "display": "Negative Infinity (NINF)",
+          "definition": "The numeric value is excessively low and unrepresentable due to a floating point processing error."
+        },
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+              "valueString": "This is sometimes an output value from measuring devices."
+            }
+          ],
+          "code": "positive-infinity",
+          "display": "Positive Infinity (PINF)",
+          "definition": "The numeric value is excessively high and unrepresentable due to a floating point processing error."
+        }
+      ]
+    },
+    {
+      "code": "not-performed",
+      "display": "Not Performed",
+      "definition": "The value is not available because the observation procedure (test, etc.) was not performed."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "This is most often associated with required bindings that do not include the actual code used, but may be used with other data types."
+        }
+      ],
+      "code": "not-permitted",
+      "display": "Not Permitted",
+      "definition": "The value is not permitted in this context (e.g. due to profiles, or the base data types)."
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "resourceType": "ValueSet",
+  "id": "medication-codes",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\n\t\t\u003cp\u003eThe value set to instantiate this attribute should be drawn from a terminologically robust code system that consists of or contains medictation concepts.\u003c/p\u003e\n\t\t\t\t\t\u003cp\u003ePossible sources include:\u003c/p\u003e\n\t\t\t\n\t\t\u003cul\u003e\n\n\t\t\t\u003cli\u003eInclude codes from http://snomed.info/sct where concept  is-a  410942007\u003c/li\u003e\n\t\t\t\t\n\t\t\t\u003cli\u003eInclude codes from http://snomed.info/sct where concept  is-a  373873005\u003c/li\u003e\n\t\t\t\n\t\t\t\u003cli\u003eInclude codes from http://snomed.info/sct where concept  is-a  106181007\u003c/li\u003e\n\t\t\t\n\t\t\u003c/ul\u003e\n\t\t\t\n\t\t\u003cp\u003eSNOMED CT is being used here as the example terminology.\u003c/p\u003e\n\t\t\t\n\t\t\u003cp\u003eThis value set includes content from SNOMED CT, which is copyright © 2002 International Health Terminology Standards Development Organisation (IHTSDO), and distributed by agreement between IHTSDO and HL7. Implementer use of SNOMED CT is not covered by this agreement.\u003c/p\u003e\n\n\t\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/medication-codes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.375"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SNOMEDCTMedicationCodes",
+  "title": "SNOMED CT Medication Codes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes all drug or medicament substance codes and all pharmaceutical/biologic products from SNOMED CT - provided as an exemplar value set.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "410942007"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "373873005"
+          }
+        ]
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "filter": [
+          {
+            "property": "concept",
+            "op": "is-a",
+            "value": "106181007"
+          }
+        ]
+      }
+    ]
+  }
+}

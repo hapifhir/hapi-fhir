@@ -1,0 +1,36 @@
+{
+  "resourceType": "MedicinalProductContraindication",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003edisease\u003c/b\u003e: Hepatic disease associated with coagulopathy and clinically relevant bleeding risk \u003cspan\u003e(Details : {http://ema.europa.eu/example/contraindicationsasdisease-symptom-procedure code \u0027Coagulopathiesandbleedingdiatheses(exclthrombocytopenic)\u0027 \u003d \u0027Coagulopathiesandbleedingdiatheses(exclthrombocytopenic))\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecomorbidity\u003c/b\u003e: Hepaticdisease \u003cspan\u003e(Details : {http://ema.europa.eu/example/comorbidity code \u0027Hepaticdisease\u0027 \u003d \u0027Hepaticdisease)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "disease": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/contraindicationsasdisease-symptom-procedure",
+        "code": "Coagulopathiesandbleedingdiatheses(exclthrombocytopenic)"
+      }
+    ],
+    "text": "Hepatic disease associated with coagulopathy and clinically relevant bleeding risk"
+  },
+  "comorbidity": [
+    {
+      "coding": [
+        {
+          "system": "http://ema.europa.eu/example/comorbidity",
+          "code": "Hepaticdisease"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

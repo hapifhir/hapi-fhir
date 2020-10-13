@@ -1,0 +1,97 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "insuranceplan-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eInsurance plan type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate a type of insurance plan.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/insurance-plan-type defines many codes, of which the following are a subset:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedical\u003ca name\u003d\"insuranceplan-type-medical\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edental\u003ca name\u003d\"insuranceplan-type-dental\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDental\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emental\u003ca name\u003d\"insuranceplan-type-mental\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMental Health\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubst-ab\u003ca name\u003d\"insuranceplan-type-subst-ab\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubstance Abuse\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evision\u003ca name\u003d\"insuranceplan-type-vision\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVision\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDrug\u003ca name\u003d\"insuranceplan-type-Drug\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDrug\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eshort-term\u003ca name\u003d\"insuranceplan-type-short-term\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eShort Term\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elong-term\u003ca name\u003d\"insuranceplan-type-long-term\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLong Term Care\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehospice\u003ca name\u003d\"insuranceplan-type-hospice\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHospice\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehome\u003ca name\u003d\"insuranceplan-type-home\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHome Health\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/insurance-plan-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1261"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "InsurancePlanType",
+  "title": "Insurance plan type",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate a type of insurance plan.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/insuranceplan-type",
+  "content": "fragment",
+  "concept": [
+    {
+      "code": "medical",
+      "display": "Medical"
+    },
+    {
+      "code": "dental",
+      "display": "Dental"
+    },
+    {
+      "code": "mental",
+      "display": "Mental Health"
+    },
+    {
+      "code": "subst-ab",
+      "display": "Substance Abuse"
+    },
+    {
+      "code": "vision",
+      "display": "Vision"
+    },
+    {
+      "code": "Drug",
+      "display": "Drug"
+    },
+    {
+      "code": "short-term",
+      "display": "Short Term"
+    },
+    {
+      "code": "long-term",
+      "display": "Long Term Care"
+    },
+    {
+      "code": "hospice",
+      "display": "Hospice"
+    },
+    {
+      "code": "home",
+      "display": "Home Health"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "resourceType": "ValueSet",
+  "id": "example-intensional",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eValue set \u0026quot;LOINC Codes for Cholesterol\u0026quot;: This is an example value set that includes \n        all the  codes for serum cholesterol from LOINC v2.36.\u003c/p\u003e\n      \u003cp\u003eDeveloped by: FHIR project team (example)\u003c/p\u003e\n      \u003cp\u003ePublished for testing on 13-June 2012\u003c/p\u003e\n      \u003cp\u003eThis value set includes all the LOINC codes in LOINC Part Concept Cholesterol | Bld-Ser-Plas (LP43571-6), except for 5932-9 Cholesterol [Presence] in Blood by Test strip\u003c/p\u003e\n      \u003cp\u003eThis content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use\u003c/p\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/example-intensional",
+  "identifier": [
+    {
+      "system": "http://acme.com/identifiers/valuesets",
+      "value": "loinc-cholesterol-ext"
+    }
+  ],
+  "version": "20150622",
+  "name": "LOINC Codes for Cholesterol in Serum/Plasma",
+  "status": "draft",
+  "experimental": true,
+  "date": "2015-06-22",
+  "publisher": "HL7 International",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This is an example value set that includes all the LOINC codes for serum/plasma cholesterol from v2.36.",
+  "copyright": "This content from LOINCÂ® is copyright Â© 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "filter": [
+          {
+            "property": "parent",
+            "op": "\u003d",
+            "value": "LP43571-6"
+          }
+        ]
+      }
+    ],
+    "exclude": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "5932-9",
+            "display": "Cholesterol [Presence] in Blood by Test strip"
+          }
+        ]
+      }
+    ]
+  }
+}

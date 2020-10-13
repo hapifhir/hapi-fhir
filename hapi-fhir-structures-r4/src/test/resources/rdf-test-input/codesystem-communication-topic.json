@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "communication-topic",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCommunicationTopic\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes describing the purpose or content of the communication.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/communication-topic defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprescription-refill-request\u003ca name\u003d\"communication-topic-prescription-refill-request\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrescription Refill Request\u003c/td\u003e\u003ctd\u003eThe purpose or content of the communication is a prescription refill request.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprogress-update\u003ca name\u003d\"communication-topic-progress-update\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProgress Update\u003c/td\u003e\u003ctd\u003eThe purpose or content of the communication is a progress update.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereport-labs\u003ca name\u003d\"communication-topic-report-labs\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReport Labs\u003c/td\u003e\u003ctd\u003eThe purpose or content of the communication is to report labs.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eappointment-reminder\u003ca name\u003d\"communication-topic-appointment-reminder\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppointment Reminder\u003c/td\u003e\u003ctd\u003eThe purpose or content of the communication is an appointment reminder.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephone-consult\u003ca name\u003d\"communication-topic-phone-consult\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhone Consult\u003c/td\u003e\u003ctd\u003eThe purpose or content of the communication is a phone consult.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esummary-report\u003ca name\u003d\"communication-topic-summary-report\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSummary Report\u003c/td\u003e\u003ctd\u003eThe purpose or content of the communication is a summary report.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/communication-topic",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1078"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CommunicationTopic",
+  "title": "CommunicationTopic",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes describing the purpose or content of the communication.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/communication-topic",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "prescription-refill-request",
+      "display": "Prescription Refill Request",
+      "definition": "The purpose or content of the communication is a prescription refill request."
+    },
+    {
+      "code": "progress-update",
+      "display": "Progress Update",
+      "definition": "The purpose or content of the communication is a progress update."
+    },
+    {
+      "code": "report-labs",
+      "display": "Report Labs",
+      "definition": "The purpose or content of the communication is to report labs."
+    },
+    {
+      "code": "appointment-reminder",
+      "display": "Appointment Reminder",
+      "definition": "The purpose or content of the communication is an appointment reminder."
+    },
+    {
+      "code": "phone-consult",
+      "display": "Phone Consult",
+      "definition": "The purpose or content of the communication is a phone consult."
+    },
+    {
+      "code": "summary-report",
+      "display": "Summary Report",
+      "definition": "The purpose or content of the communication is a summary report."
+    }
+  ]
+}

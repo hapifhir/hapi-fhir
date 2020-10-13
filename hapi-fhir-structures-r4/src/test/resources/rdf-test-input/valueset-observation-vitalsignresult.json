@@ -1,0 +1,94 @@
+{
+  "resourceType": "ValueSet",
+  "id": "observation-vitalsignresult",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eVital Signs\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set indicates the allowed vital sign result types.   The LOINC code for Vitals Signs panel (85353-1) is a grouping structure for a set of vital signs and includes related links (with type\u003dhas-member) to the Observations in this set (e.g. respiratory rate, heart rate, BP).  The Blood pressure panel (85354-9) is used to group the component observations Systolic blood pressure (8480-6) and Diastolic blood pressure (8462-4).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://loinc.org\"\u003e\u003ccode\u003ehttp://loinc.org\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/85353-1.html\"\u003e85353-1\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVital signs, weight, height, head circumference, oxygen saturation \u0026amp; BMI panel\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/9279-1.html\"\u003e9279-1\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRespiratory rate\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8867-4.html\"\u003e8867-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHeart rate\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/2708-6.html\"\u003e2708-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOxygen saturation in Arterial blood\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8310-5.html\"\u003e8310-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBody temperature\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8302-2.html\"\u003e8302-2\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBody height\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/9843-4.html\"\u003e9843-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHead Occipital-frontal circumference\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/29463-7.html\"\u003e29463-7\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBody weight\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/39156-5.html\"\u003e39156-5\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBody mass index (BMI) [Ratio]\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/85354-9.html\"\u003e85354-9\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBlood pressure panel with all children optional\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8480-6.html\"\u003e8480-6\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSystolic blood pressure\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8462-4.html\"\u003e8462-4\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiastolic blood pressure\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"http://details.loinc.org/LOINC/8478-0.html\"\u003e8478-0\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMean blood pressure\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/observation-vitalsignresult",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.3.88.12.80.62"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "VitalSigns",
+  "title": "Vital Signs",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set indicates the allowed vital sign result types.   The LOINC code for Vitals Signs panel (85353-1) is a grouping structure for a set of vital signs and includes related links (with type\u003dhas-member) to the Observations in this set (e.g. respiratory rate, heart rate, BP).  The Blood pressure panel (85354-9) is used to group the component observations Systolic blood pressure (8480-6) and Diastolic blood pressure (8462-4).",
+  "copyright": "This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at http://loinc.org/terms-of-use",
+  "compose": {
+    "include": [
+      {
+        "system": "http://loinc.org",
+        "concept": [
+          {
+            "code": "85353-1"
+          },
+          {
+            "code": "9279-1"
+          },
+          {
+            "code": "8867-4"
+          },
+          {
+            "code": "2708-6"
+          },
+          {
+            "code": "8310-5"
+          },
+          {
+            "code": "8302-2"
+          },
+          {
+            "code": "9843-4"
+          },
+          {
+            "code": "29463-7"
+          },
+          {
+            "code": "39156-5"
+          },
+          {
+            "code": "85354-9"
+          },
+          {
+            "code": "8480-6"
+          },
+          {
+            "code": "8462-4"
+          },
+          {
+            "code": "8478-0"
+          }
+        ]
+      }
+    ]
+  }
+}

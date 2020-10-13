@@ -2347,7 +2347,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals(21, response.getEntry().size());
+		assertEquals(10, response.getEntry().size());
+		assertEquals(null, response.getTotalElement().getValue());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		response = ourClient.fetchResourceFromUrl(Bundle.class, response.getLink("next").getUrl());
+
+		assertEquals(10, response.getEntry().size());
+		assertEquals(null, response.getTotalElement().getValue());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		response = ourClient.fetchResourceFromUrl(Bundle.class, response.getLink("next").getUrl());
+
+		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotalElement().getValue().intValue());
 		assertEquals(null, response.getLink("next"));
 

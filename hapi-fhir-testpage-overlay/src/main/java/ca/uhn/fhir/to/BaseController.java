@@ -668,7 +668,6 @@ public class BaseController {
 			Header[] requestHeaders = lastRequest != null ? applyHeaderFilters(lastRequest.getAllHeaders()) : new Header[0];
 			Header[] responseHeaders = lastResponse != null ? applyHeaderFilters(lastResponse.getAllHeaders()) : new Header[0];
 
-			theModelMap.put("outcomeDescription", outcomeDescription);
 			theModelMap.put("resultDescription", resultDescription.toString());
 			theModelMap.put("action", action);
 			theModelMap.put("ri", riBundle instanceof IAnyResource);

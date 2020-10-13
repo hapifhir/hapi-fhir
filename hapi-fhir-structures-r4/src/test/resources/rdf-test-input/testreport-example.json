@@ -1,0 +1,164 @@
+{
+  "resourceType": "TestReport",
+  "id": "testreport-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: testreport-example\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: urn:oid:1.3.6.1.4.1.21367.2005.3.7.9878\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: TestReport Example for TestScript Example\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: completed\u003c/p\u003e\u003cp\u003e\u003cb\u003etestScript\u003c/b\u003e: \u003ca\u003eTestScript/testscript-example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eresult\u003c/b\u003e: pass\u003c/p\u003e\u003cp\u003e\u003cb\u003escore\u003c/b\u003e: 100.0\u003c/p\u003e\u003cp\u003e\u003cb\u003etester\u003c/b\u003e: HL7 Execution Engine\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 07/10/2016 8:25:34 AM\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eparticipant\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: test-engine\u003c/p\u003e\u003cp\u003e\u003cb\u003euri\u003c/b\u003e: \u003ca\u003ehttp://projectcrucible.org\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: Crucible\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eparticipant\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: server\u003c/p\u003e\u003cp\u003e\u003cb\u003euri\u003c/b\u003e: \u003ca\u003ehttp://fhir3.healthintersections.com.au/open\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edisplay\u003c/b\u003e: HealthIntersections STU3\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003esetup\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResult\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMessage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDetail\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003epass\u003c/td\u003e\u003ctd\u003eDELETE Patient\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://projectcrucible.org/permalink/1\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResult\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMessage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDetail\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003epass\u003c/td\u003e\u003ctd\u003eHTTP 204\u003c/td\u003e\u003ctd\u003ehttp://projectcrucible.org/permalink/1\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResult\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMessage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDetail\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003epass\u003c/td\u003e\u003ctd\u003ePOST Patient/fixture-patient-create\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://projectcrucible.org/permalink/1\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResult\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMessage\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDetail\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003epass\u003c/td\u003e\u003ctd\u003eHTTP 201\u003c/td\u003e\u003ctd\u003ehttp://projectcrucible.org/permalink/1\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003etest\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Read Patient\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Read a Patient and validate response.\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eteardown\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:oid:1.3.6.1.4.1.21367.2005.3.7.9878"
+  },
+  "name": "TestReport Example for TestScript Example",
+  "status": "completed",
+  "testScript": {
+    "reference": "TestScript/testscript-example"
+  },
+  "result": "pass",
+  "score": 100.0,
+  "tester": "HL7 Execution Engine",
+  "issued": "2016-10-07T08:25:34-05:00",
+  "participant": [
+    {
+      "type": "test-engine",
+      "uri": "http://projectcrucible.org",
+      "display": "Crucible"
+    },
+    {
+      "type": "server",
+      "uri": "http://fhir3.healthintersections.com.au/open",
+      "display": "HealthIntersections STU3"
+    }
+  ],
+  "setup": {
+    "action": [
+      {
+        "operation": {
+          "result": "pass",
+          "message": "DELETE Patient",
+          "detail": "http://projectcrucible.org/permalink/1"
+        }
+      },
+      {
+        "assert": {
+          "result": "pass",
+          "message": "HTTP 204",
+          "detail": "http://projectcrucible.org/permalink/1"
+        }
+      },
+      {
+        "operation": {
+          "result": "pass",
+          "message": "POST Patient/fixture-patient-create",
+          "detail": "http://projectcrucible.org/permalink/1"
+        }
+      },
+      {
+        "assert": {
+          "result": "pass",
+          "message": "HTTP 201",
+          "detail": "http://projectcrucible.org/permalink/1"
+        }
+      }
+    ]
+  },
+  "test": [
+    {
+      "id": "01-ReadPatient",
+      "name": "Read Patient",
+      "description": "Read a Patient and validate response.",
+      "action": [
+        {
+          "operation": {
+            "result": "pass",
+            "message": "GET Patient/fixture-patient-create",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "HTTP 200",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Last-Modified Present",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Response is Patient",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Response validates",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Patient.name.family \u0027Chalmers\u0027",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Patient.name.given \u0027Peter\u0027",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Patient.name.family \u0027Chalmers\u0027",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Patient.name.family \u0027Chalmers\u0027",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        },
+        {
+          "assert": {
+            "result": "pass",
+            "message": "Patient expected values.",
+            "detail": "http://projectcrucible.org/permalink/2"
+          }
+        }
+      ]
+    }
+  ],
+  "teardown": {
+    "action": [
+      {
+        "operation": {
+          "result": "pass",
+          "message": "DELETE Patient/fixture-patient-create.",
+          "detail": "http://projectcrucible.org/permalink/3"
+        }
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

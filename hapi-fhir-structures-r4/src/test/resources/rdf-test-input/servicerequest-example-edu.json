@@ -1,0 +1,59 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "education",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: education\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: completed\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Education \u003cspan\u003e(Details : {SNOMED CT code \u0027311401005\u0027 \u003d \u0027Patient education\u0027, given as \u0027Patient education (procedure)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Health education - breast examination \u003cspan\u003e(Details : {SNOMED CT code \u002748023004\u0027 \u003d \u0027Breast self-examination technique education\u0027, given as \u0027Breast self-examination technique education (procedure)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: Jane Doe\u003c/p\u003e\u003cp\u003e\u003cb\u003eoccurrence\u003c/b\u003e: 16/08/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthoredOn\u003c/b\u003e: 16/08/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: Angela Care, MD\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: Pamela Educator, RN\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: early detection of breast mass \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "completed",
+  "intent": "order",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "311401005",
+          "display": "Patient education (procedure)"
+        }
+      ],
+      "text": "Education"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "48023004",
+        "display": "Breast self-examination technique education (procedure)"
+      }
+    ],
+    "text": "Health education - breast examination"
+  },
+  "subject": {
+    "display": "Jane Doe"
+  },
+  "occurrenceDateTime": "2014-08-16",
+  "authoredOn": "2016-08-16",
+  "requester": {
+    "display": "Angela Care, MD"
+  },
+  "performer": [
+    {
+      "display": "Pamela Educator, RN"
+    }
+  ],
+  "reasonCode": [
+    {
+      "text": "early detection of breast mass"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

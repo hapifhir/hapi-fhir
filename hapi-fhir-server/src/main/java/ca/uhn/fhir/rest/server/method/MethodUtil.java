@@ -213,6 +213,8 @@ public class MethodUtil {
 						((AtParameter) param).setType(theContext, parameterType, innerCollectionType, outerCollectionType);
 					} else if (nextAnnotation instanceof Count) {
 						param = new CountParameter();
+					} else if (nextAnnotation instanceof Offset) {
+						param = new OffsetParameter();
 					} else if (nextAnnotation instanceof GraphQLQueryUrl) {
 						param = new GraphQLQueryUrlParameter();
 					} else if (nextAnnotation instanceof GraphQLQueryBody) {

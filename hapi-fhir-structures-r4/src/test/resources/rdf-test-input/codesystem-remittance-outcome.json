@@ -1,0 +1,78 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "remittance-outcome",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eClaim Processing Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes Claim Processing Outcome codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eHL7 Inc.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/remittance-outcome defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003equeued\u003ca name\u003d\"remittance-outcome-queued\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQueued\u003c/td\u003e\u003ctd\u003eThe Claim/Pre-authorization/Pre-determination has been received but processing has not begun.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomplete\u003ca name\u003d\"remittance-outcome-complete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcessing Complete\u003c/td\u003e\u003ctd\u003eThe processing has completed without errors\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eerror\u003ca name\u003d\"remittance-outcome-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eError\u003c/td\u003e\u003ctd\u003eOne or more errors have been detected in the Claim\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epartial\u003ca name\u003d\"remittance-outcome-partial\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePartial Processing\u003c/td\u003e\u003ctd\u003eNo errors have been detected in the Claim and some of the adjudication has been performed.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/remittance-outcome",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.14"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ClaimProcessingCodes",
+  "title": "Claim Processing Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes Claim Processing Outcome codes.",
+  "copyright": "HL7 Inc.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/remittance-outcome",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "queued",
+      "display": "Queued",
+      "definition": "The Claim/Pre-authorization/Pre-determination has been received but processing has not begun."
+    },
+    {
+      "code": "complete",
+      "display": "Processing Complete",
+      "definition": "The processing has completed without errors"
+    },
+    {
+      "code": "error",
+      "display": "Error",
+      "definition": "One or more errors have been detected in the Claim"
+    },
+    {
+      "code": "partial",
+      "display": "Partial Processing",
+      "definition": "No errors have been detected in the Claim and some of the adjudication has been performed."
+    }
+  ]
+}

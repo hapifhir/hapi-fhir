@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "response-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eResponseType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe kind of response to a message.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/response-code defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eok\u003ca name\u003d\"response-code-ok\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOK\u003c/td\u003e\u003ctd\u003eThe message was accepted and processed without error.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransient-error\u003ca name\u003d\"response-code-transient-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTransient Error\u003c/td\u003e\u003ctd\u003eSome internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efatal-error\u003ca name\u003d\"response-code-fatal-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFatal Error\u003c/td\u003e\u003ctd\u003eThe message was rejected because of a problem with the content. There is no point in re-sending without change. The response narrative SHALL describe the issue.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "inm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 4
+    }
+  ],
+  "url": "http://hl7.org/fhir/response-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.381"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ResponseType",
+  "title": "ResponseType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The kind of response to a message.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/response-code",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "ok",
+      "display": "OK",
+      "definition": "The message was accepted and processed without error."
+    },
+    {
+      "code": "transient-error",
+      "display": "Transient Error",
+      "definition": "Some internal unexpected error occurred - wait and try again. Note - this is usually used for things like database unavailable, which may be expected to resolve, though human intervention may be required."
+    },
+    {
+      "code": "fatal-error",
+      "display": "Fatal Error",
+      "definition": "The message was rejected because of a problem with the content. There is no point in re-sending without change. The response narrative SHALL describe the issue."
+    }
+  ]
+}

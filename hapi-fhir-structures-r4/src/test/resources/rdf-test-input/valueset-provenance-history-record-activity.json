@@ -1,0 +1,110 @@
+{
+  "resourceType": "ValueSet",
+  "id": "provenance-history-record-activity",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/provenance-history-record-activity",
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eProvenance History Record Activity Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes for Provenance activities that are relevant when capturing event history for resources.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/DataOperation/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-DataOperation\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-CREATE\"\u003eCREATE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreated\u003c/td\u003e\u003ctd\u003eDescription:Fundamental operation in an Information System (IS) that results only in the act of bringing an object into existence. Note: The preceding definition is taken from the HL7 RBAC specification.  There is no restriction on how the operation is invoked, e.g., via a user interface. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-UPDATE\"\u003eUPDATE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUpdated\u003c/td\u003e\u003ctd\u003eDefinition:Fundamental operation in an Information System (IS) that results only in the revision or alteration of an object. Note: The preceding definition is taken from the HL7 RBAC specification. There is no restriction on how the operation is invoked, e.g., via a user interface.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-DELETE\"\u003eDELETE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeleted\u003c/td\u003e\u003ctd\u003eDescription:Fundamental operation in an Information System (IS) that results only in the removal of information about an object from memory or storage. Note: The preceding definition is taken from the HL7 RBAC specification.  There is no restriction on how the operation is invoked, e.g., via a user interface.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-ABORT\"\u003eABORT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStopped/Ended/Aborted\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;aborted\u0026quot;, i.e., terminated prior to the originally intended completion. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-HOLD\"\u003eHOLD\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHeld\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;held\u0026quot;, i.e., put aside an Act that is still in preparatory stages.  No action can occur until the Act is released. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-RELEASE\"\u003eRELEASE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReleased\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act so it is no longer \u0026quot;held\u0026quot;, i.e., allow action to occur. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-CANCEL\"\u003eCANCEL\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;cancelled\u0026quot;, i.e., abandoned before activation. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-ACTIVATE\"\u003eACTIVATE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActivated\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;active\u0026quot;, i.e., so it can be performed or is being performed, for the first time. (Contrast with REACTIVATE.) For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-SUSPEND\"\u003eSUSPEND\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuspended\u003c/td\u003e\u003ctd\u003eDefinition:Change the status of an object representing an Act to suspended, i.e., so it is temporarily not in service.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-RESUME\"\u003eRESUME\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eresume\u003c/td\u003e\u003ctd\u003eDescription:Change the status of a suspended object representing an Act to \u0026quot;active\u0026quot;, i.e., so it can be performed or is being performed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-COMPLETE\"\u003eCOMPLETE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;completed\u0026quot;, i.e., terminated normally after all of its constituents have been performed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-NULLIFY\"\u003eNULLIFY\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMark Entered-in-error\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;nullified\u0026quot;, i.e., treat as though it never existed. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-OBSOLETE\"\u003eOBSOLETE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReplaced\u003c/td\u003e\u003ctd\u003eDescription:Change the status of an object representing an Act to \u0026quot;obsolete\u0026quot; when it has been replaced by a new instance. For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/DataOperation/cs.html#v3-DataOperation-REACTIVATE\"\u003eREACTIVATE\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReactivated\u003c/td\u003e\u003ctd\u003eDescription:Change the status of a formerly active object representing an Act to \u0026quot;active\u0026quot;, i.e., so it can again be performed or is being performed. (Contrast with ACTIVATE.) For an HL7 Act, the state transitions per the HL7 Reference Information Model.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sec"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/provenance-history-record-activity",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.926"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ProvenanceHistoryRecordActivityCodes",
+  "title": "Provenance History Record Activity Codes",
+  "status": "draft",
+  "experimental": true,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Codes for Provenance activities that are relevant when capturing event history for resources.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+        "concept": [
+          {
+            "code": "CREATE",
+            "display": "Created"
+          },
+          {
+            "code": "UPDATE",
+            "display": "Updated"
+          },
+          {
+            "code": "DELETE",
+            "display": "Deleted"
+          },
+          {
+            "code": "ABORT",
+            "display": "Stopped/Ended/Aborted"
+          },
+          {
+            "code": "HOLD",
+            "display": "Held"
+          },
+          {
+            "code": "RELEASE",
+            "display": "Released"
+          },
+          {
+            "code": "CANCEL",
+            "display": "Cancelled"
+          },
+          {
+            "code": "ACTIVATE",
+            "display": "Activated"
+          },
+          {
+            "code": "SUSPEND",
+            "display": "Suspended"
+          },
+          {
+            "code": "RESUME"
+          },
+          {
+            "code": "COMPLETE",
+            "display": "Completed"
+          },
+          {
+            "code": "NULLIFY",
+            "display": "Mark Entered-in-error"
+          },
+          {
+            "code": "OBSOLETE",
+            "display": "Replaced"
+          },
+          {
+            "code": "REACTIVATE",
+            "display": "Reactivated"
+          }
+        ]
+      }
+    ]
+  }
+}

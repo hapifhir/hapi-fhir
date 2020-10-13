@@ -1,0 +1,65 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "concept-subsumption-outcome",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConceptSubsumptionOutcome\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe subsumption relationship between code/Coding \u0026quot;A\u0026quot; and code/Coding \u0026quot;B\u0026quot;. There are 4 possible codes to be returned: equivalent, subsumes, subsumed-by, and not-subsumed. If the server is unable to determine the relationship between the codes/Codings, then it returns an error (i.e. an OperationOutcome).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/concept-subsumption-outcome defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eequivalent\u003ca name\u003d\"concept-subsumption-outcome-equivalent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEquivalent\u003c/td\u003e\u003ctd\u003eThe two concepts are equivalent (have the same properties).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubsumes\u003ca name\u003d\"concept-subsumption-outcome-subsumes\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubsumes\u003c/td\u003e\u003ctd\u003eCoding/code \u0026quot;A\u0026quot; subsumes Coding/code \u0026quot;B\u0026quot; (e.g. B has all the properties A has, and some of it\u0027s own).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esubsumed-by\u003ca name\u003d\"concept-subsumption-outcome-subsumed-by\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubsumed-By\u003c/td\u003e\u003ctd\u003eCoding/code \u0026quot;A\u0026quot; is subsumed by Coding/code \u0026quot;B\u0026quot; (e.g. A has all the properties B has, and some of it\u0027s own).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-subsumed\u003ca name\u003d\"concept-subsumption-outcome-not-subsumed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot-Subsumed\u003c/td\u003e\u003ctd\u003eCoding/code \u0026quot;A\u0026quot; and Coding/code \u0026quot;B\u0026quot; are disjoint (e.g. each has propeties that the other doesn\u0027t have).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/concept-subsumption-outcome",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1239"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ConceptSubsumptionOutcome",
+  "title": "ConceptSubsumptionOutcome",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The subsumption relationship between code/Coding \"A\" and code/Coding \"B\". There are 4 possible codes to be returned: equivalent, subsumes, subsumed-by, and not-subsumed. If the server is unable to determine the relationship between the codes/Codings, then it returns an error (i.e. an OperationOutcome).",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/concept-subsumption-outcome",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "equivalent",
+      "display": "Equivalent",
+      "definition": "The two concepts are equivalent (have the same properties)."
+    },
+    {
+      "code": "subsumes",
+      "display": "Subsumes",
+      "definition": "Coding/code \"A\" subsumes Coding/code \"B\" (e.g. B has all the properties A has, and some of it\u0027s own)."
+    },
+    {
+      "code": "subsumed-by",
+      "display": "Subsumed-By",
+      "definition": "Coding/code \"A\" is subsumed by Coding/code \"B\" (e.g. A has all the properties B has, and some of it\u0027s own)."
+    },
+    {
+      "code": "not-subsumed",
+      "display": "Not-Subsumed",
+      "definition": "Coding/code \"A\" and Coding/code \"B\" are disjoint (e.g. each has propeties that the other doesn\u0027t have)."
+    }
+  ]
+}

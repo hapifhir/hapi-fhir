@@ -1,0 +1,106 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "coverageeligibilityresponse-ex-auth-support",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCoverageEligibilityResponse Auth Support Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes CoverageEligibilityResponse Auth Support codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eHL7 Inc.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/coverageeligibilityresponse-ex-auth-support defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elaborder\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-laborder\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLab Order\u003c/td\u003e\u003ctd\u003eA request or authorization for laboratory diagnostic tests.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elabreport\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-labreport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLab Report\u003c/td\u003e\u003ctd\u003eA report on laboratory diagnostic test(s).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediagnosticimageorder\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-diagnosticimageorder\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic Image Order\u003c/td\u003e\u003ctd\u003eA request or authorization for diagnostic imaging.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediagnosticimagereport\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-diagnosticimagereport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostic Image Report\u003c/td\u003e\u003ctd\u003eA report on diagnostic image(s).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprofessionalreport\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-professionalreport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProfessional Report\u003c/td\u003e\u003ctd\u003eA report from a licensed professional regarding the siutation, condition or proposed treatment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccidentreport\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-accidentreport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccident Report\u003c/td\u003e\u003ctd\u003eA formal accident report as would be filed with police or a simlar official body.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emodel\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-model\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eModel\u003c/td\u003e\u003ctd\u003eA physical model of the affected area.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epicture\u003ca name\u003d\"coverageeligibilityresponse-ex-auth-support-picture\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePicture\u003c/td\u003e\u003ctd\u003eA photograph of the affected area.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/coverageeligibilityresponse-ex-auth-support",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1394"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CoverageEligibilityResponseAuthSupportCodes",
+  "title": "CoverageEligibilityResponse Auth Support Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes CoverageEligibilityResponse Auth Support codes.",
+  "copyright": "HL7 Inc.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/coverageeligibilityresponse-ex-auth-support",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "laborder",
+      "display": "Lab Order",
+      "definition": "A request or authorization for laboratory diagnostic tests."
+    },
+    {
+      "code": "labreport",
+      "display": "Lab Report",
+      "definition": "A report on laboratory diagnostic test(s)."
+    },
+    {
+      "code": "diagnosticimageorder",
+      "display": "Diagnostic Image Order",
+      "definition": "A request or authorization for diagnostic imaging."
+    },
+    {
+      "code": "diagnosticimagereport",
+      "display": "Diagnostic Image Report",
+      "definition": "A report on diagnostic image(s)."
+    },
+    {
+      "code": "professionalreport",
+      "display": "Professional Report",
+      "definition": "A report from a licensed professional regarding the siutation, condition or proposed treatment."
+    },
+    {
+      "code": "accidentreport",
+      "display": "Accident Report",
+      "definition": "A formal accident report as would be filed with police or a simlar official body."
+    },
+    {
+      "code": "model",
+      "display": "Model",
+      "definition": "A physical model of the affected area."
+    },
+    {
+      "code": "picture",
+      "display": "Picture",
+      "definition": "A photograph of the affected area."
+    }
+  ]
+}

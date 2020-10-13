@@ -1,0 +1,99 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "certainty-subcomponent-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCertaintySubcomponentType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe subcomponent classification of quality of evidence rating systems.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/certainty-subcomponent-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRiskOfBias\u003ca name\u003d\"certainty-subcomponent-type-RiskOfBias\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRisk of bias\u003c/td\u003e\u003ctd\u003emethodologic concerns reducing internal validity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eInconsistency\u003ca name\u003d\"certainty-subcomponent-type-Inconsistency\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInconsistency\u003c/td\u003e\u003ctd\u003econcerns that findings are not similar enough to support certainty.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIndirectness\u003ca name\u003d\"certainty-subcomponent-type-Indirectness\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIndirectness\u003c/td\u003e\u003ctd\u003econcerns reducing external validity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eImprecision\u003ca name\u003d\"certainty-subcomponent-type-Imprecision\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImprecision\u003c/td\u003e\u003ctd\u003eHigh quality evidence.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePublicationBias\u003ca name\u003d\"certainty-subcomponent-type-PublicationBias\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePublication bias\u003c/td\u003e\u003ctd\u003elikelihood that what is published misrepresents what is available to publish.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDoseResponseGradient\u003ca name\u003d\"certainty-subcomponent-type-DoseResponseGradient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDose response gradient\u003c/td\u003e\u003ctd\u003ehigher certainty due to dose response relationship.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePlausibleConfounding\u003ca name\u003d\"certainty-subcomponent-type-PlausibleConfounding\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlausible confounding\u003c/td\u003e\u003ctd\u003ehigher certainty due to risk of bias in opposite direction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLargeEffect\u003ca name\u003d\"certainty-subcomponent-type-LargeEffect\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLarge effect\u003c/td\u003e\u003ctd\u003ehigher certainty due to large effect size.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/certainty-subcomponent-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1360"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CertaintySubcomponentType",
+  "title": "CertaintySubcomponentType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The subcomponent classification of quality of evidence rating systems.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/certainty-subcomponent-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "RiskOfBias",
+      "display": "Risk of bias",
+      "definition": "methodologic concerns reducing internal validity."
+    },
+    {
+      "code": "Inconsistency",
+      "display": "Inconsistency",
+      "definition": "concerns that findings are not similar enough to support certainty."
+    },
+    {
+      "code": "Indirectness",
+      "display": "Indirectness",
+      "definition": "concerns reducing external validity."
+    },
+    {
+      "code": "Imprecision",
+      "display": "Imprecision",
+      "definition": "High quality evidence."
+    },
+    {
+      "code": "PublicationBias",
+      "display": "Publication bias",
+      "definition": "likelihood that what is published misrepresents what is available to publish."
+    },
+    {
+      "code": "DoseResponseGradient",
+      "display": "Dose response gradient",
+      "definition": "higher certainty due to dose response relationship."
+    },
+    {
+      "code": "PlausibleConfounding",
+      "display": "Plausible confounding",
+      "definition": "higher certainty due to risk of bias in opposite direction."
+    },
+    {
+      "code": "LargeEffect",
+      "display": "Large effect",
+      "definition": "higher certainty due to large effect size."
+    }
+  ]
+}

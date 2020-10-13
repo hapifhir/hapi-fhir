@@ -1,0 +1,46 @@
+{
+  "resourceType": "MolecularSequence",
+  "id": "graphic-example-1",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: graphic-example-1\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: dna\u003c/p\u003e\u003cp\u003e\u003cb\u003ecoordinateSystem\u003c/b\u003e: 0\u003c/p\u003e\u003ch3\u003eReferenceSeqs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceSeqId\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrand\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowEnd\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eNC_000002.12 \u003cspan\u003e(Details : {http://www.ncbi.nlm.nih.gov/nuccore code \u0027NC_000002.12\u0027 \u003d \u0027NC_000002.12)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003ewatson\u003c/td\u003e\u003ctd\u003e128273724\u003c/td\u003e\u003ctd\u003e128273732\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eVariants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEnd\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eObservedAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCigar\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e128273725\u003c/td\u003e\u003ctd\u003e128273726\u003c/td\u003e\u003ctd\u003eG\u003c/td\u003e\u003ctd\u003eT\u003c/td\u003e\u003ctd\u003e1M\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003epointer\u003c/b\u003e: \u003ca\u003eMolecularSequence/graphic-example-2\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "type": "dna",
+  "coordinateSystem": 0,
+  "referenceSeq": {
+    "referenceSeqId": {
+      "coding": [
+        {
+          "system": "http://www.ncbi.nlm.nih.gov/nuccore",
+          "code": "NC_000002.12"
+        }
+      ]
+    },
+    "strand": "watson",
+    "windowStart": 128273724,
+    "windowEnd": 128273732
+  },
+  "variant": [
+    {
+      "start": 128273725,
+      "end": 128273726,
+      "observedAllele": "G",
+      "referenceAllele": "T",
+      "cigar": "1M"
+    }
+  ],
+  "pointer": [
+    {
+      "reference": "MolecularSequence/graphic-example-2"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "risk-estimate-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eRiskEstimateType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eWhether the risk estimate is dichotomous, continuous or qualitative and the specific type of risk estimate (eg proportion or median).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/risk-estimate-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproportion\u003ca name\u003d\"risk-estimate-type-proportion\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eproportion\u003c/td\u003e\u003ctd\u003edichotomous measure (present or absent) reported as a ratio compared to the denominator of 1 (A percentage is a proportion with denominator of 100).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ederivedProportion\u003ca name\u003d\"risk-estimate-type-derivedProportion\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ederivedProportion\u003c/td\u003e\u003ctd\u003eA special use case where the proportion is derived from a formula rather than derived from summary evidence.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emean\u003ca name\u003d\"risk-estimate-type-mean\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003emean\u003c/td\u003e\u003ctd\u003econtinuous numerical measure reported as an average.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedian\u003ca name\u003d\"risk-estimate-type-median\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003emedian\u003c/td\u003e\u003ctd\u003econtinuous numerical measure reported as the middle of the range.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecount\u003ca name\u003d\"risk-estimate-type-count\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecount\u003c/td\u003e\u003ctd\u003edescriptive measure reported as total number of items.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edescriptive\u003ca name\u003d\"risk-estimate-type-descriptive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edescriptive\u003c/td\u003e\u003ctd\u003edescriptive measure reported as narrative.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/risk-estimate-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1364"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "RiskEstimateType",
+  "title": "RiskEstimateType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Whether the risk estimate is dichotomous, continuous or qualitative and the specific type of risk estimate (eg proportion or median).",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/risk-estimate-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "proportion",
+      "display": "proportion",
+      "definition": "dichotomous measure (present or absent) reported as a ratio compared to the denominator of 1 (A percentage is a proportion with denominator of 100)."
+    },
+    {
+      "code": "derivedProportion",
+      "display": "derivedProportion",
+      "definition": "A special use case where the proportion is derived from a formula rather than derived from summary evidence."
+    },
+    {
+      "code": "mean",
+      "display": "mean",
+      "definition": "continuous numerical measure reported as an average."
+    },
+    {
+      "code": "median",
+      "display": "median",
+      "definition": "continuous numerical measure reported as the middle of the range."
+    },
+    {
+      "code": "count",
+      "display": "count",
+      "definition": "descriptive measure reported as total number of items."
+    },
+    {
+      "code": "descriptive",
+      "display": "descriptive",
+      "definition": "descriptive measure reported as narrative."
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "codesystem-hierarchy-meaning",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCodeSystemHierarchyMeaning\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe meaning of the hierarchy of concepts in a code system.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/codesystem-hierarchy-meaning defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egrouped-by\u003ca name\u003d\"codesystem-hierarchy-meaning-grouped-by\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGrouped By\u003c/td\u003e\u003ctd\u003eNo particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eis-a\u003ca name\u003d\"codesystem-hierarchy-meaning-is-a\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIs-A\u003c/td\u003e\u003ctd\u003eA hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts. Not that is-a is a property of the concepts, so additional subsumption relationships may be defined using properties or the [subsumes](extension-codesystem-subsumes.html) extension.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epart-of\u003ca name\u003d\"codesystem-hierarchy-meaning-part-of\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePart Of\u003c/td\u003e\u003ctd\u003eChild elements list the individual parts of a composite whole (e.g. body site).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclassified-with\u003ca name\u003d\"codesystem-hierarchy-meaning-classified-with\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClassified With\u003c/td\u003e\u003ctd\u003eChild concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a \u0026quot;closed world\u0026quot; meaning all things must be in the hierarchy. This results in concepts such as \u0026quot;not otherwise classified.\u0026quot;.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/codesystem-hierarchy-meaning",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.785"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CodeSystemHierarchyMeaning",
+  "title": "CodeSystemHierarchyMeaning",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The meaning of the hierarchy of concepts in a code system.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/codesystem-hierarchy-meaning",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "grouped-by",
+      "display": "Grouped By",
+      "definition": "No particular relationship between the concepts can be assumed, except what can be determined by inspection of the definitions of the elements (possible reasons to use this: importing from a source where this is not defined, or where various parts of the hierarchy have different meanings)."
+    },
+    {
+      "code": "is-a",
+      "display": "Is-A",
+      "definition": "A hierarchy where the child concepts have an IS-A relationship with the parents - that is, all the properties of the parent are also true for its child concepts. Not that is-a is a property of the concepts, so additional subsumption relationships may be defined using properties or the [subsumes](extension-codesystem-subsumes.html) extension."
+    },
+    {
+      "code": "part-of",
+      "display": "Part Of",
+      "definition": "Child elements list the individual parts of a composite whole (e.g. body site)."
+    },
+    {
+      "code": "classified-with",
+      "display": "Classified With",
+      "definition": "Child concepts in the hierarchy may have only one parent, and there is a presumption that the code system is a \"closed world\" meaning all things must be in the hierarchy. This results in concepts such as \"not otherwise classified.\"."
+    }
+  ]
+}

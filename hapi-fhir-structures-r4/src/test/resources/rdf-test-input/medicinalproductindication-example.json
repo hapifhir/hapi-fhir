@@ -1,0 +1,54 @@
+{
+  "resourceType": "MedicinalProductIndication",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003ediseaseSymptomProcedure\u003c/b\u003e: Prevention of venous thromboembolic events (VTE) in adult patients who have undergone elective hip\\nor knee replacement surgery.\\nPrevention of stroke and systemic embolism in adult patients with non-valvular atrial fibrillation\\n(NVAF), with one or more risk factors, such as prior stroke or transient ischaemic attack (TIA); age\\n≥ 75 years; hypertension; diabetes mellitus; symptomatic heart failure (NYHA Class ≥ II).\\nTreatment of deep vein thrombosis (DVT) and pulmonary embolism (PE), and prevention of recurrent\\nDVT and PE in adults (see section 4.4 for haemodynamically unstable PE patients). \u003cspan\u003e(Details : {http://ema.europa.eu/example/indicationasdisease-symptom-procedure code \u0027Venousthromboembolismprophylaxis\u0027 \u003d \u0027Venousthromboembolismprophylaxis)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecomorbidity\u003c/b\u003e: Hipsurgery \u003cspan\u003e(Details : {http://ema.europa.eu/example/comorbidity code \u0027Hipsurgery\u0027 \u003d \u0027Hipsurgery)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eintendedEffect\u003c/b\u003e: PRYLX \u003cspan\u003e(Details : {http://ema.europa.eu/example/intendedeffect code \u0027PRYLX\u0027 \u003d \u0027PRYLX)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epopulation\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "diseaseSymptomProcedure": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/indicationasdisease-symptom-procedure",
+        "code": "Venousthromboembolismprophylaxis"
+      }
+    ],
+    "text": "Prevention of venous thromboembolic events (VTE) in adult patients who have undergone elective hip\\nor knee replacement surgery.\\nPrevention of stroke and systemic embolism in adult patients with non-valvular atrial fibrillation\\n(NVAF), with one or more risk factors, such as prior stroke or transient ischaemic attack (TIA); age\\n≥ 75 years; hypertension; diabetes mellitus; symptomatic heart failure (NYHA Class ≥ II).\\nTreatment of deep vein thrombosis (DVT) and pulmonary embolism (PE), and prevention of recurrent\\nDVT and PE in adults (see section 4.4 for haemodynamically unstable PE patients)."
+  },
+  "comorbidity": [
+    {
+      "coding": [
+        {
+          "system": "http://ema.europa.eu/example/comorbidity",
+          "code": "Hipsurgery"
+        }
+      ]
+    }
+  ],
+  "intendedEffect": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/intendedeffect",
+        "code": "PRYLX"
+      }
+    ]
+  },
+  "population": [
+    {
+      "ageRange": {
+        "low": {
+          "value": 18,
+          "unit": "a"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

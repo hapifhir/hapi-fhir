@@ -1,0 +1,119 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "assert-response-code-types",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAssertionResponseTypes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of response code to use for assertion.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/assert-response-code-types defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eokay\u003ca name\u003d\"assert-response-code-types-okay\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eokay\u003c/td\u003e\u003ctd\u003eResponse code is 200.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecreated\u003ca name\u003d\"assert-response-code-types-created\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecreated\u003c/td\u003e\u003ctd\u003eResponse code is 201.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enoContent\u003ca name\u003d\"assert-response-code-types-noContent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enoContent\u003c/td\u003e\u003ctd\u003eResponse code is 204.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotModified\u003ca name\u003d\"assert-response-code-types-notModified\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enotModified\u003c/td\u003e\u003ctd\u003eResponse code is 304.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebad\u003ca name\u003d\"assert-response-code-types-bad\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebad\u003c/td\u003e\u003ctd\u003eResponse code is 400.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eforbidden\u003ca name\u003d\"assert-response-code-types-forbidden\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eforbidden\u003c/td\u003e\u003ctd\u003eResponse code is 403.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotFound\u003ca name\u003d\"assert-response-code-types-notFound\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enotFound\u003c/td\u003e\u003ctd\u003eResponse code is 404.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emethodNotAllowed\u003ca name\u003d\"assert-response-code-types-methodNotAllowed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003emethodNotAllowed\u003c/td\u003e\u003ctd\u003eResponse code is 405.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econflict\u003ca name\u003d\"assert-response-code-types-conflict\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003econflict\u003c/td\u003e\u003ctd\u003eResponse code is 409.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egone\u003ca name\u003d\"assert-response-code-types-gone\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003egone\u003c/td\u003e\u003ctd\u003eResponse code is 410.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epreconditionFailed\u003ca name\u003d\"assert-response-code-types-preconditionFailed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epreconditionFailed\u003c/td\u003e\u003ctd\u003eResponse code is 412.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunprocessable\u003ca name\u003d\"assert-response-code-types-unprocessable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eunprocessable\u003c/td\u003e\u003ctd\u003eResponse code is 422.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/assert-response-code-types",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.711"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AssertionResponseTypes",
+  "title": "AssertionResponseTypes",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of response code to use for assertion.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/assert-response-code-types",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "okay",
+      "display": "okay",
+      "definition": "Response code is 200."
+    },
+    {
+      "code": "created",
+      "display": "created",
+      "definition": "Response code is 201."
+    },
+    {
+      "code": "noContent",
+      "display": "noContent",
+      "definition": "Response code is 204."
+    },
+    {
+      "code": "notModified",
+      "display": "notModified",
+      "definition": "Response code is 304."
+    },
+    {
+      "code": "bad",
+      "display": "bad",
+      "definition": "Response code is 400."
+    },
+    {
+      "code": "forbidden",
+      "display": "forbidden",
+      "definition": "Response code is 403."
+    },
+    {
+      "code": "notFound",
+      "display": "notFound",
+      "definition": "Response code is 404."
+    },
+    {
+      "code": "methodNotAllowed",
+      "display": "methodNotAllowed",
+      "definition": "Response code is 405."
+    },
+    {
+      "code": "conflict",
+      "display": "conflict",
+      "definition": "Response code is 409."
+    },
+    {
+      "code": "gone",
+      "display": "gone",
+      "definition": "Response code is 410."
+    },
+    {
+      "code": "preconditionFailed",
+      "display": "preconditionFailed",
+      "definition": "Response code is 412."
+    },
+    {
+      "code": "unprocessable",
+      "display": "unprocessable",
+      "definition": "Response code is 422."
+    }
+  ]
+}

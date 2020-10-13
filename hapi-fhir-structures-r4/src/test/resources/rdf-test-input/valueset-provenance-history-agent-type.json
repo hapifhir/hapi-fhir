@@ -1,0 +1,71 @@
+{
+  "resourceType": "ValueSet",
+  "id": "provenance-history-agent-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/provenance-history-agent-role",
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eProvenance Event History Agent Role Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eTypes of roles indicating how a particular agent was involved with the creation or modification of a resource for use when exposing event history\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/ParticipationType/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-ParticipationType\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-AUT\"\u003eAUT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthor\u003c/td\u003e\u003ctd\u003eDefinition: A party that originates the Act and therefore has responsibility for the information given in the Act and ownership of this Act.\u003cbr/\u003e\n                        \n                           Example: the report writer, the person writing the act definition, the guideline author, the placer of an order, the EKG cart (device) creating a report etc. Every Act should have an author. Authorship is regardless of mood always actual authorship. \u003cbr/\u003e\n                        Examples of such policies might include:\u003cbr/\u003e\n                        \n                           \n                              The author and anyone they explicitly delegate may update the report;\u003cbr/\u003e\n                           \n                           \n                              All administrators within the same clinic may cancel and reschedule appointments created by other administrators within that clinic;\u003cbr/\u003e\n                           \n                        \n                        A party that is neither an author nor a party who is extended authorship maintenance rights by policy, may only amend, reverse, override, replace, or follow up in other ways on this Act, whereby the Act remains intact and is linked to another Act authored by that other party.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-INF\"\u003eINF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformant\u003c/td\u003e\u003ctd\u003eA source of reported information (e.g., a next of kin who answers questions about the patient\u0027s history).  For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-VRF\"\u003eVRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVerifier\u003c/td\u003e\u003ctd\u003eA person who verifies the correctness and appropriateness of the service (plan, order, event, etc.) and hence takes on accountability.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-ENT\"\u003eENT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eData Enterer\u003c/td\u003e\u003ctd\u003eA person entering the data into the originating system.  The data entry person is collected optionally for internal quality control purposes.  This includes the transcriptionist for dictated text.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sec"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/provenance-history-agent-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.927"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ProvenanceEventHistoryAgentRoleCodes",
+  "title": "Provenance Event History Agent Role Codes",
+  "status": "draft",
+  "experimental": true,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Types of roles indicating how a particular agent was involved with the creation or modification of a resource for use when exposing event history",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+        "concept": [
+          {
+            "code": "AUT",
+            "display": "Author"
+          },
+          {
+            "code": "INF",
+            "display": "Informant"
+          },
+          {
+            "code": "VRF",
+            "display": "Verifier"
+          },
+          {
+            "code": "ENT",
+            "display": "Data Enterer"
+          }
+        ]
+      }
+    ]
+  }
+}

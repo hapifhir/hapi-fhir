@@ -1,0 +1,64 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "medication-admin-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMedication administration  category  codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMedicationAdministration Category Codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/medication-admin-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einpatient\u003ca name\u003d\"medication-admin-category-inpatient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInpatient\u003c/td\u003e\u003ctd\u003eIncludes administrations in an inpatient or acute care setting\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoutpatient\u003ca name\u003d\"medication-admin-category-outpatient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOutpatient\u003c/td\u003e\u003ctd\u003eIncludes administrations in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor\u0027s office)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecommunity\u003ca name\u003d\"medication-admin-category-community\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunity\u003c/td\u003e\u003ctd\u003eIncludes administrations by the patient in their home (this would include long term care or nursing homes, hospices, etc.)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/medication-admin-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1111"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MedicationAdministration Category Codes",
+  "title": "Medication administration  category  codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "MedicationAdministration Category Codes",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/medication-admin-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "inpatient",
+      "display": "Inpatient",
+      "definition": "Includes administrations in an inpatient or acute care setting"
+    },
+    {
+      "code": "outpatient",
+      "display": "Outpatient",
+      "definition": "Includes administrations in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor\u0027s office)"
+    },
+    {
+      "code": "community",
+      "display": "Community",
+      "definition": "Includes administrations by the patient in their home (this would include long term care or nursing homes, hospices, etc.)"
+    }
+  ]
+}

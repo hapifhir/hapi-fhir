@@ -1,0 +1,107 @@
+{
+  "resourceType": "Encounter",
+  "id": "f003",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f003\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: v6751 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: finished\u003c/p\u003e\u003cp\u003e\u003cb\u003eclass\u003c/b\u003e: ambulatory (Details: http://terminology.hl7.org/CodeSystem/v3-ActCode code AMB \u003d \u0027ambulatory\u0027, stated as \u0027ambulatory\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Patient-initiated encounter \u003cspan\u003e(Details : {SNOMED CT code \u0027270427003\u0027 \u003d \u0027Patient-initiated encounter\u0027, given as \u0027Patient-initiated encounter\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: Non-urgent ear, nose and throat admission \u003cspan\u003e(Details : {SNOMED CT code \u0027103391001\u0027 \u003d \u0027Urgency\u0027, given as \u0027Non-urgent ear, nose and throat admission\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eP. van de Heuvel\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eParticipants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eIndividual\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003eE.M. van den Broek\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003elength\u003c/b\u003e: 90 min\u003cspan\u003e (Details: UCUM code min \u003d \u0027min\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Retropharyngeal abscess \u003cspan\u003e(Details : {SNOMED CT code \u002718099001\u0027 \u003d \u0027Retropharyngeal abscess\u0027, given as \u0027Retropharyngeal abscess\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eHospitalizations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePreAdmissionIdentifier\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAdmitSource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDischargeDisposition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e93042 (OFFICIAL)\u003c/td\u003e\u003ctd\u003eReferral by physician \u003cspan\u003e(Details : {SNOMED CT code \u0027305956004\u0027 \u003d \u0027Referral from physician\u0027, given as \u0027Referral by physician\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eDischarge to home \u003cspan\u003e(Details : {SNOMED CT code \u0027306689006\u0027 \u003d \u0027Discharge to home\u0027, given as \u0027Discharge to home\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eserviceProvider\u003c/b\u003e: \u003ca\u003eOrganization/f001\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://www.bmc.nl/zorgportal/identifiers/encounters",
+      "value": "v6751"
+    }
+  ],
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "270427003",
+          "display": "Patient-initiated encounter"
+        }
+      ]
+    }
+  ],
+  "priority": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "103391001",
+        "display": "Non-urgent ear, nose and throat admission"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "participant": [
+    {
+      "individual": {
+        "reference": "Practitioner/f001",
+        "display": "E.M. van den Broek"
+      }
+    }
+  ],
+  "length": {
+    "value": 90,
+    "unit": "min",
+    "system": "http://unitsofmeasure.org",
+    "code": "min"
+  },
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "18099001",
+          "display": "Retropharyngeal abscess"
+        }
+      ]
+    }
+  ],
+  "hospitalization": {
+    "preAdmissionIdentifier": {
+      "use": "official",
+      "system": "http://www.bmc.nl/zorgportal/identifiers/pre-admissions",
+      "value": "93042"
+    },
+    "admitSource": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "305956004",
+          "display": "Referral by physician"
+        }
+      ]
+    },
+    "dischargeDisposition": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "306689006",
+          "display": "Discharge to home"
+        }
+      ]
+    }
+  },
+  "serviceProvider": {
+    "reference": "Organization/f001"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

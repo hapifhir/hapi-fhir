@@ -1,0 +1,72 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "immunization-subpotent-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eImmunization Subpotent Reason\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe value set to instantiate this attribute should be drawn from a terminologically robust code system that consists of or contains concepts to support describing the reason why a dose is considered to be subpotent. This value set is provided as a suggestive example.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/immunization-subpotent-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epartial\u003ca name\u003d\"immunization-subpotent-reason-partial\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePartial Dose\u003c/td\u003e\u003ctd\u003eThe full volume of the dose was not administered to the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecoldchainbreak\u003ca name\u003d\"immunization-subpotent-reason-coldchainbreak\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCold Chain Break\u003c/td\u003e\u003ctd\u003eThe vaccine experienced a cold chain break.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erecall\u003ca name\u003d\"immunization-subpotent-reason-recall\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eManufacturer Recall\u003c/td\u003e\u003ctd\u003eThe vaccine was recalled by the manufacturer.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pher"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/immunization-subpotent-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1098"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ImmunizationSubpotentReason",
+  "title": "Immunization Subpotent Reason",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/pher/index.cfm"
+        }
+      ]
+    }
+  ],
+  "description": "The value set to instantiate this attribute should be drawn from a terminologically robust code system that consists of or contains concepts to support describing the reason why a dose is considered to be subpotent. This value set is provided as a suggestive example.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/immunization-subpotent-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "partial",
+      "display": "Partial Dose",
+      "definition": "The full volume of the dose was not administered to the patient."
+    },
+    {
+      "code": "coldchainbreak",
+      "display": "Cold Chain Break",
+      "definition": "The vaccine experienced a cold chain break."
+    },
+    {
+      "code": "recall",
+      "display": "Manufacturer Recall",
+      "definition": "The vaccine was recalled by the manufacturer."
+    }
+  ]
+}

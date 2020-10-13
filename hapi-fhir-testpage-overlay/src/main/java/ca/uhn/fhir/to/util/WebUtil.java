@@ -20,7 +20,7 @@ import java.util.Properties;
 
 public class WebUtil {
 	public static final String BOOTSTRAP_ID = "bootstrap";
-	public static final String BOOTSTRAP3_PKG = "org.webjars";
+	public static final String BOOTSTRAP_PKG = "org.webjars.npm";
 	public static final String JQUERY_ID = "jquery";
 	public static final String JQUERY_PKG = "org.webjars.bower";
 
@@ -48,8 +48,8 @@ public class WebUtil {
 		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.bower", "awesome-bootstrap-checkbox");
 	}
 
-	public static void webJarAddBoostrap3(ResourceHandlerRegistry theRegistry) {
-		WebUtil.addStaticResourceWebJar(theRegistry, BOOTSTRAP3_PKG, BOOTSTRAP_ID);
+	public static void webJarAddBoostrap(ResourceHandlerRegistry theRegistry) {
+		WebUtil.addStaticResourceWebJar(theRegistry, BOOTSTRAP_PKG, BOOTSTRAP_ID);
 	}
 
 	public static void webJarAddEonasdanBootstrapDatetimepicker(ResourceHandlerRegistry theRegistry) {
@@ -74,6 +74,10 @@ public class WebUtil {
 
 	public static void webJarAddSelect2(ResourceHandlerRegistry theRegistry) {
 		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars", "select2");
+	}
+
+	public static void webJarAddPopperJs(ResourceHandlerRegistry theRegistry) {
+		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.npm", "popper.js");
 	}
 
 }

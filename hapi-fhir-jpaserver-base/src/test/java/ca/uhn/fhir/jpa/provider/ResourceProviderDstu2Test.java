@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.SearchParameter;
 import ca.uhn.fhir.model.dstu2.valueset.XPathUsageTypeEnum;
 import ca.uhn.fhir.model.primitive.IntegerDt;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import org.apache.commons.io.IOUtils;
@@ -1694,7 +1695,19 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals(21, response.getEntry().size());
+		assertEquals(10, response.getEntry().size());
+		assertEquals(null, response.getTotalElement().getValue());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, response.getLink("next").getUrl());
+
+		assertEquals(10, response.getEntry().size());
+		assertEquals(null, response.getTotalElement().getValue());
+		assertThat(response.getLink("next").getUrl(), not(emptyString()));
+
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, response.getLink("next").getUrl());
+
+		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotalElement().getValue().intValue());
 		assertEquals(null, response.getLink("next"));
 

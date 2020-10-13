@@ -1,0 +1,86 @@
+{
+  "resourceType": "ValueSet",
+  "id": "care-plan-activity-kind",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCare Plan Activity Kind\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eResource types defined as part of FHIR that can be represented as in-line definitions of a care plan activity.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"codesystem-resource-types.html\"\u003e\u003ccode\u003ehttp://hl7.org/fhir/resource-types\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-Appointment\"\u003eAppointment\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppointment\u003c/td\u003e\u003ctd\u003eA booking of a healthcare event among patient(s), practitioner(s), related person(s) and/or device(s) for a specific date/time. This may result in one or more Encounter(s).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-CommunicationRequest\"\u003eCommunicationRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunicationRequest\u003c/td\u003e\u003ctd\u003eA request to convey information; e.g. the CDS system proposes that an alert be sent to a responsible provider, the CDS system proposes that the public health agency be notified about a reportable condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-DeviceRequest\"\u003eDeviceRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeviceRequest\u003c/td\u003e\u003ctd\u003eRepresents a request for a patient to employ a medical device. The device may be an implantable device, or an external assistive device, such as a walker.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-MedicationRequest\"\u003eMedicationRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedicationRequest\u003c/td\u003e\u003ctd\u003eAn order or request for both supply of the medication and the instructions for administration of the medication to a patient. The resource is called \u0026quot;MedicationRequest\u0026quot; rather than \u0026quot;MedicationPrescription\u0026quot; or \u0026quot;MedicationOrder\u0026quot; to generalize the use across inpatient and outpatient settings, including care plans, etc., and to harmonize with workflow patterns.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-NutritionOrder\"\u003eNutritionOrder\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNutritionOrder\u003c/td\u003e\u003ctd\u003eA request to supply a diet, formula feeding (enteral) or oral nutritional supplement to a patient/resident.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-Task\"\u003eTask\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTask\u003c/td\u003e\u003ctd\u003eA task to be performed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-ServiceRequest\"\u003eServiceRequest\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eServiceRequest\u003c/td\u003e\u003ctd\u003eA record of a request for service such as diagnostic investigations, treatments, or operations to be performed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-resource-types.html#resource-types-VisionPrescription\"\u003eVisionPrescription\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVisionPrescription\u003c/td\u003e\u003ctd\u003eAn authorization for the provision of glasses and/or contact lenses to a patient.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/care-plan-activity-kind",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.145"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CarePlanActivityKind",
+  "title": "Care Plan Activity Kind",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 International - Patient Care WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/patientcare/"
+        }
+      ]
+    }
+  ],
+  "description": "Resource types defined as part of FHIR that can be represented as in-line definitions of a care plan activity.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://hl7.org/fhir/resource-types",
+        "concept": [
+          {
+            "code": "Appointment"
+          },
+          {
+            "code": "CommunicationRequest"
+          },
+          {
+            "code": "DeviceRequest"
+          },
+          {
+            "code": "MedicationRequest"
+          },
+          {
+            "code": "NutritionOrder"
+          },
+          {
+            "code": "Task"
+          },
+          {
+            "code": "ServiceRequest"
+          },
+          {
+            "code": "VisionPrescription"
+          }
+        ]
+      }
+    ]
+  }
+}

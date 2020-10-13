@@ -1,0 +1,1789 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "spdx-license",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSPDXLicense\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe license that applies to an Implementation Guide (using an SPDX license Identifiers, or \u0027not-open-source\u0027). The binding is required but new SPDX license Identifiers are allowed to be used (https://spdx.org/licenses/).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/spdx-license defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-open-source\u003ca name\u003d\"spdx-license-not-open-source\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot open source\u003c/td\u003e\u003ctd\u003eNot an open source license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e0BSD\u003ca name\u003d\"spdx-license-0BSD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD Zero Clause License\u003c/td\u003e\u003ctd\u003eBSD Zero Clause License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAAL\u003ca name\u003d\"spdx-license-AAL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttribution Assurance License\u003c/td\u003e\u003ctd\u003eAttribution Assurance License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAbstyles\u003ca name\u003d\"spdx-license-Abstyles\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAbstyles License\u003c/td\u003e\u003ctd\u003eAbstyles License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAdobe-2006\u003ca name\u003d\"spdx-license-Adobe-2006\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdobe Systems Incorporated Source Code License Agreement\u003c/td\u003e\u003ctd\u003eAdobe Systems Incorporated Source Code License Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAdobe-Glyph\u003ca name\u003d\"spdx-license-Adobe-Glyph\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdobe Glyph List License\u003c/td\u003e\u003ctd\u003eAdobe Glyph List License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eADSL\u003ca name\u003d\"spdx-license-ADSL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmazon Digital Services License\u003c/td\u003e\u003ctd\u003eAmazon Digital Services License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFL-1.1\u003ca name\u003d\"spdx-license-AFL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademic Free License v1.1\u003c/td\u003e\u003ctd\u003eAcademic Free License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFL-1.2\u003ca name\u003d\"spdx-license-AFL-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademic Free License v1.2\u003c/td\u003e\u003ctd\u003eAcademic Free License v1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFL-2.0\u003ca name\u003d\"spdx-license-AFL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademic Free License v2.0\u003c/td\u003e\u003ctd\u003eAcademic Free License v2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFL-2.1\u003ca name\u003d\"spdx-license-AFL-2.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademic Free License v2.1\u003c/td\u003e\u003ctd\u003eAcademic Free License v2.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFL-3.0\u003ca name\u003d\"spdx-license-AFL-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademic Free License v3.0\u003c/td\u003e\u003ctd\u003eAcademic Free License v3.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAfmparse\u003ca name\u003d\"spdx-license-Afmparse\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAfmparse License\u003c/td\u003e\u003ctd\u003eAfmparse License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAGPL-1.0-only\u003ca name\u003d\"spdx-license-AGPL-1.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAffero General Public License v1.0 only\u003c/td\u003e\u003ctd\u003eAffero General Public License v1.0 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAGPL-1.0-or-later\u003ca name\u003d\"spdx-license-AGPL-1.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAffero General Public License v1.0 or later\u003c/td\u003e\u003ctd\u003eAffero General Public License v1.0 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAGPL-3.0-only\u003ca name\u003d\"spdx-license-AGPL-3.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Affero General Public License v3.0 only\u003c/td\u003e\u003ctd\u003eGNU Affero General Public License v3.0 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAGPL-3.0-or-later\u003ca name\u003d\"spdx-license-AGPL-3.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Affero General Public License v3.0 or later\u003c/td\u003e\u003ctd\u003eGNU Affero General Public License v3.0 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAladdin\u003ca name\u003d\"spdx-license-Aladdin\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAladdin Free Public License\u003c/td\u003e\u003ctd\u003eAladdin Free Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAMDPLPA\u003ca name\u003d\"spdx-license-AMDPLPA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAMD\u0027s plpa_map.c License\u003c/td\u003e\u003ctd\u003eAMD\u0027s plpa_map.c License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAML\u003ca name\u003d\"spdx-license-AML\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApple MIT License\u003c/td\u003e\u003ctd\u003eApple MIT License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAMPAS\u003ca name\u003d\"spdx-license-AMPAS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAcademy of Motion Picture Arts and Sciences BSD\u003c/td\u003e\u003ctd\u003eAcademy of Motion Picture Arts and Sciences BSD.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eANTLR-PD\u003ca name\u003d\"spdx-license-ANTLR-PD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eANTLR Software Rights Notice\u003c/td\u003e\u003ctd\u003eANTLR Software Rights Notice.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eApache-1.0\u003ca name\u003d\"spdx-license-Apache-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApache License 1.0\u003c/td\u003e\u003ctd\u003eApache License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eApache-1.1\u003ca name\u003d\"spdx-license-Apache-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApache License 1.1\u003c/td\u003e\u003ctd\u003eApache License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eApache-2.0\u003ca name\u003d\"spdx-license-Apache-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApache License 2.0\u003c/td\u003e\u003ctd\u003eApache License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAPAFML\u003ca name\u003d\"spdx-license-APAFML\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdobe Postscript AFM License\u003c/td\u003e\u003ctd\u003eAdobe Postscript AFM License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAPL-1.0\u003ca name\u003d\"spdx-license-APL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdaptive Public License 1.0\u003c/td\u003e\u003ctd\u003eAdaptive Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAPSL-1.0\u003ca name\u003d\"spdx-license-APSL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApple Public Source License 1.0\u003c/td\u003e\u003ctd\u003eApple Public Source License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAPSL-1.1\u003ca name\u003d\"spdx-license-APSL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApple Public Source License 1.1\u003c/td\u003e\u003ctd\u003eApple Public Source License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAPSL-1.2\u003ca name\u003d\"spdx-license-APSL-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApple Public Source License 1.2\u003c/td\u003e\u003ctd\u003eApple Public Source License 1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAPSL-2.0\u003ca name\u003d\"spdx-license-APSL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApple Public Source License 2.0\u003c/td\u003e\u003ctd\u003eApple Public Source License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eArtistic-1.0-cl8\u003ca name\u003d\"spdx-license-Artistic-1.460-cl8\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArtistic License 1.0 w/clause 8\u003c/td\u003e\u003ctd\u003eArtistic License 1.0 w/clause 8.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eArtistic-1.0-Perl\u003ca name\u003d\"spdx-license-Artistic-1.460-Perl\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArtistic License 1.0 (Perl)\u003c/td\u003e\u003ctd\u003eArtistic License 1.0 (Perl).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eArtistic-1.0\u003ca name\u003d\"spdx-license-Artistic-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArtistic License 1.0\u003c/td\u003e\u003ctd\u003eArtistic License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eArtistic-2.0\u003ca name\u003d\"spdx-license-Artistic-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eArtistic License 2.0\u003c/td\u003e\u003ctd\u003eArtistic License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBahyph\u003ca name\u003d\"spdx-license-Bahyph\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBahyph License\u003c/td\u003e\u003ctd\u003eBahyph License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBarr\u003ca name\u003d\"spdx-license-Barr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBarr License\u003c/td\u003e\u003ctd\u003eBarr License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBeerware\u003ca name\u003d\"spdx-license-Beerware\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBeerware License\u003c/td\u003e\u003ctd\u003eBeerware License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBitTorrent-1.0\u003ca name\u003d\"spdx-license-BitTorrent-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBitTorrent Open Source License v1.0\u003c/td\u003e\u003ctd\u003eBitTorrent Open Source License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBitTorrent-1.1\u003ca name\u003d\"spdx-license-BitTorrent-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBitTorrent Open Source License v1.1\u003c/td\u003e\u003ctd\u003eBitTorrent Open Source License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBorceux\u003ca name\u003d\"spdx-license-Borceux\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBorceux license\u003c/td\u003e\u003ctd\u003eBorceux license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-1-Clause\u003ca name\u003d\"spdx-license-BSD-1-Clause\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 1-Clause License\u003c/td\u003e\u003ctd\u003eBSD 1-Clause License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-2-Clause-FreeBSD\u003ca name\u003d\"spdx-license-BSD-2-Clause-FreeBSD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 2-Clause FreeBSD License\u003c/td\u003e\u003ctd\u003eBSD 2-Clause FreeBSD License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-2-Clause-NetBSD\u003ca name\u003d\"spdx-license-BSD-2-Clause-NetBSD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 2-Clause NetBSD License\u003c/td\u003e\u003ctd\u003eBSD 2-Clause NetBSD License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-2-Clause-Patent\u003ca name\u003d\"spdx-license-BSD-2-Clause-Patent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD-2-Clause Plus Patent License\u003c/td\u003e\u003ctd\u003eBSD-2-Clause Plus Patent License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-2-Clause\u003ca name\u003d\"spdx-license-BSD-2-Clause\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 2-Clause \u0026quot;Simplified\u0026quot; License\u003c/td\u003e\u003ctd\u003eBSD 2-Clause \u0026quot;Simplified\u0026quot; License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause-Attribution\u003ca name\u003d\"spdx-license-BSD-3-Clause-Attribution\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD with attribution\u003c/td\u003e\u003ctd\u003eBSD with attribution.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause-Clear\u003ca name\u003d\"spdx-license-BSD-3-Clause-Clear\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 3-Clause Clear License\u003c/td\u003e\u003ctd\u003eBSD 3-Clause Clear License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause-LBNL\u003ca name\u003d\"spdx-license-BSD-3-Clause-LBNL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLawrence Berkeley National Labs BSD variant license\u003c/td\u003e\u003ctd\u003eLawrence Berkeley National Labs BSD variant license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause-No-Nuclear-License-2014\u003ca name\u003d\"spdx-license-BSD-3-Clause-No-Nuclear-License-2014\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 3-Clause No Nuclear License 2014\u003c/td\u003e\u003ctd\u003eBSD 3-Clause No Nuclear License 2014.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause-No-Nuclear-License\u003ca name\u003d\"spdx-license-BSD-3-Clause-No-Nuclear-License\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 3-Clause No Nuclear License\u003c/td\u003e\u003ctd\u003eBSD 3-Clause No Nuclear License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause-No-Nuclear-Warranty\u003ca name\u003d\"spdx-license-BSD-3-Clause-No-Nuclear-Warranty\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 3-Clause No Nuclear Warranty\u003c/td\u003e\u003ctd\u003eBSD 3-Clause No Nuclear Warranty.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-3-Clause\u003ca name\u003d\"spdx-license-BSD-3-Clause\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 3-Clause \u0026quot;New\u0026quot; or \u0026quot;Revised\u0026quot; License\u003c/td\u003e\u003ctd\u003eBSD 3-Clause \u0026quot;New\u0026quot; or \u0026quot;Revised\u0026quot; License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-4-Clause-UC\u003ca name\u003d\"spdx-license-BSD-4-Clause-UC\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD-4-Clause (University of California-Specific)\u003c/td\u003e\u003ctd\u003eBSD-4-Clause (University of California-Specific).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-4-Clause\u003ca name\u003d\"spdx-license-BSD-4-Clause\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD 4-Clause \u0026quot;Original\u0026quot; or \u0026quot;Old\u0026quot; License\u003c/td\u003e\u003ctd\u003eBSD 4-Clause \u0026quot;Original\u0026quot; or \u0026quot;Old\u0026quot; License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-Protection\u003ca name\u003d\"spdx-license-BSD-Protection\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD Protection License\u003c/td\u003e\u003ctd\u003eBSD Protection License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSD-Source-Code\u003ca name\u003d\"spdx-license-BSD-Source-Code\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBSD Source Code Attribution\u003c/td\u003e\u003ctd\u003eBSD Source Code Attribution.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBSL-1.0\u003ca name\u003d\"spdx-license-BSL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBoost Software License 1.0\u003c/td\u003e\u003ctd\u003eBoost Software License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebzip2-1.0.5\u003ca name\u003d\"spdx-license-bzip2-1.460.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebzip2 and libbzip2 License v1.0.5\u003c/td\u003e\u003ctd\u003ebzip2 and libbzip2 License v1.0.5.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebzip2-1.0.6\u003ca name\u003d\"spdx-license-bzip2-1.460.466\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebzip2 and libbzip2 License v1.0.6\u003c/td\u003e\u003ctd\u003ebzip2 and libbzip2 License v1.0.6.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCaldera\u003ca name\u003d\"spdx-license-Caldera\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCaldera License\u003c/td\u003e\u003ctd\u003eCaldera License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCATOSL-1.1\u003ca name\u003d\"spdx-license-CATOSL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComputer Associates Trusted Open Source License 1.1\u003c/td\u003e\u003ctd\u003eComputer Associates Trusted Open Source License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-1.0\u003ca name\u003d\"spdx-license-CC-BY-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 1.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 1.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-2.0\u003ca name\u003d\"spdx-license-CC-BY-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 2.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 2.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-2.5\u003ca name\u003d\"spdx-license-CC-BY-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 2.5 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 2.5 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-3.0\u003ca name\u003d\"spdx-license-CC-BY-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 3.0 Unported\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 3.0 Unported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-4.0\u003ca name\u003d\"spdx-license-CC-BY-4.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 4.0 International\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution 4.0 International.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-1.0\u003ca name\u003d\"spdx-license-CC-BY-NC-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 1.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 1.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-2.0\u003ca name\u003d\"spdx-license-CC-BY-NC-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 2.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 2.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-2.5\u003ca name\u003d\"spdx-license-CC-BY-NC-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 2.5 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 2.5 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-3.0\u003ca name\u003d\"spdx-license-CC-BY-NC-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 3.0 Unported\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 3.0 Unported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-4.0\u003ca name\u003d\"spdx-license-CC-BY-NC-4.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 4.0 International\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial 4.0 International.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-ND-1.0\u003ca name\u003d\"spdx-license-CC-BY-NC-ND-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 1.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 1.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-ND-2.0\u003ca name\u003d\"spdx-license-CC-BY-NC-ND-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 2.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 2.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-ND-2.5\u003ca name\u003d\"spdx-license-CC-BY-NC-ND-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 2.5 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 2.5 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-ND-3.0\u003ca name\u003d\"spdx-license-CC-BY-NC-ND-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 3.0 Unported\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 3.0 Unported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-ND-4.0\u003ca name\u003d\"spdx-license-CC-BY-NC-ND-4.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 4.0 International\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial No Derivatives 4.0 International.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-SA-1.0\u003ca name\u003d\"spdx-license-CC-BY-NC-SA-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 1.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 1.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-SA-2.0\u003ca name\u003d\"spdx-license-CC-BY-NC-SA-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 2.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 2.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-SA-2.5\u003ca name\u003d\"spdx-license-CC-BY-NC-SA-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 2.5 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 2.5 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-SA-3.0\u003ca name\u003d\"spdx-license-CC-BY-NC-SA-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 3.0 Unported\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 3.0 Unported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-NC-SA-4.0\u003ca name\u003d\"spdx-license-CC-BY-NC-SA-4.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 4.0 International\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Non Commercial Share Alike 4.0 International.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-ND-1.0\u003ca name\u003d\"spdx-license-CC-BY-ND-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 1.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 1.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-ND-2.0\u003ca name\u003d\"spdx-license-CC-BY-ND-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 2.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 2.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-ND-2.5\u003ca name\u003d\"spdx-license-CC-BY-ND-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 2.5 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 2.5 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-ND-3.0\u003ca name\u003d\"spdx-license-CC-BY-ND-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 3.0 Unported\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 3.0 Unported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-ND-4.0\u003ca name\u003d\"spdx-license-CC-BY-ND-4.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 4.0 International\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution No Derivatives 4.0 International.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-SA-1.0\u003ca name\u003d\"spdx-license-CC-BY-SA-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 1.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 1.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-SA-2.0\u003ca name\u003d\"spdx-license-CC-BY-SA-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 2.0 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 2.0 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-SA-2.5\u003ca name\u003d\"spdx-license-CC-BY-SA-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 2.5 Generic\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 2.5 Generic.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-SA-3.0\u003ca name\u003d\"spdx-license-CC-BY-SA-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 3.0 Unported\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 3.0 Unported.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC-BY-SA-4.0\u003ca name\u003d\"spdx-license-CC-BY-SA-4.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 4.0 International\u003c/td\u003e\u003ctd\u003eCreative Commons Attribution Share Alike 4.0 International.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCC0-1.0\u003ca name\u003d\"spdx-license-CC0-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCreative Commons Zero v1.0 Universal\u003c/td\u003e\u003ctd\u003eCreative Commons Zero v1.0 Universal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCDDL-1.0\u003ca name\u003d\"spdx-license-CDDL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommon Development and Distribution License 1.0\u003c/td\u003e\u003ctd\u003eCommon Development and Distribution License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCDDL-1.1\u003ca name\u003d\"spdx-license-CDDL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommon Development and Distribution License 1.1\u003c/td\u003e\u003ctd\u003eCommon Development and Distribution License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCDLA-Permissive-1.0\u003ca name\u003d\"spdx-license-CDLA-Permissive-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunity Data License Agreement Permissive 1.0\u003c/td\u003e\u003ctd\u003eCommunity Data License Agreement Permissive 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCDLA-Sharing-1.0\u003ca name\u003d\"spdx-license-CDLA-Sharing-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommunity Data License Agreement Sharing 1.0\u003c/td\u003e\u003ctd\u003eCommunity Data License Agreement Sharing 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCECILL-1.0\u003ca name\u003d\"spdx-license-CECILL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v1.0\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCECILL-1.1\u003ca name\u003d\"spdx-license-CECILL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v1.1\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCECILL-2.0\u003ca name\u003d\"spdx-license-CECILL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v2.0\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCECILL-2.1\u003ca name\u003d\"spdx-license-CECILL-2.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v2.1\u003c/td\u003e\u003ctd\u003eCeCILL Free Software License Agreement v2.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCECILL-B\u003ca name\u003d\"spdx-license-CECILL-B\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeCILL-B Free Software License Agreement\u003c/td\u003e\u003ctd\u003eCeCILL-B Free Software License Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCECILL-C\u003ca name\u003d\"spdx-license-CECILL-C\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCeCILL-C Free Software License Agreement\u003c/td\u003e\u003ctd\u003eCeCILL-C Free Software License Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eClArtistic\u003ca name\u003d\"spdx-license-ClArtistic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClarified Artistic License\u003c/td\u003e\u003ctd\u003eClarified Artistic License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCNRI-Jython\u003ca name\u003d\"spdx-license-CNRI-Jython\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCNRI Jython License\u003c/td\u003e\u003ctd\u003eCNRI Jython License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCNRI-Python-GPL-Compatible\u003ca name\u003d\"spdx-license-CNRI-Python-GPL-Compatible\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCNRI Python Open Source GPL Compatible License Agreement\u003c/td\u003e\u003ctd\u003eCNRI Python Open Source GPL Compatible License Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCNRI-Python\u003ca name\u003d\"spdx-license-CNRI-Python\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCNRI Python License\u003c/td\u003e\u003ctd\u003eCNRI Python License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCondor-1.1\u003ca name\u003d\"spdx-license-Condor-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCondor Public License v1.1\u003c/td\u003e\u003ctd\u003eCondor Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCPAL-1.0\u003ca name\u003d\"spdx-license-CPAL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommon Public Attribution License 1.0\u003c/td\u003e\u003ctd\u003eCommon Public Attribution License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCPL-1.0\u003ca name\u003d\"spdx-license-CPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCommon Public License 1.0\u003c/td\u003e\u003ctd\u003eCommon Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCPOL-1.02\u003ca name\u003d\"spdx-license-CPOL-1.4602\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCode Project Open License 1.02\u003c/td\u003e\u003ctd\u003eCode Project Open License 1.02.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCrossword\u003ca name\u003d\"spdx-license-Crossword\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCrossword License\u003c/td\u003e\u003ctd\u003eCrossword License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCrystalStacker\u003ca name\u003d\"spdx-license-CrystalStacker\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCrystalStacker License\u003c/td\u003e\u003ctd\u003eCrystalStacker License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCUA-OPL-1.0\u003ca name\u003d\"spdx-license-CUA-OPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCUA Office Public License v1.0\u003c/td\u003e\u003ctd\u003eCUA Office Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCube\u003ca name\u003d\"spdx-license-Cube\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCube License\u003c/td\u003e\u003ctd\u003eCube License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecurl\u003ca name\u003d\"spdx-license-curl\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecurl License\u003c/td\u003e\u003ctd\u003ecurl License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eD-FSL-1.0\u003ca name\u003d\"spdx-license-D-FSL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDeutsche Freie Software Lizenz\u003c/td\u003e\u003ctd\u003eDeutsche Freie Software Lizenz.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediffmark\u003ca name\u003d\"spdx-license-diffmark\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ediffmark license\u003c/td\u003e\u003ctd\u003ediffmark license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDOC\u003ca name\u003d\"spdx-license-DOC\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDOC License\u003c/td\u003e\u003ctd\u003eDOC License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDotseqn\u003ca name\u003d\"spdx-license-Dotseqn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDotseqn License\u003c/td\u003e\u003ctd\u003eDotseqn License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDSDP\u003ca name\u003d\"spdx-license-DSDP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDSDP License\u003c/td\u003e\u003ctd\u003eDSDP License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edvipdfm\u003ca name\u003d\"spdx-license-dvipdfm\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edvipdfm License\u003c/td\u003e\u003ctd\u003edvipdfm License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eECL-1.0\u003ca name\u003d\"spdx-license-ECL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEducational Community License v1.0\u003c/td\u003e\u003ctd\u003eEducational Community License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eECL-2.0\u003ca name\u003d\"spdx-license-ECL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEducational Community License v2.0\u003c/td\u003e\u003ctd\u003eEducational Community License v2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEFL-1.0\u003ca name\u003d\"spdx-license-EFL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEiffel Forum License v1.0\u003c/td\u003e\u003ctd\u003eEiffel Forum License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEFL-2.0\u003ca name\u003d\"spdx-license-EFL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEiffel Forum License v2.0\u003c/td\u003e\u003ctd\u003eEiffel Forum License v2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeGenix\u003ca name\u003d\"spdx-license-eGenix\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eeGenix.com Public License 1.1.0\u003c/td\u003e\u003ctd\u003eeGenix.com Public License 1.1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEntessa\u003ca name\u003d\"spdx-license-Entessa\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntessa Public License v1.0\u003c/td\u003e\u003ctd\u003eEntessa Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEPL-1.0\u003ca name\u003d\"spdx-license-EPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEclipse Public License 1.0\u003c/td\u003e\u003ctd\u003eEclipse Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEPL-2.0\u003ca name\u003d\"spdx-license-EPL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEclipse Public License 2.0\u003c/td\u003e\u003ctd\u003eEclipse Public License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eErlPL-1.1\u003ca name\u003d\"spdx-license-ErlPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eErlang Public License v1.1\u003c/td\u003e\u003ctd\u003eErlang Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEUDatagrid\u003ca name\u003d\"spdx-license-EUDatagrid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEU DataGrid Software License\u003c/td\u003e\u003ctd\u003eEU DataGrid Software License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEUPL-1.0\u003ca name\u003d\"spdx-license-EUPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEuropean Union Public License 1.0\u003c/td\u003e\u003ctd\u003eEuropean Union Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEUPL-1.1\u003ca name\u003d\"spdx-license-EUPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEuropean Union Public License 1.1\u003c/td\u003e\u003ctd\u003eEuropean Union Public License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEUPL-1.2\u003ca name\u003d\"spdx-license-EUPL-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEuropean Union Public License 1.2\u003c/td\u003e\u003ctd\u003eEuropean Union Public License 1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEurosym\u003ca name\u003d\"spdx-license-Eurosym\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEurosym License\u003c/td\u003e\u003ctd\u003eEurosym License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFair\u003ca name\u003d\"spdx-license-Fair\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFair License\u003c/td\u003e\u003ctd\u003eFair License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFrameworx-1.0\u003ca name\u003d\"spdx-license-Frameworx-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFrameworx Open License 1.0\u003c/td\u003e\u003ctd\u003eFrameworx Open License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFreeImage\u003ca name\u003d\"spdx-license-FreeImage\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFreeImage Public License v1.0\u003c/td\u003e\u003ctd\u003eFreeImage Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFSFAP\u003ca name\u003d\"spdx-license-FSFAP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFSF All Permissive License\u003c/td\u003e\u003ctd\u003eFSF All Permissive License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFSFUL\u003ca name\u003d\"spdx-license-FSFUL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFSF Unlimited License\u003c/td\u003e\u003ctd\u003eFSF Unlimited License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFSFULLR\u003ca name\u003d\"spdx-license-FSFULLR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFSF Unlimited License (with License Retention)\u003c/td\u003e\u003ctd\u003eFSF Unlimited License (with License Retention).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eFTL\u003ca name\u003d\"spdx-license-FTL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFreetype Project License\u003c/td\u003e\u003ctd\u003eFreetype Project License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGFDL-1.1-only\u003ca name\u003d\"spdx-license-GFDL-1.461-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.1 only\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.1 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGFDL-1.1-or-later\u003ca name\u003d\"spdx-license-GFDL-1.461-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.1 or later\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.1 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGFDL-1.2-only\u003ca name\u003d\"spdx-license-GFDL-1.462-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.2 only\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.2 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGFDL-1.2-or-later\u003ca name\u003d\"spdx-license-GFDL-1.462-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.2 or later\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.2 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGFDL-1.3-only\u003ca name\u003d\"spdx-license-GFDL-1.463-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.3 only\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.3 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGFDL-1.3-or-later\u003ca name\u003d\"spdx-license-GFDL-1.463-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.3 or later\u003c/td\u003e\u003ctd\u003eGNU Free Documentation License v1.3 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGiftware\u003ca name\u003d\"spdx-license-Giftware\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGiftware License\u003c/td\u003e\u003ctd\u003eGiftware License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGL2PS\u003ca name\u003d\"spdx-license-GL2PS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGL2PS License\u003c/td\u003e\u003ctd\u003eGL2PS License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGlide\u003ca name\u003d\"spdx-license-Glide\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e3dfx Glide License\u003c/td\u003e\u003ctd\u003e3dfx Glide License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGlulxe\u003ca name\u003d\"spdx-license-Glulxe\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGlulxe License\u003c/td\u003e\u003ctd\u003eGlulxe License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egnuplot\u003ca name\u003d\"spdx-license-gnuplot\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003egnuplot License\u003c/td\u003e\u003ctd\u003egnuplot License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGPL-1.0-only\u003ca name\u003d\"spdx-license-GPL-1.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU General Public License v1.0 only\u003c/td\u003e\u003ctd\u003eGNU General Public License v1.0 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGPL-1.0-or-later\u003ca name\u003d\"spdx-license-GPL-1.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU General Public License v1.0 or later\u003c/td\u003e\u003ctd\u003eGNU General Public License v1.0 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGPL-2.0-only\u003ca name\u003d\"spdx-license-GPL-2.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU General Public License v2.0 only\u003c/td\u003e\u003ctd\u003eGNU General Public License v2.0 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGPL-2.0-or-later\u003ca name\u003d\"spdx-license-GPL-2.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU General Public License v2.0 or later\u003c/td\u003e\u003ctd\u003eGNU General Public License v2.0 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGPL-3.0-only\u003ca name\u003d\"spdx-license-GPL-3.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU General Public License v3.0 only\u003c/td\u003e\u003ctd\u003eGNU General Public License v3.0 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGPL-3.0-or-later\u003ca name\u003d\"spdx-license-GPL-3.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU General Public License v3.0 or later\u003c/td\u003e\u003ctd\u003eGNU General Public License v3.0 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egSOAP-1.3b\u003ca name\u003d\"spdx-license-gSOAP-1.463b\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003egSOAP Public License v1.3b\u003c/td\u003e\u003ctd\u003egSOAP Public License v1.3b.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHaskellReport\u003ca name\u003d\"spdx-license-HaskellReport\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHaskell Language Report License\u003c/td\u003e\u003ctd\u003eHaskell Language Report License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHPND\u003ca name\u003d\"spdx-license-HPND\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHistorical Permission Notice and Disclaimer\u003c/td\u003e\u003ctd\u003eHistorical Permission Notice and Disclaimer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIBM-pibs\u003ca name\u003d\"spdx-license-IBM-pibs\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIBM PowerPC Initialization and Boot Software\u003c/td\u003e\u003ctd\u003eIBM PowerPC Initialization and Boot Software.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eICU\u003ca name\u003d\"spdx-license-ICU\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eICU License\u003c/td\u003e\u003ctd\u003eICU License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIJG\u003ca name\u003d\"spdx-license-IJG\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIndependent JPEG Group License\u003c/td\u003e\u003ctd\u003eIndependent JPEG Group License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eImageMagick\u003ca name\u003d\"spdx-license-ImageMagick\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImageMagick License\u003c/td\u003e\u003ctd\u003eImageMagick License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eiMatix\u003ca name\u003d\"spdx-license-iMatix\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eiMatix Standard Function Library Agreement\u003c/td\u003e\u003ctd\u003eiMatix Standard Function Library Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eImlib2\u003ca name\u003d\"spdx-license-Imlib2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eImlib2 License\u003c/td\u003e\u003ctd\u003eImlib2 License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eInfo-ZIP\u003ca name\u003d\"spdx-license-Info-ZIP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInfo-ZIP License\u003c/td\u003e\u003ctd\u003eInfo-ZIP License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIntel-ACPI\u003ca name\u003d\"spdx-license-Intel-ACPI\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIntel ACPI Software License Agreement\u003c/td\u003e\u003ctd\u003eIntel ACPI Software License Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIntel\u003ca name\u003d\"spdx-license-Intel\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIntel Open Source License\u003c/td\u003e\u003ctd\u003eIntel Open Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eInterbase-1.0\u003ca name\u003d\"spdx-license-Interbase-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInterbase Public License v1.0\u003c/td\u003e\u003ctd\u003eInterbase Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIPA\u003ca name\u003d\"spdx-license-IPA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIPA Font License\u003c/td\u003e\u003ctd\u003eIPA Font License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIPL-1.0\u003ca name\u003d\"spdx-license-IPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIBM Public License v1.0\u003c/td\u003e\u003ctd\u003eIBM Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eISC\u003ca name\u003d\"spdx-license-ISC\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eISC License\u003c/td\u003e\u003ctd\u003eISC License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eJasPer-2.0\u003ca name\u003d\"spdx-license-JasPer-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eJasPer License\u003c/td\u003e\u003ctd\u003eJasPer License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eJSON\u003ca name\u003d\"spdx-license-JSON\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eJSON License\u003c/td\u003e\u003ctd\u003eJSON License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLAL-1.2\u003ca name\u003d\"spdx-license-LAL-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLicence Art Libre 1.2\u003c/td\u003e\u003ctd\u003eLicence Art Libre 1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLAL-1.3\u003ca name\u003d\"spdx-license-LAL-1.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLicence Art Libre 1.3\u003c/td\u003e\u003ctd\u003eLicence Art Libre 1.3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLatex2e\u003ca name\u003d\"spdx-license-Latex2e\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLatex2e License\u003c/td\u003e\u003ctd\u003eLatex2e License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLeptonica\u003ca name\u003d\"spdx-license-Leptonica\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLeptonica License\u003c/td\u003e\u003ctd\u003eLeptonica License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPL-2.0-only\u003ca name\u003d\"spdx-license-LGPL-2.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Library General Public License v2 only\u003c/td\u003e\u003ctd\u003eGNU Library General Public License v2 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPL-2.0-or-later\u003ca name\u003d\"spdx-license-LGPL-2.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Library General Public License v2 or later\u003c/td\u003e\u003ctd\u003eGNU Library General Public License v2 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPL-2.1-only\u003ca name\u003d\"spdx-license-LGPL-2.461-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v2.1 only\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v2.1 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPL-2.1-or-later\u003ca name\u003d\"spdx-license-LGPL-2.461-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v2.1 or later\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v2.1 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPL-3.0-only\u003ca name\u003d\"spdx-license-LGPL-3.460-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v3.0 only\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v3.0 only.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPL-3.0-or-later\u003ca name\u003d\"spdx-license-LGPL-3.460-or-later\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v3.0 or later\u003c/td\u003e\u003ctd\u003eGNU Lesser General Public License v3.0 or later.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLGPLLR\u003ca name\u003d\"spdx-license-LGPLLR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLesser General Public License For Linguistic Resources\u003c/td\u003e\u003ctd\u003eLesser General Public License For Linguistic Resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLibpng\u003ca name\u003d\"spdx-license-Libpng\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003elibpng License\u003c/td\u003e\u003ctd\u003elibpng License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elibtiff\u003ca name\u003d\"spdx-license-libtiff\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003elibtiff License\u003c/td\u003e\u003ctd\u003elibtiff License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLiLiQ-P-1.1\u003ca name\u003d\"spdx-license-LiLiQ-P-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLicence Libre du Québec – Permissive version 1.1\u003c/td\u003e\u003ctd\u003eLicence Libre du Québec – Permissive version 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLiLiQ-R-1.1\u003ca name\u003d\"spdx-license-LiLiQ-R-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLicence Libre du Québec – Réciprocité version 1.1\u003c/td\u003e\u003ctd\u003eLicence Libre du Québec – Réciprocité version 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLiLiQ-Rplus-1.1\u003ca name\u003d\"spdx-license-LiLiQ-Rplus-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLicence Libre du Québec – Réciprocité forte version 1.1\u003c/td\u003e\u003ctd\u003eLicence Libre du Québec – Réciprocité forte version 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLinux-OpenIB\u003ca name\u003d\"spdx-license-Linux-OpenIB\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLinux Kernel Variant of OpenIB.org license\u003c/td\u003e\u003ctd\u003eLinux Kernel Variant of OpenIB.org license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPL-1.0\u003ca name\u003d\"spdx-license-LPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLucent Public License Version 1.0\u003c/td\u003e\u003ctd\u003eLucent Public License Version 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPL-1.02\u003ca name\u003d\"spdx-license-LPL-1.4602\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLucent Public License v1.02\u003c/td\u003e\u003ctd\u003eLucent Public License v1.02.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPPL-1.0\u003ca name\u003d\"spdx-license-LPPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.0\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPPL-1.1\u003ca name\u003d\"spdx-license-LPPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.1\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPPL-1.2\u003ca name\u003d\"spdx-license-LPPL-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.2\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPPL-1.3a\u003ca name\u003d\"spdx-license-LPPL-1.463a\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.3a\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.3a.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLPPL-1.3c\u003ca name\u003d\"spdx-license-LPPL-1.463c\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.3c\u003c/td\u003e\u003ctd\u003eLaTeX Project Public License v1.3c.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMakeIndex\u003ca name\u003d\"spdx-license-MakeIndex\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMakeIndex License\u003c/td\u003e\u003ctd\u003eMakeIndex License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMirOS\u003ca name\u003d\"spdx-license-MirOS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMirOS License\u003c/td\u003e\u003ctd\u003eMirOS License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMIT-0\u003ca name\u003d\"spdx-license-MIT-0\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMIT No Attribution\u003c/td\u003e\u003ctd\u003eMIT No Attribution.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMIT-advertising\u003ca name\u003d\"spdx-license-MIT-advertising\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnlightenment License (e16)\u003c/td\u003e\u003ctd\u003eEnlightenment License (e16).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMIT-CMU\u003ca name\u003d\"spdx-license-MIT-CMU\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCMU License\u003c/td\u003e\u003ctd\u003eCMU License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMIT-enna\u003ca name\u003d\"spdx-license-MIT-enna\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eenna License\u003c/td\u003e\u003ctd\u003eenna License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMIT-feh\u003ca name\u003d\"spdx-license-MIT-feh\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003efeh License\u003c/td\u003e\u003ctd\u003efeh License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMIT\u003ca name\u003d\"spdx-license-MIT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMIT License\u003c/td\u003e\u003ctd\u003eMIT License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMITNFA\u003ca name\u003d\"spdx-license-MITNFA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMIT +no-false-attribs license\u003c/td\u003e\u003ctd\u003eMIT +no-false-attribs license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMotosoto\u003ca name\u003d\"spdx-license-Motosoto\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMotosoto License\u003c/td\u003e\u003ctd\u003eMotosoto License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003empich2\u003ca name\u003d\"spdx-license-mpich2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003empich2 License\u003c/td\u003e\u003ctd\u003empich2 License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMPL-1.0\u003ca name\u003d\"spdx-license-MPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMozilla Public License 1.0\u003c/td\u003e\u003ctd\u003eMozilla Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMPL-1.1\u003ca name\u003d\"spdx-license-MPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMozilla Public License 1.1\u003c/td\u003e\u003ctd\u003eMozilla Public License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMPL-2.0-no-copyleft-exception\u003ca name\u003d\"spdx-license-MPL-2.460-no-copyleft-exception\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMozilla Public License 2.0 (no copyleft exception)\u003c/td\u003e\u003ctd\u003eMozilla Public License 2.0 (no copyleft exception).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMPL-2.0\u003ca name\u003d\"spdx-license-MPL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMozilla Public License 2.0\u003c/td\u003e\u003ctd\u003eMozilla Public License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMS-PL\u003ca name\u003d\"spdx-license-MS-PL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMicrosoft Public License\u003c/td\u003e\u003ctd\u003eMicrosoft Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMS-RL\u003ca name\u003d\"spdx-license-MS-RL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMicrosoft Reciprocal License\u003c/td\u003e\u003ctd\u003eMicrosoft Reciprocal License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMTLL\u003ca name\u003d\"spdx-license-MTLL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMatrix Template Library License\u003c/td\u003e\u003ctd\u003eMatrix Template Library License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMultics\u003ca name\u003d\"spdx-license-Multics\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMultics License\u003c/td\u003e\u003ctd\u003eMultics License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMup\u003ca name\u003d\"spdx-license-Mup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMup License\u003c/td\u003e\u003ctd\u003eMup License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNASA-1.3\u003ca name\u003d\"spdx-license-NASA-1.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNASA Open Source Agreement 1.3\u003c/td\u003e\u003ctd\u003eNASA Open Source Agreement 1.3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNaumen\u003ca name\u003d\"spdx-license-Naumen\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNaumen Public License\u003c/td\u003e\u003ctd\u003eNaumen Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNBPL-1.0\u003ca name\u003d\"spdx-license-NBPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNet Boolean Public License v1\u003c/td\u003e\u003ctd\u003eNet Boolean Public License v1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNCSA\u003ca name\u003d\"spdx-license-NCSA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUniversity of Illinois/NCSA Open Source License\u003c/td\u003e\u003ctd\u003eUniversity of Illinois/NCSA Open Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNet-SNMP\u003ca name\u003d\"spdx-license-Net-SNMP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNet-SNMP License\u003c/td\u003e\u003ctd\u003eNet-SNMP License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNetCDF\u003ca name\u003d\"spdx-license-NetCDF\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNetCDF license\u003c/td\u003e\u003ctd\u003eNetCDF license.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNewsletr\u003ca name\u003d\"spdx-license-Newsletr\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNewsletr License\u003c/td\u003e\u003ctd\u003eNewsletr License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNGPL\u003ca name\u003d\"spdx-license-NGPL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNethack General Public License\u003c/td\u003e\u003ctd\u003eNethack General Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNLOD-1.0\u003ca name\u003d\"spdx-license-NLOD-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNorwegian Licence for Open Government Data\u003c/td\u003e\u003ctd\u003eNorwegian Licence for Open Government Data.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNLPL\u003ca name\u003d\"spdx-license-NLPL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNo Limit Public License\u003c/td\u003e\u003ctd\u003eNo Limit Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNokia\u003ca name\u003d\"spdx-license-Nokia\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNokia Open Source License\u003c/td\u003e\u003ctd\u003eNokia Open Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNOSL\u003ca name\u003d\"spdx-license-NOSL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNetizen Open Source License\u003c/td\u003e\u003ctd\u003eNetizen Open Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNoweb\u003ca name\u003d\"spdx-license-Noweb\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNoweb License\u003c/td\u003e\u003ctd\u003eNoweb License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNPL-1.0\u003ca name\u003d\"spdx-license-NPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNetscape Public License v1.0\u003c/td\u003e\u003ctd\u003eNetscape Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNPL-1.1\u003ca name\u003d\"spdx-license-NPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNetscape Public License v1.1\u003c/td\u003e\u003ctd\u003eNetscape Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNPOSL-3.0\u003ca name\u003d\"spdx-license-NPOSL-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNon-Profit Open Software License 3.0\u003c/td\u003e\u003ctd\u003eNon-Profit Open Software License 3.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNRL\u003ca name\u003d\"spdx-license-NRL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNRL License\u003c/td\u003e\u003ctd\u003eNRL License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNTP\u003ca name\u003d\"spdx-license-NTP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNTP License\u003c/td\u003e\u003ctd\u003eNTP License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOCCT-PL\u003ca name\u003d\"spdx-license-OCCT-PL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen CASCADE Technology Public License\u003c/td\u003e\u003ctd\u003eOpen CASCADE Technology Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOCLC-2.0\u003ca name\u003d\"spdx-license-OCLC-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOCLC Research Public License 2.0\u003c/td\u003e\u003ctd\u003eOCLC Research Public License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eODbL-1.0\u003ca name\u003d\"spdx-license-ODbL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eODC Open Database License v1.0\u003c/td\u003e\u003ctd\u003eODC Open Database License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOFL-1.0\u003ca name\u003d\"spdx-license-OFL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSIL Open Font License 1.0\u003c/td\u003e\u003ctd\u003eSIL Open Font License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOFL-1.1\u003ca name\u003d\"spdx-license-OFL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSIL Open Font License 1.1\u003c/td\u003e\u003ctd\u003eSIL Open Font License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOGTSL\u003ca name\u003d\"spdx-license-OGTSL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Group Test Suite License\u003c/td\u003e\u003ctd\u003eOpen Group Test Suite License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-1.1\u003ca name\u003d\"spdx-license-OLDAP-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.1\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-1.2\u003ca name\u003d\"spdx-license-OLDAP-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.2\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-1.3\u003ca name\u003d\"spdx-license-OLDAP-1.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.3\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-1.4\u003ca name\u003d\"spdx-license-OLDAP-1.464\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.4\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v1.4.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.0.1\u003ca name\u003d\"spdx-license-OLDAP-2.460.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.0.1\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.0.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.0\u003ca name\u003d\"spdx-license-OLDAP-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.0 (or possibly 2.0A and 2.0B)\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.0 (or possibly 2.0A and 2.0B).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.1\u003ca name\u003d\"spdx-license-OLDAP-2.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.1\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.2.1\u003ca name\u003d\"spdx-license-OLDAP-2.462.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.2.1\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.2.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.2.2\u003ca name\u003d\"spdx-license-OLDAP-2.462.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License 2.2.2\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License 2.2.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.2\u003ca name\u003d\"spdx-license-OLDAP-2.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.2\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.3\u003ca name\u003d\"spdx-license-OLDAP-2.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.3\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.4\u003ca name\u003d\"spdx-license-OLDAP-2.464\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.4\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.4.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.5\u003ca name\u003d\"spdx-license-OLDAP-2.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.5\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.5.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.6\u003ca name\u003d\"spdx-license-OLDAP-2.466\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.6\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.6.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.7\u003ca name\u003d\"spdx-license-OLDAP-2.467\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.7\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.7.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOLDAP-2.8\u003ca name\u003d\"spdx-license-OLDAP-2.468\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.8\u003c/td\u003e\u003ctd\u003eOpen LDAP Public License v2.8.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOML\u003ca name\u003d\"spdx-license-OML\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Market License\u003c/td\u003e\u003ctd\u003eOpen Market License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOpenSSL\u003ca name\u003d\"spdx-license-OpenSSL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpenSSL License\u003c/td\u003e\u003ctd\u003eOpenSSL License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOPL-1.0\u003ca name\u003d\"spdx-license-OPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Public License v1.0\u003c/td\u003e\u003ctd\u003eOpen Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOSET-PL-2.1\u003ca name\u003d\"spdx-license-OSET-PL-2.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOSET Public License version 2.1\u003c/td\u003e\u003ctd\u003eOSET Public License version 2.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOSL-1.0\u003ca name\u003d\"spdx-license-OSL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Software License 1.0\u003c/td\u003e\u003ctd\u003eOpen Software License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOSL-1.1\u003ca name\u003d\"spdx-license-OSL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Software License 1.1\u003c/td\u003e\u003ctd\u003eOpen Software License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOSL-2.0\u003ca name\u003d\"spdx-license-OSL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Software License 2.0\u003c/td\u003e\u003ctd\u003eOpen Software License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOSL-2.1\u003ca name\u003d\"spdx-license-OSL-2.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Software License 2.1\u003c/td\u003e\u003ctd\u003eOpen Software License 2.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOSL-3.0\u003ca name\u003d\"spdx-license-OSL-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOpen Software License 3.0\u003c/td\u003e\u003ctd\u003eOpen Software License 3.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePDDL-1.0\u003ca name\u003d\"spdx-license-PDDL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eODC Public Domain Dedication \u0026amp; License 1.0\u003c/td\u003e\u003ctd\u003eODC Public Domain Dedication \u0026amp; License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePHP-3.0\u003ca name\u003d\"spdx-license-PHP-3.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePHP License v3.0\u003c/td\u003e\u003ctd\u003ePHP License v3.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePHP-3.01\u003ca name\u003d\"spdx-license-PHP-3.4601\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePHP License v3.01\u003c/td\u003e\u003ctd\u003ePHP License v3.01.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePlexus\u003ca name\u003d\"spdx-license-Plexus\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlexus Classworlds License\u003c/td\u003e\u003ctd\u003ePlexus Classworlds License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePostgreSQL\u003ca name\u003d\"spdx-license-PostgreSQL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePostgreSQL License\u003c/td\u003e\u003ctd\u003ePostgreSQL License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epsfrag\u003ca name\u003d\"spdx-license-psfrag\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epsfrag License\u003c/td\u003e\u003ctd\u003epsfrag License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epsutils\u003ca name\u003d\"spdx-license-psutils\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epsutils License\u003c/td\u003e\u003ctd\u003epsutils License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePython-2.0\u003ca name\u003d\"spdx-license-Python-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePython License 2.0\u003c/td\u003e\u003ctd\u003ePython License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eQhull\u003ca name\u003d\"spdx-license-Qhull\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQhull License\u003c/td\u003e\u003ctd\u003eQhull License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eQPL-1.0\u003ca name\u003d\"spdx-license-QPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQ Public License 1.0\u003c/td\u003e\u003ctd\u003eQ Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRdisc\u003ca name\u003d\"spdx-license-Rdisc\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRdisc License\u003c/td\u003e\u003ctd\u003eRdisc License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRHeCos-1.1\u003ca name\u003d\"spdx-license-RHeCos-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRed Hat eCos Public License v1.1\u003c/td\u003e\u003ctd\u003eRed Hat eCos Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRPL-1.1\u003ca name\u003d\"spdx-license-RPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReciprocal Public License 1.1\u003c/td\u003e\u003ctd\u003eReciprocal Public License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRPL-1.5\u003ca name\u003d\"spdx-license-RPL-1.465\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReciprocal Public License 1.5\u003c/td\u003e\u003ctd\u003eReciprocal Public License 1.5.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRPSL-1.0\u003ca name\u003d\"spdx-license-RPSL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRealNetworks Public Source License v1.0\u003c/td\u003e\u003ctd\u003eRealNetworks Public Source License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRSA-MD\u003ca name\u003d\"spdx-license-RSA-MD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRSA Message-Digest License\u003c/td\u003e\u003ctd\u003eRSA Message-Digest License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRSCPL\u003ca name\u003d\"spdx-license-RSCPL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRicoh Source Code Public License\u003c/td\u003e\u003ctd\u003eRicoh Source Code Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRuby\u003ca name\u003d\"spdx-license-Ruby\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRuby License\u003c/td\u003e\u003ctd\u003eRuby License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSAX-PD\u003ca name\u003d\"spdx-license-SAX-PD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSax Public Domain Notice\u003c/td\u003e\u003ctd\u003eSax Public Domain Notice.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSaxpath\u003ca name\u003d\"spdx-license-Saxpath\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSaxpath License\u003c/td\u003e\u003ctd\u003eSaxpath License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSCEA\u003ca name\u003d\"spdx-license-SCEA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSCEA Shared Source License\u003c/td\u003e\u003ctd\u003eSCEA Shared Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSendmail\u003ca name\u003d\"spdx-license-Sendmail\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSendmail License\u003c/td\u003e\u003ctd\u003eSendmail License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSGI-B-1.0\u003ca name\u003d\"spdx-license-SGI-B-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSGI Free Software License B v1.0\u003c/td\u003e\u003ctd\u003eSGI Free Software License B v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSGI-B-1.1\u003ca name\u003d\"spdx-license-SGI-B-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSGI Free Software License B v1.1\u003c/td\u003e\u003ctd\u003eSGI Free Software License B v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSGI-B-2.0\u003ca name\u003d\"spdx-license-SGI-B-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSGI Free Software License B v2.0\u003c/td\u003e\u003ctd\u003eSGI Free Software License B v2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSimPL-2.0\u003ca name\u003d\"spdx-license-SimPL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSimple Public License 2.0\u003c/td\u003e\u003ctd\u003eSimple Public License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSISSL-1.2\u003ca name\u003d\"spdx-license-SISSL-1.462\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSun Industry Standards Source License v1.2\u003c/td\u003e\u003ctd\u003eSun Industry Standards Source License v1.2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSISSL\u003ca name\u003d\"spdx-license-SISSL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSun Industry Standards Source License v1.1\u003c/td\u003e\u003ctd\u003eSun Industry Standards Source License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSleepycat\u003ca name\u003d\"spdx-license-Sleepycat\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSleepycat License\u003c/td\u003e\u003ctd\u003eSleepycat License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSMLNJ\u003ca name\u003d\"spdx-license-SMLNJ\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard ML of New Jersey License\u003c/td\u003e\u003ctd\u003eStandard ML of New Jersey License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSMPPL\u003ca name\u003d\"spdx-license-SMPPL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecure Messaging Protocol Public License\u003c/td\u003e\u003ctd\u003eSecure Messaging Protocol Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSNIA\u003ca name\u003d\"spdx-license-SNIA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSNIA Public License 1.1\u003c/td\u003e\u003ctd\u003eSNIA Public License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSpencer-86\u003ca name\u003d\"spdx-license-Spencer-86\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpencer License 86\u003c/td\u003e\u003ctd\u003eSpencer License 86.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSpencer-94\u003ca name\u003d\"spdx-license-Spencer-94\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpencer License 94\u003c/td\u003e\u003ctd\u003eSpencer License 94.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSpencer-99\u003ca name\u003d\"spdx-license-Spencer-99\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpencer License 99\u003c/td\u003e\u003ctd\u003eSpencer License 99.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSPL-1.0\u003ca name\u003d\"spdx-license-SPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSun Public License v1.0\u003c/td\u003e\u003ctd\u003eSun Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSugarCRM-1.1.3\u003ca name\u003d\"spdx-license-SugarCRM-1.461.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSugarCRM Public License v1.1.3\u003c/td\u003e\u003ctd\u003eSugarCRM Public License v1.1.3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSWL\u003ca name\u003d\"spdx-license-SWL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eScheme Widget Library (SWL) Software License Agreement\u003c/td\u003e\u003ctd\u003eScheme Widget Library (SWL) Software License Agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTCL\u003ca name\u003d\"spdx-license-TCL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTCL/TK License\u003c/td\u003e\u003ctd\u003eTCL/TK License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTCP-wrappers\u003ca name\u003d\"spdx-license-TCP-wrappers\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTCP Wrappers License\u003c/td\u003e\u003ctd\u003eTCP Wrappers License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTMate\u003ca name\u003d\"spdx-license-TMate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTMate Open Source License\u003c/td\u003e\u003ctd\u003eTMate Open Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTORQUE-1.1\u003ca name\u003d\"spdx-license-TORQUE-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTORQUE v2.5+ Software License v1.1\u003c/td\u003e\u003ctd\u003eTORQUE v2.5+ Software License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTOSL\u003ca name\u003d\"spdx-license-TOSL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTrusster Open Source License\u003c/td\u003e\u003ctd\u003eTrusster Open Source License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eUnicode-DFS-2015\u003ca name\u003d\"spdx-license-Unicode-DFS-2015\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnicode License Agreement - Data Files and Software (2015)\u003c/td\u003e\u003ctd\u003eUnicode License Agreement - Data Files and Software (2015).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eUnicode-DFS-2016\u003ca name\u003d\"spdx-license-Unicode-DFS-2016\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnicode License Agreement - Data Files and Software (2016)\u003c/td\u003e\u003ctd\u003eUnicode License Agreement - Data Files and Software (2016).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eUnicode-TOU\u003ca name\u003d\"spdx-license-Unicode-TOU\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnicode Terms of Use\u003c/td\u003e\u003ctd\u003eUnicode Terms of Use.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eUnlicense\u003ca name\u003d\"spdx-license-Unlicense\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eThe Unlicense\u003c/td\u003e\u003ctd\u003eThe Unlicense.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eUPL-1.0\u003ca name\u003d\"spdx-license-UPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUniversal Permissive License v1.0\u003c/td\u003e\u003ctd\u003eUniversal Permissive License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eVim\u003ca name\u003d\"spdx-license-Vim\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVim License\u003c/td\u003e\u003ctd\u003eVim License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eVOSTROM\u003ca name\u003d\"spdx-license-VOSTROM\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVOSTROM Public License for Open Source\u003c/td\u003e\u003ctd\u003eVOSTROM Public License for Open Source.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eVSL-1.0\u003ca name\u003d\"spdx-license-VSL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVovida Software License v1.0\u003c/td\u003e\u003ctd\u003eVovida Software License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eW3C-19980720\u003ca name\u003d\"spdx-license-W3C-19980720\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eW3C Software Notice and License (1998-07-20)\u003c/td\u003e\u003ctd\u003eW3C Software Notice and License (1998-07-20).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eW3C-20150513\u003ca name\u003d\"spdx-license-W3C-20150513\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eW3C Software Notice and Document License (2015-05-13)\u003c/td\u003e\u003ctd\u003eW3C Software Notice and Document License (2015-05-13).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eW3C\u003ca name\u003d\"spdx-license-W3C\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eW3C Software Notice and License (2002-12-31)\u003c/td\u003e\u003ctd\u003eW3C Software Notice and License (2002-12-31).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eWatcom-1.0\u003ca name\u003d\"spdx-license-Watcom-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSybase Open Watcom Public License 1.0\u003c/td\u003e\u003ctd\u003eSybase Open Watcom Public License 1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eWsuipa\u003ca name\u003d\"spdx-license-Wsuipa\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWsuipa License\u003c/td\u003e\u003ctd\u003eWsuipa License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eWTFPL\u003ca name\u003d\"spdx-license-WTFPL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDo What The F*ck You Want To Public License\u003c/td\u003e\u003ctd\u003eDo What The F*ck You Want To Public License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eX11\u003ca name\u003d\"spdx-license-X11\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eX11 License\u003c/td\u003e\u003ctd\u003eX11 License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eXerox\u003ca name\u003d\"spdx-license-Xerox\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eXerox License\u003c/td\u003e\u003ctd\u003eXerox License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eXFree86-1.1\u003ca name\u003d\"spdx-license-XFree86-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eXFree86 License 1.1\u003c/td\u003e\u003ctd\u003eXFree86 License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003exinetd\u003ca name\u003d\"spdx-license-xinetd\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003exinetd License\u003c/td\u003e\u003ctd\u003exinetd License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eXnet\u003ca name\u003d\"spdx-license-Xnet\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eX.Net License\u003c/td\u003e\u003ctd\u003eX.Net License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003expp\u003ca name\u003d\"spdx-license-xpp\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eXPP License\u003c/td\u003e\u003ctd\u003eXPP License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eXSkat\u003ca name\u003d\"spdx-license-XSkat\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eXSkat License\u003c/td\u003e\u003ctd\u003eXSkat License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eYPL-1.0\u003ca name\u003d\"spdx-license-YPL-1.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eYahoo! Public License v1.0\u003c/td\u003e\u003ctd\u003eYahoo! Public License v1.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eYPL-1.1\u003ca name\u003d\"spdx-license-YPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eYahoo! Public License v1.1\u003c/td\u003e\u003ctd\u003eYahoo! Public License v1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZed\u003ca name\u003d\"spdx-license-Zed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZed License\u003c/td\u003e\u003ctd\u003eZed License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZend-2.0\u003ca name\u003d\"spdx-license-Zend-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZend License v2.0\u003c/td\u003e\u003ctd\u003eZend License v2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZimbra-1.3\u003ca name\u003d\"spdx-license-Zimbra-1.463\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZimbra Public License v1.3\u003c/td\u003e\u003ctd\u003eZimbra Public License v1.3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZimbra-1.4\u003ca name\u003d\"spdx-license-Zimbra-1.464\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZimbra Public License v1.4\u003c/td\u003e\u003ctd\u003eZimbra Public License v1.4.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ezlib-acknowledgement\u003ca name\u003d\"spdx-license-zlib-acknowledgement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ezlib/libpng License with Acknowledgement\u003c/td\u003e\u003ctd\u003ezlib/libpng License with Acknowledgement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZlib\u003ca name\u003d\"spdx-license-Zlib\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ezlib License\u003c/td\u003e\u003ctd\u003ezlib License.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZPL-1.1\u003ca name\u003d\"spdx-license-ZPL-1.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZope Public License 1.1\u003c/td\u003e\u003ctd\u003eZope Public License 1.1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZPL-2.0\u003ca name\u003d\"spdx-license-ZPL-2.460\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZope Public License 2.0\u003c/td\u003e\u003ctd\u003eZope Public License 2.0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eZPL-2.1\u003ca name\u003d\"spdx-license-ZPL-2.461\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eZope Public License 2.1\u003c/td\u003e\u003ctd\u003eZope Public License 2.1.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/spdx-license",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1027"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SPDXLicense",
+  "title": "SPDXLicense",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The license that applies to an Implementation Guide (using an SPDX license Identifiers, or \u0027not-open-source\u0027). The binding is required but new SPDX license Identifiers are allowed to be used (https://spdx.org/licenses/).",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/spdx-license",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "not-open-source",
+      "display": "Not open source",
+      "definition": "Not an open source license."
+    },
+    {
+      "code": "0BSD",
+      "display": "BSD Zero Clause License",
+      "definition": "BSD Zero Clause License."
+    },
+    {
+      "code": "AAL",
+      "display": "Attribution Assurance License",
+      "definition": "Attribution Assurance License."
+    },
+    {
+      "code": "Abstyles",
+      "display": "Abstyles License",
+      "definition": "Abstyles License."
+    },
+    {
+      "code": "Adobe-2006",
+      "display": "Adobe Systems Incorporated Source Code License Agreement",
+      "definition": "Adobe Systems Incorporated Source Code License Agreement."
+    },
+    {
+      "code": "Adobe-Glyph",
+      "display": "Adobe Glyph List License",
+      "definition": "Adobe Glyph List License."
+    },
+    {
+      "code": "ADSL",
+      "display": "Amazon Digital Services License",
+      "definition": "Amazon Digital Services License."
+    },
+    {
+      "code": "AFL-1.1",
+      "display": "Academic Free License v1.1",
+      "definition": "Academic Free License v1.1."
+    },
+    {
+      "code": "AFL-1.2",
+      "display": "Academic Free License v1.2",
+      "definition": "Academic Free License v1.2."
+    },
+    {
+      "code": "AFL-2.0",
+      "display": "Academic Free License v2.0",
+      "definition": "Academic Free License v2.0."
+    },
+    {
+      "code": "AFL-2.1",
+      "display": "Academic Free License v2.1",
+      "definition": "Academic Free License v2.1."
+    },
+    {
+      "code": "AFL-3.0",
+      "display": "Academic Free License v3.0",
+      "definition": "Academic Free License v3.0."
+    },
+    {
+      "code": "Afmparse",
+      "display": "Afmparse License",
+      "definition": "Afmparse License."
+    },
+    {
+      "code": "AGPL-1.0-only",
+      "display": "Affero General Public License v1.0 only",
+      "definition": "Affero General Public License v1.0 only."
+    },
+    {
+      "code": "AGPL-1.0-or-later",
+      "display": "Affero General Public License v1.0 or later",
+      "definition": "Affero General Public License v1.0 or later."
+    },
+    {
+      "code": "AGPL-3.0-only",
+      "display": "GNU Affero General Public License v3.0 only",
+      "definition": "GNU Affero General Public License v3.0 only."
+    },
+    {
+      "code": "AGPL-3.0-or-later",
+      "display": "GNU Affero General Public License v3.0 or later",
+      "definition": "GNU Affero General Public License v3.0 or later."
+    },
+    {
+      "code": "Aladdin",
+      "display": "Aladdin Free Public License",
+      "definition": "Aladdin Free Public License."
+    },
+    {
+      "code": "AMDPLPA",
+      "display": "AMD\u0027s plpa_map.c License",
+      "definition": "AMD\u0027s plpa_map.c License."
+    },
+    {
+      "code": "AML",
+      "display": "Apple MIT License",
+      "definition": "Apple MIT License."
+    },
+    {
+      "code": "AMPAS",
+      "display": "Academy of Motion Picture Arts and Sciences BSD",
+      "definition": "Academy of Motion Picture Arts and Sciences BSD."
+    },
+    {
+      "code": "ANTLR-PD",
+      "display": "ANTLR Software Rights Notice",
+      "definition": "ANTLR Software Rights Notice."
+    },
+    {
+      "code": "Apache-1.0",
+      "display": "Apache License 1.0",
+      "definition": "Apache License 1.0."
+    },
+    {
+      "code": "Apache-1.1",
+      "display": "Apache License 1.1",
+      "definition": "Apache License 1.1."
+    },
+    {
+      "code": "Apache-2.0",
+      "display": "Apache License 2.0",
+      "definition": "Apache License 2.0."
+    },
+    {
+      "code": "APAFML",
+      "display": "Adobe Postscript AFM License",
+      "definition": "Adobe Postscript AFM License."
+    },
+    {
+      "code": "APL-1.0",
+      "display": "Adaptive Public License 1.0",
+      "definition": "Adaptive Public License 1.0."
+    },
+    {
+      "code": "APSL-1.0",
+      "display": "Apple Public Source License 1.0",
+      "definition": "Apple Public Source License 1.0."
+    },
+    {
+      "code": "APSL-1.1",
+      "display": "Apple Public Source License 1.1",
+      "definition": "Apple Public Source License 1.1."
+    },
+    {
+      "code": "APSL-1.2",
+      "display": "Apple Public Source License 1.2",
+      "definition": "Apple Public Source License 1.2."
+    },
+    {
+      "code": "APSL-2.0",
+      "display": "Apple Public Source License 2.0",
+      "definition": "Apple Public Source License 2.0."
+    },
+    {
+      "code": "Artistic-1.0-cl8",
+      "display": "Artistic License 1.0 w/clause 8",
+      "definition": "Artistic License 1.0 w/clause 8."
+    },
+    {
+      "code": "Artistic-1.0-Perl",
+      "display": "Artistic License 1.0 (Perl)",
+      "definition": "Artistic License 1.0 (Perl)."
+    },
+    {
+      "code": "Artistic-1.0",
+      "display": "Artistic License 1.0",
+      "definition": "Artistic License 1.0."
+    },
+    {
+      "code": "Artistic-2.0",
+      "display": "Artistic License 2.0",
+      "definition": "Artistic License 2.0."
+    },
+    {
+      "code": "Bahyph",
+      "display": "Bahyph License",
+      "definition": "Bahyph License."
+    },
+    {
+      "code": "Barr",
+      "display": "Barr License",
+      "definition": "Barr License."
+    },
+    {
+      "code": "Beerware",
+      "display": "Beerware License",
+      "definition": "Beerware License."
+    },
+    {
+      "code": "BitTorrent-1.0",
+      "display": "BitTorrent Open Source License v1.0",
+      "definition": "BitTorrent Open Source License v1.0."
+    },
+    {
+      "code": "BitTorrent-1.1",
+      "display": "BitTorrent Open Source License v1.1",
+      "definition": "BitTorrent Open Source License v1.1."
+    },
+    {
+      "code": "Borceux",
+      "display": "Borceux license",
+      "definition": "Borceux license."
+    },
+    {
+      "code": "BSD-1-Clause",
+      "display": "BSD 1-Clause License",
+      "definition": "BSD 1-Clause License."
+    },
+    {
+      "code": "BSD-2-Clause-FreeBSD",
+      "display": "BSD 2-Clause FreeBSD License",
+      "definition": "BSD 2-Clause FreeBSD License."
+    },
+    {
+      "code": "BSD-2-Clause-NetBSD",
+      "display": "BSD 2-Clause NetBSD License",
+      "definition": "BSD 2-Clause NetBSD License."
+    },
+    {
+      "code": "BSD-2-Clause-Patent",
+      "display": "BSD-2-Clause Plus Patent License",
+      "definition": "BSD-2-Clause Plus Patent License."
+    },
+    {
+      "code": "BSD-2-Clause",
+      "display": "BSD 2-Clause \"Simplified\" License",
+      "definition": "BSD 2-Clause \"Simplified\" License."
+    },
+    {
+      "code": "BSD-3-Clause-Attribution",
+      "display": "BSD with attribution",
+      "definition": "BSD with attribution."
+    },
+    {
+      "code": "BSD-3-Clause-Clear",
+      "display": "BSD 3-Clause Clear License",
+      "definition": "BSD 3-Clause Clear License."
+    },
+    {
+      "code": "BSD-3-Clause-LBNL",
+      "display": "Lawrence Berkeley National Labs BSD variant license",
+      "definition": "Lawrence Berkeley National Labs BSD variant license."
+    },
+    {
+      "code": "BSD-3-Clause-No-Nuclear-License-2014",
+      "display": "BSD 3-Clause No Nuclear License 2014",
+      "definition": "BSD 3-Clause No Nuclear License 2014."
+    },
+    {
+      "code": "BSD-3-Clause-No-Nuclear-License",
+      "display": "BSD 3-Clause No Nuclear License",
+      "definition": "BSD 3-Clause No Nuclear License."
+    },
+    {
+      "code": "BSD-3-Clause-No-Nuclear-Warranty",
+      "display": "BSD 3-Clause No Nuclear Warranty",
+      "definition": "BSD 3-Clause No Nuclear Warranty."
+    },
+    {
+      "code": "BSD-3-Clause",
+      "display": "BSD 3-Clause \"New\" or \"Revised\" License",
+      "definition": "BSD 3-Clause \"New\" or \"Revised\" License."
+    },
+    {
+      "code": "BSD-4-Clause-UC",
+      "display": "BSD-4-Clause (University of California-Specific)",
+      "definition": "BSD-4-Clause (University of California-Specific)."
+    },
+    {
+      "code": "BSD-4-Clause",
+      "display": "BSD 4-Clause \"Original\" or \"Old\" License",
+      "definition": "BSD 4-Clause \"Original\" or \"Old\" License."
+    },
+    {
+      "code": "BSD-Protection",
+      "display": "BSD Protection License",
+      "definition": "BSD Protection License."
+    },
+    {
+      "code": "BSD-Source-Code",
+      "display": "BSD Source Code Attribution",
+      "definition": "BSD Source Code Attribution."
+    },
+    {
+      "code": "BSL-1.0",
+      "display": "Boost Software License 1.0",
+      "definition": "Boost Software License 1.0."
+    },
+    {
+      "code": "bzip2-1.0.5",
+      "display": "bzip2 and libbzip2 License v1.0.5",
+      "definition": "bzip2 and libbzip2 License v1.0.5."
+    },
+    {
+      "code": "bzip2-1.0.6",
+      "display": "bzip2 and libbzip2 License v1.0.6",
+      "definition": "bzip2 and libbzip2 License v1.0.6."
+    },
+    {
+      "code": "Caldera",
+      "display": "Caldera License",
+      "definition": "Caldera License."
+    },
+    {
+      "code": "CATOSL-1.1",
+      "display": "Computer Associates Trusted Open Source License 1.1",
+      "definition": "Computer Associates Trusted Open Source License 1.1."
+    },
+    {
+      "code": "CC-BY-1.0",
+      "display": "Creative Commons Attribution 1.0 Generic",
+      "definition": "Creative Commons Attribution 1.0 Generic."
+    },
+    {
+      "code": "CC-BY-2.0",
+      "display": "Creative Commons Attribution 2.0 Generic",
+      "definition": "Creative Commons Attribution 2.0 Generic."
+    },
+    {
+      "code": "CC-BY-2.5",
+      "display": "Creative Commons Attribution 2.5 Generic",
+      "definition": "Creative Commons Attribution 2.5 Generic."
+    },
+    {
+      "code": "CC-BY-3.0",
+      "display": "Creative Commons Attribution 3.0 Unported",
+      "definition": "Creative Commons Attribution 3.0 Unported."
+    },
+    {
+      "code": "CC-BY-4.0",
+      "display": "Creative Commons Attribution 4.0 International",
+      "definition": "Creative Commons Attribution 4.0 International."
+    },
+    {
+      "code": "CC-BY-NC-1.0",
+      "display": "Creative Commons Attribution Non Commercial 1.0 Generic",
+      "definition": "Creative Commons Attribution Non Commercial 1.0 Generic."
+    },
+    {
+      "code": "CC-BY-NC-2.0",
+      "display": "Creative Commons Attribution Non Commercial 2.0 Generic",
+      "definition": "Creative Commons Attribution Non Commercial 2.0 Generic."
+    },
+    {
+      "code": "CC-BY-NC-2.5",
+      "display": "Creative Commons Attribution Non Commercial 2.5 Generic",
+      "definition": "Creative Commons Attribution Non Commercial 2.5 Generic."
+    },
+    {
+      "code": "CC-BY-NC-3.0",
+      "display": "Creative Commons Attribution Non Commercial 3.0 Unported",
+      "definition": "Creative Commons Attribution Non Commercial 3.0 Unported."
+    },
+    {
+      "code": "CC-BY-NC-4.0",
+      "display": "Creative Commons Attribution Non Commercial 4.0 International",
+      "definition": "Creative Commons Attribution Non Commercial 4.0 International."
+    },
+    {
+      "code": "CC-BY-NC-ND-1.0",
+      "display": "Creative Commons Attribution Non Commercial No Derivatives 1.0 Generic",
+      "definition": "Creative Commons Attribution Non Commercial No Derivatives 1.0 Generic."
+    },
+    {
+      "code": "CC-BY-NC-ND-2.0",
+      "display": "Creative Commons Attribution Non Commercial No Derivatives 2.0 Generic",
+      "definition": "Creative Commons Attribution Non Commercial No Derivatives 2.0 Generic."
+    },
+    {
+      "code": "CC-BY-NC-ND-2.5",
+      "display": "Creative Commons Attribution Non Commercial No Derivatives 2.5 Generic",
+      "definition": "Creative Commons Attribution Non Commercial No Derivatives 2.5 Generic."
+    },
+    {
+      "code": "CC-BY-NC-ND-3.0",
+      "display": "Creative Commons Attribution Non Commercial No Derivatives 3.0 Unported",
+      "definition": "Creative Commons Attribution Non Commercial No Derivatives 3.0 Unported."
+    },
+    {
+      "code": "CC-BY-NC-ND-4.0",
+      "display": "Creative Commons Attribution Non Commercial No Derivatives 4.0 International",
+      "definition": "Creative Commons Attribution Non Commercial No Derivatives 4.0 International."
+    },
+    {
+      "code": "CC-BY-NC-SA-1.0",
+      "display": "Creative Commons Attribution Non Commercial Share Alike 1.0 Generic",
+      "definition": "Creative Commons Attribution Non Commercial Share Alike 1.0 Generic."
+    },
+    {
+      "code": "CC-BY-NC-SA-2.0",
+      "display": "Creative Commons Attribution Non Commercial Share Alike 2.0 Generic",
+      "definition": "Creative Commons Attribution Non Commercial Share Alike 2.0 Generic."
+    },
+    {
+      "code": "CC-BY-NC-SA-2.5",
+      "display": "Creative Commons Attribution Non Commercial Share Alike 2.5 Generic",
+      "definition": "Creative Commons Attribution Non Commercial Share Alike 2.5 Generic."
+    },
+    {
+      "code": "CC-BY-NC-SA-3.0",
+      "display": "Creative Commons Attribution Non Commercial Share Alike 3.0 Unported",
+      "definition": "Creative Commons Attribution Non Commercial Share Alike 3.0 Unported."
+    },
+    {
+      "code": "CC-BY-NC-SA-4.0",
+      "display": "Creative Commons Attribution Non Commercial Share Alike 4.0 International",
+      "definition": "Creative Commons Attribution Non Commercial Share Alike 4.0 International."
+    },
+    {
+      "code": "CC-BY-ND-1.0",
+      "display": "Creative Commons Attribution No Derivatives 1.0 Generic",
+      "definition": "Creative Commons Attribution No Derivatives 1.0 Generic."
+    },
+    {
+      "code": "CC-BY-ND-2.0",
+      "display": "Creative Commons Attribution No Derivatives 2.0 Generic",
+      "definition": "Creative Commons Attribution No Derivatives 2.0 Generic."
+    },
+    {
+      "code": "CC-BY-ND-2.5",
+      "display": "Creative Commons Attribution No Derivatives 2.5 Generic",
+      "definition": "Creative Commons Attribution No Derivatives 2.5 Generic."
+    },
+    {
+      "code": "CC-BY-ND-3.0",
+      "display": "Creative Commons Attribution No Derivatives 3.0 Unported",
+      "definition": "Creative Commons Attribution No Derivatives 3.0 Unported."
+    },
+    {
+      "code": "CC-BY-ND-4.0",
+      "display": "Creative Commons Attribution No Derivatives 4.0 International",
+      "definition": "Creative Commons Attribution No Derivatives 4.0 International."
+    },
+    {
+      "code": "CC-BY-SA-1.0",
+      "display": "Creative Commons Attribution Share Alike 1.0 Generic",
+      "definition": "Creative Commons Attribution Share Alike 1.0 Generic."
+    },
+    {
+      "code": "CC-BY-SA-2.0",
+      "display": "Creative Commons Attribution Share Alike 2.0 Generic",
+      "definition": "Creative Commons Attribution Share Alike 2.0 Generic."
+    },
+    {
+      "code": "CC-BY-SA-2.5",
+      "display": "Creative Commons Attribution Share Alike 2.5 Generic",
+      "definition": "Creative Commons Attribution Share Alike 2.5 Generic."
+    },
+    {
+      "code": "CC-BY-SA-3.0",
+      "display": "Creative Commons Attribution Share Alike 3.0 Unported",
+      "definition": "Creative Commons Attribution Share Alike 3.0 Unported."
+    },
+    {
+      "code": "CC-BY-SA-4.0",
+      "display": "Creative Commons Attribution Share Alike 4.0 International",
+      "definition": "Creative Commons Attribution Share Alike 4.0 International."
+    },
+    {
+      "code": "CC0-1.0",
+      "display": "Creative Commons Zero v1.0 Universal",
+      "definition": "Creative Commons Zero v1.0 Universal."
+    },
+    {
+      "code": "CDDL-1.0",
+      "display": "Common Development and Distribution License 1.0",
+      "definition": "Common Development and Distribution License 1.0."
+    },
+    {
+      "code": "CDDL-1.1",
+      "display": "Common Development and Distribution License 1.1",
+      "definition": "Common Development and Distribution License 1.1."
+    },
+    {
+      "code": "CDLA-Permissive-1.0",
+      "display": "Community Data License Agreement Permissive 1.0",
+      "definition": "Community Data License Agreement Permissive 1.0."
+    },
+    {
+      "code": "CDLA-Sharing-1.0",
+      "display": "Community Data License Agreement Sharing 1.0",
+      "definition": "Community Data License Agreement Sharing 1.0."
+    },
+    {
+      "code": "CECILL-1.0",
+      "display": "CeCILL Free Software License Agreement v1.0",
+      "definition": "CeCILL Free Software License Agreement v1.0."
+    },
+    {
+      "code": "CECILL-1.1",
+      "display": "CeCILL Free Software License Agreement v1.1",
+      "definition": "CeCILL Free Software License Agreement v1.1."
+    },
+    {
+      "code": "CECILL-2.0",
+      "display": "CeCILL Free Software License Agreement v2.0",
+      "definition": "CeCILL Free Software License Agreement v2.0."
+    },
+    {
+      "code": "CECILL-2.1",
+      "display": "CeCILL Free Software License Agreement v2.1",
+      "definition": "CeCILL Free Software License Agreement v2.1."
+    },
+    {
+      "code": "CECILL-B",
+      "display": "CeCILL-B Free Software License Agreement",
+      "definition": "CeCILL-B Free Software License Agreement."
+    },
+    {
+      "code": "CECILL-C",
+      "display": "CeCILL-C Free Software License Agreement",
+      "definition": "CeCILL-C Free Software License Agreement."
+    },
+    {
+      "code": "ClArtistic",
+      "display": "Clarified Artistic License",
+      "definition": "Clarified Artistic License."
+    },
+    {
+      "code": "CNRI-Jython",
+      "display": "CNRI Jython License",
+      "definition": "CNRI Jython License."
+    },
+    {
+      "code": "CNRI-Python-GPL-Compatible",
+      "display": "CNRI Python Open Source GPL Compatible License Agreement",
+      "definition": "CNRI Python Open Source GPL Compatible License Agreement."
+    },
+    {
+      "code": "CNRI-Python",
+      "display": "CNRI Python License",
+      "definition": "CNRI Python License."
+    },
+    {
+      "code": "Condor-1.1",
+      "display": "Condor Public License v1.1",
+      "definition": "Condor Public License v1.1."
+    },
+    {
+      "code": "CPAL-1.0",
+      "display": "Common Public Attribution License 1.0",
+      "definition": "Common Public Attribution License 1.0."
+    },
+    {
+      "code": "CPL-1.0",
+      "display": "Common Public License 1.0",
+      "definition": "Common Public License 1.0."
+    },
+    {
+      "code": "CPOL-1.02",
+      "display": "Code Project Open License 1.02",
+      "definition": "Code Project Open License 1.02."
+    },
+    {
+      "code": "Crossword",
+      "display": "Crossword License",
+      "definition": "Crossword License."
+    },
+    {
+      "code": "CrystalStacker",
+      "display": "CrystalStacker License",
+      "definition": "CrystalStacker License."
+    },
+    {
+      "code": "CUA-OPL-1.0",
+      "display": "CUA Office Public License v1.0",
+      "definition": "CUA Office Public License v1.0."
+    },
+    {
+      "code": "Cube",
+      "display": "Cube License",
+      "definition": "Cube License."
+    },
+    {
+      "code": "curl",
+      "display": "curl License",
+      "definition": "curl License."
+    },
+    {
+      "code": "D-FSL-1.0",
+      "display": "Deutsche Freie Software Lizenz",
+      "definition": "Deutsche Freie Software Lizenz."
+    },
+    {
+      "code": "diffmark",
+      "display": "diffmark license",
+      "definition": "diffmark license."
+    },
+    {
+      "code": "DOC",
+      "display": "DOC License",
+      "definition": "DOC License."
+    },
+    {
+      "code": "Dotseqn",
+      "display": "Dotseqn License",
+      "definition": "Dotseqn License."
+    },
+    {
+      "code": "DSDP",
+      "display": "DSDP License",
+      "definition": "DSDP License."
+    },
+    {
+      "code": "dvipdfm",
+      "display": "dvipdfm License",
+      "definition": "dvipdfm License."
+    },
+    {
+      "code": "ECL-1.0",
+      "display": "Educational Community License v1.0",
+      "definition": "Educational Community License v1.0."
+    },
+    {
+      "code": "ECL-2.0",
+      "display": "Educational Community License v2.0",
+      "definition": "Educational Community License v2.0."
+    },
+    {
+      "code": "EFL-1.0",
+      "display": "Eiffel Forum License v1.0",
+      "definition": "Eiffel Forum License v1.0."
+    },
+    {
+      "code": "EFL-2.0",
+      "display": "Eiffel Forum License v2.0",
+      "definition": "Eiffel Forum License v2.0."
+    },
+    {
+      "code": "eGenix",
+      "display": "eGenix.com Public License 1.1.0",
+      "definition": "eGenix.com Public License 1.1.0."
+    },
+    {
+      "code": "Entessa",
+      "display": "Entessa Public License v1.0",
+      "definition": "Entessa Public License v1.0."
+    },
+    {
+      "code": "EPL-1.0",
+      "display": "Eclipse Public License 1.0",
+      "definition": "Eclipse Public License 1.0."
+    },
+    {
+      "code": "EPL-2.0",
+      "display": "Eclipse Public License 2.0",
+      "definition": "Eclipse Public License 2.0."
+    },
+    {
+      "code": "ErlPL-1.1",
+      "display": "Erlang Public License v1.1",
+      "definition": "Erlang Public License v1.1."
+    },
+    {
+      "code": "EUDatagrid",
+      "display": "EU DataGrid Software License",
+      "definition": "EU DataGrid Software License."
+    },
+    {
+      "code": "EUPL-1.0",
+      "display": "European Union Public License 1.0",
+      "definition": "European Union Public License 1.0."
+    },
+    {
+      "code": "EUPL-1.1",
+      "display": "European Union Public License 1.1",
+      "definition": "European Union Public License 1.1."
+    },
+    {
+      "code": "EUPL-1.2",
+      "display": "European Union Public License 1.2",
+      "definition": "European Union Public License 1.2."
+    },
+    {
+      "code": "Eurosym",
+      "display": "Eurosym License",
+      "definition": "Eurosym License."
+    },
+    {
+      "code": "Fair",
+      "display": "Fair License",
+      "definition": "Fair License."
+    },
+    {
+      "code": "Frameworx-1.0",
+      "display": "Frameworx Open License 1.0",
+      "definition": "Frameworx Open License 1.0."
+    },
+    {
+      "code": "FreeImage",
+      "display": "FreeImage Public License v1.0",
+      "definition": "FreeImage Public License v1.0."
+    },
+    {
+      "code": "FSFAP",
+      "display": "FSF All Permissive License",
+      "definition": "FSF All Permissive License."
+    },
+    {
+      "code": "FSFUL",
+      "display": "FSF Unlimited License",
+      "definition": "FSF Unlimited License."
+    },
+    {
+      "code": "FSFULLR",
+      "display": "FSF Unlimited License (with License Retention)",
+      "definition": "FSF Unlimited License (with License Retention)."
+    },
+    {
+      "code": "FTL",
+      "display": "Freetype Project License",
+      "definition": "Freetype Project License."
+    },
+    {
+      "code": "GFDL-1.1-only",
+      "display": "GNU Free Documentation License v1.1 only",
+      "definition": "GNU Free Documentation License v1.1 only."
+    },
+    {
+      "code": "GFDL-1.1-or-later",
+      "display": "GNU Free Documentation License v1.1 or later",
+      "definition": "GNU Free Documentation License v1.1 or later."
+    },
+    {
+      "code": "GFDL-1.2-only",
+      "display": "GNU Free Documentation License v1.2 only",
+      "definition": "GNU Free Documentation License v1.2 only."
+    },
+    {
+      "code": "GFDL-1.2-or-later",
+      "display": "GNU Free Documentation License v1.2 or later",
+      "definition": "GNU Free Documentation License v1.2 or later."
+    },
+    {
+      "code": "GFDL-1.3-only",
+      "display": "GNU Free Documentation License v1.3 only",
+      "definition": "GNU Free Documentation License v1.3 only."
+    },
+    {
+      "code": "GFDL-1.3-or-later",
+      "display": "GNU Free Documentation License v1.3 or later",
+      "definition": "GNU Free Documentation License v1.3 or later."
+    },
+    {
+      "code": "Giftware",
+      "display": "Giftware License",
+      "definition": "Giftware License."
+    },
+    {
+      "code": "GL2PS",
+      "display": "GL2PS License",
+      "definition": "GL2PS License."
+    },
+    {
+      "code": "Glide",
+      "display": "3dfx Glide License",
+      "definition": "3dfx Glide License."
+    },
+    {
+      "code": "Glulxe",
+      "display": "Glulxe License",
+      "definition": "Glulxe License."
+    },
+    {
+      "code": "gnuplot",
+      "display": "gnuplot License",
+      "definition": "gnuplot License."
+    },
+    {
+      "code": "GPL-1.0-only",
+      "display": "GNU General Public License v1.0 only",
+      "definition": "GNU General Public License v1.0 only."
+    },
+    {
+      "code": "GPL-1.0-or-later",
+      "display": "GNU General Public License v1.0 or later",
+      "definition": "GNU General Public License v1.0 or later."
+    },
+    {
+      "code": "GPL-2.0-only",
+      "display": "GNU General Public License v2.0 only",
+      "definition": "GNU General Public License v2.0 only."
+    },
+    {
+      "code": "GPL-2.0-or-later",
+      "display": "GNU General Public License v2.0 or later",
+      "definition": "GNU General Public License v2.0 or later."
+    },
+    {
+      "code": "GPL-3.0-only",
+      "display": "GNU General Public License v3.0 only",
+      "definition": "GNU General Public License v3.0 only."
+    },
+    {
+      "code": "GPL-3.0-or-later",
+      "display": "GNU General Public License v3.0 or later",
+      "definition": "GNU General Public License v3.0 or later."
+    },
+    {
+      "code": "gSOAP-1.3b",
+      "display": "gSOAP Public License v1.3b",
+      "definition": "gSOAP Public License v1.3b."
+    },
+    {
+      "code": "HaskellReport",
+      "display": "Haskell Language Report License",
+      "definition": "Haskell Language Report License."
+    },
+    {
+      "code": "HPND",
+      "display": "Historical Permission Notice and Disclaimer",
+      "definition": "Historical Permission Notice and Disclaimer."
+    },
+    {
+      "code": "IBM-pibs",
+      "display": "IBM PowerPC Initialization and Boot Software",
+      "definition": "IBM PowerPC Initialization and Boot Software."
+    },
+    {
+      "code": "ICU",
+      "display": "ICU License",
+      "definition": "ICU License."
+    },
+    {
+      "code": "IJG",
+      "display": "Independent JPEG Group License",
+      "definition": "Independent JPEG Group License."
+    },
+    {
+      "code": "ImageMagick",
+      "display": "ImageMagick License",
+      "definition": "ImageMagick License."
+    },
+    {
+      "code": "iMatix",
+      "display": "iMatix Standard Function Library Agreement",
+      "definition": "iMatix Standard Function Library Agreement."
+    },
+    {
+      "code": "Imlib2",
+      "display": "Imlib2 License",
+      "definition": "Imlib2 License."
+    },
+    {
+      "code": "Info-ZIP",
+      "display": "Info-ZIP License",
+      "definition": "Info-ZIP License."
+    },
+    {
+      "code": "Intel-ACPI",
+      "display": "Intel ACPI Software License Agreement",
+      "definition": "Intel ACPI Software License Agreement."
+    },
+    {
+      "code": "Intel",
+      "display": "Intel Open Source License",
+      "definition": "Intel Open Source License."
+    },
+    {
+      "code": "Interbase-1.0",
+      "display": "Interbase Public License v1.0",
+      "definition": "Interbase Public License v1.0."
+    },
+    {
+      "code": "IPA",
+      "display": "IPA Font License",
+      "definition": "IPA Font License."
+    },
+    {
+      "code": "IPL-1.0",
+      "display": "IBM Public License v1.0",
+      "definition": "IBM Public License v1.0."
+    },
+    {
+      "code": "ISC",
+      "display": "ISC License",
+      "definition": "ISC License."
+    },
+    {
+      "code": "JasPer-2.0",
+      "display": "JasPer License",
+      "definition": "JasPer License."
+    },
+    {
+      "code": "JSON",
+      "display": "JSON License",
+      "definition": "JSON License."
+    },
+    {
+      "code": "LAL-1.2",
+      "display": "Licence Art Libre 1.2",
+      "definition": "Licence Art Libre 1.2."
+    },
+    {
+      "code": "LAL-1.3",
+      "display": "Licence Art Libre 1.3",
+      "definition": "Licence Art Libre 1.3."
+    },
+    {
+      "code": "Latex2e",
+      "display": "Latex2e License",
+      "definition": "Latex2e License."
+    },
+    {
+      "code": "Leptonica",
+      "display": "Leptonica License",
+      "definition": "Leptonica License."
+    },
+    {
+      "code": "LGPL-2.0-only",
+      "display": "GNU Library General Public License v2 only",
+      "definition": "GNU Library General Public License v2 only."
+    },
+    {
+      "code": "LGPL-2.0-or-later",
+      "display": "GNU Library General Public License v2 or later",
+      "definition": "GNU Library General Public License v2 or later."
+    },
+    {
+      "code": "LGPL-2.1-only",
+      "display": "GNU Lesser General Public License v2.1 only",
+      "definition": "GNU Lesser General Public License v2.1 only."
+    },
+    {
+      "code": "LGPL-2.1-or-later",
+      "display": "GNU Lesser General Public License v2.1 or later",
+      "definition": "GNU Lesser General Public License v2.1 or later."
+    },
+    {
+      "code": "LGPL-3.0-only",
+      "display": "GNU Lesser General Public License v3.0 only",
+      "definition": "GNU Lesser General Public License v3.0 only."
+    },
+    {
+      "code": "LGPL-3.0-or-later",
+      "display": "GNU Lesser General Public License v3.0 or later",
+      "definition": "GNU Lesser General Public License v3.0 or later."
+    },
+    {
+      "code": "LGPLLR",
+      "display": "Lesser General Public License For Linguistic Resources",
+      "definition": "Lesser General Public License For Linguistic Resources."
+    },
+    {
+      "code": "Libpng",
+      "display": "libpng License",
+      "definition": "libpng License."
+    },
+    {
+      "code": "libtiff",
+      "display": "libtiff License",
+      "definition": "libtiff License."
+    },
+    {
+      "code": "LiLiQ-P-1.1",
+      "display": "Licence Libre du Québec – Permissive version 1.1",
+      "definition": "Licence Libre du Québec – Permissive version 1.1."
+    },
+    {
+      "code": "LiLiQ-R-1.1",
+      "display": "Licence Libre du Québec – Réciprocité version 1.1",
+      "definition": "Licence Libre du Québec – Réciprocité version 1.1."
+    },
+    {
+      "code": "LiLiQ-Rplus-1.1",
+      "display": "Licence Libre du Québec – Réciprocité forte version 1.1",
+      "definition": "Licence Libre du Québec – Réciprocité forte version 1.1."
+    },
+    {
+      "code": "Linux-OpenIB",
+      "display": "Linux Kernel Variant of OpenIB.org license",
+      "definition": "Linux Kernel Variant of OpenIB.org license."
+    },
+    {
+      "code": "LPL-1.0",
+      "display": "Lucent Public License Version 1.0",
+      "definition": "Lucent Public License Version 1.0."
+    },
+    {
+      "code": "LPL-1.02",
+      "display": "Lucent Public License v1.02",
+      "definition": "Lucent Public License v1.02."
+    },
+    {
+      "code": "LPPL-1.0",
+      "display": "LaTeX Project Public License v1.0",
+      "definition": "LaTeX Project Public License v1.0."
+    },
+    {
+      "code": "LPPL-1.1",
+      "display": "LaTeX Project Public License v1.1",
+      "definition": "LaTeX Project Public License v1.1."
+    },
+    {
+      "code": "LPPL-1.2",
+      "display": "LaTeX Project Public License v1.2",
+      "definition": "LaTeX Project Public License v1.2."
+    },
+    {
+      "code": "LPPL-1.3a",
+      "display": "LaTeX Project Public License v1.3a",
+      "definition": "LaTeX Project Public License v1.3a."
+    },
+    {
+      "code": "LPPL-1.3c",
+      "display": "LaTeX Project Public License v1.3c",
+      "definition": "LaTeX Project Public License v1.3c."
+    },
+    {
+      "code": "MakeIndex",
+      "display": "MakeIndex License",
+      "definition": "MakeIndex License."
+    },
+    {
+      "code": "MirOS",
+      "display": "MirOS License",
+      "definition": "MirOS License."
+    },
+    {
+      "code": "MIT-0",
+      "display": "MIT No Attribution",
+      "definition": "MIT No Attribution."
+    },
+    {
+      "code": "MIT-advertising",
+      "display": "Enlightenment License (e16)",
+      "definition": "Enlightenment License (e16)."
+    },
+    {
+      "code": "MIT-CMU",
+      "display": "CMU License",
+      "definition": "CMU License."
+    },
+    {
+      "code": "MIT-enna",
+      "display": "enna License",
+      "definition": "enna License."
+    },
+    {
+      "code": "MIT-feh",
+      "display": "feh License",
+      "definition": "feh License."
+    },
+    {
+      "code": "MIT",
+      "display": "MIT License",
+      "definition": "MIT License."
+    },
+    {
+      "code": "MITNFA",
+      "display": "MIT +no-false-attribs license",
+      "definition": "MIT +no-false-attribs license."
+    },
+    {
+      "code": "Motosoto",
+      "display": "Motosoto License",
+      "definition": "Motosoto License."
+    },
+    {
+      "code": "mpich2",
+      "display": "mpich2 License",
+      "definition": "mpich2 License."
+    },
+    {
+      "code": "MPL-1.0",
+      "display": "Mozilla Public License 1.0",
+      "definition": "Mozilla Public License 1.0."
+    },
+    {
+      "code": "MPL-1.1",
+      "display": "Mozilla Public License 1.1",
+      "definition": "Mozilla Public License 1.1."
+    },
+    {
+      "code": "MPL-2.0-no-copyleft-exception",
+      "display": "Mozilla Public License 2.0 (no copyleft exception)",
+      "definition": "Mozilla Public License 2.0 (no copyleft exception)."
+    },
+    {
+      "code": "MPL-2.0",
+      "display": "Mozilla Public License 2.0",
+      "definition": "Mozilla Public License 2.0."
+    },
+    {
+      "code": "MS-PL",
+      "display": "Microsoft Public License",
+      "definition": "Microsoft Public License."
+    },
+    {
+      "code": "MS-RL",
+      "display": "Microsoft Reciprocal License",
+      "definition": "Microsoft Reciprocal License."
+    },
+    {
+      "code": "MTLL",
+      "display": "Matrix Template Library License",
+      "definition": "Matrix Template Library License."
+    },
+    {
+      "code": "Multics",
+      "display": "Multics License",
+      "definition": "Multics License."
+    },
+    {
+      "code": "Mup",
+      "display": "Mup License",
+      "definition": "Mup License."
+    },
+    {
+      "code": "NASA-1.3",
+      "display": "NASA Open Source Agreement 1.3",
+      "definition": "NASA Open Source Agreement 1.3."
+    },
+    {
+      "code": "Naumen",
+      "display": "Naumen Public License",
+      "definition": "Naumen Public License."
+    },
+    {
+      "code": "NBPL-1.0",
+      "display": "Net Boolean Public License v1",
+      "definition": "Net Boolean Public License v1."
+    },
+    {
+      "code": "NCSA",
+      "display": "University of Illinois/NCSA Open Source License",
+      "definition": "University of Illinois/NCSA Open Source License."
+    },
+    {
+      "code": "Net-SNMP",
+      "display": "Net-SNMP License",
+      "definition": "Net-SNMP License."
+    },
+    {
+      "code": "NetCDF",
+      "display": "NetCDF license",
+      "definition": "NetCDF license."
+    },
+    {
+      "code": "Newsletr",
+      "display": "Newsletr License",
+      "definition": "Newsletr License."
+    },
+    {
+      "code": "NGPL",
+      "display": "Nethack General Public License",
+      "definition": "Nethack General Public License."
+    },
+    {
+      "code": "NLOD-1.0",
+      "display": "Norwegian Licence for Open Government Data",
+      "definition": "Norwegian Licence for Open Government Data."
+    },
+    {
+      "code": "NLPL",
+      "display": "No Limit Public License",
+      "definition": "No Limit Public License."
+    },
+    {
+      "code": "Nokia",
+      "display": "Nokia Open Source License",
+      "definition": "Nokia Open Source License."
+    },
+    {
+      "code": "NOSL",
+      "display": "Netizen Open Source License",
+      "definition": "Netizen Open Source License."
+    },
+    {
+      "code": "Noweb",
+      "display": "Noweb License",
+      "definition": "Noweb License."
+    },
+    {
+      "code": "NPL-1.0",
+      "display": "Netscape Public License v1.0",
+      "definition": "Netscape Public License v1.0."
+    },
+    {
+      "code": "NPL-1.1",
+      "display": "Netscape Public License v1.1",
+      "definition": "Netscape Public License v1.1."
+    },
+    {
+      "code": "NPOSL-3.0",
+      "display": "Non-Profit Open Software License 3.0",
+      "definition": "Non-Profit Open Software License 3.0."
+    },
+    {
+      "code": "NRL",
+      "display": "NRL License",
+      "definition": "NRL License."
+    },
+    {
+      "code": "NTP",
+      "display": "NTP License",
+      "definition": "NTP License."
+    },
+    {
+      "code": "OCCT-PL",
+      "display": "Open CASCADE Technology Public License",
+      "definition": "Open CASCADE Technology Public License."
+    },
+    {
+      "code": "OCLC-2.0",
+      "display": "OCLC Research Public License 2.0",
+      "definition": "OCLC Research Public License 2.0."
+    },
+    {
+      "code": "ODbL-1.0",
+      "display": "ODC Open Database License v1.0",
+      "definition": "ODC Open Database License v1.0."
+    },
+    {
+      "code": "OFL-1.0",
+      "display": "SIL Open Font License 1.0",
+      "definition": "SIL Open Font License 1.0."
+    },
+    {
+      "code": "OFL-1.1",
+      "display": "SIL Open Font License 1.1",
+      "definition": "SIL Open Font License 1.1."
+    },
+    {
+      "code": "OGTSL",
+      "display": "Open Group Test Suite License",
+      "definition": "Open Group Test Suite License."
+    },
+    {
+      "code": "OLDAP-1.1",
+      "display": "Open LDAP Public License v1.1",
+      "definition": "Open LDAP Public License v1.1."
+    },
+    {
+      "code": "OLDAP-1.2",
+      "display": "Open LDAP Public License v1.2",
+      "definition": "Open LDAP Public License v1.2."
+    },
+    {
+      "code": "OLDAP-1.3",
+      "display": "Open LDAP Public License v1.3",
+      "definition": "Open LDAP Public License v1.3."
+    },
+    {
+      "code": "OLDAP-1.4",
+      "display": "Open LDAP Public License v1.4",
+      "definition": "Open LDAP Public License v1.4."
+    },
+    {
+      "code": "OLDAP-2.0.1",
+      "display": "Open LDAP Public License v2.0.1",
+      "definition": "Open LDAP Public License v2.0.1."
+    },
+    {
+      "code": "OLDAP-2.0",
+      "display": "Open LDAP Public License v2.0 (or possibly 2.0A and 2.0B)",
+      "definition": "Open LDAP Public License v2.0 (or possibly 2.0A and 2.0B)."
+    },
+    {
+      "code": "OLDAP-2.1",
+      "display": "Open LDAP Public License v2.1",
+      "definition": "Open LDAP Public License v2.1."
+    },
+    {
+      "code": "OLDAP-2.2.1",
+      "display": "Open LDAP Public License v2.2.1",
+      "definition": "Open LDAP Public License v2.2.1."
+    },
+    {
+      "code": "OLDAP-2.2.2",
+      "display": "Open LDAP Public License 2.2.2",
+      "definition": "Open LDAP Public License 2.2.2."
+    },
+    {
+      "code": "OLDAP-2.2",
+      "display": "Open LDAP Public License v2.2",
+      "definition": "Open LDAP Public License v2.2."
+    },
+    {
+      "code": "OLDAP-2.3",
+      "display": "Open LDAP Public License v2.3",
+      "definition": "Open LDAP Public License v2.3."
+    },
+    {
+      "code": "OLDAP-2.4",
+      "display": "Open LDAP Public License v2.4",
+      "definition": "Open LDAP Public License v2.4."
+    },
+    {
+      "code": "OLDAP-2.5",
+      "display": "Open LDAP Public License v2.5",
+      "definition": "Open LDAP Public License v2.5."
+    },
+    {
+      "code": "OLDAP-2.6",
+      "display": "Open LDAP Public License v2.6",
+      "definition": "Open LDAP Public License v2.6."
+    },
+    {
+      "code": "OLDAP-2.7",
+      "display": "Open LDAP Public License v2.7",
+      "definition": "Open LDAP Public License v2.7."
+    },
+    {
+      "code": "OLDAP-2.8",
+      "display": "Open LDAP Public License v2.8",
+      "definition": "Open LDAP Public License v2.8."
+    },
+    {
+      "code": "OML",
+      "display": "Open Market License",
+      "definition": "Open Market License."
+    },
+    {
+      "code": "OpenSSL",
+      "display": "OpenSSL License",
+      "definition": "OpenSSL License."
+    },
+    {
+      "code": "OPL-1.0",
+      "display": "Open Public License v1.0",
+      "definition": "Open Public License v1.0."
+    },
+    {
+      "code": "OSET-PL-2.1",
+      "display": "OSET Public License version 2.1",
+      "definition": "OSET Public License version 2.1."
+    },
+    {
+      "code": "OSL-1.0",
+      "display": "Open Software License 1.0",
+      "definition": "Open Software License 1.0."
+    },
+    {
+      "code": "OSL-1.1",
+      "display": "Open Software License 1.1",
+      "definition": "Open Software License 1.1."
+    },
+    {
+      "code": "OSL-2.0",
+      "display": "Open Software License 2.0",
+      "definition": "Open Software License 2.0."
+    },
+    {
+      "code": "OSL-2.1",
+      "display": "Open Software License 2.1",
+      "definition": "Open Software License 2.1."
+    },
+    {
+      "code": "OSL-3.0",
+      "display": "Open Software License 3.0",
+      "definition": "Open Software License 3.0."
+    },
+    {
+      "code": "PDDL-1.0",
+      "display": "ODC Public Domain Dedication \u0026 License 1.0",
+      "definition": "ODC Public Domain Dedication \u0026 License 1.0."
+    },
+    {
+      "code": "PHP-3.0",
+      "display": "PHP License v3.0",
+      "definition": "PHP License v3.0."
+    },
+    {
+      "code": "PHP-3.01",
+      "display": "PHP License v3.01",
+      "definition": "PHP License v3.01."
+    },
+    {
+      "code": "Plexus",
+      "display": "Plexus Classworlds License",
+      "definition": "Plexus Classworlds License."
+    },
+    {
+      "code": "PostgreSQL",
+      "display": "PostgreSQL License",
+      "definition": "PostgreSQL License."
+    },
+    {
+      "code": "psfrag",
+      "display": "psfrag License",
+      "definition": "psfrag License."
+    },
+    {
+      "code": "psutils",
+      "display": "psutils License",
+      "definition": "psutils License."
+    },
+    {
+      "code": "Python-2.0",
+      "display": "Python License 2.0",
+      "definition": "Python License 2.0."
+    },
+    {
+      "code": "Qhull",
+      "display": "Qhull License",
+      "definition": "Qhull License."
+    },
+    {
+      "code": "QPL-1.0",
+      "display": "Q Public License 1.0",
+      "definition": "Q Public License 1.0."
+    },
+    {
+      "code": "Rdisc",
+      "display": "Rdisc License",
+      "definition": "Rdisc License."
+    },
+    {
+      "code": "RHeCos-1.1",
+      "display": "Red Hat eCos Public License v1.1",
+      "definition": "Red Hat eCos Public License v1.1."
+    },
+    {
+      "code": "RPL-1.1",
+      "display": "Reciprocal Public License 1.1",
+      "definition": "Reciprocal Public License 1.1."
+    },
+    {
+      "code": "RPL-1.5",
+      "display": "Reciprocal Public License 1.5",
+      "definition": "Reciprocal Public License 1.5."
+    },
+    {
+      "code": "RPSL-1.0",
+      "display": "RealNetworks Public Source License v1.0",
+      "definition": "RealNetworks Public Source License v1.0."
+    },
+    {
+      "code": "RSA-MD",
+      "display": "RSA Message-Digest License",
+      "definition": "RSA Message-Digest License."
+    },
+    {
+      "code": "RSCPL",
+      "display": "Ricoh Source Code Public License",
+      "definition": "Ricoh Source Code Public License."
+    },
+    {
+      "code": "Ruby",
+      "display": "Ruby License",
+      "definition": "Ruby License."
+    },
+    {
+      "code": "SAX-PD",
+      "display": "Sax Public Domain Notice",
+      "definition": "Sax Public Domain Notice."
+    },
+    {
+      "code": "Saxpath",
+      "display": "Saxpath License",
+      "definition": "Saxpath License."
+    },
+    {
+      "code": "SCEA",
+      "display": "SCEA Shared Source License",
+      "definition": "SCEA Shared Source License."
+    },
+    {
+      "code": "Sendmail",
+      "display": "Sendmail License",
+      "definition": "Sendmail License."
+    },
+    {
+      "code": "SGI-B-1.0",
+      "display": "SGI Free Software License B v1.0",
+      "definition": "SGI Free Software License B v1.0."
+    },
+    {
+      "code": "SGI-B-1.1",
+      "display": "SGI Free Software License B v1.1",
+      "definition": "SGI Free Software License B v1.1."
+    },
+    {
+      "code": "SGI-B-2.0",
+      "display": "SGI Free Software License B v2.0",
+      "definition": "SGI Free Software License B v2.0."
+    },
+    {
+      "code": "SimPL-2.0",
+      "display": "Simple Public License 2.0",
+      "definition": "Simple Public License 2.0."
+    },
+    {
+      "code": "SISSL-1.2",
+      "display": "Sun Industry Standards Source License v1.2",
+      "definition": "Sun Industry Standards Source License v1.2."
+    },
+    {
+      "code": "SISSL",
+      "display": "Sun Industry Standards Source License v1.1",
+      "definition": "Sun Industry Standards Source License v1.1."
+    },
+    {
+      "code": "Sleepycat",
+      "display": "Sleepycat License",
+      "definition": "Sleepycat License."
+    },
+    {
+      "code": "SMLNJ",
+      "display": "Standard ML of New Jersey License",
+      "definition": "Standard ML of New Jersey License."
+    },
+    {
+      "code": "SMPPL",
+      "display": "Secure Messaging Protocol Public License",
+      "definition": "Secure Messaging Protocol Public License."
+    },
+    {
+      "code": "SNIA",
+      "display": "SNIA Public License 1.1",
+      "definition": "SNIA Public License 1.1."
+    },
+    {
+      "code": "Spencer-86",
+      "display": "Spencer License 86",
+      "definition": "Spencer License 86."
+    },
+    {
+      "code": "Spencer-94",
+      "display": "Spencer License 94",
+      "definition": "Spencer License 94."
+    },
+    {
+      "code": "Spencer-99",
+      "display": "Spencer License 99",
+      "definition": "Spencer License 99."
+    },
+    {
+      "code": "SPL-1.0",
+      "display": "Sun Public License v1.0",
+      "definition": "Sun Public License v1.0."
+    },
+    {
+      "code": "SugarCRM-1.1.3",
+      "display": "SugarCRM Public License v1.1.3",
+      "definition": "SugarCRM Public License v1.1.3."
+    },
+    {
+      "code": "SWL",
+      "display": "Scheme Widget Library (SWL) Software License Agreement",
+      "definition": "Scheme Widget Library (SWL) Software License Agreement."
+    },
+    {
+      "code": "TCL",
+      "display": "TCL/TK License",
+      "definition": "TCL/TK License."
+    },
+    {
+      "code": "TCP-wrappers",
+      "display": "TCP Wrappers License",
+      "definition": "TCP Wrappers License."
+    },
+    {
+      "code": "TMate",
+      "display": "TMate Open Source License",
+      "definition": "TMate Open Source License."
+    },
+    {
+      "code": "TORQUE-1.1",
+      "display": "TORQUE v2.5+ Software License v1.1",
+      "definition": "TORQUE v2.5+ Software License v1.1."
+    },
+    {
+      "code": "TOSL",
+      "display": "Trusster Open Source License",
+      "definition": "Trusster Open Source License."
+    },
+    {
+      "code": "Unicode-DFS-2015",
+      "display": "Unicode License Agreement - Data Files and Software (2015)",
+      "definition": "Unicode License Agreement - Data Files and Software (2015)."
+    },
+    {
+      "code": "Unicode-DFS-2016",
+      "display": "Unicode License Agreement - Data Files and Software (2016)",
+      "definition": "Unicode License Agreement - Data Files and Software (2016)."
+    },
+    {
+      "code": "Unicode-TOU",
+      "display": "Unicode Terms of Use",
+      "definition": "Unicode Terms of Use."
+    },
+    {
+      "code": "Unlicense",
+      "display": "The Unlicense",
+      "definition": "The Unlicense."
+    },
+    {
+      "code": "UPL-1.0",
+      "display": "Universal Permissive License v1.0",
+      "definition": "Universal Permissive License v1.0."
+    },
+    {
+      "code": "Vim",
+      "display": "Vim License",
+      "definition": "Vim License."
+    },
+    {
+      "code": "VOSTROM",
+      "display": "VOSTROM Public License for Open Source",
+      "definition": "VOSTROM Public License for Open Source."
+    },
+    {
+      "code": "VSL-1.0",
+      "display": "Vovida Software License v1.0",
+      "definition": "Vovida Software License v1.0."
+    },
+    {
+      "code": "W3C-19980720",
+      "display": "W3C Software Notice and License (1998-07-20)",
+      "definition": "W3C Software Notice and License (1998-07-20)."
+    },
+    {
+      "code": "W3C-20150513",
+      "display": "W3C Software Notice and Document License (2015-05-13)",
+      "definition": "W3C Software Notice and Document License (2015-05-13)."
+    },
+    {
+      "code": "W3C",
+      "display": "W3C Software Notice and License (2002-12-31)",
+      "definition": "W3C Software Notice and License (2002-12-31)."
+    },
+    {
+      "code": "Watcom-1.0",
+      "display": "Sybase Open Watcom Public License 1.0",
+      "definition": "Sybase Open Watcom Public License 1.0."
+    },
+    {
+      "code": "Wsuipa",
+      "display": "Wsuipa License",
+      "definition": "Wsuipa License."
+    },
+    {
+      "code": "WTFPL",
+      "display": "Do What The F*ck You Want To Public License",
+      "definition": "Do What The F*ck You Want To Public License."
+    },
+    {
+      "code": "X11",
+      "display": "X11 License",
+      "definition": "X11 License."
+    },
+    {
+      "code": "Xerox",
+      "display": "Xerox License",
+      "definition": "Xerox License."
+    },
+    {
+      "code": "XFree86-1.1",
+      "display": "XFree86 License 1.1",
+      "definition": "XFree86 License 1.1."
+    },
+    {
+      "code": "xinetd",
+      "display": "xinetd License",
+      "definition": "xinetd License."
+    },
+    {
+      "code": "Xnet",
+      "display": "X.Net License",
+      "definition": "X.Net License."
+    },
+    {
+      "code": "xpp",
+      "display": "XPP License",
+      "definition": "XPP License."
+    },
+    {
+      "code": "XSkat",
+      "display": "XSkat License",
+      "definition": "XSkat License."
+    },
+    {
+      "code": "YPL-1.0",
+      "display": "Yahoo! Public License v1.0",
+      "definition": "Yahoo! Public License v1.0."
+    },
+    {
+      "code": "YPL-1.1",
+      "display": "Yahoo! Public License v1.1",
+      "definition": "Yahoo! Public License v1.1."
+    },
+    {
+      "code": "Zed",
+      "display": "Zed License",
+      "definition": "Zed License."
+    },
+    {
+      "code": "Zend-2.0",
+      "display": "Zend License v2.0",
+      "definition": "Zend License v2.0."
+    },
+    {
+      "code": "Zimbra-1.3",
+      "display": "Zimbra Public License v1.3",
+      "definition": "Zimbra Public License v1.3."
+    },
+    {
+      "code": "Zimbra-1.4",
+      "display": "Zimbra Public License v1.4",
+      "definition": "Zimbra Public License v1.4."
+    },
+    {
+      "code": "zlib-acknowledgement",
+      "display": "zlib/libpng License with Acknowledgement",
+      "definition": "zlib/libpng License with Acknowledgement."
+    },
+    {
+      "code": "Zlib",
+      "display": "zlib License",
+      "definition": "zlib License."
+    },
+    {
+      "code": "ZPL-1.1",
+      "display": "Zope Public License 1.1",
+      "definition": "Zope Public License 1.1."
+    },
+    {
+      "code": "ZPL-2.0",
+      "display": "Zope Public License 2.0",
+      "definition": "Zope Public License 2.0."
+    },
+    {
+      "code": "ZPL-2.1",
+      "display": "Zope Public License 2.1",
+      "definition": "Zope Public License 2.1."
+    }
+  ]
+}

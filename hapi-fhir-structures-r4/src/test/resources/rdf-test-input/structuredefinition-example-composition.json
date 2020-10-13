@@ -1,0 +1,114 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "example-composition",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-composition\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/StructureDefinition/example-composition\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: DocumentStructure\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Document Structure (For testing section templates)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 05/11/2018 5:47:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: complex-type\u003c/p\u003e\u003cp\u003e\u003cb\u003eabstract\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: \u003ca\u003eComposition\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebaseDefinition\u003c/b\u003e: \u003ca\u003ehttp://hl7.org/fhir/StructureDefinition/Composition\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ederivation\u003c/b\u003e: constraint\u003c/p\u003e\u003ch3\u003eDifferentials\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eElement\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etodo-bundle\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/StructureDefinition/example-composition",
+  "name": "DocumentStructure",
+  "title": "Document Structure (For testing section templates)",
+  "status": "active",
+  "experimental": false,
+  "date": "2018-11-05T17:47:00+11:00",
+  "kind": "complex-type",
+  "abstract": false,
+  "type": "Composition",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Composition",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Composition",
+        "path": "Composition"
+      },
+      {
+        "id": "Composition.section",
+        "path": "Composition.section",
+        "slicing": {
+          "discriminator": [
+            {
+              "type": "pattern",
+              "path": "code"
+            }
+          ],
+          "description": "Slice by .section.code",
+          "ordered": true,
+          "rules": "closed"
+        }
+      },
+      {
+        "id": "Composition.section:procedure",
+        "path": "Composition.section",
+        "sliceName": "procedure",
+        "min": 1,
+        "type": [
+          {
+            "code": "BackboneElement",
+            "profile": [
+              "http://hl7.org/fhir/StructureDefinition/document-section-library"
+            ],
+            "_profile": [
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-profile-element",
+                    "valueString": "Composition.section:procedure"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Composition.section:medications",
+        "path": "Composition.section",
+        "sliceName": "medications",
+        "min": 1,
+        "type": [
+          {
+            "code": "BackboneElement",
+            "profile": [
+              "http://hl7.org/fhir/StructureDefinition/document-section-library"
+            ],
+            "_profile": [
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-profile-element",
+                    "valueString": "Composition.section:medications"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "Composition.section:plan",
+        "path": "Composition.section",
+        "sliceName": "plan",
+        "min": 0,
+        "type": [
+          {
+            "code": "BackboneElement",
+            "profile": [
+              "http://hl7.org/fhir/StructureDefinition/document-section-library"
+            ],
+            "_profile": [
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-profile-element",
+                    "valueString": "Composition.section:plan"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

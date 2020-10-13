@@ -133,6 +133,9 @@ public class ${className}ResourceProvider extends
 			@ca.uhn.fhir.rest.annotation.Count
 			Integer theCount,
 
+			@ca.uhn.fhir.rest.annotation.Offset
+			Integer theOffset,
+
 			SummaryEnum theSummaryMode,
 
 			SearchTotalModeEnum theSearchTotalMode
@@ -159,6 +162,7 @@ public class ${className}ResourceProvider extends
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);
 			paramMap.setCount(theCount);
+			paramMap.setOffset(theOffset);
 			paramMap.setSummaryMode(theSummaryMode);
 			paramMap.setSearchTotalMode(theSearchTotalMode);
 

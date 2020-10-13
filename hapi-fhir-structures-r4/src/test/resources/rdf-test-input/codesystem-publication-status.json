@@ -1,0 +1,98 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "publication-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePublicationStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe lifecycle status of an artifact.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/publication-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"publication-status-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eThis resource is still under development and is not yet considered to be ready for normal use.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"publication-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eThis resource is ready for normal use.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eretired\u003ca name\u003d\"publication-status-retired\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRetired\u003c/td\u003e\u003ctd\u003eThis resource has been withdrawn or superseded and should no longer be used.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"publication-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe authoring system does not know which of the status values currently applies for this resource.  Note: This concept is not to be used for \u0026quot;other\u0026quot; - one of the listed statuses is presumed to apply, it\u0027s just not known which one.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    }
+  ],
+  "url": "http://hl7.org/fhir/publication-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.4"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PublicationStatus",
+  "title": "PublicationStatus",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "The lifecycle status of an artifact.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/publication-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "draft",
+      "display": "Draft",
+      "definition": "This resource is still under development and is not yet considered to be ready for normal use.",
+      "designation": [
+        {
+          "language": "ru",
+          "value": "черновик"
+        },
+        {
+          "language": "nl",
+          "value": "ontwerp"
+        }
+      ]
+    },
+    {
+      "code": "active",
+      "display": "Active",
+      "definition": "This resource is ready for normal use.",
+      "designation": [
+        {
+          "language": "ru",
+          "value": "активный"
+        },
+        {
+          "language": "nl",
+          "value": "actief"
+        }
+      ]
+    },
+    {
+      "code": "retired",
+      "display": "Retired",
+      "definition": "This resource has been withdrawn or superseded and should no longer be used.",
+      "designation": [
+        {
+          "language": "ru",
+          "value": "удалён"
+        },
+        {
+          "language": "nl",
+          "value": "verouderd"
+        }
+      ]
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The authoring system does not know which of the status values currently applies for this resource.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, it\u0027s just not known which one."
+    }
+  ]
+}

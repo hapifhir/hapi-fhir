@@ -1,0 +1,108 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "request-intent",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eRequestIntent\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes indicating the degree of authority/intentionality associated with a request.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/request-intent defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproposal\u003ca name\u003d\"request-intent-proposal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProposal\u003c/td\u003e\u003ctd\u003eThe request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eplan\u003ca name\u003d\"request-intent-plan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlan\u003c/td\u003e\u003ctd\u003eThe request represents an intention to ensure something occurs without providing an authorization for others to act.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edirective\u003ca name\u003d\"request-intent-directive\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDirective\u003c/td\u003e\u003ctd\u003eThe request represents a legally binding instruction authored by a Patient or RelatedPerson.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eorder\u003ca name\u003d\"request-intent-order\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOrder\u003c/td\u003e\u003ctd\u003eThe request represents a request/demand and authorization for action by a Practitioner.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  original-order\u003ca name\u003d\"request-intent-original-order\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOriginal Order\u003c/td\u003e\u003ctd\u003eThe request represents an original authorization for action.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  reflex-order\u003ca name\u003d\"request-intent-reflex-order\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReflex Order\u003c/td\u003e\u003ctd\u003eThe request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  filler-order\u003ca name\u003d\"request-intent-filler-order\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFiller Order\u003c/td\u003e\u003ctd\u003eThe request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller\u0027s intention to act upon a submitted order.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e3\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e    instance-order\u003ca name\u003d\"request-intent-instance-order\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInstance Order\u003c/td\u003e\u003ctd\u003eAn order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoption\u003ca name\u003d\"request-intent-option\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOption\u003c/td\u003e\u003ctd\u003eThe request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/request-intent",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.114"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "RequestIntent",
+  "title": "RequestIntent",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes indicating the degree of authority/intentionality associated with a request.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/request-intent",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "proposal",
+      "display": "Proposal",
+      "definition": "The request is a suggestion made by someone/something that does not have an intention to ensure it occurs and without providing an authorization to act."
+    },
+    {
+      "code": "plan",
+      "display": "Plan",
+      "definition": "The request represents an intention to ensure something occurs without providing an authorization for others to act."
+    },
+    {
+      "code": "directive",
+      "display": "Directive",
+      "definition": "The request represents a legally binding instruction authored by a Patient or RelatedPerson."
+    },
+    {
+      "code": "order",
+      "display": "Order",
+      "definition": "The request represents a request/demand and authorization for action by a Practitioner.",
+      "concept": [
+        {
+          "code": "original-order",
+          "display": "Original Order",
+          "definition": "The request represents an original authorization for action."
+        },
+        {
+          "code": "reflex-order",
+          "display": "Reflex Order",
+          "definition": "The request represents an automatically generated supplemental authorization for action based on a parent authorization together with initial results of the action taken against that parent authorization."
+        },
+        {
+          "code": "filler-order",
+          "display": "Filler Order",
+          "definition": "The request represents the view of an authorization instantiated by a fulfilling system representing the details of the fulfiller\u0027s intention to act upon a submitted order.",
+          "concept": [
+            {
+              "code": "instance-order",
+              "display": "Instance Order",
+              "definition": "An order created in fulfillment of a broader order that represents the authorization for a single activity occurrence.  E.g. The administration of a single dose of a drug."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "option",
+      "display": "Option",
+      "definition": "The request represents a component or option for a RequestGroup that establishes timing, conditionality and/or other constraints among a set of requests.  Refer to [[[RequestGroup]]] for additional information on how this status is used."
+    }
+  ]
+}

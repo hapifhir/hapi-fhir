@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<title th:include="window-title :: home" />
 		<th:block th:include="tmpl-head :: head" />
@@ -66,10 +66,12 @@
 							
 								<!-- Conformance -->
 								
-									<div class="row-fluid">
-										Retrieve the server's <b>conformance</b> statement.										
+									<div class="row">
+                              <div class="col-12">
+   										Retrieve the server's <b>conformance</b> statement.
+                              </div>
 									</div>
-								    <div class="row-fluid">
+								    <div class="row">
 								    	<div class="col-sm-3 form-group">
 											<a type="button" id="fetch-conformance-btn"
 												class="btn btn-primary btn-block">
@@ -89,14 +91,15 @@
 								<!-- Server History -->
 								
 									<br clear="all"/>
-									<div class="row-fluid">
-										Retrieve the update <b>history</b> across all resource types on
-										the server.										
+									<div class="row">
+                              <div class="col-12">
+                                 Retrieve the update <b>history</b> across all resource types on
+                                 the server.
+                              </div>
 									</div>
-								    <div class="row-fluid top-buffer">
+								    <div class="row top-buffer">
 								    	<div class="col-sm-3">
-										<button type="button" id="server-history-btn"
-											class="btn btn-primary btn-block">
+										<button type="button" id="server-history-btn" class="btn btn-primary btn-block">
                                  <i class="far fa-calendar-alt"></i>
 											History
 										</button>
@@ -104,12 +107,16 @@
 								        <div class='col-sm-5'>
 								            <div class="form-group">
 								                <div class='input-group date' id='server-history-datetime' data-date-format="YYYY-MM-DDTHH:mm:ss">
-								                    <div class="input-group-addon">
-								                    Since
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+      								                    Since
+                                               </span>
 								                    </div>
 								                    <input type='text' class="form-control" id="server-history-since"/>
-								                    <div class="input-group-addon">
-								                    <span class="glyphicon glyphicon-calendar"></span>
+                                           <div class="input-group-append input-group-addon"> <!-- input-group-addon is from Bootstrap3 but the time picker needs it there -->
+                                               <span class="input-group-text">
+								                           <i class="far fa-calendar-alt"></i>
+                                               </span>
 								                    </div>
 								                </div>
 								            </div>
@@ -117,8 +124,10 @@
 										<div class='col-sm-3'>
 								            <div class="form-group">
 								                <div class='input-group'>
-								                    <div class="input-group-addon">
-								                    Limit #
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+								                           Limit #
+                                               </span>
 								                    </div>
 								                    <input type="text" class="form-control" id="server-history-limit" placeholder="(opt)"/>
 								                </div>
@@ -149,11 +158,13 @@
 								<!-- Transaction -->
 								
 									<br clear="all"/>
-									<div class="row-fluid">
-										Post a bundle containing multiple resources to the server and
-										store all resources within a single atomic transaction.										
+									<div class="row">
+                              <div class="col-12">
+                                 Post a bundle containing multiple resources to the server and
+                                 store all resources within a single atomic transaction.
+                              </div>
 									</div>
-								    <div class="row-fluid">
+								    <div class="row">
 								    	<div class="col-sm-3">
 											<button type="button" id="transaction-btn" class="btn btn-primary btn-block">
                                     <i class="fas fa-file-archive"></i>
@@ -163,9 +174,11 @@
 										<div class='col-sm-9'>
 								            <div class="form-group">
 								                <div class='input-group'>
-								                    <div class="input-group-addon">
-								                    Bundle
-								                    <span class="loadingStar">*</span>
+                                           <div class="input-group-prepend">
+                                               <span class="input-group-text">
+								                           Bundle
+								                           <span class="loadingStar">*</span>
+                                               </span>
 								                    </div>
 								                    <textarea class="form-control" id="transaction-body" style="white-space: nowrap; overflow: auto;" placeholder="(place transaction bundle body here)" rows="1"><th:block th:if="${transactionBundle} != null" th:text="${transactionBundle}"/></textarea>
 								                </div>
@@ -202,10 +215,10 @@
 								<!-- 
 								
 									<br clear="all"/>
-									<div class="row-fluid">
+									<div class="row">
 										Show all of the tags currently in use on the server										
 									</div>
-								    <div class="row-fluid">
+								    <div class="row">
 								    	<div class="col-sm-3 form-group">
 											<button type="button" id="get-server-tags-btn" class="btn btn-primary btn-block">
 												<span class="fa fa-tags"></i>

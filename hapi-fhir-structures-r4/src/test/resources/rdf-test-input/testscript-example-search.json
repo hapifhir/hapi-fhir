@@ -1,0 +1,281 @@
+{
+  "resourceType": "TestScript",
+  "id": "testscript-example-search",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: testscript-example-search\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/TestScript/testscript-example-search\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: urn:oid:1.3.6.1.4.1.21367.2005.3.7.9881\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 1.0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: TestScript Example Search\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 18/01/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: TestScript example resource with simple Patient search test. The read tests will utilize user defined dynamic variables that will hold the Patient search parameter values.\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America (the) \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America\u0027, given as \u0027United States of America (the)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Patient Search Operation\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: © HL7.org 2011+\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003emetadata\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eLinks\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/patient.html\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDemographics and other administrative information about an individual or animal receiving care or other health-related services.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eCapabilities\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRequired\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValidated\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLink\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCapabilities\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003ctd\u003ePatient Search Operation\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/http.html#search\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003eCapabilityStatement/example\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003ch3\u003eFixtures\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAutocreate\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAutodelete\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePeter Chalmers\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eprofile\u003c/b\u003e: \u003ca\u003eGenerated Summary: url: http://hl7.org/fhir/StructureDefinition/Bundle; version: 4.0.1; name: Bundle; ACTIVE; date: 01/11/2019 9:29:23 AM; publisher: Health Level Seven International (FHIR Infrastructure); description: A container for a collection of resources.; 4.0.1; RESOURCE; type: Bundle; baseDefinition: http://hl7.org/fhir/StructureDefinition/Resource; SPECIALIZATION\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003evariable\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: PatientCreateLocation\u003c/p\u003e\u003cp\u003e\u003cb\u003eheaderField\u003c/b\u003e: Location\u003c/p\u003e\u003cp\u003e\u003cb\u003esourceId\u003c/b\u003e: PatientCreateResponse\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003evariable\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: PatientSearchFamilyName\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Enter patient search criteria for a known family name on the target system\u003c/p\u003e\u003cp\u003e\u003cb\u003ehint\u003c/b\u003e: [Family name]\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003evariable\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: PatientSearchGivenName\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Enter patient search criteria for a known given name on the target system\u003c/p\u003e\u003cp\u003e\u003cb\u003ehint\u003c/b\u003e: [Given name]\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003evariable\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: PatientSearchBundleTotal\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Evaluate the returned Patient searchset Bundle.total value\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: Bundle.total.toInteger()\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003esetup\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAccept\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEncodeRequestUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eParams\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eSearch (Details: http://terminology.hl7.org/CodeSystem/testscript-operation-codes code search \u003d \u0027Search\u0027, stated as \u0027null\u0027)\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eTest simple search to verify server support.\u003c/td\u003e\u003ctd\u003exml\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003e?family\u003dDONTEXPECTAMATCH\u0026amp;given\u003dDONTEXPECTAMATCH\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDirection\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eOperator\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRequestURL\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the request url contains the family search parameter.\u003c/td\u003e\u003ctd\u003erequest\u003c/td\u003e\u003ctd\u003econtains\u003c/td\u003e\u003ctd\u003efamily\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDirection\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResponseCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned HTTP status is 200(OK).\u003c/td\u003e\u003ctd\u003eresponse\u003c/td\u003e\u003ctd\u003e200\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned resource type is Bundle.\u003c/td\u003e\u003ctd\u003eBundle\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eNavigationLinks\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned Bundle correctly defines the navigation links.\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003etest\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Patient Create Search\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Create a Patient resource and capture the returned HTTP Header Location. Then search for (read) that Patient using the Location URL value and validate the response.\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003etest\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Patient Search Dynamic\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Search for Patient resources using the user defined dynamic variables ${PatientSearchFamilyName} and ${PatientSearchGivenName} and validate response.\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/TestScript/testscript-example-search",
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:oid:1.3.6.1.4.1.21367.2005.3.7.9881"
+  },
+  "version": "1.0",
+  "name": "TestScript Example Search",
+  "status": "draft",
+  "experimental": true,
+  "date": "2017-01-18",
+  "publisher": "HL7",
+  "contact": [
+    {
+      "name": "Support",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "support@HL7.org",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "TestScript example resource with simple Patient search test. The read tests will utilize user defined dynamic variables that will hold the Patient search parameter values.",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US",
+          "display": "United States of America (the)"
+        }
+      ]
+    }
+  ],
+  "purpose": "Patient Search Operation",
+  "copyright": "© HL7.org 2011+",
+  "metadata": {
+    "link": [
+      {
+        "url": "http://hl7.org/fhir/patient.html",
+        "description": "Demographics and other administrative information about an individual or animal receiving care or other health-related services."
+      }
+    ],
+    "capability": [
+      {
+        "required": true,
+        "validated": false,
+        "description": "Patient Search Operation",
+        "link": [
+          "http://hl7.org/fhir/http.html#search"
+        ],
+        "capabilities": "CapabilityStatement/example"
+      }
+    ]
+  },
+  "fixture": [
+    {
+      "id": "fixture-patient-create",
+      "autocreate": false,
+      "autodelete": false,
+      "resource": {
+        "reference": "Patient/example",
+        "display": "Peter Chalmers"
+      }
+    }
+  ],
+  "profile": [
+    {
+      "id": "bundle-profile",
+      "reference": "http://hl7.org/fhir/StructureDefinition/Bundle"
+    }
+  ],
+  "variable": [
+    {
+      "name": "PatientCreateLocation",
+      "headerField": "Location",
+      "sourceId": "PatientCreateResponse"
+    },
+    {
+      "name": "PatientSearchFamilyName",
+      "description": "Enter patient search criteria for a known family name on the target system",
+      "hint": "[Family name]"
+    },
+    {
+      "name": "PatientSearchGivenName",
+      "description": "Enter patient search criteria for a known given name on the target system",
+      "hint": "[Given name]"
+    },
+    {
+      "name": "PatientSearchBundleTotal",
+      "description": "Evaluate the returned Patient searchset Bundle.total value",
+      "expression": "Bundle.total.toInteger()"
+    }
+  ],
+  "setup": {
+    "action": [
+      {
+        "operation": {
+          "type": {
+            "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+            "code": "search"
+          },
+          "resource": "Patient",
+          "description": "Test simple search to verify server support.",
+          "accept": "xml",
+          "encodeRequestUrl": true,
+          "params": "?family\u003dDONTEXPECTAMATCH\u0026given\u003dDONTEXPECTAMATCH"
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the request url contains the family search parameter.",
+          "direction": "request",
+          "operator": "contains",
+          "requestURL": "family",
+          "warningOnly": false
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned HTTP status is 200(OK).",
+          "direction": "response",
+          "responseCode": "200",
+          "warningOnly": false
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned resource type is Bundle.",
+          "resource": "Bundle",
+          "warningOnly": false
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned Bundle correctly defines the navigation links.",
+          "navigationLinks": true,
+          "warningOnly": false
+        }
+      }
+    ]
+  },
+  "test": [
+    {
+      "id": "01-PatientCreateSearch",
+      "name": "Patient Create Search",
+      "description": "Create a Patient resource and capture the returned HTTP Header Location. Then search for (read) that Patient using the Location URL value and validate the response.",
+      "action": [
+        {
+          "operation": {
+            "type": {
+              "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+              "code": "create"
+            },
+            "resource": "Patient",
+            "description": "Create a Patient resource and capture the returned HTTP Header Location.",
+            "accept": "xml",
+            "contentType": "xml",
+            "encodeRequestUrl": true,
+            "responseId": "PatientCreateResponse",
+            "sourceId": "fixture-patient-create"
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned HTTP status is 201(Created).",
+            "response": "created",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned HTTP Header Location is present.",
+            "direction": "response",
+            "headerField": "Location",
+            "operator": "notEmpty",
+            "warningOnly": false
+          }
+        },
+        {
+          "operation": {
+            "type": {
+              "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+              "code": "read"
+            },
+            "description": "Read the created Patient using the captured Location URL value.",
+            "accept": "xml",
+            "encodeRequestUrl": true,
+            "url": "${PatientCreateLocation}"
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned HTTP status is 200(OK).",
+            "response": "okay",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned resource type is Patient.",
+            "resource": "Patient",
+            "warningOnly": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "02-PatientSearchDynamic",
+      "name": "Patient Search Dynamic",
+      "description": "Search for Patient resources using the user defined dynamic variables ${PatientSearchFamilyName} and ${PatientSearchGivenName} and validate response.",
+      "action": [
+        {
+          "operation": {
+            "type": {
+              "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+              "code": "search"
+            },
+            "resource": "Patient",
+            "description": "Search for Patient resources on the destination test system.",
+            "accept": "xml",
+            "encodeRequestUrl": true,
+            "params": "?family\u003d${PatientSearchFamilyName}\u0026given\u003d${PatientSearchGivenName}"
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned HTTP status is 200(OK).",
+            "response": "okay",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned format is XML.",
+            "contentType": "xml",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned resource type is Bundle.",
+            "resource": "Bundle",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Bundle conforms to the base FHIR specification.",
+            "validateProfileId": "bundle-profile",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Bundle type equals \u0027searchset\u0027.",
+            "operator": "equals",
+            "path": "fhir:Bundle/fhir:type/@value",
+            "value": "searchset",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Bundle total is greater than or equal to the number of returned entries.",
+            "expression": "Bundle.total.toInteger() \u003e\u003d entry.count()",
+            "warningOnly": false
+          }
+        }
+      ]
+    }
+  ]
+}

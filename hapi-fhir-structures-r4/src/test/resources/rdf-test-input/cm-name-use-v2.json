@@ -1,0 +1,106 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "cm-name-use-v2",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ev2.NameUse (http://hl7.org/fhir/ConceptMap/cm-name-use-v2)\u003c/h2\u003e\u003cp\u003eMapping from \u003ca href\u003d\"valueset-name-use.html\"\u003ehttp://hl7.org/fhir/ValueSet/name-use\u003c/a\u003e to \u003ca href\u003d\"v2/0200/index.html\"\u003ehttp://terminology.hl7.org/ValueSet/v2-0200\u003c/a\u003e\u003c/p\u003e\u003cp\u003eDRAFT. Published on 01/11/2019 9:29:23 AM by HL7 (FHIR Project) (\u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e, \u003ca href\u003d\"mailto:fhir@lists.hl7.org\"\u003efhir@lists.hl7.org\u003c/a\u003e). \u003c/p\u003e\u003cbr/\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd colspan\u003d\"1\"\u003e\u003cb\u003eSource Concept Details\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEquivalence\u003c/b\u003e\u003c/td\u003e\u003ctd colspan\u003d\"1\"\u003e\u003cb\u003eDestination Concept Details\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e from \u003ca href\u003d\"codesystem-name-use.html\" title\u003d\"http://hl7.org/fhir/name-use\"\u003eNameUse\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e from \u003ca href\u003d\"v2/0200/index.html\" title\u003d\"http://terminology.hl7.org/CodeSystem/v2-0200\"\u003ev2 Name Type\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eusual (Usual)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eD (Customary Name)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eofficial (Official)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eL (Official Registry Name)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003etemp (Temp)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTEMP (Temporary Name)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003enickname (Nickname)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eN (Nickname)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eanonymous (Anonymous)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eS (Pseudonym)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"border-bottom-style: none\"\u003eold (Old)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#wider\"\u003ewider\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNOUSE (No Longer To Be Used)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"border-top-style: none\"/\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#wider\"\u003ewider\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBAD (Bad Name)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003emaiden (Name changed for Marriage)\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"codesystem-concept-map-equivalence.html#equivalent\"\u003eequivalent\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eM (Maiden Name)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/cm-name-use-v2",
+  "version": "4.0.1",
+  "name": "v2.NameUse",
+  "title": "v2 map for NameUse",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "sourceCanonical": "http://hl7.org/fhir/ValueSet/name-use",
+  "targetCanonical": "http://terminology.hl7.org/ValueSet/v2-0200",
+  "group": [
+    {
+      "source": "http://hl7.org/fhir/name-use",
+      "target": "http://terminology.hl7.org/CodeSystem/v2-0200",
+      "element": [
+        {
+          "code": "usual",
+          "target": [
+            {
+              "code": "D",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "official",
+          "target": [
+            {
+              "code": "L",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "temp",
+          "target": [
+            {
+              "code": "TEMP",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "nickname",
+          "target": [
+            {
+              "code": "N",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "anonymous",
+          "target": [
+            {
+              "code": "S",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "old",
+          "target": [
+            {
+              "code": "NOUSE",
+              "equivalence": "wider"
+            },
+            {
+              "code": "BAD",
+              "equivalence": "wider"
+            }
+          ]
+        },
+        {
+          "code": "maiden",
+          "target": [
+            {
+              "code": "M",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

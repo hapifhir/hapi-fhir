@@ -1,0 +1,153 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "feeding-device",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFeeding Device Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMaterials used or needed to feed the patient.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright   of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers   of these specifications must have the appropriate SNOMED CT Affiliate license - for more   information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/feeding-device defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estandard-nipple\u003ca name\u003d\"feeding-device-standard-nipple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStandard nipple\u003c/td\u003e\u003ctd\u003eStandard nipple definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epreemie-nipple\u003ca name\u003d\"feeding-device-preemie-nipple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePreemie nipple\u003c/td\u003e\u003ctd\u003ePreemie nipple definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eortho-nipple\u003ca name\u003d\"feeding-device-ortho-nipple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOrthodontic nipple\u003c/td\u003e\u003ctd\u003eOrthodontic nipple definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esloflo-nipple\u003ca name\u003d\"feeding-device-sloflo-nipple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSlow flow nipple\u003c/td\u003e\u003ctd\u003eSlow flow nipple definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emidflo-nipple\u003ca name\u003d\"feeding-device-midflo-nipple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMiddle flow nipple\u003c/td\u003e\u003ctd\u003eMiddle flow nipple definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebigcut-nipple\u003ca name\u003d\"feeding-device-bigcut-nipple\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnlarged, cross-cut nipple\u003c/td\u003e\u003ctd\u003eEnlarged, cross-cut nipple definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehaberman-bottle\u003ca name\u003d\"feeding-device-haberman-bottle\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHaberman bottle\u003c/td\u003e\u003ctd\u003eHaberman bottle definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esippy-valve\u003ca name\u003d\"feeding-device-sippy-valve\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSippy cup with valve\u003c/td\u003e\u003ctd\u003eSippy cup with valve definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esippy-no-valve\u003ca name\u003d\"feeding-device-sippy-no-valve\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSippy cup without valve\u003c/td\u003e\u003ctd\u003eSippy cup without valve definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprovale-cup\u003ca name\u003d\"feeding-device-provale-cup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvale Cup\u003c/td\u003e\u003ctd\u003eProvale Cup definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eglass-lid\u003ca name\u003d\"feeding-device-glass-lid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGlass with lid/sippy cup\u003c/td\u003e\u003ctd\u003eGlass with lid/sippy cup definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehandhold-cup\u003ca name\u003d\"feeding-device-handhold-cup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDouble handhold on glass/cup\u003c/td\u003e\u003ctd\u003eDouble handhold on glass/cup definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erubber-mat\u003ca name\u003d\"feeding-device-rubber-mat\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRubber matting under tray\u003c/td\u003e\u003ctd\u003eRubber matting under tray definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estraw\u003ca name\u003d\"feeding-device-straw\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStraw\u003c/td\u003e\u003ctd\u003eStraw definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enose-cup\u003ca name\u003d\"feeding-device-nose-cup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNose cup\u003c/td\u003e\u003ctd\u003eNose cup definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003escoop-plate\u003ca name\u003d\"feeding-device-scoop-plate\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eScoop plate\u003c/td\u003e\u003ctd\u003eScoop plate definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eutensil-holder\u003ca name\u003d\"feeding-device-utensil-holder\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHand wrap utensil holder\u003c/td\u003e\u003ctd\u003eHand wrap utensil holder definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efoam-handle\u003ca name\u003d\"feeding-device-foam-handle\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFoam handle utensils\u003c/td\u003e\u003ctd\u003eFoam handle utensils definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eangled-utensil\u003ca name\u003d\"feeding-device-angled-utensil\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAngled utensils\u003c/td\u003e\u003ctd\u003eAngled utensils definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003espout-cup\u003ca name\u003d\"feeding-device-spout-cup\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpout cup\u003c/td\u003e\u003ctd\u003eSpout cup definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eautofeeding-device\u003ca name\u003d\"feeding-device-autofeeding-device\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAutomated feeding devices\u003c/td\u003e\u003ctd\u003eAutomated feeding devices definition:\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erocker-knife\u003ca name\u003d\"feeding-device-rocker-knife\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRocker knife\u003c/td\u003e\u003ctd\u003eRocker knife definition:\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/feeding-device",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.962"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FeedingDeviceCodes",
+  "title": "Feeding Device Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR NutritionOrder team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Materials used or needed to feed the patient.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright   of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers   of these specifications must have the appropriate SNOMED CT Affiliate license - for more   information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "standard-nipple",
+      "display": "Standard nipple",
+      "definition": "Standard nipple definition:"
+    },
+    {
+      "code": "preemie-nipple",
+      "display": "Preemie nipple",
+      "definition": "Preemie nipple definition:"
+    },
+    {
+      "code": "ortho-nipple",
+      "display": "Orthodontic nipple",
+      "definition": "Orthodontic nipple definition:"
+    },
+    {
+      "code": "sloflo-nipple",
+      "display": "Slow flow nipple",
+      "definition": "Slow flow nipple definition:"
+    },
+    {
+      "code": "midflo-nipple",
+      "display": "Middle flow nipple",
+      "definition": "Middle flow nipple definition:"
+    },
+    {
+      "code": "bigcut-nipple",
+      "display": "Enlarged, cross-cut nipple",
+      "definition": "Enlarged, cross-cut nipple definition:"
+    },
+    {
+      "code": "haberman-bottle",
+      "display": "Haberman bottle",
+      "definition": "Haberman bottle definition:"
+    },
+    {
+      "code": "sippy-valve",
+      "display": "Sippy cup with valve",
+      "definition": "Sippy cup with valve definition:"
+    },
+    {
+      "code": "sippy-no-valve",
+      "display": "Sippy cup without valve",
+      "definition": "Sippy cup without valve definition:"
+    },
+    {
+      "code": "provale-cup",
+      "display": "Provale Cup",
+      "definition": "Provale Cup definition:"
+    },
+    {
+      "code": "glass-lid",
+      "display": "Glass with lid/sippy cup",
+      "definition": "Glass with lid/sippy cup definition:"
+    },
+    {
+      "code": "handhold-cup",
+      "display": "Double handhold on glass/cup",
+      "definition": "Double handhold on glass/cup definition:"
+    },
+    {
+      "code": "rubber-mat",
+      "display": "Rubber matting under tray",
+      "definition": "Rubber matting under tray definition:"
+    },
+    {
+      "code": "straw",
+      "display": "Straw",
+      "definition": "Straw definition:"
+    },
+    {
+      "code": "nose-cup",
+      "display": "Nose cup",
+      "definition": "Nose cup definition:"
+    },
+    {
+      "code": "scoop-plate",
+      "display": "Scoop plate",
+      "definition": "Scoop plate definition:"
+    },
+    {
+      "code": "utensil-holder",
+      "display": "Hand wrap utensil holder",
+      "definition": "Hand wrap utensil holder definition:"
+    },
+    {
+      "code": "foam-handle",
+      "display": "Foam handle utensils",
+      "definition": "Foam handle utensils definition:"
+    },
+    {
+      "code": "angled-utensil",
+      "display": "Angled utensils",
+      "definition": "Angled utensils definition:"
+    },
+    {
+      "code": "spout-cup",
+      "display": "Spout cup",
+      "definition": "Spout cup definition:"
+    },
+    {
+      "code": "autofeeding-device",
+      "display": "Automated feeding devices",
+      "definition": "Automated feeding devices definition:"
+    },
+    {
+      "code": "rocker-knife",
+      "display": "Rocker knife",
+      "definition": "Rocker knife definition:"
+    }
+  ]
+}

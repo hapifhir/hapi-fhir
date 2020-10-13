@@ -1,0 +1,64 @@
+{
+  "resourceType": "ValueSet",
+  "id": "sequence-quality-method",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eF d a- method\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sequence quality method\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eUnless otherwise noted, the contents of the FDA website (www.fda.gov)—both text and graphics—are not copyrighted. They are in the public domain and may be republished, reprinted and otherwise used freely by anyone without the need to obtain permission from FDA. Credit to the U.S. Food and Drug Administration as the source is appreciated but not required. FDA appreciates being informed about the use of website materials. Contact FDA, HFI-50, Rockville, MD 20857 or email webmail@oc.fda.gov.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude all codes defined in \u003ccode\u003ehttps://precision.fda.gov/apps/\u003c/code\u003e\u003c/li\u003e\u003cli\u003eInclude all codes defined in \u003ccode\u003ehttps://precision.fda.gov/jobs/\u003c/code\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cg"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/sequence-quality-method",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.223"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "FDA-Method",
+  "title": "F d a- method",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sequence quality method",
+  "copyright": "Unless otherwise noted, the contents of the FDA website (www.fda.gov)—both text and graphics—are not copyrighted. They are in the public domain and may be republished, reprinted and otherwise used freely by anyone without the need to obtain permission from FDA. Credit to the U.S. Food and Drug Administration as the source is appreciated but not required. FDA appreciates being informed about the use of website materials. Contact FDA, HFI-50, Rockville, MD 20857 or email webmail@oc.fda.gov.",
+  "compose": {
+    "include": [
+      {
+        "system": "https://precision.fda.gov/apps/"
+      },
+      {
+        "system": "https://precision.fda.gov/jobs/"
+      }
+    ]
+  }
+}

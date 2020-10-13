@@ -1,0 +1,86 @@
+{
+  "resourceType": "Procedure",
+  "id": "f002",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f002\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: completed\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Partial lobectomy of lung \u003cspan\u003e(Details : {SNOMED CT code \u0027359615001\u0027 \u003d \u0027Partial lobectomy of lung\u0027, given as \u0027Partial lobectomy of lung\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eP. van de Heuvel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eEncounter/f002\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformed\u003c/b\u003e: 08/03/2013 9:00:10 AM --\u0026gt; 08/03/2013 9:30:10 AM\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eFunction\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eCare role \u003cspan\u003e(Details : {urn:oid:2.16.840.1.113883.2.4.15.111 code \u002701.000\u0027 \u003d \u002701.000\u0027, given as \u0027Arts\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003eM.I.M. Versteegh\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Malignant tumor of lung \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: Lung structure \u003cspan\u003e(Details : {SNOMED CT code \u002739607008\u0027 \u003d \u0027Lung\u0027, given as \u0027Lung structure\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eoutcome\u003c/b\u003e: improved blood circulation \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereport\u003c/b\u003e: \u003ca\u003eLab results blood test\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003efollowUp\u003c/b\u003e: described in care plan \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "359615001",
+        "display": "Partial lobectomy of lung"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "encounter": {
+    "reference": "Encounter/f002"
+  },
+  "performedPeriod": {
+    "start": "2013-03-08T09:00:10+01:00",
+    "end": "2013-03-08T09:30:10+01:00"
+  },
+  "performer": [
+    {
+      "function": {
+        "coding": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.4.15.111",
+            "code": "01.000",
+            "display": "Arts"
+          }
+        ],
+        "text": "Care role"
+      },
+      "actor": {
+        "reference": "Practitioner/f003",
+        "display": "M.I.M. Versteegh"
+      }
+    }
+  ],
+  "reasonCode": [
+    {
+      "text": "Malignant tumor of lung"
+    }
+  ],
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "39607008",
+          "display": "Lung structure"
+        }
+      ]
+    }
+  ],
+  "outcome": {
+    "text": "improved blood circulation"
+  },
+  "report": [
+    {
+      "reference": "DiagnosticReport/f001",
+      "display": "Lab results blood test"
+    }
+  ],
+  "followUp": [
+    {
+      "text": "described in care plan"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

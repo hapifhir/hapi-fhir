@@ -1,88 +1,82 @@
 <!DOCTYPE html>
-<html lang="en">
-<div th:fragment="top" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-	<div class="container-fluid">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse"
-				data-target=".navbar-collapse">
-				<span class="sr-only">Toggle navigation</span> <span
-					class="icon-bar"></span> <span class="icon-bar"></span> <span
-					class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand"
-				th:href="'home?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}">
-				<span class="fa fa-home topbarIcon"></span> Home
-			</a> 
-			<a class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
-				th:if="${resourceName} != null and ${resourceName.empty} == false"
-				th:href="'resource?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty} + '&amp;resource=' + ${resourceName}">
-				<span class="glyphicon glyphicon-chevron-right"></span> <span
-				th:text="${resourceName}"></span>
-			</a>
-			<div class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
-				th:if="${outcomeDescription} != null">
-				<span class="glyphicon glyphicon-chevron-right"></span> <span
-					th:text="${outcomeDescription}"></span>
-			</div>
-			<div class="navbar-left navbarBreadcrumb hidden-xs hidden-sm"
-				th:if="${extraBreadcrumb} != null">
-				<span class="glyphicon glyphicon-chevron-right"></span>&nbsp;<span
-					th:text="${extraBreadcrumb}"></span>
-			</div>
-		</div>
-		
-		<div class="navbar-collapse collapse">
-			<ul class="nav navbar-nav navbar-right">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-				<!--
-				Server Selection Dropdown 
-				-->
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle"	data-toggle="dropdown">
-					<span id="serverSelectorFhirIcon" class="glyphicon glyphicon-fire topbarIcon"></span>&nbsp;<span id="serverSelectorName" th:text="'Server: ' + ${baseName}"></span>&nbsp;<span class="caret" /></a>
-					<ul class="dropdown-menu" role="menu">
-						<li th:each="serverEntry : ${serverEntries}">
-							<a th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'">
-                        <i class="far fa-check-square" th:if="${serverEntry.key} == ${serverId}"></i>
-                        <i class="far fa-square" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}"></i>
-								&nbsp;&nbsp;
-								<th:block 	th:text="${serverEntry.value}"/>
-							</a>
-						</li>
-					</ul>
-				</li>
-				
-				<!--
-				Security Dropdown 
-				-->
-				<th:block th:if="${apiKey != null}">
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle"	data-toggle="dropdown"><span class="fa fa-key topbarIcon"></span>&nbsp;API Key&nbsp;<span class="caret" /></a>
-						<ul class="dropdown-menu" role="menu">
-							<div style="padding: 10px;">
-								<p>If your chosen server requires an API key / Bearer token, enter it here:</p>
-								<input type="text" name="apiKey" id="apiKey" th:value="${apiKey}"/>
-								
-								<script type="text/javascript">
-									$('#apiKey').on('click', function(event){
-									    // The event won't be propagated up to the document NODE and 
-									    // therefore delegated events won't be fired
-									    event.stopPropagation();
-									});
-								</script>
-							</div>
-						</ul>
-					</li>
-				</th:block>
-				
-				<!-- 
-				SourceCode / About this Server
-				-->
-				<th:block th:include="tmpl-navbar-top-farright :: farright"/>
-				
-			</ul>
-		</div>
-		
-	</div>
-</div>
+
+<header th:fragment="top" class="header" id="header">
+   <nav class="navbar navbar-dark bg-dark fixed-top navbar-expand-lg">
+
+      <a class="navbar-brand hidden-xs hidden-sm"
+         th:if="${resourceName} != null and ${resourceName.empty} == false"
+         th:href="'resource?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty} + '&amp;resource=' + ${resourceName}">
+         <i class="fas fa-broom" style="color: #F88;"></i>
+         <span th:text="${resourceName}"></span>
+         Resource
+      </a>
+      <a class="navbar-brand" th:href="'home?encoding=' + ${encoding} + '&amp;pretty=' + ${pretty}" th:unless="${resourceName} != null and ${resourceName.empty} == false">
+         <span class="fa fa-home topbarIcon"></span> Home
+      </a>
+
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+         <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+         <!--
+         Server selection dropdown
+         -->
+         <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-fire topbarIcon"></i>&nbsp;<span id="serverSelectorName" th:text="'Server: ' + ${baseName}"></span>&nbsp;<span class="caret" /></a>
+               </a>
+               <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a th:each="serverEntry : ${serverEntries}" th:href="'javascript:selectServer(\'' + ${serverEntry.key} + '\');'" class="dropdown-item">
+                     <i class="far fa-check-square" th:if="${serverEntry.key} == ${serverId}"></i>
+                     <i class="far fa-square" style="color: #CCC;" th:unless="${serverEntry.key} == ${serverId}"></i>
+                     &nbsp;&nbsp;
+                     <th:block 	th:text="${serverEntry.value}"/>
+                  </a>
+               </div>
+            </li>
+         </ul>
+
+         <!--
+         Security Dropdown
+         -->
+         <th:block th:if="${apiKey != null}">
+            <ul class="navbar-nav">
+               <li class="nav-item dropdown">
+                  <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown"><span class="fa fa-key topbarIcon"></span>&nbsp;API Key&nbsp;<span class="caret" /></a>
+                  <ul class="dropdown-menu" role="menu">
+                     <div style="padding: 10px;">
+                        <p>If your chosen server requires an API key / Bearer token, enter it here:</p>
+                        <input type="text" name="apiKey" id="apiKey" th:value="${apiKey}"/>
+
+                        <script type="text/javascript">
+                           $('#apiKey').on('click', function(event){
+                              // The event won't be propagated up to the document NODE and
+                              // therefore delegated events won't be fired
+                              event.stopPropagation();
+                           });
+                        </script>
+                     </div>
+                  </ul>
+               </li>
+            </ul>
+         </th:block>
+
+         <!--
+         SourceCode / About this Server
+         -->
+         <th:block th:replace="tmpl-navbar-top-farright :: farright"/>
+
+      </div>
+
+
+
+   </nav>
+
+</header>
+
 </html>

@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "message-significance-category",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMessageSignificanceCategory\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe impact of the content of a message.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/message-significance-category defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econsequence\u003ca name\u003d\"message-significance-category-consequence\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsequence\u003c/td\u003e\u003ctd\u003eThe message represents/requests a change that should not be processed more than once; e.g., making a booking for an appointment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecurrency\u003ca name\u003d\"message-significance-category-currency\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCurrency\u003c/td\u003e\u003ctd\u003eThe message represents a response to query for current information. Retrospective processing is wrong and/or wasteful.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enotification\u003ca name\u003d\"message-significance-category-notification\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNotification\u003c/td\u003e\u003ctd\u003eThe content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "inm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/message-significance-category",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.189"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MessageSignificanceCategory",
+  "title": "MessageSignificanceCategory",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The impact of the content of a message.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/message-significance-category",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "consequence",
+      "display": "Consequence",
+      "definition": "The message represents/requests a change that should not be processed more than once; e.g., making a booking for an appointment."
+    },
+    {
+      "code": "currency",
+      "display": "Currency",
+      "definition": "The message represents a response to query for current information. Retrospective processing is wrong and/or wasteful."
+    },
+    {
+      "code": "notification",
+      "display": "Notification",
+      "definition": "The content is not necessarily intended to be current, and it can be reprocessed, though there may be version issues created by processing old notifications."
+    }
+  ]
+}

@@ -62,6 +62,10 @@ public class BaseJpaResourceProviderPatientR5 extends JpaResourceProviderR5<Pati
 		@OperationParam(name = Constants.PARAM_COUNT)
 			UnsignedIntType theCount,
 
+		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+		@OperationParam(name = Constants.PARAM_OFFSET)
+			UnsignedIntType theOffset,
+
 		@Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
 		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
 			DateRangeParam theLastUpdated,
@@ -86,7 +90,7 @@ public class BaseJpaResourceProviderPatientR5 extends JpaResourceProviderR5<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theOffset,  theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -104,6 +108,10 @@ public class BaseJpaResourceProviderPatientR5 extends JpaResourceProviderR5<Pati
 		@OperationParam(name = Constants.PARAM_COUNT)
 			UnsignedIntType theCount,
 
+		@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+		@OperationParam(name = Constants.PARAM_OFFSET)
+			UnsignedIntType theOffset,
+
 		@Description(shortDefinition = "Only return resources which were last updated as specified by the given range")
 		@OperationParam(name = Constants.PARAM_LASTUPDATED, min = 0, max = 1)
 			DateRangeParam theLastUpdated,
@@ -128,7 +136,7 @@ public class BaseJpaResourceProviderPatientR5 extends JpaResourceProviderR5<Pati
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}

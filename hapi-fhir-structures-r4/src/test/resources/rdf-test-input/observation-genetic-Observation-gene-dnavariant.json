@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "observation-genetic-Observation-gene-dnavariant",
+  "url": "http://hl7.org/fhir/SearchParameter/observation-genetic-Observation-gene-dnavariant",
+  "version": "4.0.1",
+  "name": "gene-dnavariant",
+  "status": "draft",
+  "experimental": true,
+  "description": "HGNC gene symbol and HGVS DNA Variant",
+  "code": "gene-dnavariant",
+  "base": [
+    "Observation"
+  ],
+  "type": "string",
+  "expression": "Observation.extension(\u0027http://hl7.org/fhir/StructureDefinition/observation-geneticsDnaVariant\u0027)",
+  "xpathUsage": "normal"
+}

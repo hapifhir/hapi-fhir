@@ -1,0 +1,84 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "rejection-criteria",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eRejectionCriterion\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCriterion for rejection of the specimen by laboratory.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/rejection-criteria defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehemolized\u003ca name\u003d\"rejection-criteria-hemolized\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehemolized specimen\u003c/td\u003e\u003ctd\u003eblood specimen hemolized.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einsufficient\u003ca name\u003d\"rejection-criteria-insufficient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einsufficient specimen volume\u003c/td\u003e\u003ctd\u003einsufficient quantity of specimen.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebroken\u003ca name\u003d\"rejection-criteria-broken\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebroken specimen container\u003c/td\u003e\u003ctd\u003especimen container broken.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclotted\u003ca name\u003d\"rejection-criteria-clotted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003especimen clotted\u003c/td\u003e\u003ctd\u003especimen clotted.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewrong-temperature\u003ca name\u003d\"rejection-criteria-wrong-temperature\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003especimen temperature inappropriate\u003c/td\u003e\u003ctd\u003especimen temperature inappropriate.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "oo"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/rejection-criteria",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1260"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "RejectionCriterion",
+  "title": "RejectionCriterion",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Criterion for rejection of the specimen by laboratory.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/rejection-criteria",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "hemolized",
+      "display": "hemolized specimen",
+      "definition": "blood specimen hemolized."
+    },
+    {
+      "code": "insufficient",
+      "display": "insufficient specimen volume",
+      "definition": "insufficient quantity of specimen."
+    },
+    {
+      "code": "broken",
+      "display": "broken specimen container",
+      "definition": "specimen container broken."
+    },
+    {
+      "code": "clotted",
+      "display": "specimen clotted",
+      "definition": "specimen clotted."
+    },
+    {
+      "code": "wrong-temperature",
+      "display": "specimen temperature inappropriate",
+      "definition": "specimen temperature inappropriate."
+    }
+  ]
+}

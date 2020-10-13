@@ -1,0 +1,124 @@
+{
+  "resourceType": "ValueSet",
+  "id": "identifier-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eIdentifierType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA coded type for an identifier that can be used to determine which identifier to use for a specific purpose.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v2/0203/index.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v2-0203\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-DL\"\u003eDL\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDriver\u0027s license number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-PPN\"\u003ePPN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePassport number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-BRN\"\u003eBRN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBreed Registry Number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-MR\"\u003eMR\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical record number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-MCN\"\u003eMCN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMicrochip Number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-EN\"\u003eEN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEmployer number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-TAX\"\u003eTAX\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTax ID number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-NIIP\"\u003eNIIP\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNational Insurance Payor Identifier (Payor)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-PRN\"\u003ePRN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-MD\"\u003eMD\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMedical License number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-DR\"\u003eDR\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDonor Registration Number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-ACSN\"\u003eACSN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccession ID\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-UDI\"\u003eUDI\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUniversal Device Identifier\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-SNO\"\u003eSNO\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSerial Number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-SB\"\u003eSB\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSocial Beneficiary Identifier\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-PLAC\"\u003ePLAC\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePlacer Identifier\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-FILL\"\u003eFILL\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFiller Identifier\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0203/index.html#v2-0203-JHN\"\u003eJHN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eJurisdictional health number (Canada)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-warning",
+      "valueMarkdown": "Types are for general categories of identifiers. See [the identifier registry](identifier-registry.html) for a list of common identifier systems"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "vocab"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/identifier-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.45"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "Identifier Type Codes",
+  "title": "IdentifierType",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "A coded type for an identifier that can be used to determine which identifier to use for a specific purpose.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "concept": [
+          {
+            "code": "DL"
+          },
+          {
+            "code": "PPN"
+          },
+          {
+            "code": "BRN"
+          },
+          {
+            "code": "MR"
+          },
+          {
+            "code": "MCN"
+          },
+          {
+            "code": "EN"
+          },
+          {
+            "code": "TAX"
+          },
+          {
+            "code": "NIIP"
+          },
+          {
+            "code": "PRN"
+          },
+          {
+            "code": "MD"
+          },
+          {
+            "code": "DR"
+          },
+          {
+            "code": "ACSN"
+          },
+          {
+            "code": "UDI"
+          },
+          {
+            "code": "SNO"
+          },
+          {
+            "code": "SB"
+          },
+          {
+            "code": "PLAC"
+          },
+          {
+            "code": "FILL"
+          },
+          {
+            "code": "JHN"
+          }
+        ]
+      }
+    ]
+  }
+}

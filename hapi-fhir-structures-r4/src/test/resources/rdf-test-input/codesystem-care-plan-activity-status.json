@@ -1,0 +1,106 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "care-plan-activity-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCarePlanActivityStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes that reflect the current state of a care plan activity within its overall life cycle.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/care-plan-activity-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-started\u003ca name\u003d\"care-plan-activity-status-not-started\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Started\u003c/td\u003e\u003ctd\u003eCare plan activity is planned but no action has yet been taken.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003escheduled\u003ca name\u003d\"care-plan-activity-status-scheduled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eScheduled\u003c/td\u003e\u003ctd\u003eAppointment or other booking has occurred but activity has not yet begun.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein-progress\u003ca name\u003d\"care-plan-activity-status-in-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Progress\u003c/td\u003e\u003ctd\u003eCare plan activity has been started but is not yet complete.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eon-hold\u003ca name\u003d\"care-plan-activity-status-on-hold\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOn Hold\u003c/td\u003e\u003ctd\u003eCare plan activity was started but has temporarily ceased with an expectation of resumption at a future time.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecompleted\u003ca name\u003d\"care-plan-activity-status-completed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCompleted\u003c/td\u003e\u003ctd\u003eCare plan activity has been completed (more or less) as planned.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"care-plan-activity-status-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eThe planned care plan activity has been withdrawn.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  stopped\u003ca name\u003d\"care-plan-activity-status-stopped\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStopped\u003c/td\u003e\u003ctd\u003eThe planned care plan activity has been ended prior to completion after the activity was started.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"care-plan-activity-status-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe current state of the care plan activity is not known.  Note: This concept is not to be used for \u0026quot;other\u0026quot; - one of the listed statuses is presumed to apply, but the authoring/source system does not know which one.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"care-plan-activity-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eCare plan activity was entered in error and voided.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/care-plan-activity-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.147"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CarePlanActivityStatus",
+  "title": "CarePlanActivityStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes that reflect the current state of a care plan activity within its overall life cycle.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/care-plan-activity-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "not-started",
+      "display": "Not Started",
+      "definition": "Care plan activity is planned but no action has yet been taken."
+    },
+    {
+      "code": "scheduled",
+      "display": "Scheduled",
+      "definition": "Appointment or other booking has occurred but activity has not yet begun."
+    },
+    {
+      "code": "in-progress",
+      "display": "In Progress",
+      "definition": "Care plan activity has been started but is not yet complete."
+    },
+    {
+      "code": "on-hold",
+      "display": "On Hold",
+      "definition": "Care plan activity was started but has temporarily ceased with an expectation of resumption at a future time."
+    },
+    {
+      "code": "completed",
+      "display": "Completed",
+      "definition": "Care plan activity has been completed (more or less) as planned."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "The planned care plan activity has been withdrawn.",
+      "concept": [
+        {
+          "code": "stopped",
+          "display": "Stopped",
+          "definition": "The planned care plan activity has been ended prior to completion after the activity was started."
+        }
+      ]
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The current state of the care plan activity is not known.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which one."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "Care plan activity was entered in error and voided."
+    }
+  ]
+}

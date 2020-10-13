@@ -1,0 +1,113 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "surface",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSurface Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes a smattering of FDI tooth surface codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/FDI-surface defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eM\u003ca name\u003d\"surface-M\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMesial\u003c/td\u003e\u003ctd\u003eThe surface of a tooth that is closest to the midline (middle) of the face.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eO\u003ca name\u003d\"surface-O\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOcclusal\u003c/td\u003e\u003ctd\u003eThe chewing surface of posterior teeth.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eI\u003ca name\u003d\"surface-I\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIncisal\u003c/td\u003e\u003ctd\u003eThe biting edge of anterior teeth.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eD\u003ca name\u003d\"surface-D\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDistal\u003c/td\u003e\u003ctd\u003eThe surface of a tooth that faces away from the midline of the face.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eB\u003ca name\u003d\"surface-B\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBuccal\u003c/td\u003e\u003ctd\u003eThe surface of a posterior tooth facing the cheeks.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eV\u003ca name\u003d\"surface-V\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVentral\u003c/td\u003e\u003ctd\u003eThe surface of a tooth facing the lips.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eL\u003ca name\u003d\"surface-L\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLingual\u003c/td\u003e\u003ctd\u003eThe surface of a tooth facing the tongue.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMO\u003ca name\u003d\"surface-MO\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMesioclusal\u003c/td\u003e\u003ctd\u003eThe Mesioclusal surfaces of a tooth.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDO\u003ca name\u003d\"surface-DO\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDistoclusal\u003c/td\u003e\u003ctd\u003eThe Distoclusal surfaces of a tooth.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDI\u003ca name\u003d\"surface-DI\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDistoincisal\u003c/td\u003e\u003ctd\u003eThe Distoincisal surfaces of a tooth.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMOD\u003ca name\u003d\"surface-MOD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMesioclusodistal\u003c/td\u003e\u003ctd\u003eThe Mesioclusodistal surfaces of a tooth.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/FDI-surface",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1154"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SurfaceCodes",
+  "title": "Surface Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes a smattering of FDI tooth surface codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/surface",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "M",
+      "display": "Mesial",
+      "definition": "The surface of a tooth that is closest to the midline (middle) of the face."
+    },
+    {
+      "code": "O",
+      "display": "Occlusal",
+      "definition": "The chewing surface of posterior teeth."
+    },
+    {
+      "code": "I",
+      "display": "Incisal",
+      "definition": "The biting edge of anterior teeth."
+    },
+    {
+      "code": "D",
+      "display": "Distal",
+      "definition": "The surface of a tooth that faces away from the midline of the face."
+    },
+    {
+      "code": "B",
+      "display": "Buccal",
+      "definition": "The surface of a posterior tooth facing the cheeks."
+    },
+    {
+      "code": "V",
+      "display": "Ventral",
+      "definition": "The surface of a tooth facing the lips."
+    },
+    {
+      "code": "L",
+      "display": "Lingual",
+      "definition": "The surface of a tooth facing the tongue."
+    },
+    {
+      "code": "MO",
+      "display": "Mesioclusal",
+      "definition": "The Mesioclusal surfaces of a tooth."
+    },
+    {
+      "code": "DO",
+      "display": "Distoclusal",
+      "definition": "The Distoclusal surfaces of a tooth."
+    },
+    {
+      "code": "DI",
+      "display": "Distoincisal",
+      "definition": "The Distoincisal surfaces of a tooth."
+    },
+    {
+      "code": "MOD",
+      "display": "Mesioclusodistal",
+      "definition": "The Mesioclusodistal surfaces of a tooth."
+    }
+  ]
+}

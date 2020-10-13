@@ -1,0 +1,84 @@
+{
+  "resourceType": "Communication",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003ePatient has very high serum potassium\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "type": {
+        "text": "Paging System"
+      },
+      "system": "urn:oid:1.3.4.5.6.7",
+      "value": "2345678901"
+    }
+  ],
+  "instantiatesUri": [
+    "http://example.org/hyperkalemia"
+  ],
+  "partOf": [
+    {
+      "display": "Serum Potassium Observation"
+    }
+  ],
+  "status": "completed",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://acme.org/messagetypes",
+          "code": "Alert"
+        }
+      ],
+      "text": "Alert"
+    }
+  ],
+  "medium": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationMode",
+          "code": "WRITTEN",
+          "display": "written"
+        }
+      ],
+      "text": "written"
+    }
+  ],
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "encounter": {
+    "reference": "Encounter/example"
+  },
+  "sent": "2014-12-12T18:01:10-08:00",
+  "received": "2014-12-12T18:01:11-08:00",
+  "recipient": [
+    {
+      "reference": "Practitioner/example"
+    }
+  ],
+  "sender": {
+    "reference": "Device/f001"
+  },
+  "payload": [
+    {
+      "contentString": "Patient 1 has a very high serum potassium value (7.2 mmol/L on 2014-Dec-12 at 5:55 pm)"
+    },
+    {
+      "contentReference": {
+        "display": "Serum Potassium Observation"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "resourceType": "AuditEvent",
+  "id": "example-pixQuery",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example-pixQuery\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Query (Details: DICOM code 110112 \u003d \u0027Query\u0027, stated as \u0027Query\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003esubtype\u003c/b\u003e: PIX Query (Details: urn:oid:1.3.6.1.4.1.19376.1.2 code ITI-9 \u003d \u0027ITI-9\u0027, stated as \u0027PIX Query\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e: E\u003c/p\u003e\u003cp\u003e\u003cb\u003erecorded\u003c/b\u003e: 26/08/2015 11:42:24 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eoutcome\u003c/b\u003e: 0\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eagent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Source Role ID \u003cspan\u003e(Details : {DICOM code \u0027110153\u0027 \u003d \u0027Source Role ID\u0027, given as \u0027Source Role ID\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewho\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ealtId\u003c/b\u003e: 6580\u003c/p\u003e\u003cp\u003e\u003cb\u003erequestor\u003c/b\u003e: false\u003c/p\u003e\u003ch3\u003eNetworks\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAddress\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eWorkstation1.ehr.familyclinic.com\u003c/td\u003e\u003ctd\u003e1\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eagent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: human user \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/extra-security-role-type code \u0027humanuser\u0027 \u003d \u0027human user\u0027, given as \u0027human user\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewho\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ealtId\u003c/b\u003e: 601847123\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Grahame Grieve\u003c/p\u003e\u003cp\u003e\u003cb\u003erequestor\u003c/b\u003e: true\u003c/p\u003e\u003c/blockquote\u003e\u003ch3\u003eSources\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eObserver\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ehl7connect.healthintersections.com.au\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentity\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhat\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Person (Details: http://terminology.hl7.org/CodeSystem/audit-entity-type code 1 \u003d \u0027Person\u0027, stated as \u0027Person\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003erole\u003c/b\u003e: Patient (Details: http://terminology.hl7.org/CodeSystem/object-role code 1 \u003d \u0027Patient\u0027, stated as \u0027Patient\u0027)\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eentity\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: System Object (Details: http://terminology.hl7.org/CodeSystem/audit-entity-type code 2 \u003d \u0027System Object\u0027, stated as \u0027System Object\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003erole\u003c/b\u003e: Query (Details: http://terminology.hl7.org/CodeSystem/object-role code 24 \u003d \u0027Query\u0027, stated as \u0027Query\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003equery\u003c/b\u003e: PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPFBSUEFfSU4yMDEzMDlVVjAyIElUU1ZlcnNpb249IlhNTF8xLjAiIHhtbG5zPSJ1cm46aGw3LW9yZzp2MyI+CiAgPGlkIGV4dGVuc2lvbj0iMzU0MjMiIHJvb3Q9IjEuMi44NDAuMTE0MzUwLjEuMTMuMC4xLjcuMS4xIi8+CiAgPGNyZWF0aW9uVGltZSB2YWx1ZT0iMjAxNDA1MDgxNjQ5MjUiLz4KICA8aW50ZXJhY3Rpb25JZCBleHRlbnNpb249IlBSUEFfSU4yMDEzMDVVVjAyIiByb290PSIyLjE2Ljg0MC4xLjExMzg4My4xLjYiLz4KICA8cHJvY2Vzc2luZ0NvZGUgY29kZT0iVCIvPgogIDxwcm9jZXNzaW5nTW9kZUNvZGUgY29kZT0iVCIvPgogIDxhY2NlcHRBY2tDb2RlIGNvZGU9IkFMIi8+CiAgPHJlY2VpdmVyIHR5cGVDb2RlPSJSQ1YiPgogICAgPGRldmljZSBjbGFzc0NvZGU9IkRFViIgZGV0ZXJtaW5lckNvZGU9IklOU1RBTkNFIj4KICAgICAgPGlkIHJvb3Q9IkVIUl9NSVNZUyIvPgogICAgICA8YXNBZ2VudCBjbGFzc0NvZGU9IkFHTlQiPgogICAgICAgIDxyZXByZXNlbnRlZE9yZ2FuaXphdGlvbiBjbGFzc0NvZGU9Ik9SRyIgZGV0ZXJtaW5lckNvZGU9IklOU1RBTkNFIj4KICAgICAgICAgIDxpZCByb290PSJNSVNZUyIvPgogICAgICAgIDwvcmVwcmVzZW50ZWRPcmdhbml6YXRpb24+CiAgICAgIDwvYXNBZ2VudD4KICAgIDwvZGV2aWNlPgogIDwvcmVjZWl2ZXI+CiAgPHNlbmRlciB0eXBlQ29kZT0iU05EIj4KICAgIDxkZXZpY2UgY2xhc3NDb2RlPSJERVYiIGRldGVybWluZXJDb2RlPSJJTlNUQU5DRSI+CiAgICAgIDxpZCByb290PSIyLjE2Ljg0MC4xLjExMzg4My40LjIiLz4KICAgICAgPGFzQWdlbnQgY2xhc3NDb2RlPSJBR05UIj4KICAgICAgICA8cmVwcmVzZW50ZWRPcmdhbml6YXRpb24gY2xhc3NDb2RlPSJPUkciIGRldGVybWluZXJDb2RlPSJJTlNUQU5DRSI+CiAgICAgICAgICA8aWQgcm9vdD0iMi4xNi44NDAuMS4xMTM4ODMuNC4yIi8+CiAgICAgICAgPC9yZXByZXNlbnRlZE9yZ2FuaXphdGlvbj4KICAgICAgPC9hc0FnZW50PgogICAgPC9kZXZpY2U+CiAgPC9zZW5kZXI+CiAgPGNvbnRyb2xBY3RQcm9jZXNzIGNsYXNzQ29kZT0iQ0FDVCIgbW9vZENvZGU9IkVWTiI+CiAgICA8Y29kZSBjb2RlPSJQUlBBX1RFMjAxMzA5VVYwMiIgY29kZVN5c3RlbT0iMi4xNi44NDAuMS4xMTM4ODMuMS42Ii8+CiAgICA8cXVlcnlCeVBhcmFtZXRlcj4KICAgICAgPHF1ZXJ5SWQgZXh0ZW5zaW9uPSIxODQwOTk3MDg0IiByb290PSIxLjIuODQwLjExNDM1MC4xLjEzLjI4LjEuMTguNS45OTkiLz4KICAgICAgPHN0YXR1c0NvZGUgY29kZT0ibmV3Ii8+CiAgICAgIDxyZXNwb25zZVByaW9yaXR5Q29kZSBjb2RlPSJJIi8+CiAgICAgIDxwYXJhbWV0ZXJMaXN0PgogICAgICAgIDxwYXRpZW50SWRlbnRpZmllcj4KICAgICAgICAgIDx2YWx1ZSBleHRlbnNpb249IlN1cnlhQnJhbmQiIHJvb3Q9IjIuMTYuODQwLjEuMTEzODgzLjQuMiIvPgogICAgICAgICAgPHNlbWFudGljc1RleHQ+UGF0aWVudC5JZDwvc2VtYW50aWNzVGV4dD4KICAgICAgICA8L3BhdGllbnRJZGVudGlmaWVyPgogICAgICA8L3BhcmFtZXRlckxpc3Q+CiAgICA8L3F1ZXJ5QnlQYXJhbWV0ZXI+CiAgPC9jb250cm9sQWN0UHJvY2Vzcz4KPC9QUlBBX0lOMjAxMzA5VVYwMj4K\u003c/p\u003e\u003ch3\u003eDetails\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValue[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eMSH-10\u003c/td\u003e\u003ctd\u003eMS4yLjg0MC4xMTQzNTAuMS4xMy4wLjEuNy4xLjE\u003d\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "type": {
+    "system": "http://dicom.nema.org/resources/ontology/DCM",
+    "code": "110112",
+    "display": "Query"
+  },
+  "subtype": [
+    {
+      "system": "urn:oid:1.3.6.1.4.1.19376.1.2",
+      "code": "ITI-9",
+      "display": "PIX Query"
+    }
+  ],
+  "action": "E",
+  "recorded": "2015-08-26T23:42:24Z",
+  "outcome": "0",
+  "agent": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://dicom.nema.org/resources/ontology/DCM",
+            "code": "110153",
+            "display": "Source Role ID"
+          }
+        ]
+      },
+      "who": {
+        "identifier": {
+          "system": "urn:oid:2.16.840.1.113883.4.2",
+          "value": "2.16.840.1.113883.4.2"
+        }
+      },
+      "altId": "6580",
+      "requestor": false,
+      "network": {
+        "address": "Workstation1.ehr.familyclinic.com",
+        "type": "1"
+      }
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/extra-security-role-type",
+            "code": "humanuser",
+            "display": "human user"
+          }
+        ]
+      },
+      "who": {
+        "identifier": {
+          "value": "95"
+        }
+      },
+      "altId": "601847123",
+      "name": "Grahame Grieve",
+      "requestor": true
+    }
+  ],
+  "source": {
+    "observer": {
+      "display": "hl7connect.healthintersections.com.au"
+    }
+  },
+  "entity": [
+    {
+      "what": {
+        "identifier": {
+          "value": "e3cdfc81a0d24bd^^^\u00262.16.840.1.113883.4.2\u0026ISO"
+        }
+      },
+      "type": {
+        "system": "http://terminology.hl7.org/CodeSystem/audit-entity-type",
+        "code": "1",
+        "display": "Person"
+      },
+      "role": {
+        "system": "http://terminology.hl7.org/CodeSystem/object-role",
+        "code": "1",
+        "display": "Patient"
+      }
+    },
+    {
+      "type": {
+        "system": "http://terminology.hl7.org/CodeSystem/audit-entity-type",
+        "code": "2",
+        "display": "System Object"
+      },
+      "role": {
+        "system": "http://terminology.hl7.org/CodeSystem/object-role",
+        "code": "24",
+        "display": "Query"
+      },
+      "query": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPFBSUEFfSU4yMDEzMDlVVjAyIElUU1ZlcnNpb249IlhNTF8xLjAiIHhtbG5zPSJ1cm46aGw3LW9yZzp2MyI+CiAgPGlkIGV4dGVuc2lvbj0iMzU0MjMiIHJvb3Q9IjEuMi44NDAuMTE0MzUwLjEuMTMuMC4xLjcuMS4xIi8+CiAgPGNyZWF0aW9uVGltZSB2YWx1ZT0iMjAxNDA1MDgxNjQ5MjUiLz4KICA8aW50ZXJhY3Rpb25JZCBleHRlbnNpb249IlBSUEFfSU4yMDEzMDVVVjAyIiByb290PSIyLjE2Ljg0MC4xLjExMzg4My4xLjYiLz4KICA8cHJvY2Vzc2luZ0NvZGUgY29kZT0iVCIvPgogIDxwcm9jZXNzaW5nTW9kZUNvZGUgY29kZT0iVCIvPgogIDxhY2NlcHRBY2tDb2RlIGNvZGU9IkFMIi8+CiAgPHJlY2VpdmVyIHR5cGVDb2RlPSJSQ1YiPgogICAgPGRldmljZSBjbGFzc0NvZGU9IkRFViIgZGV0ZXJtaW5lckNvZGU9IklOU1RBTkNFIj4KICAgICAgPGlkIHJvb3Q9IkVIUl9NSVNZUyIvPgogICAgICA8YXNBZ2VudCBjbGFzc0NvZGU9IkFHTlQiPgogICAgICAgIDxyZXByZXNlbnRlZE9yZ2FuaXphdGlvbiBjbGFzc0NvZGU9Ik9SRyIgZGV0ZXJtaW5lckNvZGU9IklOU1RBTkNFIj4KICAgICAgICAgIDxpZCByb290PSJNSVNZUyIvPgogICAgICAgIDwvcmVwcmVzZW50ZWRPcmdhbml6YXRpb24+CiAgICAgIDwvYXNBZ2VudD4KICAgIDwvZGV2aWNlPgogIDwvcmVjZWl2ZXI+CiAgPHNlbmRlciB0eXBlQ29kZT0iU05EIj4KICAgIDxkZXZpY2UgY2xhc3NDb2RlPSJERVYiIGRldGVybWluZXJDb2RlPSJJTlNUQU5DRSI+CiAgICAgIDxpZCByb290PSIyLjE2Ljg0MC4xLjExMzg4My40LjIiLz4KICAgICAgPGFzQWdlbnQgY2xhc3NDb2RlPSJBR05UIj4KICAgICAgICA8cmVwcmVzZW50ZWRPcmdhbml6YXRpb24gY2xhc3NDb2RlPSJPUkciIGRldGVybWluZXJDb2RlPSJJTlNUQU5DRSI+CiAgICAgICAgICA8aWQgcm9vdD0iMi4xNi44NDAuMS4xMTM4ODMuNC4yIi8+CiAgICAgICAgPC9yZXByZXNlbnRlZE9yZ2FuaXphdGlvbj4KICAgICAgPC9hc0FnZW50PgogICAgPC9kZXZpY2U+CiAgPC9zZW5kZXI+CiAgPGNvbnRyb2xBY3RQcm9jZXNzIGNsYXNzQ29kZT0iQ0FDVCIgbW9vZENvZGU9IkVWTiI+CiAgICA8Y29kZSBjb2RlPSJQUlBBX1RFMjAxMzA5VVYwMiIgY29kZVN5c3RlbT0iMi4xNi44NDAuMS4xMTM4ODMuMS42Ii8+CiAgICA8cXVlcnlCeVBhcmFtZXRlcj4KICAgICAgPHF1ZXJ5SWQgZXh0ZW5zaW9uPSIxODQwOTk3MDg0IiByb290PSIxLjIuODQwLjExNDM1MC4xLjEzLjI4LjEuMTguNS45OTkiLz4KICAgICAgPHN0YXR1c0NvZGUgY29kZT0ibmV3Ii8+CiAgICAgIDxyZXNwb25zZVByaW9yaXR5Q29kZSBjb2RlPSJJIi8+CiAgICAgIDxwYXJhbWV0ZXJMaXN0PgogICAgICAgIDxwYXRpZW50SWRlbnRpZmllcj4KICAgICAgICAgIDx2YWx1ZSBleHRlbnNpb249IlN1cnlhQnJhbmQiIHJvb3Q9IjIuMTYuODQwLjEuMTEzODgzLjQuMiIvPgogICAgICAgICAgPHNlbWFudGljc1RleHQ+UGF0aWVudC5JZDwvc2VtYW50aWNzVGV4dD4KICAgICAgICA8L3BhdGllbnRJZGVudGlmaWVyPgogICAgICA8L3BhcmFtZXRlckxpc3Q+CiAgICA8L3F1ZXJ5QnlQYXJhbWV0ZXI+CiAgPC9jb250cm9sQWN0UHJvY2Vzcz4KPC9QUlBBX0lOMjAxMzA5VVYwMj4K",
+      "detail": [
+        {
+          "type": "MSH-10",
+          "valueBase64Binary": "MS4yLjg0MC4xMTQzNTAuMS4xMy4wLjEuNy4xLjE\u003d"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

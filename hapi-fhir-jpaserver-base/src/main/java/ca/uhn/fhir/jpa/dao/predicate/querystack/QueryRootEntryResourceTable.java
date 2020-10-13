@@ -79,7 +79,7 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 	/**
 	 * Root query constructor
 	 */
-	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, boolean theCountQuery, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
+	QueryRootEntryResourceTable(CriteriaBuilder theCriteriaBuilder, boolean theDistinct, boolean theCountQuery, SearchParameterMap theSearchParameterMap, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		super(theCriteriaBuilder);
 		myCriteriaBuilder = theCriteriaBuilder;
 		mySearchParameterMap = theSearchParameterMap;
@@ -91,6 +91,8 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 
 		if (theCountQuery) {
 			query.multiselect(myCriteriaBuilder.countDistinct(myResourceTableRoot));
+		} else if (theDistinct) {
+			query.distinct(true).multiselect(get("myId").as(Long.class));
 		} else {
 			query.multiselect(get("myId").as(Long.class));
 		}

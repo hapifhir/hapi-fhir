@@ -140,6 +140,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private boolean myIgnoreServerParsedRequestParameters = true;
 	private String myImplementationDescription;
 	private IPagingProvider myPagingProvider;
+	private Integer myDefaultPageSize;
+	private Integer myMaximumPageSize;
+	private boolean myStatelessPagingDefault = false;
 	private Lock myProviderRegistrationMutex = new ReentrantLock();
 	private Map<String, ResourceBinding> myResourceNameToBinding = new HashMap<>();
 	private IServerAddressStrategy myServerAddressStrategy = new IncomingRequestAddressStrategy();
@@ -672,6 +675,30 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public void setPagingProvider(IPagingProvider thePagingProvider) {
 		myPagingProvider = thePagingProvider;
+	}
+
+	@Override
+	public Integer getDefaultPageSize() {
+		return myDefaultPageSize;
+	}
+
+	/**
+	 * Sets the default page size to use, or <code>null</code> if no default page size
+	 */
+	public void setDefaultPageSize(Integer thePageSize) {
+		myDefaultPageSize = thePageSize;
+	}
+
+	@Override
+	public Integer getMaximumPageSize() {
+		return myMaximumPageSize;
+	}
+
+	/**
+	 * Sets the maximum page size to use, or <code>null</code> if no maximum page size
+	 */
+	public void setMaximumPageSize(Integer theMaximumPageSize) {
+		myMaximumPageSize = theMaximumPageSize;
 	}
 
 	/**

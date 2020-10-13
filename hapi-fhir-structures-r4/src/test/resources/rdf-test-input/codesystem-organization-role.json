@@ -1,0 +1,96 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "organization-role",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eOrganization Affiliation Role\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate the role of one Organization in relation to another.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/organization-role defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprovider\u003ca name\u003d\"organization-role-provider\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvider\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eagency\u003ca name\u003d\"organization-role-agency\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAgency\u003c/td\u003e\u003ctd\u003eAn organization such as a public health agency, community/social services provider, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresearch\u003ca name\u003d\"organization-role-research\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResearch\u003c/td\u003e\u003ctd\u003eAn organization providing research-related services such as conducting research, recruiting research participants, analyzing data, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epayer\u003ca name\u003d\"organization-role-payer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePayer\u003c/td\u003e\u003ctd\u003eAn organization providing reimbursement, payment, or related services\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ediagnostics\u003ca name\u003d\"organization-role-diagnostics\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDiagnostics\u003c/td\u003e\u003ctd\u003eAn organization providing diagnostic testing/laboratory services\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esupplier\u003ca name\u003d\"organization-role-supplier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSupplier\u003c/td\u003e\u003ctd\u003eAn organization that provides medical supplies (e.g. medical devices, equipment, pharmaceutical products, etc.)\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHIE/HIO\u003ca name\u003d\"organization-role-HIE.47HIO\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHIE/HIO\u003c/td\u003e\u003ctd\u003eAn organization that facilitates electronic clinical data exchange between entities\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emember\u003ca name\u003d\"organization-role-member\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMember\u003c/td\u003e\u003ctd\u003eA type of non-ownership relationship between entities (encompasses partnerships, collaboration, joint ventures, etc.)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/organization-role",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.881"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "OrganizationAffiliationRole",
+  "title": "Organization Affiliation Role",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate the role of one Organization in relation to another.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/organization-role",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "provider",
+      "display": "Provider"
+    },
+    {
+      "code": "agency",
+      "display": "Agency",
+      "definition": "An organization such as a public health agency, community/social services provider, etc."
+    },
+    {
+      "code": "research",
+      "display": "Research",
+      "definition": "An organization providing research-related services such as conducting research, recruiting research participants, analyzing data, etc."
+    },
+    {
+      "code": "payer",
+      "display": "Payer",
+      "definition": "An organization providing reimbursement, payment, or related services"
+    },
+    {
+      "code": "diagnostics",
+      "display": "Diagnostics",
+      "definition": "An organization providing diagnostic testing/laboratory services"
+    },
+    {
+      "code": "supplier",
+      "display": "Supplier",
+      "definition": "An organization that provides medical supplies (e.g. medical devices, equipment, pharmaceutical products, etc.)"
+    },
+    {
+      "code": "HIE/HIO",
+      "display": "HIE/HIO",
+      "definition": "An organization that facilitates electronic clinical data exchange between entities"
+    },
+    {
+      "code": "member",
+      "display": "Member",
+      "definition": "A type of non-ownership relationship between entities (encompasses partnerships, collaboration, joint ventures, etc.)"
+    }
+  ]
+}

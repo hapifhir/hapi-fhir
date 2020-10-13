@@ -1,0 +1,87 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "contactentity-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eContact entity type\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate the purpose for which you would contact a contact party.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/contactentity-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBILL\u003ca name\u003d\"contactentity-type-BILL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBilling\u003c/td\u003e\u003ctd\u003eContact details for information regarding to billing/general finance enquiries.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eADMIN\u003ca name\u003d\"contactentity-type-ADMIN\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdministrative\u003c/td\u003e\u003ctd\u003eContact details for administrative enquiries.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHR\u003ca name\u003d\"contactentity-type-HR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHuman Resource\u003c/td\u003e\u003ctd\u003eContact details for issues related to Human Resources, such as staff matters, OH\u0026amp;S etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePAYOR\u003ca name\u003d\"contactentity-type-PAYOR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePayor\u003c/td\u003e\u003ctd\u003eContact details for dealing with issues related to insurance claims/adjudication/payment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePATINF\u003ca name\u003d\"contactentity-type-PATINF\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eGeneric information contact for patients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePRESS\u003ca name\u003d\"contactentity-type-PRESS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePress\u003c/td\u003e\u003ctd\u003eDedicated contact point for matters relating to press enquiries.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/contactentity-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1129"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ContactEntityType",
+  "title": "Contact entity type",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate the purpose for which you would contact a contact party.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/contactentity-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "BILL",
+      "display": "Billing",
+      "definition": "Contact details for information regarding to billing/general finance enquiries."
+    },
+    {
+      "code": "ADMIN",
+      "display": "Administrative",
+      "definition": "Contact details for administrative enquiries."
+    },
+    {
+      "code": "HR",
+      "display": "Human Resource",
+      "definition": "Contact details for issues related to Human Resources, such as staff matters, OH\u0026S etc."
+    },
+    {
+      "code": "PAYOR",
+      "display": "Payor",
+      "definition": "Contact details for dealing with issues related to insurance claims/adjudication/payment."
+    },
+    {
+      "code": "PATINF",
+      "display": "Patient",
+      "definition": "Generic information contact for patients."
+    },
+    {
+      "code": "PRESS",
+      "display": "Press",
+      "definition": "Dedicated contact point for matters relating to press enquiries."
+    }
+  ]
+}

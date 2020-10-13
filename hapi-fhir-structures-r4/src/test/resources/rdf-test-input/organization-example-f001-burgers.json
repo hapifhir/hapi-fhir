@@ -1,0 +1,107 @@
+{
+  "resourceType": "Organization",
+  "id": "f001",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f001\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 91654 (OFFICIAL), 17-0112278 (USUAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: University Medical Hospital \u003cspan\u003e(Details : {urn:oid:2.16.840.1.113883.2.4.15.1060 code \u0027V6\u0027 \u003d \u0027V6\u0027, given as \u0027University Medical Hospital\u0027}; {http://terminology.hl7.org/CodeSystem/organization-type code \u0027prov\u0027 \u003d \u0027Healthcare Provider\u0027, given as \u0027Healthcare Provider\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Burgers University Medical Center\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 022-655 2300(WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: \u003c/p\u003e\u003cul\u003e\u003cli\u003eGalapagosweg 91 Den Burg 9105 PZ NLD (WORK)\u003c/li\u003e\u003cli\u003ePO Box 2311 Den Burg 9100 AA NLD (WORK)\u003c/li\u003e\u003c/ul\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Press \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/contactentity-type code \u0027PRESS\u0027 \u003d \u0027Press)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 022-655 2334\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Patient \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/contactentity-type code \u0027PATINF\u0027 \u003d \u0027Patient)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 022-655 2335\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "urn:oid:2.16.528.1",
+      "value": "91654"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.1",
+      "value": "17-0112278"
+    }
+  ],
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "urn:oid:2.16.840.1.113883.2.4.15.1060",
+          "code": "V6",
+          "display": "University Medical Hospital"
+        },
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "prov",
+          "display": "Healthcare Provider"
+        }
+      ]
+    }
+  ],
+  "name": "Burgers University Medical Center",
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "022-655 2300",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "use": "work",
+      "line": [
+        "Galapagosweg 91"
+      ],
+      "city": "Den Burg",
+      "postalCode": "9105 PZ",
+      "country": "NLD"
+    },
+    {
+      "use": "work",
+      "line": [
+        "PO Box 2311"
+      ],
+      "city": "Den Burg",
+      "postalCode": "9100 AA",
+      "country": "NLD"
+    }
+  ],
+  "contact": [
+    {
+      "purpose": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/contactentity-type",
+            "code": "PRESS"
+          }
+        ]
+      },
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "022-655 2334"
+        }
+      ]
+    },
+    {
+      "purpose": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/contactentity-type",
+            "code": "PATINF"
+          }
+        ]
+      },
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "022-655 2335"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

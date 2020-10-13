@@ -1,0 +1,82 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "MessageHeader-process-message",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eProcess Message\u003c/h2\u003e\u003cp\u003eOPERATION: Process Message\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/MessageHeader-process-message\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eThis operation accepts a message, processes it according to the definition of the event in the message header, and returns one or more response messages.\u003c/p\u003e\n\u003cp\u003eIn addition to processing the message event, a server may choose to retain all or some the resources and make them available on a RESTful interface, but is not required to do so.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/$process-message\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003econtent\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe message to process (or, if using asynchronous messaging, it may be a response message to accept)\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003easync\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#boolean\"\u003eboolean\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eIf \u0027true\u0027 the message is processed using the asynchronous messaging pattern\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003eresponse-url\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"datatypes.html#url\"\u003eurl\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA URL to submit response messages to, if asynchronous messaging is being used, and if the MessageHeader.source.endpoint is not the appropriate place to submit responses\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003ereturn\u003c/td\u003e\u003ctd\u003e0..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eA response message, if synchronous messaging is being used (mandatory in this case). For asynchronous messaging, there is no return value\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eThis operation does not use the parameters resource; the parameters \u0026quot;async\u0026quot; and \u0026quot;response-url\u0026quot; always go in the URL, if they are used, and the \u0026quot;content\u0026quot; parameter is always the body of the HTTP message.\u003c/p\u003e\n\u003cp\u003eWhen processing messages, a server may return one of several status codes:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003e\u003cstrong\u003e200 OK\u003c/strong\u003e: Indicates that the message has been fully processed.  If an application-level response is expected for the submitted message, that response SHALL be returned as the body of the 200 response.\u003c/li\u003e\n\u003cli\u003e\u003cstrong\u003e202 Accepted\u003c/strong\u003e: Indicates that the receiving system has accepted custody of the message\u003c/li\u003e\n\u003cli\u003e\u003cstrong\u003e204 No Content\u003c/strong\u003e: Indicates that the message has been fully processed and would normally have had an application-level response, but because of instructions from the sender (e.g. the \u003ca href\u003d\"extension-messageheader-response-request.html\"\u003emessageheader-response-request\u003c/a\u003e extension), no response is being provided\u003c/li\u003e\n\u003cli\u003e\u003cstrong\u003e300+\u003c/strong\u003e: Indicates that the message was not successfully processed.  The server MAY return an \u003ca href\u003d\"operationoutcome.html\"\u003eOperationOutcome\u003c/a\u003e with additional information, and SHOULD do so if the response code is 400 or greater.\u0026lt;br/\u0026gt;\nThe client SHALL interpret a 4xx response to indicate that there is no point resubmitting the unaltered message, and a 5xx response to indicate an unexpected error occurred on the part of the server, with the implication that it may be appropriate to resubmit the original message. Doing so SHOULD NOT result in a duplicate message response. Repeated failures indicate either a fatal problem with the submission or a problem with the receiving application.\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThe following rules apply when using $process-message:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eThe operation only accepts POST transactions - any other HTTP method will result in an HTTP error\u003c/li\u003e\n\u003cli\u003eThe request content type submitted is always \u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e with type \u0026quot;message\u0026quot; containing a \u003ca href\u003d\"messageheader.html\"\u003eMessage Header\u003c/a\u003e resource as the first resource\u003c/li\u003e\n\u003cli\u003eThe response content type returned is always \u003ca href\u003d\"bundle.html\"\u003eBundle\u003c/a\u003e with type \u0026quot;message\u0026quot; containing a \u003ca href\u003d\"messageheader.html\"\u003eMessage Header\u003c/a\u003e resource as the first resource, or an HTTP error\u003c/li\u003e\n\u003cli\u003eIf the response is an error, the body SHOULD be an \u003ca href\u003d\"operationoutcome.html\"\u003eErrors \u0026amp;mp; Warning\u003c/a\u003e resource with full details\u003c/li\u003e\n\u003cli\u003eThe mailbox may be authenticated using standard HTTP authentication methods, including OAuth\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThe $process-message operation can be used by any HTTP end-point that accepts FHIR messages, not just FHIR RESTful servers.\u003c/p\u003e\n\u003cp\u003eIn order to ensure consistency of processing, the \u003ca href\u003d\"messaging.html#reliable\"\u003elogical rules regarding processing of Bundle.id and message id\u003c/a\u003e SHALL be followed when messages are processed using this operation.\u003c/p\u003e\n\u003cp\u003eThe $process-message operation may be used synchronously, or asynchronously.\u003c/p\u003e\n\u003cp\u003eThe following rules apply when using the $process-message operation synchronously:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eThe URL (http://server/base/$process-message) has no parameters\u003c/li\u003e\n\u003cli\u003eIt is an error if the sender POSTs a message that requires multiple response messages\u003c/li\u003e\n\u003cli\u003eServers SHALL accept multiple concurrent message submissions and process them correctly (they are allowed to process them sequentially internally, but multiple concurrent submissions is not an error in its own right)\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThe following rules apply when using the $process-message operation asynchronously:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003eThe URL has at least one parameter: http://server/base/$process-message?async\u003dtrue\u003c/li\u003e\n\u003cli\u003eThe server acknowledges the message with a 200 OK with no body, or returns an HTTP error if the message cannot be processed\u003c/li\u003e\n\u003cli\u003eAccepting the message means that the server has understood the message enough to know where to respond\u003c/li\u003e\n\u003cli\u003eAn \u003ca href\u003d\"operationoutcome.html\"\u003eOperationOutcome\u003c/a\u003e SHOULD be returned in either case\u003c/li\u003e\n\u003cli\u003eBy default, the server responds by invoking the $process-message using the sender\u0027s stated end-point in the message: POST [MessageHeader.source.endpoint]/$process-messages]\u003c/li\u003e\n\u003cli\u003eSince the source end-point may be manipulated by message transfer engines, an alternative response address may be specified using the parameter \u0026quot;response-url\u0026quot;: http://server/base/$process-message?async\u003dtrue\u0026amp;amp;response-url\u003dhttp://server2.com/base/anything.  The endpoint at the specified URL SHALL implement the signature of the $process-message operation (parameter async\u003dtrue, accept a Bundle, return a 200 OK or an error)\u003c/li\u003e\n\u003cli\u003eThe server submits response messages to the appropriate end-point with the parameter async\u003dtrue. There is no response message for the response messages\u003c/li\u003e\n\u003c/ul\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 4
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/MessageHeader-process-message",
+  "version": "4.0.1",
+  "name": "Process Message",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This operation accepts a message, processes it according to the definition of the event in the message header, and returns one or more response messages.  \n\nIn addition to processing the message event, a server may choose to retain all or some the resources and make them available on a RESTful interface, but is not required to do so.",
+  "code": "process-message",
+  "comment": "This operation does not use the parameters resource; the parameters \"async\" and \"response-url\" always go in the URL, if they are used, and the \"content\" parameter is always the body of the HTTP message.\n\nWhen processing messages, a server may return one of several status codes:\n* **200 OK**: Indicates that the message has been fully processed.  If an application-level response is expected for the submitted message, that response SHALL be returned as the body of the 200 response.\n* **202 Accepted**: Indicates that the receiving system has accepted custody of the message\n* **204 No Content**: Indicates that the message has been fully processed and would normally have had an application-level response, but because of instructions from the sender (e.g. the [messageheader-response-request](extension-messageheader-response-request.html) extension), no response is being provided\n* **300+**: Indicates that the message was not successfully processed.  The server MAY return an [OperationOutcome](operationoutcome.html) with additional information, and SHOULD do so if the response code is 400 or greater.\u003cbr/\u003e\n    The client SHALL interpret a 4xx response to indicate that there is no point resubmitting the unaltered message, and a 5xx response to indicate an unexpected error occurred on the part of the server, with the implication that it may be appropriate to resubmit the original message. Doing so SHOULD NOT result in a duplicate message response. Repeated failures indicate either a fatal problem with the submission or a problem with the receiving application.\n\nThe following rules apply when using $process-message:\n\n* The operation only accepts POST transactions - any other HTTP method will result in an HTTP error\n* The request content type submitted is always [Bundle](bundle.html) with type \"message\" containing a [Message Header](messageheader.html) resource as the first resource\n* The response content type returned is always [Bundle](bundle.html) with type \"message\" containing a [Message Header](messageheader.html) resource as the first resource, or an HTTP error\n* If the response is an error, the body SHOULD be an [Errors \u0026mp; Warning](operationoutcome.html) resource with full details\n* The mailbox may be authenticated using standard HTTP authentication methods, including OAuth\n\nThe $process-message operation can be used by any HTTP end-point that accepts FHIR messages, not just FHIR RESTful servers.\n\nIn order to ensure consistency of processing, the [logical rules regarding processing of Bundle.id and message id](messaging.html#reliable) SHALL be followed when messages are processed using this operation.\n\nThe $process-message operation may be used synchronously, or asynchronously.\n\nThe following rules apply when using the $process-message operation synchronously:\n\n* The URL (http://server/base/$process-message) has no parameters\n* It is an error if the sender POSTs a message that requires multiple response messages\n* Servers SHALL accept multiple concurrent message submissions and process them correctly (they are allowed to process them sequentially internally, but multiple concurrent submissions is not an error in its own right)\n\nThe following rules apply when using the $process-message operation asynchronously:\n\n* The URL has at least one parameter: http://server/base/$process-message?async\u003dtrue\n* The server acknowledges the message with a 200 OK with no body, or returns an HTTP error if the message cannot be processed\n* Accepting the message means that the server has understood the message enough to know where to respond\n* An [OperationOutcome](operationoutcome.html) SHOULD be returned in either case\n* By default, the server responds by invoking the $process-message using the sender\u0027s stated end-point in the message: POST [MessageHeader.source.endpoint]/$process-messages]\n* Since the source end-point may be manipulated by message transfer engines, an alternative response address may be specified using the parameter \"response-url\": http://server/base/$process-message?async\u003dtrue\u0026amp;response-url\u003dhttp://server2.com/base/anything.  The endpoint at the specified URL SHALL implement the signature of the $process-message operation (parameter async\u003dtrue, accept a Bundle, return a 200 OK or an error)\n* The server submits response messages to the appropriate end-point with the parameter async\u003dtrue. There is no response message for the response messages",
+  "resource": [
+    "MessageHeader"
+  ],
+  "system": true,
+  "type": false,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "content",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The message to process (or, if using asynchronous messaging, it may be a response message to accept)",
+      "type": "Bundle"
+    },
+    {
+      "name": "async",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "If \u0027true\u0027 the message is processed using the asynchronous messaging pattern",
+      "type": "boolean"
+    },
+    {
+      "name": "response-url",
+      "use": "in",
+      "min": 0,
+      "max": "1",
+      "documentation": "A URL to submit response messages to, if asynchronous messaging is being used, and if the MessageHeader.source.endpoint is not the appropriate place to submit responses",
+      "type": "url"
+    },
+    {
+      "name": "return",
+      "use": "out",
+      "min": 0,
+      "max": "1",
+      "documentation": "A response message, if synchronous messaging is being used (mandatory in this case). For asynchronous messaging, there is no return value",
+      "type": "Bundle"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "resourceType": "Measure",
+  "id": "component-a-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eScreening for Alcohol Misuse\n    \u003cp\u003eThis measure example is used to illustrate how a composite measure can be constructured. This measure is one component of the composite measure.\u003c/p\u003e\u003c/div\u003e"
+  },
+  "title": "Screening for Alcohol Misuse",
+  "status": "draft",
+  "scoring": {
+    "coding": [
+      {
+        "code": "proportion"
+      }
+    ]
+  },
+  "group": [
+    {
+      "id": "Main",
+      "population": [
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "initial-population"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Initial Population"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "denominator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Denominator"
+          }
+        },
+        {
+          "code": {
+            "coding": [
+              {
+                "code": "numerator"
+              }
+            ]
+          },
+          "criteria": {
+            "language": "text/cql",
+            "expression": "Numerator"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

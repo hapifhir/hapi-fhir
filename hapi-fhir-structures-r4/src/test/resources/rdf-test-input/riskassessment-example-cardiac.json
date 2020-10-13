@@ -1,0 +1,68 @@
+{
+  "resourceType": "RiskAssessment",
+  "id": "cardiac",
+  "text": {
+    "status": "additional",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ctable\u003e\n        \u003ctr\u003e\n          \u003ctd colspan\u003d\"2\"\u003e\n            \u003ch1\u003eInformation about your risk score:\u003c/h1\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eAge:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e39\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eGender:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003emale\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eTotal Cholesterol:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e244 mg/dL\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eHDL Cholesterol:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e50 mg/dL\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eSmoker:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eNo\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eSystolic Blood Pressure:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e107 mm/Hg\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003e\n            \u003cstrong\u003eOn medication for HBP:\u003c/strong\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eNo\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd valign\u003d\"top\"\u003e\n            \u003cb\u003eRisk Score*\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e2%\u003cbr/\u003eMeans 2 of 100 people with this level of risk will have a heart attack in the next 10 years.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd colspan\u003d\"2\"\u003e* Your risk score was calculated using an equation.  Other NCEP products, such as printed ATP III materials, use a point system to determine a risk score that is close to the equation score.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd colspan\u003d\"2\"\u003eTo find out what your risk score means and how to lower your risk for a heart attack, go to\u003cbr/\u003e\n            \u003ca href\u003d\"http://www.nhlbi.nih.gov/health/public/heart/chol/hbc_what.htm\"\u003e\u0026quot;High Blood Cholesterol—What You Need to Know\u0026quot;\u003c/a\u003e.\u003cbr/\u003e\n            \u003ca href\u003d\"http://www.nhlbi.nih.gov/health/public/heart/chol/chol_tlc.htm\"\u003eYour Guide to Lowering Cholesterol with Therapeutic Lifestyle Changes (TLC)\u003c/a\u003e\u003cbr/\u003e\n            \u003ca href\u003d\"http://www.nhlbi.nih.gov/health/public/heart/other/hhw/index.htm\"\u003eThe Healthy Heart Handbook for Women\u003c/a\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://example.org",
+      "value": "risk-assessment-cardiac"
+    }
+  ],
+  "status": "final",
+  "subject": {
+    "reference": "Patient/pat2"
+  },
+  "encounter": {
+    "reference": "Encounter/example"
+  },
+  "occurrenceDateTime": "2014-07-19T16:04:00Z",
+  "performer": {
+    "display": "http://cvdrisk.nhlbi.nih.gov/#cholesterol"
+  },
+  "basis": [
+    {
+      "reference": "Patient/pat2"
+    },
+    {
+      "reference": "DiagnosticReport/lipids"
+    },
+    {
+      "reference": "Observation/blood-pressure"
+    }
+  ],
+  "prediction": [
+    {
+      "outcome": {
+        "text": "Heart Attack"
+      },
+      "probabilityDecimal": 0.02,
+      "whenRange": {
+        "low": {
+          "value": 39,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 49,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

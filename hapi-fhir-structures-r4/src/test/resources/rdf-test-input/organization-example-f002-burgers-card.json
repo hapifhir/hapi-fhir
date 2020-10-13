@@ -1,0 +1,80 @@
+{
+  "resourceType": "Organization",
+  "id": "f002",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f002\u003c/p\u003e\u003cp\u003e\u003cb\u003eactive\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Hospital Department \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/organization-type code \u0027dept\u0027 \u003d \u0027Hospital Department\u0027, given as \u0027Hospital Department\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Burgers UMC Cardiology unit\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 022-655 2320\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: South Wing, floor 2 \u003c/p\u003e\u003cp\u003e\u003cb\u003epartOf\u003c/b\u003e: \u003ca\u003eOrganization/f001\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eContacts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePurpose\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTelecom\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAddress\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eAdministrative \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/contactentity-type code \u0027ADMIN\u0027 \u003d \u0027Administrative)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003emevr. D. de Haan\u003c/td\u003e\u003ctd\u003eph: 022-655 2321\u003c/td\u003e\u003ctd\u003eSouth Wing, floor 2 \u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "active": true,
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/organization-type",
+          "code": "dept",
+          "display": "Hospital Department"
+        }
+      ]
+    }
+  ],
+  "name": "Burgers UMC Cardiology unit",
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "022-655 2320"
+    }
+  ],
+  "address": [
+    {
+      "line": [
+        "South Wing, floor 2"
+      ]
+    }
+  ],
+  "partOf": {
+    "reference": "Organization/f001"
+  },
+  "contact": [
+    {
+      "purpose": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/contactentity-type",
+            "code": "ADMIN"
+          }
+        ]
+      },
+      "name": {
+        "text": "mevr. D. de Haan"
+      },
+      "telecom": [
+        {
+          "system": "phone",
+          "value": "022-655 2321"
+        },
+        {
+          "system": "email",
+          "value": "cardio@burgersumc.nl"
+        },
+        {
+          "system": "fax",
+          "value": "022-655 2322"
+        }
+      ],
+      "address": {
+        "line": [
+          "South Wing, floor 2"
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

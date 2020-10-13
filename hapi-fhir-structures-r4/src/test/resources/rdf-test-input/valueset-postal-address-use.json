@@ -1,0 +1,138 @@
+{
+  "resourceType": "ValueSet",
+  "id": "postal-address-use",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePostalAddressUse\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eUses of an address not included in Address.use.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/AddressUse/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-AddressUse\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-BAD\"\u003eBAD\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebad address\u003c/td\u003e\u003ctd\u003eA flag indicating that the address is bad, in fact, useless.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-CONF\"\u003eCONF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003econfidential address\u003c/td\u003e\u003ctd\u003eIndicates that the address is considered sensitive and should only be shared or published in accordance with organizational controls governing patient demographic information with increased sensitivity. Uses of Addresses. Lloyd to supply more complete description.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-HP\"\u003eHP\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eprimary home\u003c/td\u003e\u003ctd\u003eThe primary home, to reach a person after business hours.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-HV\"\u003eHV\u003c/a\u003e\u003c/td\u003e\u003ctd\u003evacation home\u003c/td\u003e\u003ctd\u003eA vacation home, to reach a person while on vacation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-DIR\"\u003eDIR\u003c/a\u003e\u003c/td\u003e\u003ctd\u003edirect\u003c/td\u003e\u003ctd\u003eIndicates a work place address or telecommunication address that reaches the individual or organization directly without intermediaries. For phones, often referred to as a \u0027private line\u0027.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-PUB\"\u003ePUB\u003c/a\u003e\u003c/td\u003e\u003ctd\u003epublic\u003c/td\u003e\u003ctd\u003eIndicates a work place address or telecommunication address that is a \u0027standard\u0027 address which may reach a reception service, mail-room, or other intermediary prior to the target entity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-PHYS\"\u003ePHYS\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ephysical visit address\u003c/td\u003e\u003ctd\u003eUsed primarily to visit an address.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/AddressUse/cs.html#v3-AddressUse-PST\"\u003ePST\u003c/a\u003e\u003c/td\u003e\u003ctd\u003epostal address\u003c/td\u003e\u003ctd\u003eUsed to send mail.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/postal-address-use",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.908"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PostalAddressUse",
+  "title": "PostalAddressUse",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Uses of an address not included in Address.use.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-AddressUse",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A flag indicating that the address is bad, in fact, useless."
+              }
+            ],
+            "code": "BAD",
+            "display": "bad address"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Indicates that the address is considered sensitive and should only be shared or published in accordance with organizational controls governing patient demographic information with increased sensitivity. Uses of Addresses. Lloyd to supply more complete description."
+              }
+            ],
+            "code": "CONF",
+            "display": "confidential address"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "The primary home, to reach a person after business hours."
+              }
+            ],
+            "code": "HP",
+            "display": "primary home"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "A vacation home, to reach a person while on vacation."
+              }
+            ],
+            "code": "HV",
+            "display": "vacation home"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Indicates a work place address or telecommunication address that reaches the individual or organization directly without intermediaries. For phones, often referred to as a \u0027private line\u0027."
+              }
+            ],
+            "code": "DIR",
+            "display": "direct"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Indicates a work place address or telecommunication address that is a \u0027standard\u0027 address which may reach a reception service, mail-room, or other intermediary prior to the target entity."
+              }
+            ],
+            "code": "PUB",
+            "display": "public"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Used primarily to visit an address."
+              }
+            ],
+            "code": "PHYS",
+            "display": "physical visit address"
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "Used to send mail."
+              }
+            ],
+            "code": "PST",
+            "display": "postal address"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "resourceType": "ValueSet",
+  "id": "units-of-time",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eUnitsOfTime\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA unit of time (units from UCUM).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThese codes are excerpted from UCUM (THE UNIFIED CODE FOR UNITS OF MEASURE). UCUM is Copyright © 1989-2013 Regenstrief Institute, Inc. and The UCUM Organization, Indianapolis, IN. All rights reserved. See http://unitsofmeasure.org/trac//wiki/TermsOfUse for details.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"http://unitsofmeasure.org\"\u003e\u003ccode\u003ehttp://unitsofmeasure.org\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003es\u003c/td\u003e\u003ctd\u003esecond\u003c/td\u003e\u003ctd\u003esecond\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003emin\u003c/td\u003e\u003ctd\u003eminute\u003c/td\u003e\u003ctd\u003eminute\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eh\u003c/td\u003e\u003ctd\u003ehour\u003c/td\u003e\u003ctd\u003ehour\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ed\u003c/td\u003e\u003ctd\u003eday\u003c/td\u003e\u003ctd\u003eday\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ewk\u003c/td\u003e\u003ctd\u003eweek\u003c/td\u003e\u003ctd\u003eweek\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003emo\u003c/td\u003e\u003ctd\u003emonth\u003c/td\u003e\u003ctd\u003emonth\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ea\u003c/td\u003e\u003ctd\u003eyear\u003c/td\u003e\u003ctd\u003eyear\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003cp\u003e\u003cb\u003eAdditional Language Displays\u003c/b\u003e\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003e中文 (Chinese, zh)\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003es\u003c/td\u003e\u003ctd\u003e秒\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003emin\u003c/td\u003e\u003ctd\u003e分钟\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eh\u003c/td\u003e\u003ctd\u003e小时\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ed\u003c/td\u003e\u003ctd\u003e天\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ewk\u003c/td\u003e\u003ctd\u003e星期\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003emo\u003c/td\u003e\u003ctd\u003e月\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ea\u003c/td\u003e\u003ctd\u003e年\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/units-of-time",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.77"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "UnitsOfTime",
+  "title": "UnitsOfTime",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A unit of time (units from UCUM).",
+  "copyright": "These codes are excerpted from UCUM (THE UNIFIED CODE FOR UNITS OF MEASURE). UCUM is Copyright © 1989-2013 Regenstrief Institute, Inc. and The UCUM Organization, Indianapolis, IN. All rights reserved. See http://unitsofmeasure.org/trac//wiki/TermsOfUse for details.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://unitsofmeasure.org",
+        "concept": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "second"
+              }
+            ],
+            "code": "s",
+            "display": "second",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "秒"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "minute"
+              }
+            ],
+            "code": "min",
+            "display": "minute",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "分钟"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "hour"
+              }
+            ],
+            "code": "h",
+            "display": "hour",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "小时"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "day"
+              }
+            ],
+            "code": "d",
+            "display": "day",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "天"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "week"
+              }
+            ],
+            "code": "wk",
+            "display": "week",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "星期"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "month"
+              }
+            ],
+            "code": "mo",
+            "display": "month",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "月"
+              }
+            ]
+          },
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/valueset-concept-definition",
+                "valueString": "year"
+              }
+            ],
+            "code": "a",
+            "display": "year",
+            "designation": [
+              {
+                "language": "zh",
+                "value": "年"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

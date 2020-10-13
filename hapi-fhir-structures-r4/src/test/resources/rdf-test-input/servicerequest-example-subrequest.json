@@ -1,0 +1,73 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "subrequest",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: subrequest\u003c/p\u003e\u003cp\u003e\u003cb\u003ebasedOn\u003c/b\u003e: Original Request\u003c/p\u003e\u003cp\u003e\u003cb\u003ereplaces\u003c/b\u003e: Previous allergy test\u003c/p\u003e\u003cp\u003e\u003cb\u003erequisition\u003c/b\u003e: A13848392\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: instance-order\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: routine\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Peanut IgG \u003cspan\u003e(Details : {LOINC code \u002735542-0\u0027 \u003d \u0027Peanut IgG Ab [Mass/volume] in Serum)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/dicom\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eoccurrence\u003c/b\u003e: 08/05/2013 9:33:27 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003eDr. Adam Careful\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformerType\u003c/b\u003e: Nurse \u003cspan\u003e(Details : {[not stated] code \u0027null\u0027 \u003d \u0027null\u0027, given as \u0027Qualified nurse\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Check for Peanut Allergy \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: Right arm \u003cspan\u003e(Details : {[not stated] code \u0027null\u0027 \u003d \u0027null\u0027, given as \u0027Right arm\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "basedOn": [
+    {
+      "display": "Original Request"
+    }
+  ],
+  "replaces": [
+    {
+      "display": "Previous allergy test"
+    }
+  ],
+  "requisition": {
+    "value": "A13848392"
+  },
+  "status": "active",
+  "intent": "instance-order",
+  "priority": "routine",
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "35542-0"
+      }
+    ],
+    "text": "Peanut IgG"
+  },
+  "subject": {
+    "reference": "Patient/dicom"
+  },
+  "occurrenceDateTime": "2013-05-08T09:33:27+07:00",
+  "requester": {
+    "reference": "Practitioner/example",
+    "display": "Dr. Adam Careful"
+  },
+  "performerType": {
+    "coding": [
+      {
+        "display": "Qualified nurse"
+      }
+    ],
+    "text": "Nurse"
+  },
+  "reasonCode": [
+    {
+      "text": "Check for Peanut Allergy"
+    }
+  ],
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "display": "Right arm"
+        }
+      ],
+      "text": "Right arm"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}
