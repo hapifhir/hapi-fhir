@@ -118,11 +118,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>fr.inria.lille.shexjava</groupId>
 			<artifactId>shexjava-core</artifactId>
 			<version>${shexjava_version}</version>
