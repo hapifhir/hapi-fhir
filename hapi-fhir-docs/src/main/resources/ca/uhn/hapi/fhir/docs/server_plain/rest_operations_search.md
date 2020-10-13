@@ -349,6 +349,8 @@ Example URL to invoke this method:
 http://fhir.example.com/Patient?_identifier=urn:foo|123&_sort=given
 ```
 
+<a name="limiting-results"/>
+
 # Limiting results (`_count`)
 
 FHIR supports [Page Count](http://www.hl7.org/implement/standards/fhir/search.html#count). Count specification may be passed into handler methods with
