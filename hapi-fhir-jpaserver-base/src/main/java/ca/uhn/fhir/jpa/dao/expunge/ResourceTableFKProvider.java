@@ -9,19 +9,13 @@ import java.util.List;
 @Service
 public class ResourceTableFKProvider {
 	@Nonnull
-	protected List<ResourceForeignKey> getResourceForeignKeys() {
-		// To find all the FKs that need to be included here, run the following SQL in the INFORMATION_SCHEMA:
-		// SELECT FKTABLE_NAME, FKCOLUMN_NAME FROM CROSS_REFERENCES WHERE PKTABLE_NAME = 'HFJ_RESOURCE'
+	public List<ResourceForeignKey> getResourceForeignKeys() {
 		List<ResourceForeignKey> resourceForeignKeys = new ArrayList<>();
-		// Note this one is a secondary dependency
+		// Adding this secondary dependency first
 		resourceForeignKeys.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
 
-		// FIXME KHS hook
-//		resourcePidLinks.add(new ResourcePidLink("CDH_LB_REF", "LB_RES_ID"));
-//		resourcePidLinks.add(new ResourcePidLink("CDH_LB_REF", "ROOT_RES_ID"));
-//		resourcePidLinks.add(new ResourcePidLink("CDH_LB_REF", "SUBS_RES_ID"));
-//		resourcePidLinks.add(new ResourcePidLink("CDH_LB_SUB_GROUP", "SUBS_RES_ID"));
-//		resourcePidLinks.add(new ResourcePidLink("CDH_LB_WL_SUBS", "SUBS_RES_ID"));
+		// To find all the FKs that need to be included here, run the following SQL in the INFORMATION_SCHEMA:
+		// SELECT FKTABLE_NAME, FKCOLUMN_NAME FROM CROSS_REFERENCES WHERE PKTABLE_NAME = 'HFJ_RESOURCE'
 		resourceForeignKeys.add(new ResourceForeignKey("HFJ_FORCED_ID", "RESOURCE_PID"));
 		resourceForeignKeys.add(new ResourceForeignKey("HFJ_IDX_CMP_STRING_UNIQ", "RES_ID"));
 		resourceForeignKeys.add(new ResourceForeignKey("HFJ_RES_LINK", "SRC_RESOURCE_ID"));
