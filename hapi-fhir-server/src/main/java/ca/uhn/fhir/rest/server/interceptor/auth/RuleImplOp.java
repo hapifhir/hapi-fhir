@@ -67,6 +67,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
+	private boolean myAppliesToDeleteExpunge;
 
 	/**
 	 * Constructor
@@ -626,4 +627,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		myAppliesToDeleteCascade = theAppliesToDeleteCascade;
 	}
 
+	void setAppliesToDeleteExpunge(boolean theAppliesToDeleteExpunge) {
+		myAppliesToDeleteExpunge = theAppliesToDeleteExpunge;
+	}
 }

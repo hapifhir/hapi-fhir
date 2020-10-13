@@ -25,6 +25,8 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.SliceImpl;
@@ -48,7 +50,7 @@ public class EmpiPersonDeletingSvc {
 	@Autowired
 	DeleteExpungeService myDeleteExpungeService;
 
-	public DeleteMethodOutcome expungePersonPids(List<Long> thePersonPids) {
-		return myDeleteExpungeService.expungeByResourcePids(new SliceImpl<>(thePersonPids));
+	public DeleteMethodOutcome expungePersonPids(List<Long> thePersonPids, ServletRequestDetails theRequestDetails) {
+		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.EMPI_CLEAR, new SliceImpl<>(thePersonPids), theRequestDetails);
 	}
 }

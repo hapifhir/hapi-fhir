@@ -462,6 +462,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
+
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 		} else {
@@ -518,7 +519,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (paramMap.isDeleteExpunge()) {
-			return myDeleteExpungeService.expungeByResourcePids(new SliceImpl<>(ResourcePersistentId.toLongList(resourceIds)));
+			return myDeleteExpungeService.expungeByResourcePids(theUrl, new SliceImpl<>(ResourcePersistentId.toLongList(resourceIds)), theRequest);
 		} else {
 			return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 		}

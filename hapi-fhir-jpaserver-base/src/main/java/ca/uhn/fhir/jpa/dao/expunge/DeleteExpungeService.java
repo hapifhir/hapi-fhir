@@ -1,12 +1,18 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +47,10 @@ public class DeleteExpungeService {
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public DeleteMethodOutcome expungeByResourcePids(Slice<Long> thePids) {
+	public DeleteMethodOutcome expungeByResourcePids(String theUrl, Slice<Long> thePids, RequestDetails theRequest) {
 		if (thePids.isEmpty()) {
 			return new DeleteMethodOutcome();
 		}
@@ -50,6 +58,12 @@ public class DeleteExpungeService {
 		if (!myDaoConfig.isExpungeEnabled()) {
 			throw new MethodNotAllowedException("_expunge is not enabled on this server");
 		}
+
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(String.class, theUrl);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_DELETE_EXPUNGE, params);
 
 		validateOkToDeleteAndExpunge(thePids);
 		ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());

@@ -27,8 +27,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
-
-
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
 	protected Person myPractitionerPerson;
@@ -46,7 +44,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearAllLinks() {
 		assertLinkCount(2);
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		assertNoLinksExist();
 	}
 
@@ -68,7 +66,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Person read = myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myEmpiProviderR4.clearEmpiLinks(new StringType("Patient"));
+		myEmpiProviderR4.clearEmpiLinks(new StringType("Patient"), myRequestDetails);
 		assertNoPatientLinksExist();
 		try {
 			myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
@@ -85,7 +83,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		Person person = getPersonFromTarget(patientAndUpdateLinks);
 		assertThat(person, is(notNullValue()));
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
 		person = getPersonFromTarget(patientAndUpdateLinks);
 		assertThat(person, is(nullValue()));
@@ -102,7 +100,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkPersons(personFromTarget, personFromTarget2);
 
 		//SUT
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
@@ -125,7 +123,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkPersons(personFromTarget2, personFromTarget);
 
 		//SUT
-		Parameters parameters = myEmpiProviderR4.clearEmpiLinks(null);
+		Parameters parameters = myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		assertThat(search.size(), is(equalTo(0)));
@@ -145,7 +143,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Person read = myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myEmpiProviderR4.clearEmpiLinks(new StringType("Practitioner"));
+		myEmpiProviderR4.clearEmpiLinks(new StringType("Practitioner"), myRequestDetails);
 		assertNoPractitionerLinksExist();
 		try {
 			myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
@@ -156,7 +154,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearInvalidTargetType() {
 		try {
-			myEmpiProviderR4.clearEmpiLinks(new StringType("Observation"));
+			myEmpiProviderR4.clearEmpiLinks(new StringType("Observation"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), is(equalTo("$empi-clear does not support resource type: Observation")));
