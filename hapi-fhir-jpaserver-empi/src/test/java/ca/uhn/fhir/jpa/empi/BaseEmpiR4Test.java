@@ -111,7 +111,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected ServletRequestDetails myRequestDetails;
 
 	@BeforeEach
-	public void before() {
+	public void beforeSetRequestDetails() {
 		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
 	}
 
