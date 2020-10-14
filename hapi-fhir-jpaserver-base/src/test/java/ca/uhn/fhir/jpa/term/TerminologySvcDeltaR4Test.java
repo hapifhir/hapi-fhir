@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
@@ -20,7 +19,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -34,10 +32,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
@@ -396,8 +394,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
 		assertFalse(myTermDeferredStorageSvc.isStorageQueueEmpty());
-		while (!myTermDeferredStorageSvc.isStorageQueueEmpty()) {
+		int counter = 0;
+		while (!myTermDeferredStorageSvc.isStorageQueueEmpty() && ++counter < 10000) {
 			myTermDeferredStorageSvc.saveDeferred();
+		}
+		if (counter >= 10000) {
+			((TermDeferredStorageSvcImpl)myTermDeferredStorageSvc).logQueueForUnitTest();
+			fail("myTermDeferredStorageSvc.saveDeferred() did not empty myTermDeferredStorageSvc storage queue.");
 		}
 
 		List<String> expectedHierarchy = new ArrayList<>();

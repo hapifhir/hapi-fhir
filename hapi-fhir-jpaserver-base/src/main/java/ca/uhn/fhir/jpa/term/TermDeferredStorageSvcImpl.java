@@ -380,4 +380,16 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	void setCodeSystemVersionDaoForUnitTest(ITermCodeSystemVersionDao theCodeSystemVersionDao) {
 		myCodeSystemVersionDao = theCodeSystemVersionDao;
 	}
+
+	@VisibleForTesting
+	public void logQueueForUnitTest() {
+		ourLog.info("isProcessDeferredPaused: {}", isProcessDeferredPaused());
+		ourLog.info("isDeferredConcepts: {}", isDeferredConcepts());
+		ourLog.info("isConceptLinksToSaveLater: {}", isConceptLinksToSaveLater());
+		ourLog.info("isDeferredValueSets: {}", isDeferredValueSets());
+		ourLog.info("isDeferredConceptMaps: {}", isDeferredConceptMaps());
+		ourLog.info("isDeferredCodeSystemDeletions: {}", isDeferredCodeSystemDeletions());
+	}
+
+
 }
