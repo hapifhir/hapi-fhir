@@ -381,6 +381,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myCodeSystemVersionDao = theCodeSystemVersionDao;
 	}
 
+	@Override
 	@VisibleForTesting
 	public void logQueueForUnitTest() {
 		ourLog.info("isProcessDeferredPaused: {}", isProcessDeferredPaused());

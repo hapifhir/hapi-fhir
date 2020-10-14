@@ -399,7 +399,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermDeferredStorageSvc.saveDeferred();
 		}
 		if (counter >= 10000) {
-			((TermDeferredStorageSvcImpl)myTermDeferredStorageSvc).logQueueForUnitTest();
+			myTermDeferredStorageSvc.logQueueForUnitTest();
 			fail("myTermDeferredStorageSvc.saveDeferred() did not empty myTermDeferredStorageSvc storage queue.");
 		}
 
