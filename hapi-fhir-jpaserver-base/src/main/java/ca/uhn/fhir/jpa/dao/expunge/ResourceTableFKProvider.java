@@ -11,8 +11,9 @@ public class ResourceTableFKProvider {
 	@Nonnull
 	public List<ResourceForeignKey> getResourceForeignKeys() {
 		List<ResourceForeignKey> resourceForeignKeys = new ArrayList<>();
-		// Adding this secondary dependency first
+		// Add some secondary related records that don't have foreign keys
 		resourceForeignKeys.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
+		resourceForeignKeys.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
 
 		// To find all the FKs that need to be included here, run the following SQL in the INFORMATION_SCHEMA:
 		// SELECT FKTABLE_NAME, FKCOLUMN_NAME FROM CROSS_REFERENCES WHERE PKTABLE_NAME = 'HFJ_RESOURCE'

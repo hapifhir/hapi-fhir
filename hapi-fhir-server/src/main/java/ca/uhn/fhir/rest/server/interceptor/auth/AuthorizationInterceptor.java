@@ -346,7 +346,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		checkPointcutAndFailIfDeny(theRequestDetails, thePointcut, theResourceToDelete);
 	}
 
-	@Hook(Pointcut.STORAGE_DELETE_EXPUNGE)
+	@Hook(Pointcut.STORAGE_PRE_DELETE_EXPUNGE)
 	public void hookDeleteExpunge(RequestDetails theRequestDetails, Pointcut thePointcut) {
 		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, null, null, null, thePointcut);
 	}

@@ -25,7 +25,7 @@ import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class DeleteExpungeService {
@@ -46,7 +46,7 @@ public class DeleteExpungeService {
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public DeleteMethodOutcome expungeByResourcePids(String theUrl, Slice<Long> thePids, RequestDetails theRequest) {
+	public DeleteMethodOutcome expungeByResourcePids(String theUrl, String theResourceName, Slice<Long> thePids, RequestDetails theRequest) {
 		if (thePids.isEmpty()) {
 			return new DeleteMethodOutcome();
 		}
@@ -55,24 +55,16 @@ public class DeleteExpungeService {
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(String.class, theUrl);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_DELETE_EXPUNGE, params);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 
 		validateOkToDeleteAndExpunge(thePids);
+
 		ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());
-		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();
-
-		AtomicInteger expungedEntitiesCount = new AtomicInteger();
-		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
-			myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceForeignKey, pidChunk, expungedEntitiesCount));
-		}
-
-		// Lastly we need to delete records from the resource table all of these other tables link to:
-		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
-		AtomicInteger expungedResourcesCount = new AtomicInteger();
-		myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(resourceTablePk, pidChunk, expungedResourcesCount));
-		expungedEntitiesCount.addAndGet(expungedResourcesCount.get());
-
+		AtomicLong expungedEntitiesCount = new AtomicLong();
+		AtomicLong expungedResourcesCount = new AtomicLong();
+		myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(theResourceName, pidChunk, expungedResourcesCount, expungedEntitiesCount, theRequest));
 		ourLog.info("Expunged a total of {} records", expungedEntitiesCount);
+
 		DeleteMethodOutcome retval = new DeleteMethodOutcome();
 		retval.setExpungedResourcesCount(expungedResourcesCount.get());
 		retval.setExpungedEntitiesCount(expungedEntitiesCount.get());
@@ -103,19 +95,37 @@ public class DeleteExpungeService {
 		}
 	}
 
-	private void deleteInTransaction(ResourceForeignKey theResourceForeignKey, List<Long> thePidChunk, AtomicInteger theACount) {
+	private void deleteInTransaction(String theResourceName, List<Long> thePidChunk, AtomicLong theExpungedResourcesCount, AtomicLong theExpungedEntitiesCount, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-
-		Integer count = txTemplate.execute(t -> delete(theResourceForeignKey, thePidChunk));
-		if (count != null) {
-			theACount.addAndGet(count);
-		}
+		txTemplate.executeWithoutResult(t -> deleteAllRecordsLinkingTo(theResourceName, thePidChunk, theExpungedResourcesCount, theExpungedEntitiesCount, theRequest));
 	}
 
-	private Integer delete(ResourceForeignKey resourceForeignKey, List<Long> thePids) {
-		String pids = thePids.toString().replace("[", "(").replace("]", ")");
-		int retval = myEntityManager.createNativeQuery("DELETE FROM " + resourceForeignKey.table + " WHERE " + resourceForeignKey.key + " IN " + pids).executeUpdate();
-		ourLog.info("Expunged {} records from {}", retval, resourceForeignKey.table);
-		return retval;
+	private void deleteAllRecordsLinkingTo(String theResourceName, List<Long> thePids, AtomicLong theExpungedResourcesCount, AtomicLong theExpungedEntitiesCount, RequestDetails theRequest) {
+		HookParams params = new HookParams()
+			.add(String.class, theResourceName)
+			.add(List.class, thePids)
+			.add(AtomicLong.class, theExpungedEntitiesCount)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_DELETE_EXPUNGE_PID_LIST, params);
+
+		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
+		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();
+
+		for (ResourceForeignKey resourceForeignKey : resourceForeignKeys) {
+			deleteRecordsByColumn(pidListString, resourceForeignKey, theExpungedEntitiesCount);
+		}
+
+		// Lastly we need to delete records from the resource table all of these other tables link to:
+		ResourceForeignKey resourceTablePk = new ResourceForeignKey("HFJ_RESOURCE", "RES_ID");
+		int entitiesDeleted = deleteRecordsByColumn(pidListString, resourceTablePk, theExpungedEntitiesCount);
+		theExpungedResourcesCount.addAndGet(entitiesDeleted);
+	}
+
+	private int deleteRecordsByColumn(String thePidListString, ResourceForeignKey theResourceForeignKey, AtomicLong theExpungedEntitiesCount) {
+		int entitesDeleted = myEntityManager.createNativeQuery("DELETE FROM " + theResourceForeignKey.table + " WHERE " + theResourceForeignKey.key + " IN " + thePidListString).executeUpdate();
+		ourLog.info("Expunged {} records from {}", entitesDeleted, theResourceForeignKey.table);
+		theExpungedEntitiesCount.addAndGet(entitesDeleted);
+		return entitesDeleted;
 	}
 }
