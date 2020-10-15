@@ -3,15 +3,15 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
 public class DeleteExpungeService {
@@ -45,9 +46,9 @@ public class DeleteExpungeService {
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
-	private IdHelperService myIdHelperService;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+	private DaoConfig myDaoConfig;
 
 	public DeleteMethodOutcome expungeByResourcePids(String theUrl, String theResourceName, Slice<Long> thePids, RequestDetails theRequest) {
 		if (thePids.isEmpty()) {
@@ -60,7 +61,8 @@ public class DeleteExpungeService {
 			.add(String.class, theUrl);
 		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE, params);
 
-		validateOkToDeleteAndExpunge(thePids);
+		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		txTemplate.executeWithoutResult(t -> validateOkToDeleteAndExpunge(thePids));
 
 		ourLog.info("Expunging all records linking to {} resources...", thePids.getNumber());
 		AtomicLong expungedEntitiesCount = new AtomicLong();
@@ -75,26 +77,37 @@ public class DeleteExpungeService {
 	}
 
 	public void validateOkToDeleteAndExpunge(Slice<Long> theAllTargetPids) {
-		List<Long> conflictSourcePids = Collections.synchronizedList(new ArrayList<>());
-		myPartitionRunner.runInPartitionedThreads(theAllTargetPids, someTargetPids -> findSourcePidsWithTargetPidIn(theAllTargetPids.getContent(), someTargetPids, conflictSourcePids));
-
-		if (conflictSourcePids.isEmpty()) {
+		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+			ourLog.info("Referential integrity on delete disabled.  Skipping referential integrity check.");
 			return;
 		}
 
-		IIdType firstConflictId = myIdHelperService.resourceIdFromPidOrThrowException(conflictSourcePids.get(0));
-		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflictId.toVersionless().getValue());
+		List<ResourceLink> conflictResourceLinks = Collections.synchronizedList(new ArrayList<>());
+		myPartitionRunner.runInPartitionedThreads(theAllTargetPids, someTargetPids -> findResourceLinksWithTargetPidIn(theAllTargetPids.getContent(), someTargetPids, conflictResourceLinks));
+
+		if (conflictResourceLinks.isEmpty()) {
+			return;
+		}
+
+		ResourceLink firstConflict = conflictResourceLinks.get(0);
+		String sourceResourceId = firstConflict.getSourceResource().getIdDt().toVersionless().getValue();
+		String targetResourceId = firstConflict.getTargetResource().getIdDt().toVersionless().getValue();
+		throw new InvalidRequestException("DELETE with _expunge=true failed.  Unable to delete " +
+			targetResourceId + " because " + sourceResourceId + " refers to it via the path " + firstConflict.getSourcePath());
 	}
 
-	private void findSourcePidsWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<Long> theSourcePids) {
+	private void findResourceLinksWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<ResourceLink> theConflictResourceLinks) {
 		// We only need to find one conflict, so if we found one already in an earlier partition run, we can skip the rest of the searches
-		if (theSourcePids.isEmpty()) {
-			List<Long> someSourcePids = myResourceLinkDao.findSourcePidWithTargetPidIn(theSomeTargetPids);
-			// Remove sources we're planning to delete, since those conflicts don't matter
-			someSourcePids.removeAll(theAllTargetPids);
-			if (!someSourcePids.isEmpty()) {
-				theSourcePids.addAll(someSourcePids);
-			}
+		if (theConflictResourceLinks.isEmpty()) {
+			List<ResourceLink> conflictResourceLinks = myResourceLinkDao.findWithTargetPidIn(theSomeTargetPids).stream()
+				// Filter out resource links for which we are planning to delete the source.
+				// theAllTargetPids contains a list of all the pids we are planning to delete.  So we only want
+				// to consider a link to be a conflict if the source of that link is not in theAllTargetPids.
+				.filter(link -> !theAllTargetPids.contains(link.getSourceResourcePid()))
+				.collect(Collectors.toList());
+
+			// We do this in two steps to avoid lock contention on this synchronized list
+			theConflictResourceLinks.addAll(conflictResourceLinks);
 		}
 	}
 

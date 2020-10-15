@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.HapiExtensions;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
@@ -458,7 +457,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, dates.get(1).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_LINK
-			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForResourceId(patientId);
+			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForSourceResourceId(patientId);
 			assertEquals(1, resourceLinks.size());
 			assertEquals(myPartitionId, resourceLinks.get(0).getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
@@ -542,7 +541,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, dates.get(1).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_LINK
-			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForResourceId(patientId);
+			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForSourceResourceId(patientId);
 			assertEquals(1, resourceLinks.size());
 			assertEquals(null, resourceLinks.get(0).getPartitionId().getPartitionId());
 			assertEquals(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());

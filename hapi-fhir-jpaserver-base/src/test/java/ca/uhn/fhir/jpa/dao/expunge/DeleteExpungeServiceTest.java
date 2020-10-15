@@ -53,8 +53,8 @@ class DeleteExpungeServiceTest extends BaseJpaR4Test {
 			myOrganizationDao.deleteByUrl("Organization?" + JpaConstants.PARAM_DELETE_EXPUNGE + "=true", mySrd);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), "Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " +
-				patientId.toVersionless());
+
+			assertEquals(e.getMessage(), "DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization");
 		}
 	}
 
