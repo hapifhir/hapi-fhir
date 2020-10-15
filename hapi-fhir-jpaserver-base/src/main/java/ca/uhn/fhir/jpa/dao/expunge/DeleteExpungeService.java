@@ -6,11 +6,12 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,8 @@ public class DeleteExpungeService {
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
 	private IResourceLinkDao myResourceLinkDao;
+	@Autowired
+	private IdHelperService myIdHelperService;
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -79,8 +82,8 @@ public class DeleteExpungeService {
 			return;
 		}
 
-		ResourceTable firstConflict = myResourceTableDao.getOne(conflictSourcePids.get(0));
-		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflict.getIdDt().toVersionless().getValue());
+		IIdType firstConflictId = myIdHelperService.resourceIdFromPidOrThrowException(conflictSourcePids.get(0));
+		throw new InvalidRequestException("Other resources reference the resource(s) you are trying to delete.  Aborting delete operation.  First delete conflict is " + firstConflictId.toVersionless().getValue());
 	}
 
 	private void findSourcePidsWithTargetPidIn(List<Long> theAllTargetPids, List<Long> theSomeTargetPids, List<Long> theSourcePids) {
