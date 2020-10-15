@@ -520,10 +520,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		if (paramMap.isDeleteExpunge()) {
-			return myDeleteExpungeService.expungeByResourcePids(theUrl, new SliceImpl<>(ResourcePersistentId.toLongList(resourceIds)), theRequest);
+			return deleteExpunge(theUrl, theRequest, resourceIds);
 		} else {
 			return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
 		}
+	}
+
+	private DeleteMethodOutcome deleteExpunge(String theTheUrl, RequestDetails theTheRequest, Set<ResourcePersistentId> theResourceIds) {
+		if (!myDaoConfig.isExpungeEnabled() || !myDaoConfig.isDeleteExpungeEnabled()) {
+			throw new MethodNotAllowedException("_expunge is not enabled on this server");
+		}
+
+		return myDeleteExpungeService.expungeByResourcePids(theTheUrl, new SliceImpl<>(ResourcePersistentId.toLongList(theResourceIds)), theTheRequest);
 	}
 
 	@NotNull

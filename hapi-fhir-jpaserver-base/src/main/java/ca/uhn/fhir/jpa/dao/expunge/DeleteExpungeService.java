@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -11,7 +10,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +36,6 @@ public class DeleteExpungeService {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
 	private PartitionRunner myPartitionRunner;
 	@Autowired
 	private ResourceTableFKProvider myResourceTableFKProvider;
@@ -53,10 +49,6 @@ public class DeleteExpungeService {
 	public DeleteMethodOutcome expungeByResourcePids(String theUrl, Slice<Long> thePids, RequestDetails theRequest) {
 		if (thePids.isEmpty()) {
 			return new DeleteMethodOutcome();
-		}
-
-		if (!myDaoConfig.isExpungeEnabled()) {
-			throw new MethodNotAllowedException("_expunge is not enabled on this server");
 		}
 
 		HookParams params = new HookParams()

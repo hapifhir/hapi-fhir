@@ -28,6 +28,7 @@ class DeleteExpungeServiceTest extends BaseJpaR4Test {
 	public void before() {
 		myDaoConfig.setAllowMultipleDelete(true);
 		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
 	}
 
 	@AfterEach
@@ -35,6 +36,7 @@ class DeleteExpungeServiceTest extends BaseJpaR4Test {
 		DaoConfig daoConfig = new DaoConfig();
 		myDaoConfig.setAllowMultipleDelete(daoConfig.isAllowMultipleDelete());
 		myDaoConfig.setExpungeEnabled(daoConfig.isExpungeEnabled());
+		myDaoConfig.setDeleteExpungeEnabled(daoConfig.isDeleteExpungeEnabled());
 	}
 
 	@Test
