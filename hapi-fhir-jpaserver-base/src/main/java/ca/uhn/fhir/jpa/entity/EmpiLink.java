@@ -276,6 +276,11 @@ public class EmpiLink {
 		return this;
 	}
 
+	public EmpiLink setEmpiTargetType(String theEmpiTargetType) {
+		myEmpiTargetType = theEmpiTargetType;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
@@ -292,9 +297,5 @@ public class EmpiLink {
 
 	public String getEmpiTargetType() {
 		return myEmpiTargetType;
-	}
-
-	public void setEmpiTargetType(String theEmpiTargetType) {
-		myEmpiTargetType = theEmpiTargetType;
 	}
 }

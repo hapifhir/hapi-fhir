@@ -62,7 +62,6 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
 		mergeLinks(theFromPerson, theToPerson, toPersonPid, theEmpiTransactionContext);
-
 		refreshLinksAndUpdatePerson(theToPerson, theEmpiTransactionContext);
 
 		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFromPerson);
@@ -79,6 +78,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
 			.setPersonPid(theFromPersonPid)
 			.setTargetPid(theToPersonPid)
+			.setEmpiTargetType("Person")
 			.setMatchResult(EmpiMatchResultEnum.MATCH)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
