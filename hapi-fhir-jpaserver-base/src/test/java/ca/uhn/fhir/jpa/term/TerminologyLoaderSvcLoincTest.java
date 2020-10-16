@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -54,6 +55,24 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor;
+	@Captor
+	private ArgumentCaptor<CodeSystem> mySystemCaptor_267_first;
+	@Captor
+	private ArgumentCaptor<CodeSystem> mySystemCaptor_267_second;
+	@Captor
+	private ArgumentCaptor<CodeSystem> mySystemCaptor_268;
+	@Captor
+	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor_267_first;
+	@Captor
+	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor_267_second;
+	@Captor
+	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor_268;
+	@Captor
+	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_267_first;
+	@Captor
+	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_267_second;
+	@Captor
+	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor_268;
 	private ZipCollectionBuilder myFiles;
 	@Mock
 	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
@@ -404,77 +423,160 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	public void testLoadLoincMultipleVersions() throws IOException {
 
 		// Load LOINC marked as version 2.67
+
 		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		CodeSystem loincCS = mySystemCaptor.getValue();
-		assertEquals("2.67", loincCS.getVersion());
-		List<ValueSet> loincVS_resources = myValueSetsCaptor.getValue();
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_first.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_first.capture(), myConceptMapCaptor_267_first.capture());
+		List<CodeSystem> loincCSResources = mySystemCaptor_267_first.getAllValues();
+		assertEquals(2, loincCSResources.size());
+		assertEquals("2.67", loincCSResources.get(0).getVersion());
+		assertNull(loincCSResources.get(1).getVersion());
+
+		List<List<ValueSet>> loincVS_resourceLists = myValueSetsCaptor_267_first.getAllValues();
+		assertEquals(2, loincVS_resourceLists.size());
+		List<ValueSet> loincVS_resources = loincVS_resourceLists.get(0);
 		for (ValueSet loincVS : loincVS_resources) {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
-				assertEquals("2.67.Beta.1", loincVS.getVersion());
+				assertEquals("Beta.1-2.67", loincVS.getVersion());
 			} else {
 				assertEquals("2.67", loincVS.getVersion());
 			}
 		}
-		List<ConceptMap> loincCM_resources = myConceptMapCaptor.getValue();
+		loincVS_resources = loincVS_resourceLists.get(1);
+		for (ValueSet loincVS : loincVS_resources) {
+			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+				assertEquals("Beta.1", loincVS.getVersion());
+			} else if (loincVS.getId().equals("loinc-all")) {
+				assertEquals("1.0.0", loincVS.getVersion());
+			} else {
+				assertNull(loincVS.getVersion());
+			}
+		}
+
+		List<List<ConceptMap>> loincCM_resourceLists = myConceptMapCaptor_267_first.getAllValues();
+		assertEquals(2, loincCM_resourceLists.size());
+		List<ConceptMap> loincCM_resources = loincCM_resourceLists.get(0);
 		for (ConceptMap loincCM : loincCM_resources) {
-			assertEquals("2.67.Beta.1", loincCM.getVersion());
+			assertEquals("Beta.1-2.67", loincCM.getVersion());
 			assertEquals(1, loincCM.getGroup().size());
 			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
 			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 			assertEquals("2.67", group.getSourceVersion());
 		}
+		loincCM_resources = loincCM_resourceLists.get(1);
+		for (ConceptMap loincCM : loincCM_resources) {
+			assertEquals("Beta.1", loincCM.getVersion());
+			assertEquals(1, loincCM.getGroup().size());
+			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
+			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+			assertNull(group.getSourceVersion());
+		}
+
+		reset(myTermCodeSystemStorageSvc);
 
 		// Update LOINC marked as version 2.67
 		myFiles = new ZipCollectionBuilder();
 		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		loincCS = mySystemCaptor.getValue();
-		assertEquals("2.67", loincCS.getVersion());
-		loincVS_resources = myValueSetsCaptor.getValue();
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_267_second.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_267_second.capture(), myConceptMapCaptor_267_second.capture());
+		loincCSResources = mySystemCaptor_267_second.getAllValues();
+		assertEquals(2, loincCSResources.size());
+		assertEquals("2.67", loincCSResources.get(0).getVersion());
+		assertNull(loincCSResources.get(1).getVersion());
+
+		loincVS_resourceLists = myValueSetsCaptor_267_second.getAllValues();
+		assertEquals(2, loincVS_resourceLists.size());
+		loincVS_resources = loincVS_resourceLists.get(0);
 		for (ValueSet loincVS : loincVS_resources) {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
-				assertEquals("2.67.Beta.1", loincVS.getVersion());
+				assertEquals("Beta.1-2.67", loincVS.getVersion());
 			} else {
 				assertEquals("2.67", loincVS.getVersion());
 			}
 		}
-		loincCM_resources = myConceptMapCaptor.getValue();
+		loincVS_resources = loincVS_resourceLists.get(1);
+		for (ValueSet loincVS : loincVS_resources) {
+			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+				assertEquals("Beta.1", loincVS.getVersion());
+			} else if (loincVS.getId().equals("loinc-all")) {
+				assertEquals("1.0.0", loincVS.getVersion());
+			} else {
+				assertNull(loincVS.getVersion());
+			}
+		}
+
+		loincCM_resourceLists = myConceptMapCaptor_267_second.getAllValues();
+		assertEquals(2, loincCM_resourceLists.size());
+		loincCM_resources = loincCM_resourceLists.get(0);
 		for (ConceptMap loincCM : loincCM_resources) {
-			assertEquals("2.67.Beta.1", loincCM.getVersion());
+			assertEquals("Beta.1-2.67", loincCM.getVersion());
 			assertEquals(1, loincCM.getGroup().size());
 			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
 			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 			assertEquals("2.67", group.getSourceVersion());
 		}
+		loincCM_resources = loincCM_resourceLists.get(1);
+		for (ConceptMap loincCM : loincCM_resources) {
+			assertEquals("Beta.1", loincCM.getVersion());
+			assertEquals(1, loincCM.getGroup().size());
+			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
+			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+			assertNull(group.getSourceVersion());
+		}
+
+		reset(myTermCodeSystemStorageSvc);
 
 		// Load LOINC marked as version 2.68
 		myFiles = new ZipCollectionBuilder();
 		addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v268_loincupload.properties");
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermCodeSystemStorageSvc, times(3)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		loincCS = mySystemCaptor.getValue();
-		assertEquals("2.68", loincCS.getVersion());
-		loincVS_resources = myValueSetsCaptor.getValue();
+		verify(myTermCodeSystemStorageSvc, times(2)).storeNewCodeSystemVersion(mySystemCaptor_268.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor_268.capture(), myConceptMapCaptor_268.capture());
+		loincCSResources = mySystemCaptor_268.getAllValues();
+		assertEquals(2, loincCSResources.size());
+		assertEquals("2.68", loincCSResources.get(0).getVersion());
+		assertNull(loincCSResources.get(1).getVersion());
+
+		loincVS_resourceLists = myValueSetsCaptor_268.getAllValues();
+		assertEquals(2, loincVS_resourceLists.size());
+		loincVS_resources = loincVS_resourceLists.get(0);
 		for (ValueSet loincVS : loincVS_resources) {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
-				assertEquals("2.68.Beta.1", loincVS.getVersion());
+				assertEquals("Beta.1-2.68", loincVS.getVersion());
 			} else {
 				assertEquals("2.68", loincVS.getVersion());
 			}
 		}
-		loincCM_resources = myConceptMapCaptor.getValue();
+		loincVS_resources = loincVS_resourceLists.get(1);
+		for (ValueSet loincVS : loincVS_resources) {
+			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
+				assertEquals("Beta.1", loincVS.getVersion());
+			} else if (loincVS.getId().equals("loinc-all")) {
+				assertEquals("1.0.0", loincVS.getVersion());
+			} else {
+				assertNull(loincVS.getVersion());
+			}
+		}
+
+		loincCM_resourceLists = myConceptMapCaptor_268.getAllValues();
+		assertEquals(2, loincCM_resourceLists.size());
+		loincCM_resources = loincCM_resourceLists.get(0);
 		for (ConceptMap loincCM : loincCM_resources) {
-			assertEquals("2.68.Beta.1", loincCM.getVersion());
+			assertEquals("Beta.1-2.68", loincCM.getVersion());
 			assertEquals(1, loincCM.getGroup().size());
 			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
 			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 			assertEquals("2.68", group.getSourceVersion());
+		}
+		loincCM_resources = loincCM_resourceLists.get(1);
+		for (ConceptMap loincCM : loincCM_resources) {
+			assertEquals("Beta.1", loincCM.getVersion());
+			assertEquals(1, loincCM.getGroup().size());
+			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
+			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+			assertNull(group.getSourceVersion());
 		}
 
 	}
