@@ -89,10 +89,10 @@ public class EmpiLinkDaoSvc {
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
-			EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink();
-			empiLink.setPersonPid(thePersonPid);
-			empiLink.setTargetPid(theResourcePid);
-			return empiLink;
+			EmpiLink newLink = myEmpiLinkFactory.newEmpiLink();
+			newLink.setPersonPid(thePersonPid);
+			newLink.setTargetPid(theResourcePid);
+			return newLink;
 		}
 	}
 

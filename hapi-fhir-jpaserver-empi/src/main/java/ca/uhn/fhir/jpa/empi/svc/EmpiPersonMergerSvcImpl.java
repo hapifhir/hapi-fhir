@@ -68,7 +68,6 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		addMergeLink(fromPersonPid, toPersonPid);
 		myPersonHelper.deactivatePerson(theFromPerson);
 
-		// FIXME KHS we're losing our saved link here.. What the heck is going on??
 		refreshLinksAndUpdatePerson(theFromPerson, theEmpiTransactionContext);
 
 		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
@@ -76,9 +75,8 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	}
 
 	private void addMergeLink(Long theDeactivatedPersonPid, Long theActivePersonPid) {
-		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setPersonPid(theActivePersonPid)
-			.setTargetPid(theDeactivatedPersonPid)
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getOrCreateEmpiLinkByPersonPidAndTargetPid(theActivePersonPid, theDeactivatedPersonPid);
+		empiLink
 			.setEmpiTargetType("Person")
 			.setMatchResult(EmpiMatchResultEnum.REDIRECT)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL);

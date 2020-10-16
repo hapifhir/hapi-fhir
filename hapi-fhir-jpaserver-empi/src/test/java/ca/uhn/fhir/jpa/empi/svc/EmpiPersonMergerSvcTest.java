@@ -24,11 +24,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -101,7 +103,16 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	}
 
 	private Person mergePersons() {
-		return (Person) myEmpiPersonMergerSvc.mergePersons(myFromPerson, myToPerson, createEmpiContext());
+		assertEquals(0, redirectLinkCount());
+		Person retval = (Person) myEmpiPersonMergerSvc.mergePersons(myFromPerson, myToPerson, createEmpiContext());
+		assertEquals(1, redirectLinkCount());
+		return retval;
+	}
+
+	private int redirectLinkCount() {
+		EmpiLink empiLink = new EmpiLink().setMatchResult(EmpiMatchResultEnum.REDIRECT);
+		Example<EmpiLink> example = Example.of(empiLink);
+		return myEmpiLinkDao.findAll(example).size();
 	}
 
 	private EmpiTransactionContext createEmpiContext() {
@@ -112,9 +123,20 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void mergeRemovesPossibleDuplicatesLink() {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink().setPersonPid(myToPersonPid).setTargetPid(myFromPersonPid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(empiLink);
-		assertEquals(1, myEmpiLinkDao.count());
+
+		{
+			List<EmpiLink> foundLinks = myEmpiLinkDao.findAll();
+			assertEquals(1, foundLinks.size());
+			assertEquals(EmpiMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
+		}
+
 		mergePersons();
-		assertEquals(0, myEmpiLinkDao.count());
+
+		{
+			List<EmpiLink> foundLinks = myEmpiLinkDao.findAll();
+			assertEquals(1, foundLinks.size());
+			assertEquals(EmpiMatchResultEnum.REDIRECT, foundLinks.get(0).getMatchResult());
+		}
 	}
 
 	@Test
@@ -145,7 +167,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myFromPerson, myTargetPatient1);
 
 		Person mergedPerson = mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(mergedPerson);
+		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
 		assertEquals(1, links.size());
 		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToPerson.getLink().size());
@@ -156,7 +178,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
 		Person mergedPerson = mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(mergedPerson);
+		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
 		assertEquals(1, links.size());
 		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToPerson.getLink().size());
@@ -172,9 +194,15 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
+		List<EmpiLink> links = getNonRedirectLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+	}
+
+	private List<EmpiLink> getNonRedirectLinksByPerson(Person thePerson) {
+		return myEmpiLinkDaoSvc.findEmpiLinksByPerson(thePerson).stream()
+			.filter(link -> !(link.getMatchResult() == EmpiMatchResultEnum.REDIRECT))
+			.collect(Collectors.toList());
 	}
 
 	@Test
@@ -188,7 +216,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToPerson, myTargetPatient1);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
+		List<EmpiLink> links = getNonRedirectLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}
@@ -203,7 +231,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		saveLink(toLink);
 
 		mergePersons();
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByPerson(myToPerson);
+		List<EmpiLink> links = getNonRedirectLinksByPerson(myToPerson);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}
@@ -262,7 +290,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		mergePersons();
 		assertEquals(1, myToPerson.getLink().size());
-		assertEquals(2, myEmpiLinkDao.count());
+		assertEquals(3, myEmpiLinkDao.count());
 	}
 
 	@Test
