@@ -399,6 +399,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermDeferredStorageSvc.saveDeferred();
 		}
 		if (counter >= 10000) {
+			ourLog.error("Failed to empty myTermDeferredStorageSvc storage queue after 10000 attempts");
 			myTermDeferredStorageSvc.logQueueForUnitTest();
 			fail("myTermDeferredStorageSvc.saveDeferred() did not empty myTermDeferredStorageSvc storage queue.");
 		}
