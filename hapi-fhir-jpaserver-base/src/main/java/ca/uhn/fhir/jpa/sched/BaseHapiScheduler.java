@@ -73,8 +73,6 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	@Override
 	public void init() throws SchedulerException {
-		assert myInstanceName != null;
-
 		setProperties();
 		myFactory.setQuartzProperties(myProperties);
 		myFactory.setBeanName(myInstanceName);
@@ -82,6 +80,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		myFactory.setJobFactory(mySpringBeanJobFactory);
 		massageJobFactory(myFactory);
 		try {
+			Validate.notBlank(myInstanceName, "No instance name supplied");
 			myFactory.afterPropertiesSet();
 		} catch (Exception e) {
 			throw new SchedulerException(e);
