@@ -6,24 +6,24 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.Observation;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	public static final int TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE = 5;
 
-	@AfterEach
+	@After
 	public void after() {
 		myDaoConfig.setMaximumTransactionBundleSize(new DaoConfig().getMaximumTransactionBundleSize());
 	}
 
-	@BeforeEach
+	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setMaximumTransactionBundleSize(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE);
 	}
