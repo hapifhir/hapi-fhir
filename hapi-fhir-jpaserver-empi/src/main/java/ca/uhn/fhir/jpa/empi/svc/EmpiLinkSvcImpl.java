@@ -110,7 +110,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(thePersonResource);
 
 		List<IBaseBackboneElement> newLinks = empiLinks.stream()
-			.filter(link -> link.isMatch() || link.isPossibleMatch())
+			.filter(link -> link.isMatch() || link.isPossibleMatch() || link.isRedirect())
 			.map(this::personLinkFromEmpiLink)
 			.collect(Collectors.toList());
 		myPersonHelper.setLinks(thePersonResource, newLinks);

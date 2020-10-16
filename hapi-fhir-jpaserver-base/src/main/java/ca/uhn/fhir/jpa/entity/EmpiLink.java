@@ -184,6 +184,10 @@ public class EmpiLink {
 		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH;
 	}
 
+	public boolean isRedirect() {
+		return myMatchResult == EmpiMatchResultEnum.REDIRECT;
+	}
+
 	public boolean isPossibleDuplicate() {
 		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
 	}

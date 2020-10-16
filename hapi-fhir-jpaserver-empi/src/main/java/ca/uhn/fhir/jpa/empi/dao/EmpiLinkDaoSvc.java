@@ -316,13 +316,4 @@ public class EmpiLinkDaoSvc {
 	public EmpiLink newEmpiLink() {
 		return myEmpiLinkFactory.newEmpiLink();
 	}
-
-	public void logAllEmpiLinksForUnitTest(String theHeader) {
-		List<EmpiLink> links = myEmpiLinkDao.findAll();
-
-		ourLog.info("ALL EMPI LINKS: {} {}", theHeader, links.size());
-		for (EmpiLink link : links) {
-			ourLog.info(link.toString());
-		}
-	}
 }

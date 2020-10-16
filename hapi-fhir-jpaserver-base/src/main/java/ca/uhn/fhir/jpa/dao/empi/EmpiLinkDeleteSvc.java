@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.empi;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -51,11 +52,11 @@ public class EmpiLinkDeleteSvc {
 		return removed;
 	}
 
-	public int deleteWithPersonReferenceTo(IBaseResource theResource) {
+	public int deleteNonRedirectWithWithAnyReferenceTo(IBaseResource theResource) {
 		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
-		int removed =  myEmpiLinkDao.deleteWithPersonReferenceToPid(pid);
+		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, EmpiMatchResultEnum.REDIRECT);
 		if (removed > 0) {
-			ourLog.info("Removed {} EMPI links with person references to {}", removed, theResource.getIdElement().toVersionless());
+			ourLog.info("Removed {} non-redirect EMPI links with references to {}", removed, theResource.getIdElement().toVersionless());
 		}
 		return removed;
 	}

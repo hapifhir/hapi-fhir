@@ -201,7 +201,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	private List<EmpiLink> getNonRedirectLinksByPerson(Person thePerson) {
 		return myEmpiLinkDaoSvc.findEmpiLinksByPerson(thePerson).stream()
-			.filter(link -> !(link.getMatchResult() == EmpiMatchResultEnum.REDIRECT))
+			.filter(link -> !link.isRedirect())
 			.collect(Collectors.toList());
 	}
 
