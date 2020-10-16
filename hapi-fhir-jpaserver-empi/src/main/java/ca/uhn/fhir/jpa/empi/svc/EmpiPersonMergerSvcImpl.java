@@ -68,25 +68,28 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		addMergeLink(fromPersonPid, toPersonPid);
 		myPersonHelper.deactivatePerson(theFromPerson);
 
+		// FIXME KHS we're losing our saved link here.. What the heck is going on??
 		refreshLinksAndUpdatePerson(theFromPerson, theEmpiTransactionContext);
 
 		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
 		return theToPerson;
 	}
 
-	private void addMergeLink(Long theFromPersonPid, Long theToPersonPid) {
+	private void addMergeLink(Long theDeactivatedPersonPid, Long theActivePersonPid) {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setPersonPid(theFromPersonPid)
-			.setTargetPid(theToPersonPid)
+			.setPersonPid(theActivePersonPid)
+			.setTargetPid(theDeactivatedPersonPid)
 			.setEmpiTargetType("Person")
-			.setMatchResult(EmpiMatchResultEnum.MATCH)
+			.setMatchResult(EmpiMatchResultEnum.REDIRECT)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
 	}
 
 	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
+		myEmpiLinkDaoSvc.logAllEmpiLinksForUnitTest("A");
 		myEmpiResourceDaoSvc.updatePerson(theToPerson);
+		myEmpiLinkDaoSvc.logAllEmpiLinksForUnitTest("B");
 	}
 
 	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, Long theToPersonPid, EmpiTransactionContext theEmpiTransactionContext) {

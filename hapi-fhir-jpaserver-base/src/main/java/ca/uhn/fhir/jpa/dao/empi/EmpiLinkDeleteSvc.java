@@ -50,4 +50,13 @@ public class EmpiLinkDeleteSvc {
 		}
 		return removed;
 	}
+
+	public int deleteWithPersonReferenceTo(IBaseResource theResource) {
+		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
+		int removed =  myEmpiLinkDao.deleteWithPersonReferenceToPid(pid);
+		if (removed > 0) {
+			ourLog.info("Removed {} EMPI links with person references to {}", removed, theResource.getIdElement().toVersionless());
+		}
+		return removed;
+	}
 }

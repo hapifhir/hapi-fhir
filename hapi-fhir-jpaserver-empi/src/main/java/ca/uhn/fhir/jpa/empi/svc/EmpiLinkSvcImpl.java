@@ -119,6 +119,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		} else if (newLinks.size() < origLinkCount) {
 			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links decreased from " + origLinkCount + " to " + newLinks.size());
 		}
+
 	}
 
 	@Override

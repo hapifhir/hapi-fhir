@@ -32,4 +32,8 @@ public interface IEmpiLinkDao extends JpaRepository<EmpiLink, Long> {
 	@Modifying
 	@Query("DELETE FROM EmpiLink f WHERE myPersonPid = :pid OR myTargetPid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
+
+	@Modifying
+	@Query("DELETE FROM EmpiLink f WHERE myPersonPid = :pid")
+	int deleteWithPersonReferenceToPid(@Param("pid") Long thePid);
 }

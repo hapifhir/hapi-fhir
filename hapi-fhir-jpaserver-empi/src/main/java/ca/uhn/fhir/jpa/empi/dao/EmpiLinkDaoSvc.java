@@ -194,8 +194,8 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Optional.empty();
 		}
-		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
-		Example<EmpiLink> example = Example.of(empiLink);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findOne(example);
 	}
 
@@ -222,8 +222,8 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
-		Example<EmpiLink> example = Example.of(empiLink);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
 
@@ -303,8 +303,8 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
-		Example<EmpiLink> example = Example.of(empiLink);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
 
@@ -317,4 +317,12 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkFactory.newEmpiLink();
 	}
 
+	public void logAllEmpiLinksForUnitTest(String theHeader) {
+		List<EmpiLink> links = myEmpiLinkDao.findAll();
+
+		ourLog.info("ALL EMPI LINKS: {} {}", theHeader, links.size());
+		for (EmpiLink link : links) {
+			ourLog.info(link.toString());
+		}
+	}
 }

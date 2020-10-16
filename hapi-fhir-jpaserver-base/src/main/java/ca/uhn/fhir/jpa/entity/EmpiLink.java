@@ -284,6 +284,7 @@ public class EmpiLink {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
+			.append("myId", myId)
 			.append("myPersonPid", myPersonPid)
 			.append("myTargetPid", myTargetPid)
 			.append("myEmpiTargetType", myEmpiTargetType)
