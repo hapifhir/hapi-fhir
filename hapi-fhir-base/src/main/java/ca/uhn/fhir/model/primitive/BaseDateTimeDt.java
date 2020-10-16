@@ -586,8 +586,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	}
 
 	private TimeZone getTimeZone(String offset) {
-		return timezoneCache.computeIfAbsent(offset, (offsetLocal) ->
-			TimeZone.getTimeZone("GMT" + offsetLocal));
+		return timezoneCache.computeIfAbsent(offset, TimeZone::getTimeZone);
 	}
 
 	public BaseDateTimeDt setTimeZone(TimeZone theTimeZone) {
