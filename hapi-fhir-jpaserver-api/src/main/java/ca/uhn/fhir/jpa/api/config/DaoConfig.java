@@ -1313,7 +1313,7 @@ public class DaoConfig {
 	 * If set to <code>true</code> (default is <code>false</code>), the _expunge parameter on the DELETE
 	 * operation will be enabled on this server. DELETE _expunge removes all data associated with a resource in a highly performant
 	 * way, skipping most of the the checks that are enforced with usual DELETE operations.  The only check
-	 * that is performed before deleting the data is that no other resources reference the resources about to
+	 * that is performed before deleting the resources and their indexes is that no other resources reference the resources about to
 	 * be deleted.  This operation is potentially dangerous since it allows
 	 * a client to physically delete data in a way that can not be recovered (without resorting
 	 * to backups).
