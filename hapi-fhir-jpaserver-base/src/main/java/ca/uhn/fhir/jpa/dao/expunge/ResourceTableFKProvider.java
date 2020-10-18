@@ -14,6 +14,7 @@ public class ResourceTableFKProvider {
 		// Add some secondary related records that don't have foreign keys
 		retval.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
 		retval.add(new ResourceForeignKey("TRM_CODESYSTEM_VER", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
 
 		// To find all the FKs that need to be included here, run the following SQL in the INFORMATION_SCHEMA:
 		// SELECT FKTABLE_NAME, FKCOLUMN_NAME FROM CROSS_REFERENCES WHERE PKTABLE_NAME = 'HFJ_RESOURCE'
