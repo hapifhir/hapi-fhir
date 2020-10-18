@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "list-mode",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eListMode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe processing mode that applies to this list.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/list-mode defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eworking\u003ca name\u003d\"list-mode-working\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWorking List\u003c/td\u003e\u003ctd\u003eThis list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esnapshot\u003ca name\u003d\"list-mode-snapshot\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSnapshot List\u003c/td\u003e\u003ctd\u003eThis list was prepared as a snapshot. It should not be assumed to be current.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003echanges\u003ca name\u003d\"list-mode-changes\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eChange List\u003c/td\u003e\u003ctd\u003eA point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://hl7.org/fhir/list-mode",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.319"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ListMode",
+  "title": "ListMode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The processing mode that applies to this list.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/list-mode",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "working",
+      "display": "Working List",
+      "definition": "This list is the master list, maintained in an ongoing fashion with regular updates as the real world list it is tracking changes."
+    },
+    {
+      "code": "snapshot",
+      "display": "Snapshot List",
+      "definition": "This list was prepared as a snapshot. It should not be assumed to be current."
+    },
+    {
+      "code": "changes",
+      "display": "Change List",
+      "definition": "A point-in-time list that shows what changes have been made or recommended.  E.g. a discharge medication list showing what was added and removed during an encounter."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "device-extensions-Device-din",
+  "url": "http://hl7.org/fhir/SearchParameter/device-extensions-Device-din",
+  "version": "4.0.1",
+  "name": "din",
+  "status": "draft",
+  "experimental": true,
+  "description": "The donation identification number (DIN)",
+  "code": "din",
+  "base": [
+    "Device"
+  ],
+  "type": "token",
+  "expression": "Device.extension(\u0027http://hl7.org/fhir/SearchParameter/device-extensions-Device-din\u0027)",
+  "xpathUsage": "normal"
+}

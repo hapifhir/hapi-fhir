@@ -1,0 +1,71 @@
+{
+  "resourceType": "Task",
+  "id": "fm-example6",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n\t\t\t\u003cp\u003e\n\t\t\t\t\u003cb\u003e Generated Narrative with Details\u003c/b\u003e\n\t\t\t\u003c/p\u003e\n\t\t\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http:/happyvalley.com/task",
+      "value": "20181012-001"
+    },
+    {
+      "use": "official",
+      "system": "http://nationalinsurers.com/identifiers/12345",
+      "value": "123GB5674"
+    }
+  ],
+  "status": "completed",
+  "intent": "order",
+  "priority": "stat",
+  "code": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/financialtaskcode",
+        "code": "status"
+      }
+    ]
+  },
+  "focus": {
+    "identifier": {
+      "system": "http://happyvalley.com/claim",
+      "value": "1500"
+    }
+  },
+  "authoredOn": "2018-10-04T08:25:05+10:00",
+  "lastModified": "2018-10-04T08:25:05+10:00",
+  "requester": {
+    "reference": "Organization/example",
+    "display": "Happy Valley Clinic"
+  },
+  "owner": {
+    "identifier": {
+      "system": "http://nationalinsurers.com/identifiers",
+      "value": "12345"
+    }
+  },
+  "output": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/financial-taskoutputtype",
+            "code": "status"
+          }
+        ]
+      },
+      "valueCode": "complete"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

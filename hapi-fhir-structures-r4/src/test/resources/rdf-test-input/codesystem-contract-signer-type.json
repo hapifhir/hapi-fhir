@@ -1,0 +1,280 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "contract-signer-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eContract Signer Type Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample Contract Signer Type codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set based on ASTM Standard, E1762-95 (2013) HL7 RoleClass OID 2.16.840.1.113883.5.110, HL7 Role Code 2.16.840.1.113883.5.111, HL7 ParticipationType OID: 2.16.840.1.113883.5.90, HL7 ParticipationFunction codes at OID: 2.16.840.1.113883.5.88, and HL7 Security and Privacy Domain Analysis Model roles classes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/contractsignertypecodes defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAMENDER\u003ca name\u003d\"contract-signer-type-AMENDER\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmender\u003c/td\u003e\u003ctd\u003eA person who has corrected, edited, or amended pre-existing information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAUTHN\u003ca name\u003d\"contract-signer-type-AUTHN\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthenticator\u003c/td\u003e\u003ctd\u003eA person in the role of verifier who attests to the accuracy of an act, but who does not have privileges to legally authenticate information content. An example would be a resident physician who sees a patient and dictates a note, then later signs it. The resident\u0027s signature constitutes an authentication.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAUT\u003ca name\u003d\"contract-signer-type-AUT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAuthor\u003c/td\u003e\u003ctd\u003eAn entity that authored specific content. There can be multiple authors of content, which may take such forms as a contract, a healthcare record entry or document, a policy, or a consent directive.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAFFL\u003ca name\u003d\"contract-signer-type-AFFL\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAffiliate\u003c/td\u003e\u003ctd\u003eAn entity that has a business or professional relationship with another entity in accordance with an agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAGNT\u003ca name\u003d\"contract-signer-type-AGNT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAgent\u003c/td\u003e\u003ctd\u003eAn entity that acts or is authorized to act on behalf of another entity in accordance with an agreement.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eASSIGNED\u003ca name\u003d\"contract-signer-type-ASSIGNED\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAssigned Entity\u003c/td\u003e\u003ctd\u003eAn agent role in which the agent is an Entity acting in the employ of an organization. The focus is on functional role on behalf of the organization, unlike the Employee role where the focus is on the \u0027Human Resources\u0027 relationship between the employee and the organization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCIT\u003ca name\u003d\"contract-signer-type-CIT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCitizen\u003c/td\u003e\u003ctd\u003eThe member of a jurisdiction afforded certain rights and encumbered with certain obligation in accordance with jurisdictional policy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCLAIMANT\u003ca name\u003d\"contract-signer-type-CLAIMANT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClaimant\u003c/td\u003e\u003ctd\u003eA party that makes a claim for coverage under a policy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCOAUTH\u003ca name\u003d\"contract-signer-type-COAUTH\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCo-Author\u003c/td\u003e\u003ctd\u003eThe entity that co-authored content. There can be multiple co-authors of content, which may take such forms as a contract, a healthcare record entry or document, a policy, or a consent directive.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCONSENTER\u003ca name\u003d\"contract-signer-type-CONSENTER\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsenter\u003c/td\u003e\u003ctd\u003eA patient or patient representative who is the grantee in a healthcare related agreement such as a consent for healthcare services, advanced directive, or a privacy consent directive in accordance with jurisdictional, organizational, or patient policy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCONSWIT\u003ca name\u003d\"contract-signer-type-CONSWIT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsent Witness\u003c/td\u003e\u003ctd\u003eA person who has witnessed and attests to observing a patient being counseled about a healthcare related agreement such as a consent for healthcare services, advanced directive, or a privacy consent directive.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCONT\u003ca name\u003d\"contract-signer-type-CONT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContact\u003c/td\u003e\u003ctd\u003eA person or an organization that provides or receives information regarding another entity. Examples; patient NOK and emergency contacts; guarantor contact; employer contact.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCOPART\u003ca name\u003d\"contract-signer-type-COPART\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCo-Participant\u003c/td\u003e\u003ctd\u003eA person who participates in the generation of and attest to veracity of content but is not an author or co-author. For example, a surgeon who is required by institutional, regulatory, or legal rules to sign an operative report, but who was not involved in the authorship of that report.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCOVPTY\u003ca name\u003d\"contract-signer-type-COVPTY\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCovered Party\u003c/td\u003e\u003ctd\u003eAn entity, which is the insured, that receives benefits such as healthcare services, reimbursement for out-of-pocket expenses, or compensation for losses through coverage under the terms of an insurance policy. The underwriter of that policy is the scoping entity. The covered party receives coverage because of some contractual or other relationship with the holder of that policy. Note that a particular policy may cover several individuals one of whom may be, but need not be, the policy holder. Thus the notion of covered party is a role that is distinct from that of the policy holder.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDELEGATEE\u003ca name\u003d\"contract-signer-type-DELEGATEE\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDelegatee\u003c/td\u003e\u003ctd\u003eA party to whom some right or authority is delegated by a delegator.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edelegator\u003ca name\u003d\"contract-signer-type-delegator\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDelegator\u003c/td\u003e\u003ctd\u003eA party that delegates a right or authority to another party.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDEPEND\u003ca name\u003d\"contract-signer-type-DEPEND\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDependent\u003c/td\u003e\u003ctd\u003eA person covered under an insurance policy or program based on an association with a subscriber, which is recognized by the policy holder. The dependent has an association with the subscriber such as a financial dependency or personal relationship such as that of a spouse, or a natural or adopted child. The policy holder may be required by law to recognize certain associations or may have discretion about the associations. For example, a policy holder may dictate the criteria for the dependent status of adult children who are students, such as requiring full time enrollment, or may recognize domestic partners as dependents. Under certain circumstances, the dependent may be under the indirect authority of a responsible party acting as a surrogate for the subscriber, for example, if the subscriber is differently-abled or deceased, a guardian ad lidem or estate executor may be appointed to assume the subscriber\u0027s legal standing in the relationship with the dependent.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDPOWATT\u003ca name\u003d\"contract-signer-type-DPOWATT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDurable Power of Attorney\u003c/td\u003e\u003ctd\u003eA person who has been granted the authority to represent or act on another\u0027s behalf generally in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Unlike ordinary powers of attorney, durable powers can survive for long periods of time, and again, unlike standard powers of attorney, durable powers can continue after incompetency.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEMGCON\u003ca name\u003d\"contract-signer-type-EMGCON\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEmergency Contact\u003c/td\u003e\u003ctd\u003eAn entity to be contacted in the event of an emergency\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEVTWIT\u003ca name\u003d\"contract-signer-type-EVTWIT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEvent Witness\u003c/td\u003e\u003ctd\u003eA person who attests to observing an occurrence.  For example, the witness has observed a procedure and is attesting to this fact.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eEXCEST\u003ca name\u003d\"contract-signer-type-EXCEST\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExecutor of Estate\u003c/td\u003e\u003ctd\u003eA person who has been granted the authority to act as an estate executor for a deceased person who was the responsible party.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGRANTEE\u003ca name\u003d\"contract-signer-type-GRANTEE\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGrantee\u003c/td\u003e\u003ctd\u003eA person who grants to another person the authority to represent or act on that person\u0027s behalf.  Examples include (1) exercising specific rights belonging to the grantee; (2) performing specific duties on behalf of a grantee; and (3) making specific decisions concerning a grantee.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGRANTOR\u003ca name\u003d\"contract-signer-type-GRANTOR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGrantor\u003c/td\u003e\u003ctd\u003eA person who has been granted the authority to represent or act on another\u0027s behalf. Examples include (1) exercising specific rights belonging to the grantee; (2) performing specific duties on behalf of a grantee; and (3) making specific decisions concerning a grantee.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGUAR\u003ca name\u003d\"contract-signer-type-GUAR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGuarantor\u003c/td\u003e\u003ctd\u003eA person or organization contractually recognized by the issuer as an entity that has assumed fiscal responsibility (e.g., by making or giving a promise, assurance, or pledge) for another entity\u0027s financial obligations by guaranteeing to pay for amounts owed to a particular account.  In a healthcare context, the account may be a patient\u0027s billing account for services rendered by a provider or a health plan premium account.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGUARD\u003ca name\u003d\"contract-signer-type-GUARD\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGuardian\u003c/td\u003e\u003ctd\u003eA person or organization legally empowered with responsibility for the care of a ward.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eGUADLTM\u003ca name\u003d\"contract-signer-type-GUADLTM\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGuardian ad lidem\u003c/td\u003e\u003ctd\u003eA person appointed by the court to look out for the best interests of a minor child during the course of legal proceedings.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eINF\u003ca name\u003d\"contract-signer-type-INF\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInformant\u003c/td\u003e\u003ctd\u003eAn entity that is the source of reported information (e.g., a next of kin who answers questions about the patient\u0027s history). For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eINTPRT\u003ca name\u003d\"contract-signer-type-INTPRT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInterpreter\u003c/td\u003e\u003ctd\u003eA person who converts spoken or written language into the language of key participants in an event such as when a provider is obtaining a patient\u0027s consent to treatment or permission to disclose information.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eINSBJ\u003ca name\u003d\"contract-signer-type-INSBJ\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInvestigation Subject\u003c/td\u003e\u003ctd\u003eAn entity that is the subject of an investigation. This role is scoped by the party responsible for the investigation.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHPOWATT\u003ca name\u003d\"contract-signer-type-HPOWATT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealthcare Power of Attorney\u003c/td\u003e\u003ctd\u003eA person who has been granted the authority to represent or act on another\u0027s behalf for healthcare related matters in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific healthcare legal rights belonging to the grantee such as signing a consent directive; (2) performing specific healthcare related legal duties on behalf of a grantee such as claims payment; and (3) making specific healthcare legal decisions concerning a grantee such as consenting to healthcare services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHPROV\u003ca name\u003d\"contract-signer-type-HPROV\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHealthcare Provider\u003c/td\u003e\u003ctd\u003eAn entity that is authorized to provide health care services by an authorizing organization or jurisdiction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eLEGAUTHN\u003ca name\u003d\"contract-signer-type-LEGAUTHN\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLegal Authenticator\u003c/td\u003e\u003ctd\u003eA person in the role of verifier who attests to the accuracy of information content, and who has privileges to certify the legal authenticity of that content with a signature that constitutes a legal authentication.  For example, a licensed physician who signs a consult authored by a resident physician who authenticated it.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNMDINS\u003ca name\u003d\"contract-signer-type-NMDINS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNamed Insured\u003c/td\u003e\u003ctd\u003eA party to an insurance policy under which the insurer agrees to indemnify for losses, provides benefits for, or renders services. A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subject that is the named insured under a comprehensive automobile, disability, or property and casualty policy.  The named insured and might or might not be the policy holder.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNOK\u003ca name\u003d\"contract-signer-type-NOK\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNext of Kin\u003c/td\u003e\u003ctd\u003eA person, who is a type of contact, designated to receive notifications on behalf of another person who is a relative.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNOTARY\u003ca name\u003d\"contract-signer-type-NOTARY\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNotary\u003c/td\u003e\u003ctd\u003eThe party credentialed to legally attest to the contract binding by verifying the identity and capacity of the grantor and grantee, and witnessing their signing of the contract or agreement such as a real estate transaction, pre-nuptial agreement, or a will.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePAT\u003ca name\u003d\"contract-signer-type-PAT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eA person, animal, or other living subject that is the actual or potential recipient of health care services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePOWATT\u003ca name\u003d\"contract-signer-type-POWATT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePower of Attorney\u003c/td\u003e\u003ctd\u003eA person who has been granted the authority to represent or act on another\u0027s behalf generally in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific legal rights belonging to the grantee such as signing a contract; (2) performing specific legal duties on behalf of a grantee such as making loan payments; and (3) making specific legal decisions concerning a grantee such as financial investment decisions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePRIMAUTH\u003ca name\u003d\"contract-signer-type-PRIMAUTH\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrimary Author\u003c/td\u003e\u003ctd\u003eAn entity that is the primary or sole author of information content.  In the healthcare context, there can be only one primary author of health information content in a record entry or document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePRIRECIP\u003ca name\u003d\"contract-signer-type-PRIRECIP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrimary Responsible Party \u003c/td\u003e\u003ctd\u003eAn entity that may, should receive, or has received information or an object to which it was primarily addressed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRECIP\u003ca name\u003d\"contract-signer-type-RECIP\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRecipient\u003c/td\u003e\u003ctd\u003eAn entity that may, should receive, or has received information or an object, which might not have been primarily addressed to it. For example, the staff of a provider, a clearinghouse, or other intermediary.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRESPRSN\u003ca name\u003d\"contract-signer-type-RESPRSN\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResponsible Party\u003c/td\u003e\u003ctd\u003eAn entity that has legal responsibility for another party.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eREVIEWER\u003ca name\u003d\"contract-signer-type-REVIEWER\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReviewer\u003c/td\u003e\u003ctd\u003eA person, device, or algorithm that has used approved criteria for filtered data for inclusion into the patient record.  Examples: (1) a medical records clerk who scans a document for inclusion in the medical record, enters header information, or catalogues and classifies the data, or a combination thereof; (2) a gateway that receives data from another computer system and interprets that data or changes its format, or both, before entering it into the patient record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTRANS\u003ca name\u003d\"contract-signer-type-TRANS\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTranscriber\u003c/td\u003e\u003ctd\u003eAn entity entering the data into the originating system. This includes the transcriptionist for dictated text transcribed into electronic form.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSOURCE\u003ca name\u003d\"contract-signer-type-SOURCE\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSource\u003c/td\u003e\u003ctd\u003eAn automated data source that generates a signature along with content. Examples: (1) the signature for an image that is generated by a device for inclusion in the patient record; (2) the signature for an ECG derived by an ECG system for inclusion in the patient record; (3) the data from a biomedical monitoring device or system that is for inclusion in the patient record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSPOWATT\u003ca name\u003d\"contract-signer-type-SPOWATT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSpecial Power of Attorney\u003c/td\u003e\u003ctd\u003eA person who has been granted the authority to represent or act on another\u0027s behalf for a limited set of specific matters in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific legal rights belonging to the grantee such as drafting a will; (2) performing specific legal duties on behalf of a grantee such as making a reversible mortgage to pay for end of life expenses; and (3) making specific legal decisions concerning a grantee such as managing a trust.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eVALID\u003ca name\u003d\"contract-signer-type-VALID\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eValidator\u003c/td\u003e\u003ctd\u003eA person who validates a health information document for inclusion in the patient record. For example, a medical student or resident is credentialed to perform history or physical examinations and to write progress notes. The attending physician signs the history and physical examination to validate the entry for inclusion in the patient\u0027s medical record.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eVERF\u003ca name\u003d\"contract-signer-type-VERF\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eVerifier\u003c/td\u003e\u003ctd\u003eA person who asserts the correctness and appropriateness of an act or the recording of the act, and is accountable for the assertion that the act or the recording of the act complies with jurisdictional or organizational policy. For example, a physician is required to countersign a verbal order that has previously been recorded in the medical record by a registered nurse who has carried out the verbal order.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eWIT\u003ca name\u003d\"contract-signer-type-WIT\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWitness\u003c/td\u003e\u003ctd\u003eA person witnessing the signature of another party. A witness is not knowledgeable about the content being signed, much less approves of anything stated in the content. For example, an advanced directive witness or a witness that a party to a contract signed that certain demographic or financial information is truthful.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/contractsignertypecodes",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1201"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ContractSignerTypeCodes",
+  "title": "Contract Signer Type Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "description": "This value set includes sample Contract Signer Type codes.",
+  "copyright": "This is an example set based on ASTM Standard, E1762-95 (2013) HL7 RoleClass OID 2.16.840.1.113883.5.110, HL7 Role Code 2.16.840.1.113883.5.111, HL7 ParticipationType OID: 2.16.840.1.113883.5.90, HL7 ParticipationFunction codes at OID: 2.16.840.1.113883.5.88, and HL7 Security and Privacy Domain Analysis Model roles classes.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/contract-signer-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "AMENDER",
+      "display": "Amender",
+      "definition": "A person who has corrected, edited, or amended pre-existing information."
+    },
+    {
+      "code": "AUTHN",
+      "display": "Authenticator",
+      "definition": "A person in the role of verifier who attests to the accuracy of an act, but who does not have privileges to legally authenticate information content. An example would be a resident physician who sees a patient and dictates a note, then later signs it. The resident\u0027s signature constitutes an authentication."
+    },
+    {
+      "code": "AUT",
+      "display": "Author",
+      "definition": "An entity that authored specific content. There can be multiple authors of content, which may take such forms as a contract, a healthcare record entry or document, a policy, or a consent directive."
+    },
+    {
+      "code": "AFFL",
+      "display": "Affiliate",
+      "definition": "An entity that has a business or professional relationship with another entity in accordance with an agreement."
+    },
+    {
+      "code": "AGNT",
+      "display": "Agent",
+      "definition": "An entity that acts or is authorized to act on behalf of another entity in accordance with an agreement."
+    },
+    {
+      "code": "ASSIGNED",
+      "display": "Assigned Entity",
+      "definition": "An agent role in which the agent is an Entity acting in the employ of an organization. The focus is on functional role on behalf of the organization, unlike the Employee role where the focus is on the \u0027Human Resources\u0027 relationship between the employee and the organization."
+    },
+    {
+      "code": "CIT",
+      "display": "Citizen",
+      "definition": "The member of a jurisdiction afforded certain rights and encumbered with certain obligation in accordance with jurisdictional policy."
+    },
+    {
+      "code": "CLAIMANT",
+      "display": "Claimant",
+      "definition": "A party that makes a claim for coverage under a policy."
+    },
+    {
+      "code": "COAUTH",
+      "display": "Co-Author",
+      "definition": "The entity that co-authored content. There can be multiple co-authors of content, which may take such forms as a contract, a healthcare record entry or document, a policy, or a consent directive."
+    },
+    {
+      "code": "CONSENTER",
+      "display": "Consenter",
+      "definition": "A patient or patient representative who is the grantee in a healthcare related agreement such as a consent for healthcare services, advanced directive, or a privacy consent directive in accordance with jurisdictional, organizational, or patient policy."
+    },
+    {
+      "code": "CONSWIT",
+      "display": "Consent Witness",
+      "definition": "A person who has witnessed and attests to observing a patient being counseled about a healthcare related agreement such as a consent for healthcare services, advanced directive, or a privacy consent directive."
+    },
+    {
+      "code": "CONT",
+      "display": "Contact",
+      "definition": "A person or an organization that provides or receives information regarding another entity. Examples; patient NOK and emergency contacts; guarantor contact; employer contact."
+    },
+    {
+      "code": "COPART",
+      "display": "Co-Participant",
+      "definition": "A person who participates in the generation of and attest to veracity of content but is not an author or co-author. For example, a surgeon who is required by institutional, regulatory, or legal rules to sign an operative report, but who was not involved in the authorship of that report."
+    },
+    {
+      "code": "COVPTY",
+      "display": "Covered Party",
+      "definition": "An entity, which is the insured, that receives benefits such as healthcare services, reimbursement for out-of-pocket expenses, or compensation for losses through coverage under the terms of an insurance policy. The underwriter of that policy is the scoping entity. The covered party receives coverage because of some contractual or other relationship with the holder of that policy. Note that a particular policy may cover several individuals one of whom may be, but need not be, the policy holder. Thus the notion of covered party is a role that is distinct from that of the policy holder."
+    },
+    {
+      "code": "DELEGATEE",
+      "display": "Delegatee",
+      "definition": "A party to whom some right or authority is delegated by a delegator."
+    },
+    {
+      "code": "delegator",
+      "display": "Delegator",
+      "definition": "A party that delegates a right or authority to another party."
+    },
+    {
+      "code": "DEPEND",
+      "display": "Dependent",
+      "definition": "A person covered under an insurance policy or program based on an association with a subscriber, which is recognized by the policy holder. The dependent has an association with the subscriber such as a financial dependency or personal relationship such as that of a spouse, or a natural or adopted child. The policy holder may be required by law to recognize certain associations or may have discretion about the associations. For example, a policy holder may dictate the criteria for the dependent status of adult children who are students, such as requiring full time enrollment, or may recognize domestic partners as dependents. Under certain circumstances, the dependent may be under the indirect authority of a responsible party acting as a surrogate for the subscriber, for example, if the subscriber is differently-abled or deceased, a guardian ad lidem or estate executor may be appointed to assume the subscriber\u0027s legal standing in the relationship with the dependent."
+    },
+    {
+      "code": "DPOWATT",
+      "display": "Durable Power of Attorney",
+      "definition": "A person who has been granted the authority to represent or act on another\u0027s behalf generally in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Unlike ordinary powers of attorney, durable powers can survive for long periods of time, and again, unlike standard powers of attorney, durable powers can continue after incompetency."
+    },
+    {
+      "code": "EMGCON",
+      "display": "Emergency Contact",
+      "definition": "An entity to be contacted in the event of an emergency"
+    },
+    {
+      "code": "EVTWIT",
+      "display": "Event Witness",
+      "definition": "A person who attests to observing an occurrence.  For example, the witness has observed a procedure and is attesting to this fact."
+    },
+    {
+      "code": "EXCEST",
+      "display": "Executor of Estate",
+      "definition": "A person who has been granted the authority to act as an estate executor for a deceased person who was the responsible party."
+    },
+    {
+      "code": "GRANTEE",
+      "display": "Grantee",
+      "definition": "A person who grants to another person the authority to represent or act on that person\u0027s behalf.  Examples include (1) exercising specific rights belonging to the grantee; (2) performing specific duties on behalf of a grantee; and (3) making specific decisions concerning a grantee."
+    },
+    {
+      "code": "GRANTOR",
+      "display": "Grantor",
+      "definition": "A person who has been granted the authority to represent or act on another\u0027s behalf. Examples include (1) exercising specific rights belonging to the grantee; (2) performing specific duties on behalf of a grantee; and (3) making specific decisions concerning a grantee."
+    },
+    {
+      "code": "GUAR",
+      "display": "Guarantor",
+      "definition": "A person or organization contractually recognized by the issuer as an entity that has assumed fiscal responsibility (e.g., by making or giving a promise, assurance, or pledge) for another entity\u0027s financial obligations by guaranteeing to pay for amounts owed to a particular account.  In a healthcare context, the account may be a patient\u0027s billing account for services rendered by a provider or a health plan premium account."
+    },
+    {
+      "code": "GUARD",
+      "display": "Guardian",
+      "definition": "A person or organization legally empowered with responsibility for the care of a ward."
+    },
+    {
+      "code": "GUADLTM",
+      "display": "Guardian ad lidem",
+      "definition": "A person appointed by the court to look out for the best interests of a minor child during the course of legal proceedings."
+    },
+    {
+      "code": "INF",
+      "display": "Informant",
+      "definition": "An entity that is the source of reported information (e.g., a next of kin who answers questions about the patient\u0027s history). For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject."
+    },
+    {
+      "code": "INTPRT",
+      "display": "Interpreter",
+      "definition": "A person who converts spoken or written language into the language of key participants in an event such as when a provider is obtaining a patient\u0027s consent to treatment or permission to disclose information."
+    },
+    {
+      "code": "INSBJ",
+      "display": "Investigation Subject",
+      "definition": "An entity that is the subject of an investigation. This role is scoped by the party responsible for the investigation."
+    },
+    {
+      "code": "HPOWATT",
+      "display": "Healthcare Power of Attorney",
+      "definition": "A person who has been granted the authority to represent or act on another\u0027s behalf for healthcare related matters in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific healthcare legal rights belonging to the grantee such as signing a consent directive; (2) performing specific healthcare related legal duties on behalf of a grantee such as claims payment; and (3) making specific healthcare legal decisions concerning a grantee such as consenting to healthcare services."
+    },
+    {
+      "code": "HPROV",
+      "display": "Healthcare Provider",
+      "definition": "An entity that is authorized to provide health care services by an authorizing organization or jurisdiction."
+    },
+    {
+      "code": "LEGAUTHN",
+      "display": "Legal Authenticator",
+      "definition": "A person in the role of verifier who attests to the accuracy of information content, and who has privileges to certify the legal authenticity of that content with a signature that constitutes a legal authentication.  For example, a licensed physician who signs a consult authored by a resident physician who authenticated it."
+    },
+    {
+      "code": "NMDINS",
+      "display": "Named Insured",
+      "definition": "A party to an insurance policy under which the insurer agrees to indemnify for losses, provides benefits for, or renders services. A named insured may be either a person, non-person living subject, or an organization, or a group of persons, non-person living subject that is the named insured under a comprehensive automobile, disability, or property and casualty policy.  The named insured and might or might not be the policy holder."
+    },
+    {
+      "code": "NOK",
+      "display": "Next of Kin",
+      "definition": "A person, who is a type of contact, designated to receive notifications on behalf of another person who is a relative."
+    },
+    {
+      "code": "NOTARY",
+      "display": "Notary",
+      "definition": "The party credentialed to legally attest to the contract binding by verifying the identity and capacity of the grantor and grantee, and witnessing their signing of the contract or agreement such as a real estate transaction, pre-nuptial agreement, or a will."
+    },
+    {
+      "code": "PAT",
+      "display": "Patient",
+      "definition": "A person, animal, or other living subject that is the actual or potential recipient of health care services."
+    },
+    {
+      "code": "POWATT",
+      "display": "Power of Attorney",
+      "definition": "A person who has been granted the authority to represent or act on another\u0027s behalf generally in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific legal rights belonging to the grantee such as signing a contract; (2) performing specific legal duties on behalf of a grantee such as making loan payments; and (3) making specific legal decisions concerning a grantee such as financial investment decisions."
+    },
+    {
+      "code": "PRIMAUTH",
+      "display": "Primary Author",
+      "definition": "An entity that is the primary or sole author of information content.  In the healthcare context, there can be only one primary author of health information content in a record entry or document."
+    },
+    {
+      "code": "PRIRECIP",
+      "display": "Primary Responsible Party ",
+      "definition": "An entity that may, should receive, or has received information or an object to which it was primarily addressed."
+    },
+    {
+      "code": "RECIP",
+      "display": "Recipient",
+      "definition": "An entity that may, should receive, or has received information or an object, which might not have been primarily addressed to it. For example, the staff of a provider, a clearinghouse, or other intermediary."
+    },
+    {
+      "code": "RESPRSN",
+      "display": "Responsible Party",
+      "definition": "An entity that has legal responsibility for another party."
+    },
+    {
+      "code": "REVIEWER",
+      "display": "Reviewer",
+      "definition": "A person, device, or algorithm that has used approved criteria for filtered data for inclusion into the patient record.  Examples: (1) a medical records clerk who scans a document for inclusion in the medical record, enters header information, or catalogues and classifies the data, or a combination thereof; (2) a gateway that receives data from another computer system and interprets that data or changes its format, or both, before entering it into the patient record."
+    },
+    {
+      "code": "TRANS",
+      "display": "Transcriber",
+      "definition": "An entity entering the data into the originating system. This includes the transcriptionist for dictated text transcribed into electronic form."
+    },
+    {
+      "code": "SOURCE",
+      "display": "Source",
+      "definition": "An automated data source that generates a signature along with content. Examples: (1) the signature for an image that is generated by a device for inclusion in the patient record; (2) the signature for an ECG derived by an ECG system for inclusion in the patient record; (3) the data from a biomedical monitoring device or system that is for inclusion in the patient record."
+    },
+    {
+      "code": "SPOWATT",
+      "display": "Special Power of Attorney",
+      "definition": "A person who has been granted the authority to represent or act on another\u0027s behalf for a limited set of specific matters in a manner which is a legally binding upon the person giving such authority as if he or she personally were to do the acts. Examples include (1) exercising specific legal rights belonging to the grantee such as drafting a will; (2) performing specific legal duties on behalf of a grantee such as making a reversible mortgage to pay for end of life expenses; and (3) making specific legal decisions concerning a grantee such as managing a trust."
+    },
+    {
+      "code": "VALID",
+      "display": "Validator",
+      "definition": "A person who validates a health information document for inclusion in the patient record. For example, a medical student or resident is credentialed to perform history or physical examinations and to write progress notes. The attending physician signs the history and physical examination to validate the entry for inclusion in the patient\u0027s medical record."
+    },
+    {
+      "code": "VERF",
+      "display": "Verifier",
+      "definition": "A person who asserts the correctness and appropriateness of an act or the recording of the act, and is accountable for the assertion that the act or the recording of the act complies with jurisdictional or organizational policy. For example, a physician is required to countersign a verbal order that has previously been recorded in the medical record by a registered nurse who has carried out the verbal order."
+    },
+    {
+      "code": "WIT",
+      "display": "Witness",
+      "definition": "A person witnessing the signature of another party. A witness is not knowledgeable about the content being signed, much less approves of anything stated in the content. For example, an advanced directive witness or a witness that a party to a contract signed that certain demographic or financial information is truthful."
+    }
+  ]
+}

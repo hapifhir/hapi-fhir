@@ -1,0 +1,349 @@
+{
+  "resourceType": "Claim",
+  "id": "760152",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eA human-readable rendering of the Pharmacy Claim\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://happypharma.com/claim",
+      "value": "7612345"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "pharmacy"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "Patient/1"
+  },
+  "created": "2014-08-16",
+  "insurer": {
+    "reference": "Organization/2"
+  },
+  "provider": {
+    "reference": "Organization/1"
+  },
+  "priority": {
+    "coding": [
+      {
+        "code": "stat"
+      }
+    ]
+  },
+  "payee": {
+    "type": {
+      "coding": [
+        {
+          "code": "provider"
+        }
+      ]
+    }
+  },
+  "careTeam": [
+    {
+      "sequence": 1,
+      "provider": {
+        "reference": "Practitioner/example"
+      }
+    }
+  ],
+  "supportingInfo": [
+    {
+      "sequence": 1,
+      "category": {
+        "coding": [
+          {
+            "code": "pharmacyrefill"
+          }
+        ]
+      },
+      "code": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/CodeSystem/pharmacy-refill",
+            "code": "new"
+          }
+        ]
+      }
+    },
+    {
+      "sequence": 2,
+      "category": {
+        "coding": [
+          {
+            "code": "pharmacyinformation"
+          }
+        ]
+      },
+      "code": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/CodeSystem/pharmacy-information",
+            "code": "refillsremaining"
+          }
+        ]
+      },
+      "valueQuantity": {
+        "value": 0
+      }
+    },
+    {
+      "sequence": 3,
+      "category": {
+        "coding": [
+          {
+            "code": "pharmacyinformation"
+          }
+        ]
+      },
+      "code": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/CodeSystem/pharmacy-information",
+            "code": "dayssupply"
+          }
+        ]
+      },
+      "valueQuantity": {
+        "value": 10
+      }
+    },
+    {
+      "sequence": 4,
+      "category": {
+        "coding": [
+          {
+            "code": "pharmacy"
+          }
+        ]
+      },
+      "code": {
+        "coding": [
+          {
+            "system": "http://example.org/fhir/CodeSystem/pharmacy-form",
+            "code": "capsule"
+          }
+        ]
+      }
+    }
+  ],
+  "diagnosis": [
+    {
+      "sequence": 1,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "code": "654456"
+          }
+        ]
+      }
+    }
+  ],
+  "insurance": [
+    {
+      "sequence": 1,
+      "focal": true,
+      "coverage": {
+        "reference": "Coverage/9876B1"
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "careTeamSequence": [
+        1
+      ],
+      "informationSequence": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "productOrService": {
+        "coding": [
+          {
+            "system": "http://localdruglist.org",
+            "code": "compound",
+            "display": "Custom compound"
+          }
+        ]
+      },
+      "servicedDate": "2014-08-16",
+      "quantity": {
+        "value": 30,
+        "unit": "TAB",
+        "system": "http://unitsofmeasure.org",
+        "code": "TAB"
+      },
+      "net": {
+        "value": 155.00,
+        "currency": "USD"
+      },
+      "detail": [
+        {
+          "sequence": 1,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://localdruglist.org",
+                "code": "44001",
+                "display": "Acetaminophen 250mg"
+              }
+            ]
+          },
+          "quantity": {
+            "value": 250,
+            "unit": "mg"
+          },
+          "net": {
+            "value": 20.00,
+            "currency": "USD"
+          },
+          "subDetail": [
+            {
+              "sequence": 1,
+              "productOrService": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/ex-pharmaservice",
+                    "code": "drugcost"
+                  }
+                ]
+              },
+              "net": {
+                "value": 20.00,
+                "currency": "USD"
+              }
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://localdruglist.org",
+                "code": "44035",
+                "display": "Phenacetin 50mg"
+              }
+            ]
+          },
+          "quantity": {
+            "value": 50,
+            "unit": "mg"
+          },
+          "net": {
+            "value": 25.00,
+            "currency": "USD"
+          },
+          "subDetail": [
+            {
+              "sequence": 1,
+              "productOrService": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/ex-pharmaservice",
+                    "code": "drugcost"
+                  }
+                ]
+              },
+              "net": {
+                "value": 25.00,
+                "currency": "USD"
+              }
+            }
+          ]
+        },
+        {
+          "sequence": 3,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://localdruglist.org",
+                "code": "44057",
+                "display": "Codeine 25mg"
+              }
+            ]
+          },
+          "quantity": {
+            "value": 25,
+            "unit": "mg"
+          },
+          "net": {
+            "value": 28.00,
+            "currency": "USD"
+          },
+          "subDetail": [
+            {
+              "sequence": 1,
+              "productOrService": {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/ex-pharmaservice",
+                    "code": "drugcost"
+                  }
+                ]
+              },
+              "net": {
+                "value": 28.00,
+                "currency": "USD"
+              }
+            }
+          ]
+        },
+        {
+          "sequence": 2,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ex-pharmaservice",
+                "code": "markup"
+              }
+            ]
+          },
+          "net": {
+            "value": 22.00,
+            "currency": "USD"
+          }
+        },
+        {
+          "sequence": 3,
+          "productOrService": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/ex-pharmaservice",
+                "code": "compoundfee"
+              }
+            ]
+          },
+          "net": {
+            "value": 60.00,
+            "currency": "USD"
+          }
+        }
+      ]
+    }
+  ],
+  "total": {
+    "value": 155.00,
+    "currency": "USD"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

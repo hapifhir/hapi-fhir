@@ -1,0 +1,2574 @@
+{
+  "resourceType": "Bundle",
+  "id": "registry",
+  "type": "collection",
+  "entry": [
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/dicom-uid",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "dicom-uid",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: dicom-uid\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: DICOM Unique Id\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 31/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: NEMA\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: An OID issued under DICOM OID rules. DICOM OIDs are represented as plain OIDs, with a prefix of \u0026quot;urn:oid:\u0026quot;\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: World \u003cspan\u003e(Details : {http://unstats.un.org/unsd/methods/m49/m49.htm code \u0027001\u0027 \u003d \u0027World)\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eUniqueIds\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValue\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePreferred\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003euri\u003c/td\u003e\u003ctd\u003eurn:dicom:uid\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+        },
+        "name": "DICOM Unique Id",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-31",
+        "publisher": "NEMA",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "https://www.dicomstandard.org/"
+              }
+            ]
+          }
+        ],
+        "description": "An OID issued under DICOM OID rules. DICOM OIDs are represented as plain OIDs, with a prefix of \"urn:oid:\"",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+                "code": "001"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "uri",
+            "value": "urn:dicom:uid",
+            "preferred": true
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/us-ssn",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "us-ssn",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: us-ssn\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: United States Social Security Number\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 31/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: United States Social Security Administration\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Social Beneficiary Identifier \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027SB\u0027 \u003d \u0027Social Beneficiary Identifier)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: The SSN is represented in resources with dashes removed\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: http://hl7.org/fhir/sid/us-ssn\u003c/p\u003e\u003cp\u003e\u003cb\u003epreferred\u003c/b\u003e: true\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.1\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "United States Social Security Number",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-31",
+        "publisher": "United States Social Security Administration",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "http://www.ssa.gov/"
+              }
+            ]
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "SB"
+            }
+          ]
+        },
+        "description": "The SSN is represented in resources with dashes removed",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "uri",
+            "value": "http://hl7.org/fhir/sid/us-ssn",
+            "preferred": true
+          },
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.1"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/us-medicare",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "us-medicare",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: us-medicare\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: United States Medicare Number\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 12/07/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Centers for Medicare \u0026amp; Medicaid Services\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Social Beneficiary Identifier \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027SB\u0027 \u003d \u0027Social Beneficiary Identifier)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Medicare Numbers (HIC or HICN) are represented without any spaces or dashes\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: http://hl7.org/fhir/sid/us-medicare\u003c/p\u003e\u003cp\u003e\u003cb\u003epreferred\u003c/b\u003e: true\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.572\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "United States Medicare Number",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2016-07-12",
+        "publisher": "Centers for Medicare \u0026 Medicaid Services",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "https://www.medicare.gov/"
+              }
+            ]
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "SB"
+            }
+          ]
+        },
+        "description": "Medicare Numbers (HIC or HICN) are represented without any spaces or dashes",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "uri",
+            "value": "http://hl7.org/fhir/sid/us-medicare",
+            "preferred": true
+          },
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.572"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/us-mbi",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "us-mbi",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: us-mbi\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Medicare Beneficiary Identifier (United States)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 12/07/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Centers for Medicare \u0026amp; Medicaid Services\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Social Beneficiary Identifier \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027SB\u0027 \u003d \u0027Social Beneficiary Identifier)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Medicare Beneficiary Identifiers are represented without any spaces or dashes\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: http://hl7.org/fhir/sid/us-mbi\u003c/p\u003e\u003cp\u003e\u003cb\u003epreferred\u003c/b\u003e: true\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.927\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Medicare Beneficiary Identifier (United States)",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2016-07-12",
+        "publisher": "Centers for Medicare \u0026 Medicaid Services",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "https://www.medicare.gov/"
+              }
+            ]
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "SB"
+            }
+          ]
+        },
+        "description": "Medicare Beneficiary Identifiers are represented without any spaces or dashes",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "uri",
+            "value": "http://hl7.org/fhir/sid/us-mbi",
+            "preferred": true
+          },
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.927"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/us-npi",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "us-npi",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: us-npi\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: United States National Provider Identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 31/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Centers for Medicare and Medicaid Services\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Provider number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027PRN\u0027 \u003d \u0027Provider number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: http://hl7.org/fhir/sid/us-npi\u003c/p\u003e\u003cp\u003e\u003cb\u003epreferred\u003c/b\u003e: true\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.6\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "United States National Provider Identifier",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-31",
+        "publisher": "Centers for Medicare and Medicaid Services",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "http://www.cms.gov/"
+              }
+            ]
+          }
+        ],
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "PRN"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "uri",
+            "value": "http://hl7.org/fhir/sid/us-npi",
+            "preferred": true
+          },
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.6"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/gtin",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "gtin",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: gtin\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Global Trade Item Number (GTIN)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 18/12/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: GS1\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Note: GTINs may be used in both [Codes](datatypes.html#Coding) and [Identifiers](datatypes.html#Identifier)\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: World \u003cspan\u003e(Details : {http://unstats.un.org/unsd/methods/m49/m49.htm code \u0027001\u0027 \u003d \u0027World)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 1.3.160\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: https://www.gs1.org/gtin\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Global Trade Item Number (GTIN)",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2017-12-18",
+        "publisher": "GS1",
+        "contact": [
+          {
+            "telecom": [
+              {
+                "system": "url",
+                "value": "http://www.gs1.org/"
+              }
+            ]
+          }
+        ],
+        "description": "Note: GTINs may be used in both [Codes](datatypes.html#Coding) and [Identifiers](datatypes.html#Identifier)",
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "http://unstats.un.org/unsd/methods/m49/m49.htm",
+                "code": "001"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "1.3.160"
+          },
+          {
+            "type": "uri",
+            "value": "https://www.gs1.org/gtin"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.2",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.2",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.2\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Alaska Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.2\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.2\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Alaska Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.2"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.2"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.1",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.1",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.1\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Alabama Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.1\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.1\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Alabama Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.1"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.1"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.5",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.5",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.5\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Arkansas Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.5\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.5\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Arkansas Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.5"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.5"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.4",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.4",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.4\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Arizona Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.4\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.4\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Arizona Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.4"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.4"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.6",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.6",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.6\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: California Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.6\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.6\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "California Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.6"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.6"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.8",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.8",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.8\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Colorado Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.8\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.8\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Colorado Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.8"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.8"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.9",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.9",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.9\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Connecticut Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.9\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.9\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Connecticut Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.9"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.9"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.11",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.11",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.11\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: DC Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.11\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.11\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "DC Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.11"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.11"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.10",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.10",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.10\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Delaware Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.10\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.10\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Delaware Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.10"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.10"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.12",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.12",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.12\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Florida Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.12\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.12\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Florida Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.12"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.12"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.13",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.13",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.13\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Georgia Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.13\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.13\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Georgia Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.13"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.13"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.15",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.15",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.15\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Hawaii Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.15\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.15\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Hawaii Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.15"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.15"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.18",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.18",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.18\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Indiana Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.18\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.18\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Indiana Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.18"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.18"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.19",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.19",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.19\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Iowa Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.19\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.19\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Iowa Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.19"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.19"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.16",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.16",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.16\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Idaho Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.16\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.16\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Idaho Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.16"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.16"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.17",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.17",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.17\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Illinois Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.17\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.17\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Illinois Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.17"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.17"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.20",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.20",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.20\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Kansas Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.20\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.20\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Kansas Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.20"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.20"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.21",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.21",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.21\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Kentucky Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.21\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.21\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Kentucky Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.21"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.21"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.22",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.22",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.22\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Louisiana Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.22\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.22\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Louisiana Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.22"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.22"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.25",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.25",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.25\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Massachusetts Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.25\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.25\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Massachusetts Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.25"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.25"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.24",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.24",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.24\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Maryland Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.24\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.24\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Maryland Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.24"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.24"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.23",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.23",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.23\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Maine Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.23\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.23\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Maine Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.23"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.23"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.26",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.26",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.26\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Michigan Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.26\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.26\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Michigan Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.26"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.26"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.27",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.27",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.27\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Minnesota Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.27\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.27\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Minnesota Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.27"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.27"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.29",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.29",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.29\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Missouri Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.29\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.29\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Missouri Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.29"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.29"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.28",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.28",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.28\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Mississippi Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.28\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.28\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Mississippi Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.28"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.28"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.30",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.30",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.30\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Montana Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.30\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.30\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Montana Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.30"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.30"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.36",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.36",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.36\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: New York Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.36\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.36\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "New York Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.36"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.36"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.37",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.37",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.37\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: North Carolina Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.37\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.37\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "North Carolina Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.37"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.37"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.38",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.38",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.38\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: North Dakota Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.38\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.38\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "North Dakota Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.38"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.38"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.31",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.31",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.31\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Nebraska Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.31\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.31\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Nebraska Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.31"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.31"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.33",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.33",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.33\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: New Hampshire Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.33\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.33\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "New Hampshire Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.33"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.33"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.34",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.34",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.34\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: New Jersey Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.34\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.34\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "New Jersey Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.34"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.34"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.35",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.35",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.35\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: New Mexico Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.35\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.35\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "New Mexico Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.35"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.35"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.32",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.32",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.32\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Nevada Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.32\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.32\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Nevada Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.32"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.32"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.39",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.39",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.39\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Ohio Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.39\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.39\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Ohio Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.39"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.39"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.40",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.40",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.40\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Oklahoma Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.40\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.40\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Oklahoma Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.40"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.40"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.41",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.41",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.41\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Oregon Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.41\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.41\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Oregon Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.41"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.41"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.42",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.42",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.42\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Pennsylvania Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.42\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.42\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Pennsylvania Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.42"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.42"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.44",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.44",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.44\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Rhode Island Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.44\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.44\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Rhode Island Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.44"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.44"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.45",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.45",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.45\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: South Carolina Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.45\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.45\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "South Carolina Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.45"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.45"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.46",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.46",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.46\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: South Dakota Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.46\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.46\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "South Dakota Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.46"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.46"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.47",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.47",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.47\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Tennessee Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.47\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.47\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Tennessee Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.47"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.47"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.48",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.48",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.48\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Texas Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.48\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.48\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Texas Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.48"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.48"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.49",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.49",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.49\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Utah Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.49\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.49\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Utah Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.49"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.49"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.51",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.51",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.51\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Virginia Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.51\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.51\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Virginia Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.51"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.51"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.50",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.50",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.50\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Vermont Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.50\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.50\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Vermont Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.50"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.50"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.53",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.53",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.53\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Washington Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.53\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.53\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Washington Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.53"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.53"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.55",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.55",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.55\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Wisconsin Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.55\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.55\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Wisconsin Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.55"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.55"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.54",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.54",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.54\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: West Virginia Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.54\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.54\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "West Virginia Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.54"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.54"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "http://hl7.org/fhir/NamingSystem/4.3.56",
+      "resource": {
+        "resourceType": "NamingSystem",
+        "id": "4.3.56",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 4.3.56\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Wyoming Driver\u0027s License\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003ekind\u003c/b\u003e: identifier\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/07/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7 International\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Driver\u0027s license number \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0203 code \u0027DL\u0027 \u003d \u0027Driver\u0027s license number)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: oid\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 2.16.840.1.113883.4.3.56\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003euniqueId\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: uri\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: urn:oid:2.16.840.1.113883.4.3.56\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+        },
+        "name": "Wyoming Driver\u0027s License",
+        "status": "active",
+        "kind": "identifier",
+        "date": "2015-07-03",
+        "publisher": "HL7 International",
+        "type": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "DL"
+            }
+          ]
+        },
+        "jurisdiction": [
+          {
+            "coding": [
+              {
+                "system": "urn:iso:std:iso:3166",
+                "code": "US"
+              }
+            ]
+          }
+        ],
+        "uniqueId": [
+          {
+            "type": "oid",
+            "value": "2.16.840.1.113883.4.3.56"
+          },
+          {
+            "type": "uri",
+            "value": "urn:oid:2.16.840.1.113883.4.3.56"
+          }
+        ]
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "phq-9-questionnaire",
+  "meta": {
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/cqf-questionnaire"
+    ],
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003ePHQ-9 Questionnaire with dynamic logic\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/cqf-library",
+      "valueCanonical": "Library/phq-9-logic"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "official",
+      "value": "phq-9"
+    }
+  ],
+  "version": "1.0.0",
+  "title": "Patient Health Questionnaire (PHQ-9)",
+  "status": "draft",
+  "subjectType": [
+    "Patient"
+  ],
+  "code": [
+    {
+      "system": "http://loinc.org",
+      "code": "44249-1",
+      "display": "PHQ-9 quick depression assessment panel:-:Pt:^Patient:-:Report.PHQ-9"
+    }
+  ],
+  "item": [
+    {
+      "linkId": "LittleInterest",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44250-9"
+        }
+      ],
+      "text": "Little interest or pleasure in doing things",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "FeelingDown",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44255-8"
+        }
+      ],
+      "text": "Feeling down, depressed, or hopeless",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "TroubleSleeping",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44259-0"
+        }
+      ],
+      "text": "Trouble falling or staying asleep",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "FeelingTired",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44254-1"
+        }
+      ],
+      "text": "Feeling tired or having little energy",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "BadAppetite",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44251-7"
+        }
+      ],
+      "text": "Poor appetite or overeating",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "FeelingBadAboutSelf",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44258-2"
+        }
+      ],
+      "text": "Feeling bad about yourself - or that you are a failure or have let yourself or your family down",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "TroubleConcentrating",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44252-5"
+        }
+      ],
+      "text": "Trouble concentrating on things, such as reading the newspaper or watching television",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "linkId": "MovingSpeaking",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44253-3"
+        }
+      ],
+      "text": "Moving or speaking so slowly that other people could have noticed. Or the opposite - being so fidgety or restless that you have been moving around a lot more than usual",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/cqf-expression",
+          "valueExpression": {
+            "language": "text/cql",
+            "expression": "CalculateTotalScore"
+          }
+        }
+      ],
+      "linkId": "TotalScore",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44261-6"
+        }
+      ],
+      "text": "Total score",
+      "type": "integer",
+      "required": true
+    },
+    {
+      "linkId": "Difficulty",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "44256-6"
+        }
+      ],
+      "text": "If you checked off any problems, how difficult have these problems made it for you to do your work, take care of things at home, or get along with other people",
+      "type": "choice",
+      "required": true,
+      "answerValueSet": "http://loinc.org/vs/LL358-3"
+    }
+  ]
+}

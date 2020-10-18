@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "patient-extensions-Patient-mothersMaidenName",
+  "url": "http://hl7.org/fhir/SearchParameter/patient-extensions-Patient-mothersMaidenName",
+  "version": "4.0.1",
+  "name": "mothersMaidenName",
+  "status": "draft",
+  "experimental": true,
+  "description": "Search based on patient\u0027s mother\u0027s maiden name",
+  "code": "mothersMaidenName",
+  "base": [
+    "Patient"
+  ],
+  "type": "string",
+  "expression": "Patient.extension(\u0027http://hl7.org/fhir/StructureDefinition/patient-extensions-Patient-mothersMaidenName\u0027)",
+  "xpathUsage": "normal"
+}

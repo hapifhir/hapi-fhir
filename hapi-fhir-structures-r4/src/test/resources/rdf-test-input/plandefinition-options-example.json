@@ -1,0 +1,67 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "options-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e[Put rendering here]\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "ActivityDefinition",
+      "id": "activitydefinition-medicationrequest-1",
+      "status": "draft",
+      "kind": "MedicationRequest",
+      "productCodeableConcept": {
+        "text": "Medication 1"
+      }
+    },
+    {
+      "resourceType": "ActivityDefinition",
+      "id": "activitydefinition-medicationrequest-2",
+      "status": "draft",
+      "kind": "MedicationRequest",
+      "productCodeableConcept": {
+        "text": "Medication 2"
+      }
+    }
+  ],
+  "title": "This example illustrates relationships between actions.",
+  "status": "draft",
+  "action": [
+    {
+      "groupingBehavior": "logical-group",
+      "selectionBehavior": "all",
+      "action": [
+        {
+          "id": "medication-action-1",
+          "title": "Administer Medication 1",
+          "definitionCanonical": "#activitydefinition-medicationrequest-1"
+        },
+        {
+          "id": "medication-action-2",
+          "title": "Administer Medication 2",
+          "relatedAction": [
+            {
+              "actionId": "medication-action-1",
+              "relationship": "after-end",
+              "offsetDuration": {
+                "value": 1,
+                "unit": "h"
+              }
+            }
+          ],
+          "definitionCanonical": "#activitydefinition-medicationrequest-2"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

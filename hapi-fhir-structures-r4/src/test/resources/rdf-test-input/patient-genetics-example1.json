@@ -1,0 +1,62 @@
+{
+  "resourceType": "Patient",
+  "id": "genetics-example1",
+  "meta": {
+    "lastUpdated": "2012-05-29T23:45:32Z",
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eEverywoman, Eve. SSN:\n      444222222\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+            "code": "SS"
+          }
+        ]
+      },
+      "system": "http://hl7.org/fhir/sid/us-ssn",
+      "value": "444222222"
+    }
+  ],
+  "active": true,
+  "name": [
+    {
+      "use": "official",
+      "family": "Everywoman",
+      "given": [
+        "Eve"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "555-555-2003",
+      "use": "work"
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1973-05-31",
+  "address": [
+    {
+      "use": "home",
+      "line": [
+        "2222 Home Street"
+      ]
+    }
+  ],
+  "managingOrganization": {
+    "reference": "Organization/hl7"
+  }
+}

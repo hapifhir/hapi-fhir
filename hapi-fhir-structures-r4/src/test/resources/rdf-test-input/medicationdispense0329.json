@@ -1,0 +1,201 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "meddisp0329",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: meddisp0329\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: completed\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: id: med0319; Ointment \u003cspan\u003e(Details : {SNOMED CT code \u0027385101003\u0027 \u003d \u0027Ointment\u0027, given as \u0027Ointment\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f006\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eauthorizingPrescription\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0329\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Refill - Part Fill \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ActCode code \u0027RFP\u0027 \u003d \u0027Refill - Part Fill\u0027, given as \u0027Refill - Part Fill\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 30 g\u003cspan\u003e (Details: UCUM code g \u003d \u0027g\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edaysSupply\u003c/b\u003e: 10 Day\u003cspan\u003e (Details: UCUM code d \u003d \u0027d\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenPrepared\u003c/b\u003e: 15/01/2015 10:20:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenHandedOver\u003c/b\u003e: 15/01/2015 4:20:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0319",
+      "form": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "385101003",
+            "display": "Ointment"
+          }
+        ],
+        "text": "Ointment"
+      },
+      "ingredient": [
+        {
+          "itemCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "387253001",
+                "display": "Salicyclic Acid (substance)"
+              }
+            ]
+          },
+          "strength": {
+            "numerator": {
+              "value": 5,
+              "system": "http://unitsofmeasure.org",
+              "code": "g"
+            },
+            "denominator": {
+              "value": 100,
+              "system": "http://unitsofmeasure.org",
+              "code": "g"
+            }
+          }
+        },
+        {
+          "itemCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "396458002",
+                "display": "Hydrocortisone (substance)"
+              }
+            ]
+          },
+          "strength": {
+            "numerator": {
+              "value": 1,
+              "system": "http://unitsofmeasure.org",
+              "code": "g"
+            },
+            "denominator": {
+              "value": 100,
+              "system": "http://unitsofmeasure.org",
+              "code": "g"
+            }
+          }
+        },
+        {
+          "itemCodeableConcept": {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "126066007",
+                "display": "White Petrolatum (substance)"
+              }
+            ]
+          },
+          "strength": {
+            "numerator": {
+              "value": 94,
+              "system": "http://unitsofmeasure.org",
+              "code": "g"
+            },
+            "denominator": {
+              "value": 100,
+              "system": "http://unitsofmeasure.org",
+              "code": "g"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "status": "completed",
+  "medicationReference": {
+    "reference": "#med0319"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f006"
+      }
+    }
+  ],
+  "authorizingPrescription": [
+    {
+      "reference": "MedicationRequest/medrx0329"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "RFP",
+        "display": "Refill - Part Fill"
+      }
+    ]
+  },
+  "quantity": {
+    "value": 30,
+    "system": "http://unitsofmeasure.org",
+    "code": "g"
+  },
+  "daysSupply": {
+    "value": 10,
+    "unit": "Day",
+    "system": "http://unitsofmeasure.org",
+    "code": "d"
+  },
+  "whenPrepared": "2015-01-15T10:20:00Z",
+  "whenHandedOver": "2015-01-15T16:20:00Z",
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "Apply twice daily to affected area on left arm",
+      "additionalInstruction": [
+        {
+          "text": "Apply sparingly"
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "frequency": 2,
+          "period": 1,
+          "periodUnit": "d"
+        }
+      },
+      "site": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "72098002",
+            "display": "Entire left upper arm (body structure)"
+          }
+        ]
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "359540000",
+            "display": "Topical (qualifier value)"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 1,
+            "unit": "ea",
+            "system": "http://unitsofmeasure.org",
+            "code": "ea"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "resourceType": "Encounter",
+  "id": "f002",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f002\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: v3251 (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: finished\u003c/p\u003e\u003cp\u003e\u003cb\u003eclass\u003c/b\u003e: ambulatory (Details: http://terminology.hl7.org/CodeSystem/v3-ActCode code AMB \u003d \u0027ambulatory\u0027, stated as \u0027ambulatory\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Patient-initiated encounter \u003cspan\u003e(Details : {SNOMED CT code \u0027270427003\u0027 \u003d \u0027Patient-initiated encounter\u0027, given as \u0027Patient-initiated encounter\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: Urgent \u003cspan\u003e(Details : {SNOMED CT code \u0027103391001\u0027 \u003d \u0027Urgency\u0027, given as \u0027Urgent\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eP. van de Heuvel\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eParticipants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eIndividual\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003eM.I.M Versteegh\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003elength\u003c/b\u003e: 140 min\u003cspan\u003e (Details: UCUM code min \u003d \u0027min\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Partial lobectomy of lung \u003cspan\u003e(Details : {SNOMED CT code \u002734068001\u0027 \u003d \u0027Heart valve replacement\u0027, given as \u0027Partial lobectomy of lung\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eHospitalizations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePreAdmissionIdentifier\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAdmitSource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDischargeDisposition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e98682 (OFFICIAL)\u003c/td\u003e\u003ctd\u003eReferral by radiologist \u003cspan\u003e(Details : {SNOMED CT code \u0027305997006\u0027 \u003d \u0027Referral by radiologist\u0027, given as \u0027Referral by radiologist\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eDischarge to home \u003cspan\u003e(Details : {SNOMED CT code \u0027306689006\u0027 \u003d \u0027Discharge to home\u0027, given as \u0027Discharge to home\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eserviceProvider\u003c/b\u003e: \u003ca\u003eBMC\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "http://www.bmc.nl/zorgportal/identifiers/encounters",
+      "value": "v3251"
+    }
+  ],
+  "status": "finished",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "AMB",
+    "display": "ambulatory"
+  },
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "270427003",
+          "display": "Patient-initiated encounter"
+        }
+      ]
+    }
+  ],
+  "priority": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "103391001",
+        "display": "Urgent"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/f001",
+    "display": "P. van de Heuvel"
+  },
+  "participant": [
+    {
+      "individual": {
+        "reference": "Practitioner/f003",
+        "display": "M.I.M Versteegh"
+      }
+    }
+  ],
+  "length": {
+    "value": 140,
+    "unit": "min",
+    "system": "http://unitsofmeasure.org",
+    "code": "min"
+  },
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "34068001",
+          "display": "Partial lobectomy of lung"
+        }
+      ]
+    }
+  ],
+  "hospitalization": {
+    "preAdmissionIdentifier": {
+      "use": "official",
+      "system": "http://www.bmc.nl/zorgportal/identifiers/pre-admissions",
+      "value": "98682"
+    },
+    "admitSource": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "305997006",
+          "display": "Referral by radiologist"
+        }
+      ]
+    },
+    "dischargeDisposition": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "306689006",
+          "display": "Discharge to home"
+        }
+      ]
+    }
+  },
+  "serviceProvider": {
+    "reference": "Organization/f001",
+    "display": "BMC"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

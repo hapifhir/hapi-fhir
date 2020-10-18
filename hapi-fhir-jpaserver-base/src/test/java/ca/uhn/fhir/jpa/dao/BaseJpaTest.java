@@ -207,6 +207,8 @@ public abstract class BaseJpaTest extends BaseTest {
 		when(mySrd.getInterceptorBroadcaster()).thenReturn(myRequestOperationCallback);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
+		when(mySrd.getServer().getMaximumPageSize()).thenReturn(null);
 	}
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
@@ -374,7 +376,9 @@ public abstract class BaseJpaTest extends BaseTest {
 		}
 
 		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theProvider.getResources(0, size);
+		List<IBaseResource> resources = theProvider instanceof PersistedJpaBundleProvider ?
+			theProvider.getResources(0, size) :
+			theProvider.getResources(0, Integer.MAX_VALUE);
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}

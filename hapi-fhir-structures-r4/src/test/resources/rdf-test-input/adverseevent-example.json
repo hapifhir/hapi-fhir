@@ -1,0 +1,75 @@
+{
+  "resourceType": "AdverseEvent",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 49476534\u003c/p\u003e\u003cp\u003e\u003cb\u003eactuality\u003c/b\u003e: actual\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Product Use Error \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/adverse-event-category code \u0027product-use-error\u0027 \u003d \u0027Product Use Error\u0027, given as \u0027Product Use Error\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eevent\u003c/b\u003e: This was a mild rash on the left forearm \u003cspan\u003e(Details : {SNOMED CT code \u0027304386008\u0027 \u003d \u0027O/E - itchy rash\u0027, given as \u0027O/E - itchy rash\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 29/01/2017 12:34:56 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eseriousness\u003c/b\u003e: Non-serious \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/adverse-event-seriousness code \u0027Non-serious\u0027 \u003d \u0027Non-serious\u0027, given as \u0027Non-serious\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eseverity\u003c/b\u003e: Mild \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/adverse-event-severity code \u0027mild\u0027 \u003d \u0027Mild\u0027, given as \u0027Mild\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erecorder\u003c/b\u003e: \u003ca\u003ePractitioner/example\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eSuspectEntities\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eInstance\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003eMedication/example\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": {
+    "system": "http://acme.com/ids/patients/risks",
+    "value": "49476534"
+  },
+  "actuality": "actual",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/adverse-event-category",
+          "code": "product-use-error",
+          "display": "Product Use Error"
+        }
+      ]
+    }
+  ],
+  "event": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "304386008",
+        "display": "O/E - itchy rash"
+      }
+    ],
+    "text": "This was a mild rash on the left forearm"
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "date": "2017-01-29T12:34:56+00:00",
+  "seriousness": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/adverse-event-seriousness",
+        "code": "Non-serious",
+        "display": "Non-serious"
+      }
+    ]
+  },
+  "severity": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/adverse-event-severity",
+        "code": "mild",
+        "display": "Mild"
+      }
+    ]
+  },
+  "recorder": {
+    "reference": "Practitioner/example"
+  },
+  "suspectEntity": [
+    {
+      "instance": {
+        "reference": "Medication/example"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

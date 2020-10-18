@@ -5,44 +5,44 @@
 	<h4>Options</h4>
 
 	<label class="navBarButtonLabel">Encoding</label>
-	<div class="btn-group " data-toggle="buttons" id="encodingBtnGroup">
-		<label class="btn btn-sm btn-default active">
+	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="encodingBtnGroup">
+		<label class="btn btn-info active">
 			<input type="radio" name="encoding" id="encode-default" value="" />(default)
 		</label> 
-		<label class="btn btn-sm btn-default"> 
+		<label class="btn btn-info">
 			<input type="radio" name="encoding" id="encode-xml" value="xml" />XML
 		</label>
-		<label class="btn btn-sm btn-default"> 
+		<label class="btn btn-info">
 			<input type="radio" name="encoding" id="encode-json" value="json" />JSON
 		</label>
 	</div>
 
 	<br /> <label class="navBarButtonLabel">Pretty</label>
-	<div class="btn-group top-buffer" data-toggle="buttons" id="prettyBtnGroup">
-		<label class="btn btn-sm btn-default active"> <input
+	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="prettyBtnGroup" style="margin-top: 5px;">
+		<label class="btn btn-info active"> <input
 			type="radio" name="pretty" id="pretty-default" value="" />(default)
-		</label> <label class="btn btn-sm btn-default"> <input
+		</label> <label class="btn btn-info"> <input
 			type="radio" name="pretty" id="pretty-true" value="true" />On
-		</label> <label class="btn btn-sm btn-default"> <input
+		</label> <label class="btn btn-info"> <input
 			type="radio" name="pretty" id="pretty-false" value="false" />Off
 		</label>
 	</div>
 
 	<br /> <label class="navBarButtonLabel">Summary</label>
-	<div class="btn-group top-buffer" data-toggle="buttons" id="summaryBtnGroup">
-		<label class="btn btn-sm btn-default active"> 
+	<div class="btn-group btn-group-toggle" data-toggle="buttons" id="summaryBtnGroup" style="margin-top: 5px;">
+		<label class="btn btn-info active">
 			<input type="radio" name="_summary" id="summary-default" value="" />(none)
 		</label> 
-		<label class="btn btn-sm btn-default"> 
+		<label class="btn btn-info">
 			<input type="radio" name="_summary" id="summary-true" value="true" />true
 		</label> 
-		<label class="btn btn-sm btn-default"> 
+		<label class="btn btn-info">
 			<input type="radio" name="_summary" id="summary-text" value="text" />text
 		</label>
-		<label class="btn btn-sm btn-default"> 
+		<label class="btn btn-info">
 			<input type="radio" name="_summary" id="summary-data" value="data" />data
 		</label>
-		<label class="btn btn-sm btn-default"> 
+		<label class="btn btn-info">
 			<input type="radio" name="_summary" id="summary-count" value="count" />count
 		</label>
 	</div>
@@ -78,7 +78,9 @@
 				$('#summary-data').trigger("click");
 		} else if (summary == 'count') {
 				$('#summary-count').trigger("click");
-		}
+		} else {
+            $('#summary-default').trigger("click");
+      }
 
 		if ([[${!#strings.isEmpty(resultBody)}]]) {
 			// When we're displaying a result page, the options buttons should
@@ -122,7 +124,7 @@
                th:data1="${resource.typeElement.valueAsString}"
                onclick="doAction(this, 'resource', this.getAttribute('data1'));">
 					<th:block th:text="${resource.typeElement.valueAsString}" >Patient</th:block>
-					<span class="badge" th:if="${resourceCounts[resource.typeElement.valueAsString]} != null" th:text="${resourceCounts[resource.typeElement.valueAsString]}"/>
+					<span class="badge badge-secondary" th:if="${resourceCounts[resource.typeElement.valueAsString]} != null" th:text="${resourceCounts[resource.typeElement.valueAsString]}"/>
 				</a>
 			</li>
 		</th:block>

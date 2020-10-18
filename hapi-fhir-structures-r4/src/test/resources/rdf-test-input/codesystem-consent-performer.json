@@ -1,0 +1,69 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "consent-performer",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePerformer Role Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes sample Performer Role codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/consentperformer defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econsenter\u003ca name\u003d\"consent-performer-consenter\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConsenter\u003c/td\u003e\u003ctd\u003eAn entity or an entity\u0027s delegatee who is the grantee in an agreement such as a consent for services, advanced directive, or a privacy consent directive in accordance with jurisdictional, organizational, or patient policy.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egrantee\u003ca name\u003d\"consent-performer-grantee\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGrantee\u003c/td\u003e\u003ctd\u003eAn entity which accepts certain rights or authority from a grantor.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egrantor\u003ca name\u003d\"consent-performer-grantor\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGrantor\u003c/td\u003e\u003ctd\u003eAn entity which agrees to confer certain rights or authority to a grantee.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edelegatee\u003ca name\u003d\"consent-performer-delegatee\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDelegatee\u003c/td\u003e\u003ctd\u003eA party to whom some right or authority is granted by a delegator.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edelegator\u003ca name\u003d\"consent-performer-delegator\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDelegator\u003c/td\u003e\u003ctd\u003eA party that grants all or some portion its right or authority to another party.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/consentperformer",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1017"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "PerformerRoleCodes",
+  "title": "Performer Role Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "CBCC",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes sample Performer Role codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/consent-performer",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "consenter",
+      "display": "Consenter",
+      "definition": "An entity or an entity\u0027s delegatee who is the grantee in an agreement such as a consent for services, advanced directive, or a privacy consent directive in accordance with jurisdictional, organizational, or patient policy."
+    },
+    {
+      "code": "grantee",
+      "display": "Grantee",
+      "definition": "An entity which accepts certain rights or authority from a grantor."
+    },
+    {
+      "code": "grantor",
+      "display": "Grantor",
+      "definition": "An entity which agrees to confer certain rights or authority to a grantee."
+    },
+    {
+      "code": "delegatee",
+      "display": "Delegatee",
+      "definition": "A party to whom some right or authority is granted by a delegator."
+    },
+    {
+      "code": "delegator",
+      "display": "Delegator",
+      "definition": "A party that grants all or some portion its right or authority to another party."
+    }
+  ]
+}

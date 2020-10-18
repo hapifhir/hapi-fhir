@@ -1,0 +1,1118 @@
+{
+  "resourceType": "StructureDefinition",
+  "id": "Event",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eto do\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "informative"
+    }
+  ],
+  "url": "http://hl7.org/fhir/StructureDefinition/Event",
+  "version": "4.0.1",
+  "name": "Event",
+  "title": "event",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Health Level Seven International fhir",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Logical Model: A pattern to be followed by resources that represent the performance of some activity, possibly in accordance with a request or service definition.",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "v2",
+      "uri": "http://hl7.org/v2",
+      "name": "HL7 v2 Mapping"
+    },
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    },
+    {
+      "identity": "w5",
+      "uri": "http://hl7.org/fhir/fivews",
+      "name": "FiveWs Pattern Mapping"
+    }
+  ],
+  "kind": "logical",
+  "abstract": false,
+  "type": "Event",
+  "snapshot": {
+    "element": [
+      {
+        "id": "Event",
+        "path": "Event",
+        "short": "Event Pattern",
+        "definition": "A pattern to be followed by resources that represent the performance of some activity, possibly in accordance with a request or service definition.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event",
+          "min": 0,
+          "max": "*"
+        },
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          },
+          {
+            "key": "inv-1",
+            "severity": "error",
+            "human": "Not Done Reason can only be specified if status is \u0027not-done\u0027",
+            "expression": "status\u003d\u0027not-done\u0027 or notDoneReason.exists().not()",
+            "xpath": "f:status/@value\u003d\u0027not-done\u0027 or not(exists(f:notDoneReason))"
+          },
+          {
+            "key": "inv-2",
+            "severity": "error",
+            "human": "reason elements can only be specified if status is NOT \u0027not-done\u0027",
+            "expression": "status!\u003d\u0027not-done\u0027 or (reasonCode.exists().not() and reasonReference.exists().not())",
+            "xpath": "not(f:status/@value\u003d\u0027not-done\u0027) or not(exists(f:reasonCode) or exists(f:reasonReference))"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "EVN (for administrative events)"
+          },
+          {
+            "identity": "rim",
+            "map": "Act[moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "Event.identifier",
+        "path": "Event.identifier",
+        "short": "Business Identifier for {{title}}",
+        "definition": "Business identifiers assigned to this {{title}} by the performer and/or other systems.  These identifiers remain constant as the resource is updated and propagates from server to server.",
+        "comment": "Note: This is a business identifier, not a resource identifier (see [discussion](resource.html#identifiers)).  It is best practice for the identifier to only appear on a single resource instance, however business practices may occasionally dictate that multiple resource instances with the same identifier can exist - possibly even with different resource types.  For example, multiple Patient and a Person resource instance might share the same social insurance number.",
+        "requirements": "Allows identification of the {{title}} as it is known by various participating systems and in a way that remains consistent across servers.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.identifier",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Identifier"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".identifier"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.identifier"
+          }
+        ]
+      },
+      {
+        "id": "Event.instantiatesCanonical",
+        "path": "Event.instantiatesCanonical",
+        "short": "Instantiates FHIR protocol or definition",
+        "definition": "The URL pointing to a FHIR-defined protocol, guideline, orderset or other definition that is adhered to in whole or in part by this {{title}}.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.instantiatesCanonical",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "canonical",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Definition"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dDEFN].target"
+          }
+        ]
+      },
+      {
+        "id": "Event.instantiatesUri",
+        "path": "Event.instantiatesUri",
+        "short": "Instantiates external protocol or definition",
+        "definition": "The URL pointing to an externally maintained protocol, guideline, orderset or other definition that is adhered to in whole or in part by this {{title}}.",
+        "comment": "This might be an HTML page, PDF, etc. or could just be a non-resolvable URI identifier.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.instantiatesUri",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "uri"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dDEFN].target"
+          }
+        ]
+      },
+      {
+        "id": "Event.basedOn",
+        "path": "Event.basedOn",
+        "short": "Fulfills plan, proposal or order",
+        "definition": "A plan, proposal or order that is fulfilled in whole or in part by this {{title}}.",
+        "comment": "[The allowed reference resources may be adjusted as appropriate for the event resource].",
+        "requirements": "Allows tracing of authorization for the {{title}} and tracking whether proposals/recommendations were acted upon.",
+        "alias": [
+          "fulfills"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.basedOn",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Request"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "ORC in proximity to EVN segment"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dFLFS].target"
+          }
+        ]
+      },
+      {
+        "id": "Event.partOf",
+        "path": "Event.partOf",
+        "short": "Part of referenced event",
+        "definition": "A larger event of which this particular {{title}} is a component or step.",
+        "comment": "Not to be used to link an {{title}} to an Encounter - use \u0027context\u0027 for that.\n\n[The allowed reference resources may be adjusted as appropriate for the event resource].",
+        "requirements": "[E.g. Drug administration as part of a procedure, procedure as part of observation, etc.].",
+        "alias": [
+          "container"
+        ],
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.partOf",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Event"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dCOMP].source[moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "Event.researchStudy",
+        "path": "Event.researchStudy",
+        "short": "Associated research study",
+        "definition": "Indicates that this {{title}} is relevant to the specified research study(ies).",
+        "comment": "This relevance might mean that the {{title}} occurred as part of the study protocol, but can also include events that occurred outside the study but still have relevance.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.researchStudy",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/ResearchStudy"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dPERT].target[classCode\u003dCLNTRL, moodCode\u003dEVN]"
+          }
+        ]
+      },
+      {
+        "id": "Event.status",
+        "path": "Event.status",
+        "short": "preparation | in-progress | not-done | suspended | aborted | completed | entered-in-error | unknown",
+        "definition": "The current state of the {{title}}.",
+        "comment": "A nominal state-transition diagram can be found in the [[event.html#statemachine | Event pattern]] documentation\n\nUnknown does not represent \"other\" - one of the defined statuses must apply.  Unknown is used when the authoring system is not sure what the current status is.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Event.status",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "code"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": true,
+        "isModifierReason": "This element is labelled as a modifier because it is a status element that contains status entered-in-error which means that the resource should not be treated as valid",
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "EventStatus"
+            }
+          ],
+          "strength": "required",
+          "description": "Codes identifying the lifecycle stage of an event.",
+          "valueSet": "http://hl7.org/fhir/ValueSet/event-status|4.0.1"
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".status"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.status"
+          }
+        ]
+      },
+      {
+        "id": "Event.statusReason",
+        "path": "Event.statusReason",
+        "short": "Reason for current status",
+        "definition": "Captures the reason for the current state of the {{title}}.",
+        "comment": "This is generally only used for \"exception\" statuses such as \"not-done\", \"suspended\" or \"cancelled\".  The reason for performing the event at all is captured in reasonCode, not here.\n\n[distinct reason codes for different statuses can be enforced using invariants if they are universal bindings].",
+        "alias": [
+          "Suspended Reason",
+          "Cancelled Reason"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.statusReason",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "EventStatusReason"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes identifying the reason for the current state of an event."
+        },
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship[typeCode\u003dSUBJ].source[classCode\u003dCACT, moodCode\u003dEVN].reasonCOde"
+          }
+        ]
+      },
+      {
+        "id": "Event.code",
+        "path": "Event.code",
+        "short": "What was done",
+        "definition": "A code that identifies the specific service or action that was or is being performed.",
+        "alias": [
+          "type"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.code",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "EventCode"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes indicating the details of what is/was done.  These will vary significantly based on the type of event resource and will often be example/preferred rather than extensible/required."
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".code"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.what[x]"
+          }
+        ]
+      },
+      {
+        "id": "Event.subject",
+        "path": "Event.subject",
+        "short": "Individual service was done for/to",
+        "definition": "The individual or set of individuals the action is being or was performed on.",
+        "comment": "[For resources that aren\u0027t patient-specific, the set of allowed resources may be extended to include other things.  Group should generally be retained unless there\u0027s certainty this resource won\u0027t be used for veterinary, research or public health settings where Group may be necessary (e.g. this cage of rats/crate of chickens, group of people in a 5 mile radious of the incident, etc.)].",
+        "requirements": "Links the {{title}} to the Patient context.",
+        "alias": [
+          "patient"
+        ],
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Event.subject",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Group"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "PAT in proximity to EVN segment"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dSBJ].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.subject"
+          }
+        ]
+      },
+      {
+        "id": "Event.encounter",
+        "path": "Event.encounter",
+        "short": "Encounter created as part of",
+        "definition": "The Encounter during which this {{title}} was created or to which the creation of this record is tightly associated.",
+        "comment": "This will typically be the encounter the {{title}} was created during, but some {{title}}s may be initiated prior to or after the official completion of an encounter but still be tied to the context of the encounter (e.g. pre-admission lab tests).",
+        "requirements": "Links the {{title}} to the Encounter context.",
+        "alias": [
+          "context"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.encounter",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Encounter"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "PV1 in proximity to EVN segment"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship(typeCode\u003dCOMP].source[classCode\u003c\u003dPCPR, moodCode\u003dEVN]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.context"
+          }
+        ]
+      },
+      {
+        "id": "Event.occurrence[x]",
+        "path": "Event.occurrence[x]",
+        "short": "When {{title}} occurred/is occurring",
+        "definition": "The date, period or timing when the {{title}} did occur or is occurring.",
+        "comment": "This indicates when the activity actually occurred or is occurring, not when it was asked/requested/ordered to occur.  For the latter, look at the occurence element of the  Request this {{event}} is \"basedOn\".  The status code allows differentiation of whether the timing reflects a historic event or an ongoing event.  Ongoing events should not include an upper bound in the Period or Timing.bounds.\n\n[The list of types may be constrained as appropriate for the type of event.  The use of \u0027Timing\u0027 in type is generally only appropriate for Events that are typically used to represent summary information.].",
+        "alias": [
+          "timing"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.occurrence[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          },
+          {
+            "code": "Period"
+          },
+          {
+            "code": "Timing"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".effectiveTime"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.done[x]"
+          }
+        ]
+      },
+      {
+        "id": "Event.recorded",
+        "path": "Event.recorded",
+        "short": "When {{title}} was first captured in the subject\u0027s record",
+        "definition": "The date the occurrence of the {{title}} was first captured in the record - potentially significantly after the occurrence of the event.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.recorded",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "dateTime"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "Varies by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dAUT].time"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.recorded"
+          }
+        ]
+      },
+      {
+        "id": "Event.reported[x]",
+        "path": "Event.reported[x]",
+        "short": "Reported rather than primary record",
+        "definition": "Indicates if this record was captured as a secondary \u0027reported\u0027 record rather than as an original primary source-of-truth record.  It may also indicate the source of the report.",
+        "requirements": "Reported data may have different rules on editing and may be visually distinguished from primary data.",
+        "alias": [
+          "informer"
+        ],
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.reported[x]",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "boolean"
+          },
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson",
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/Organization"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dRPT].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.source"
+          }
+        ]
+      },
+      {
+        "id": "Event.performer",
+        "path": "Event.performer",
+        "short": "Who performed {{title}} and what they did",
+        "definition": "Indicates who or what performed the {{title}} and how they were involved.",
+        "comment": "[Resources may choose to replace this with just a single performer or repeating where there\u0027s no need to distinguish the function performed].",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.performer",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Element"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true
+      },
+      {
+        "id": "Event.performer.function",
+        "path": "Event.performer.function",
+        "short": "Type of performance",
+        "definition": "Distinguishes the type of involvement of the performer in the {{title}}. [Consider adding examples].",
+        "requirements": "Allows disambiguation of the types of involvement of different performers.",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.performer.function",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "EventPerformerFunction"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes that describe the specific involvement of a performer in an event.  E.g. Primary vs. secondary vs. supervising, etc."
+        }
+      },
+      {
+        "id": "Event.performer.actor",
+        "path": "Event.performer.actor",
+        "short": "Who performed {{title}}",
+        "definition": "Indicates who or what performed the {{title}}.",
+        "min": 1,
+        "max": "1",
+        "base": {
+          "path": "Event.performer.actor",
+          "min": 1,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Practitioner",
+              "http://hl7.org/fhir/StructureDefinition/PractitionerRole",
+              "http://hl7.org/fhir/StructureDefinition/Organization",
+              "http://hl7.org/fhir/StructureDefinition/CareTeam",
+              "http://hl7.org/fhir/StructureDefinition/Patient",
+              "http://hl7.org/fhir/StructureDefinition/Device",
+              "http://hl7.org/fhir/StructureDefinition/RelatedPerson"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "EVN.5 or by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dPRF].role[scoper.determinerCode\u003dINSTANCE]"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.actor"
+          }
+        ]
+      },
+      {
+        "id": "Event.location",
+        "path": "Event.location",
+        "short": "Where {{title}} occurred",
+        "definition": "The principal physical location where the {{title}} was performed.",
+        "requirements": "Ties the event to where the records are likely kept and provides context around the event occurrence (e.g. if it occurred inside or outside a dedicated healthcare setting).",
+        "min": 0,
+        "max": "1",
+        "base": {
+          "path": "Event.location",
+          "min": 0,
+          "max": "1"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Location"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "EVN.7"
+          },
+          {
+            "identity": "rim",
+            "map": ".participation[typeCode\u003dLOC].role"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.where[x]"
+          }
+        ]
+      },
+      {
+        "id": "Event.reasonCode",
+        "path": "Event.reasonCode",
+        "short": "Why was {{title}} performed?",
+        "definition": "Describes why the {{title}} occurred in coded or textual form.",
+        "comment": "Textual reasons can be captured using reasonCode.text.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.reasonCode",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "CodeableConcept"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "binding": {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+              "valueString": "EventReason"
+            }
+          ],
+          "strength": "example",
+          "description": "Codes identifying why this event was necessary.  These may be clinical reasons (e.g. diagnoses, symptoms) and/or administrative reasons.  While the detailed constraints of relevant reasons will vary by resource, some degree of consistency across resources around recommended codes would be desirable."
+        },
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "EVN.4 or by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".reasonCode"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          }
+        ]
+      },
+      {
+        "id": "Event.reasonReference",
+        "path": "Event.reasonReference",
+        "short": "Why was {{title}} performed?",
+        "definition": "Indicates another resource whose existence justifies this {{title}}.",
+        "comment": "[Additional resources may be added as appropriate].",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.reasonReference",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Reference",
+            "targetProfile": [
+              "http://hl7.org/fhir/StructureDefinition/Condition",
+              "http://hl7.org/fhir/StructureDefinition/Observation",
+              "http://hl7.org/fhir/StructureDefinition/Media",
+              "http://hl7.org/fhir/StructureDefinition/DiagnosticReport",
+              "http://hl7.org/fhir/StructureDefinition/DocumentReference"
+            ]
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": true,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "EVN.4 or by domain"
+          },
+          {
+            "identity": "rim",
+            "map": ".outboundRelationship[typeCode\u003dRSON].target"
+          },
+          {
+            "identity": "w5",
+            "map": "FiveWs.why[x]"
+          }
+        ]
+      },
+      {
+        "id": "Event.note",
+        "path": "Event.note",
+        "short": "Comments made about the event",
+        "definition": "Comments made about the {{title}} by the performer, subject or other participants.",
+        "min": 0,
+        "max": "*",
+        "base": {
+          "path": "Event.note",
+          "min": 0,
+          "max": "*"
+        },
+        "type": [
+          {
+            "code": "Annotation"
+          }
+        ],
+        "constraint": [
+          {
+            "key": "ele-1",
+            "severity": "error",
+            "human": "All FHIR elements must have a @value or children",
+            "expression": "hasValue() or (children().count() \u003e id.count())",
+            "xpath": "@value|f:*|h:div",
+            "source": "http://hl7.org/fhir/StructureDefinition/Element"
+          }
+        ],
+        "isModifier": false,
+        "isSummary": false,
+        "mapping": [
+          {
+            "identity": "v2",
+            "map": "NTE"
+          },
+          {
+            "identity": "rim",
+            "map": ".inboundRelationship(typeCode\u003dSUBJ].source[classCode\u003dANNGEN, moodCode\u003dEVN].value[xsi:type\u003dST]"
+          }
+        ]
+      }
+    ]
+  }
+}

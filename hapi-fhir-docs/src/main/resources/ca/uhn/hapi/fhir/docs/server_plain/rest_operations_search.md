@@ -349,6 +349,65 @@ Example URL to invoke this method:
 http://fhir.example.com/Patient?_identifier=urn:foo|123&_sort=given
 ```
 
+<a name="limiting-results"/>
+
+# Limiting results (`_count`)
+
+FHIR supports [Page Count](http://www.hl7.org/implement/standards/fhir/search.html#count). Count specification may be passed into handler methods with
+[@Count](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Count.html) annotation. Count may be used to limit the number
+of resources fetched from the database.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|count}}
+``` 
+
+Example URL to invoke this method:
+
+```url
+http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10
+```
+
+# Paging
+
+## Offset paging with `_offset`
+
+HAPI FHIR supports also paging. Offset specification can be passed into handler methods with [@Offset](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Offset.html) annotation.
+This annotation is *not* part of the FHIR standard. 
+
+There are two possible ways to use paging. It is possible to define `_offset` parameter in the
+request which means that when combined with `_count` the paging is done on the database level. This type of
+paging benefits from not having to return so many items from the database when paging items. It's also possible
+to define default page size (i.e. default `_count` if not given) and maximum page size (i.e. maximum value
+for the `_count` parameter). See [RestfulServer](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/RestfulServer.html)
+for more information.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|offset}}
+``` 
+
+Example URL to invoke this method for the first page:
+
+```url
+http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10&_offset=0
+```
+or just
+```url
+http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10
+```
+
+Example URL to invoke this method for the second page:
+
+```url
+http://fhir.example.com/Patient?_identifier=urn:foo|123&_count=10&_offset=10
+```
+
+Note that if the paging provider is configured to be database backed, `_offset=0` behaves differently than no `_offset`. This 
+allows the user the choose if he wants offset paging or database backed paging.
+
+## Using paging provider
+
+It is also possible to implement own paging provider (or use implementation bundled in HAPI FHIR). See [Paging](./paging.html) for information on how to use paging provider.
+
 # Adding Descriptions
 
 It is also possible to annotate search methods and/or parameters with the [@Description](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/model/api/annotation/Description.html) annotation. This annotation allows you to add a description of the method and the individual parameters. These descriptions will be placed in the server's conformance statement, which can be helpful to anyone who is developing software against your server.

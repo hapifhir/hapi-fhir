@@ -1,0 +1,17 @@
+{
+  "resourceType": "SearchParameter",
+  "id": "diagnosticreport-genetic-DiagnosticReport-assessed-condition",
+  "url": "http://hl7.org/fhir/SearchParameter/diagnosticreport-genetic-DiagnosticReport-assessed-condition",
+  "version": "4.0.1",
+  "name": "assessed-condition",
+  "status": "draft",
+  "experimental": true,
+  "description": "Condition assessed by genetic test",
+  "code": "assessed-condition",
+  "base": [
+    "DiagnosticReport"
+  ],
+  "type": "reference",
+  "expression": "DiagnosticReport.extension(\u0027http://hl7.org/fhir/StructureDefinition/DiagnosticReport-geneticsAssessedCondition\u0027)",
+  "xpathUsage": "normal"
+}

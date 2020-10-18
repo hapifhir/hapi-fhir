@@ -1,0 +1,79 @@
+{
+  "resourceType": "ValueSet",
+  "id": "name-assembly-order",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eHumanNameAssemblyOrder\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA code that represents the preferred display order of the components of a human name.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude all codes defined in \u003ca href\u003d\"codesystem-name-assembly-order.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/name-assembly-order\u003c/code\u003e\u003c/a\u003e\u003c/li\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v2/0444/index.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v2-0444\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0444/index.html#v2-0444-F\"\u003eF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrefix Family Given Suffix\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v2/0444/index.html#v2-0444-G\"\u003eG\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrefix Given Family Suffix\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/NullFlavor/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-NullFlavor\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/NullFlavor/cs.html#v3-NullFlavor-UNK\"\u003eUNK\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eDescription:A proper value is applicable, but not known.\u003cbr/\u003e\n                        \n                           Usage Notes: This means the actual value is not known.  If the only thing that is unknown is how to properly express the value in the necessary constraints (value set, datatype, etc.), then the OTH or UNC flavor should be used.  No properties should be included for a datatype with this property unless:\u003cbr/\u003e\n                        \n                           Those properties themselves directly translate to a semantic of \u0026quot;unknown\u0026quot;.  (E.g. a local code sent as a translation that conveys \u0027unknown\u0027)\n                           Those properties further qualify the nature of what is unknown.  (E.g. specifying a use code of \u0026quot;H\u0026quot; and a URL prefix of \u0026quot;tel:\u0026quot; to convey that it is the home phone number that is unknown.)\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/name-assembly-order",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.913"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "HumanNameAssemblyOrder",
+  "title": "HumanNameAssemblyOrder",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A code that represents the preferred display order of the components of a human name.",
+  "immutable": true,
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/name-assembly-order"
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0444",
+        "concept": [
+          {
+            "code": "F",
+            "display": "Prefix Family Given Suffix"
+          },
+          {
+            "code": "G",
+            "display": "Prefix Given Family Suffix"
+          }
+        ]
+      },
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-NullFlavor",
+        "concept": [
+          {
+            "code": "UNK",
+            "display": "Unknown"
+          }
+        ]
+      }
+    ]
+  }
+}

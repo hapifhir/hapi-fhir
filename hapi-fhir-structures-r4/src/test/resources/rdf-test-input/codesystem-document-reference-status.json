@@ -1,0 +1,59 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "document-reference-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDocumentReferenceStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe status of the document reference.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/document-reference-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecurrent\u003ca name\u003d\"document-reference-status-current\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCurrent\u003c/td\u003e\u003ctd\u003eThis is the current reference for this document.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esuperseded\u003ca name\u003d\"document-reference-status-superseded\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSuperseded\u003c/td\u003e\u003ctd\u003eThis reference has been superseded by another reference.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"document-reference-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThis reference was created in error.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/document-reference-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.8"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DocumentReferenceStatus",
+  "title": "DocumentReferenceStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "description": "The status of the document reference.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/document-reference-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "current",
+      "display": "Current",
+      "definition": "This is the current reference for this document."
+    },
+    {
+      "code": "superseded",
+      "display": "Superseded",
+      "definition": "This reference has been superseded by another reference."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "This reference was created in error."
+    }
+  ]
+}

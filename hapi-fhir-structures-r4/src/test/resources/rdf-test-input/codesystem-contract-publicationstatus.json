@@ -1,0 +1,142 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "contract-publicationstatus",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eEach definition includes usage notes explaining\n            the precedence order in contract lifecycle - i.e., while only some stages are required,\n            the order in which they may occur is deterministic; and a map to comparable FHIR and v.3\n            status codes. It follows guidance about use of status codes in FHIR at\n            http://build.fhir.org/sc.html.\u003chr/\u003e\u003ch2\u003eContract Resource Publication Status codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set contract specific codes for status.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eHL7 International.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/contract-publicationstatus defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eamended\u003ca name\u003d\"contract-publicationstatus-amended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmended\u003c/td\u003e\u003ctd\u003eContract is augmented with additional information to correct errors in a predecessor or to updated values in a predecessor. Usage: Contract altered within effective time. Precedence Order \u003d 9. Comparable FHIR and v.3 status codes: revised; replaced.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eappended\u003ca name\u003d\"contract-publicationstatus-appended\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAppended\u003c/td\u003e\u003ctd\u003eContract is augmented with additional information that was missing from a predecessor Contract. Usage: Contract altered within effective time. Precedence Order \u003d 9. Comparable FHIR and v.3 status codes: updated, replaced.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"contract-publicationstatus-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eContract is terminated due to failure of the Grantor and/or the Grantee to fulfil one or more contract provisions. Usage: Abnormal contract termination. Precedence Order \u003d 10. Comparable FHIR and v.3 status codes: stopped; failed; aborted.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edisputed\u003ca name\u003d\"contract-publicationstatus-disputed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDisputed\u003c/td\u003e\u003ctd\u003eContract is pended to rectify failure of the Grantor or the Grantee to fulfil contract provision(s). E.g., Grantee complaint about Grantor\u0027s failure to comply with contract provisions. Usage: Contract pended. Precedence Order \u003d 7. Comparable FHIR and v.3 status codes: on hold; pended; suspended.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"contract-publicationstatus-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eContract was created in error. No Precedence Order.  Status may be applied to a Contract with any status.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexecutable\u003ca name\u003d\"contract-publicationstatus-executable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExecutable\u003c/td\u003e\u003ctd\u003eContract execution pending; may be executed when either the Grantor or the Grantee accepts the contract provisions by signing. I.e., where either the Grantor or the Grantee has signed, but not both. E.g., when an insurance applicant signs the insurers application, which references the policy. Usage: Optional first step of contract execution activity.  May be skipped and contracting activity moves directly to executed state. Precedence Order \u003d 3. Comparable FHIR and v.3 status codes: draft; preliminary; planned; intended; active.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexecuted\u003ca name\u003d\"contract-publicationstatus-executed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExecuted\u003c/td\u003e\u003ctd\u003eContract is activated for period stipulated when both the Grantor and Grantee have signed it. Usage: Required state for normal completion of contracting activity.  Precedence Order \u003d 6. Comparable FHIR and v.3 status codes: accepted; completed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enegotiable\u003ca name\u003d\"contract-publicationstatus-negotiable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNegotiable\u003c/td\u003e\u003ctd\u003eContract execution is suspended while either or both the Grantor and Grantee propose and consider new or revised contract provisions. I.e., where the party which has not signed proposes changes to the terms.  E .g., a life insurer declines to agree to the signed application because the life insurer has evidence that the applicant, who asserted to being younger or a non-smoker to get a lower premium rate - but offers instead to agree to a higher premium based on the applicants actual age or smoking status. Usage: Optional contract activity between executable and executed state. Precedence Order \u003d 4. Comparable FHIR and v.3 status codes: in progress; review; held.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoffered\u003ca name\u003d\"contract-publicationstatus-offered\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOffered\u003c/td\u003e\u003ctd\u003eContract is a proposal by either the Grantor or the Grantee. Aka - A Contract hard copy or electronic \u0027template\u0027, \u0027form\u0027 or \u0027application\u0027. E.g., health insurance application; consent directive form. Usage: Beginning of contract negotiation, which may have been completed as a precondition because used for 0..* contracts. Precedence Order \u003d 2. Comparable FHIR and v.3 status codes: requested; new.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epolicy\u003ca name\u003d\"contract-publicationstatus-policy\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePolicy\u003c/td\u003e\u003ctd\u003eContract template is available as the basis for an application or offer by the Grantor or Grantee. E.g., health insurance policy; consent directive policy.  Usage: Required initial contract activity, which may have been completed as a precondition because used for 0..* contracts. Precedence Order \u003d 1. Comparable FHIR and v.3 status codes: proposed; intended.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erejected\u003ca name\u003d\"contract-publicationstatus-rejected\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRejected\u003c/td\u003e\u003ctd\u003e Execution of the Contract is not completed because either or both the Grantor and Grantee decline to accept some or all of the contract provisions. Usage: Optional contract activity between executable and abnormal termination. Precedence Order \u003d 5. Comparable FHIR and v.3 status codes:  stopped; cancelled.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erenewed\u003ca name\u003d\"contract-publicationstatus-renewed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRenewed\u003c/td\u003e\u003ctd\u003eBeginning of a successor Contract at the termination of predecessor Contract lifecycle. Usage: Follows termination of a preceding Contract that has reached its expiry date. Precedence Order \u003d 13. Comparable FHIR and v.3 status codes: superseded.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erevoked\u003ca name\u003d\"contract-publicationstatus-revoked\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRevoked\u003c/td\u003e\u003ctd\u003eA Contract that is rescinded.  May be required prior to replacing with an updated Contract. Comparable FHIR and v.3 status codes: nullified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eresolved\u003ca name\u003d\"contract-publicationstatus-resolved\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eResolved\u003c/td\u003e\u003ctd\u003eContract is reactivated after being pended because of faulty execution. *E.g., competency of the signer(s), or where the policy is substantially different from and did not accompany the application/form so that the applicant could not compare them. Aka - \u0027\u0027reactivated\u0027\u0027. Usage: Optional stage where a pended contract is reactivated. Precedence Order \u003d 8. Comparable FHIR and v.3 status codes: reactivated.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eterminated\u003ca name\u003d\"contract-publicationstatus-terminated\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTerminated\u003c/td\u003e\u003ctd\u003eContract reaches its expiry date. It might or might not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order \u003d 12. Comparable FHIR and v.3 status codes: Obsoleted.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/contract-publicationstatus",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1209"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ContractResourcePublicationStatusCodes",
+  "title": "Contract Resource Publication Status codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "name": "FHIR project team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set contract specific codes for status.",
+  "copyright": "HL7 International.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/contract-publicationstatus",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "amended",
+      "display": "Amended",
+      "definition": "Contract is augmented with additional information to correct errors in a predecessor or to updated values in a predecessor. Usage: Contract altered within effective time. Precedence Order \u003d 9. Comparable FHIR and v.3 status codes: revised; replaced."
+    },
+    {
+      "code": "appended",
+      "display": "Appended",
+      "definition": "Contract is augmented with additional information that was missing from a predecessor Contract. Usage: Contract altered within effective time. Precedence Order \u003d 9. Comparable FHIR and v.3 status codes: updated, replaced."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "Contract is terminated due to failure of the Grantor and/or the Grantee to fulfil one or more contract provisions. Usage: Abnormal contract termination. Precedence Order \u003d 10. Comparable FHIR and v.3 status codes: stopped; failed; aborted."
+    },
+    {
+      "code": "disputed",
+      "display": "Disputed",
+      "definition": "Contract is pended to rectify failure of the Grantor or the Grantee to fulfil contract provision(s). E.g., Grantee complaint about Grantor\u0027s failure to comply with contract provisions. Usage: Contract pended. Precedence Order \u003d 7. Comparable FHIR and v.3 status codes: on hold; pended; suspended."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "Contract was created in error. No Precedence Order.  Status may be applied to a Contract with any status."
+    },
+    {
+      "code": "executable",
+      "display": "Executable",
+      "definition": "Contract execution pending; may be executed when either the Grantor or the Grantee accepts the contract provisions by signing. I.e., where either the Grantor or the Grantee has signed, but not both. E.g., when an insurance applicant signs the insurers application, which references the policy. Usage: Optional first step of contract execution activity.  May be skipped and contracting activity moves directly to executed state. Precedence Order \u003d 3. Comparable FHIR and v.3 status codes: draft; preliminary; planned; intended; active."
+    },
+    {
+      "code": "executed",
+      "display": "Executed",
+      "definition": "Contract is activated for period stipulated when both the Grantor and Grantee have signed it. Usage: Required state for normal completion of contracting activity.  Precedence Order \u003d 6. Comparable FHIR and v.3 status codes: accepted; completed."
+    },
+    {
+      "code": "negotiable",
+      "display": "Negotiable",
+      "definition": "Contract execution is suspended while either or both the Grantor and Grantee propose and consider new or revised contract provisions. I.e., where the party which has not signed proposes changes to the terms.  E .g., a life insurer declines to agree to the signed application because the life insurer has evidence that the applicant, who asserted to being younger or a non-smoker to get a lower premium rate - but offers instead to agree to a higher premium based on the applicants actual age or smoking status. Usage: Optional contract activity between executable and executed state. Precedence Order \u003d 4. Comparable FHIR and v.3 status codes: in progress; review; held."
+    },
+    {
+      "code": "offered",
+      "display": "Offered",
+      "definition": "Contract is a proposal by either the Grantor or the Grantee. Aka - A Contract hard copy or electronic \u0027template\u0027, \u0027form\u0027 or \u0027application\u0027. E.g., health insurance application; consent directive form. Usage: Beginning of contract negotiation, which may have been completed as a precondition because used for 0..* contracts. Precedence Order \u003d 2. Comparable FHIR and v.3 status codes: requested; new."
+    },
+    {
+      "code": "policy",
+      "display": "Policy",
+      "definition": "Contract template is available as the basis for an application or offer by the Grantor or Grantee. E.g., health insurance policy; consent directive policy.  Usage: Required initial contract activity, which may have been completed as a precondition because used for 0..* contracts. Precedence Order \u003d 1. Comparable FHIR and v.3 status codes: proposed; intended."
+    },
+    {
+      "code": "rejected",
+      "display": "Rejected",
+      "definition": " Execution of the Contract is not completed because either or both the Grantor and Grantee decline to accept some or all of the contract provisions. Usage: Optional contract activity between executable and abnormal termination. Precedence Order \u003d 5. Comparable FHIR and v.3 status codes:  stopped; cancelled."
+    },
+    {
+      "code": "renewed",
+      "display": "Renewed",
+      "definition": "Beginning of a successor Contract at the termination of predecessor Contract lifecycle. Usage: Follows termination of a preceding Contract that has reached its expiry date. Precedence Order \u003d 13. Comparable FHIR and v.3 status codes: superseded."
+    },
+    {
+      "code": "revoked",
+      "display": "Revoked",
+      "definition": "A Contract that is rescinded.  May be required prior to replacing with an updated Contract. Comparable FHIR and v.3 status codes: nullified."
+    },
+    {
+      "code": "resolved",
+      "display": "Resolved",
+      "definition": "Contract is reactivated after being pended because of faulty execution. *E.g., competency of the signer(s), or where the policy is substantially different from and did not accompany the application/form so that the applicant could not compare them. Aka - \u0027\u0027reactivated\u0027\u0027. Usage: Optional stage where a pended contract is reactivated. Precedence Order \u003d 8. Comparable FHIR and v.3 status codes: reactivated."
+    },
+    {
+      "code": "terminated",
+      "display": "Terminated",
+      "definition": "Contract reaches its expiry date. It might or might not be renewed or renegotiated. Usage: Normal end of contract period. Precedence Order \u003d 12. Comparable FHIR and v.3 status codes: Obsoleted."
+    }
+  ]
+}

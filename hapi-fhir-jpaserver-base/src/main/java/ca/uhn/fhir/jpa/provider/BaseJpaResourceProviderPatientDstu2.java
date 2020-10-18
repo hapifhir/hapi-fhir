@@ -59,6 +59,10 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 			@OperationParam(name = Constants.PARAM_COUNT) 
 			ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+
+			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+			@OperationParam(name = Constants.PARAM_OFFSET)
+			ca.uhn.fhir.model.primitive.UnsignedIntDt theOffset,
 			
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
@@ -84,7 +88,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientInstanceEverything(theServletRequest, theId, theCount, theOffset,theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -101,6 +105,10 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 				@OperationParam(name = Constants.PARAM_COUNT) 
 				ca.uhn.fhir.model.primitive.UnsignedIntDt theCount,
+
+				@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+				@OperationParam(name = Constants.PARAM_OFFSET)
+				ca.uhn.fhir.model.primitive.UnsignedIntDt theOffset,
 				
 				@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 				@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
@@ -126,7 +134,7 @@ public class BaseJpaResourceProviderPatientDstu2 extends JpaResourceProviderDstu
 
 		startRequest(theServletRequest);
 		try {
-			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
+			return ((IFhirResourceDaoPatient<Patient>) getDao()).patientTypeEverything(theServletRequest, theCount, theOffset, theLastUpdated, theSortSpec, toStringAndList(theContent), toStringAndList(theNarrative), toStringAndList(theFilter), theRequestDetails);
 		} finally {
 			endRequest(theServletRequest);
 		}

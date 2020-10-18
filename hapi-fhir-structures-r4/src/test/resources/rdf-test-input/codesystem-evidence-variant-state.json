@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "evidence-variant-state",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eEvidenceVariantState\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eUsed for results by exposure in variant states such as low-risk, medium-risk and high-risk states.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/evidence-variant-state defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elow-risk\u003ca name\u003d\"evidence-variant-state-low-risk\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003elow risk\u003c/td\u003e\u003ctd\u003elow risk estimate.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emedium-risk\u003ca name\u003d\"evidence-variant-state-medium-risk\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003emedium risk\u003c/td\u003e\u003ctd\u003emedium risk estimate.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehigh-risk\u003ca name\u003d\"evidence-variant-state-high-risk\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehigh risk\u003c/td\u003e\u003ctd\u003ehigh risk estimate.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/evidence-variant-state",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1354"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "EvidenceVariantState",
+  "title": "EvidenceVariantState",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Used for results by exposure in variant states such as low-risk, medium-risk and high-risk states.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/evidence-variant-state",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "low-risk",
+      "display": "low risk",
+      "definition": "low risk estimate."
+    },
+    {
+      "code": "medium-risk",
+      "display": "medium risk",
+      "definition": "medium risk estimate."
+    },
+    {
+      "code": "high-risk",
+      "display": "high risk",
+      "definition": "high risk estimate."
+    }
+  ]
+}

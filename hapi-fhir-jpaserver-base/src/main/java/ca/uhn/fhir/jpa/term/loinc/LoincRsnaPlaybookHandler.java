@@ -84,7 +84,10 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 
 		// ConceptMap version from properties files
 		String loincRsnaCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
-		
+
+		// CodeSystem version from properties file
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+
 		// RSNA Codes VS
 		ValueSet vs;
 		if (!myIdToValueSet.containsKey(RSNA_CODES_VS_ID)) {
@@ -93,6 +96,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 			vs.setId(RSNA_CODES_VS_ID);
 			vs.setName(RSNA_CODES_VS_NAME);
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.setVersion(codeSystemVersionId);
 			myIdToValueSet.put(RSNA_CODES_VS_ID, vs);
 			myValueSets.add(vs);
 		} else {
@@ -177,7 +181,6 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 
 		String partConceptMapId;
 		String termConceptMapId;
-		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (codeSystemVersionId != null) {
 			partConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID + "-" + codeSystemVersionId;
 			termConceptMapId = LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID + "-" + codeSystemVersionId;
@@ -195,6 +198,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 					.setConceptMapVersion(loincRsnaCmVersion)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
 					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+					.setSourceCodeSystemVersion(codeSystemVersionId)
 					.setSourceCode(partNumber)
 					.setSourceDisplay(partName)
 					.setTargetCodeSystem(RID_CS_URI)
@@ -213,6 +217,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 					.setConceptMapVersion(loincRsnaCmVersion)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
 					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
+					.setSourceCodeSystemVersion(codeSystemVersionId)
 					.setSourceCode(loincNumber)
 					.setSourceDisplay(longCommonName)
 					.setTargetCodeSystem(RPID_CS_URI)

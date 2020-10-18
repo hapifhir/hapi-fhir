@@ -1,0 +1,107 @@
+{
+  "resourceType": "MolecularSequence",
+  "id": "fda-vcfeval-comparison",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: fda-vcfeval-comparison\u003c/p\u003e\u003cp\u003e\u003cb\u003ecoordinateSystem\u003c/b\u003e: 1\u003c/p\u003e\u003cp\u003e\u003cb\u003epatient\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eReferenceSeqs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceSeqId\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrand\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowEnd\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eNC_000001.11 \u003cspan\u003e(Details : {http://www.ncbi.nlm.nih.gov/nuccore code \u0027NC_000001.11\u0027 \u003d \u0027NC_000001.11)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003ewatson\u003c/td\u003e\u003ctd\u003e10453\u003c/td\u003e\u003ctd\u003e101770080\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eVariants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEnd\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eObservedAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceAllele\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e13116\u003c/td\u003e\u003ctd\u003e13117\u003c/td\u003e\u003ctd\u003eT\u003c/td\u003e\u003ctd\u003eG\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003equality\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: indel\u003c/p\u003e\u003cp\u003e\u003cb\u003estandardSequence\u003c/b\u003e: file-BkZxBZ00bpJVk2q6x43b1YBx \u003cspan\u003e(Details : {https://precision.fda.gov/files/ code \u0027file-BkZxBZ00bpJVk2q6x43b1YBx\u0027 \u003d \u0027file-BkZxBZ00bpJVk2q6x43b1YBx)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estart\u003c/b\u003e: 10453\u003c/p\u003e\u003cp\u003e\u003cb\u003eend\u003c/b\u003e: 101770080\u003c/p\u003e\u003cp\u003e\u003cb\u003emethod\u003c/b\u003e: Vcfeval + Hap.py Comparison \u003cspan\u003e(Details : {https://precision.fda.gov/apps/ code \u0027app-BxfGF8j02pBZzZxbzZxP725P\u0027 \u003d \u0027app-BxfGF8j02pBZzZxbzZxP725P)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etruthTP\u003c/b\u003e: 7749\u003c/p\u003e\u003cp\u003e\u003cb\u003etruthFN\u003c/b\u003e: 2554\u003c/p\u003e\u003cp\u003e\u003cb\u003equeryFP\u003c/b\u003e: 10670\u003c/p\u003e\u003cp\u003e\u003cb\u003egtFP\u003c/b\u003e: 2186\u003c/p\u003e\u003cp\u003e\u003cb\u003eprecision\u003c/b\u003e: 0.428005\u003c/p\u003e\u003cp\u003e\u003cb\u003erecall\u003c/b\u003e: 0.752111\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003equality\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: snp\u003c/p\u003e\u003cp\u003e\u003cb\u003estandardSequence\u003c/b\u003e: file-BkZxBZ00bpJVk2q6x43b1YBx \u003cspan\u003e(Details : {https://precision.fda.gov/files/ code \u0027file-BkZxBZ00bpJVk2q6x43b1YBx\u0027 \u003d \u0027file-BkZxBZ00bpJVk2q6x43b1YBx)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estart\u003c/b\u003e: 10453\u003c/p\u003e\u003cp\u003e\u003cb\u003eend\u003c/b\u003e: 101770080\u003c/p\u003e\u003cp\u003e\u003cb\u003emethod\u003c/b\u003e: Vcfeval + Hap.py Comparison \u003cspan\u003e(Details : {https://precision.fda.gov/apps/ code \u0027app-BxfGF8j02pBZzZxbzZxP725P\u0027 \u003d \u0027app-BxfGF8j02pBZzZxbzZxP725P)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etruthTP\u003c/b\u003e: 92106\u003c/p\u003e\u003cp\u003e\u003cb\u003etruthFN\u003c/b\u003e: 1247\u003c/p\u003e\u003cp\u003e\u003cb\u003equeryFP\u003c/b\u003e: 21744\u003c/p\u003e\u003cp\u003e\u003cb\u003egtFP\u003c/b\u003e: 493\u003c/p\u003e\u003cp\u003e\u003cb\u003eprecision\u003c/b\u003e: 0.808602\u003c/p\u003e\u003cp\u003e\u003cb\u003erecall\u003c/b\u003e: 0.986642\u003c/p\u003e\u003c/blockquote\u003e\u003ch3\u003eRepositories\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003elogin\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttps://precision.fda.gov/jobs/job-ByxYPx809jFVy21KJG74Jg3Y\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFDA\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "coordinateSystem": 1,
+  "patient": {
+    "reference": "Patient/example"
+  },
+  "referenceSeq": {
+    "referenceSeqId": {
+      "coding": [
+        {
+          "system": "http://www.ncbi.nlm.nih.gov/nuccore",
+          "code": "NC_000001.11"
+        }
+      ]
+    },
+    "strand": "watson",
+    "windowStart": 10453,
+    "windowEnd": 101770080
+  },
+  "variant": [
+    {
+      "start": 13116,
+      "end": 13117,
+      "observedAllele": "T",
+      "referenceAllele": "G"
+    }
+  ],
+  "quality": [
+    {
+      "type": "indel",
+      "standardSequence": {
+        "coding": [
+          {
+            "system": "https://precision.fda.gov/files/",
+            "code": "file-BkZxBZ00bpJVk2q6x43b1YBx"
+          }
+        ]
+      },
+      "start": 10453,
+      "end": 101770080,
+      "method": {
+        "coding": [
+          {
+            "system": "https://precision.fda.gov/apps/",
+            "code": "app-BxfGF8j02pBZzZxbzZxP725P"
+          }
+        ],
+        "text": "Vcfeval + Hap.py Comparison"
+      },
+      "truthTP": 7749,
+      "truthFN": 2554,
+      "queryFP": 10670,
+      "gtFP": 2186,
+      "precision": 0.428005,
+      "recall": 0.752111
+    },
+    {
+      "type": "snp",
+      "standardSequence": {
+        "coding": [
+          {
+            "system": "https://precision.fda.gov/files/",
+            "code": "file-BkZxBZ00bpJVk2q6x43b1YBx"
+          }
+        ]
+      },
+      "start": 10453,
+      "end": 101770080,
+      "method": {
+        "coding": [
+          {
+            "system": "https://precision.fda.gov/apps/",
+            "code": "app-BxfGF8j02pBZzZxbzZxP725P"
+          }
+        ],
+        "text": "Vcfeval + Hap.py Comparison"
+      },
+      "truthTP": 92106,
+      "truthFN": 1247,
+      "queryFP": 21744,
+      "gtFP": 493,
+      "precision": 0.808602,
+      "recall": 0.986642
+    }
+  ],
+  "repository": [
+    {
+      "type": "login",
+      "url": "https://precision.fda.gov/jobs/job-ByxYPx809jFVy21KJG74Jg3Y",
+      "name": "FDA"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "resourceType": "Practitioner",
+  "id": "f004",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f004\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 118265112 (OFFICIAL), 523ASA1LK927 (USUAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Ronald Briet (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003etelecom\u003c/b\u003e: ph: 0205569273(WORK), r.briet@bmc.nl(WORK), fax: 0205664440(WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003eaddress\u003c/b\u003e: Galapagosweg 91 Amsterdam 1105 AZ NLD (WORK)\u003c/p\u003e\u003cp\u003e\u003cb\u003egender\u003c/b\u003e: male\u003c/p\u003e\u003cp\u003e\u003cb\u003ebirthDate\u003c/b\u003e: 04/02/1980\u003c/p\u003e\u003cp\u003e\u003cb\u003ecommunication\u003c/b\u003e: Language \u003cspan\u003e(Details : {urn:ietf:bcp:47 code \u0027nl\u0027 \u003d \u0027Dutch\u0027, given as \u0027Netherlands\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "urn:oid:2.16.528.1.1007.3.1",
+      "value": "118265112"
+    },
+    {
+      "use": "usual",
+      "system": "urn:oid:2.16.840.1.113883.2.4.6.3",
+      "value": "523ASA1LK927"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "Briet",
+      "given": [
+        "Ronald"
+      ],
+      "suffix": [
+        "MD"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "0205569273",
+      "use": "work"
+    },
+    {
+      "system": "email",
+      "value": "r.briet@bmc.nl",
+      "use": "work"
+    },
+    {
+      "system": "fax",
+      "value": "0205664440",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "use": "work",
+      "line": [
+        "Galapagosweg 91"
+      ],
+      "city": "Amsterdam",
+      "postalCode": "1105 AZ",
+      "country": "NLD"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1980-02-04",
+  "communication": [
+    {
+      "coding": [
+        {
+          "system": "urn:ietf:bcp:47",
+          "code": "nl",
+          "display": "Netherlands"
+        }
+      ],
+      "text": "Language"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

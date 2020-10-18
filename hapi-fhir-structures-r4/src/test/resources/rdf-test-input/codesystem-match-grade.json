@@ -1,0 +1,65 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "match-grade",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMatchGrade\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA Master Patient Index (MPI) assessment of whether a candidate patient record is a match or not.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/match-grade defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecertain\u003ca name\u003d\"match-grade-certain\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCertain Match\u003c/td\u003e\u003ctd\u003eThis record meets the matching criteria to be automatically considered as a full match.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprobable\u003ca name\u003d\"match-grade-probable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProbable Match\u003c/td\u003e\u003ctd\u003eThis record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epossible\u003ca name\u003d\"match-grade-possible\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePossible Match\u003c/td\u003e\u003ctd\u003eThis record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecertainly-not\u003ca name\u003d\"match-grade-certainly-not\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCertainly Not a Match\u003c/td\u003e\u003ctd\u003eThis record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the matching engine.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://terminology.hl7.org/CodeSystem/match-grade",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1289"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MatchGrade",
+  "title": "MatchGrade",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A Master Patient Index (MPI) assessment of whether a candidate patient record is a match or not.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/match-grade",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "certain",
+      "display": "Certain Match",
+      "definition": "This record meets the matching criteria to be automatically considered as a full match."
+    },
+    {
+      "code": "probable",
+      "display": "Probable Match",
+      "definition": "This record is a close match, but not a certain match. Additional review (e.g. by a human) may be required before using this as a match."
+    },
+    {
+      "code": "possible",
+      "display": "Possible Match",
+      "definition": "This record may be a matching one. Additional review (e.g. by a human) SHOULD be performed before using this as a match."
+    },
+    {
+      "code": "certainly-not",
+      "display": "Certainly Not a Match",
+      "definition": "This record is known not to be a match. Note that usually non-matching records are not returned, but in some cases records previously or likely considered as a match may specifically be negated by the matching engine."
+    }
+  ]
+}

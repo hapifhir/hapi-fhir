@@ -1,0 +1,64 @@
+{
+  "resourceType": "ValueSet",
+  "id": "condition-severity",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablevalueset"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eThis value set includes the following SNOMED CT \u0026quot;Severity\u0026quot; concepts:\u003c/p\u003e\n      \u003cul\u003e\n        \u003cli\u003e24484000: Severe\u003c/li\u003e\n        \u003cli\u003e6736007: Moderate\u003c/li\u003e\n        \u003cli\u003e255604002: Mild\u003c/li\u003e\n      \u003c/ul\u003e\n      \u003cp\u003eThis value set includes content from SNOMED CT, which is copyright © 2002+ International Health Terminology Standards Development Organisation (IHTSDO), and distributed by agreement between IHTSDO and HL7. Implementer use of SNOMED CT is not covered by this agreement\u003c/p\u003e  \n    \u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    }
+  ],
+  "url": "http://hl7.org/fhir/ValueSet/condition-severity",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.3.168"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "Condition/DiagnosisSeverity",
+  "title": "Condition/Diagnosis Severity",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Preferred value set for Condition/Diagnosis severity grading.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "compose": {
+    "include": [
+      {
+        "system": "http://snomed.info/sct",
+        "concept": [
+          {
+            "code": "24484000"
+          },
+          {
+            "code": "6736007"
+          },
+          {
+            "code": "255604002"
+          }
+        ]
+      }
+    ]
+  }
+}

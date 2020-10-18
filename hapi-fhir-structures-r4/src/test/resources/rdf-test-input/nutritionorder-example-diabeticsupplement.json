@@ -1,0 +1,111 @@
+{
+  "resourceType": "NutritionOrder",
+  "id": "diabeticsupplement",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: diabeticsupplement\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 123\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003epatient\u003c/b\u003e: \u003ca\u003ePeter Chalmers\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eInpatient\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edateTime\u003c/b\u003e: 17/09/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003eorderer\u003c/b\u003e: \u003ca\u003eDr Adam Careful\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eallergyIntolerance\u003c/b\u003e: \u003ca\u003eCashew Nuts\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003efoodPreferenceModifier\u003c/b\u003e: Kosher \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/diet code \u0027kosher\u0027 \u003d \u0027Kosher)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eexcludeFoodModifier\u003c/b\u003e: Cashew Nut \u003cspan\u003e(Details : {SNOMED CT code \u0027227493005\u0027 \u003d \u0027Cashew nuts\u0027, given as \u0027Cashew Nut\u0027})\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eSupplements\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eProductName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eSchedule\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eQuantity\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eAdult diabetic formula \u003cspan\u003e(Details : {SNOMED CT code \u0027443051000124104\u0027 \u003d \u0027Adult diabetic specialty formula (product)\u0027, given as \u0027Adult diabetes specialty formula\u0027}; {http://goodhealthhospital.org/supplement-type-codes code \u00271010\u0027 \u003d \u00271010\u0027, given as \u0027Adult diabetic formula\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eGlucerna\u003c/td\u003e\u003ctd\u003eStarting 10/02/2015 3:00:00 PM, Do Once per 24 hours\u003c/td\u003e\u003ctd\u003e1 8 oz bottle\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://goodhealthhospital.org/nutrition-requests",
+      "value": "123"
+    }
+  ],
+  "status": "active",
+  "intent": "order",
+  "patient": {
+    "reference": "Patient/example",
+    "display": "Peter Chalmers"
+  },
+  "encounter": {
+    "reference": "Encounter/example",
+    "display": "Inpatient"
+  },
+  "dateTime": "2014-09-17",
+  "orderer": {
+    "reference": "Practitioner/example",
+    "display": "Dr Adam Careful"
+  },
+  "allergyIntolerance": [
+    {
+      "reference": "AllergyIntolerance/example",
+      "display": "Cashew Nuts"
+    }
+  ],
+  "foodPreferenceModifier": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/diet",
+          "code": "kosher"
+        }
+      ]
+    }
+  ],
+  "excludeFoodModifier": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "version": "20140730",
+          "code": "227493005",
+          "display": "Cashew Nut"
+        }
+      ]
+    }
+  ],
+  "supplement": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "443051000124104",
+            "display": "Adult diabetes specialty formula"
+          },
+          {
+            "system": "http://goodhealthhospital.org/supplement-type-codes",
+            "code": "1010",
+            "display": "Adult diabetic formula"
+          }
+        ],
+        "text": "Adult diabetic formula"
+      },
+      "productName": "Glucerna",
+      "schedule": [
+        {
+          "repeat": {
+            "boundsPeriod": {
+              "start": "2015-02-10T15:00:00Z"
+            },
+            "frequency": 1,
+            "period": 24,
+            "periodUnit": "h"
+          }
+        },
+        {
+          "repeat": {
+            "duration": 1,
+            "durationUnit": "h",
+            "when": [
+              "HS"
+            ]
+          }
+        }
+      ],
+      "quantity": {
+        "value": 1,
+        "unit": "8 oz bottle"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

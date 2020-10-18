@@ -1,0 +1,91 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "condition-ver-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConditionVerificationStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe verification status to support or decline the clinical status of the condition or diagnosis.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/condition-ver-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunconfirmed\u003ca name\u003d\"condition-ver-status-unconfirmed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnconfirmed\u003c/td\u003e\u003ctd\u003eThere is not sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  provisional\u003ca name\u003d\"condition-ver-status-provisional\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProvisional\u003c/td\u003e\u003ctd\u003eThis is a tentative diagnosis - still a candidate that is under consideration.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  differential\u003ca name\u003d\"condition-ver-status-differential\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDifferential\u003c/td\u003e\u003ctd\u003eOne of a set of potential (and typically mutually exclusive) diagnoses asserted to further guide the diagnostic process and preliminary treatment.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econfirmed\u003ca name\u003d\"condition-ver-status-confirmed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eConfirmed\u003c/td\u003e\u003ctd\u003eThere is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erefuted\u003ca name\u003d\"condition-ver-status-refuted\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRefuted\u003c/td\u003e\u003ctd\u003eThis condition has been ruled out by diagnostic and clinical evidence.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentered-in-error\u003ca name\u003d\"condition-ver-status-entered-in-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEntered in Error\u003c/td\u003e\u003ctd\u003eThe statement was entered in error and is not valid.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1075"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ConditionVerificationStatus",
+  "title": "ConditionVerificationStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The verification status to support or decline the clinical status of the condition or diagnosis.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/condition-ver-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "unconfirmed",
+      "display": "Unconfirmed",
+      "definition": "There is not sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.",
+      "concept": [
+        {
+          "code": "provisional",
+          "display": "Provisional",
+          "definition": "This is a tentative diagnosis - still a candidate that is under consideration."
+        },
+        {
+          "code": "differential",
+          "display": "Differential",
+          "definition": "One of a set of potential (and typically mutually exclusive) diagnoses asserted to further guide the diagnostic process and preliminary treatment."
+        }
+      ]
+    },
+    {
+      "code": "confirmed",
+      "display": "Confirmed",
+      "definition": "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition."
+    },
+    {
+      "code": "refuted",
+      "display": "Refuted",
+      "definition": "This condition has been ruled out by diagnostic and clinical evidence."
+    },
+    {
+      "code": "entered-in-error",
+      "display": "Entered in Error",
+      "definition": "The statement was entered in error and is not valid."
+    }
+  ]
+}

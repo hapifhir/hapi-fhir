@@ -1,0 +1,106 @@
+{
+  "resourceType": "Condition",
+  "id": "f202",
+  "meta": {
+    "security": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "TBOO",
+        "display": "taboo"
+      }
+    ],
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f202\u003c/p\u003e\u003cp\u003e\u003cb\u003emeta\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003eclinicalStatus\u003c/b\u003e: Resolved \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-clinical code \u0027resolved\u0027 \u003d \u0027Resolved)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003everificationStatus\u003c/b\u003e: Confirmed \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-ver-status code \u0027confirmed\u0027 \u003d \u0027Confirmed)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Encounter Diagnosis \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/condition-category code \u0027encounter-diagnosis\u0027 \u003d \u0027Encounter Diagnosis)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eseverity\u003c/b\u003e: Severe \u003cspan\u003e(Details : {SNOMED CT code \u002724484000\u0027 \u003d \u0027Severe\u0027, given as \u0027Severe\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Malignant neoplastic disease \u003cspan\u003e(Details : {SNOMED CT code \u0027363346000\u0027 \u003d \u0027Malignant tumour\u0027, given as \u0027Malignant neoplastic disease\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ebodySite\u003c/b\u003e: Entire head and neck \u003cspan\u003e(Details : {SNOMED CT code \u0027361355005\u0027 \u003d \u0027Entire head and neck\u0027, given as \u0027Entire head and neck\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eonset\u003c/b\u003e: 52 years\u003cspan\u003e (Details: UCUM code a \u003d \u0027a\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eabatement\u003c/b\u003e: 54 years\u003cspan\u003e (Details: UCUM code a \u003d \u0027a\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erecordedDate\u003c/b\u003e: 01/12/2012\u003c/p\u003e\u003ch3\u003eEvidences\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDetail\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003eErasmus\u0027 diagnostic report of Roel\u0027s tumor\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "resolved"
+      }
+    ]
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+        "code": "confirmed"
+      }
+    ]
+  },
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+          "code": "encounter-diagnosis"
+        }
+      ]
+    }
+  ],
+  "severity": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "24484000",
+        "display": "Severe"
+      }
+    ]
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "363346000",
+        "display": "Malignant neoplastic disease"
+      }
+    ]
+  },
+  "bodySite": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "361355005",
+          "display": "Entire head and neck"
+        }
+      ]
+    }
+  ],
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "onsetAge": {
+    "value": 52,
+    "unit": "years",
+    "system": "http://unitsofmeasure.org",
+    "code": "a"
+  },
+  "abatementAge": {
+    "value": 54,
+    "unit": "years",
+    "system": "http://unitsofmeasure.org",
+    "code": "a"
+  },
+  "recordedDate": "2012-12-01",
+  "evidence": [
+    {
+      "detail": [
+        {
+          "reference": "DiagnosticReport/f201",
+          "display": "Erasmus\u0027 diagnostic report of Roel\u0027s tumor"
+        }
+      ]
+    }
+  ]
+}

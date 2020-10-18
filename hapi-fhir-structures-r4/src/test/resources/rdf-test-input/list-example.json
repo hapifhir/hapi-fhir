@@ -1,0 +1,54 @@
+{
+  "resourceType": "List",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ctable\u003e\n        \u003cthead\u003e\n          \u003ctr\u003e\n            \u003cth\u003eCondition\u003c/th\u003e\n            \u003cth\u003eSeverity\u003c/th\u003e\n            \u003cth\u003eDate\u003c/th\u003e\n            \u003cth\u003eLocation\u003c/th\u003e\n            \u003cth\u003eStatus\u003c/th\u003e\n          \u003c/tr\u003e\n        \u003c/thead\u003e\n        \u003ctbody\u003e\n          \u003ctr\u003e\n            \u003ctd\u003eBurnt Ear\u003c/td\u003e\n            \u003ctd\u003eSevere\u003c/td\u003e\n            \u003ctd\u003e24-May 2012\u003c/td\u003e\n            \u003ctd\u003eLeft Ear\u003c/td\u003e\n            \u003ctd\u003edeleted\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003eAsthma\u003c/td\u003e\n            \u003ctd\u003eMild\u003c/td\u003e\n            \u003ctd\u003e21-Nov 2012\u003c/td\u003e\n            \u003ctd\u003e--\u003c/td\u003e\n            \u003ctd\u003eadded\u003c/td\u003e\n          \u003c/tr\u003e\n        \u003c/tbody\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "urn:uuid:a9fcea7c-fcdf-4d17-a5e0-f26dda030b59",
+      "value": "23974652"
+    }
+  ],
+  "status": "current",
+  "mode": "changes",
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "encounter": {
+    "reference": "Encounter/example"
+  },
+  "date": "2012-11-25T22:17:00+11:00",
+  "source": {
+    "reference": "Patient/example"
+  },
+  "entry": [
+    {
+      "flag": {
+        "text": "Deleted due to error"
+      },
+      "deleted": true,
+      "item": {
+        "reference": "Condition/example"
+      }
+    },
+    {
+      "flag": {
+        "text": "Added"
+      },
+      "item": {
+        "reference": "Condition/example2"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

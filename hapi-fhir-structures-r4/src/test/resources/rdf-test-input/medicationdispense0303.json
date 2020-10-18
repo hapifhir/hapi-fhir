@@ -1,0 +1,150 @@
+{
+  "resourceType": "MedicationDispense",
+  "id": "meddisp0303",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: meddisp0303\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003epartOf\u003c/b\u003e: \u003ca\u003eProcedure/biopsy\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: on-hold\u003c/p\u003e\u003cp\u003e\u003cb\u003estatusReason\u003c/b\u003e: \u003ca\u003eDetectedIssue/allergy\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Outpatient \u003cspan\u003e(Details : {http://terminology.hl7.org/fhir/CodeSystem/medicationdispense-category code \u0027outpatient\u0027 \u003d \u0027Outpatient\u0027, given as \u0027Outpatient\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: id: med0310; Oxycodone Hydrochloride 5mg oral tablet (Roxicodone \u003cspan\u003e(Details : {RxNorm code \u00271049623\u0027 \u003d \u0027ROXICODONE 5 MG Oral Tablet\u0027, given as \u0027Oxycodone Hydrochloride 5mg oral tablet (Roxicodone\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003econtext\u003c/b\u003e: \u003ca\u003eEncounter/f001\u003c/a\u003e\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePractitioner/f006\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003eauthorizingPrescription\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0310\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Emergency Supply \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v3-ActCode code \u0027EM\u0027 \u003d \u0027Emergency Supply\u0027, given as \u0027Emergency Supply\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 30 TAB\u003cspan\u003e (Details: http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm code TAB \u003d \u0027Tablet\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edaysSupply\u003c/b\u003e: 10 Day\u003cspan\u003e (Details: UCUM code d \u003d \u0027d\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ewhenPrepared\u003c/b\u003e: 15/04/2016 7:14:00 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003edosageInstruction\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edetectedIssue\u003c/b\u003e: \u003ca\u003eDetectedIssue/allergy\u003c/a\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Medication",
+      "id": "med0310",
+      "code": {
+        "coding": [
+          {
+            "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+            "code": "1049623",
+            "display": "Oxycodone Hydrochloride 5mg oral tablet (Roxicodone"
+          }
+        ]
+      }
+    }
+  ],
+  "partOf": [
+    {
+      "reference": "Procedure/biopsy"
+    }
+  ],
+  "status": "on-hold",
+  "statusReasonReference": {
+    "reference": "DetectedIssue/allergy"
+  },
+  "category": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/fhir/CodeSystem/medicationdispense-category",
+        "code": "outpatient",
+        "display": "Outpatient"
+      }
+    ]
+  },
+  "medicationReference": {
+    "reference": "#med0310"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "context": {
+    "reference": "Encounter/f001"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f006"
+      }
+    }
+  ],
+  "authorizingPrescription": [
+    {
+      "reference": "MedicationRequest/medrx0310"
+    }
+  ],
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+        "code": "EM",
+        "display": "Emergency Supply"
+      }
+    ]
+  },
+  "quantity": {
+    "value": 30,
+    "system": "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm",
+    "code": "TAB"
+  },
+  "daysSupply": {
+    "value": 10,
+    "unit": "Day",
+    "system": "http://unitsofmeasure.org",
+    "code": "d"
+  },
+  "whenPrepared": "2016-04-15T07:14:00+05:00",
+  "dosageInstruction": [
+    {
+      "sequence": 1,
+      "text": "one to two tablets every 4-6 hours as needed for rib pain",
+      "additionalInstruction": [
+        {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "418914006",
+              "display": "Warning. May cause drowsiness. If affected do not drive or operate machinery. Avoid alcoholic drink (qualifier value)"
+            }
+          ]
+        }
+      ],
+      "timing": {
+        "repeat": {
+          "frequency": 1,
+          "period": 4,
+          "periodMax": 6,
+          "periodUnit": "h"
+        }
+      },
+      "asNeededCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "297217002",
+            "display": "Rib Pain (finding)"
+          }
+        ]
+      },
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "26643006",
+            "display": "Oral Route"
+          }
+        ]
+      },
+      "method": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "421521009",
+            "display": "Swallow - dosing instruction imperative (qualifier value)"
+          }
+        ]
+      }
+    }
+  ],
+  "detectedIssue": [
+    {
+      "reference": "DetectedIssue/allergy"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

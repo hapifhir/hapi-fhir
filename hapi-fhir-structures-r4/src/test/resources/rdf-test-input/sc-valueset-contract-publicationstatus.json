@@ -1,0 +1,117 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "sc-contract-publicationstatus",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eContractResourcePublicationStatusCodesCanonicalMap (http://hl7.org/fhir/ConceptMap/sc-contract-publicationstatus)\u003c/h2\u003e\u003cp\u003eMapping from \u003ca href\u003d\"valueset-contract-publicationstatus.html\"\u003ehttp://hl7.org/fhir/ValueSet/contract-publicationstatus\u003c/a\u003e to \u003ca href\u003d\"valueset-resource-status.html\"\u003ehttp://hl7.org/fhir/ValueSet/resource-status\u003c/a\u003e\u003c/p\u003e\u003cp\u003eDRAFT. Published on 01/11/2019 9:29:23 AM by Financial Management (\u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e). \u003c/p\u003e\u003cdiv\u003e\u003cp\u003eCanonical Mapping for \u0026quot;This value set contract specific codes for status.\u0026quot;\u003c/p\u003e\n\u003c/div\u003e\u003cbr/\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eSource Code\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEquivalence\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDestination Code\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eentered-in-error\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eerror\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eoffered\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eproposed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003enegotiable,policy\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003edraft\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eexecutable,resolved\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eactive\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003edisputed\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003esuspended\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003erevoked\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003efailed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eamended,appended,renewed\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003ereplaced\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eexecuted\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003ecomplete\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ecancelled,rejected,terminated\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eabandoned\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/sc-contract-publicationstatus",
+  "version": "4.0.1",
+  "name": "ContractResourcePublicationStatusCodesCanonicalMap",
+  "title": "Canonical Mapping for \"Contract Resource Publication Status codes\"",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Canonical Mapping for \"This value set contract specific codes for status.\"",
+  "sourceCanonical": "http://hl7.org/fhir/ValueSet/contract-publicationstatus",
+  "targetCanonical": "http://hl7.org/fhir/ValueSet/resource-status",
+  "group": [
+    {
+      "source": "http://hl7.org/fhir/contract-publicationstatus",
+      "target": "http://hl7.org/fhir/resource-status",
+      "element": [
+        {
+          "code": "entered-in-error",
+          "target": [
+            {
+              "code": "error",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "offered",
+          "target": [
+            {
+              "code": "proposed",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "negotiable,policy",
+          "target": [
+            {
+              "code": "draft",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "executable,resolved",
+          "target": [
+            {
+              "code": "active",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "disputed",
+          "target": [
+            {
+              "code": "suspended",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "revoked",
+          "target": [
+            {
+              "code": "failed",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "amended,appended,renewed",
+          "target": [
+            {
+              "code": "replaced",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "executed",
+          "target": [
+            {
+              "code": "complete",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "cancelled,rejected,terminated",
+          "target": [
+            {
+              "code": "abandoned",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

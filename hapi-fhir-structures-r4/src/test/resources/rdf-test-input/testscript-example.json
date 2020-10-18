@@ -1,0 +1,312 @@
+{
+  "resourceType": "TestScript",
+  "id": "testscript-example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: testscript-example\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/TestScript/testscript-example\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: urn:oid:1.3.6.1.4.1.21367.2005.3.7.9876\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 1.0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: TestScript Example\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003eexperimental\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 18/01/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: HL7\u003c/p\u003e\u003cp\u003e\u003cb\u003econtact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: TestScript example resource with setup to delete if present and create a new instance of a Patient; and single test definition to read the created Patient with various asserts.\u003c/p\u003e\u003cp\u003e\u003cb\u003euseContext\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America (the) \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America\u0027, given as \u0027United States of America (the)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: Patient Conditional Create (Update), Read and Delete Operations\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: © HL7.org 2011+\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003emetadata\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eLinks\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/patient.html\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDemographics and other administrative information about an individual or animal receiving care or other health-related services.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eCapabilities\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eRequired\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eValidated\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLink\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCapabilities\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003ctd\u003ePatient Update, Read and Delete Operations\u003c/td\u003e\u003ctd\u003e\u003ca\u003ehttp://hl7.org/fhir/http.html#delete\u003c/a\u003e\u003c/td\u003e\u003ctd\u003e\u003ca\u003eCapabilityStatement/example\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003efixture\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eautocreate\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003eautodelete\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003eresource\u003c/b\u003e: \u003ca\u003ePeter Chalmers\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003efixture\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eautocreate\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003eautodelete\u003c/b\u003e: false\u003c/p\u003e\u003cp\u003e\u003cb\u003eresource\u003c/b\u003e: \u003ca\u003ePeter Chalmers (minimum)\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cp\u003e\u003cb\u003eprofile\u003c/b\u003e: \u003ca\u003eGenerated Summary: url: http://hl7.org/fhir/StructureDefinition/Patient; version: 4.0.1; name: Patient; ACTIVE; date: 01/11/2019 9:29:23 AM; publisher: Health Level Seven International (Patient Administration); description: Demographics and other administrative information about an individual or animal receiving care or other health-related services.; purpose: Tracking patient is the center of the healthcare process.; 4.0.1; RESOURCE; type: Patient; baseDefinition: http://hl7.org/fhir/StructureDefinition/DomainResource; SPECIALIZATION\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eVariables\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePath\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eSourceId\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ecreateResourceId\u003c/td\u003e\u003ctd\u003ePatient/id\u003c/td\u003e\u003ctd\u003efixture-patient-create\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003esetup\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLabel\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAccept\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEncodeRequestUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eParams\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eDelete (Details: http://terminology.hl7.org/CodeSystem/testscript-operation-codes code delete \u003d \u0027Delete\u0027, stated as \u0027null\u0027)\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eSetupDeletePatient\u003c/td\u003e\u003ctd\u003eExecute a delete operation to insure the patient does not exist on the server.\u003c/td\u003e\u003ctd\u003ejson\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003e/${createResourceId}\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDirection\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eOperator\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResponseCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned HTTP status is 200(OK) or 204(No Content).\u003c/td\u003e\u003ctd\u003eresponse\u003c/td\u003e\u003ctd\u003ein\u003c/td\u003e\u003ctd\u003e200,204\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eLabel\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eAccept\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eContentType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEncodeRequestUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eParams\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eSourceId\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eUpdate (Details: http://terminology.hl7.org/CodeSystem/testscript-operation-codes code update \u003d \u0027Update\u0027, stated as \u0027null\u0027)\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eSetupCreatePatient\u003c/td\u003e\u003ctd\u003eCreate patient resource on test server using the contents of fixture-patient-create\u003c/td\u003e\u003ctd\u003ejson\u003c/td\u003e\u003ctd\u003ejson\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003e/${createResourceId}\u003c/td\u003e\u003ctd\u003efixture-patient-create\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDirection\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResponseCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned HTTP status is 201(Created).\u003c/td\u003e\u003ctd\u003eresponse\u003c/td\u003e\u003ctd\u003e201\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResource\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEncodeRequestUrl\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eTargetId\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eRead (Details: http://terminology.hl7.org/CodeSystem/testscript-operation-codes code read \u003d \u0027Read\u0027, stated as \u0027null\u0027)\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eRead the created patient resource on the test server using the id from fixture-patient-create. Verify contents.\u003c/td\u003e\u003ctd\u003etrue\u003c/td\u003e\u003ctd\u003efixture-patient-create\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDirection\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eResponse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned HTTP status is 200(OK).\u003c/td\u003e\u003ctd\u003eresponse\u003c/td\u003e\u003ctd\u003eokay\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDescription\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCompareToSourceId\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCompareToSourceExpression\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eOperator\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWarningOnly\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eConfirm that the returned Patient contains the expected family name \u0027Chalmers\u0027. Uses explicit compareToSourceId reference to fixture-patient-create used to create the Patient.\u003c/td\u003e\u003ctd\u003efixture-patient-create\u003c/td\u003e\u003ctd\u003ePatient.name.first().family\u003c/td\u003e\u003ctd\u003eequals\u003c/td\u003e\u003ctd\u003efalse\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003etest\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: Read Patient\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Read a Patient and validate response.\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eAsserts\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eteardown\u003c/b\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003ch3\u003eOperations\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/TestScript/testscript-example",
+  "identifier": {
+    "system": "urn:ietf:rfc:3986",
+    "value": "urn:oid:1.3.6.1.4.1.21367.2005.3.7.9876"
+  },
+  "version": "1.0",
+  "name": "TestScript Example",
+  "status": "draft",
+  "experimental": true,
+  "date": "2017-01-18",
+  "publisher": "HL7",
+  "contact": [
+    {
+      "name": "Support",
+      "telecom": [
+        {
+          "system": "email",
+          "value": "support@HL7.org",
+          "use": "work"
+        }
+      ]
+    }
+  ],
+  "description": "TestScript example resource with setup to delete if present and create a new instance of a Patient; and single test definition to read the created Patient with various asserts.",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://terminology.hl7.org/CodeSystem/variant-state",
+            "code": "positive"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US",
+          "display": "United States of America (the)"
+        }
+      ]
+    }
+  ],
+  "purpose": "Patient Conditional Create (Update), Read and Delete Operations",
+  "copyright": "© HL7.org 2011+",
+  "metadata": {
+    "link": [
+      {
+        "url": "http://hl7.org/fhir/patient.html",
+        "description": "Demographics and other administrative information about an individual or animal receiving care or other health-related services."
+      }
+    ],
+    "capability": [
+      {
+        "required": true,
+        "validated": false,
+        "description": "Patient Update, Read and Delete Operations",
+        "link": [
+          "http://hl7.org/fhir/http.html#delete",
+          "http://hl7.org/fhir/http.html#read",
+          "http://hl7.org/fhir/http.html#update"
+        ],
+        "capabilities": "CapabilityStatement/example"
+      }
+    ]
+  },
+  "fixture": [
+    {
+      "id": "fixture-patient-create",
+      "autocreate": false,
+      "autodelete": false,
+      "resource": {
+        "reference": "Patient/example",
+        "display": "Peter Chalmers"
+      }
+    },
+    {
+      "id": "fixture-patient-minimum",
+      "autocreate": false,
+      "autodelete": false,
+      "resource": {
+        "reference": "Patient/example",
+        "display": "Peter Chalmers (minimum)"
+      }
+    }
+  ],
+  "profile": [
+    {
+      "id": "patient-profile",
+      "reference": "http://hl7.org/fhir/StructureDefinition/Patient"
+    }
+  ],
+  "variable": [
+    {
+      "name": "createResourceId",
+      "path": "Patient/id",
+      "sourceId": "fixture-patient-create"
+    }
+  ],
+  "setup": {
+    "action": [
+      {
+        "operation": {
+          "type": {
+            "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+            "code": "delete"
+          },
+          "resource": "Patient",
+          "label": "SetupDeletePatient",
+          "description": "Execute a delete operation to insure the patient does not exist on the server.",
+          "accept": "json",
+          "encodeRequestUrl": true,
+          "params": "/${createResourceId}"
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned HTTP status is 200(OK) or 204(No Content).",
+          "direction": "response",
+          "operator": "in",
+          "responseCode": "200,204",
+          "warningOnly": false
+        }
+      },
+      {
+        "operation": {
+          "type": {
+            "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+            "code": "update"
+          },
+          "resource": "Patient",
+          "label": "SetupCreatePatient",
+          "description": "Create patient resource on test server using the contents of fixture-patient-create",
+          "accept": "json",
+          "contentType": "json",
+          "encodeRequestUrl": true,
+          "params": "/${createResourceId}",
+          "sourceId": "fixture-patient-create"
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned HTTP status is 201(Created).",
+          "direction": "response",
+          "responseCode": "201",
+          "warningOnly": false
+        }
+      },
+      {
+        "operation": {
+          "type": {
+            "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+            "code": "read"
+          },
+          "resource": "Patient",
+          "description": "Read the created patient resource on the test server using the id from fixture-patient-create. Verify contents.",
+          "encodeRequestUrl": true,
+          "targetId": "fixture-patient-create"
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned HTTP status is 200(OK).",
+          "direction": "response",
+          "response": "okay",
+          "warningOnly": false
+        }
+      },
+      {
+        "assert": {
+          "description": "Confirm that the returned Patient contains the expected family name \u0027Chalmers\u0027. Uses explicit compareToSourceId reference to fixture-patient-create used to create the Patient.",
+          "compareToSourceId": "fixture-patient-create",
+          "compareToSourceExpression": "Patient.name.first().family",
+          "operator": "equals",
+          "warningOnly": false
+        }
+      }
+    ]
+  },
+  "test": [
+    {
+      "id": "01-ReadPatient",
+      "name": "Read Patient",
+      "description": "Read a Patient and validate response.",
+      "action": [
+        {
+          "operation": {
+            "type": {
+              "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+              "code": "read"
+            },
+            "resource": "Patient",
+            "description": "Read the patient resource on the test server using the id from fixture-patient-create. Prevent URL encoding of the request.",
+            "encodeRequestUrl": false,
+            "responseId": "fixture-patient-read",
+            "targetId": "fixture-patient-create"
+          }
+        },
+        {
+          "assert": {
+            "label": "01-ReadPatientOK",
+            "description": "Confirm that the returned HTTP status is 200(OK).",
+            "direction": "response",
+            "response": "okay",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned HTTP Header Last-Modified is present. Warning only as the server might not support versioning.",
+            "direction": "response",
+            "headerField": "Last-Modified",
+            "operator": "notEmpty",
+            "warningOnly": true
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned resource type is Patient.",
+            "resource": "Patient",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Patient conforms to the base FHIR specification.",
+            "validateProfileId": "patient-profile",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Patient contains the expected family name \u0027Chalmers\u0027. Uses explicit sourceId reference to read responseId fixture.",
+            "operator": "equals",
+            "path": "fhir:Patient/fhir:name/fhir:family/@value",
+            "sourceId": "fixture-patient-read",
+            "value": "Chalmers",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Patient contains the expected given name \u0027Peter\u0027. Uses explicit sourceId reference to read responseId fixture.",
+            "operator": "equals",
+            "path": "fhir:Patient/fhir:name/fhir:given/@value",
+            "sourceId": "fixture-patient-read",
+            "value": "Peter",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Patient contains the expected family name \u0027Chalmers\u0027. Uses explicit compareToSourceId reference to fixture-patient-create used to create the Patient and implicit reference to read response payload.",
+            "compareToSourceId": "fixture-patient-create",
+            "compareToSourcePath": "fhir:Patient/fhir:name/fhir:family/@value",
+            "operator": "equals",
+            "path": "fhir:Patient/fhir:name/fhir:family/@value",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned Patient contains the expected family name \u0027Chalmers\u0027. Uses explicit compareToSourceId reference to fixture-patient-create used to create the Patient and explicit reference to read response payload and default operator of \u0027equals\u0027.",
+            "compareToSourceId": "fixture-patient-create",
+            "compareToSourcePath": "fhir:Patient/fhir:name/fhir:given/@value",
+            "path": "fhir:Patient/fhir:name/fhir:given/@value",
+            "sourceId": "fixture-patient-read",
+            "warningOnly": false
+          }
+        },
+        {
+          "assert": {
+            "description": "Confirm that the returned resource contains the expected retained elements and values. Warning only to provide users with reviewable results.",
+            "minimumId": "fixture-patient-minimum",
+            "warningOnly": true
+          }
+        }
+      ]
+    }
+  ],
+  "teardown": {
+    "action": [
+      {
+        "operation": {
+          "type": {
+            "system": "http://terminology.hl7.org/CodeSystem/testscript-operation-codes",
+            "code": "delete"
+          },
+          "resource": "Patient",
+          "description": "Delete the patient resource on the test server using the id from fixture-patient-create.",
+          "encodeRequestUrl": true,
+          "targetId": "fixture-patient-create"
+        }
+      }
+    ]
+  }
+}

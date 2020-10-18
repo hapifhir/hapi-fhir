@@ -1,0 +1,70 @@
+{
+  "resourceType": "Schedule",
+  "id": "exampleloc1",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      Dr. Beverly Crusher - USS Enterprise-D Sickbay Schedule\n\t\t\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "http://example.org/scheduleid",
+      "value": "46"
+    }
+  ],
+  "active": true,
+  "serviceCategory": [
+    {
+      "coding": [
+        {
+          "code": "17",
+          "display": "General Practice"
+        }
+      ]
+    }
+  ],
+  "serviceType": [
+    {
+      "coding": [
+        {
+          "code": "75",
+          "display": "Genetic Counselling"
+        }
+      ]
+    }
+  ],
+  "specialty": [
+    {
+      "coding": [
+        {
+          "code": "394580004",
+          "display": "Clinical genetics"
+        }
+      ]
+    }
+  ],
+  "actor": [
+    {
+      "reference": "Practitioner/1",
+      "display": "Dr. Beverly Crusher"
+    },
+    {
+      "reference": "Location/3",
+      "display": "USS Enterprise-D Sickbay"
+    }
+  ],
+  "planningHorizon": {
+    "start": "2017-12-25T09:15:00Z",
+    "end": "2017-12-25T09:30:00Z"
+  },
+  "comment": "The slots attached to this schedule are for genetic counselling in the USS Enterprise-D Sickbay.",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

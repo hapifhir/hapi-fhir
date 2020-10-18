@@ -1,0 +1,78 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "gender-identity",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGender identity\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate a patient\u0027s gender identity.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/gender-identity defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransgender-female\u003ca name\u003d\"gender-identity-transgender-female\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etransgender female\u003c/td\u003e\u003ctd\u003ethe patient identifies as transgender male-to-female\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransgender-male\u003ca name\u003d\"gender-identity-transgender-male\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etransgender male\u003c/td\u003e\u003ctd\u003ethe patient identifies as transgender female-to-male\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enon-binary\u003ca name\u003d\"gender-identity-non-binary\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003enon-binary\u003c/td\u003e\u003ctd\u003ethe patient identifies with neither/both female and male\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emale\u003ca name\u003d\"gender-identity-male\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003emale\u003c/td\u003e\u003ctd\u003ethe patient identifies as male\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efemale\u003ca name\u003d\"gender-identity-female\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003efemale\u003c/td\u003e\u003ctd\u003ethe patient identifies as female\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eother\u003ca name\u003d\"gender-identity-other\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eother\u003c/td\u003e\u003ctd\u003eother gender identity\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enon-disclose\u003ca name\u003d\"gender-identity-non-disclose\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edoes not wish to disclose\u003c/td\u003e\u003ctd\u003ethe patient does not wish to disclose his gender identity\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/gender-identity",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.973"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GenderIdentity",
+  "title": "Gender identity",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate a patient\u0027s gender identity.",
+  "copyright": "This resource includes content from SNOMED Clinical Terms® (SNOMED CT®) which is copyright of the International Health Terminology Standards Development Organisation (IHTSDO). Implementers of these specifications must have the appropriate SNOMED CT Affiliate license - for more information contact http://www.snomed.org/snomed-ct/get-snomed-ct or info@snomed.org",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "transgender-female",
+      "display": "transgender female",
+      "definition": "the patient identifies as transgender male-to-female"
+    },
+    {
+      "code": "transgender-male",
+      "display": "transgender male",
+      "definition": "the patient identifies as transgender female-to-male"
+    },
+    {
+      "code": "non-binary",
+      "display": "non-binary",
+      "definition": "the patient identifies with neither/both female and male"
+    },
+    {
+      "code": "male",
+      "display": "male",
+      "definition": "the patient identifies as male"
+    },
+    {
+      "code": "female",
+      "display": "female",
+      "definition": "the patient identifies as female"
+    },
+    {
+      "code": "other",
+      "display": "other",
+      "definition": "other gender identity"
+    },
+    {
+      "code": "non-disclose",
+      "display": "does not wish to disclose",
+      "definition": "the patient does not wish to disclose his gender identity"
+    }
+  ]
+}

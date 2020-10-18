@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "list-order",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eList Order Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eBase values for the order of the items in a list resource.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/list-order defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euser\u003ca name\u003d\"list-order-user\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by User\u003c/td\u003e\u003ctd\u003eThe list was sorted by a user. The criteria the user used are not specified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esystem\u003ca name\u003d\"list-order-system\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by System\u003c/td\u003e\u003ctd\u003eThe list was sorted by the system. The criteria the user used are not specified; define additional codes to specify a particular order (or use other defined codes).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eevent-date\u003ca name\u003d\"list-order-event-date\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by Event Date\u003c/td\u003e\u003ctd\u003eThe list is sorted by the data of the event. This can be used when the list has items which are dates with past or future events.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eentry-date\u003ca name\u003d\"list-order-entry-date\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by Item Date\u003c/td\u003e\u003ctd\u003eThe list is sorted by the date the item was added to the list. Note that the date added to the list is not explicit in the list itself.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epriority\u003ca name\u003d\"list-order-priority\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by Priority\u003c/td\u003e\u003ctd\u003eThe list is sorted by priority. The exact method in which priority has been determined is not specified.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ealphabetic\u003ca name\u003d\"list-order-alphabetic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted Alphabetically\u003c/td\u003e\u003ctd\u003eThe list is sorted alphabetically by an unspecified property of the items in the list.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecategory\u003ca name\u003d\"list-order-category\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by Category\u003c/td\u003e\u003ctd\u003eThe list is sorted categorically by an unspecified property of the items in the list.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatient\u003ca name\u003d\"list-order-patient\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSorted by Patient\u003c/td\u003e\u003ctd\u003eThe list is sorted by patient, with items for each patient grouped together.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sd"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/list-order",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1107"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ListOrderCodes",
+  "title": "List Order Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Base values for the order of the items in a list resource.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/list-order",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "user",
+      "display": "Sorted by User",
+      "definition": "The list was sorted by a user. The criteria the user used are not specified."
+    },
+    {
+      "code": "system",
+      "display": "Sorted by System",
+      "definition": "The list was sorted by the system. The criteria the user used are not specified; define additional codes to specify a particular order (or use other defined codes)."
+    },
+    {
+      "code": "event-date",
+      "display": "Sorted by Event Date",
+      "definition": "The list is sorted by the data of the event. This can be used when the list has items which are dates with past or future events."
+    },
+    {
+      "code": "entry-date",
+      "display": "Sorted by Item Date",
+      "definition": "The list is sorted by the date the item was added to the list. Note that the date added to the list is not explicit in the list itself."
+    },
+    {
+      "code": "priority",
+      "display": "Sorted by Priority",
+      "definition": "The list is sorted by priority. The exact method in which priority has been determined is not specified."
+    },
+    {
+      "code": "alphabetic",
+      "display": "Sorted Alphabetically",
+      "definition": "The list is sorted alphabetically by an unspecified property of the items in the list."
+    },
+    {
+      "code": "category",
+      "display": "Sorted by Category",
+      "definition": "The list is sorted categorically by an unspecified property of the items in the list."
+    },
+    {
+      "code": "patient",
+      "display": "Sorted by Patient",
+      "definition": "The list is sorted by patient, with items for each patient grouped together."
+    }
+  ]
+}

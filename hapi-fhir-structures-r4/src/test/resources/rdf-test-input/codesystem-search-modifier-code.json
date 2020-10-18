@@ -1,0 +1,119 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "search-modifier-code",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSearchModifierCode\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA supported modifier for a search parameter.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/search-modifier-code defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emissing\u003ca name\u003d\"search-modifier-code-missing\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMissing\u003c/td\u003e\u003ctd\u003eThe search parameter returns resources that have a value or not.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexact\u003ca name\u003d\"search-modifier-code-exact\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExact\u003c/td\u003e\u003ctd\u003eThe search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econtains\u003ca name\u003d\"search-modifier-code-contains\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContains\u003c/td\u003e\u003ctd\u003eThe search parameter returns resources that include the supplied parameter value anywhere within the field being searched.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot\u003ca name\u003d\"search-modifier-code-not\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot\u003c/td\u003e\u003ctd\u003eThe search parameter returns resources that do not contain a match.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etext\u003ca name\u003d\"search-modifier-code-text\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eText\u003c/td\u003e\u003ctd\u003eThe search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ein\u003ca name\u003d\"search-modifier-code-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn\u003c/td\u003e\u003ctd\u003eThe search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enot-in\u003ca name\u003d\"search-modifier-code-not-in\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot In\u003c/td\u003e\u003ctd\u003eThe search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebelow\u003ca name\u003d\"search-modifier-code-below\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBelow\u003c/td\u003e\u003ctd\u003eThe search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eabove\u003ca name\u003d\"search-modifier-code-above\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAbove\u003c/td\u003e\u003ctd\u003eThe search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etype\u003ca name\u003d\"search-modifier-code-type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eType\u003c/td\u003e\u003ctd\u003eThe search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eidentifier\u003ca name\u003d\"search-modifier-code-identifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIdentifier\u003c/td\u003e\u003ctd\u003eThe search parameter applies to the identifier on the resource, not the reference.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eofType\u003ca name\u003d\"search-modifier-code-ofType\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOf Type\u003c/td\u003e\u003ctd\u003eThe search parameter has the format system|code|value, where the system and code refer to an Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/search-modifier-code",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.640"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SearchModifierCode",
+  "title": "SearchModifierCode",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A supported modifier for a search parameter.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/search-modifier-code",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "missing",
+      "display": "Missing",
+      "definition": "The search parameter returns resources that have a value or not."
+    },
+    {
+      "code": "exact",
+      "display": "Exact",
+      "definition": "The search parameter returns resources that have a value that exactly matches the supplied parameter (the whole string, including casing and accents)."
+    },
+    {
+      "code": "contains",
+      "display": "Contains",
+      "definition": "The search parameter returns resources that include the supplied parameter value anywhere within the field being searched."
+    },
+    {
+      "code": "not",
+      "display": "Not",
+      "definition": "The search parameter returns resources that do not contain a match."
+    },
+    {
+      "code": "text",
+      "display": "Text",
+      "definition": "The search parameter is processed as a string that searches text associated with the code/value - either CodeableConcept.text, Coding.display, or Identifier.type.text."
+    },
+    {
+      "code": "in",
+      "display": "In",
+      "definition": "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set."
+    },
+    {
+      "code": "not-in",
+      "display": "Not In",
+      "definition": "The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set."
+    },
+    {
+      "code": "below",
+      "display": "Below",
+      "definition": "The search parameter tests whether the value in a resource is subsumed by the specified value (is-a, or hierarchical relationships)."
+    },
+    {
+      "code": "above",
+      "display": "Above",
+      "definition": "The search parameter tests whether the value in a resource subsumes the specified value (is-a, or hierarchical relationships)."
+    },
+    {
+      "code": "type",
+      "display": "Type",
+      "definition": "The search parameter only applies to the Resource Type specified as a modifier (e.g. the modifier is not actually :type, but :Patient etc.)."
+    },
+    {
+      "code": "identifier",
+      "display": "Identifier",
+      "definition": "The search parameter applies to the identifier on the resource, not the reference."
+    },
+    {
+      "code": "ofType",
+      "display": "Of Type",
+      "definition": "The search parameter has the format system|code|value, where the system and code refer to an Identifier.type.coding.system and .code, and match if any of the type codes match. All 3 parts must be present."
+    }
+  ]
+}

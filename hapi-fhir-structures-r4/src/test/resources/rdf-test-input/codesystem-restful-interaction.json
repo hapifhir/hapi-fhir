@@ -1,0 +1,131 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "restful-interaction",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFHIR Restful Interactions\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe set of interactions defined by the RESTful part of the FHIR specification.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/restful-interaction defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eLvl\u003c/b\u003e\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eread\u003ca name\u003d\"restful-interaction-read\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eread\u003c/td\u003e\u003ctd\u003eRead the current state of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003evread\u003ca name\u003d\"restful-interaction-vread\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003evread\u003c/td\u003e\u003ctd\u003eRead the state of a specific version of the resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eupdate\u003ca name\u003d\"restful-interaction-update\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eupdate\u003c/td\u003e\u003ctd\u003eUpdate an existing resource by its id (or create it if it is new).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatch\u003ca name\u003d\"restful-interaction-patch\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epatch\u003c/td\u003e\u003ctd\u003eUpdate an existing resource by posting a set of changes to it.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edelete\u003ca name\u003d\"restful-interaction-delete\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edelete\u003c/td\u003e\u003ctd\u003eDelete a resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ehistory\u003ca name\u003d\"restful-interaction-history\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory\u003c/td\u003e\u003ctd\u003eRetrieve the change history for a particular resource, type of resource, or the entire system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  history-instance\u003ca name\u003d\"restful-interaction-history-instance\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory-instance\u003c/td\u003e\u003ctd\u003eRetrieve the change history for a particular resource.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  history-type\u003ca name\u003d\"restful-interaction-history-type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory-type\u003c/td\u003e\u003ctd\u003eRetrieve the change history for all resources of a particular type.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  history-system\u003ca name\u003d\"restful-interaction-history-system\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ehistory-system\u003c/td\u003e\u003ctd\u003eRetrieve the change history for all resources on a system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecreate\u003ca name\u003d\"restful-interaction-create\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecreate\u003c/td\u003e\u003ctd\u003eCreate a new resource with a server assigned id.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esearch\u003ca name\u003d\"restful-interaction-search\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003esearch\u003c/td\u003e\u003ctd\u003eSearch a resource type or all resources based on some filter criteria.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  search-type\u003ca name\u003d\"restful-interaction-search-type\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003esearch-type\u003c/td\u003e\u003ctd\u003eSearch all resources of the specified type based on some filter criteria.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e  search-system\u003ca name\u003d\"restful-interaction-search-system\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003esearch-system\u003c/td\u003e\u003ctd\u003eSearch all resources based on some filter criteria.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecapabilities\u003ca name\u003d\"restful-interaction-capabilities\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecapabilities\u003c/td\u003e\u003ctd\u003eGet a Capability Statement for the system.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etransaction\u003ca name\u003d\"restful-interaction-transaction\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etransaction\u003c/td\u003e\u003ctd\u003eUpdate, create or delete a set of resources as a single transaction.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebatch\u003ca name\u003d\"restful-interaction-batch\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebatch\u003c/td\u003e\u003ctd\u003eperform a set of a separate interactions in a single http operation\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoperation\u003ca name\u003d\"restful-interaction-operation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eoperation\u003c/td\u003e\u003ctd\u003ePerform an operation as defined by an OperationDefinition.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/restful-interaction",
+  "version": "4.0.1",
+  "name": "FHIR Restful Interactions",
+  "status": "active",
+  "experimental": false,
+  "publisher": "FHIR Project",
+  "description": "The set of interactions defined by the RESTful part of the FHIR specification.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/restful-interaction",
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "read",
+      "display": "read",
+      "definition": "Read the current state of the resource."
+    },
+    {
+      "code": "vread",
+      "display": "vread",
+      "definition": "Read the state of a specific version of the resource."
+    },
+    {
+      "code": "update",
+      "display": "update",
+      "definition": "Update an existing resource by its id (or create it if it is new)."
+    },
+    {
+      "code": "patch",
+      "display": "patch",
+      "definition": "Update an existing resource by posting a set of changes to it."
+    },
+    {
+      "code": "delete",
+      "display": "delete",
+      "definition": "Delete a resource."
+    },
+    {
+      "code": "history",
+      "display": "history",
+      "definition": "Retrieve the change history for a particular resource, type of resource, or the entire system.",
+      "concept": [
+        {
+          "code": "history-instance",
+          "display": "history-instance",
+          "definition": "Retrieve the change history for a particular resource."
+        },
+        {
+          "code": "history-type",
+          "display": "history-type",
+          "definition": "Retrieve the change history for all resources of a particular type."
+        },
+        {
+          "code": "history-system",
+          "display": "history-system",
+          "definition": "Retrieve the change history for all resources on a system."
+        }
+      ]
+    },
+    {
+      "code": "create",
+      "display": "create",
+      "definition": "Create a new resource with a server assigned id."
+    },
+    {
+      "code": "search",
+      "display": "search",
+      "definition": "Search a resource type or all resources based on some filter criteria.",
+      "concept": [
+        {
+          "code": "search-type",
+          "display": "search-type",
+          "definition": "Search all resources of the specified type based on some filter criteria."
+        },
+        {
+          "code": "search-system",
+          "display": "search-system",
+          "definition": "Search all resources based on some filter criteria."
+        }
+      ]
+    },
+    {
+      "code": "capabilities",
+      "display": "capabilities",
+      "definition": "Get a Capability Statement for the system."
+    },
+    {
+      "code": "transaction",
+      "display": "transaction",
+      "definition": "Update, create or delete a set of resources as a single transaction."
+    },
+    {
+      "code": "batch",
+      "display": "batch",
+      "definition": "perform a set of a separate interactions in a single http operation"
+    },
+    {
+      "code": "operation",
+      "display": "operation",
+      "definition": "Perform an operation as defined by an OperationDefinition."
+    }
+  ]
+}

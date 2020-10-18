@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2059
+title: "In the JPA server, when performing synchronous searches it is now possible to specify a limit and offset using
+   a new (nonstandard) parameter called _offset. Thanks to Tuomo Ala-Vannesluoma for the pull request!"

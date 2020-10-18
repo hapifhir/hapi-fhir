@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2118
+title: "Support for RDF Turle parsing and encoding has now been added. This support was previously partially 
+   implemented, but did not work correctly. A huge thanks to Josh Collins and Eric Prud'hommeaux
+   of Janeiro Digital for the pull request!"

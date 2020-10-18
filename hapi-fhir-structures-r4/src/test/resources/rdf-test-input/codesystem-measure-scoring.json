@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "measure-scoring",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMeasureScoring\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe scoring type of the measure.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/measure-scoring defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eproportion\u003ca name\u003d\"measure-scoring-proportion\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProportion\u003c/td\u003e\u003ctd\u003eThe measure score is defined using a proportion.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eratio\u003ca name\u003d\"measure-scoring-ratio\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRatio\u003c/td\u003e\u003ctd\u003eThe measure score is defined using a ratio.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econtinuous-variable\u003ca name\u003d\"measure-scoring-continuous-variable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContinuous Variable\u003c/td\u003e\u003ctd\u003eThe score is defined by a calculation of some quantity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecohort\u003ca name\u003d\"measure-scoring-cohort\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCohort\u003c/td\u003e\u003ctd\u003eThe measure is a cohort definition.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cqi"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/measure-scoring",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1232"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MeasureScoring",
+  "title": "MeasureScoring",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The scoring type of the measure.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/measure-scoring",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "proportion",
+      "display": "Proportion",
+      "definition": "The measure score is defined using a proportion."
+    },
+    {
+      "code": "ratio",
+      "display": "Ratio",
+      "definition": "The measure score is defined using a ratio."
+    },
+    {
+      "code": "continuous-variable",
+      "display": "Continuous Variable",
+      "definition": "The score is defined by a calculation of some quantity."
+    },
+    {
+      "code": "cohort",
+      "display": "Cohort",
+      "definition": "The measure is a cohort definition."
+    }
+  ]
+}

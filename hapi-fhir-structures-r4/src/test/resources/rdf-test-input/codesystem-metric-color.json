@@ -1,0 +1,99 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "metric-color",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDeviceMetricColor\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eDescribes the typical color of representation.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/metric-color defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eblack\u003ca name\u003d\"metric-color-black\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Black\u003c/td\u003e\u003ctd\u003eColor for representation - black.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ered\u003ca name\u003d\"metric-color-red\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Red\u003c/td\u003e\u003ctd\u003eColor for representation - red.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egreen\u003ca name\u003d\"metric-color-green\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Green\u003c/td\u003e\u003ctd\u003eColor for representation - green.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eyellow\u003ca name\u003d\"metric-color-yellow\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Yellow\u003c/td\u003e\u003ctd\u003eColor for representation - yellow.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eblue\u003ca name\u003d\"metric-color-blue\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Blue\u003c/td\u003e\u003ctd\u003eColor for representation - blue.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emagenta\u003ca name\u003d\"metric-color-magenta\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Magenta\u003c/td\u003e\u003ctd\u003eColor for representation - magenta.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecyan\u003ca name\u003d\"metric-color-cyan\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor Cyan\u003c/td\u003e\u003ctd\u003eColor for representation - cyan.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewhite\u003ca name\u003d\"metric-color-white\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eColor White\u003c/td\u003e\u003ctd\u003eColor for representation - white.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "dev"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://hl7.org/fhir/metric-color",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.655"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "DeviceMetricColor",
+  "title": "DeviceMetricColor",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Describes the typical color of representation.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/metric-color",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "black",
+      "display": "Color Black",
+      "definition": "Color for representation - black."
+    },
+    {
+      "code": "red",
+      "display": "Color Red",
+      "definition": "Color for representation - red."
+    },
+    {
+      "code": "green",
+      "display": "Color Green",
+      "definition": "Color for representation - green."
+    },
+    {
+      "code": "yellow",
+      "display": "Color Yellow",
+      "definition": "Color for representation - yellow."
+    },
+    {
+      "code": "blue",
+      "display": "Color Blue",
+      "definition": "Color for representation - blue."
+    },
+    {
+      "code": "magenta",
+      "display": "Color Magenta",
+      "definition": "Color for representation - magenta."
+    },
+    {
+      "code": "cyan",
+      "display": "Color Cyan",
+      "definition": "Color for representation - cyan."
+    },
+    {
+      "code": "white",
+      "display": "Color White",
+      "definition": "Color for representation - white."
+    }
+  ]
+}

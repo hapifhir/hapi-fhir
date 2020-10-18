@@ -5,13 +5,13 @@ function addSearchParamRow() {
 	var nextRow = numRows++;
 	var select = $('<select/>', {/*style:'margin-left:30px;'*/});
 	var plusBtn = $('<button />', {type:'button', 'class':'btn btn-success btn-block'});
-	plusBtn.append($('<span />', {'class':'glyphicon glyphicon-plus'}));
+	plusBtn.append($('<i />', {'class':'fas fa-plus'}));
 	plusBtn.isAdd = true;
 
 	var rowDiv = $('<div />', { 'class': 'row top-buffer', id: 'search-param-row-' + nextRow }).append(
 			$('<div />', { 'class': 'col-sm-1' }).append(plusBtn),
 			$('<div />', { 'class': 'col-sm-5' }).append(select),
-			$('<div />', { id: 'search-param-rowopts-' + nextRow })
+			$('<div />', { id: 'search-param-rowopts-' + nextRow, 'class': 'col-sm-6' })
 	);
 	$("#search-param-rows").append(rowDiv);
 	
@@ -30,18 +30,10 @@ function addSearchParamRow() {
 						var nextName = searchParam.name + '_' + i; 
 						params[nextName] = searchParam;
 						select.append(
-							$('<option />', { value: nextName }).text(searchParam.name + ' - ' + searchParam.documentation)														
+							$('<option />', { value: nextName }).text(searchParam.name + ' - ' + searchParam.documentation)
 						);
 						
 					}
-					/*
-					restResource.searchParam.forEach(function(searchParam){
-						params[searchParam.name] = searchParam;
-						select.append(
-							$('<option />', { value: searchParam.name }).text(searchParam.name + ' - ' + searchParam.documentation)														
-						);
-					});
-					*/
 				}
 			}				
 		});
@@ -65,44 +57,44 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 	var addNameAndType = true;
 	if (theSearchParamType === 'id') {
 		$('#search-param-rowopts-' + theContainerRowNum).append(
-			$('<div />', { 'class': 'col-sm-3' }).append(
-		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'id', type: 'text', 'class': 'form-control' })
+			$('<div />', { }).append(
+		    	$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: 'ResourceType/nnn', type: 'text', 'class': 'form-control' })
 		    )
 		);
 	} else if (theSearchParamType == 'token') {
 		
 		var tokenQualifiers = [];
 		tokenQualifiers.push({});
-		tokenQualifiers[0].name='Matches';
+		tokenQualifiers[0].name='=';
 		tokenQualifiers[0].value='';
 	
 		tokenQualifiers.push({});
-		tokenQualifiers[1].name='Text';
+		tokenQualifiers[1].name=':text';
 		tokenQualifiers[1].value=':text';
 		tokenQualifiers[1].description='The search parameter is processed as a string that searches text associated with the code/value.';
 		
 		tokenQualifiers.push({});
-		tokenQualifiers[2].name='Not';
+		tokenQualifiers[2].name=':not';
 		tokenQualifiers[2].value=':not';
 		tokenQualifiers[2].description='Reverse the code matching described in the paragraph above. Note that this includes resources that have no value for the parameter.';
 		
 		tokenQualifiers.push({});
-		tokenQualifiers[3].name='Above';
+		tokenQualifiers[3].name=':above';
 		tokenQualifiers[3].value=':above';
 		tokenQualifiers[3].description='The search parameter is a concept with the form [system]|[code], and the search parameter tests whether the coding in a resource subsumes the specified search code. For example, the search concept has an is-a relationship with the coding in the resource, and this includes the coding itself.';
 
 		tokenQualifiers.push({});
-		tokenQualifiers[4].name='Below';
+		tokenQualifiers[4].name=':below';
 		tokenQualifiers[4].value=':below';
 		tokenQualifiers[4].description='The search parameter is a concept with the form [system]|[code], and the search parameter tests whether the coding in a resource is subsumed by the specified search code. For example, the coding in the resource has an is-a relationship with the search concept, and this includes the coding itself.';
 
 		tokenQualifiers.push({});
-		tokenQualifiers[5].name='In';
+		tokenQualifiers[5].name=':in';
 		tokenQualifiers[5].value=':in';
 		tokenQualifiers[5].description='The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is in the specified value set. The reference may be literal (to an address where the value set can be found) or logical (a reference to ValueSet.url). If the server can treat the reference as a literal URL, it does, else it tries to match known logical ValueSet.url values.';
 
 		tokenQualifiers.push({});
-		tokenQualifiers[6].name='Not-in';
+		tokenQualifiers[6].name=':not-in';
 		tokenQualifiers[6].value=':not-in';
 		tokenQualifiers[6].description='The search parameter is a URI (relative or absolute) that identifies a value set, and the search parameter tests whether the coding is not in the specified value set.';
 
@@ -119,7 +111,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 				}
       }
       var tokenQualifierLabel = $('<span>' + tokenQualifiers[0].name + '</span>');
-		var tokenQualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
+		var tokenQualifierDropdown = $('<div />', {'class':'dropdown-menu', role:'menu'});
 		for (var i = 0; i < tokenQualifiers.length; i++) {
 			var qualName = tokenQualifiers[i].name;
 			var nextValue = tokenQualifiers[i].value;
@@ -131,25 +123,23 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		
 		
 		$('#search-param-rowopts-' + theContainerRowNum).append(
-			$('<div />', { 'class': 'col-sm-6' }).append(
-				$('<div />', { 'class':'input-group'}).append(
-					$('<div />', {'class':'input-group-btn'}).append(
-							$('<button />', {'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown'}).append(
-									tokenQualifierLabel,
-									$('<span class="caret" style="margin-left: 5px;"></span>')
-								),
-								tokenQualifierDropdown
-							),
-					$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
-							$('<span>System</span>')
-						),
-					$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.0', placeholder: "(opt)" }),
-					$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
-						$('<span>Code</span>')
-					),
-					$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "(opt)" })
-				)
-		    )
+         $('<div />', { 'class':'input-group'}).append(
+            $('<div />', {'class':'input-group-prepend'}).append(
+                  $('<button />', {'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown'}).append(
+                        tokenQualifierLabel,
+                        $('<span class="caret" style="margin-left: 5px;"></span>')
+                     ),
+                     tokenQualifierDropdown
+                  ),
+            $('<div />', { 'class':'input-group-prepend'} ).append(
+                  $('<div class="input-group-text">System</div>')
+               ),
+            $('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.0', placeholder: "(opt)" }),
+            $('<div />', { 'class':'input-group-prepend'} ).append(
+               $('<div class="input-group-text">Code</div>')
+            ),
+            $('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "(opt)" })
+         )
 		);
 		
 	} else if (theSearchParamType === 'string') {
@@ -168,7 +158,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		);
 		
 		var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
-		var qualifierDropdown = $('<ul />', {'class':'dropdown-menu', role:'menu'});
+		var qualifierDropdown = $('<div />', {'class':'dropdown-menu', role:'menu'});
 		
 		function clickFunction(value, name){
 			return function(){
@@ -180,14 +170,14 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 			var nextLink = $('<a>' + qualifiers[i].name+'</a>');
 			var qualName = qualifiers[i].name;
 			var nextValue = qualifiers[i].value;
-			qualifierDropdown.append($('<li />').append(nextLink));
+			qualifierDropdown.append($('<a />', {'class':'dropdown-item'}).append(nextLink));
 			nextLink.click(clickFunction(nextValue, qualName));
 		}
 	
 		$('#search-param-rowopts-' + theContainerRowNum).append(
-			$('<div />', { 'class': 'col-sm-5 input-group' }).append(
-				$('<div />', {'class':'input-group-btn'}).append(
-					$('<button />', {'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown'}).append(
+			$('<div />', { 'class': 'input-group' }).append(
+				$('<div />', {'class':'input-group-prepend btn-group'}).append(
+					$('<button />', {'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown'}).append(
 						matchesLabel,
 						$('<span class="caret" style="margin-left: 5px;"></span>')
 					),
@@ -226,7 +216,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 				$('<input />', { id: 'param.' + theRowNum + '.0', placeholder: placeholderText, type: 'hidden' })
 		);
 		$('#search-param-rowopts-' + theContainerRowNum).append(
-			$('<div />', { 'class': 'col-sm-3' }).append(
+			$('<div />', { }).append(
 				$('<input />', { id: 'param.' + theRowNum + '.1', placeholder: placeholderText, type: 'text', 'class': 'form-control' })
 			)
 		);
@@ -242,15 +232,8 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 		var newContainer = $('<div />', { id: 'search-param-rowopts-' + newContainerRowNum });
 	
 		$('#search-param-rowopts-' + theContainerRowNum).append(
-			$('<br clear="all" />'), 
-			$('<div />', { 'class': 'col-sm-1' }),
-			$('<div />', { 'class': 'col-sm-1' }).append(
-	        	$('<i class="glyphicon glyphicon-link" style="margin-left: 20px; margin-top: 10px;"></i>')
-	    	),
-			$('<div />', { 'class': 'col-sm-4' }).append(
-				select
-			),
-			newContainer
+			select,
+		   newContainer
 		);
 	
 		var params = [];
@@ -318,7 +301,7 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
 
 
       var matchesLabel = $('<span>' + qualifiers[0].name + '</span>');
-      var qualifierDropdown = $('<ul />', {'class': 'dropdown-menu', role: 'menu'});
+      var qualifierDropdown = $('<div />', {'class': 'dropdown-menu', role: 'menu'});
 
       function clickFunction(value, name) {
          return function () {
@@ -335,9 +318,9 @@ function addSearchControls(theConformance, theSearchParamType, theSearchParamNam
       }
 
       $('#search-param-rowopts-' + theContainerRowNum).append(
-         $('<div />', {'class': 'col-sm-5 input-group'}).append(
-            $('<div />', {'class': 'input-group-btn'}).append(
-               $('<button />', {'class': 'btn btn-default dropdown-toggle', 'data-toggle': 'dropdown'}).append(
+         $('<div />', {'class': 'input-group'}).append(
+            $('<div />', {'class': 'input-group-prepend btn-group'}).append(
+               $('<button />', {'class': 'btn btn-default dropdown-toggle input-group-text', 'data-toggle': 'dropdown'}).append(
                   matchesLabel,
                   $('<span class="caret" style="margin-left: 5px;"></span>')
                ),
@@ -376,13 +359,15 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 	} else {
 		input = $('<div />', { 'class':'input-group date', 'data-date-format':'YYYY-MM-DDTHH:mm:ss' });
 	}
-	var qualifierDiv = $('<div />');
+	var qualifierDiv = $('<div />', {'class':'input-group-prepend'});
 	
 	input.append(
 		qualifierDiv,
 		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + inputId1 }),
-		$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
-			$('<i />', { 'class':'fa fa-chevron-circle-down'})
+		$('<div />', { 'class':'input-group-append input-group-addon'} ).append(
+		   $('<span />', {'class':'input-group-text'}).append(
+			   $('<i />', { 'class':'far fa-calendar-alt'})
+         )
 		)
 	);
     input.datetimepicker({
@@ -393,17 +378,17 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
     // overrides all addon buttons while it inits..
     qualifierDiv.addClass('input-group-btn');
     var qualifierTooltip = "Set a qualifier and a date to specify a boundary date. Set two qualifiers and dates to specify a range.";
-    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('=');
+    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('eq');
     qualifierBtn.tooltip({
         'selector': '',
         'placement': 'top',
         'container':'body'
       });
-    var qualifierBtnEq = $('<a>=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
-    var qualifierBtnGt = $('<a>&gt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>');  });
-    var qualifierBtnGe = $('<a>&gt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>=');  });
-    var qualifierBtnLt = $('<a>&lt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<');  });
-    var qualifierBtnLe = $('<a>&lt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<=');  });
+    var qualifierBtnEq = $('<a>eq</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'eq'); });
+    var qualifierBtnGt = $('<a>gt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'gt');  });
+    var qualifierBtnGe = $('<a>ge</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ge');  });
+    var qualifierBtnLt = $('<a>lt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'lt');  });
+    var qualifierBtnLe = $('<a>le</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'le');  });
     qualifierDiv.append(
 		qualifierBtn,
 		$('<ul class="dropdown-menu" role="menu">').append(
@@ -417,7 +402,7 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 
 	$('#search-param-rowopts-' + theContainerRowNum).append(
 		qualifier,
-		$('<div />', { 'class': 'col-sm-3' }).append(
+		$('<div />', { }).append(
 	    	input
     	)
     );
@@ -426,34 +411,34 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRowNum) {
 	var input = $('<div />', { 'class':'input-group'});
 	var qualifier = $('<input />', {type:'hidden', id:'param.' + theRowNum + '.0'});
-	var qualifierDiv = $('<div />', {'class':'input-group-btn'});
+	var qualifierDiv = $('<div />', {'class':'input-group-prepend'});
 	
 	input.append(
 		qualifierDiv,
 		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.1', placeholder: "value" }),
-		$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
-			$('<span>System</span>')
+		$('<div />', { 'class':'input-group-append'} ).append(
+			$('<span class="input-group-text">System</span>')
 		),
 		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.2', placeholder: "(opt)" }),
-		$('<div />', { 'class':'input-group-addon', 'style':'padding:6px;'} ).append(
-			$('<span>Code</span>')
+		$('<div />', { 'class':'input-group-append'} ).append(
+			$('<span class="input-group-text">Code</span>')
 		),
 		$('<input />', { type:'text', 'class':'form-control', id: 'param.' + theRowNum + '.3', placeholder: "(opt)" })
 	);
 
-    var qualifierTooltip = "Set a qualifier and a date to specify a boundary date. Set two qualifiers and dates to specify a range.";
-    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('=');
+    var qualifierTooltip = "You can optionally use a qualifier to specify a range.";
+    var qualifierBtn = $('<button />', {type:'button', 'class':'btn btn-default dropdown-toggle input-group-text', 'data-toggle':'dropdown', 'data-placement':'top', 'title':qualifierTooltip}).text('=');
     qualifierBtn.tooltip({
         'selector': '',
-        'placement': 'top',
+        'placement': 'left',
         'container':'body'
       });
     var qualifierBtnEq = $('<a>=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '='); });
-    var qualifierBtnAp = $('<a>~ (Approx)</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '~'); });
-    var qualifierBtnGt = $('<a>&gt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>');  });
-    var qualifierBtnGe = $('<a>&gt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '>=');  });
-    var qualifierBtnLt = $('<a>&lt;</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<');  });
-    var qualifierBtnLe = $('<a>&lt;=</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, '<=');  });
+    var qualifierBtnAp = $('<a>ap (Approx)</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ap'); });
+    var qualifierBtnGt = $('<a>gt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'gt');  });
+    var qualifierBtnGe = $('<a>ge</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'ge');  });
+    var qualifierBtnLt = $('<a>lt</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'lt');  });
+    var qualifierBtnLe = $('<a>le</a>').click(function() { updateSearchDateQualifier(qualifierBtn, qualifier, 'le');  });
     qualifierDiv.append(
 		qualifierBtn,
 		$('<ul class="dropdown-menu" role="menu">').append(
@@ -468,13 +453,9 @@ function addSearchControlQuantity(theSearchParamName, theContainerRowNum, theRow
 
 	$('#search-param-rowopts-' + theContainerRowNum).append(
 		qualifier,
-		$('<div />', { 'class': 'col-sm-5' }).append(
+		$('<div />', { }).append(
 			input
 		)
-//		$('<div />', { 'class': 'col-sm-2' }).append(
-//			$('<div />', { 'class':'input-group'}).append(
-//			)
-//		)
 	);
 }
 

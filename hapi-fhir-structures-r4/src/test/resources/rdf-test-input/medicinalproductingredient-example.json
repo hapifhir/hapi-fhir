@@ -1,0 +1,74 @@
+{
+  "resourceType": "MedicinalProductIngredient",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example\u003c/p\u003e\u003cp\u003e\u003cb\u003erole\u003c/b\u003e: ActiveBase \u003cspan\u003e(Details : {http://ema.europa.eu/example/ingredientRole code \u0027ActiveBase\u0027 \u003d \u0027ActiveBase)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003emanufacturer\u003c/b\u003e: \u003ca\u003eOrganization/example\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eSpecifiedSubstances\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eGroup\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eequixabanCompanyequixaban1 \u003cspan\u003e(Details : {http://ema.europa.eu/example/specifiedSubstance code \u0027equixabanCompanyequixaban1\u0027 \u003d \u0027equixabanCompanyequixaban1)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e2 \u003cspan\u003e(Details : {http://ema.europa.eu/example/specifiedSubstanceGroup code \u00272\u0027 \u003d \u00272)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003esubstance\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: EQUIXABAN \u003cspan\u003e(Details : {http://ema.europa.eu/example/substance code \u0027EQUIXABAN\u0027 \u003d \u0027EQUIXABAN)\u003c/span\u003e\u003c/p\u003e\u003ch3\u003eStrengths\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "role": {
+    "coding": [
+      {
+        "system": "http://ema.europa.eu/example/ingredientRole",
+        "code": "ActiveBase"
+      }
+    ]
+  },
+  "manufacturer": [
+    {
+      "reference": "Organization/example"
+    }
+  ],
+  "specifiedSubstance": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://ema.europa.eu/example/specifiedSubstance",
+            "code": "equixabanCompanyequixaban1"
+          }
+        ]
+      },
+      "group": {
+        "coding": [
+          {
+            "system": "http://ema.europa.eu/example/specifiedSubstanceGroup",
+            "code": "2"
+          }
+        ]
+      }
+    }
+  ],
+  "substance": {
+    "code": {
+      "coding": [
+        {
+          "system": "http://ema.europa.eu/example/substance",
+          "code": "EQUIXABAN"
+        }
+      ]
+    },
+    "strength": [
+      {
+        "presentation": {
+          "numerator": {
+            "value": 2.5,
+            "unit": "mg"
+          },
+          "denominator": {
+            "value": 1,
+            "unit": "{tablet}"
+          }
+        }
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

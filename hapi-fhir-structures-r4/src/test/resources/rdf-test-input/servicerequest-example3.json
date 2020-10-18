@@ -1,0 +1,49 @@
+{
+  "resourceType": "ServiceRequest",
+  "id": "do-not-turn",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: do-not-turn\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 20170201-0002\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003epriority\u003c/b\u003e: stat\u003c/p\u003e\u003cp\u003e\u003cb\u003edoNotPerform\u003c/b\u003e: true\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Turning patient in bed (procedure) \u003cspan\u003e(Details : {SNOMED CT code \u0027359962006\u0027 \u003d \u0027Turning patient in bed\u0027, given as \u0027Turning patient in bed (procedure)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthoredOn\u003c/b\u003e: 01/02/2017 5:23:07 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003erequester\u003c/b\u003e: \u003ca\u003eDr Adam Careful\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonReference\u003c/b\u003e: Patient has a spinal fracture\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://goodhealth.org/placer-ids",
+      "value": "20170201-0002"
+    }
+  ],
+  "status": "active",
+  "intent": "order",
+  "priority": "stat",
+  "doNotPerform": true,
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "359962006",
+        "display": "Turning patient in bed (procedure)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "authoredOn": "2017-02-01T17:23:07Z",
+  "requester": {
+    "reference": "Practitioner/example",
+    "display": "Dr Adam Careful"
+  },
+  "reasonReference": [
+    {
+      "display": "Patient has a spinal fracture"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

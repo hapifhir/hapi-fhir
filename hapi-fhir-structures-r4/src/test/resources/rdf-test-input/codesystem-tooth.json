@@ -1,0 +1,263 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "tooth",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eOral Site Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes a smattering of FDI oral site codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/ex-tooth defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e0\u003ca name\u003d\"tooth-0\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOral cavity\u003c/td\u003e\u003ctd\u003eOral cavity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1\u003ca name\u003d\"tooth-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e1\u003c/td\u003e\u003ctd\u003ePermanent teeth Maxillary right.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2\u003ca name\u003d\"tooth-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e2\u003c/td\u003e\u003ctd\u003ePermanent teeth Maxillary left.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e3\u003ca name\u003d\"tooth-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e3\u003c/td\u003e\u003ctd\u003ePermanent teeth Mandibular right.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4\u003ca name\u003d\"tooth-4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e4\u003c/td\u003e\u003ctd\u003ePermanent teeth Mandibular left.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5\u003ca name\u003d\"tooth-5\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e5\u003c/td\u003e\u003ctd\u003eDeciduous teeth Maxillary right.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e6\u003ca name\u003d\"tooth-6\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e6\u003c/td\u003e\u003ctd\u003eDeciduous teeth Maxillary left.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e7\u003ca name\u003d\"tooth-7\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e7\u003c/td\u003e\u003ctd\u003eDeciduous teeth Mandibular right.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e8\u003ca name\u003d\"tooth-8\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e8\u003c/td\u003e\u003ctd\u003eDeciduous teeth Mandibular left.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11\u003ca name\u003d\"tooth-11\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e11\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 1 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e12\u003ca name\u003d\"tooth-12\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e12\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 2 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e13\u003ca name\u003d\"tooth-13\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e13\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 3 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e14\u003ca name\u003d\"tooth-14\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e14\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 4 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e15\u003ca name\u003d\"tooth-15\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e15\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 5 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e16\u003ca name\u003d\"tooth-16\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e16\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 6 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e17\u003ca name\u003d\"tooth-17\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e17\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 7 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e18\u003ca name\u003d\"tooth-18\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e18\u003c/td\u003e\u003ctd\u003eUpper Right Tooth 8 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e21\u003ca name\u003d\"tooth-21\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e21\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 1 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e22\u003ca name\u003d\"tooth-22\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e22\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 2 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e23\u003ca name\u003d\"tooth-23\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e23\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 3 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e24\u003ca name\u003d\"tooth-24\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e24\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 4 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e25\u003ca name\u003d\"tooth-25\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e25\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 5 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e26\u003ca name\u003d\"tooth-26\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e26\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 6 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e27\u003ca name\u003d\"tooth-27\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e27\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 7 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e28\u003ca name\u003d\"tooth-28\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e28\u003c/td\u003e\u003ctd\u003eUpper Left Tooth 8 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e31\u003ca name\u003d\"tooth-31\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e31\u003c/td\u003e\u003ctd\u003eLower Left Tooth 1 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e32\u003ca name\u003d\"tooth-32\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e32\u003c/td\u003e\u003ctd\u003eLower Left Tooth 2 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e33\u003ca name\u003d\"tooth-33\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e33\u003c/td\u003e\u003ctd\u003eLower Left Tooth 3 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e34\u003ca name\u003d\"tooth-34\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e34\u003c/td\u003e\u003ctd\u003eLower Left Tooth 4 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e35\u003ca name\u003d\"tooth-35\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e35\u003c/td\u003e\u003ctd\u003eLower Left Tooth 5 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e36\u003ca name\u003d\"tooth-36\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e36\u003c/td\u003e\u003ctd\u003eLower Left Tooth 6 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e37\u003ca name\u003d\"tooth-37\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e37\u003c/td\u003e\u003ctd\u003eLower Left Tooth 7 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e38\u003ca name\u003d\"tooth-38\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e38\u003c/td\u003e\u003ctd\u003eLower Left Tooth 8 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e41\u003ca name\u003d\"tooth-41\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e41\u003c/td\u003e\u003ctd\u003eLower Right Tooth 1 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e42\u003ca name\u003d\"tooth-42\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e42\u003c/td\u003e\u003ctd\u003eLower Right Tooth 2 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e43\u003ca name\u003d\"tooth-43\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e43\u003c/td\u003e\u003ctd\u003eLower Right Tooth 3 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e44\u003ca name\u003d\"tooth-44\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e44\u003c/td\u003e\u003ctd\u003eLower Right Tooth 4 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e45\u003ca name\u003d\"tooth-45\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e45\u003c/td\u003e\u003ctd\u003eLower Right Tooth 5 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e46\u003ca name\u003d\"tooth-46\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e46\u003c/td\u003e\u003ctd\u003eLower Right Tooth 6 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e47\u003ca name\u003d\"tooth-47\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e47\u003c/td\u003e\u003ctd\u003eLower Right Tooth 7 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e48\u003ca name\u003d\"tooth-48\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003e48\u003c/td\u003e\u003ctd\u003eLower Right Tooth 8 from the central axis, permanent dentition.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/ex-tooth",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1152"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "OralSiteCodes",
+  "title": "Oral Site Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes a smattering of FDI oral site codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/tooth",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "0",
+      "display": "Oral cavity",
+      "definition": "Oral cavity."
+    },
+    {
+      "code": "1",
+      "display": "1",
+      "definition": "Permanent teeth Maxillary right."
+    },
+    {
+      "code": "2",
+      "display": "2",
+      "definition": "Permanent teeth Maxillary left."
+    },
+    {
+      "code": "3",
+      "display": "3",
+      "definition": "Permanent teeth Mandibular right."
+    },
+    {
+      "code": "4",
+      "display": "4",
+      "definition": "Permanent teeth Mandibular left."
+    },
+    {
+      "code": "5",
+      "display": "5",
+      "definition": "Deciduous teeth Maxillary right."
+    },
+    {
+      "code": "6",
+      "display": "6",
+      "definition": "Deciduous teeth Maxillary left."
+    },
+    {
+      "code": "7",
+      "display": "7",
+      "definition": "Deciduous teeth Mandibular right."
+    },
+    {
+      "code": "8",
+      "display": "8",
+      "definition": "Deciduous teeth Mandibular left."
+    },
+    {
+      "code": "11",
+      "display": "11",
+      "definition": "Upper Right Tooth 1 from the central axis, permanent dentition."
+    },
+    {
+      "code": "12",
+      "display": "12",
+      "definition": "Upper Right Tooth 2 from the central axis, permanent dentition."
+    },
+    {
+      "code": "13",
+      "display": "13",
+      "definition": "Upper Right Tooth 3 from the central axis, permanent dentition."
+    },
+    {
+      "code": "14",
+      "display": "14",
+      "definition": "Upper Right Tooth 4 from the central axis, permanent dentition."
+    },
+    {
+      "code": "15",
+      "display": "15",
+      "definition": "Upper Right Tooth 5 from the central axis, permanent dentition."
+    },
+    {
+      "code": "16",
+      "display": "16",
+      "definition": "Upper Right Tooth 6 from the central axis, permanent dentition."
+    },
+    {
+      "code": "17",
+      "display": "17",
+      "definition": "Upper Right Tooth 7 from the central axis, permanent dentition."
+    },
+    {
+      "code": "18",
+      "display": "18",
+      "definition": "Upper Right Tooth 8 from the central axis, permanent dentition."
+    },
+    {
+      "code": "21",
+      "display": "21",
+      "definition": "Upper Left Tooth 1 from the central axis, permanent dentition."
+    },
+    {
+      "code": "22",
+      "display": "22",
+      "definition": "Upper Left Tooth 2 from the central axis, permanent dentition."
+    },
+    {
+      "code": "23",
+      "display": "23",
+      "definition": "Upper Left Tooth 3 from the central axis, permanent dentition."
+    },
+    {
+      "code": "24",
+      "display": "24",
+      "definition": "Upper Left Tooth 4 from the central axis, permanent dentition."
+    },
+    {
+      "code": "25",
+      "display": "25",
+      "definition": "Upper Left Tooth 5 from the central axis, permanent dentition."
+    },
+    {
+      "code": "26",
+      "display": "26",
+      "definition": "Upper Left Tooth 6 from the central axis, permanent dentition."
+    },
+    {
+      "code": "27",
+      "display": "27",
+      "definition": "Upper Left Tooth 7 from the central axis, permanent dentition."
+    },
+    {
+      "code": "28",
+      "display": "28",
+      "definition": "Upper Left Tooth 8 from the central axis, permanent dentition."
+    },
+    {
+      "code": "31",
+      "display": "31",
+      "definition": "Lower Left Tooth 1 from the central axis, permanent dentition."
+    },
+    {
+      "code": "32",
+      "display": "32",
+      "definition": "Lower Left Tooth 2 from the central axis, permanent dentition."
+    },
+    {
+      "code": "33",
+      "display": "33",
+      "definition": "Lower Left Tooth 3 from the central axis, permanent dentition."
+    },
+    {
+      "code": "34",
+      "display": "34",
+      "definition": "Lower Left Tooth 4 from the central axis, permanent dentition."
+    },
+    {
+      "code": "35",
+      "display": "35",
+      "definition": "Lower Left Tooth 5 from the central axis, permanent dentition."
+    },
+    {
+      "code": "36",
+      "display": "36",
+      "definition": "Lower Left Tooth 6 from the central axis, permanent dentition."
+    },
+    {
+      "code": "37",
+      "display": "37",
+      "definition": "Lower Left Tooth 7 from the central axis, permanent dentition."
+    },
+    {
+      "code": "38",
+      "display": "38",
+      "definition": "Lower Left Tooth 8 from the central axis, permanent dentition."
+    },
+    {
+      "code": "41",
+      "display": "41",
+      "definition": "Lower Right Tooth 1 from the central axis, permanent dentition."
+    },
+    {
+      "code": "42",
+      "display": "42",
+      "definition": "Lower Right Tooth 2 from the central axis, permanent dentition."
+    },
+    {
+      "code": "43",
+      "display": "43",
+      "definition": "Lower Right Tooth 3 from the central axis, permanent dentition."
+    },
+    {
+      "code": "44",
+      "display": "44",
+      "definition": "Lower Right Tooth 4 from the central axis, permanent dentition."
+    },
+    {
+      "code": "45",
+      "display": "45",
+      "definition": "Lower Right Tooth 5 from the central axis, permanent dentition."
+    },
+    {
+      "code": "46",
+      "display": "46",
+      "definition": "Lower Right Tooth 6 from the central axis, permanent dentition."
+    },
+    {
+      "code": "47",
+      "display": "47",
+      "definition": "Lower Right Tooth 7 from the central axis, permanent dentition."
+    },
+    {
+      "code": "48",
+      "display": "48",
+      "definition": "Lower Right Tooth 8 from the central axis, permanent dentition."
+    }
+  ]
+}

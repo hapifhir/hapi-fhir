@@ -1,0 +1,278 @@
+{
+  "resourceType": "Observation",
+  "id": "1minute-apgar-score",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 1minute-apgar-score\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Survey \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027survey\u0027 \u003d \u0027Survey\u0027, given as \u0027Survey\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: 1 minute Apgar Score \u003cspan\u003e(Details : {LOINC code \u00279272-6\u0027 \u003d \u00271 minute Apgar Score\u0027, given as \u00271 minute Apgar Score\u0027}; {SNOMED CT code \u0027169895004\u0027 \u003d \u0027Apgar at 1 minute\u0027, given as \u0027Apgar at 1 minute\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: id: newborn; 12345; active; Peter James Chalmers ; gender: male; birthDate: 18/05/2016\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 18/05/2016 10:33:22 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003ePractitioner/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0 {score}\u003cspan\u003e (Details: UCUM code {score} \u003d \u0027{score}\u0027)\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Apgar color score \u003cspan\u003e(Details : {LOINC code \u002732406-1\u0027 \u003d \u00271 minute Apgar Color\u0027, given as \u00271 minute Apgar Color\u0027}; {SNOMED CT code \u0027249227004\u0027 \u003d \u0027Apgar color score\u0027, given as \u0027Apgar color score\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0. The baby\u0027s whole body is completely bluish-gray or pale \u003cspan\u003e(Details : {LOINC code \u0027LA6722-8\u0027 \u003d \u0027The baby\u0027s whole body is completely bluish-gray or pale\u0027, given as \u0027The baby\u0027s whole body is completely bluish-gray or pale\u0027}; {http://acme.ped/apgarcolor code \u00270\u0027 \u003d \u00270)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Apgar respiratory effort score \u003cspan\u003e(Details : {LOINC code \u002732407-9\u0027 \u003d \u00271 minute Apgar Heart rate\u0027, given as \u00271 minute Apgar Heart Rate\u0027}; {SNOMED CT code \u0027249223000\u0027 \u003d \u0027Apgar heart rate score\u0027, given as \u0027Apgar heart rate score\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0. No heart rate \u003cspan\u003e(Details : {LOINC code \u0027LA6716-0\u0027 \u003d \u0027No heart rate\u0027, given as \u0027No heart rate\u0027}; {http://acme.ped/apgarheartrate code \u00270\u0027 \u003d \u00270)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Apgar response to stimulus score \u003cspan\u003e(Details : {LOINC code \u002732409-5\u0027 \u003d \u00271 minute Apgar Reflex irritability\u0027, given as \u00271 minute Apgar Reflex Irritability\u0027}; {SNOMED CT code \u0027249226008\u0027 \u003d \u0027Apgar response to stimulus score\u0027, given as \u0027Apgar response to stimulus score\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0. No response to airways being suctioned \u003cspan\u003e(Details : {LOINC code \u0027LA6719-4\u0027 \u003d \u0027No response to airways being suctioned\u0027, given as \u0027No response to airways being suctioned\u0027}; {http://acme.ped/apgarreflexirritability code \u00270\u0027 \u003d \u00270)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Apgar muscle tone score \u003cspan\u003e(Details : {LOINC code \u002732408-7\u0027 \u003d \u00271 minute Apgar Muscle tone\u0027, given as \u00271 minute Apgar Muscle Tone\u0027}; {SNOMED CT code \u0027249225007\u0027 \u003d \u0027Apgar muscle tone score\u0027, given as \u0027Apgar muscle tone score\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0. Limp; no movement \u003cspan\u003e(Details : {LOINC code \u0027LA6713-7\u0027 \u003d \u0027Limp; no movement\u0027, given as \u0027Limp; no movement\u0027}; {http://acme.ped/apgarmuscletone code \u00270\u0027 \u003d \u00270)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ecomponent\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Apgar respiratory effort score \u003cspan\u003e(Details : {LOINC code \u002732410-3\u0027 \u003d \u00271 minute Apgar Respiratory effort\u0027, given as \u00271 minute Apgar Respiratory effort\u0027}; {SNOMED CT code \u0027249224006\u0027 \u003d \u0027Apgar respiratory effort score\u0027, given as \u0027Apgar respiratory effort score\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 0. Not breathing \u003cspan\u003e(Details : {LOINC code \u0027LA6725-1\u0027 \u003d \u0027Not breathing\u0027, given as \u0027Not breathing\u0027}; {http://acme.ped/apgarrespiratoryeffort code \u00270\u0027 \u003d \u00270)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Patient",
+      "id": "newborn",
+      "identifier": [
+        {
+          "system": "http://acmehealthcare/org/mrns",
+          "value": "12345"
+        }
+      ],
+      "active": true,
+      "name": [
+        {
+          "family": "Chalmers",
+          "given": [
+            "Peter",
+            "James"
+          ]
+        }
+      ],
+      "gender": "male",
+      "birthDate": "2016-05-18",
+      "_birthDate": {
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-birthTime",
+            "valueDateTime": "2016-05-18T10:28:45Z"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "survey",
+          "display": "Survey"
+        }
+      ],
+      "text": "Survey"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "9272-6",
+        "display": "1 minute Apgar Score"
+      },
+      {
+        "system": "http://snomed.info/sct",
+        "code": "169895004",
+        "display": "Apgar at 1 minute"
+      }
+    ],
+    "text": "1 minute Apgar Score"
+  },
+  "subject": {
+    "reference": "#newborn"
+  },
+  "effectiveDateTime": "2016-05-18T22:33:22Z",
+  "performer": [
+    {
+      "reference": "Practitioner/example"
+    }
+  ],
+  "valueQuantity": {
+    "value": 0,
+    "system": "http://unitsofmeasure.org",
+    "code": "{score}"
+  },
+  "component": [
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "32406-1",
+            "display": "1 minute Apgar Color"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "code": "249227004",
+            "display": "Apgar color score"
+          }
+        ],
+        "text": "Apgar color score"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ],
+            "system": "http://loinc.org",
+            "code": "LA6722-8",
+            "display": "The baby\u0027s whole body is completely bluish-gray or pale"
+          },
+          {
+            "system": "http://acme.ped/apgarcolor",
+            "code": "0"
+          }
+        ],
+        "text": "0. The baby\u0027s whole body is completely bluish-gray or pale"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "32407-9",
+            "display": "1 minute Apgar Heart Rate"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "code": "249223000",
+            "display": "Apgar heart rate score"
+          }
+        ],
+        "text": "Apgar respiratory effort score"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ],
+            "system": "http://loinc.org",
+            "code": "LA6716-0",
+            "display": "No heart rate"
+          },
+          {
+            "system": "http://acme.ped/apgarheartrate",
+            "code": "0"
+          }
+        ],
+        "text": "0. No heart rate"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "32409-5",
+            "display": "1 minute Apgar Reflex Irritability"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "code": "249226008",
+            "display": "Apgar response to stimulus score"
+          }
+        ],
+        "text": "Apgar response to stimulus score"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ],
+            "system": "http://loinc.org",
+            "code": "LA6719-4",
+            "display": "No response to airways being suctioned"
+          },
+          {
+            "system": "http://acme.ped/apgarreflexirritability",
+            "code": "0"
+          }
+        ],
+        "text": "0. No response to airways being suctioned"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "32408-7",
+            "display": "1 minute Apgar Muscle Tone"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "code": "249225007",
+            "display": "Apgar muscle tone score"
+          }
+        ],
+        "text": "Apgar muscle tone score"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ],
+            "system": "http://loinc.org",
+            "code": "LA6713-7",
+            "display": "Limp; no movement"
+          },
+          {
+            "system": "http://acme.ped/apgarmuscletone",
+            "code": "0"
+          }
+        ],
+        "text": "0. Limp; no movement"
+      }
+    },
+    {
+      "code": {
+        "coding": [
+          {
+            "system": "http://loinc.org",
+            "code": "32410-3",
+            "display": "1 minute Apgar Respiratory effort"
+          },
+          {
+            "system": "http://snomed.info/sct",
+            "code": "249224006",
+            "display": "Apgar respiratory effort score"
+          }
+        ],
+        "text": "Apgar respiratory effort score"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/ordinalValue",
+                "valueDecimal": 0
+              }
+            ],
+            "system": "http://loinc.org",
+            "code": "LA6725-1",
+            "display": "Not breathing"
+          },
+          {
+            "system": "http://acme.ped/apgarrespiratoryeffort",
+            "code": "0"
+          }
+        ],
+        "text": "0. Not breathing"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

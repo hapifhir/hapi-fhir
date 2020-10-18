@@ -1,0 +1,46 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-request-medsallergies",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/Patient/example"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/MedicationStatement?patient\u003dexample\u0026_list\u003d$current-medications"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/AllergyIntolerance?patient\u003dexample\u0026_list\u003d$current-allergies"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/Condition?patient\u003dexample\u0026_list\u003d$current-problems"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/MedicationStatement?patient\u003dexample\u0026notgiven:not\u003dtrue"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

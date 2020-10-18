@@ -1,0 +1,85 @@
+{
+  "resourceType": "ConceptMap",
+  "id": "sc-report-status-codes",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTestReportStatusCanonicalMap (http://hl7.org/fhir/ConceptMap/sc-report-status-codes)\u003c/h2\u003e\u003cp\u003eMapping from \u003ca href\u003d\"valueset-report-status-codes.html\"\u003ehttp://hl7.org/fhir/ValueSet/report-status-codes\u003c/a\u003e to \u003ca href\u003d\"valueset-resource-status.html\"\u003ehttp://hl7.org/fhir/ValueSet/resource-status\u003c/a\u003e\u003c/p\u003e\u003cp\u003eDRAFT. Published on 01/11/2019 9:29:23 AM by HL7 (FHIR Project) (\u003ca href\u003d\"http://hl7.org/fhir\"\u003ehttp://hl7.org/fhir\u003c/a\u003e, \u003ca href\u003d\"mailto:fhir@lists.hl7.org\"\u003efhir@lists.hl7.org\u003c/a\u003e). \u003c/p\u003e\u003cdiv\u003e\u003cp\u003eCanonical Mapping for \u0026quot;The current status of the test report.\u0026quot;\u003c/p\u003e\n\u003c/div\u003e\u003cbr/\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eSource Code\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEquivalence\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDestination Code\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eentered-in-error\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eerror\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ein-progress\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003eactive\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ewaiting\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003esuspended\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003estopped\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003efailed\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003ecompleted\u003c/td\u003e\u003ctd\u003eequivalent\u003c/td\u003e\u003ctd\u003ecomplete\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ConceptMap/sc-report-status-codes",
+  "version": "4.0.1",
+  "name": "TestReportStatusCanonicalMap",
+  "title": "Canonical Mapping for \"TestReportStatus\"",
+  "status": "draft",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Canonical Mapping for \"The current status of the test report.\"",
+  "sourceCanonical": "http://hl7.org/fhir/ValueSet/report-status-codes",
+  "targetCanonical": "http://hl7.org/fhir/ValueSet/resource-status",
+  "group": [
+    {
+      "source": "http://hl7.org/fhir/report-status-codes",
+      "target": "http://hl7.org/fhir/resource-status",
+      "element": [
+        {
+          "code": "entered-in-error",
+          "target": [
+            {
+              "code": "error",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "in-progress",
+          "target": [
+            {
+              "code": "active",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "waiting",
+          "target": [
+            {
+              "code": "suspended",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "stopped",
+          "target": [
+            {
+              "code": "failed",
+              "equivalence": "equivalent"
+            }
+          ]
+        },
+        {
+          "code": "completed",
+          "target": [
+            {
+              "code": "complete",
+              "equivalence": "equivalent"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

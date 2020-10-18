@@ -1,0 +1,75 @@
+{
+  "resourceType": "MedicationAdministration",
+  "id": "medadmin0313",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: medadmin0313\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: completed\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: Paracetamol 240mg suppository (product) \u003cspan\u003e(Details : {SNOMED CT code \u0027322254008\u0027 \u003d \u0027Paracetamol 240mg suppository\u0027, given as \u0027Paracetamol 240mg suppository (product)\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 15/01/2015 10:03:00 PM --\u0026gt; 16/01/2015 2:03:00 AM\u003c/p\u003e\u003ch3\u003ePerformers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eActor\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e\u003ca\u003ePatrick Pump\u003c/a\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003ereasonCode\u003c/b\u003e: Emergency \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/reason-medication-given code \u0027c\u0027 \u003d \u0027Emergency\u0027, given as \u0027Emergency\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003erequest\u003c/b\u003e: \u003ca\u003eMedicationRequest/medrx0324\u003c/a\u003e\u003c/p\u003e\u003ch3\u003eDosages\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eText\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eSite\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDose\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eInsert one suppository rectally twice daily as needed for fever to a maximim of 3 per day\u003c/td\u003e\u003ctd\u003eRectum structure \u003cspan\u003e(Details : {SNOMED CT code \u002734402009\u0027 \u003d \u0027Rectum\u0027, given as \u0027Rectum structure\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e240 mg\u003cspan\u003e (Details: UCUM code mg \u003d \u0027mg\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "status": "completed",
+  "medicationCodeableConcept": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "322254008",
+        "display": "Paracetamol 240mg suppository (product)"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "effectivePeriod": {
+    "start": "2015-01-15T22:03:00+01:00",
+    "end": "2015-01-16T02:03:00+01:00"
+  },
+  "performer": [
+    {
+      "actor": {
+        "reference": "Practitioner/f007",
+        "display": "Patrick Pump"
+      }
+    }
+  ],
+  "reasonCode": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/reason-medication-given",
+          "code": "c",
+          "display": "Emergency"
+        }
+      ]
+    }
+  ],
+  "request": {
+    "reference": "MedicationRequest/medrx0324"
+  },
+  "dosage": {
+    "text": "Insert one suppository rectally twice daily as needed for fever to a maximim of 3 per day",
+    "site": {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "34402009",
+          "display": "Rectum structure"
+        }
+      ]
+    },
+    "dose": {
+      "value": 240,
+      "unit": "mg",
+      "system": "http://unitsofmeasure.org",
+      "code": "mg"
+    }
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

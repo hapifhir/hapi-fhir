@@ -1,0 +1,261 @@
+{
+  "resourceType": "SpecimenDefinition",
+  "id": "2364",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 2364\u003c/p\u003e\u003cp\u003e\u003cb\u003etypeCollected\u003c/b\u003e: Venous blood specimen \u003cspan\u003e(Details : {SNOMED CT code \u0027122555007\u0027 \u003d \u0027Venous blood specimen\u0027, given as \u0027Venous blood specimen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epatientPreparation\u003c/b\u003e: 12 hour fasting \u003cspan\u003e(Details )\u003c/span\u003e, At rest \u003cspan\u003e(Details : {SNOMED CT code \u0027263678003\u0027 \u003d \u0027At rest\u0027, given as \u0027At rest\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etimeAspect\u003c/b\u003e: preferrably morning time\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003etypeTested\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Serum specimen \u003cspan\u003e(Details : {SNOMED CT code \u0027119364003\u0027 \u003d \u0027Serum specimen\u0027, given as \u0027Serum specimen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epreference\u003c/b\u003e: preferred\u003c/p\u003e\u003ch3\u003eContainers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMaterial\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCap\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMinimumVolume[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eplastic \u003cspan\u003e(Details : {SNOMED CT code \u002761088005\u0027 \u003d \u0027Plastic\u0027, given as \u0027plastic\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eEvacuated blood collection tube, thrombin/clot activator/gel separator \u003cspan\u003e(Details : {SNOMED CT code \u0027702281005\u0027 \u003d \u0027Evacuated blood collection tube, thrombin/clot activator/gel separator\u0027, given as \u0027Evacuated blood collection tube, thrombin/clot activator/gel separator\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eyellow cap \u003cspan\u003e(Details : {urn:iso:std:iso:6710:2017 code \u0027yellow\u0027 \u003d \u0027yellow\u0027, given as \u0027yellow cap\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e2 ml\u003cspan\u003e (Details: UCUM code mL \u003d \u0027mL\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ehandling\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureQualifier\u003c/b\u003e: Ambient temperature \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureRange\u003c/b\u003e: 15-25 °C\u003c/p\u003e\u003cp\u003e\u003cb\u003emaxDuration\u003c/b\u003e: 60 minute\u003cspan\u003e (Details: UCUM code min \u003d \u0027min\u0027)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ehandling\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureQualifier\u003c/b\u003e: Refrigerated temperature \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureRange\u003c/b\u003e: 2-8 °C\u003c/p\u003e\u003cp\u003e\u003cb\u003emaxDuration\u003c/b\u003e: 8 hour\u003cspan\u003e (Details: UCUM code h \u003d \u0027h\u0027)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003etypeTested\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Plasma specimen \u003cspan\u003e(Details : {SNOMED CT code \u0027119361006\u0027 \u003d \u0027Plasma specimen\u0027, given as \u0027Plasma specimen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epreference\u003c/b\u003e: alternate\u003c/p\u003e\u003ch3\u003eContainers\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMaterial\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCap\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eMinimumVolume[x]\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eglass \u003cspan\u003e(Details : {SNOMED CT code \u002732039001\u0027 \u003d \u0027Glass\u0027, given as \u0027glass\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003eEvacuated blood collection tube with heparin lithium and gel separator \u003cspan\u003e(Details : {SNOMED CT code \u0027767390000\u0027 \u003d \u0027Evacuated blood collection tube with heparin lithium and gel separator\u0027, given as \u0027Evacuated blood collection tube with heparin lithium and gel separator\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003egreen cap \u003cspan\u003e(Details : {urn:iso:std:iso:6710:2017 code \u0027green\u0027 \u003d \u0027green\u0027, given as \u0027green cap\u0027})\u003c/span\u003e\u003c/td\u003e\u003ctd\u003e2 ml\u003cspan\u003e (Details: UCUM code mL \u003d \u0027mL\u0027)\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003erejectionCriterion\u003c/b\u003e: insufficient specimen volume \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/rejection-criteria code \u0027insufficient\u0027 \u003d \u0027insufficient specimen volume\u0027, given as \u0027insufficient specimen volume\u0027})\u003c/span\u003e, hemolized specimen \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/rejection-criteria code \u0027hemolized\u0027 \u003d \u0027hemolized specimen\u0027, given as \u0027hemolized specimen\u0027})\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ehandling\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureQualifier\u003c/b\u003e: Ambient temperature \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureRange\u003c/b\u003e: 15-25 °C\u003c/p\u003e\u003cp\u003e\u003cb\u003emaxDuration\u003c/b\u003e: 60 minute\u003cspan\u003e (Details: UCUM code min \u003d \u0027min\u0027)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003ehandling\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureQualifier\u003c/b\u003e: Refrigerated temperature \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etemperatureRange\u003c/b\u003e: 2-8 °C\u003c/p\u003e\u003cp\u003e\u003cb\u003emaxDuration\u003c/b\u003e: 8 hour\u003cspan\u003e (Details: UCUM code h \u003d \u0027h\u0027)\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "typeCollected": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "122555007",
+        "display": "Venous blood specimen"
+      }
+    ]
+  },
+  "patientPreparation": [
+    {
+      "text": "12 hour fasting"
+    },
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "263678003",
+          "display": "At rest"
+        }
+      ]
+    }
+  ],
+  "timeAspect": "preferrably morning time",
+  "typeTested": [
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "119364003",
+            "display": "Serum specimen"
+          }
+        ]
+      },
+      "preference": "preferred",
+      "container": {
+        "material": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "61088005",
+              "display": "plastic"
+            }
+          ]
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "702281005",
+              "display": "Evacuated blood collection tube, thrombin/clot activator/gel separator"
+            }
+          ]
+        },
+        "cap": {
+          "coding": [
+            {
+              "system": "urn:iso:std:iso:6710:2017",
+              "code": "yellow",
+              "display": "yellow cap"
+            }
+          ]
+        },
+        "minimumVolumeQuantity": {
+          "value": 2,
+          "unit": "ml",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      },
+      "handling": [
+        {
+          "temperatureQualifier": {
+            "text": "Ambient temperature"
+          },
+          "temperatureRange": {
+            "low": {
+              "value": 15,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            },
+            "high": {
+              "value": 25,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            }
+          },
+          "maxDuration": {
+            "value": 60,
+            "unit": "minute",
+            "system": "http://unitsofmeasure.org",
+            "code": "min"
+          }
+        },
+        {
+          "temperatureQualifier": {
+            "text": "Refrigerated temperature"
+          },
+          "temperatureRange": {
+            "low": {
+              "value": 2,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            },
+            "high": {
+              "value": 8,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            }
+          },
+          "maxDuration": {
+            "value": 8,
+            "unit": "hour",
+            "system": "http://unitsofmeasure.org",
+            "code": "h"
+          }
+        }
+      ]
+    },
+    {
+      "type": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "119361006",
+            "display": "Plasma specimen"
+          }
+        ]
+      },
+      "preference": "alternate",
+      "container": {
+        "material": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "32039001",
+              "display": "glass"
+            }
+          ]
+        },
+        "type": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "767390000",
+              "display": "Evacuated blood collection tube with heparin lithium and gel separator"
+            }
+          ]
+        },
+        "cap": {
+          "coding": [
+            {
+              "system": "urn:iso:std:iso:6710:2017",
+              "code": "green",
+              "display": "green cap"
+            }
+          ]
+        },
+        "minimumVolumeQuantity": {
+          "value": 2,
+          "unit": "ml",
+          "system": "http://unitsofmeasure.org",
+          "code": "mL"
+        }
+      },
+      "rejectionCriterion": [
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/rejection-criteria",
+              "code": "insufficient",
+              "display": "insufficient specimen volume"
+            }
+          ]
+        },
+        {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/rejection-criteria",
+              "code": "hemolized",
+              "display": "hemolized specimen"
+            }
+          ]
+        }
+      ],
+      "handling": [
+        {
+          "temperatureQualifier": {
+            "text": "Ambient temperature"
+          },
+          "temperatureRange": {
+            "low": {
+              "value": 15,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            },
+            "high": {
+              "value": 25,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            }
+          },
+          "maxDuration": {
+            "value": 60,
+            "unit": "minute",
+            "system": "http://unitsofmeasure.org",
+            "code": "min"
+          }
+        },
+        {
+          "temperatureQualifier": {
+            "text": "Refrigerated temperature"
+          },
+          "temperatureRange": {
+            "low": {
+              "value": 2,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            },
+            "high": {
+              "value": 8,
+              "unit": "°C",
+              "system": "http://unitsofmeasure.org",
+              "code": "Cel"
+            }
+          },
+          "maxDuration": {
+            "value": 8,
+            "unit": "hour",
+            "system": "http://unitsofmeasure.org",
+            "code": "h"
+          }
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

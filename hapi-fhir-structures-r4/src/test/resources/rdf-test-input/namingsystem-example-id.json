@@ -1,0 +1,71 @@
+{
+  "resourceType": "NamingSystem",
+  "id": "example-id",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003e\n        \u003cb\u003eAustralian IHI Number\u003c/b\u003e\n      \u003c/p\u003e\n      \n      \u003cp\u003e oid: 1.2.36.1.2001.1003.0\u003c/p\u003e\n      \n      \u003cp\u003e uri: http://ns.electronichealth.net.au/id/hi/ihi/1.0\u003c/p\u003e\n    \n    \u003c/div\u003e"
+  },
+  "name": "Austalian Healthcare Identifier - Individual",
+  "status": "active",
+  "kind": "identifier",
+  "date": "2015-08-31",
+  "publisher": "HL7 Australia on behalf of NEHTA",
+  "contact": [
+    {
+      "name": "HL7 Australia FHIR Team",
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7-australia.wikispaces.com/FHIR+Australia"
+        }
+      ]
+    }
+  ],
+  "responsible": "HI Service Operator / NEHTA",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+        "code": "NI",
+        "display": "National unique individual identifier"
+      }
+    ],
+    "text": "IHI"
+  },
+  "description": "Australian HI Identifier as established by relevant regulations etc.",
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "AU"
+        }
+      ]
+    }
+  ],
+  "usage": "Used in Australia for identifying patients",
+  "uniqueId": [
+    {
+      "type": "oid",
+      "value": "1.2.36.1.2001.1003.0",
+      "comment": "This value is used in Australian CDA documents"
+    },
+    {
+      "type": "uri",
+      "value": "http://ns.electronichealth.net.au/id/hi/ihi/1.0",
+      "preferred": true,
+      "period": {
+        "start": "2015-08-21"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

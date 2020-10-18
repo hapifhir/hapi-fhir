@@ -1,0 +1,185 @@
+{
+  "resourceType": "Questionnaire",
+  "id": "gcs",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: gcs\u003c/p\u003e\u003cp\u003e\u003cb\u003econtained\u003c/b\u003e: , , \u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/Questionnaire/gcs\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Glasgow Coma Score\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003esubjectType\u003c/b\u003e: Patient\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 03/08/2015\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: FHIR Project team\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Glasgow coma score total (Details: LOINC code 9269-2 \u003d \u0027Glasgow coma score total\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003elinkId\u003c/b\u003e: 1.1\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Glasgow coma score verbal (Details: LOINC code 9270-0 \u003d \u0027Glasgow coma score verbal\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: choice\u003c/p\u003e\u003cp\u003e\u003cb\u003eanswerValueSet\u003c/b\u003e: \u003ca\u003e#verbal\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003elinkId\u003c/b\u003e: 1.2\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Glasgow coma score motor (Details: LOINC code 9268-4 \u003d \u0027Glasgow coma score motor\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: choice\u003c/p\u003e\u003cp\u003e\u003cb\u003eanswerValueSet\u003c/b\u003e: \u003ca\u003e#motor\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eitem\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003elinkId\u003c/b\u003e: 1.3\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Glasgow coma score eye opening (Details: LOINC code 9267-6 \u003d \u0027Glasgow coma score eye opening\u0027, stated as \u0027null\u0027)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: choice\u003c/p\u003e\u003cp\u003e\u003cb\u003eanswerValueSet\u003c/b\u003e: \u003ca\u003e#eye\u003c/a\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "ValueSet",
+      "id": "motor",
+      "identifier": [
+        {
+          "system": "http://loinc.org",
+          "value": "http://loinc.org/ValueSet/LL357-5"
+        }
+      ],
+      "name": "GCS Motor Value Set",
+      "status": "active",
+      "description": "LOINC ANSWER LIST    (LL357-5)",
+      "compose": {
+        "include": [
+          {
+            "system": "http://loinc.org",
+            "concept": [
+              {
+                "code": "LA6562-8",
+                "display": "No motor response"
+              },
+              {
+                "code": "LA6563-6",
+                "display": "Extension to pain"
+              },
+              {
+                "code": "LA6564-4",
+                "display": "Flexion to pain"
+              },
+              {
+                "code": "LA6565-1",
+                "display": "Withdrawl from pain"
+              },
+              {
+                "code": "LA6566-9",
+                "display": "Localizing pain"
+              },
+              {
+                "code": "LA6567-7",
+                "display": "Obeys commands"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "verbal",
+      "identifier": [
+        {
+          "system": "http://loinc.org",
+          "value": "http://loinc.org/ValueSet/LL356-7"
+        }
+      ],
+      "name": "GCS Verbal Value Set",
+      "status": "active",
+      "description": "LOINC ANSWER LIST    (LL356-7)",
+      "compose": {
+        "include": [
+          {
+            "system": "http://loinc.org",
+            "concept": [
+              {
+                "code": "LA6557-8",
+                "display": "No verbal response (\u003e2yrs); no vocal response (\u003c\u003d2yrs)"
+              },
+              {
+                "code": "LA6558-6",
+                "display": "Incomprehensible sounds"
+              },
+              {
+                "code": "LA6559-4",
+                "display": "Inappropriate words"
+              },
+              {
+                "code": "LA6560-2",
+                "display": "Confused"
+              },
+              {
+                "code": "LA6561-0",
+                "display": "Oriented"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "resourceType": "ValueSet",
+      "id": "eye",
+      "identifier": [
+        {
+          "system": "http://loinc.org",
+          "value": "http://loinc.org/ValueSet/LL355-9"
+        }
+      ],
+      "name": "GCS Eye Value Set",
+      "status": "active",
+      "description": "LOINC ANSWER LIST    (LL355-9)",
+      "compose": {
+        "include": [
+          {
+            "system": "http://loinc.org",
+            "concept": [
+              {
+                "code": "LA6553-7",
+                "display": "No eye opening"
+              },
+              {
+                "code": "LA6554-5",
+                "display": "Eye opening to pain"
+              },
+              {
+                "code": "LA6555-2",
+                "display": "Eye opening to verbal command"
+              },
+              {
+                "code": "LA6556-0",
+                "display": "Eyes open spontaneously"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "url": "http://hl7.org/fhir/Questionnaire/gcs",
+  "title": "Glasgow Coma Score",
+  "status": "draft",
+  "subjectType": [
+    "Patient"
+  ],
+  "date": "2015-08-03",
+  "publisher": "FHIR Project team",
+  "code": [
+    {
+      "system": "http://loinc.org",
+      "code": "9269-2"
+    }
+  ],
+  "item": [
+    {
+      "linkId": "1.1",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "9270-0"
+        }
+      ],
+      "type": "choice",
+      "answerValueSet": "#verbal"
+    },
+    {
+      "linkId": "1.2",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "9268-4"
+        }
+      ],
+      "type": "choice",
+      "answerValueSet": "#motor"
+    },
+    {
+      "linkId": "1.3",
+      "code": [
+        {
+          "system": "http://loinc.org",
+          "code": "9267-6"
+        }
+      ],
+      "type": "choice",
+      "answerValueSet": "#eye"
+    }
+  ]
+}

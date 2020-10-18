@@ -1,0 +1,72 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "medicationrequest-course-of-therapy",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMedication request  course of  therapy  codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eMedicationRequest Course of Therapy Codes\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003econtinuous\u003ca name\u003d\"medicationrequest-course-of-therapy-continuous\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContinuous long term therapy\u003c/td\u003e\u003ctd\u003eA medication which is expected to be continued beyond the present order and which the patient should be assumed to be taking unless explicitly stopped.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eacute\u003ca name\u003d\"medicationrequest-course-of-therapy-acute\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eShort course (acute) therapy\u003c/td\u003e\u003ctd\u003eA medication which the patient is only expected to consume for the duration of the current order and which is not expected to be renewed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eseasonal\u003ca name\u003d\"medicationrequest-course-of-therapy-seasonal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSeasonal\u003c/td\u003e\u003ctd\u003eA medication which is expected to be used on a part time basis at certain times of the year\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "phx"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/medicationrequest-course-of-therapy",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1327"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "medicationRequest Course of Therapy Codes",
+  "title": "Medication request  course of  therapy  codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "MedicationRequest Course of Therapy Codes",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/medicationrequest-course-of-therapy",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "continuous",
+      "display": "Continuous long term therapy",
+      "definition": "A medication which is expected to be continued beyond the present order and which the patient should be assumed to be taking unless explicitly stopped."
+    },
+    {
+      "code": "acute",
+      "display": "Short course (acute) therapy",
+      "definition": "A medication which the patient is only expected to consume for the duration of the current order and which is not expected to be renewed."
+    },
+    {
+      "code": "seasonal",
+      "display": "Seasonal",
+      "definition": "A medication which is expected to be used on a part time basis at certain times of the year"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "certainty-subcomponent-rating",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCertaintySubcomponentRating\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe quality rating of the subcomponent of a quality of evidence rating.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/certainty-subcomponent-rating defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eno-change\u003ca name\u003d\"certainty-subcomponent-rating-no-change\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eno change to rating\u003c/td\u003e\u003ctd\u003eno change to quality rating.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edowncode1\u003ca name\u003d\"certainty-subcomponent-rating-downcode1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereduce rating: -1\u003c/td\u003e\u003ctd\u003ereduce quality rating by 1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edowncode2\u003ca name\u003d\"certainty-subcomponent-rating-downcode2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereduce rating: -2\u003c/td\u003e\u003ctd\u003ereduce quality rating by 2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edowncode3\u003ca name\u003d\"certainty-subcomponent-rating-downcode3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ereduce rating: -3\u003c/td\u003e\u003ctd\u003ereduce quality rating by 3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eupcode1\u003ca name\u003d\"certainty-subcomponent-rating-upcode1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eincrease rating: +1\u003c/td\u003e\u003ctd\u003eincrease quality rating by 1.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eupcode2\u003ca name\u003d\"certainty-subcomponent-rating-upcode2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eincrease rating: +2\u003c/td\u003e\u003ctd\u003eincrease quality rating by 2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eno-concern\u003ca name\u003d\"certainty-subcomponent-rating-no-concern\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eno serious concern\u003c/td\u003e\u003ctd\u003eno serious concern.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eserious-concern\u003ca name\u003d\"certainty-subcomponent-rating-serious-concern\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eserious concern\u003c/td\u003e\u003ctd\u003eserious concern.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecritical-concern\u003ca name\u003d\"certainty-subcomponent-rating-critical-concern\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecritical concern\u003c/td\u003e\u003ctd\u003ecritical concern.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epresent\u003ca name\u003d\"certainty-subcomponent-rating-present\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epresent\u003c/td\u003e\u003ctd\u003epossible reason for increasing quality rating was checked and found to bepresent.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eabsent\u003ca name\u003d\"certainty-subcomponent-rating-absent\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eabsent\u003c/td\u003e\u003ctd\u003epossible reason for increasing quality rating was checked and found to be absent.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/certainty-subcomponent-rating",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1362"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CertaintySubcomponentRating",
+  "title": "CertaintySubcomponentRating",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The quality rating of the subcomponent of a quality of evidence rating.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/certainty-subcomponent-rating",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "no-change",
+      "display": "no change to rating",
+      "definition": "no change to quality rating."
+    },
+    {
+      "code": "downcode1",
+      "display": "reduce rating: -1",
+      "definition": "reduce quality rating by 1."
+    },
+    {
+      "code": "downcode2",
+      "display": "reduce rating: -2",
+      "definition": "reduce quality rating by 2."
+    },
+    {
+      "code": "downcode3",
+      "display": "reduce rating: -3",
+      "definition": "reduce quality rating by 3."
+    },
+    {
+      "code": "upcode1",
+      "display": "increase rating: +1",
+      "definition": "increase quality rating by 1."
+    },
+    {
+      "code": "upcode2",
+      "display": "increase rating: +2",
+      "definition": "increase quality rating by 2."
+    },
+    {
+      "code": "no-concern",
+      "display": "no serious concern",
+      "definition": "no serious concern."
+    },
+    {
+      "code": "serious-concern",
+      "display": "serious concern",
+      "definition": "serious concern."
+    },
+    {
+      "code": "critical-concern",
+      "display": "critical concern",
+      "definition": "critical concern."
+    },
+    {
+      "code": "present",
+      "display": "present",
+      "definition": "possible reason for increasing quality rating was checked and found to bepresent."
+    },
+    {
+      "code": "absent",
+      "display": "absent",
+      "definition": "possible reason for increasing quality rating was checked and found to be absent."
+    }
+  ]
+}

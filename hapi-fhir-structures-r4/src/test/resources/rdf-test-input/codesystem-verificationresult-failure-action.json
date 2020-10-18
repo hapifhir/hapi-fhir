@@ -1,0 +1,82 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "verificationresult-failure-action",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eFailure-action\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe result if validation fails\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/failure-action defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efatal\u003ca name\u003d\"verificationresult-failure-action-fatal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFatal\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewarn\u003ca name\u003d\"verificationresult-failure-action-warn\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWarning\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erec-only\u003ca name\u003d\"verificationresult-failure-action-rec-only\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRecord only\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003enone\u003ca name\u003d\"verificationresult-failure-action-none\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNone\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/failure-action",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.1.891"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "failure-action",
+  "title": "Failure-action",
+  "status": "draft",
+  "experimental": false,
+  "date": "2018-06-05T14:06:02+00:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    },
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The result if validation fails",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/verificationresult-failure-action",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "fatal",
+      "display": "Fatal"
+    },
+    {
+      "code": "warn",
+      "display": "Warning"
+    },
+    {
+      "code": "rec-only",
+      "display": "Record only"
+    },
+    {
+      "code": "none",
+      "display": "None"
+    }
+  ]
+}

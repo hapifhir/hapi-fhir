@@ -1,0 +1,66 @@
+{
+  "resourceType": "OperationDefinition",
+  "id": "Resource-convert",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eConvert from one form to another\u003c/h2\u003e\u003cp\u003eOPERATION: Convert from one form to another\u003c/p\u003e\u003cp\u003eThe official URL for this operation definition is: \u003c/p\u003e\u003cpre\u003ehttp://hl7.org/fhir/OperationDefinition/Resource-convert\u003c/pre\u003e\u003cdiv\u003e\u003cp\u003eThis operation takes a resource in one form, and returns to in another form. Both input and output are a single resource. The primary use of this operation is to convert between formats (e.g. (XML -\u0026gt; JSON or vice versa)\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eURL: [base]/$convert\u003c/p\u003e\u003cp\u003eParameters\u003c/p\u003e\u003ctable class\u003d\"grid\"\u003e\u003ctr\u003e\u003ctd\u003e\u003cb\u003eUse\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eName\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCardinality\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eBinding\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDocumentation\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eIN\u003c/td\u003e\u003ctd\u003einput\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"resource.html\"\u003eResource\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe resource that is to be converted\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003eOUT\u003c/td\u003e\u003ctd\u003eoutput\u003c/td\u003e\u003ctd\u003e1..1\u003c/td\u003e\u003ctd\u003e\u003ca href\u003d\"resource.html\"\u003eResource\u003c/a\u003e\u003c/td\u003e\u003ctd/\u003e\u003ctd\u003e\u003cdiv\u003e\u003cp\u003eThe resource after conversion\u003c/p\u003e\n\u003c/div\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cdiv\u003e\u003cp\u003eWhile the primary use of this operation is simple - converting a resource from one format to another, there are many potential uses including:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003econverting resources from one version to another\u003c/li\u003e\n\u003cli\u003erestructuring information in a resource (e.g. moving method into/out of Observation.code)\u003c/li\u003e\n\u003cli\u003eextracting data from a questionnaire\u003c/li\u003e\n\u003cli\u003econverting CDA documents or v2 messages (as a binary resource) to a bundle (or vice versa) (or even openEHR or openMHealth).\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eThese variants would all be associated with parameters that define and control these kind of conversions, though such parameters are not defined at this time. In the absence of any parameters, simple format conversion is all that will occur.\u003c/p\u003e\n\u003cp\u003eFor this reason, implementers should be aware that:\u003c/p\u003e\n\u003cul\u003e\n\u003cli\u003ethe output resource type may be different from the input resource (particularly, it might be a bundle)\u003c/li\u003e\n\u003cli\u003ebinary resources may be represented directly using some other content-type (i.e. just post the content directly)\u003c/li\u003e\n\u003c/ul\u003e\n\u003cp\u003eImplementers are encouraged to provide feedback to HL7 about their use of this operation\u003c/p\u003e\n\u003c/div\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    }
+  ],
+  "url": "http://hl7.org/fhir/OperationDefinition/Resource-convert",
+  "version": "4.0.1",
+  "name": "Convert from one form to another",
+  "status": "draft",
+  "kind": "operation",
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "This operation takes a resource in one form, and returns to in another form. Both input and output are a single resource. The primary use of this operation is to convert between formats (e.g. (XML -\u003e JSON or vice versa)",
+  "code": "convert",
+  "comment": "While the primary use of this operation is simple - converting a resource from one format to another, there are many potential uses including:\n\n* converting resources from one version to another\n* restructuring information in a resource (e.g. moving method into/out of Observation.code)\n* extracting data from a questionnaire\n* converting CDA documents or v2 messages (as a binary resource) to a bundle (or vice versa) (or even openEHR or openMHealth). \n\nThese variants would all be associated with parameters that define and control these kind of conversions, though such parameters are not defined at this time. In the absence of any parameters, simple format conversion is all that will occur.\n\nFor this reason, implementers should be aware that:\n\n* the output resource type may be different from the input resource (particularly, it might be a bundle)\n* binary resources may be represented directly using some other content-type (i.e. just post the content directly)\n\nImplementers are encouraged to provide feedback to HL7 about their use of this operation",
+  "resource": [
+    "Resource"
+  ],
+  "system": true,
+  "type": false,
+  "instance": false,
+  "parameter": [
+    {
+      "name": "input",
+      "use": "in",
+      "min": 1,
+      "max": "1",
+      "documentation": "The resource that is to be converted",
+      "type": "Resource"
+    },
+    {
+      "name": "output",
+      "use": "out",
+      "min": 1,
+      "max": "1",
+      "documentation": "The resource after conversion",
+      "type": "Resource"
+    }
+  ]
+}

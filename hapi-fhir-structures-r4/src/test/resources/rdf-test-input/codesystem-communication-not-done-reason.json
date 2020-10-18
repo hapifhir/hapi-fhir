@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "communication-not-done-reason",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCommunicationNotDoneReason\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes for the reason why a communication did not happen.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/communication-not-done-reason defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"communication-not-done-reason-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eThe communication was not done due to an unknown reason.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esystem-error\u003ca name\u003d\"communication-not-done-reason-system-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSystem Error\u003c/td\u003e\u003ctd\u003eThe communication was not done due to a system error.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einvalid-phone-number\u003ca name\u003d\"communication-not-done-reason-invalid-phone-number\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInvalid Phone Number\u003c/td\u003e\u003ctd\u003eThe communication was not done due to an invalid phone number.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erecipient-unavailable\u003ca name\u003d\"communication-not-done-reason-recipient-unavailable\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRecipient Unavailable\u003c/td\u003e\u003ctd\u003eThe communication was not done due to the recipient being unavailable.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003efamily-objection\u003ca name\u003d\"communication-not-done-reason-family-objection\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eFamily Objection\u003c/td\u003e\u003ctd\u003eThe communication was not done due to a family objection.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatient-objection\u003ca name\u003d\"communication-not-done-reason-patient-objection\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient Objection\u003c/td\u003e\u003ctd\u003eThe communication was not done due to a patient objection.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pc"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/communication-not-done-reason",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1077"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CommunicationNotDoneReason",
+  "title": "CommunicationNotDoneReason",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes for the reason why a communication did not happen.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/communication-not-done-reason",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "The communication was not done due to an unknown reason."
+    },
+    {
+      "code": "system-error",
+      "display": "System Error",
+      "definition": "The communication was not done due to a system error."
+    },
+    {
+      "code": "invalid-phone-number",
+      "display": "Invalid Phone Number",
+      "definition": "The communication was not done due to an invalid phone number."
+    },
+    {
+      "code": "recipient-unavailable",
+      "display": "Recipient Unavailable",
+      "definition": "The communication was not done due to the recipient being unavailable."
+    },
+    {
+      "code": "family-objection",
+      "display": "Family Objection",
+      "definition": "The communication was not done due to a family objection."
+    },
+    {
+      "code": "patient-objection",
+      "display": "Patient Objection",
+      "definition": "The communication was not done due to a patient objection."
+    }
+  ]
+}

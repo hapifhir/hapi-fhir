@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflict;
 import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Condition;
@@ -243,11 +244,12 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 	}
 
 	private DeleteConflictOutcome deleteConflictsFixedRetryCount(DeleteConflictList theList) {
+		TransactionDetails transactionDetails = new TransactionDetails();
 		for (DeleteConflict next : theList) {
 			IdDt source = next.getSourceId();
 			if ("Patient".equals(source.getResourceType())) {
 				ourLog.info("Deleting {}", source);
-				myPatientDao.delete(source, theList, null, null);
+				myPatientDao.delete(source, theList, null, transactionDetails);
 				++myInterceptorDeleteCount;
 			}
 		}

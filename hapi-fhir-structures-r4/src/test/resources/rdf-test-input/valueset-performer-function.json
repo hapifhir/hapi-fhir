@@ -1,0 +1,78 @@
+{
+  "resourceType": "ValueSet",
+  "id": "performer-function",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003ePerformer Function Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe types of involvement of the performer in the Event.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis value set includes codes from the following code systems:\u003c/p\u003e\u003cul\u003e\u003cli\u003eInclude these codes as defined in \u003ca href\u003d\"v3/ParticipationType/cs.html\"\u003e\u003ccode\u003ehttp://terminology.hl7.org/CodeSystem/v3-ParticipationType\u003c/code\u003e\u003c/a\u003e\u003ctable class\u003d\"none\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-TRANS\"\u003eTRANS\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTranscriber\u003c/td\u003e\u003ctd\u003eAn entity entering the data into the originating system. The data entry entity is collected optionally for internal quality control purposes. This includes the transcriptionist for dictated text transcribed into electronic form.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-PART\"\u003ePART\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eParticipation\u003c/td\u003e\u003ctd\u003eIndicates that the target of the participation is involved in some manner in the act, but does not qualify how.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-ATND\"\u003eATND\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eattender\u003c/td\u003e\u003ctd\u003eThe practitioner that has responsibility for overseeing a patient\u0027s care during a patient encounter.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-CON\"\u003eCON\u003c/a\u003e\u003c/td\u003e\u003ctd\u003econsultant\u003c/td\u003e\u003ctd\u003eAn advisor participating in the service by performing evaluations and making recommendations.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-AUT\"\u003eAUT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthor (originator)\u003c/td\u003e\u003ctd\u003eDefinition: A party that originates the Act and therefore has responsibility for the information given in the Act and ownership of this Act.\u003cbr/\u003e\n                        \n                           Example: the report writer, the person writing the act definition, the guideline author, the placer of an order, the EKG cart (device) creating a report etc. Every Act should have an author. Authorship is regardless of mood always actual authorship. \u003cbr/\u003e\n                        Examples of such policies might include:\u003cbr/\u003e\n                        \n                           \n                              The author and anyone they explicitly delegate may update the report;\u003cbr/\u003e\n                           \n                           \n                              All administrators within the same clinic may cancel and reschedule appointments created by other administrators within that clinic;\u003cbr/\u003e\n                           \n                        \n                        A party that is neither an author nor a party who is extended authorship maintenance rights by policy, may only amend, reverse, override, replace, or follow up in other ways on this Act, whereby the Act remains intact and is linked to another Act authored by that other party.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-INF\"\u003eINF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003einformant\u003c/td\u003e\u003ctd\u003eA source of reported information (e.g., a next of kin who answers questions about the patient\u0027s history).  For history questions, the patient is logically an informant, yet the informant of history questions is implicitly the subject.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-ENT\"\u003eENT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003edata entry person\u003c/td\u003e\u003ctd\u003eA person entering the data into the originating system.  The data entry person is collected optionally for internal quality control purposes.  This includes the transcriptionist for dictated text.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-WIT\"\u003eWIT\u003c/a\u003e\u003c/td\u003e\u003ctd\u003ewitness\u003c/td\u003e\u003ctd\u003eOnly with service events.  A person witnessing the action happening without doing anything.  A witness is not necessarily aware, much less approves of anything stated in the service event.  Example for a witness is students watching an operation or an advanced directive witness.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-PPRF\"\u003ePPRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eprimary performer\u003c/td\u003e\u003ctd\u003eThe principal or primary performer of the act.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-SPRF\"\u003eSPRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003esecondary performer\u003c/td\u003e\u003ctd\u003eA person assisting in an act through his substantial presence and involvement   This includes: assistants, technicians, associates, or whatever the job titles may be.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-RESP\"\u003eRESP\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eresponsible party\u003c/td\u003e\u003ctd\u003eThe person or organization that has primary responsibility for the act.  The responsible party is not necessarily present in an action, but is accountable for the action through the power to delegate, and the duty to review actions with the performing actor after the fact.  This responsibility may be ethical, legal, contractual, fiscal, or fiduciary in nature.\u003cbr/\u003e\n                        \n                           Example: A person who is the head of a biochemical laboratory; a sponsor for a policy or government program.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-VRF\"\u003eVRF\u003c/a\u003e\u003c/td\u003e\u003ctd\u003everifier\u003c/td\u003e\u003ctd\u003eA person who verifies the correctness and appropriateness of the service (plan, order, event, etc.) and hence takes on accountability.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-AUTHEN\"\u003eAUTHEN\u003c/a\u003e\u003c/td\u003e\u003ctd\u003eauthenticator\u003c/td\u003e\u003ctd\u003eA verifier who attests to the accuracy of an act, but who does not have privileges to legally authenticate the act. An example would be a resident physician who sees a patient and dictates a note, then later signs it. Their signature constitutes an authentication.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e\u003ca href\u003d\"v3/ParticipationType/cs.html#v3-ParticipationType-LA\"\u003eLA\u003c/a\u003e\u003c/td\u003e\u003ctd\u003elegal authenticator\u003c/td\u003e\u003ctd\u003eA verifier who legally authenticates the accuracy of an act. An example would be a staff physician who sees a patient and dictates a note, then later signs it. Their signature constitutes a legal authentication.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/li\u003e\u003c/ul\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ValueSet/performer-function",
+  "version": "4.0.1",
+  "name": "Performer Function Codes",
+  "status": "draft",
+  "publisher": "HL7 International - Orders and Observations WG",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://www.hl7.org/Special/committees/orders/index.cfm"
+        }
+      ]
+    }
+  ],
+  "description": "The types of involvement of the performer in the Event.",
+  "compose": {
+    "include": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+        "concept": [
+          {
+            "code": "TRANS"
+          },
+          {
+            "code": "PART"
+          },
+          {
+            "code": "ATND"
+          },
+          {
+            "code": "CON"
+          },
+          {
+            "code": "AUT"
+          },
+          {
+            "code": "INF"
+          },
+          {
+            "code": "ENT"
+          },
+          {
+            "code": "WIT"
+          },
+          {
+            "code": "PPRF"
+          },
+          {
+            "code": "SPRF"
+          },
+          {
+            "code": "RESP"
+          },
+          {
+            "code": "VRF"
+          },
+          {
+            "code": "AUTHEN"
+          },
+          {
+            "code": "LA"
+          }
+        ]
+      }
+    ]
+  }
+}

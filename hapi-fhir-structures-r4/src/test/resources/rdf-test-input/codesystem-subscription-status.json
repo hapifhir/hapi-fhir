@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "subscription-status",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSubscriptionStatus\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe status of a subscription.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/subscription-status defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erequested\u003ca name\u003d\"subscription-status-requested\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRequested\u003c/td\u003e\u003ctd\u003eThe client has requested the subscription, and the server has not yet set it up.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"subscription-status-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eActive\u003c/td\u003e\u003ctd\u003eThe subscription is active.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eerror\u003ca name\u003d\"subscription-status-error\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eError\u003c/td\u003e\u003ctd\u003eThe server has an error executing the notification.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoff\u003ca name\u003d\"subscription-status-off\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOff\u003c/td\u003e\u003ctd\u003eToo many errors have occurred or the subscription has expired.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/subscription-status",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.503"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SubscriptionStatus",
+  "title": "SubscriptionStatus",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The status of a subscription.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/subscription-status",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "requested",
+      "display": "Requested",
+      "definition": "The client has requested the subscription, and the server has not yet set it up."
+    },
+    {
+      "code": "active",
+      "display": "Active",
+      "definition": "The subscription is active."
+    },
+    {
+      "code": "error",
+      "display": "Error",
+      "definition": "The server has an error executing the notification."
+    },
+    {
+      "code": "off",
+      "display": "Off",
+      "definition": "Too many errors have occurred or the subscription has expired."
+    }
+  ]
+}

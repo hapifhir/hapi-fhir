@@ -154,6 +154,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		if (group == null) {
 			group = conceptMap.addGroup();
 			group.setSource(theMapping.getSourceCodeSystem());
+			group.setSourceVersion(theMapping.getSourceCodeSystemVersion());
 			group.setTarget(theMapping.getTargetCodeSystem());
 			group.setTargetVersion(defaultIfBlank(theMapping.getTargetCodeSystemVersion(), null));
 		}
@@ -188,11 +189,11 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 	ValueSet getValueSet(String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
 
-		String version = null;
+		String version;
 		if (isNotBlank(theVersionPropertyName)) {
 			version = myUploadProperties.getProperty(theVersionPropertyName);
 		} else {
-			version = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+			version = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		}
 
 		ValueSet vs;
@@ -231,6 +232,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 		private String myConceptMapVersion;
 		private String myConceptMapName;
 		private String mySourceCodeSystem;
+		private String mySourceCodeSystemVersion;
 		private String mySourceCode;
 		private String mySourceDisplay;
 		private String myTargetCodeSystem;
@@ -308,6 +310,15 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 
 		ConceptMapping setSourceCodeSystem(String theSourceCodeSystem) {
 			mySourceCodeSystem = theSourceCodeSystem;
+			return this;
+		}
+
+		String getSourceCodeSystemVersion() {
+			return mySourceCodeSystemVersion;
+		}
+
+		ConceptMapping setSourceCodeSystemVersion(String theSourceCodeSystemVersion) {
+			mySourceCodeSystemVersion = theSourceCodeSystemVersion;
 			return this;
 		}
 

@@ -1,0 +1,123 @@
+{
+  "resourceType": "NutritionOrder",
+  "id": "pureeddiet",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: pureeddiet\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: 123\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003eintent\u003c/b\u003e: order\u003c/p\u003e\u003cp\u003e\u003cb\u003epatient\u003c/b\u003e: \u003ca\u003ePeter Chalmers\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eInpatient\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edateTime\u003c/b\u003e: 17/09/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003eorderer\u003c/b\u003e: \u003ca\u003eDr Adam Careful\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eallergyIntolerance\u003c/b\u003e: \u003ca\u003eCashew Nuts\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003efoodPreferenceModifier\u003c/b\u003e: Dairy Free \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/diet code \u0027dairy-free\u0027 \u003d \u0027Dairy Free)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eexcludeFoodModifier\u003c/b\u003e: Cashew Nut \u003cspan\u003e(Details : {SNOMED CT code \u0027227493005\u0027 \u003d \u0027Cashew nuts\u0027, given as \u0027Cashew Nut\u0027})\u003c/span\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eoralDiet\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: Pureed diet \u003cspan\u003e(Details : {SNOMED CT code \u0027226211001\u0027 \u003d \u0027Pureed diet\u0027, given as \u0027Pureed diet\u0027}; {http://goodhealthhospital.org/diet-type-codes code \u00271010\u0027 \u003d \u00271010\u0027, given as \u0027Pureed diet\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eschedule\u003c/b\u003e: Starting 10/02/2015, Do 3 per 1 days\u003c/p\u003e\u003ch3\u003eTextures\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eModifier\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003ePureed \u003cspan\u003e(Details : {SNOMED CT code \u0027228055009\u0027 \u003d \u0027Liquidized food\u0027, given as \u0027Liquidized food\u0027})\u003c/span\u003e\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003efluidConsistencyType\u003c/b\u003e: Nectar thick liquids \u003cspan\u003e(Details : {SNOMED CT code \u0027439021000124105\u0027 \u003d \u0027Dietary liquid consistency - nectar thick liquid (regime/therapy)\u0027, given as \u0027Dietary liquid consistency - nectar thick liquid\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://goodhealthhospital.org/nutrition-requests",
+      "value": "123"
+    }
+  ],
+  "status": "active",
+  "intent": "order",
+  "patient": {
+    "reference": "Patient/example",
+    "display": "Peter Chalmers"
+  },
+  "encounter": {
+    "reference": "Encounter/example",
+    "display": "Inpatient"
+  },
+  "dateTime": "2014-09-17",
+  "orderer": {
+    "reference": "Practitioner/example",
+    "display": "Dr Adam Careful"
+  },
+  "allergyIntolerance": [
+    {
+      "reference": "AllergyIntolerance/example",
+      "display": "Cashew Nuts"
+    }
+  ],
+  "foodPreferenceModifier": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/diet",
+          "code": "dairy-free"
+        }
+      ]
+    }
+  ],
+  "excludeFoodModifier": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "version": "20140730",
+          "code": "227493005",
+          "display": "Cashew Nut"
+        }
+      ]
+    }
+  ],
+  "oralDiet": {
+    "type": [
+      {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "226211001",
+            "display": "Pureed diet"
+          },
+          {
+            "system": "http://goodhealthhospital.org/diet-type-codes",
+            "code": "1010",
+            "display": "Pureed diet"
+          }
+        ],
+        "text": "Pureed diet"
+      }
+    ],
+    "schedule": [
+      {
+        "repeat": {
+          "boundsPeriod": {
+            "start": "2015-02-10"
+          },
+          "frequency": 3,
+          "period": 1,
+          "periodUnit": "d"
+        }
+      }
+    ],
+    "texture": [
+      {
+        "modifier": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "228055009",
+              "display": "Liquidized food"
+            }
+          ],
+          "text": "Pureed"
+        }
+      }
+    ],
+    "fluidConsistencyType": [
+      {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "439021000124105",
+            "display": "Dietary liquid consistency - nectar thick liquid"
+          }
+        ],
+        "text": "Nectar thick liquids"
+      }
+    ]
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

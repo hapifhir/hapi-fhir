@@ -1,0 +1,76 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "animal-genderstatus",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eGender status\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis example value set defines a set of codes that can be used to indicate the current state of the animal\u0027s reproductive organs.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/animal-genderstatus defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eneutered\u003ca name\u003d\"animal-genderstatus-neutered\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNeutered\u003c/td\u003e\u003ctd\u003eThe animal has been sterilized, castrated or otherwise made infertile.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eintact\u003ca name\u003d\"animal-genderstatus-intact\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIntact\u003c/td\u003e\u003ctd\u003eThe animal\u0027s reproductive organs are intact.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunknown\u003ca name\u003d\"animal-genderstatus-unknown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnknown\u003c/td\u003e\u003ctd\u003eUnable to determine whether the animal has been neutered.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/animal-genderstatus",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.419"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "GenderStatus",
+  "title": "Gender status",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This example value set defines a set of codes that can be used to indicate the current state of the animal\u0027s reproductive organs.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/animal-genderstatus",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "neutered",
+      "display": "Neutered",
+      "definition": "The animal has been sterilized, castrated or otherwise made infertile.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "gesteriliseerd"
+        }
+      ]
+    },
+    {
+      "code": "intact",
+      "display": "Intact",
+      "definition": "The animal\u0027s reproductive organs are intact.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "intact"
+        }
+      ]
+    },
+    {
+      "code": "unknown",
+      "display": "Unknown",
+      "definition": "Unable to determine whether the animal has been neutered.",
+      "designation": [
+        {
+          "language": "nl",
+          "value": "onbekend"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "resourceType": "Organization",
+  "id": "3",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \n      \u003cp\u003eMichigan Helth\u003c/p\u003e\n    \n    \u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "system": "http://michigan.gov/state-dept-ids",
+      "value": "25"
+    }
+  ],
+  "name": "Michigan Health",
+  "alias": [
+    "Michigan State Department of Health"
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

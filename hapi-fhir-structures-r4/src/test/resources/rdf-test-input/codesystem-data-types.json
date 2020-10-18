@@ -1,0 +1,379 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "data-types",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eDataType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eA version specific list of the data types defined by the FHIR specification for use as an element  type (any of the FHIR defined data types).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/data-types defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eComments\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAddress\u003ca name\u003d\"data-types-Address\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAddress\u003c/td\u003e\u003ctd\u003eAn address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAge\u003ca name\u003d\"data-types-Age\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAge\u003c/td\u003e\u003ctd\u003eA duration of time during which an organism (or a process) has existed.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAnnotation\u003ca name\u003d\"data-types-Annotation\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAnnotation\u003c/td\u003e\u003ctd\u003eA  text note which also  contains information about who made the statement and when.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eAttachment\u003ca name\u003d\"data-types-Attachment\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttachment\u003c/td\u003e\u003ctd\u003eFor referring to data content defined in other formats.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBackboneElement\u003ca name\u003d\"data-types-BackboneElement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBackboneElement\u003c/td\u003e\u003ctd\u003eBase definition for all elements that are defined inside a resource - but not those in a data type.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCodeableConcept\u003ca name\u003d\"data-types-CodeableConcept\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCodeableConcept\u003c/td\u003e\u003ctd\u003eA concept that may be defined by a formal reference to a terminology or ontology or may be provided by text.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCoding\u003ca name\u003d\"data-types-Coding\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCoding\u003c/td\u003e\u003ctd\u003eA reference to a code defined by a terminology system.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eContactDetail\u003ca name\u003d\"data-types-ContactDetail\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContactDetail\u003c/td\u003e\u003ctd\u003eSpecifies contact information for a person or organization.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eContactPoint\u003ca name\u003d\"data-types-ContactPoint\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContactPoint\u003c/td\u003e\u003ctd\u003eDetails for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eContributor\u003ca name\u003d\"data-types-Contributor\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eContributor\u003c/td\u003e\u003ctd\u003eA contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCount\u003ca name\u003d\"data-types-Count\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCount\u003c/td\u003e\u003ctd\u003eA measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDataRequirement\u003ca name\u003d\"data-types-DataRequirement\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDataRequirement\u003c/td\u003e\u003ctd\u003eDescribes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDistance\u003ca name\u003d\"data-types-Distance\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDistance\u003c/td\u003e\u003ctd\u003eA length - a value with a unit that is a physical distance.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDosage\u003ca name\u003d\"data-types-Dosage\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDosage\u003c/td\u003e\u003ctd\u003eIndicates how the medication is/was taken or should be taken by the patient.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eDuration\u003ca name\u003d\"data-types-Duration\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDuration\u003c/td\u003e\u003ctd\u003eA length of time.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eElement\u003ca name\u003d\"data-types-Element\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eElement\u003c/td\u003e\u003ctd\u003eBase definition for all elements in a resource.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eElementDefinition\u003ca name\u003d\"data-types-ElementDefinition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eElementDefinition\u003c/td\u003e\u003ctd\u003eCaptures constraints on each element within the resource, profile, or extension.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eExpression\u003ca name\u003d\"data-types-Expression\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExpression\u003c/td\u003e\u003ctd\u003eA expression that is evaluated in a specified context and returns a value. The context of use of the expression must specify the context in which the expression is evaluated, and how the result of the expression is used.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eExtension\u003ca name\u003d\"data-types-Extension\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExtension\u003c/td\u003e\u003ctd\u003eOptional Extension Element - found in all resources.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eHumanName\u003ca name\u003d\"data-types-HumanName\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHumanName\u003c/td\u003e\u003ctd\u003eA human\u0027s name with the ability to identify parts and usage.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIdentifier\u003ca name\u003d\"data-types-Identifier\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIdentifier\u003c/td\u003e\u003ctd\u003eAn identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMarketingStatus\u003ca name\u003d\"data-types-MarketingStatus\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMarketingStatus\u003c/td\u003e\u003ctd\u003eThe marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMeta\u003ca name\u003d\"data-types-Meta\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMeta\u003c/td\u003e\u003ctd\u003eThe metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMoney\u003ca name\u003d\"data-types-Money\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMoney\u003c/td\u003e\u003ctd\u003eAn amount of economic utility in some recognized currency.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eMoneyQuantity\u003ca name\u003d\"data-types-MoneyQuantity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMoneyQuantity\u003c/td\u003e\u003ctd/\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNarrative\u003ca name\u003d\"data-types-Narrative\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNarrative\u003c/td\u003e\u003ctd\u003eA human-readable summary of the resource conveying the essential clinical and business information for the resource.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eParameterDefinition\u003ca name\u003d\"data-types-ParameterDefinition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eParameterDefinition\u003c/td\u003e\u003ctd\u003eThe parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePeriod\u003ca name\u003d\"data-types-Period\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePeriod\u003c/td\u003e\u003ctd\u003eA time period defined by a start and end date and optionally time.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ePopulation\u003ca name\u003d\"data-types-Population\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePopulation\u003c/td\u003e\u003ctd\u003eA populatioof people with some set of grouping criteria.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eProdCharacteristic\u003ca name\u003d\"data-types-ProdCharacteristic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProdCharacteristic\u003c/td\u003e\u003ctd\u003eThe marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eProductShelfLife\u003ca name\u003d\"data-types-ProductShelfLife\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProductShelfLife\u003c/td\u003e\u003ctd\u003eThe shelf-life and storage information for a medicinal product item or container can be described using this class.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eQuantity\u003ca name\u003d\"data-types-Quantity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuantity\u003c/td\u003e\u003ctd\u003eA measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRange\u003ca name\u003d\"data-types-Range\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRange\u003c/td\u003e\u003ctd\u003eA set of ordered Quantities defined by a low and high limit.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRatio\u003ca name\u003d\"data-types-Ratio\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRatio\u003c/td\u003e\u003ctd\u003eA relationship of two Quantity values - expressed as a numerator and a denominator.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eReference\u003ca name\u003d\"data-types-Reference\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReference\u003c/td\u003e\u003ctd\u003eA reference from one resource to another.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eRelatedArtifact\u003ca name\u003d\"data-types-RelatedArtifact\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRelatedArtifact\u003c/td\u003e\u003ctd\u003eRelated artifacts such as additional documentation, justification, or bibliographic references.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSampledData\u003ca name\u003d\"data-types-SampledData\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSampledData\u003c/td\u003e\u003ctd\u003eA series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSignature\u003ca name\u003d\"data-types-Signature\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSignature\u003c/td\u003e\u003ctd\u003eA signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSimpleQuantity\u003ca name\u003d\"data-types-SimpleQuantity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSimpleQuantity\u003c/td\u003e\u003ctd/\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSubstanceAmount\u003ca name\u003d\"data-types-SubstanceAmount\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubstanceAmount\u003c/td\u003e\u003ctd\u003eChemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTiming\u003ca name\u003d\"data-types-Timing\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTiming\u003c/td\u003e\u003ctd\u003eSpecifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eTriggerDefinition\u003ca name\u003d\"data-types-TriggerDefinition\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTriggerDefinition\u003c/td\u003e\u003ctd\u003eA description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eUsageContext\u003ca name\u003d\"data-types-UsageContext\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUsageContext\u003c/td\u003e\u003ctd\u003eSpecifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care).\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ebase64Binary\u003ca name\u003d\"data-types-base64Binary\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ebase64Binary\u003c/td\u003e\u003ctd\u003eA stream of bytes\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eboolean\u003ca name\u003d\"data-types-boolean\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eboolean\u003c/td\u003e\u003ctd\u003eValue of \u0026quot;true\u0026quot; or \u0026quot;false\u0026quot;\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecanonical\u003ca name\u003d\"data-types-canonical\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecanonical\u003c/td\u003e\u003ctd\u003eA URI that is a reference to a canonical URL on a FHIR resource\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecode\u003ca name\u003d\"data-types-code\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecode\u003c/td\u003e\u003ctd\u003eA string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edate\u003ca name\u003d\"data-types-date\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edate\u003c/td\u003e\u003ctd\u003eA date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edateTime\u003ca name\u003d\"data-types-dateTime\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edateTime\u003c/td\u003e\u003ctd\u003eA date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edecimal\u003ca name\u003d\"data-types-decimal\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003edecimal\u003c/td\u003e\u003ctd\u003eA rational number with implicit precision\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eid\u003ca name\u003d\"data-types-id\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eid\u003c/td\u003e\u003ctd\u003eAny combination of letters, numerals, \u0026quot;-\u0026quot; and \u0026quot;.\u0026quot;, with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einstant\u003ca name\u003d\"data-types-instant\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einstant\u003c/td\u003e\u003ctd\u003eAn instant in time - known at least to the second\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einteger\u003ca name\u003d\"data-types-integer\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003einteger\u003c/td\u003e\u003ctd\u003eA whole number\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003emarkdown\u003ca name\u003d\"data-types-markdown\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003emarkdown\u003c/td\u003e\u003ctd\u003eA string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoid\u003ca name\u003d\"data-types-oid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eoid\u003c/td\u003e\u003ctd\u003eAn OID represented as a URI\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epositiveInt\u003ca name\u003d\"data-types-positiveInt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003epositiveInt\u003c/td\u003e\u003ctd\u003eAn integer with a value that is positive (e.g. \u0026gt;0)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estring\u003ca name\u003d\"data-types-string\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003estring\u003c/td\u003e\u003ctd\u003eA sequence of Unicode characters\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etime\u003ca name\u003d\"data-types-time\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003etime\u003c/td\u003e\u003ctd\u003eA time during the day, with no date specified\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eunsignedInt\u003ca name\u003d\"data-types-unsignedInt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eunsignedInt\u003c/td\u003e\u003ctd\u003eAn integer with a value that is not negative (e.g. \u0026gt;\u003d 0)\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euri\u003ca name\u003d\"data-types-uri\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003euri\u003c/td\u003e\u003ctd\u003eString of characters used to identify a name or a resource\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eurl\u003ca name\u003d\"data-types-url\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eurl\u003c/td\u003e\u003ctd\u003eA URI that is a literal reference\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003euuid\u003ca name\u003d\"data-types-uuid\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003euuid\u003c/td\u003e\u003ctd\u003eA UUID, represented as a URI\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003exhtml\u003ca name\u003d\"data-types-xhtml\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eXHTML\u003c/td\u003e\u003ctd\u003eXHTML format, as defined by W3C, but restricted usage (mainly, no active content)\u003c/td\u003e\u003ctd\u003eSpecial case: xhtml can only be used in the narrative Data Type\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/valueset-special-status",
+      "valueString": "This Code System is normative - it is generated based on the information defined in this specification. The definition will remain fixed  across versions, but the actual contents will change from version to version"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    }
+  ],
+  "url": "http://hl7.org/fhir/data-types",
+  "version": "4.0.1",
+  "name": "DataType",
+  "title": "DataType",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "A version specific list of the data types defined by the FHIR specification for use as an element  type (any of the FHIR defined data types).",
+  "caseSensitive": true,
+  "content": "complete",
+  "concept": [
+    {
+      "code": "Address",
+      "display": "Address",
+      "definition": "An address expressed using postal conventions (as opposed to GPS or other location definition formats).  This data type may be used to convey addresses for use in delivering mail as well as for visiting locations which might not be valid for mail delivery.  There are a variety of postal address formats defined around the world."
+    },
+    {
+      "code": "Age",
+      "display": "Age",
+      "definition": "A duration of time during which an organism (or a process) has existed."
+    },
+    {
+      "code": "Annotation",
+      "display": "Annotation",
+      "definition": "A  text note which also  contains information about who made the statement and when."
+    },
+    {
+      "code": "Attachment",
+      "display": "Attachment",
+      "definition": "For referring to data content defined in other formats."
+    },
+    {
+      "code": "BackboneElement",
+      "display": "BackboneElement",
+      "definition": "Base definition for all elements that are defined inside a resource - but not those in a data type."
+    },
+    {
+      "code": "CodeableConcept",
+      "display": "CodeableConcept",
+      "definition": "A concept that may be defined by a formal reference to a terminology or ontology or may be provided by text."
+    },
+    {
+      "code": "Coding",
+      "display": "Coding",
+      "definition": "A reference to a code defined by a terminology system."
+    },
+    {
+      "code": "ContactDetail",
+      "display": "ContactDetail",
+      "definition": "Specifies contact information for a person or organization."
+    },
+    {
+      "code": "ContactPoint",
+      "display": "ContactPoint",
+      "definition": "Details for all kinds of technology mediated contact points for a person or organization, including telephone, email, etc."
+    },
+    {
+      "code": "Contributor",
+      "display": "Contributor",
+      "definition": "A contributor to the content of a knowledge asset, including authors, editors, reviewers, and endorsers."
+    },
+    {
+      "code": "Count",
+      "display": "Count",
+      "definition": "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."
+    },
+    {
+      "code": "DataRequirement",
+      "display": "DataRequirement",
+      "definition": "Describes a required data item for evaluation in terms of the type of data, and optional code or date-based filters of the data."
+    },
+    {
+      "code": "Distance",
+      "display": "Distance",
+      "definition": "A length - a value with a unit that is a physical distance."
+    },
+    {
+      "code": "Dosage",
+      "display": "Dosage",
+      "definition": "Indicates how the medication is/was taken or should be taken by the patient."
+    },
+    {
+      "code": "Duration",
+      "display": "Duration",
+      "definition": "A length of time."
+    },
+    {
+      "code": "Element",
+      "display": "Element",
+      "definition": "Base definition for all elements in a resource."
+    },
+    {
+      "code": "ElementDefinition",
+      "display": "ElementDefinition",
+      "definition": "Captures constraints on each element within the resource, profile, or extension."
+    },
+    {
+      "code": "Expression",
+      "display": "Expression",
+      "definition": "A expression that is evaluated in a specified context and returns a value. The context of use of the expression must specify the context in which the expression is evaluated, and how the result of the expression is used."
+    },
+    {
+      "code": "Extension",
+      "display": "Extension",
+      "definition": "Optional Extension Element - found in all resources."
+    },
+    {
+      "code": "HumanName",
+      "display": "HumanName",
+      "definition": "A human\u0027s name with the ability to identify parts and usage."
+    },
+    {
+      "code": "Identifier",
+      "display": "Identifier",
+      "definition": "An identifier - identifies some entity uniquely and unambiguously. Typically this is used for business identifiers."
+    },
+    {
+      "code": "MarketingStatus",
+      "display": "MarketingStatus",
+      "definition": "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available."
+    },
+    {
+      "code": "Meta",
+      "display": "Meta",
+      "definition": "The metadata about a resource. This is content in the resource that is maintained by the infrastructure. Changes to the content might not always be associated with version changes to the resource."
+    },
+    {
+      "code": "Money",
+      "display": "Money",
+      "definition": "An amount of economic utility in some recognized currency."
+    },
+    {
+      "code": "MoneyQuantity",
+      "display": "MoneyQuantity"
+    },
+    {
+      "code": "Narrative",
+      "display": "Narrative",
+      "definition": "A human-readable summary of the resource conveying the essential clinical and business information for the resource."
+    },
+    {
+      "code": "ParameterDefinition",
+      "display": "ParameterDefinition",
+      "definition": "The parameters to the module. This collection specifies both the input and output parameters. Input parameters are provided by the caller as part of the $evaluate operation. Output parameters are included in the GuidanceResponse."
+    },
+    {
+      "code": "Period",
+      "display": "Period",
+      "definition": "A time period defined by a start and end date and optionally time."
+    },
+    {
+      "code": "Population",
+      "display": "Population",
+      "definition": "A populatioof people with some set of grouping criteria."
+    },
+    {
+      "code": "ProdCharacteristic",
+      "display": "ProdCharacteristic",
+      "definition": "The marketing status describes the date when a medicinal product is actually put on the market or the date as of which it is no longer available."
+    },
+    {
+      "code": "ProductShelfLife",
+      "display": "ProductShelfLife",
+      "definition": "The shelf-life and storage information for a medicinal product item or container can be described using this class."
+    },
+    {
+      "code": "Quantity",
+      "display": "Quantity",
+      "definition": "A measured amount (or an amount that can potentially be measured). Note that measured amounts include amounts that are not precisely quantified, including amounts involving arbitrary units and floating currencies."
+    },
+    {
+      "code": "Range",
+      "display": "Range",
+      "definition": "A set of ordered Quantities defined by a low and high limit."
+    },
+    {
+      "code": "Ratio",
+      "display": "Ratio",
+      "definition": "A relationship of two Quantity values - expressed as a numerator and a denominator."
+    },
+    {
+      "code": "Reference",
+      "display": "Reference",
+      "definition": "A reference from one resource to another."
+    },
+    {
+      "code": "RelatedArtifact",
+      "display": "RelatedArtifact",
+      "definition": "Related artifacts such as additional documentation, justification, or bibliographic references."
+    },
+    {
+      "code": "SampledData",
+      "display": "SampledData",
+      "definition": "A series of measurements taken by a device, with upper and lower limits. There may be more than one dimension in the data."
+    },
+    {
+      "code": "Signature",
+      "display": "Signature",
+      "definition": "A signature along with supporting context. The signature may be a digital signature that is cryptographic in nature, or some other signature acceptable to the domain. This other signature may be as simple as a graphical image representing a hand-written signature, or a signature ceremony Different signature approaches have different utilities."
+    },
+    {
+      "code": "SimpleQuantity",
+      "display": "SimpleQuantity"
+    },
+    {
+      "code": "SubstanceAmount",
+      "display": "SubstanceAmount",
+      "definition": "Chemical substances are a single substance type whose primary defining element is the molecular structure. Chemical substances shall be defined on the basis of their complete covalent molecular structure; the presence of a salt (counter-ion) and/or solvates (water, alcohols) is also captured. Purity, grade, physical form or particle size are not taken into account in the definition of a chemical substance or in the assignment of a Substance ID."
+    },
+    {
+      "code": "Timing",
+      "display": "Timing",
+      "definition": "Specifies an event that may occur multiple times. Timing schedules are used to record when things are planned, expected or requested to occur. The most common usage is in dosage instructions for medications. They are also used when planning care of various kinds, and may be used for reporting the schedule to which past regular activities were carried out."
+    },
+    {
+      "code": "TriggerDefinition",
+      "display": "TriggerDefinition",
+      "definition": "A description of a triggering event. Triggering events can be named events, data events, or periodic, as determined by the type element."
+    },
+    {
+      "code": "UsageContext",
+      "display": "UsageContext",
+      "definition": "Specifies clinical/business/etc. metadata that can be used to retrieve, index and/or categorize an artifact. This metadata can either be specific to the applicable population (e.g., age category, DRG) or the specific context of care (e.g., venue, care setting, provider of care)."
+    },
+    {
+      "code": "base64Binary",
+      "display": "base64Binary",
+      "definition": "A stream of bytes"
+    },
+    {
+      "code": "boolean",
+      "display": "boolean",
+      "definition": "Value of \"true\" or \"false\""
+    },
+    {
+      "code": "canonical",
+      "display": "canonical",
+      "definition": "A URI that is a reference to a canonical URL on a FHIR resource"
+    },
+    {
+      "code": "code",
+      "display": "code",
+      "definition": "A string which has at least one character and no leading or trailing whitespace and where there is no whitespace other than single spaces in the contents"
+    },
+    {
+      "code": "date",
+      "display": "date",
+      "definition": "A date or partial date (e.g. just year or year + month). There is no time zone. The format is a union of the schema types gYear, gYearMonth and date.  Dates SHALL be valid dates."
+    },
+    {
+      "code": "dateTime",
+      "display": "dateTime",
+      "definition": "A date, date-time or partial date (e.g. just year or year + month).  If hours and minutes are specified, a time zone SHALL be populated. The format is a union of the schema types gYear, gYearMonth, date and dateTime. Seconds must be provided due to schema type constraints but may be zero-filled and may be ignored.                 Dates SHALL be valid dates."
+    },
+    {
+      "code": "decimal",
+      "display": "decimal",
+      "definition": "A rational number with implicit precision"
+    },
+    {
+      "code": "id",
+      "display": "id",
+      "definition": "Any combination of letters, numerals, \"-\" and \".\", with a length limit of 64 characters.  (This might be an integer, an unprefixed OID, UUID or any other identifier pattern that meets these constraints.)  Ids are case-insensitive."
+    },
+    {
+      "code": "instant",
+      "display": "instant",
+      "definition": "An instant in time - known at least to the second"
+    },
+    {
+      "code": "integer",
+      "display": "integer",
+      "definition": "A whole number"
+    },
+    {
+      "code": "markdown",
+      "display": "markdown",
+      "definition": "A string that may contain Github Flavored Markdown syntax for optional processing by a mark down presentation engine"
+    },
+    {
+      "code": "oid",
+      "display": "oid",
+      "definition": "An OID represented as a URI"
+    },
+    {
+      "code": "positiveInt",
+      "display": "positiveInt",
+      "definition": "An integer with a value that is positive (e.g. \u003e0)"
+    },
+    {
+      "code": "string",
+      "display": "string",
+      "definition": "A sequence of Unicode characters"
+    },
+    {
+      "code": "time",
+      "display": "time",
+      "definition": "A time during the day, with no date specified"
+    },
+    {
+      "code": "unsignedInt",
+      "display": "unsignedInt",
+      "definition": "An integer with a value that is not negative (e.g. \u003e\u003d 0)"
+    },
+    {
+      "code": "uri",
+      "display": "uri",
+      "definition": "String of characters used to identify a name or a resource"
+    },
+    {
+      "code": "url",
+      "display": "url",
+      "definition": "A URI that is a literal reference"
+    },
+    {
+      "code": "uuid",
+      "display": "uuid",
+      "definition": "A UUID, represented as a URI"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "Special case: xhtml can only be used in the narrative Data Type"
+        }
+      ],
+      "code": "xhtml",
+      "display": "XHTML",
+      "definition": "XHTML format, as defined by W3C, but restricted usage (mainly, no active content)"
+    }
+  ]
+}

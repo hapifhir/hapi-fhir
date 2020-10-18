@@ -1,0 +1,428 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "opioidcds-10",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: opioidcds-10\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/ig/opioid-cds/PlanDefinition/opioidcds-10\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: cdc-opioid-guidance (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 0.1.0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: cdc-opioid-10\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: CDC Opioid Prescribing Guideline Recommendation #10\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: ECA Rule \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/plan-definition-type code \u0027eca-rule\u0027 \u003d \u0027ECA Rule\u0027, given as \u0027ECA Rule\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 23/04/2017\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Centers for Disease Control and Prevention (CDC)\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: When prescribing opioids for chronic pain, providers should use urine drug testing before starting opioid therapy and consider urine drug testing at least annually to assess for prescribed medications as well as other controlled prescription drugs and illicit drugs.\u003c/p\u003e\u003cp\u003e\u003cb\u003euseContext\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America\u0027, given as \u0027United States of America\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.\u003c/p\u003e\u003cp\u003e\u003cb\u003eusage\u003c/b\u003e: Providers should be aware if patients are taking other prescription drugs or illicit drugs that might increase their risk of an overdose.\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: © CDC 2016+.\u003c/p\u003e\u003cp\u003e\u003cb\u003etopic\u003c/b\u003e: Opioid Prescribing \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthor\u003c/b\u003e: , , , \u003c/p\u003e\u003cp\u003e\u003cb\u003erelatedArtifact\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003elibrary\u003c/b\u003e: \u003ca\u003eLibrary/opioidcds-recommendation-10\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Annual Urine Screening Check\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Patient has not had a urine screening in the past 12 months\u003c/p\u003e\u003cp\u003e\u003cb\u003edocumentation\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etrigger\u003c/b\u003e: \u003c/p\u003e\u003ch3\u003eConditions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eKind\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpression\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eapplicability\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eDynamicValues\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003ePath\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpression\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eactivity.extension\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eActions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Positive Urine Screening Check\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Patient has a urine screening testing positive for either unprescribed opioids or illicit drugs in the past 12 months\u003c/p\u003e\u003cp\u003e\u003cb\u003edocumentation\u003c/b\u003e: \u003c/p\u003e\u003ch3\u003eConditions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eKind\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpression\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eapplicability\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eActions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ig/opioid-cds/PlanDefinition/opioidcds-10",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "cdc-opioid-guidance"
+    }
+  ],
+  "version": "0.1.0",
+  "name": "cdc-opioid-10",
+  "title": "CDC Opioid Prescribing Guideline Recommendation #10",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+        "code": "eca-rule",
+        "display": "ECA Rule"
+      }
+    ]
+  },
+  "status": "draft",
+  "date": "2017-04-23",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "When prescribing opioids for chronic pain, providers should use urine drug testing before starting opioid therapy and consider urine drug testing at least annually to assess for prescribed medications as well as other controlled prescription drugs and illicit drugs.",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "182888003",
+            "display": "Medication requested (situation)"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "82423001",
+            "display": "Chronic pain (finding)"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US",
+          "display": "United States of America"
+        }
+      ]
+    }
+  ],
+  "purpose": "CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.",
+  "usage": "Providers should be aware if patients are taking other prescription drugs or illicit drugs that might increase their risk of an overdose.",
+  "copyright": "© CDC 2016+.",
+  "topic": [
+    {
+      "text": "Opioid Prescribing"
+    }
+  ],
+  "author": [
+    {
+      "name": "Kensaku Kawamoto, MD, PhD, MHS"
+    },
+    {
+      "name": "Bryn Rhodes"
+    },
+    {
+      "name": "Floyd Eisenberg, MD, MPH"
+    },
+    {
+      "name": "Robert McClure, MD, MPH"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "display": "CDC guideline for prescribing opioids for chronic pain",
+      "url": "https://guidelines.gov/summaries/summary/50153/cdc-guideline-for-prescribing-opioids-for-chronic-pain---united-states-2016#420"
+    }
+  ],
+  "library": [
+    "Library/opioidcds-recommendation-10"
+  ],
+  "action": [
+    {
+      "title": "Annual Urine Screening Check",
+      "description": "Patient has not had a urine screening in the past 12 months",
+      "documentation": [
+        {
+          "type": "documentation",
+          "document": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                      "code": "strong",
+                      "display": "Strong"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                      "code": "low",
+                      "display": "Low quality"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "trigger": [
+        {
+          "type": "named-event",
+          "name": "medication-prescribe"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": {
+            "description": "Patient has not had a urine screening in the past 12 months",
+            "language": "text/cql",
+            "expression": "No Screenings in Past Year"
+          }
+        }
+      ],
+      "dynamicValue": [
+        {
+          "path": "activity.extension",
+          "expression": {
+            "language": "text/cql",
+            "expression": "Get Indicator"
+          }
+        }
+      ],
+      "action": [
+        {
+          "description": "Will perform urine screening"
+        },
+        {
+          "description": "Not for chronic pain management. Snooze 3 months"
+        }
+      ]
+    },
+    {
+      "title": "Positive Urine Screening Check",
+      "description": "Patient has a urine screening testing positive for either unprescribed opioids or illicit drugs in the past 12 months",
+      "documentation": [
+        {
+          "type": "documentation",
+          "document": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                      "code": "strong",
+                      "display": "Strong"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                      "code": "low",
+                      "display": "Low quality"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": {
+            "description": "Patient has a positive urine screening in the past 12 months",
+            "language": "text/cql",
+            "expression": "Has Positive Screening?"
+          }
+        }
+      ],
+      "action": [
+        {
+          "title": "Unprescribed Opioids Found In Urine Screening",
+          "description": "Patient has a positive urine screening in the past 12 months for opioid(s), which is not prescribed",
+          "documentation": [
+            {
+              "type": "documentation",
+              "document": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                          "code": "strong",
+                          "display": "Strong"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                          "code": "low",
+                          "display": "Low quality"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "description": "Patient has a positive urine screening in the past 12 months for opioid(s), which is not prescribed",
+                "language": "text/cql",
+                "expression": "Has Unprescribed Opioids?"
+              }
+            }
+          ],
+          "dynamicValue": [
+            {
+              "path": "activity.extension",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Get Indicator"
+              }
+            },
+            {
+              "path": "action.description",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Inconsistent Unprescribed Opioids"
+              }
+            }
+          ],
+          "action": [
+            {
+              "description": "Not for chronic pain management. Snooze 3 months"
+            }
+          ]
+        },
+        {
+          "title": "Prescribed Opioids Not Found In Urine Screening",
+          "description": "Patient has a positive urine screening in the past 12 months, which does not include prescribed opioids",
+          "documentation": [
+            {
+              "type": "documentation",
+              "document": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                          "code": "strong",
+                          "display": "Strong"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                          "code": "low",
+                          "display": "Low quality"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "description": "Patient has a positive urine screening in the past 12 months, which does not include prescribed opioids",
+                "language": "text/cql",
+                "expression": "Has Missing Opioids?"
+              }
+            }
+          ],
+          "dynamicValue": [
+            {
+              "path": "activity.extension",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Get Indicator"
+              }
+            },
+            {
+              "path": "action.description",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Inconsistent Missing Opioids"
+              }
+            }
+          ]
+        },
+        {
+          "title": "Illicit Drugs Found In Urine Screening",
+          "description": "Patient has a positive urine screening in the past 12 months for illicit drugs",
+          "documentation": [
+            {
+              "type": "documentation",
+              "document": {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                          "code": "strong",
+                          "display": "Strong"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                    "valueCodeableConcept": {
+                      "coding": [
+                        {
+                          "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                          "code": "low",
+                          "display": "Low quality"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "condition": [
+            {
+              "kind": "applicability",
+              "expression": {
+                "description": "Patient has a positive urine screening in the past 12 months for illicit drugs",
+                "language": "text/cql",
+                "expression": "Has Illicit Drugs in Screening?"
+              }
+            }
+          ],
+          "dynamicValue": [
+            {
+              "path": "activity.extension",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Get Indicator"
+              }
+            },
+            {
+              "path": "action.description",
+              "expression": {
+                "language": "text/cql",
+                "expression": "Inconsistent Illicit Drugs"
+              }
+            }
+          ],
+          "action": [
+            {
+              "description": "Not for chronic pain management. Snooze 3 months"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

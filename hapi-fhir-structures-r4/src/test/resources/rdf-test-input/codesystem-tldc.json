@@ -1,0 +1,64 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "tldc",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eTemplateStatusCode LifeCycle\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eLife cycle of the Status Code of a Template Design (Version)\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system urn:oid:2.16.840.1.113883.3.1937.98.5.8 defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edraft\u003ca name\u003d\"tldc-draft\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDraft\u003c/td\u003e\u003ctd\u003eDesign is under development (nascent).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epending\u003ca name\u003d\"tldc-pending\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUnder pre-publication review\u003c/td\u003e\u003ctd\u003eDesign is completed and is being reviewed.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eactive\u003ca name\u003d\"tldc-active\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eactive\u003c/td\u003e\u003ctd\u003eDesign has been deemed fit for the intended purpose and is published by the governance group.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ereview\u003ca name\u003d\"tldc-review\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIn Review\u003c/td\u003e\u003ctd\u003eDesign is active, but is under review. The review may result in a change to the design. The change may necessitate a new version to be created. This in turn may result in the prior version of the template to be retired. Alternatively, the review may result in a change to the design that does not require a new version to be created, or it may result in no change to the design at all.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecancelled\u003ca name\u003d\"tldc-cancelled\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCancelled\u003c/td\u003e\u003ctd\u003eA drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published in an active state.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erejected\u003ca name\u003d\"tldc-rejected\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRejected\u003c/td\u003e\u003ctd\u003eA previously drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published for consideration in a pending state.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eretired\u003ca name\u003d\"tldc-retired\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eretired\u003c/td\u003e\u003ctd\u003eA previously active design is discontinued from use. It should no longer be used for future designs, but for historical purposes may be used to process data previously recorded using this design. A newer design may or may not exist. The design is published in the retired state.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eterminated\u003ca name\u003d\"tldc-terminated\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTerminated\u003c/td\u003e\u003ctd\u003eA design is determined to be erroneous or not fit for the intended purpose and should no longer be used, even for historical purposes. No new designs can be developed for this template. The associated template no longer needs to be published, but if published, is shown in the terminated state.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "url": "urn:oid:2.16.840.1.113883.3.1937.98.5.8",
+  "name": "TemplateStatusCodeLifeCycle",
+  "title": "TemplateStatusCode LifeCycle",
+  "status": "active",
+  "experimental": false,
+  "date": "2013-12-05",
+  "publisher": "Art-Decor",
+  "description": "Life cycle of the Status Code of a Template Design (Version)",
+  "caseSensitive": true,
+  "valueSet": "urn:oid:2.16.840.1.113883.3.1937.98.11.8",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "draft",
+      "display": "Draft",
+      "definition": "Design is under development (nascent)."
+    },
+    {
+      "code": "pending",
+      "display": "Under pre-publication review",
+      "definition": "Design is completed and is being reviewed."
+    },
+    {
+      "code": "active",
+      "display": "active",
+      "definition": "Design has been deemed fit for the intended purpose and is published by the governance group."
+    },
+    {
+      "code": "review",
+      "display": "In Review",
+      "definition": "Design is active, but is under review. The review may result in a change to the design. The change may necessitate a new version to be created. This in turn may result in the prior version of the template to be retired. Alternatively, the review may result in a change to the design that does not require a new version to be created, or it may result in no change to the design at all."
+    },
+    {
+      "code": "cancelled",
+      "display": "Cancelled",
+      "definition": "A drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published in an active state."
+    },
+    {
+      "code": "rejected",
+      "display": "Rejected",
+      "definition": "A previously drafted design is determined to be erroneous or not fit for intended purpose and is discontinued before ever being published for consideration in a pending state."
+    },
+    {
+      "code": "retired",
+      "display": "retired",
+      "definition": "A previously active design is discontinued from use. It should no longer be used for future designs, but for historical purposes may be used to process data previously recorded using this design. A newer design may or may not exist. The design is published in the retired state."
+    },
+    {
+      "code": "terminated",
+      "display": "Terminated",
+      "definition": "A design is determined to be erroneous or not fit for the intended purpose and should no longer be used, even for historical purposes. No new designs can be developed for this template. The associated template no longer needs to be published, but if published, is shown in the terminated state."
+    }
+  ]
+}

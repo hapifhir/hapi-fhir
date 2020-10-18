@@ -277,7 +277,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myLowerBound == null || myLowerBound.getValue() == null) {
 			return null;
 		}
-		int retVal = DateUtils.convertDatetoDayInteger(myLowerBound.getValue());
+		int retVal = DateUtils.convertDateToDayInteger(myLowerBound.getValue());
 
 		if (myLowerBound.getPrefix() != null) {
 			switch (myLowerBound.getPrefix()) {
@@ -308,7 +308,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 		if (myUpperBound == null || myUpperBound.getValue() == null) {
 			return null;
 		}
-		int retVal = DateUtils.convertDatetoDayInteger(myUpperBound.getValue());
+		int retVal = DateUtils.convertDateToDayInteger(myUpperBound.getValue());
 		if (myUpperBound.getPrefix() != null) {
 			switch (myUpperBound.getPrefix()) {
 				case LESSTHAN:

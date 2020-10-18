@@ -149,6 +149,43 @@ public List<Patient> findPatients(
 }
 //END SNIPPET: sort
 
+//START SNIPPET: count
+@Search
+public List<Patient> findPatients(
+	@RequiredParam(name=Patient.SP_IDENTIFIER) StringParam theParameter,
+	@Count Integer theCount) {
+	List<Patient> retVal=new ArrayList<Patient>(); // populate this
+
+	// count is null unless a _count parameter is actually provided
+	if (theCount != null) {
+		// ... do search with count ...
+	} else {
+		// ... do search without count ...
+	}
+
+	return retVal;
+}
+//END SNIPPET: count
+
+//START SNIPPET: offset
+@Search
+public List<Patient> findPatients(
+	@RequiredParam(name=Patient.SP_IDENTIFIER) StringParam theParameter,
+	@Offset Integer theOffset,
+	@Count Integer theCount) {
+	List<Patient> retVal=new ArrayList<Patient>(); // populate this
+
+	// offset is null unless a _offset parameter is actually provided
+	if (theOffset != null) {
+		// ... do search with offset ...
+	} else {
+		// ... do search without offset ...
+	}
+
+	return retVal;
+}
+//END SNIPPET: offset
+
 //START SNIPPET: underlyingReq
 @Search
 public List<Patient> findPatients(

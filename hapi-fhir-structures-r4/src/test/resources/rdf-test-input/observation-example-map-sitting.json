@@ -1,0 +1,93 @@
+{
+  "resourceType": "Observation",
+  "id": "map-sitting",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: map-sitting\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Laboratory \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/observation-category code \u0027laboratory\u0027 \u003d \u0027Laboratory\u0027, given as \u0027Laboratory\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: Mean blood pressure \u003cspan\u003e(Details : {LOINC code \u00278478-0\u0027 \u003d \u0027Mean blood pressure\u0027, given as \u0027Mean blood pressure\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eencounter\u003c/b\u003e: \u003ca\u003eEncounter/example\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 02/04/2018 10:30:10 AM --\u0026gt; 05/04/2018 10:30:10 AM\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 03/04/2018 3:30:10 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 60 mm Hg\u003cspan\u003e (Details: UCUM code mm[Hg] \u003d \u0027mmHg\u0027)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003einterpretation\u003c/b\u003e: Below low normal \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/v2-0078 code \u0027L\u0027 \u003d \u0027Low\u0027, given as \u0027Low\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/observation-bodyPosition",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "33586001",
+            "display": "Sitting position (finding)"
+          }
+        ]
+      }
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/observation-delta",
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "1250004",
+            "display": "Decreased (qualifier value)"
+          }
+        ]
+      }
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+          "code": "laboratory",
+          "display": "Laboratory"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://loinc.org",
+        "code": "8478-0",
+        "display": "Mean blood pressure"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/example"
+  },
+  "encounter": {
+    "reference": "Encounter/example"
+  },
+  "effectivePeriod": {
+    "start": "2018-04-02T10:30:10+01:00",
+    "end": "2018-04-05T10:30:10+01:00"
+  },
+  "issued": "2018-04-03T15:30:10+01:00",
+  "valueQuantity": {
+    "value": 60,
+    "unit": "mm Hg",
+    "system": "http://unitsofmeasure.org",
+    "code": "mm[Hg]"
+  },
+  "interpretation": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0078",
+          "code": "L",
+          "display": "Low"
+        }
+      ],
+      "text": "Below low normal"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -37,6 +37,8 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -120,6 +122,7 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 	public static final String UNIT_TEST_CAPTURE_STACK = "unit_test_capture_stack";
+	public static final Integer INTEGER_0 = Integer.valueOf(0);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
 	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
@@ -458,20 +461,41 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
+		boolean wantOnlyCount = isWantOnlyCount(theParams);
+		boolean wantCount = isWantCount(theParams, wantOnlyCount);
+
 		// Execute the query and make sure we return distinct results
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		return txTemplate.execute(t -> {
-
+				
 			// Load the results synchronously
 			final List<ResourcePersistentId> pids = new ArrayList<>();
 
 			RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theResourceType);
 
-			if (theParams.isWantOnlyCount()) {
-				Iterator<Long> countQuery = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, requestPartitionId);
-				Long size = countQuery.next();
-				return new SimpleBundleProvider(size.intValue());
+			Long count = 0L;
+			if (wantCount) {
+				ourLog.trace("Performing count");
+				// TODO FulltextSearchSvcImpl will remove necessary parameters from the "theParams", this will cause actual query after count to
+				//  return wrong response. This is some dirty fix to avoid that issue. Params should not be mutated?
+				//  Maybe instead of removing them we could skip them in db query builder if full text search was used?
+				List<List<IQueryParameterType>> contentAndTerms = theParams.get(Constants.PARAM_CONTENT);
+				List<List<IQueryParameterType>> textAndTerms = theParams.get(Constants.PARAM_TEXT);
+
+				Iterator<Long> countIterator = theSb.createCountQuery(theParams, theSearchUuid, theRequestDetails, requestPartitionId);
+
+				if (contentAndTerms != null) theParams.put(Constants.PARAM_CONTENT, contentAndTerms);
+				if (textAndTerms != null) theParams.put(Constants.PARAM_TEXT, textAndTerms);
+
+				count = countIterator.next();
+				ourLog.trace("Got count {}", count);
+			}
+
+			if (wantOnlyCount) {
+				SimpleBundleProvider bundleProvider = new SimpleBundleProvider();
+				bundleProvider.setSize(count.intValue());
+				return bundleProvider;
 			}
 
 			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails, requestPartitionId)) {
@@ -525,8 +549,45 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// Hook: STORAGE_PRESHOW_RESOURCES
 			resources = InterceptorUtil.fireStoragePreshowResource(resources, theRequestDetails, myInterceptorBroadcaster);
 
-			return new SimpleBundleProvider(resources);
+			SimpleBundleProvider bundleProvider = new SimpleBundleProvider(resources);
+
+			if (wantCount) {
+				bundleProvider.setSize(count.intValue());
+			} else {
+				Integer queryCount = getQueryCount(theLoadSynchronousUpTo, theParams);
+				if (queryCount == null || queryCount > pids.size()) {
+					// No limit, last page or everything was fetched within the limit
+					bundleProvider.setSize(getTotalCount(queryCount, theParams.getOffset(), pids.size()));
+				} else {
+					bundleProvider.setSize(null);
+				}
+			}
+
+			return bundleProvider;
 		});
+	}
+
+	private int getTotalCount(Integer queryCount, Integer offset, int queryResultCount) {
+		if (queryCount != null) {
+			if (offset != null) {
+				return offset + queryResultCount;
+			} else {
+				return queryResultCount;
+			}
+		} else {
+			return queryResultCount;
+		}
+	}
+
+	private Integer getQueryCount(Integer theLoadSynchronousUpTo, SearchParameterMap theParams) {
+		if (theLoadSynchronousUpTo != null) {
+			return theLoadSynchronousUpTo;
+		} else if (theParams.getCount() != null) {
+			return theParams.getCount();
+		} else if (myDaoConfig.getFetchSizeDefaultMaximum() != null) {
+			return myDaoConfig.getFetchSizeDefaultMaximum();
+		}
+		return null;
 	}
 
 	@org.jetbrains.annotations.Nullable
@@ -1002,11 +1063,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 *
 			 * before doing anything else.
 			 */
-			boolean wantOnlyCount = myParams.isWantOnlyCount();
-			boolean wantCount =
-				wantOnlyCount ||
-					SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
-					(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+			boolean wantOnlyCount = isWantOnlyCount(myParams);
+			boolean wantCount = isWantCount(myParams, wantOnlyCount);
 			if (wantCount) {
 				ourLog.trace("Performing count");
 				ISearchBuilder sb = newSearchBuilder();
@@ -1135,6 +1193,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 	}
 
+	private boolean isWantCount(SearchParameterMap myParams, boolean wantOnlyCount) {
+		return wantOnlyCount ||
+			SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
+			(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+	}
+
+	private static boolean isWantOnlyCount(SearchParameterMap myParams) {
+		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
+			| INTEGER_0.equals(myParams.getCount());
+	}
 
 	public class SearchContinuationTask extends SearchTask {
 

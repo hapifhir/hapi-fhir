@@ -1,0 +1,179 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "object-role",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eAuditEventEntityRole\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCode representing the role the entity played in the audit event.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/object-role defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e1\u003ca name\u003d\"object-role-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient\u003c/td\u003e\u003ctd\u003eThis object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e2\u003ca name\u003d\"object-role-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLocation\u003c/td\u003e\u003ctd\u003eThis is a location identified as related to the event.  This is usually the location where the event took place.  Note that for shipping, the usual events are arrival at a location or departure from a location.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e3\u003ca name\u003d\"object-role-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eReport\u003c/td\u003e\u003ctd\u003eThis object is any kind of persistent document created as a result of the event.  This could be a paper report, film, electronic report, DICOM Study, etc.  Issues related to medical records life cycle management are conveyed elsewhere.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e4\u003ca name\u003d\"object-role-4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDomain Resource\u003c/td\u003e\u003ctd\u003eA logical object related to a health record event.  This is any healthcare  specific resource (object) not restricted to FHIR defined Resources.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e5\u003ca name\u003d\"object-role-5\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMaster file\u003c/td\u003e\u003ctd\u003eThis is any configurable file used to control creation of documents.  Examples include the objects maintained by the HL7 Master File transactions, Value Sets, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e6\u003ca name\u003d\"object-role-6\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUser\u003c/td\u003e\u003ctd\u003eA human participant not otherwise identified by some other category.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e7\u003ca name\u003d\"object-role-7\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eList\u003c/td\u003e\u003ctd\u003e(deprecated).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e8\u003ca name\u003d\"object-role-8\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eDoctor\u003c/td\u003e\u003ctd\u003eTypically, a licensed person who is providing or performing care related to the event, generally a physician.   The key distinction between doctor and practitioner is with regards to their role, not the licensing.  The doctor is the human who actually performed the work.  The practitioner is the human or organization that is responsible for the work.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e9\u003ca name\u003d\"object-role-9\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSubscriber\u003c/td\u003e\u003ctd\u003eA person or system that is being notified as part of the event.  This is relevant in situations where automated systems provide notifications to other parties when an event took place.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e10\u003ca name\u003d\"object-role-10\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGuarantor\u003c/td\u003e\u003ctd\u003eInsurance company, or any other organization who accepts responsibility for paying for the healthcare event.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11\u003ca name\u003d\"object-role-11\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity User Entity\u003c/td\u003e\u003ctd\u003eA person or active system object involved in the event with a security role.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e12\u003ca name\u003d\"object-role-12\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity User Group\u003c/td\u003e\u003ctd\u003eA person or system object involved in the event with the authority to modify security roles of other objects.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e13\u003ca name\u003d\"object-role-13\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity Resource\u003c/td\u003e\u003ctd\u003eA passive object, such as a role table, that is relevant to the event.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e14\u003ca name\u003d\"object-role-14\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSecurity Granularity Definition\u003c/td\u003e\u003ctd\u003e(deprecated)  Relevant to certain RBAC security methodologies.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e15\u003ca name\u003d\"object-role-15\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePractitioner\u003c/td\u003e\u003ctd\u003eAny person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note the distinction between practitioner and the doctor that actually provided the care to the patient.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e16\u003ca name\u003d\"object-role-16\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eData Destination\u003c/td\u003e\u003ctd\u003eThe source or destination for data transfer, when it does not match some other role.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e17\u003ca name\u003d\"object-role-17\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eData Repository\u003c/td\u003e\u003ctd\u003eA source or destination for data transfer that acts as an archive, database, or similar role.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e18\u003ca name\u003d\"object-role-18\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSchedule\u003c/td\u003e\u003ctd\u003eAn object that holds schedule information.  This could be an appointment book, availability information, etc.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e19\u003ca name\u003d\"object-role-19\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCustomer\u003c/td\u003e\u003ctd\u003eAn organization or person that is the recipient of services.  This could be an organization that is buying services for a patient, or a person that is buying services for an animal.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e20\u003ca name\u003d\"object-role-20\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eJob\u003c/td\u003e\u003ctd\u003eAn order, task, work item, procedure step, or other description of work to be performed; e.g. a particular instance of an MPPS.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e21\u003ca name\u003d\"object-role-21\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eJob Stream\u003c/td\u003e\u003ctd\u003eA list of jobs or a system that provides lists of jobs; e.g. an MWL SCP.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e22\u003ca name\u003d\"object-role-22\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTable\u003c/td\u003e\u003ctd\u003e(Deprecated).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e23\u003ca name\u003d\"object-role-23\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRouting Criteria\u003c/td\u003e\u003ctd\u003eAn object that specifies or controls the routing or delivery of items.  For example, a distribution list is the routing criteria for mail.  The items delivered may be documents, jobs, or other objects.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e24\u003ca name\u003d\"object-role-24\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eQuery\u003c/td\u003e\u003ctd\u003eThe contents of a query.  This is used to capture the contents of any kind of query.  For security surveillance purposes knowing the queries being made is very important.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "sec"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/object-role",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1135"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "AuditEventEntityRole",
+  "title": "AuditEventEntityRole",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Code representing the role the entity played in the audit event.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/object-role",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "1",
+      "display": "Patient",
+      "definition": "This object is the patient that is the subject of care related to this event.  It is identifiable by patient ID or equivalent.  The patient may be either human or animal."
+    },
+    {
+      "code": "2",
+      "display": "Location",
+      "definition": "This is a location identified as related to the event.  This is usually the location where the event took place.  Note that for shipping, the usual events are arrival at a location or departure from a location."
+    },
+    {
+      "code": "3",
+      "display": "Report",
+      "definition": "This object is any kind of persistent document created as a result of the event.  This could be a paper report, film, electronic report, DICOM Study, etc.  Issues related to medical records life cycle management are conveyed elsewhere."
+    },
+    {
+      "code": "4",
+      "display": "Domain Resource",
+      "definition": "A logical object related to a health record event.  This is any healthcare  specific resource (object) not restricted to FHIR defined Resources."
+    },
+    {
+      "code": "5",
+      "display": "Master file",
+      "definition": "This is any configurable file used to control creation of documents.  Examples include the objects maintained by the HL7 Master File transactions, Value Sets, etc."
+    },
+    {
+      "code": "6",
+      "display": "User",
+      "definition": "A human participant not otherwise identified by some other category."
+    },
+    {
+      "code": "7",
+      "display": "List",
+      "definition": "(deprecated)."
+    },
+    {
+      "code": "8",
+      "display": "Doctor",
+      "definition": "Typically, a licensed person who is providing or performing care related to the event, generally a physician.   The key distinction between doctor and practitioner is with regards to their role, not the licensing.  The doctor is the human who actually performed the work.  The practitioner is the human or organization that is responsible for the work."
+    },
+    {
+      "code": "9",
+      "display": "Subscriber",
+      "definition": "A person or system that is being notified as part of the event.  This is relevant in situations where automated systems provide notifications to other parties when an event took place."
+    },
+    {
+      "code": "10",
+      "display": "Guarantor",
+      "definition": "Insurance company, or any other organization who accepts responsibility for paying for the healthcare event."
+    },
+    {
+      "code": "11",
+      "display": "Security User Entity",
+      "definition": "A person or active system object involved in the event with a security role."
+    },
+    {
+      "code": "12",
+      "display": "Security User Group",
+      "definition": "A person or system object involved in the event with the authority to modify security roles of other objects."
+    },
+    {
+      "code": "13",
+      "display": "Security Resource",
+      "definition": "A passive object, such as a role table, that is relevant to the event."
+    },
+    {
+      "code": "14",
+      "display": "Security Granularity Definition",
+      "definition": "(deprecated)  Relevant to certain RBAC security methodologies."
+    },
+    {
+      "code": "15",
+      "display": "Practitioner",
+      "definition": "Any person or organization responsible for providing care.  This encompasses all forms of care, licensed or otherwise, and all sorts of teams and care groups. Note the distinction between practitioner and the doctor that actually provided the care to the patient."
+    },
+    {
+      "code": "16",
+      "display": "Data Destination",
+      "definition": "The source or destination for data transfer, when it does not match some other role."
+    },
+    {
+      "code": "17",
+      "display": "Data Repository",
+      "definition": "A source or destination for data transfer that acts as an archive, database, or similar role."
+    },
+    {
+      "code": "18",
+      "display": "Schedule",
+      "definition": "An object that holds schedule information.  This could be an appointment book, availability information, etc."
+    },
+    {
+      "code": "19",
+      "display": "Customer",
+      "definition": "An organization or person that is the recipient of services.  This could be an organization that is buying services for a patient, or a person that is buying services for an animal."
+    },
+    {
+      "code": "20",
+      "display": "Job",
+      "definition": "An order, task, work item, procedure step, or other description of work to be performed; e.g. a particular instance of an MPPS."
+    },
+    {
+      "code": "21",
+      "display": "Job Stream",
+      "definition": "A list of jobs or a system that provides lists of jobs; e.g. an MWL SCP."
+    },
+    {
+      "code": "22",
+      "display": "Table",
+      "definition": "(Deprecated)."
+    },
+    {
+      "code": "23",
+      "display": "Routing Criteria",
+      "definition": "An object that specifies or controls the routing or delivery of items.  For example, a distribution list is the routing criteria for mail.  The items delivered may be documents, jobs, or other objects."
+    },
+    {
+      "code": "24",
+      "display": "Query",
+      "definition": "The contents of a query.  This is used to capture the contents of any kind of query.  For security surveillance purposes knowing the queries being made is very important."
+    }
+  ]
+}

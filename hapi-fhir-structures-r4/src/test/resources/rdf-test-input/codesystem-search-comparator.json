@@ -1,0 +1,104 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "search-comparator",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSearchComparator\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eWhat Search Comparator Codes are supported in search.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/search-comparator defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeq\u003ca name\u003d\"search-comparator-eq\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEquals\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is equal to the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ene\u003ca name\u003d\"search-comparator-ne\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Equals\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is not equal to the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003egt\u003ca name\u003d\"search-comparator-gt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGreater Than\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is greater than the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003elt\u003ca name\u003d\"search-comparator-lt\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLess Than\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is less than the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ege\u003ca name\u003d\"search-comparator-ge\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGreater or Equals\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is greater or equal to the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ele\u003ca name\u003d\"search-comparator-le\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLess of Equal\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is less or equal to the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003esa\u003ca name\u003d\"search-comparator-sa\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStarts After\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource starts after the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eeb\u003ca name\u003d\"search-comparator-eb\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEnds Before\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource ends before the provided value.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eap\u003ca name\u003d\"search-comparator-ap\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eApproximately\u003c/td\u003e\u003ctd\u003ethe value for the parameter in the resource is approximately the same to the provided value.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/search-comparator",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.638"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SearchComparator",
+  "title": "SearchComparator",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "What Search Comparator Codes are supported in search.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/search-comparator",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "eq",
+      "display": "Equals",
+      "definition": "the value for the parameter in the resource is equal to the provided value."
+    },
+    {
+      "code": "ne",
+      "display": "Not Equals",
+      "definition": "the value for the parameter in the resource is not equal to the provided value."
+    },
+    {
+      "code": "gt",
+      "display": "Greater Than",
+      "definition": "the value for the parameter in the resource is greater than the provided value."
+    },
+    {
+      "code": "lt",
+      "display": "Less Than",
+      "definition": "the value for the parameter in the resource is less than the provided value."
+    },
+    {
+      "code": "ge",
+      "display": "Greater or Equals",
+      "definition": "the value for the parameter in the resource is greater or equal to the provided value."
+    },
+    {
+      "code": "le",
+      "display": "Less of Equal",
+      "definition": "the value for the parameter in the resource is less or equal to the provided value."
+    },
+    {
+      "code": "sa",
+      "display": "Starts After",
+      "definition": "the value for the parameter in the resource starts after the provided value."
+    },
+    {
+      "code": "eb",
+      "display": "Ends Before",
+      "definition": "the value for the parameter in the resource ends before the provided value."
+    },
+    {
+      "code": "ap",
+      "display": "Approximately",
+      "definition": "the value for the parameter in the resource is approximately the same to the provided value."
+    }
+  ]
+}

@@ -24,6 +24,19 @@ The following example shows a server implementation with paging	support.
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/PagingServer.java|provider}}
 ```
 
+HAPI FHIR contains couple of implementations for `IPagingProvider`.
+
+### DatabaseBackedPagingProvider
+
+When using `DatabaseBackedPagingProvider` HAPI FHIR searches may be done asynchronously. This means that
+the result is also cached to the database and the client may base the cached search result set.
+
+### FifoMemoryPagingProvider
+
+When using `FifoMemoryPagingProvider` HAPI FHIR server search is persisted on the server memory and when
+pages are fetched the server returns the results from the cached memory (unless the cache overflowed and the old result
+set is no longer available).
+
 # Bundle Providers
 
 If a server supports a paging provider, a further optimization is to also use a bundle provider. A bundle provider simply takes the place of the `List<IBaseResource>` return type in your provider methods. In other words, instead of returning *List<IBaseResource>*, your search method will return [IBundleProvider](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/api/server/IBundleProvider.html).

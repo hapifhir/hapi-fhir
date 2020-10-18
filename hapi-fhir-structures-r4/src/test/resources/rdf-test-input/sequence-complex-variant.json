@@ -1,0 +1,68 @@
+{
+  "resourceType": "MolecularSequence",
+  "id": "sequence-complex-variant",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: sequence-complex-variant\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: ?? (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: dna\u003c/p\u003e\u003cp\u003e\u003cb\u003ecoordinateSystem\u003c/b\u003e: 1\u003c/p\u003e\u003cp\u003e\u003cb\u003especimen\u003c/b\u003e: \u003ca\u003eMolecular Specimen ID: MLD45-Z4-1234\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003edevice\u003c/b\u003e: 12 lead EKG Device Metric\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eHL7\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003equantity\u003c/b\u003e: 25\u003c/p\u003e\u003ch3\u003eReferenceSeqs\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceSeqId\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStrand\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eWindowEnd\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eNC_000002.12 \u003cspan\u003e(Details : {http://www.ncbi.nlm.nih.gov/nuccore code \u0027NC_000002.12\u0027 \u003d \u0027NC_000002.12)\u003c/span\u003e\u003c/td\u003e\u003ctd\u003ewatson\u003c/td\u003e\u003ctd\u003e128273724\u003c/td\u003e\u003ctd\u003e128273754\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003ch3\u003eVariants\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eStart\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eEnd\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eObservedAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReferenceAllele\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eCigar\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003e128273724\u003c/td\u003e\u003ctd\u003e128273736\u003c/td\u003e\u003ctd\u003eCTCATTGT\u003c/td\u003e\u003ctd\u003eCTCCATTGCATGCGTT\u003c/td\u003e\u003ctd\u003e3M1D4M6N2M\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003ereadCoverage\u003c/b\u003e: 1\u003c/p\u003e\u003ch3\u003eRepositories\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eType\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDatasetId\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eReadsetId\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eother\u003c/td\u003e\u003ctd\u003eEnsembl\u003c/td\u003e\u003ctd\u003ev1beta2\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "use": "official"
+    }
+  ],
+  "type": "dna",
+  "coordinateSystem": 1,
+  "specimen": {
+    "reference": "Specimen/genetics-example1-somatic",
+    "display": "Molecular Specimen ID: MLD45-Z4-1234"
+  },
+  "device": {
+    "display": "12 lead EKG Device Metric"
+  },
+  "performer": {
+    "reference": "Organization/hl7",
+    "display": "HL7"
+  },
+  "quantity": {
+    "value": 25
+  },
+  "referenceSeq": {
+    "referenceSeqId": {
+      "coding": [
+        {
+          "system": "http://www.ncbi.nlm.nih.gov/nuccore",
+          "code": "NC_000002.12"
+        }
+      ]
+    },
+    "strand": "watson",
+    "windowStart": 128273724,
+    "windowEnd": 128273754
+  },
+  "variant": [
+    {
+      "start": 128273724,
+      "end": 128273736,
+      "observedAllele": "CTCATTGT",
+      "referenceAllele": "CTCCATTGCATGCGTT",
+      "cigar": "3M1D4M6N2M"
+    }
+  ],
+  "readCoverage": 1,
+  "repository": [
+    {
+      "type": "other",
+      "datasetId": "Ensembl",
+      "readsetId": "v1beta2"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

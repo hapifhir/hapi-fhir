@@ -12,6 +12,10 @@
 	<artifactId>hapi-fhir-structures-r4</artifactId>
 	<packaging>bundle</packaging>
 
+	<properties>
+		<shexjava_version>1.3beta</shexjava_version>
+	</properties>
+
 	<name>HAPI FHIR Structures - FHIR R4</name>
 
 	<dependencies>
@@ -100,6 +104,33 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<optional>true</optional>
+			<type>pom</type>
+			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.jsonld-java</groupId>
+					<artifactId>jsonld-java</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>fr.inria.lille.shexjava</groupId>
+			<artifactId>shexjava-core</artifactId>
+			<version>${shexjava_version}</version>
+			<scope>test</scope>
+			<exclusions>
+				<!-- If this is included it confused the RDFParser -->
+				<exclusion>
+					<groupId>org.apache.commons</groupId>
+					<artifactId>commons-rdf-jena</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 
 		<!--
 		Optional dependencies used by org.hl7.fhir.r4

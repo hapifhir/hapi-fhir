@@ -1,0 +1,195 @@
+{
+  "resourceType": "RiskAssessment",
+  "id": "genetic",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003cp\u003eProbability of developing breast cancer before the age indicated:\u003c/p\u003e\n      \u003ctable\u003e\n        \u003cthead\u003e\n          \u003ctr\u003e\n            \u003cth\u003eAge\u003c/th\u003e\n            \u003cth\u003eProbability (%)\u003c/th\u003e\n          \u003c/tr\u003e\n        \u003c/thead\u003e\n        \u003ctbody\u003e\n          \u003ctr\u003e\n            \u003ctd\u003ecurrent-53\u003c/td\u003e\n            \u003ctd\u003e0.0168\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e54-57\u003c/td\u003e\n            \u003ctd\u003e0.0368\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e58-62\u003c/td\u003e\n            \u003ctd\u003e0.0594\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e63-67\u003c/td\u003e\n            \u003ctd\u003e0.0838\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e68-72\u003c/td\u003e\n            \u003ctd\u003e0.1089\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e73-77\u003c/td\u003e\n            \u003ctd\u003e0.1327\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e78-82\u003c/td\u003e\n            \u003ctd\u003e0.1530\u003c/td\u003e\n          \u003c/tr\u003e\n          \u003ctr\u003e\n            \u003ctd\u003e83-87\u003c/td\u003e\n            \u003ctd\u003e0.1663\u003c/td\u003e\n          \u003c/tr\u003e\n        \u003c/tbody\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "status": "final",
+  "method": {
+    "coding": [
+      {
+        "code": "BRCAPRO"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/b248b1b2-1686-4b94-9936-37d7a5f94b51"
+  },
+  "occurrenceDateTime": "2006-01-13T23:01:00Z",
+  "basis": [
+    {
+      "reference": "List/prognosis"
+    }
+  ],
+  "prediction": [
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.000168,
+      "whenRange": {
+        "high": {
+          "value": 53,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.000368,
+      "whenRange": {
+        "low": {
+          "value": 54,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 57,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.000594,
+      "whenRange": {
+        "low": {
+          "value": 58,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 62,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.000838,
+      "whenRange": {
+        "low": {
+          "value": 63,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 67,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.001089,
+      "whenRange": {
+        "low": {
+          "value": 68,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 72,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.001327,
+      "whenRange": {
+        "low": {
+          "value": 73,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 77,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.001530,
+      "whenRange": {
+        "low": {
+          "value": 78,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 82,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    },
+    {
+      "outcome": {
+        "text": "Breast Cancer"
+      },
+      "probabilityDecimal": 0.001663,
+      "whenRange": {
+        "low": {
+          "value": 83,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "high": {
+          "value": 88,
+          "unit": "years",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        }
+      }
+    }
+  ],
+  "note": [
+    {
+      "text": "High degree of certainty"
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

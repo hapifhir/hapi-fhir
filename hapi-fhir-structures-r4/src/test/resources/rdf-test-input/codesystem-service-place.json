@@ -1,0 +1,143 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "service-place",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eExample Service Place Codes\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set includes a smattering of Service Place codes.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003e\u003cb\u003eCopyright Statement:\u003c/b\u003e\u003c/p\u003e\u003cdiv\u003e\u003cp\u003eThis is an example set.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/ex-serviceplace defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e01\u003ca name\u003d\"service-place-01\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePharmacy\u003c/td\u003e\u003ctd\u003eA facility or location where drugs and other medically related items and services are sold, dispensed, or otherwise provided directly to patients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e03\u003ca name\u003d\"service-place-03\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSchool\u003c/td\u003e\u003ctd\u003eA facility whose primary purpose is education.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e04\u003ca name\u003d\"service-place-04\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHomeless Shelter\u003c/td\u003e\u003ctd\u003eA facility or location whose primary purpose is to provide temporary housing to homeless individuals (e.g., emergency shelters, individual or family shelters).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e05\u003ca name\u003d\"service-place-05\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIndian Health Service Free-standing Facility\u003c/td\u003e\u003ctd\u003eA facility or location, owned and operated by the Indian Health Service, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services to American Indians and Alaska Natives who do not require hospitalization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e06\u003ca name\u003d\"service-place-06\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eIndian Health Service Provider-based Facility\u003c/td\u003e\u003ctd\u003eA facility or location, owned and operated by the Indian Health Service, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services rendered by, or under the supervision of, physicians to American Indians and Alaska Natives admitted as inpatients or outpatients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e07\u003ca name\u003d\"service-place-07\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTribal 638 Free-Standing Facility\u003c/td\u003e\u003ctd\u003eA facility or location owned and operated by a federally recognized American Indian or Alaska Native tribe or tribal organization under a 638 agreement, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services to tribal members who do not require hospitalization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e08\u003ca name\u003d\"service-place-08\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTribal 638 Provider-Based Facility\u003c/td\u003e\u003ctd\u003eA facility or location owned and operated by a federally recognized American Indian or Alaska Native tribe or tribal organization under a 638 agreement, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services to tribal members admitted as inpatients or outpatients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e09\u003ca name\u003d\"service-place-09\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePrison/Correctional Facility\u003c/td\u003e\u003ctd\u003eA prison, jail, reformatory, work farm, detention center, or any other similar facility maintained by either Federal, State or local authorities for the purpose of confinement or rehabilitation of adult or juvenile criminal offenders.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e11\u003ca name\u003d\"service-place-11\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOffice\u003c/td\u003e\u003ctd\u003eLocation, other than a hospital, skilled nursing facility (SNF), military treatment facility, community health center, State or local public health clinic, or intermediate care facility (ICF), where the health professional routinely provides health examinations, diagnosis, and treatment of illness or injury on an ambulatory basis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e12\u003ca name\u003d\"service-place-12\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eHome\u003c/td\u003e\u003ctd\u003eLocation, other than a hospital or other facility, where the patient receives care in a private residence.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e13\u003ca name\u003d\"service-place-13\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAssisted Living Fa\u003c/td\u003e\u003ctd\u003eCongregate residential facility with self-contained living units providing assessment of each resident\u0027s needs and on-site support 24 hours a day, 7 days a week, with the capacity to deliver or arrange for services including some health care and other services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e14\u003ca name\u003d\"service-place-14\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGroup Home\u003c/td\u003e\u003ctd\u003eA residence, with shared living areas, where clients receive supervision and other services such as social and/or behavioral services, custodial service, and minimal services (e.g., medication administration).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e15\u003ca name\u003d\"service-place-15\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eMobile Unit\u003c/td\u003e\u003ctd\u003eA facility/unit that moves from place-to-place equipped to provide preventive, screening, diagnostic, and/or treatment services.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e19\u003ca name\u003d\"service-place-19\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOff Campus-Outpatient Hospital\u003c/td\u003e\u003ctd\u003eportion of an off-campus hospital provider-based department which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e20\u003ca name\u003d\"service-place-20\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eUrgent Care Facility\u003c/td\u003e\u003ctd\u003eLocation, distinct from a hospital emergency room, an office, or a clinic, whose purpose is to diagnose and treat illness or injury for unscheduled, ambulatory patients seeking immediate medical attention.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e21\u003ca name\u003d\"service-place-21\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInpatient Hospital\u003c/td\u003e\u003ctd\u003eA facility, other than psychiatric, which primarily provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services by, or under, the supervision of physicians to patients admitted for a variety of medical conditions.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e41\u003ca name\u003d\"service-place-41\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAmbulance—Land\u003c/td\u003e\u003ctd\u003eA land vehicle specifically designed, equipped and staffed for lifesaving and transporting the sick or injured.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fm"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/ex-serviceplace",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1157"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ExampleServicePlaceCodes",
+  "title": "Example Service Place Codes",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "Financial Management",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set includes a smattering of Service Place codes.",
+  "copyright": "This is an example set.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/service-place",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "01",
+      "display": "Pharmacy",
+      "definition": "A facility or location where drugs and other medically related items and services are sold, dispensed, or otherwise provided directly to patients."
+    },
+    {
+      "code": "03",
+      "display": "School",
+      "definition": "A facility whose primary purpose is education."
+    },
+    {
+      "code": "04",
+      "display": "Homeless Shelter",
+      "definition": "A facility or location whose primary purpose is to provide temporary housing to homeless individuals (e.g., emergency shelters, individual or family shelters)."
+    },
+    {
+      "code": "05",
+      "display": "Indian Health Service Free-standing Facility",
+      "definition": "A facility or location, owned and operated by the Indian Health Service, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services to American Indians and Alaska Natives who do not require hospitalization."
+    },
+    {
+      "code": "06",
+      "display": "Indian Health Service Provider-based Facility",
+      "definition": "A facility or location, owned and operated by the Indian Health Service, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services rendered by, or under the supervision of, physicians to American Indians and Alaska Natives admitted as inpatients or outpatients."
+    },
+    {
+      "code": "07",
+      "display": "Tribal 638 Free-Standing Facility",
+      "definition": "A facility or location owned and operated by a federally recognized American Indian or Alaska Native tribe or tribal organization under a 638 agreement, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services to tribal members who do not require hospitalization."
+    },
+    {
+      "code": "08",
+      "display": "Tribal 638 Provider-Based Facility",
+      "definition": "A facility or location owned and operated by a federally recognized American Indian or Alaska Native tribe or tribal organization under a 638 agreement, which provides diagnostic, therapeutic (surgical and nonsurgical), and rehabilitation services to tribal members admitted as inpatients or outpatients."
+    },
+    {
+      "code": "09",
+      "display": "Prison/Correctional Facility",
+      "definition": "A prison, jail, reformatory, work farm, detention center, or any other similar facility maintained by either Federal, State or local authorities for the purpose of confinement or rehabilitation of adult or juvenile criminal offenders."
+    },
+    {
+      "code": "11",
+      "display": "Office",
+      "definition": "Location, other than a hospital, skilled nursing facility (SNF), military treatment facility, community health center, State or local public health clinic, or intermediate care facility (ICF), where the health professional routinely provides health examinations, diagnosis, and treatment of illness or injury on an ambulatory basis."
+    },
+    {
+      "code": "12",
+      "display": "Home",
+      "definition": "Location, other than a hospital or other facility, where the patient receives care in a private residence."
+    },
+    {
+      "code": "13",
+      "display": "Assisted Living Fa",
+      "definition": "Congregate residential facility with self-contained living units providing assessment of each resident\u0027s needs and on-site support 24 hours a day, 7 days a week, with the capacity to deliver or arrange for services including some health care and other services."
+    },
+    {
+      "code": "14",
+      "display": "Group Home",
+      "definition": "A residence, with shared living areas, where clients receive supervision and other services such as social and/or behavioral services, custodial service, and minimal services (e.g., medication administration)."
+    },
+    {
+      "code": "15",
+      "display": "Mobile Unit",
+      "definition": "A facility/unit that moves from place-to-place equipped to provide preventive, screening, diagnostic, and/or treatment services."
+    },
+    {
+      "code": "19",
+      "display": "Off Campus-Outpatient Hospital",
+      "definition": "portion of an off-campus hospital provider-based department which provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services to sick or injured persons who do not require hospitalization or institutionalization."
+    },
+    {
+      "code": "20",
+      "display": "Urgent Care Facility",
+      "definition": "Location, distinct from a hospital emergency room, an office, or a clinic, whose purpose is to diagnose and treat illness or injury for unscheduled, ambulatory patients seeking immediate medical attention."
+    },
+    {
+      "code": "21",
+      "display": "Inpatient Hospital",
+      "definition": "A facility, other than psychiatric, which primarily provides diagnostic, therapeutic (both surgical and nonsurgical), and rehabilitation services by, or under, the supervision of physicians to patients admitted for a variety of medical conditions."
+    },
+    {
+      "code": "41",
+      "display": "Ambulance—Land",
+      "definition": "A land vehicle specifically designed, equipped and staffed for lifesaving and transporting the sick or injured."
+    }
+  ]
+}

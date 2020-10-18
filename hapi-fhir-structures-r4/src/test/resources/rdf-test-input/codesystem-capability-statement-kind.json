@@ -1,0 +1,84 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "capability-statement-kind",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "extensions",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eCapabilityStatementKind\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eHow a capability statement is intended to be used.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/capability-statement-kind defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eComments\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003einstance\u003ca name\u003d\"capability-statement-kind-instance\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInstance\u003c/td\u003e\u003ctd\u003eThe CapabilityStatement instance represents the present capabilities of a specific system instance.  This is the kind returned by /metadata for a FHIR server end-point.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecapability\u003ca name\u003d\"capability-statement-kind-capability\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCapability\u003c/td\u003e\u003ctd\u003eThe CapabilityStatement instance represents the capabilities of a system or piece of software, independent of a particular installation.\u003c/td\u003e\u003ctd\u003eElements marked as \u0027optional\u0027 represent configurable capabilities\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erequirements\u003ca name\u003d\"capability-statement-kind-requirements\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eRequirements\u003c/td\u003e\u003ctd\u003eThe CapabilityStatement instance represents a set of requirements for other systems to meet; e.g. as part of an implementation guide or \u0027request for proposal\u0027.\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://hl7.org/fhir/capability-statement-kind",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.199"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "CapabilityStatementKind",
+  "title": "CapabilityStatementKind",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "How a capability statement is intended to be used.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/capability-statement-kind",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "instance",
+      "display": "Instance",
+      "definition": "The CapabilityStatement instance represents the present capabilities of a specific system instance.  This is the kind returned by /metadata for a FHIR server end-point."
+    },
+    {
+      "extension": [
+        {
+          "url": "http://hl7.org/fhir/StructureDefinition/codesystem-concept-comments",
+          "valueString": "Elements marked as \u0027optional\u0027 represent configurable capabilities"
+        }
+      ],
+      "code": "capability",
+      "display": "Capability",
+      "definition": "The CapabilityStatement instance represents the capabilities of a system or piece of software, independent of a particular installation."
+    },
+    {
+      "code": "requirements",
+      "display": "Requirements",
+      "definition": "The CapabilityStatement instance represents a set of requirements for other systems to meet; e.g. as part of an implementation guide or \u0027request for proposal\u0027."
+    }
+  ]
+}

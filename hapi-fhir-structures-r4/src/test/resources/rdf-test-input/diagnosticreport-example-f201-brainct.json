@@ -1,0 +1,72 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "f201",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: f201\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecategory\u003c/b\u003e: Radiology \u003cspan\u003e(Details : {SNOMED CT code \u0027394914008\u0027 \u003d \u0027Radiology - speciality\u0027, given as \u0027Radiology\u0027}; {http://terminology.hl7.org/CodeSystem/v2-0074 code \u0027RAD\u0027 \u003d \u0027Radiology)\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: CT of head-neck \u003cspan\u003e(Details : {SNOMED CT code \u0027429858000\u0027 \u003d \u0027Computed tomography (CT) of head and neck\u0027, given as \u0027Computed tomography (CT) of head and neck\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eRoel\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 01/12/2012 12:00:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eissued\u003c/b\u003e: 01/12/2012 12:00:00 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003eBlijdorp MC\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eimagingStudy\u003c/b\u003e: HEAD and NECK CT DICOM imaging study\u003c/p\u003e\u003cp\u003e\u003cb\u003econclusion\u003c/b\u003e: CT brains: large tumor sphenoid/clivus.\u003c/p\u003e\u003cp\u003e\u003cb\u003econclusionCode\u003c/b\u003e: Malignant tumor of craniopharyngeal duct \u003cspan\u003e(Details : {SNOMED CT code \u0027188340000\u0027 \u003d \u0027Malignant tumor of craniopharyngeal duct\u0027, given as \u0027Malignant tumor of craniopharyngeal duct\u0027})\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "394914008",
+          "display": "Radiology"
+        },
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+          "code": "RAD"
+        }
+      ]
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "429858000",
+        "display": "Computed tomography (CT) of head and neck"
+      }
+    ],
+    "text": "CT of head-neck"
+  },
+  "subject": {
+    "reference": "Patient/f201",
+    "display": "Roel"
+  },
+  "effectiveDateTime": "2012-12-01T12:00:00+01:00",
+  "issued": "2012-12-01T12:00:00+01:00",
+  "performer": [
+    {
+      "reference": "Organization/f203",
+      "display": "Blijdorp MC"
+    }
+  ],
+  "imagingStudy": [
+    {
+      "display": "HEAD and NECK CT DICOM imaging study"
+    }
+  ],
+  "conclusion": "CT brains: large tumor sphenoid/clivus.",
+  "conclusionCode": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "188340000",
+          "display": "Malignant tumor of craniopharyngeal duct"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

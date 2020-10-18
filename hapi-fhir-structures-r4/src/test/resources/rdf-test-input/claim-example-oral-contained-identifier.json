@@ -1,0 +1,149 @@
+{
+  "resourceType": "Claim",
+  "id": "100155",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eThis example assumes a national health care scheme where patients, providers and organizations have known business identifiers.\u003c/div\u003e"
+  },
+  "contained": [
+    {
+      "resourceType": "Patient",
+      "id": "patient-1",
+      "name": [
+        {
+          "use": "official",
+          "family": "Donald",
+          "given": [
+            "Duck"
+          ]
+        }
+      ],
+      "gender": "male",
+      "birthDate": "1986-05-17",
+      "address": [
+        {
+          "use": "home",
+          "line": [
+            "1234 Main Street"
+          ],
+          "city": "Vancouver",
+          "postalCode": "V2H1Y3",
+          "country": "CAD"
+        }
+      ]
+    }
+  ],
+  "identifier": [
+    {
+      "system": "http://happyvalley.com/claim",
+      "value": "12347"
+    }
+  ],
+  "status": "active",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/claim-type",
+        "code": "oral"
+      }
+    ]
+  },
+  "use": "claim",
+  "patient": {
+    "reference": "#patient-1"
+  },
+  "created": "2014-08-16",
+  "insurer": {
+    "identifier": {
+      "system": "http://www.jurisdiction.com/insurers",
+      "value": "123456"
+    }
+  },
+  "provider": {
+    "identifier": {
+      "system": "http://www.jurisdiction.com/careorganizations",
+      "value": "HOSP12345"
+    }
+  },
+  "priority": {
+    "coding": [
+      {
+        "code": "normal"
+      }
+    ]
+  },
+  "payee": {
+    "type": {
+      "coding": [
+        {
+          "code": "provider"
+        }
+      ]
+    }
+  },
+  "careTeam": [
+    {
+      "sequence": 1,
+      "provider": {
+        "identifier": {
+          "system": "http://www.jurisdiction.com/providerId",
+          "value": "MD98765"
+        }
+      }
+    }
+  ],
+  "diagnosis": [
+    {
+      "sequence": 1,
+      "diagnosisCodeableConcept": {
+        "coding": [
+          {
+            "code": "123456"
+          }
+        ]
+      }
+    }
+  ],
+  "insurance": [
+    {
+      "sequence": 1,
+      "focal": true,
+      "coverage": {
+        "reference": "http://www.jurisdiction.com/nationalplan/123AB345"
+      }
+    }
+  ],
+  "item": [
+    {
+      "sequence": 1,
+      "careTeamSequence": [
+        1
+      ],
+      "productOrService": {
+        "coding": [
+          {
+            "code": "1200"
+          }
+        ]
+      },
+      "servicedDate": "2014-08-16",
+      "unitPrice": {
+        "value": 135.57,
+        "currency": "USD"
+      },
+      "net": {
+        "value": 135.57,
+        "currency": "USD"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "resourceType": "Observation",
+  "id": "656",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: 656\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: patientId-urn:oid:1.2.4~0000000000000000~152584~20170503155426~820\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: final\u003c/p\u003e\u003cp\u003e\u003cb\u003ecode\u003c/b\u003e: MDC_FLOW_AWAY_EXP_FORCED_PEAK \u003cspan\u003e(Details : {urn:iso:std:iso:11073:10101 code \u0027152584\u0027 \u003d \u0027152584\u0027, given as \u0027MDC_FLOW_AWAY_EXP_FORCED_PEAK\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003ePatient/PatientId-patientId\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 03/05/2017 3:54:26 PM\u003c/p\u003e\u003cp\u003e\u003cb\u003eperformer\u003c/b\u003e: \u003ca\u003ePatient/PatientId-patientId\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003evalue\u003c/b\u003e: 820 cL/s\u003cspan\u003e (Details: urn:iso:std:iso:11073:10101 code 265201 \u003d \u0027265201\u0027)\u003c/span\u003e\u003c/p\u003e\u003c/div\u003e"
+  },
+  "identifier": [
+    {
+      "value": "patientId-urn:oid:1.2.4~0000000000000000~152584~20170503155426~820"
+    }
+  ],
+  "status": "final",
+  "code": {
+    "coding": [
+      {
+        "system": "urn:iso:std:iso:11073:10101",
+        "code": "152584",
+        "display": "MDC_FLOW_AWAY_EXP_FORCED_PEAK"
+      }
+    ]
+  },
+  "subject": {
+    "reference": "Patient/PatientId-patientId"
+  },
+  "effectiveDateTime": "2017-05-03T15:54:26-04:00",
+  "performer": [
+    {
+      "reference": "Patient/PatientId-patientId"
+    }
+  ],
+  "valueQuantity": {
+    "value": 820,
+    "unit": "cL/s",
+    "system": "urn:iso:std:iso:11073:10101",
+    "code": "265201"
+  },
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

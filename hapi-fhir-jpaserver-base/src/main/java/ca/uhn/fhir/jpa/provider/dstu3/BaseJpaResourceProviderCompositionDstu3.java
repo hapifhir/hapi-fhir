@@ -62,6 +62,10 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the size of those pages.") 
 			@OperationParam(name = Constants.PARAM_COUNT) 
 			UnsignedIntType theCount,
+
+			@Description(formalDefinition="Results from this method are returned across multiple pages. This parameter controls the offset when fetching a page.")
+			@OperationParam(name = Constants.PARAM_OFFSET)
+			UnsignedIntType theOffset,
 			
 			@Description(shortDefinition="Only return resources which were last updated as specified by the given range")
 			@OperationParam(name = Constants.PARAM_LASTUPDATED, min=0, max=1) 
@@ -76,7 +80,7 @@ public class BaseJpaResourceProviderCompositionDstu3 extends JpaResourceProvider
 
 		startRequest(theServletRequest);
 		try {
-			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theLastUpdated, theSortSpec, theRequestDetails);
+			IBundleProvider bundleProvider = ((IFhirResourceDaoComposition<Composition>) getDao()).getDocumentForComposition(theServletRequest, theId, theCount, theOffset, theLastUpdated, theSortSpec, theRequestDetails);
 			List<IBaseResource> resourceList = bundleProvider.getResources(0, bundleProvider.size());
 
 			boolean foundCompositionResource = false;

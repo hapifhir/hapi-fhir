@@ -20,7 +20,7 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry theRegistry) {
-		WebUtil.webJarAddBoostrap3(theRegistry);
+		WebUtil.webJarAddBoostrap(theRegistry);
 		WebUtil.webJarAddJQuery(theRegistry);
 		WebUtil.webJarAddFontAwesome(theRegistry);
 		WebUtil.webJarAddJSTZ(theRegistry);
@@ -28,6 +28,7 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 		WebUtil.webJarAddMomentJS(theRegistry);
 		WebUtil.webJarAddSelect2(theRegistry);
 		WebUtil.webJarAddAwesomeCheckbox(theRegistry);
+		WebUtil.webJarAddPopperJs(theRegistry);
 
 		theRegistry.addResourceHandler("/css/**").addResourceLocations("/css/");
 		theRegistry.addResourceHandler("/fa/**").addResourceLocations("/fa/");
@@ -43,6 +44,7 @@ public class FhirTesterMvcConfig extends WebMvcConfigurerAdapter {
 		resolver.setSuffix(".html");
 		resolver.setTemplateMode(TemplateMode.HTML);
 		resolver.setCharacterEncoding("UTF-8");
+
 		return resolver;
 	}
 

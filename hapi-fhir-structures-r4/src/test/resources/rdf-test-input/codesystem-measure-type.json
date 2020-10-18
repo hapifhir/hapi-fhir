@@ -1,0 +1,84 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "measure-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eMeasureType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe type of measure (includes codes from 2.16.840.1.113883.1.11.20368).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/measure-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eprocess\u003ca name\u003d\"measure-type-process\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eProcess\u003c/td\u003e\u003ctd\u003eA measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eoutcome\u003ca name\u003d\"measure-type-outcome\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOutcome\u003c/td\u003e\u003ctd\u003eA measure that indicates the result of the performance (or non-performance) of a function or process.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estructure\u003ca name\u003d\"measure-type-structure\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eStructure\u003c/td\u003e\u003ctd\u003eA measure that focuses on a health care provider\u0027s capacity, systems, and processes to provide high-quality care.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003epatient-reported-outcome\u003ca name\u003d\"measure-type-patient-reported-outcome\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePatient Reported Outcome\u003c/td\u003e\u003ctd\u003eA measure that focuses on patient-reported information such as patient engagement or patient experience measures.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecomposite\u003ca name\u003d\"measure-type-composite\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eComposite\u003c/td\u003e\u003ctd\u003eA measure that combines multiple component measures in to a single quality measure.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cqi"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 2
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/measure-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1233"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "MeasureType",
+  "title": "MeasureType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The type of measure (includes codes from 2.16.840.1.113883.1.11.20368).",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/measure-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "process",
+      "display": "Process",
+      "definition": "A measure which focuses on a process which leads to a certain outcome, meaning that a scientific basis exists for believing that the process, when executed well, will increase the probability of achieving a desired outcome."
+    },
+    {
+      "code": "outcome",
+      "display": "Outcome",
+      "definition": "A measure that indicates the result of the performance (or non-performance) of a function or process."
+    },
+    {
+      "code": "structure",
+      "display": "Structure",
+      "definition": "A measure that focuses on a health care provider\u0027s capacity, systems, and processes to provide high-quality care."
+    },
+    {
+      "code": "patient-reported-outcome",
+      "display": "Patient Reported Outcome",
+      "definition": "A measure that focuses on patient-reported information such as patient engagement or patient experience measures."
+    },
+    {
+      "code": "composite",
+      "display": "Composite",
+      "definition": "A measure that combines multiple component measures in to a single quality measure."
+    }
+  ]
+}

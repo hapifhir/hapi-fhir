@@ -1,0 +1,166 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "nhin-purposeofuse",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eNHIN PurposeOfUse\u003c/h2\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eThis value set is suitable for use with the provenance resource. It is derived from, but not compatible with, the HL7 v3 Purpose of use Code system.\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003cp\u003eThis code system http://healthit.gov/nhin/purposeofuse defines the following codes:\u003c/p\u003e\n      \u003ctable class\u003d\"codes\"\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003e\n            \u003cb\u003eCode\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDisplay\u003c/b\u003e\n          \u003c/td\u003e\n          \u003ctd\u003e\n            \u003cb\u003eDefinition\u003c/b\u003e\n          \u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eTREATMENT\n            \u003ca name\u003d\"nhin-purposeofuse-TREATMENT\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eTreatment\u003c/td\u003e\n          \u003ctd\u003eTreatment\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003ePAYMENT\n            \u003ca name\u003d\"nhin-purposeofuse-PAYMENT\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ePayment\u003c/td\u003e\n          \u003ctd\u003ePayment\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eOPERATIONS\n            \u003ca name\u003d\"nhin-purposeofuse-OPERATIONS\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eOperations\u003c/td\u003e\n          \u003ctd\u003eHealthcare Operations\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eSYSADMIN\n            \u003ca name\u003d\"nhin-purposeofuse-SYSADMIN\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eSysadmin\u003c/td\u003e\n          \u003ctd\u003eSystem Administration\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eFRAUD\n            \u003ca name\u003d\"nhin-purposeofuse-FRAUD\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eFraud\u003c/td\u003e\n          \u003ctd\u003eFraud detection\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003ePSYCHOTHERAPY\n            \u003ca name\u003d\"nhin-purposeofuse-PSYCHOTHERAPY\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ePsychotherapy\u003c/td\u003e\n          \u003ctd\u003eUse or disclosure of Psychotherapy Notes\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eTRAINING\n            \u003ca name\u003d\"nhin-purposeofuse-TRAINING\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eTraining\u003c/td\u003e\n          \u003ctd\u003eUse or disclosure by the covered entity for its own training programs\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eLEGAL\n            \u003ca name\u003d\"nhin-purposeofuse-LEGAL\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eLegal\u003c/td\u003e\n          \u003ctd\u003eUse or disclosure by the covered entity to defend itself in a legal action\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eMARKETING\n            \u003ca name\u003d\"nhin-purposeofuse-MARKETING\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eMarketing\u003c/td\u003e\n          \u003ctd\u003eMarketing\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eDIRECTORY\n            \u003ca name\u003d\"nhin-purposeofuse-DIRECTORY\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eDirectory\u003c/td\u003e\n          \u003ctd\u003eUse and disclosure for facility directories\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eFAMILY\n            \u003ca name\u003d\"nhin-purposeofuse-FAMILY\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eFamily\u003c/td\u003e\n          \u003ctd\u003eDisclose to a family member, other relative, or a close personal friend of the individual\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003ePRESENT\n            \u003ca name\u003d\"nhin-purposeofuse-PRESENT\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ePresent\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures with the individual present.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eEMERGENCY\n            \u003ca name\u003d\"nhin-purposeofuse-EMERGENCY\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eEmergency\u003c/td\u003e\n          \u003ctd\u003ePermission cannot practicably be provided because of the individual\u0027s incapacity or an emergency.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eDISASTER\n            \u003ca name\u003d\"nhin-purposeofuse-DISASTER\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eDisaster\u003c/td\u003e\n          \u003ctd\u003eUse and disclosures for disaster relief purposes.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003ePUBLICHEALTH\n            \u003ca name\u003d\"nhin-purposeofuse-PUBLICHEALTH\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003ePublic Health\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures for public health activities.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eABUSE\n            \u003ca name\u003d\"nhin-purposeofuse-ABUSE\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eAbuse\u003c/td\u003e\n          \u003ctd\u003eDisclosures about victims of abuse, neglect or domestic violence.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eOVERSIGHT\n            \u003ca name\u003d\"nhin-purposeofuse-OVERSIGHT\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eOversight\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures for health oversight activities.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eJUDICIAL\n            \u003ca name\u003d\"nhin-purposeofuse-JUDICIAL\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eJudicial\u003c/td\u003e\n          \u003ctd\u003eDisclosures for judicial and administrative proceedings.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eLAW\n            \u003ca name\u003d\"nhin-purposeofuse-LAW\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eLaw Enforcement\u003c/td\u003e\n          \u003ctd\u003eDisclosures for law enforcement purposes.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eDECEASED\n            \u003ca name\u003d\"nhin-purposeofuse-DECEASED\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eDeceased\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures about decedents.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eDONATION\n            \u003ca name\u003d\"nhin-purposeofuse-DONATION\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eDonation\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures for cadaveric organ,  eye or tissue donation purposes\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eRESEARCH\n            \u003ca name\u003d\"nhin-purposeofuse-RESEARCH\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eResearch\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures for research purposes.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eTHREAT\n            \u003ca name\u003d\"nhin-purposeofuse-THREAT\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eThreat\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures to avert a serious threat to health or safety.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eGOVERNMENT\n            \u003ca name\u003d\"nhin-purposeofuse-GOVERNMENT\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eGovernment\u003c/td\u003e\n          \u003ctd\u003eUses and disclosures for specialized government functions.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eWORKERSCOMP\n            \u003ca name\u003d\"nhin-purposeofuse-WORKERSCOMP\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eWorker\u0027s Comp\u003c/td\u003e\n          \u003ctd\u003eDisclosures for workers\u0027 compensation.\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eCOVERAGE\n            \u003ca name\u003d\"nhin-purposeofuse-COVERAGE\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eCoverage\u003c/td\u003e\n          \u003ctd\u003eDisclosures for insurance or disability coverage determination\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd style\u003d\"white-space:nowrap\"\u003eREQUEST\n            \u003ca name\u003d\"nhin-purposeofuse-REQUEST\"\u003e \u003c/a\u003e\n          \u003c/td\u003e\n          \u003ctd\u003eRequest\u003c/td\u003e\n          \u003ctd\u003eRequest of the Individual\u003c/td\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://healthit.gov/nhin/purposeofuse",
+  "version": "2.0",
+  "name": "NHIN PurposeOfUse",
+  "status": "active",
+  "experimental": false,
+  "date": "2010-01-29",
+  "publisher": "Nationwide Health Information Network (NHIN)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "https://www.healthit.gov/sites/default/files/nhin-authorization-framework-production-specification-v2.0-1.pdf"
+        }
+      ]
+    }
+  ],
+  "description": "This value set is suitable for use with the provenance resource. It is derived from, but not compatible with, the HL7 v3 Purpose of use Code system.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/nhin-purposeofuse",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "TREATMENT",
+      "display": "Treatment",
+      "definition": "Treatment"
+    },
+    {
+      "code": "PAYMENT",
+      "display": "Payment",
+      "definition": "Payment"
+    },
+    {
+      "code": "OPERATIONS",
+      "display": "Operations",
+      "definition": "Healthcare Operations"
+    },
+    {
+      "code": "SYSADMIN",
+      "display": "Sysadmin",
+      "definition": "System Administration"
+    },
+    {
+      "code": "FRAUD",
+      "display": "Fraud",
+      "definition": "Fraud detection"
+    },
+    {
+      "code": "PSYCHOTHERAPY",
+      "display": "Psychotherapy",
+      "definition": "Use or disclosure of Psychotherapy Notes"
+    },
+    {
+      "code": "TRAINING",
+      "display": "Training",
+      "definition": "Use or disclosure by the covered entity for its own training programs"
+    },
+    {
+      "code": "LEGAL",
+      "display": "Legal",
+      "definition": "Use or disclosure by the covered entity to defend itself in a legal action"
+    },
+    {
+      "code": "MARKETING",
+      "display": "Marketing",
+      "definition": "Marketing"
+    },
+    {
+      "code": "DIRECTORY",
+      "display": "Directory",
+      "definition": "Use and disclosure for facility directories"
+    },
+    {
+      "code": "FAMILY",
+      "display": "Family",
+      "definition": "Disclose to a family member, other relative, or a close personal friend of the individual"
+    },
+    {
+      "code": "PRESENT",
+      "display": "Present",
+      "definition": "Uses and disclosures with the individual present."
+    },
+    {
+      "code": "EMERGENCY",
+      "display": "Emergency",
+      "definition": "Permission cannot practicably be provided because of the individual\u0027s incapacity or an emergency."
+    },
+    {
+      "code": "DISASTER",
+      "display": "Disaster",
+      "definition": "Use and disclosures for disaster relief purposes."
+    },
+    {
+      "code": "PUBLICHEALTH",
+      "display": "Public Health",
+      "definition": "Uses and disclosures for public health activities."
+    },
+    {
+      "code": "ABUSE",
+      "display": "Abuse",
+      "definition": "Disclosures about victims of abuse, neglect or domestic violence."
+    },
+    {
+      "code": "OVERSIGHT",
+      "display": "Oversight",
+      "definition": "Uses and disclosures for health oversight activities."
+    },
+    {
+      "code": "JUDICIAL",
+      "display": "Judicial",
+      "definition": "Disclosures for judicial and administrative proceedings."
+    },
+    {
+      "code": "LAW",
+      "display": "Law Enforcement",
+      "definition": "Disclosures for law enforcement purposes."
+    },
+    {
+      "code": "DECEASED",
+      "display": "Deceased",
+      "definition": "Uses and disclosures about decedents."
+    },
+    {
+      "code": "DONATION",
+      "display": "Donation",
+      "definition": "Uses and disclosures for cadaveric organ,  eye or tissue donation purposes"
+    },
+    {
+      "code": "RESEARCH",
+      "display": "Research",
+      "definition": "Uses and disclosures for research purposes."
+    },
+    {
+      "code": "THREAT",
+      "display": "Threat",
+      "definition": "Uses and disclosures to avert a serious threat to health or safety."
+    },
+    {
+      "code": "GOVERNMENT",
+      "display": "Government",
+      "definition": "Uses and disclosures for specialized government functions."
+    },
+    {
+      "code": "WORKERSCOMP",
+      "display": "Worker\u0027s Comp",
+      "definition": "Disclosures for workers\u0027 compensation."
+    },
+    {
+      "code": "COVERAGE",
+      "display": "Coverage",
+      "definition": "Disclosures for insurance or disability coverage determination"
+    },
+    {
+      "code": "REQUEST",
+      "display": "Request",
+      "definition": "Request of the Individual"
+    }
+  ]
+}

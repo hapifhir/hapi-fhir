@@ -1,0 +1,79 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "research-study-reason-stopped",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eResearchStudyReasonStopped\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes for why the study ended prematurely.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/research-study-reason-stopped defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eaccrual-goal-met\u003ca name\u003d\"research-study-reason-stopped-accrual-goal-met\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAccrual Goal Met\u003c/td\u003e\u003ctd\u003eThe study prematurely ended because the accrual goal was met.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclosed-due-to-toxicity\u003ca name\u003d\"research-study-reason-stopped-closed-due-to-toxicity\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClosed due to toxicity\u003c/td\u003e\u003ctd\u003eThe study prematurely ended due to toxicity.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclosed-due-to-lack-of-study-progress\u003ca name\u003d\"research-study-reason-stopped-closed-due-to-lack-of-study-progress\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eClosed due to lack of study progress\u003c/td\u003e\u003ctd\u003eThe study prematurely ended due to lack of study progress.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003etemporarily-closed-per-study-design\u003ca name\u003d\"research-study-reason-stopped-temporarily-closed-per-study-design\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eTemporarily closed per study design\u003c/td\u003e\u003ctd\u003eThe study prematurely ended temporarily per study design.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "brr"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/research-study-reason-stopped",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1249"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ResearchStudyReasonStopped",
+  "title": "ResearchStudyReasonStopped",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes for why the study ended prematurely.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/research-study-reason-stopped",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "accrual-goal-met",
+      "display": "Accrual Goal Met",
+      "definition": "The study prematurely ended because the accrual goal was met."
+    },
+    {
+      "code": "closed-due-to-toxicity",
+      "display": "Closed due to toxicity",
+      "definition": "The study prematurely ended due to toxicity."
+    },
+    {
+      "code": "closed-due-to-lack-of-study-progress",
+      "display": "Closed due to lack of study progress",
+      "definition": "The study prematurely ended due to lack of study progress."
+    },
+    {
+      "code": "temporarily-closed-per-study-design",
+      "display": "Temporarily closed per study design",
+      "definition": "The study prematurely ended temporarily per study design."
+    }
+  ]
+}

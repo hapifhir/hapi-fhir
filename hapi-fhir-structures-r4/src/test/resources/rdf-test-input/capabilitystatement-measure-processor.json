@@ -1,0 +1,96 @@
+{
+  "resourceType": "CapabilityStatement",
+  "id": "measure-processor",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\n      \u003ch2\u003eMeasure Calculation Service Conformance Statement\u003c/h2\u003e\n      \u003cdiv\u003e\n        \u003cp\u003eBasic conformance statement for a Measure Processor Service. A server can support more functionality\n           than defined here, but this is the minimum amount\u003c/p\u003e\n\n      \u003c/div\u003e\n      \u003ctable\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eMode\u003c/td\u003e\n          \u003ctd\u003eSERVER\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eDescription\u003c/td\u003e\n          \u003ctd\u003eRESTful Measure Processor Server\u003c/td\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eTransaction\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSystem History\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n        \u003ctr\u003e\n          \u003ctd\u003eSystem Search\u003c/td\u003e\n          \u003ctd/\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n      \u003ctable\u003e\n        \u003ctr\u003e\n          \u003cth\u003e\n            \u003cb\u003eResource Type\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eProfile\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eRead\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eV-Read\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eSearch\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eUpdate\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eUpdates\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eCreate\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eDelete\u003c/b\u003e\n          \u003c/th\u003e\n          \u003cth\u003e\n            \u003cb\u003eHistory\u003c/b\u003e\n          \u003c/th\u003e\n        \u003c/tr\u003e\n      \u003c/table\u003e\n    \u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/measure-processor",
+  "name": "Measure Processor Service Conformance Statement",
+  "status": "draft",
+  "date": "2016-09-16",
+  "publisher": "HL7, Inc",
+  "contact": [
+    {
+      "name": "FHIR Project",
+      "telecom": [
+        {
+          "system": "other",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "Basic conformance statement for a Measure Processor Service. A server can support more functionality    than defined here, but this is the minimum amount",
+  "kind": "capability",
+  "software": {
+    "name": "ACME Measure Processor Service"
+  },
+  "fhirVersion": "4.0.1",
+  "format": [
+    "json",
+    "xml"
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "RESTful Measure Processor Service",
+      "security": {
+        "cors": true,
+        "service": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/restful-security-service",
+                "code": "Certificates"
+              }
+            ]
+          }
+        ]
+      },
+      "resource": [
+        {
+          "type": "Measure",
+          "profile": "StructureDefinition/Measure",
+          "interaction": [
+            {
+              "code": "read",
+              "documentation": "Read allows clients to get the logical definitions of the measures"
+            },
+            {
+              "code": "search-type",
+              "documentation": "Search allows clients to filter measures based on a provided search parameter"
+            }
+          ],
+          "searchParam": [
+            {
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-identifier",
+              "type": "token"
+            },
+            {
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-status",
+              "type": "token"
+            },
+            {
+              "name": "version",
+              "definition": "http://hl7.org/fhir/SearchParameter/Measure-version",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "operation": [
+        {
+          "name": "evaluate-measure",
+          "definition": "OperationDefinition/Measure-evaluate-measure"
+        },
+        {
+          "name": "data-requirements",
+          "definition": "OperationDefinition/Measure-data-requirements"
+        }
+      ]
+    }
+  ]
+}

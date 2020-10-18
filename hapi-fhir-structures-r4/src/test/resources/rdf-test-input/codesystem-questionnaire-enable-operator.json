@@ -1,0 +1,94 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "questionnaire-enable-operator",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eQuestionnaireItemOperator\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThe criteria by which a question is enabled.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://hl7.org/fhir/questionnaire-enable-operator defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eexists\u003ca name\u003d\"questionnaire-enable-operator-exists\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eExists\u003c/td\u003e\u003ctd\u003eTrue if whether an answer exists is equal to the enableWhen answer (which must be a boolean).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003d\u003ca name\u003d\"questionnaire-enable-operator-.61\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEquals\u003c/td\u003e\u003ctd\u003eTrue if whether at least one answer has a value that is equal to the enableWhen answer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e!\u003d\u003ca name\u003d\"questionnaire-enable-operator-.33.61\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNot Equals\u003c/td\u003e\u003ctd\u003eTrue if whether at least no answer has a value that is equal to the enableWhen answer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u0026gt;\u003ca name\u003d\"questionnaire-enable-operator-.62\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGreater Than\u003c/td\u003e\u003ctd\u003eTrue if whether at least no answer has a value that is greater than the enableWhen answer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u0026lt;\u003ca name\u003d\"questionnaire-enable-operator-.60\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLess Than\u003c/td\u003e\u003ctd\u003eTrue if whether at least no answer has a value that is less than the enableWhen answer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u0026gt;\u003d\u003ca name\u003d\"questionnaire-enable-operator-.62.61\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGreater or Equals\u003c/td\u003e\u003ctd\u003eTrue if whether at least no answer has a value that is greater or equal to the enableWhen answer.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u0026lt;\u003d\u003ca name\u003d\"questionnaire-enable-operator-.60.61\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eLess or Equals\u003c/td\u003e\u003ctd\u003eTrue if whether at least no answer has a value that is less or equal to the enableWhen answer.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 3
+    }
+  ],
+  "url": "http://hl7.org/fhir/questionnaire-enable-operator",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1006"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "QuestionnaireItemOperator",
+  "title": "QuestionnaireItemOperator",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "The criteria by which a question is enabled.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/questionnaire-enable-operator",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "exists",
+      "display": "Exists",
+      "definition": "True if whether an answer exists is equal to the enableWhen answer (which must be a boolean)."
+    },
+    {
+      "code": "\u003d",
+      "display": "Equals",
+      "definition": "True if whether at least one answer has a value that is equal to the enableWhen answer."
+    },
+    {
+      "code": "!\u003d",
+      "display": "Not Equals",
+      "definition": "True if whether at least no answer has a value that is equal to the enableWhen answer."
+    },
+    {
+      "code": "\u003e",
+      "display": "Greater Than",
+      "definition": "True if whether at least no answer has a value that is greater than the enableWhen answer."
+    },
+    {
+      "code": "\u003c",
+      "display": "Less Than",
+      "definition": "True if whether at least no answer has a value that is less than the enableWhen answer."
+    },
+    {
+      "code": "\u003e\u003d",
+      "display": "Greater or Equals",
+      "definition": "True if whether at least no answer has a value that is greater or equal to the enableWhen answer."
+    },
+    {
+      "code": "\u003c\u003d",
+      "display": "Less or Equals",
+      "definition": "True if whether at least no answer has a value that is less or equal to the enableWhen answer."
+    }
+  ]
+}

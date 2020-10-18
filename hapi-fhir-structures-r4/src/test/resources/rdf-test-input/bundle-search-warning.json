@@ -1,0 +1,46 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-search-warning",
+  "meta": {
+    "lastUpdated": "2017-03-14T08:23:30+11:00",
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  },
+  "type": "searchset",
+  "total": 0,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://example.org/fhir/Observation?patient.identifier\u003dhttp://example.com/fhir/identifier/mrn|123456"
+    }
+  ],
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "OperationOutcome",
+        "id": "warning",
+        "text": {
+          "status": "generated",
+          "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eThere is no matching patient for MRN 123456\u003c/div\u003e"
+        },
+        "issue": [
+          {
+            "severity": "warning",
+            "code": "not-found",
+            "details": {
+              "text": "There is no matching patient for MRN 123456"
+            }
+          }
+        ]
+      },
+      "search": {
+        "mode": "outcome"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "resourceType": "AppointmentResponse",
+  "id": "example",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003eAccept Brian MRI results discussion\u003c/div\u003e"
+  },
+  "appointment": {
+    "reference": "Appointment/example",
+    "display": "Brian MRI results discussion"
+  },
+  "actor": {
+    "reference": "Patient/example",
+    "display": "Peter James Chalmers"
+  },
+  "participantStatus": "accepted",
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

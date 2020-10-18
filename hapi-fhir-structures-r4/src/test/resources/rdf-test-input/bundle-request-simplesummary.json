@@ -1,0 +1,40 @@
+{
+  "resourceType": "Bundle",
+  "id": "bundle-request-simplesummary",
+  "type": "batch",
+  "entry": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/Patient/example"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/Condition?patient\u003dexample"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/MedicationStatement?patient\u003dexample"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/Observation?patient\u003dexample\u0026code\u003dhttp://loinc.org|55284-4\u0026date\u003dge2015-01-01"
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

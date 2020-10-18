@@ -1,0 +1,93 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "restful-security-service",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eRestfulSecurityService\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eTypes of security services used with FHIR.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/restful-security-service defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eOAuth\u003ca name\u003d\"restful-security-service-OAuth\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eOAuth\u003c/td\u003e\u003ctd\u003eOAuth (unspecified version see oauth.net).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eSMART-on-FHIR\u003ca name\u003d\"restful-security-service-SMART-on-FHIR\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eSMART-on-FHIR\u003c/td\u003e\u003ctd\u003eOAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eNTLM\u003ca name\u003d\"restful-security-service-NTLM\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eNTLM\u003c/td\u003e\u003ctd\u003eMicrosoft NTLM Authentication.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eBasic\u003ca name\u003d\"restful-security-service-Basic\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eBasic\u003c/td\u003e\u003ctd\u003eBasic authentication defined in HTTP specification.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eKerberos\u003ca name\u003d\"restful-security-service-Kerberos\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eKerberos\u003c/td\u003e\u003ctd\u003esee http://www.ietf.org/rfc/rfc4120.txt.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eCertificates\u003ca name\u003d\"restful-security-service-Certificates\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eCertificates\u003c/td\u003e\u003ctd\u003eSSL where client must have a certificate registered with the server.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "fhir"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "normative"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-normative-version",
+      "valueCode": "4.0.0"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 5
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/restful-security-service",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1079"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "RestfulSecurityService",
+  "title": "RestfulSecurityService",
+  "status": "active",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Types of security services used with FHIR.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/restful-security-service",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "OAuth",
+      "display": "OAuth",
+      "definition": "OAuth (unspecified version see oauth.net)."
+    },
+    {
+      "code": "SMART-on-FHIR",
+      "display": "SMART-on-FHIR",
+      "definition": "OAuth2 using SMART-on-FHIR profile (see http://docs.smarthealthit.org/)."
+    },
+    {
+      "code": "NTLM",
+      "display": "NTLM",
+      "definition": "Microsoft NTLM Authentication."
+    },
+    {
+      "code": "Basic",
+      "display": "Basic",
+      "definition": "Basic authentication defined in HTTP specification."
+    },
+    {
+      "code": "Kerberos",
+      "display": "Kerberos",
+      "definition": "see http://www.ietf.org/rfc/rfc4120.txt."
+    },
+    {
+      "code": "Certificates",
+      "display": "Certificates",
+      "definition": "SSL where client must have a certificate registered with the server."
+    }
+  ]
+}

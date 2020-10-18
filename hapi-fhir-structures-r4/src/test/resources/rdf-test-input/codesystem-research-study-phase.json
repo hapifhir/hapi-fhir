@@ -1,0 +1,99 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "research-study-phase",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eResearchStudyPhase\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eCodes for the stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/research-study-phase defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003en-a\u003ca name\u003d\"research-study-phase-n-a\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eN/A\u003c/td\u003e\u003ctd\u003eTrials without phases (for example, studies of devices or behavioral interventions).\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eearly-phase-1\u003ca name\u003d\"research-study-phase-early-phase-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eEarly Phase 1\u003c/td\u003e\u003ctd\u003eDesignation for optional exploratory trials conducted in accordance with the United States Food and Drug Administration\u0027s (FDA) 2006 Guidance on Exploratory Investigational New Drug (IND) Studies. Formerly called Phase 0.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephase-1\u003ca name\u003d\"research-study-phase-phase-1\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhase 1\u003c/td\u003e\u003ctd\u003eIncludes initial studies to determine the metabolism and pharmacologic actions of drugs in humans, the side effects associated with increasing doses, and to gain early evidence of effectiveness; may include healthy participants and/or patients.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephase-1-phase-2\u003ca name\u003d\"research-study-phase-phase-1-phase-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhase 1/Phase 2\u003c/td\u003e\u003ctd\u003eTrials that are a combination of phases 1 and 2.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephase-2\u003ca name\u003d\"research-study-phase-phase-2\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhase 2\u003c/td\u003e\u003ctd\u003eIncludes controlled clinical studies conducted to evaluate the effectiveness of the drug for a particular indication or indications in participants with the disease or condition under study and to determine the common short-term side effects and risks.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephase-2-phase-3\u003ca name\u003d\"research-study-phase-phase-2-phase-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhase 2/Phase 3\u003c/td\u003e\u003ctd\u003eTrials that are a combination of phases 2 and 3.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephase-3\u003ca name\u003d\"research-study-phase-phase-3\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhase 3\u003c/td\u003e\u003ctd\u003eIncludes trials conducted after preliminary evidence suggesting effectiveness of the drug has been obtained, and are intended to gather additional information to evaluate the overall benefit-risk relationship of the drug.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ephase-4\u003ca name\u003d\"research-study-phase-phase-4\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ePhase 4\u003c/td\u003e\u003ctd\u003eStudies of FDA-approved drugs to delineate additional information including the drug\u0027s risks, benefits, and optimal use.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "brr"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "draft"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 1
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/research-study-phase",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1247"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "ResearchStudyPhase",
+  "title": "ResearchStudyPhase",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Codes for the stage in the progression of a therapy from initial experimental use in humans in clinical trials to post-market evaluation.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/research-study-phase",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "n-a",
+      "display": "N/A",
+      "definition": "Trials without phases (for example, studies of devices or behavioral interventions)."
+    },
+    {
+      "code": "early-phase-1",
+      "display": "Early Phase 1",
+      "definition": "Designation for optional exploratory trials conducted in accordance with the United States Food and Drug Administration\u0027s (FDA) 2006 Guidance on Exploratory Investigational New Drug (IND) Studies. Formerly called Phase 0."
+    },
+    {
+      "code": "phase-1",
+      "display": "Phase 1",
+      "definition": "Includes initial studies to determine the metabolism and pharmacologic actions of drugs in humans, the side effects associated with increasing doses, and to gain early evidence of effectiveness; may include healthy participants and/or patients."
+    },
+    {
+      "code": "phase-1-phase-2",
+      "display": "Phase 1/Phase 2",
+      "definition": "Trials that are a combination of phases 1 and 2."
+    },
+    {
+      "code": "phase-2",
+      "display": "Phase 2",
+      "definition": "Includes controlled clinical studies conducted to evaluate the effectiveness of the drug for a particular indication or indications in participants with the disease or condition under study and to determine the common short-term side effects and risks."
+    },
+    {
+      "code": "phase-2-phase-3",
+      "display": "Phase 2/Phase 3",
+      "definition": "Trials that are a combination of phases 2 and 3."
+    },
+    {
+      "code": "phase-3",
+      "display": "Phase 3",
+      "definition": "Includes trials conducted after preliminary evidence suggesting effectiveness of the drug has been obtained, and are intended to gather additional information to evaluate the overall benefit-risk relationship of the drug."
+    },
+    {
+      "code": "phase-4",
+      "display": "Phase 4",
+      "definition": "Studies of FDA-approved drugs to delineate additional information including the drug\u0027s risks, benefits, and optimal use."
+    }
+  ]
+}

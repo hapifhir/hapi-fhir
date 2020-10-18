@@ -1,0 +1,86 @@
+{
+  "resourceType": "MedicationStatement",
+  "id": "example003",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: example003\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: active\u003c/p\u003e\u003cp\u003e\u003cb\u003emedication\u003c/b\u003e: Little Pink Pill for water retention \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003esubject\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eeffective\u003c/b\u003e: 01/02/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003edateAsserted\u003c/b\u003e: 22/02/2014\u003c/p\u003e\u003cp\u003e\u003cb\u003einformationSource\u003c/b\u003e: \u003ca\u003eDonald Duck\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003ereasonReference\u003c/b\u003e: \u003ca\u003eObservation/blood-pressure\u003c/a\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003enote\u003c/b\u003e: Patient cannot remember the name of the tablet, but takes it every day in the morning for water retention\u003c/p\u003e\u003cp\u003e\u003cb\u003edosage\u003c/b\u003e: \u003c/p\u003e\u003c/div\u003e"
+  },
+  "status": "active",
+  "medicationCodeableConcept": {
+    "text": "Little Pink Pill for water retention"
+  },
+  "subject": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "effectiveDateTime": "2014-02-01",
+  "dateAsserted": "2014-02-22",
+  "informationSource": {
+    "reference": "Patient/pat1",
+    "display": "Donald Duck"
+  },
+  "reasonReference": [
+    {
+      "reference": "Observation/blood-pressure"
+    }
+  ],
+  "note": [
+    {
+      "text": "Patient cannot remember the name of the tablet, but takes it every day in the morning for water retention"
+    }
+  ],
+  "dosage": [
+    {
+      "sequence": 1,
+      "text": "1 tablet per day",
+      "asNeededBoolean": false,
+      "route": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "260548002",
+            "display": "Oral"
+          }
+        ]
+      },
+      "doseAndRate": [
+        {
+          "type": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/dose-rate-type",
+                "code": "ordered",
+                "display": "Ordered"
+              }
+            ]
+          },
+          "doseQuantity": {
+            "value": 1,
+            "unit": "tab",
+            "system": "http://terminology.hl7.org/CodeSystem/v3-orderableDrugForm",
+            "code": "tab"
+          }
+        }
+      ],
+      "maxDosePerPeriod": {
+        "numerator": {
+          "value": 1
+        },
+        "denominator": {
+          "value": 1,
+          "system": "http://unitsofmeasure.org",
+          "code": "d"
+        }
+      }
+    }
+  ],
+  "meta": {
+    "tag": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/v3-ActReason",
+        "code": "HTEST",
+        "display": "test health data"
+      }
+    ]
+  }
+}

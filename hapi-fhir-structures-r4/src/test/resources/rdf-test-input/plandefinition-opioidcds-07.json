@@ -1,0 +1,204 @@
+{
+  "resourceType": "PlanDefinition",
+  "id": "opioidcds-07",
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003cp\u003e\u003cb\u003eGenerated Narrative with Details\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eid\u003c/b\u003e: opioidcds-07\u003c/p\u003e\u003cp\u003e\u003cb\u003eurl\u003c/b\u003e: \u003cb\u003ehttp://hl7.org/fhir/ig/opioid-cds/PlanDefinition/opioidcds-07\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eidentifier\u003c/b\u003e: cdc-opioid-guidance (OFFICIAL)\u003c/p\u003e\u003cp\u003e\u003cb\u003eversion\u003c/b\u003e: 0.1.0\u003c/p\u003e\u003cp\u003e\u003cb\u003ename\u003c/b\u003e: cdc-opioid-07\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: CDC Opioid Prescribing Guideline Recommendation #7\u003c/p\u003e\u003cp\u003e\u003cb\u003etype\u003c/b\u003e: ECA Rule \u003cspan\u003e(Details : {http://terminology.hl7.org/CodeSystem/plan-definition-type code \u0027eca-rule\u0027 \u003d \u0027ECA Rule\u0027, given as \u0027ECA Rule\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003estatus\u003c/b\u003e: draft\u003c/p\u003e\u003cp\u003e\u003cb\u003edate\u003c/b\u003e: 19/03/2018\u003c/p\u003e\u003cp\u003e\u003cb\u003epublisher\u003c/b\u003e: Centers for Disease Control and Prevention (CDC)\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Clinicians should evaluate benefits and harms with patients within 1 to 4 weeks of starting opioid therapy for chronic pain or of dose escalation. Clinicians should evaluate benefits and harms of continued therapy with patients every 3 months or more frequently.\u003c/p\u003e\u003cp\u003e\u003cb\u003euseContext\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003ejurisdiction\u003c/b\u003e: United States of America \u003cspan\u003e(Details : {urn:iso:std:iso:3166 code \u0027US\u0027 \u003d \u0027United States of America\u0027, given as \u0027United States of America\u0027})\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epurpose\u003c/b\u003e: CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.\u003c/p\u003e\u003cp\u003e\u003cb\u003eusage\u003c/b\u003e: If benefits do not outweigh harms of continued opioid therapy, clinicians should optimize other therapies and work with patients to taper opioids to lower dosages or to taper and discontinue opioids.\u003c/p\u003e\u003cp\u003e\u003cb\u003ecopyright\u003c/b\u003e: © CDC 2016+.\u003c/p\u003e\u003cp\u003e\u003cb\u003etopic\u003c/b\u003e: Opioid Prescribing \u003cspan\u003e(Details )\u003c/span\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003eauthor\u003c/b\u003e: , , , \u003c/p\u003e\u003cp\u003e\u003cb\u003erelatedArtifact\u003c/b\u003e: , \u003c/p\u003e\u003cp\u003e\u003cb\u003elibrary\u003c/b\u003e: \u003ca\u003eLibrary/opioidcds-recommendation-07\u003c/a\u003e\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003eaction\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003etitle\u003c/b\u003e: Existing patient should be evaluated for risk of continued opioid therapy.\u003c/p\u003e\u003cp\u003e\u003cb\u003edescription\u003c/b\u003e: Checking if the trigger prescription meets the inclusion criteria for recommendation #7 workflow.\u003c/p\u003e\u003cp\u003e\u003cb\u003edocumentation\u003c/b\u003e: \u003c/p\u003e\u003cp\u003e\u003cb\u003etrigger\u003c/b\u003e: \u003c/p\u003e\u003ch3\u003eConditions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003ctd\u003e\u003cb\u003eKind\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eExpression\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003ctd\u003eapplicability\u003c/td\u003e\u003ctd/\u003e\u003c/tr\u003e\u003c/table\u003e\u003cp\u003e\u003cb\u003egroupingBehavior\u003c/b\u003e: visual-group\u003c/p\u003e\u003cp\u003e\u003cb\u003eselectionBehavior\u003c/b\u003e: exactly-one\u003c/p\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: action.title\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: action.description\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003cblockquote\u003e\u003cp\u003e\u003cb\u003edynamicValue\u003c/b\u003e\u003c/p\u003e\u003cp\u003e\u003cb\u003epath\u003c/b\u003e: action.extension\u003c/p\u003e\u003cp\u003e\u003cb\u003eexpression\u003c/b\u003e: \u003c/p\u003e\u003c/blockquote\u003e\u003ch3\u003eActions\u003c/h3\u003e\u003ctable\u003e\u003ctr\u003e\u003ctd\u003e-\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd\u003e*\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/blockquote\u003e\u003c/div\u003e"
+  },
+  "url": "http://hl7.org/fhir/ig/opioid-cds/PlanDefinition/opioidcds-07",
+  "identifier": [
+    {
+      "use": "official",
+      "value": "cdc-opioid-guidance"
+    }
+  ],
+  "version": "0.1.0",
+  "name": "cdc-opioid-07",
+  "title": "CDC Opioid Prescribing Guideline Recommendation #7",
+  "type": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/plan-definition-type",
+        "code": "eca-rule",
+        "display": "ECA Rule"
+      }
+    ]
+  },
+  "status": "draft",
+  "date": "2018-03-19",
+  "publisher": "Centers for Disease Control and Prevention (CDC)",
+  "description": "Clinicians should evaluate benefits and harms with patients within 1 to 4 weeks of starting opioid therapy for chronic pain or of dose escalation. Clinicians should evaluate benefits and harms of continued therapy with patients every 3 months or more frequently.",
+  "useContext": [
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "182888003",
+            "display": "Medication requested (situation)"
+          }
+        ]
+      }
+    },
+    {
+      "code": {
+        "system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+        "code": "focus",
+        "display": "Clinical Focus"
+      },
+      "valueCodeableConcept": {
+        "coding": [
+          {
+            "system": "http://snomed.info/sct",
+            "code": "82423001",
+            "display": "Chronic pain (finding)"
+          }
+        ]
+      }
+    }
+  ],
+  "jurisdiction": [
+    {
+      "coding": [
+        {
+          "system": "urn:iso:std:iso:3166",
+          "code": "US",
+          "display": "United States of America"
+        }
+      ]
+    }
+  ],
+  "purpose": "CDC’s Guideline for Prescribing Opioids for Chronic Pain is intended to improve communication between providers and patients about the risks and benefits of opioid therapy for chronic pain, improve the safety and effectiveness of pain treatment, and reduce the risks associated with long-term opioid therapy, including opioid use disorder and overdose. The Guideline is not intended for patients who are in active cancer treatment, palliative care, or end-of-life care.",
+  "usage": "If benefits do not outweigh harms of continued opioid therapy, clinicians should optimize other therapies and work with patients to taper opioids to lower dosages or to taper and discontinue opioids.",
+  "copyright": "© CDC 2016+.",
+  "topic": [
+    {
+      "text": "Opioid Prescribing"
+    }
+  ],
+  "author": [
+    {
+      "name": "Kensaku Kawamoto, MD, PhD, MHS"
+    },
+    {
+      "name": "Bryn Rhodes"
+    },
+    {
+      "name": "Floyd Eisenberg, MD, MPH"
+    },
+    {
+      "name": "Robert McClure, MD, MPH"
+    }
+  ],
+  "relatedArtifact": [
+    {
+      "type": "documentation",
+      "display": "CDC guideline for prescribing opioids for chronic pain",
+      "url": "https://guidelines.gov/summaries/summary/50153/cdc-guideline-for-prescribing-opioids-for-chronic-pain---united-states-2016#420"
+    },
+    {
+      "type": "documentation",
+      "display": "MME Conversion Tables",
+      "url": "https://www.cdc.gov/drugoverdose/pdf/calculating_total_daily_dose-a.pdf"
+    }
+  ],
+  "library": [
+    "Library/opioidcds-recommendation-07"
+  ],
+  "action": [
+    {
+      "title": "Existing patient should be evaluated for risk of continued opioid therapy.",
+      "description": "Checking if the trigger prescription meets the inclusion criteria for recommendation #7 workflow.",
+      "documentation": [
+        {
+          "type": "documentation",
+          "document": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-strengthOfRecommendation",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/recommendation-strength",
+                      "code": "strong",
+                      "display": "Strong"
+                    }
+                  ]
+                }
+              },
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/cqf-qualityOfEvidence",
+                "valueCodeableConcept": {
+                  "coding": [
+                    {
+                      "system": "http://terminology.hl7.org/CodeSystem/evidence-quality",
+                      "code": "low",
+                      "display": "Low quality"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "trigger": [
+        {
+          "type": "named-event",
+          "name": "medication-prescribe"
+        }
+      ],
+      "condition": [
+        {
+          "kind": "applicability",
+          "expression": {
+            "description": "Check whether the existing patient, without an end of life condition or risk assessment in the past 90 days, has taken an opioid-with-abuse-potential for 7 of the past 10 days or 63 of the past 90 days.",
+            "language": "text/cql",
+            "expression": "Inclusion Criteria"
+          }
+        }
+      ],
+      "groupingBehavior": "visual-group",
+      "selectionBehavior": "exactly-one",
+      "dynamicValue": [
+        {
+          "path": "action.title",
+          "expression": {
+            "language": "text/cql",
+            "expression": "Get Summary"
+          }
+        },
+        {
+          "path": "action.description",
+          "expression": {
+            "language": "text/cql",
+            "expression": "Get Detail"
+          }
+        },
+        {
+          "path": "action.extension",
+          "expression": {
+            "language": "text/cql",
+            "expression": "Get Indicator"
+          }
+        }
+      ],
+      "action": [
+        {
+          "description": "Will schedule assessment of risk for opioid use for the patient"
+        },
+        {
+          "description": "Risk of overdose carefully considered and outweighed by benefit; snooze 3 mo"
+        },
+        {
+          "description": "N/A - see comment; snooze 3 mo"
+        }
+      ]
+    }
+  ]
+}

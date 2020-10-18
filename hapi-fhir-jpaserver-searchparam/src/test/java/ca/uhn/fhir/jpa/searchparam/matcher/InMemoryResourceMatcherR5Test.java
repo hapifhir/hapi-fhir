@@ -41,9 +41,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_DATE = "1970-10-17";
+	public static final String OBSERVATION_DATETIME = OBSERVATION_DATE + "T01:00:00-08:30";
 	public static final String OBSERVATION_CODE = "MATCH";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
+	private static final String EARLY_DATETIME = EARLY_DATE + "T12:00:00Z";
+	private static final String LATE_DATETIME = LATE_DATE + "T12:00:00Z";
 	private static final String SOURCE_URI = "urn:source:0";
 	private static final String REQUEST_ID = "a_request_id";
 	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
@@ -70,7 +73,7 @@ public class InMemoryResourceMatcherR5Test {
 
 		myObservation = new Observation();
 		myObservation.getMeta().setSource(TEST_SOURCE);
-		myObservation.setEffective(new DateTimeType(OBSERVATION_DATE));
+		myObservation.setEffective(new DateTimeType(OBSERVATION_DATETIME));
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setCode(OBSERVATION_CODE);
 		myObservation.setCode(codeableConcept);
@@ -120,34 +123,52 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	private void testDateUnsupportedDateOp(ParamPrefixEnum theOperator) {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBSERVATION_DATE, myObservation, mySearchParams);
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBSERVATION_DATETIME, myObservation, mySearchParams);
 		assertFalse(result.supported());
 		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());
 	}
 
 	@Test
 	public void testDateSupportedOps() {
-		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
-		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
-		testDateSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
-		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
-		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, false, true, false, false);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, false, true, true, false);
+		testDateSupportedOp(ParamPrefixEnum.EQUAL, false, false, true, false);
+		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, false, true, true);
+		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, false, true);
 	}
 
-	private void testDateSupportedOp(ParamPrefixEnum theOperator, boolean theEarly, boolean theSame, boolean theLater) {
+	@Test
+	public void testDateTimeSupportedOps() {
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, true, true, false, false);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, true, false);
+		testDateSupportedOp(ParamPrefixEnum.EQUAL, true, false, true, false);
+		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, true, false, true, true);
+		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, true, false, false, true);
+	}
+
+	private void testDateSupportedOp(ParamPrefixEnum theOperator, boolean theIncludeTime, boolean theEarly, boolean theSame, boolean theLater) {
+		String earlyDate = EARLY_DATE;
+		String observationDate = OBSERVATION_DATE;
+		String lateDate = LATE_DATE;
+		if (theIncludeTime) {
+			earlyDate = EARLY_DATETIME;
+			observationDate = OBSERVATION_DATETIME;
+			lateDate = LATE_DATETIME;
+		}
+
 		String equation = "date=" + theOperator.getValue();
 		{
-			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + EARLY_DATE, myObservation, mySearchParams);
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + earlyDate, myObservation, mySearchParams);
 			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theEarly);
 		}
 		{
-			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + observationDate, myObservation, mySearchParams);
 			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theSame);
 		}
 		{
-			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + lateDate, myObservation, mySearchParams);
 			assertTrue(result.supported(), result.getUnsupportedReason());
 			assertEquals(result.matched(), theLater);
 		}

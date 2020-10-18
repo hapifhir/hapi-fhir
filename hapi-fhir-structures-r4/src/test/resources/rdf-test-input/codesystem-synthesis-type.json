@@ -1,0 +1,89 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "synthesis-type",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSynthesisType\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eTypes of combining results from a body of evidence (eg. summary data meta-analysis).\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/synthesis-type defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003estd-MA\u003ca name\u003d\"synthesis-type-std-MA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003esummary data meta-analysis\u003c/td\u003e\u003ctd\u003eA meta-analysis of the summary data of estimates from individual studies or data sets.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eIPD-MA\u003ca name\u003d\"synthesis-type-IPD-MA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eindividual patient data meta-analysis\u003c/td\u003e\u003ctd\u003eA meta-analysis of the individual participant data from individual studies or data sets.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eindirect-NMA\u003ca name\u003d\"synthesis-type-indirect-NMA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eindirect network meta-analysis\u003c/td\u003e\u003ctd\u003eAn indirect meta-analysis derived from 2 or more direct comparisons in a network meta-analysis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ecombined-NMA\u003ca name\u003d\"synthesis-type-combined-NMA\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003ecombined direct plus indirect network meta-analysis\u003c/td\u003e\u003ctd\u003eAn composite meta-analysis derived from direct comparisons and indirect comparisons in a network meta-analysis.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003erange\u003ca name\u003d\"synthesis-type-range\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003erange of results\u003c/td\u003e\u003ctd\u003eA range of results across a body of evidence.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eclassification\u003ca name\u003d\"synthesis-type-classification\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eclassifcation of results\u003c/td\u003e\u003ctd\u003eAn approach describing a body of evidence by categorically classifying individual studies (eg 3 studies showed beneft and 2 studied found no effect).\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "cds"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-standards-status",
+      "valueCode": "trial-use"
+    },
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-fmm",
+      "valueInteger": 0
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/synthesis-type",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1348"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SynthesisType",
+  "title": "SynthesisType",
+  "status": "draft",
+  "experimental": false,
+  "date": "2019-11-01T09:29:23+11:00",
+  "publisher": "HL7 (FHIR Project)",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        },
+        {
+          "system": "email",
+          "value": "fhir@lists.hl7.org"
+        }
+      ]
+    }
+  ],
+  "description": "Types of combining results from a body of evidence (eg. summary data meta-analysis).",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/synthesis-type",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "std-MA",
+      "display": "summary data meta-analysis",
+      "definition": "A meta-analysis of the summary data of estimates from individual studies or data sets."
+    },
+    {
+      "code": "IPD-MA",
+      "display": "individual patient data meta-analysis",
+      "definition": "A meta-analysis of the individual participant data from individual studies or data sets."
+    },
+    {
+      "code": "indirect-NMA",
+      "display": "indirect network meta-analysis",
+      "definition": "An indirect meta-analysis derived from 2 or more direct comparisons in a network meta-analysis."
+    },
+    {
+      "code": "combined-NMA",
+      "display": "combined direct plus indirect network meta-analysis",
+      "definition": "An composite meta-analysis derived from direct comparisons and indirect comparisons in a network meta-analysis."
+    },
+    {
+      "code": "range",
+      "display": "range of results",
+      "definition": "A range of results across a body of evidence."
+    },
+    {
+      "code": "classification",
+      "display": "classifcation of results",
+      "definition": "An approach describing a body of evidence by categorically classifying individual studies (eg 3 studies showed beneft and 2 studied found no effect)."
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "resourceType": "CodeSystem",
+  "id": "encounter-special-arrangements",
+  "meta": {
+    "lastUpdated": "2019-11-01T09:29:23.356+11:00",
+    "profile": [
+      "http://hl7.org/fhir/StructureDefinition/shareablecodesystem"
+    ]
+  },
+  "text": {
+    "status": "generated",
+    "div": "\u003cdiv xmlns\u003d\"http://www.w3.org/1999/xhtml\"\u003e\u003ch2\u003eSpecial arrangements\u003c/h2\u003e\u003cdiv\u003e\u003cp\u003eThis value set defines a set of codes that can be used to indicate the kinds of special arrangements in place for a patients visit.\u003c/p\u003e\n\u003c/div\u003e\u003cp\u003eThis code system http://terminology.hl7.org/CodeSystem/encounter-special-arrangements defines the following codes:\u003c/p\u003e\u003ctable class\u003d\"codes\"\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003e\u003cb\u003eCode\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDisplay\u003c/b\u003e\u003c/td\u003e\u003ctd\u003e\u003cb\u003eDefinition\u003c/b\u003e\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003ewheel\u003ca name\u003d\"encounter-special-arrangements-wheel\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eWheelchair\u003c/td\u003e\u003ctd\u003eThe patient requires a wheelchair to be made available for the encounter.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eadd-bed\u003ca name\u003d\"encounter-special-arrangements-add-bed\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAdditional bedding\u003c/td\u003e\u003ctd\u003eAn additional bed made available for a person accompanying the patient, for example a parent accompanying a child.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eint\u003ca name\u003d\"encounter-special-arrangements-int\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eInterpreter\u003c/td\u003e\u003ctd\u003eThe patient is not fluent in the local language and requires an interpreter to be available. Refer to the Patient.Language property for the type of interpreter required.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003eatt\u003ca name\u003d\"encounter-special-arrangements-att\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eAttendant\u003c/td\u003e\u003ctd\u003eA person who accompanies a patient to provide assistive services necessary for the patient\u0027s care during the encounter.\u003c/td\u003e\u003c/tr\u003e\u003ctr\u003e\u003ctd style\u003d\"white-space:nowrap\"\u003edog\u003ca name\u003d\"encounter-special-arrangements-dog\"\u003e \u003c/a\u003e\u003c/td\u003e\u003ctd\u003eGuide dog\u003c/td\u003e\u003ctd\u003eThe patient has a guide dog and the location used for the encounter should be able to support the presence of the service animal.\u003c/td\u003e\u003c/tr\u003e\u003c/table\u003e\u003c/div\u003e"
+  },
+  "extension": [
+    {
+      "url": "http://hl7.org/fhir/StructureDefinition/structuredefinition-wg",
+      "valueCode": "pa"
+    }
+  ],
+  "url": "http://terminology.hl7.org/CodeSystem/encounter-special-arrangements",
+  "identifier": [
+    {
+      "system": "urn:ietf:rfc:3986",
+      "value": "urn:oid:2.16.840.1.113883.4.642.4.1090"
+    }
+  ],
+  "version": "4.0.1",
+  "name": "SpecialArrangements",
+  "title": "Special arrangements",
+  "status": "draft",
+  "experimental": false,
+  "publisher": "FHIR Project team",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "url",
+          "value": "http://hl7.org/fhir"
+        }
+      ]
+    }
+  ],
+  "description": "This value set defines a set of codes that can be used to indicate the kinds of special arrangements in place for a patients visit.",
+  "caseSensitive": true,
+  "valueSet": "http://hl7.org/fhir/ValueSet/encounter-special-arrangements",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "wheel",
+      "display": "Wheelchair",
+      "definition": "The patient requires a wheelchair to be made available for the encounter."
+    },
+    {
+      "code": "add-bed",
+      "display": "Additional bedding",
+      "definition": "An additional bed made available for a person accompanying the patient, for example a parent accompanying a child."
+    },
+    {
+      "code": "int",
+      "display": "Interpreter",
+      "definition": "The patient is not fluent in the local language and requires an interpreter to be available. Refer to the Patient.Language property for the type of interpreter required."
+    },
+    {
+      "code": "att",
+      "display": "Attendant",
+      "definition": "A person who accompanies a patient to provide assistive services necessary for the patient\u0027s care during the encounter."
+    },
+    {
+      "code": "dog",
+      "display": "Guide dog",
+      "definition": "The patient has a guide dog and the location used for the encounter should be able to support the presence of the service animal."
+    }
+  ]
+}
