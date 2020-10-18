@@ -770,7 +770,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		myCaptureQueriesListener.clear();
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, null, mySrd);
 		List<IIdType> actual = toUnqualifiedVersionlessIds(resp);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual, containsInAnyOrder(orgId, medId, patId, moId, patId2));
@@ -783,7 +783,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		// Specific patient ID with no linked stuff
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, patId2, null, null, null, null, null, null, mySrd);
+		resp = myPatientDao.patientInstanceEverything(request, patId2, null, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(patId2, orgId));
 
 	}
