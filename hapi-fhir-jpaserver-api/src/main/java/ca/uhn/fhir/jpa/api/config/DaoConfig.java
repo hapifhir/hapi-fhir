@@ -248,9 +248,9 @@ public class DaoConfig {
 	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
 	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
 	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.3.0</p>
+	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
 	 *
-	 * @since 5.2.0
+	 * @since 5.3.0
 	 */
 	public boolean isUseLegacySearchBuilder() {
 		return myUseLegacySearchBuilder;
@@ -260,9 +260,9 @@ public class DaoConfig {
 	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
 	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
 	 * legacy SQL builder based on Hibernate.
-	 * <p>Note that this method will be removed in HAPI FHIR 5.3.0</p>
+	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
 	 *
-	 * @since 5.2.0
+	 * @since 5.3.0
 	 */
 	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
 		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
