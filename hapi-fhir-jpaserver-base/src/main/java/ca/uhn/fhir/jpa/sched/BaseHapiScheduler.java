@@ -33,6 +33,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import javax.annotation.Nonnull;
 import java.util.Properties;
@@ -49,7 +50,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 
 	private final String myThreadNamePrefix;
 	private final AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
-	private final StdSchedulerFactory myFactory = new StdSchedulerFactory();
+	private final SchedulerFactoryBean myFactory = new SchedulerFactoryBean();
 	private final Properties myProperties = new Properties();
 
 	private Scheduler myScheduler;
@@ -73,10 +74,24 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	@Override
 	public void init() throws SchedulerException {
 		setProperties();
-		myFactory.initialize(myProperties);
+		myFactory.setQuartzProperties(myProperties);
+		myFactory.setBeanName(myInstanceName);
+		myFactory.setSchedulerName(myThreadNamePrefix);
+		myFactory.setJobFactory(mySpringBeanJobFactory);
+		massageJobFactory(myFactory);
+		try {
+			Validate.notBlank(myInstanceName, "No instance name supplied");
+			myFactory.afterPropertiesSet();
+		} catch (Exception e) {
+			throw new SchedulerException(e);
+		}
+
 		myScheduler = myFactory.getScheduler();
-		myScheduler.setJobFactory(mySpringBeanJobFactory);
 		myScheduler.standby();
+	}
+
+	protected void massageJobFactory(SchedulerFactoryBean theFactory) {
+		// nothing by default
 	}
 
 	protected void setProperties() {
