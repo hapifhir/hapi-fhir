@@ -243,6 +243,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	// FIXME: remove?
+	@Test
+	public void testParameterOrder() throws IOException {
+
+		myCaptureQueriesListener.clear();
+		HttpGet get = new HttpGet(ourServerBase + "/Observation?patient.identifier=https://github.com/synthetichealth/synthea%7C06a42917-2bf1-4b82-bc08-1b6edf15bcb0&status=final,final2&code=http://loinc.org%7C6299-2&__sort=-date&encounter.type=http://snomed.info/sct%7C");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+		}
+		myCaptureQueriesListener.logSelectQueries();
+
+	}
+
 	@Test
 	public void testSearchForTokenValueOnlyUsesValueHash() {
 

@@ -84,6 +84,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
+import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -104,9 +105,11 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -114,6 +117,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -206,13 +210,28 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 
 		// Handle each parameter
-		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
-			String nextParamName = nextParamEntry.getKey();
+		List<String> paramNames = new ArrayList<>(myParams.keySet());
+
+		// FIXME: remove?
+		if (theRequest != null) {
+			paramNames.sort((o1,o2)->{
+				if (o1.equals("patient")) {
+					return -1;
+				}
+				if (o2.equals("patient")) {
+					return 1;
+				}
+				return 0;
+			});
+			ourLog.info("New params: {}", paramNames);
+		}
+
+		for (String nextParamName : paramNames) {
 			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
 				// Skip parameters for Subject, Patient, Code and Category for LastN as these will be filtered by Elasticsearch
 				continue;
 			}
-			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
+			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
 			Condition predicate = theQueryStack3.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);

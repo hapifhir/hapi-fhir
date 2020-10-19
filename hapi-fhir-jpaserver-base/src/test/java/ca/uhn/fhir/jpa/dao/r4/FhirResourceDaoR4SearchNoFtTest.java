@@ -616,6 +616,21 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 
+	// FIXME: remove
+	@Test
+	public void testSearchParamOrder() {
+
+		RuntimeResourceDefinition resDef = myFhirCtx.getResourceDefinition("Observation");
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl("Observation?patient.identifier=https://github.com/synthetichealth/synthea%7C06a42917-2bf1-4b82-bc08-1b6edf15bcb0&status=final,final2&code=http://loinc.org%7C6299-2&__sort=-date&encounter.type=http://snomed.info/sct%7C", resDef);
+		map.setLoadSynchronous(true);
+		myCaptureQueriesListener.clear();
+		myObservationDao.search(map);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+	}
+
+
+
 	/**
 	 * See #1053
 	 */

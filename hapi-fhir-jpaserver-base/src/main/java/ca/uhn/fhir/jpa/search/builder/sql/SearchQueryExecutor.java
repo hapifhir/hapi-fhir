@@ -36,6 +36,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Date;
 import java.util.Iterator;
 
 public class SearchQueryExecutor implements Iterator<Long>, Closeable {
@@ -123,7 +125,12 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 					}
 
 					for (int i = 0; i < args.length; i++) {
-						myStatement.setObject(i + 1, args[i]);
+						Object nextObject = args[i];
+						if (nextObject instanceof Date) {
+							myStatement.setObject(i + 1, nextObject, Types.TIMESTAMP);
+						} else {
+							myStatement.setObject(i + 1, nextObject);
+						}
 					}
 					myResultSet = myStatement.executeQuery();
 					myQueryInitialized = true;
