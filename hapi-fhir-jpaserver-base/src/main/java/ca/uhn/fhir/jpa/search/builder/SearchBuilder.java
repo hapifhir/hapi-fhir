@@ -207,21 +207,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Handle each parameter
 		List<String> paramNames = new ArrayList<>(myParams.keySet());
-
-		// FIXME: remove?
-//		if (theRequest != null) {
-//			paramNames.sort((o1,o2)->{
-//				if (o1.equals("patient")) {
-//					return -1;
-//				}
-//				if (o2.equals("patient")) {
-//					return 1;
-//				}
-//				return 0;
-//			});
-//			ourLog.info("New params: {}", paramNames);
-//		}
-
 		for (String nextParamName : paramNames) {
 			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
 				// Skip parameters for Subject, Patient, Code and Category for LastN as these will be filtered by Elasticsearch

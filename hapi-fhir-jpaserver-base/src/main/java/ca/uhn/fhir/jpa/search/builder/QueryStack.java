@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -78,7 +77,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -109,7 +107,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -158,7 +155,7 @@ public class QueryStack {
 
 	public void addSortOnDate(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		DatePredicateBuilder sortPredicateBuilder = mySqlBuilder.addDateSelector(firstPredicateBuilder.getResourceIdColumn());
+		DatePredicateBuilder sortPredicateBuilder = mySqlBuilder.addDatePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -179,7 +176,7 @@ public class QueryStack {
 
 	public void addSortOnNumber(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		NumberPredicateBuilder sortPredicateBuilder = mySqlBuilder.addNumberSelector(firstPredicateBuilder.getResourceIdColumn());
+		NumberPredicateBuilder sortPredicateBuilder = mySqlBuilder.addNumberPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -188,7 +185,7 @@ public class QueryStack {
 
 	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		QuantityPredicateBuilder sortPredicateBuilder = mySqlBuilder.addQuantity(firstPredicateBuilder.getResourceIdColumn());
+		QuantityPredicateBuilder sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -209,7 +206,7 @@ public class QueryStack {
 
 	public void addSortOnResourceLink(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		ResourceLinkPredicateBuilder sortPredicateBuilder = mySqlBuilder.addReferenceSelector(this, firstPredicateBuilder.getResourceIdColumn());
+		ResourceLinkPredicateBuilder sortPredicateBuilder = mySqlBuilder.addReferencePredicateBuilder(this, firstPredicateBuilder.getResourceIdColumn());
 
 		Condition pathPredicate = sortPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(pathPredicate);
@@ -219,7 +216,7 @@ public class QueryStack {
 
 	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		StringPredicateBuilder sortPredicateBuilder = mySqlBuilder.addStringSelector(firstPredicateBuilder.getResourceIdColumn());
+		StringPredicateBuilder sortPredicateBuilder = mySqlBuilder.addStringPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -228,7 +225,7 @@ public class QueryStack {
 
 	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		TokenPredicateBuilder sortPredicateBuilder = mySqlBuilder.addTokenSelector(firstPredicateBuilder.getResourceIdColumn());
+		TokenPredicateBuilder sortPredicateBuilder = mySqlBuilder.addTokenPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -238,7 +235,7 @@ public class QueryStack {
 
 	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		UriPredicateBuilder sortPredicateBuilder = mySqlBuilder.addUriSelector(firstPredicateBuilder.getResourceIdColumn());
+		UriPredicateBuilder sortPredicateBuilder = mySqlBuilder.addUriPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -315,7 +312,7 @@ public class QueryStack {
 														List<? extends IQueryParameterType> theList,
 														RequestPartitionId theRequestPartitionId) {
 
-		CoordsPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.COORDS, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addCoordsSelector(theSourceJoinColumn)).getResult();
+		CoordsPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.COORDS, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addCoordsPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return predicateBuilder.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -339,7 +336,7 @@ public class QueryStack {
 
 		String paramName = theSearchParam.getName();
 
-		PredicateBuilderCacheLookupResult<DatePredicateBuilder> predicateBuilderLookupResult = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.DATE, theSourceJoinColumn, paramName, () -> mySqlBuilder.addDateSelector(theSourceJoinColumn));
+		PredicateBuilderCacheLookupResult<DatePredicateBuilder> predicateBuilderLookupResult = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.DATE, theSourceJoinColumn, paramName, () -> mySqlBuilder.addDatePredicateBuilder(theSourceJoinColumn));
 		DatePredicateBuilder predicateBuilder = predicateBuilderLookupResult.getResult();
 		boolean cacheHit = predicateBuilderLookupResult.isCacheHit();
 
@@ -529,7 +526,7 @@ public class QueryStack {
 				parameterName = parameterName.substring(0, colonIndex);
 			}
 
-			ResourceLinkPredicateBuilder join = mySqlBuilder.addReferenceSelectorReversed(this, theSourceJoinColumn);
+			ResourceLinkPredicateBuilder join = mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
 			Condition partitionPredicate = join.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = join.createResourceLinkPaths(targetResourceType, paramReference);
@@ -587,7 +584,7 @@ public class QueryStack {
 														SearchFilterParser.CompareOperation theOperation,
 														RequestPartitionId theRequestPartitionId) {
 
-		NumberPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.NUMBER, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addNumberSelector(theSourceJoinColumn)).getResult();
+		NumberPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.NUMBER, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addNumberPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -628,7 +625,7 @@ public class QueryStack {
 														  SearchFilterParser.CompareOperation theOperation,
 														  RequestPartitionId theRequestPartitionId) {
 
-		QuantityPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantity(theSourceJoinColumn)).getResult();
+		QuantityPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -666,7 +663,7 @@ public class QueryStack {
 
 		}
 
-		ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.REFERENCE, theSourceJoinColumn, theParamName, () -> mySqlBuilder.addReferenceSelector(this, theSourceJoinColumn)).getResult();
+		ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.REFERENCE, theSourceJoinColumn, theParamName, () -> mySqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn)).getResult();
 		return predicateBuilder.createPredicate(theRequest, theResourceName, theParamName, theList, theOperation, theRequestPartitionId);
 	}
 
@@ -719,7 +716,7 @@ public class QueryStack {
 														SearchFilterParser.CompareOperation theOperation,
 														RequestPartitionId theRequestPartitionId) {
 
-		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addStringSelector(theSourceJoinColumn)).getResult();
+		StringPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.STRING, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addStringPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -800,7 +797,7 @@ public class QueryStack {
 			if (paramInverted) {
 
 				SearchQueryBuilder sqlBuilder = mySqlBuilder.newChildSqlBuilder();
-				TagPredicateBuilder tagSelector = sqlBuilder.addTagSelector(null);
+				TagPredicateBuilder tagSelector = sqlBuilder.addTagPredicateBuilder(null);
 				sqlBuilder.addPredicate(tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
 				SelectQuery sql = sqlBuilder.getSelect();
 
@@ -812,7 +809,7 @@ public class QueryStack {
 				// Tag table can't be a query root because it will include deleted resources, and can't select by resource type
 				mySqlBuilder.getOrCreateFirstPredicateBuilder();
 
-				TagPredicateBuilder tagJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TAG, theSourceJoinColumn, theParamName, () -> mySqlBuilder.addTagSelector(theSourceJoinColumn)).getResult();
+				TagPredicateBuilder tagJoin = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TAG, theSourceJoinColumn, theParamName, () -> mySqlBuilder.addTagPredicateBuilder(theSourceJoinColumn)).getResult();
 				tagPredicate = tagJoin.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId);
 				join = tagJoin;
 			}
@@ -868,7 +865,7 @@ public class QueryStack {
 			return null;
 		}
 
-		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addTokenSelector(theSourceJoinColumn)).getResult();
+		TokenPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.TOKEN, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addTokenPredicateBuilder(theSourceJoinColumn)).getResult();
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
@@ -887,7 +884,7 @@ public class QueryStack {
 													RequestPartitionId theRequestPartitionId) {
 
 		String paramName = theSearchParam.getName();
-		UriPredicateBuilder join = mySqlBuilder.addUriSelector(theSourceJoinColumn);
+		UriPredicateBuilder join = mySqlBuilder.addUriPredicateBuilder(theSourceJoinColumn);
 
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, paramName, theList.get(0).getMissing(), theRequestPartitionId);
@@ -1043,7 +1040,7 @@ public class QueryStack {
 	}
 
 	public void addPredicateEverythingOperation(String theResourceName, Long theTargetPid) {
-		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferenceSelector(this, null);
+		ResourceLinkPredicateBuilder table = mySqlBuilder.addReferencePredicateBuilder(this, null);
 		Condition predicate = table.createEverythingPredicate(theResourceName, theTargetPid);
 		mySqlBuilder.addPredicate(predicate);
 	}
