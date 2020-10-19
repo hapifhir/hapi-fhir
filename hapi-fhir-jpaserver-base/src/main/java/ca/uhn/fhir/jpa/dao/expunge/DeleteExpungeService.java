@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -12,6 +14,9 @@ import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.StopWatch;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +43,8 @@ public class DeleteExpungeService {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private PartitionRunner myPartitionRunner;
 	@Autowired
 	private ResourceTableFKProvider myResourceTableFKProvider;
@@ -51,6 +58,7 @@ public class DeleteExpungeService {
 	private DaoConfig myDaoConfig;
 
 	public DeleteMethodOutcome expungeByResourcePids(String theUrl, String theResourceName, Slice<Long> thePids, RequestDetails theRequest) {
+		StopWatch w = new StopWatch();
 		if (thePids.isEmpty()) {
 			return new DeleteMethodOutcome();
 		}
@@ -70,9 +78,25 @@ public class DeleteExpungeService {
 		myPartitionRunner.runInPartitionedThreads(thePids, pidChunk -> deleteInTransaction(theResourceName, pidChunk, expungedResourcesCount, expungedEntitiesCount, theRequest));
 		ourLog.info("Expunged a total of {} records", expungedEntitiesCount);
 
+		IBaseOperationOutcome oo;
+		if (expungedResourcesCount.get() == 0) {
+			oo = OperationOutcomeUtil.newInstance(myFhirContext);
+			String message = myFhirContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl);
+			String severity = "warning";
+			String code = "not-found";
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, severity, message, null, code);
+		} else {
+			oo = OperationOutcomeUtil.newInstance(myFhirContext);
+			String message = myFhirContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulDeletes", expungedResourcesCount.get(), w.getMillis());
+			String severity = "information";
+			String code = "informational";
+			OperationOutcomeUtil.addIssue(myFhirContext, oo, severity, message, null, code);
+		}
+
 		DeleteMethodOutcome retval = new DeleteMethodOutcome();
 		retval.setExpungedResourcesCount(expungedResourcesCount.get());
 		retval.setExpungedEntitiesCount(expungedEntitiesCount.get());
+		retval.setOperationOutcome(oo);
 		return retval;
 	}
 
