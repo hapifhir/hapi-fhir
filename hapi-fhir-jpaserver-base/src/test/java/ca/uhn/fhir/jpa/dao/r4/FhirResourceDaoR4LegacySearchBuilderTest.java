@@ -4227,7 +4227,7 @@ public class FhirResourceDaoR4LegacySearchBuilderTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		myCaptureQueriesListener.clear();
 		IBundleProvider values = myPatientDao.search(map);
-		assertEquals(5, values.size().intValue());
+		assertEquals(null, values.size());
 		assertEquals(5, values.getResources(0, 1000).size());
 
 		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);

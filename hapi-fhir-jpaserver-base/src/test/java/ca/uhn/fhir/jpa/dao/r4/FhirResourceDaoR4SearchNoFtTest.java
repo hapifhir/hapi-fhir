@@ -3523,7 +3523,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String searchQuery = queries.get(0);
 		assertEquals(3, countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"), searchQuery);
-		assertEquals(4, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
+		assertEquals(5, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
 	}
 
 
@@ -3548,7 +3548,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		String searchQuery = queries.get(0);
 		assertEquals(1, countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"), searchQuery);
-		assertEquals(1, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
+		assertEquals(2, countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"), searchQuery);
 		assertEquals(2, countMatches(searchQuery.toUpperCase(), "RES_UPDATED"), searchQuery);
 	}
 
@@ -3970,7 +3970,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(found).toString(), toUnqualifiedVersionlessIdValues(found), contains(id1));
 
 		String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(0, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+		assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 		assertEquals(0, countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
 		assertEquals(1, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 		assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value"), searchQuery);
@@ -4256,7 +4256,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, contains(obsId1));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(0, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal >= '20200605'"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal <= '20200606'"), searchQuery);
 		}
@@ -4275,7 +4275,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
 			assertEquals(0, countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
-			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(2, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(4, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
@@ -4290,7 +4290,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(patients.toString(), patients, containsInAnyOrder(obsId3, obsId4));
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
-			assertEquals(0, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
@@ -5315,7 +5315,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(1, outcome.sizeOrThrowNpe());
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		assertEquals(3, countMatches(searchSql, "JOIN"));
+		assertEquals(4, countMatches(searchSql, "JOIN"));
 		assertEquals(1, countMatches(searchSql, "SELECT"));
 
 	}

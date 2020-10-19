@@ -804,7 +804,7 @@ public class QueryStack {
 				sqlBuilder.addPredicate(tagSelector.createPredicateTag(tagType, tokens, theParamName, theRequestPartitionId));
 				SelectQuery sql = sqlBuilder.getSelect();
 
-				join = mySqlBuilder.getOrCreateLastPredicateBuilder();
+				join = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 				Expression subSelect = new Subquery(sql);
 				tagPredicate = new InCondition(join.getResourceIdColumn(), subSelect).setNegate(true);
 

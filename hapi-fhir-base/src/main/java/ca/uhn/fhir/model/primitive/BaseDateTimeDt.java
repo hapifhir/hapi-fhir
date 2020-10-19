@@ -579,7 +579,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			parseInt(theWholeValue, theValue.substring(1, 3), 0, 23);
 			parseInt(theWholeValue, theValue.substring(4, 6), 0, 59);
 			clearTimeZone();
-			setTimeZone(getTimeZone(theValue));
+			setTimeZone(getTimeZone("GMT" + theValue));
 		}
 
 		return this;

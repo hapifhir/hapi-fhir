@@ -143,7 +143,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		results = myPatientDao.search(params);
 		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-		assertThat(sql, containsString("COUNT(DISTINCT t0.RES_ID)"));
+		assertThat(sql, containsString("COUNT(DISTINCT "));
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
@@ -790,7 +790,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		ourLog.info(selectQuery);
-		assertEquals(1, StringUtils.countMatches(selectQuery, "JOIN"));
+		assertEquals(2, StringUtils.countMatches(selectQuery, "JOIN"));
 		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));
 	}
 

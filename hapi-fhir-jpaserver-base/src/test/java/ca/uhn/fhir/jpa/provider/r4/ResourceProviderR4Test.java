@@ -2939,6 +2939,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Disabled
 	@Test
 	public void testPagingOverEverythingSetWithNoPagingProvider() {
 		ourRestServer.setPagingProvider(null);
@@ -2977,7 +2978,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(null, response.getTotalElement().getValue());
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
+		myCaptureQueriesListener.clear();
 		response = myClient.fetchResourceFromUrl(Bundle.class, response.getLink("next").getUrl());
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotalElement().getValue().intValue());

@@ -36,6 +36,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.Iterator;
@@ -127,7 +128,8 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 					for (int i = 0; i < args.length; i++) {
 						Object nextObject = args[i];
 						if (nextObject instanceof Date) {
-							myStatement.setObject(i + 1, nextObject, Types.TIMESTAMP);
+							Timestamp ts = new Timestamp(((Date) nextObject).getTime());
+							myStatement.setTimestamp(i + 1, ts);
 						} else {
 							myStatement.setObject(i + 1, nextObject);
 						}

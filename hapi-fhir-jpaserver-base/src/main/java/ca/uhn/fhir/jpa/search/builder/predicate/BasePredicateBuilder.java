@@ -83,7 +83,7 @@ public class BasePredicateBuilder {
 	}
 
 	protected BaseJoiningPredicateBuilder getOrCreateQueryRootTable() {
-		return mySearchSqlBuilder.getOrCreateLastPredicateBuilder();
+		return mySearchSqlBuilder.getOrCreateFirstPredicateBuilder();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {

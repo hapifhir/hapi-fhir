@@ -84,7 +84,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.Condition;
-import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -105,11 +104,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -117,7 +114,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -213,18 +209,18 @@ public class SearchBuilder implements ISearchBuilder {
 		List<String> paramNames = new ArrayList<>(myParams.keySet());
 
 		// FIXME: remove?
-		if (theRequest != null) {
-			paramNames.sort((o1,o2)->{
-				if (o1.equals("patient")) {
-					return -1;
-				}
-				if (o2.equals("patient")) {
-					return 1;
-				}
-				return 0;
-			});
-			ourLog.info("New params: {}", paramNames);
-		}
+//		if (theRequest != null) {
+//			paramNames.sort((o1,o2)->{
+//				if (o1.equals("patient")) {
+//					return -1;
+//				}
+//				if (o2.equals("patient")) {
+//					return 1;
+//				}
+//				return 0;
+//			});
+//			ourLog.info("New params: {}", paramNames);
+//		}
 
 		for (String nextParamName : paramNames) {
 			if (myParams.isLastN() && LastNParameterHelper.isLastNParameter(nextParamName, myContext)) {
@@ -257,7 +253,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		init(theParams, theSearchUuid, theRequestPartitionId);
 
-		ArrayList<SearchQueryExecutor> queries = createQuery(myParams, null, null, true, theRequest, null);
+		ArrayList<SearchQueryExecutor> queries = createQuery(myParams, null, null, null, true, theRequest, null);
 		try (SearchQueryExecutor queryExecutor = queries.get(0)) {
 			return Lists.newArrayList(queryExecutor.next()).iterator();
 		}
@@ -293,7 +289,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myRequestPartitionId = theRequestPartitionId;
 	}
 
-	private ArrayList<SearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
+	private ArrayList<SearchQueryExecutor> createQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest,
 																		SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		List<ResourcePersistentId> pids = new ArrayList<>();
@@ -346,24 +342,24 @@ public class SearchBuilder implements ISearchBuilder {
 		ArrayList<SearchQueryExecutor> queries = new ArrayList<>();
 
 		if (!pids.isEmpty()) {
-			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, sort, theCount, theRequest, queries));
+			new QueryChunker<Long>().chunk(ResourcePersistentId.toLongList(pids), t -> doCreateChunkedQueries(theParams, t, theOffset, sort, theCount, theRequest, queries));
 		} else {
-			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theMaximumResults, theCount, theRequest, null);
+			Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, theMaximumResults, theCount, theRequest, null);
 			query.ifPresent(t -> queries.add(t));
 		}
 
 		return queries;
 	}
 
-	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
+	private void doCreateChunkedQueries(SearchParameterMap theParams, List<Long> thePids, Integer theOffset, SortSpec sort, boolean theCount, RequestDetails theRequest, ArrayList<SearchQueryExecutor> theQueries) {
 		if (thePids.size() < getMaximumPageSize()) {
 			normalizeIdListForLastNInClause(thePids);
 		}
-		Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, thePids.size(), theCount, theRequest, thePids);
+		Optional<SearchQueryExecutor> query = createChunkedQuery(theParams, sort, theOffset, thePids.size(), theCount, theRequest, thePids);
 		query.ifPresent(t -> theQueries.add(t));
 	}
 
-	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
+	private Optional<SearchQueryExecutor> createChunkedQuery(SearchParameterMap theParams, SortSpec sort, Integer theOffset, Integer theMaximumResults, boolean theCount, RequestDetails theRequest, List<Long> thePidList) {
 		String sqlBuilderResourceName = myParams.getEverythingMode() == null ? myResourceName : null;
 		SearchQueryBuilder sqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, sqlBuilderResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
 		QueryStack queryStack3 = new QueryStack(theParams, myDaoConfig, myDaoConfig.getModelConfig(), myContext, sqlBuilder, mySearchParamRegistry, myPartitionSettings);
@@ -391,7 +387,7 @@ public class SearchBuilder implements ISearchBuilder {
 				// the one problem with this approach is that it doesn't catch Patients that have absolutely
 				// nothing linked to them. So we do one additional query to make sure we catch those too.
 				SearchQueryBuilder fetchPidsSqlBuilder = new SearchQueryBuilder(myContext, myDaoConfig.getModelConfig(), myPartitionSettings, myRequestPartitionId, myResourceName, mySqlBuilderFactory, myDialectProvider, theCount);
-				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(myMaxResultsToFetch);
+				GeneratedSql allTargetsSql = fetchPidsSqlBuilder.generate(theOffset, myMaxResultsToFetch);
 				String sql = allTargetsSql.getSql();
 				Object[] args = allTargetsSql.getBindVariables().toArray(new Object[0]);
 				List<Long> output = jdbcTemplate.query(sql, args, new SingleColumnRowMapper<>(Long.class));
@@ -459,7 +455,7 @@ public class SearchBuilder implements ISearchBuilder {
 		/*
 		 * Now perform the search
 		 */
-		GeneratedSql generatedSql = sqlBuilder.generate(myMaxResultsToFetch);
+		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
 		if (generatedSql.isMatchNothing()) {
 			return Optional.empty();
 		}
@@ -1035,12 +1031,14 @@ public class SearchBuilder implements ISearchBuilder {
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 		private int myNonSkipCount = 0;
+		private final Integer myOffset;
 
 		private ArrayList<SearchQueryExecutor> myQueryList = new ArrayList<>();
 
 		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
 			mySort = myParams.getSort();
+			myOffset = myParams.getOffset();
 			myRequest = theRequest;
 
 			// Includes are processed inline for $everything query
@@ -1066,7 +1064,7 @@ public class SearchBuilder implements ISearchBuilder {
 						myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 					}
 
-					initializeIteratorQuery(myMaxResultsToFetch);
+					initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 
 					// If the query resulted in extra results being requested
 					if (myAlsoIncludePids != null) {
@@ -1128,7 +1126,7 @@ public class SearchBuilder implements ISearchBuilder {
 											.add(StorageProcessingMessage.class, message);
 										JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-										initializeIteratorQuery(myMaxResultsToFetch);
+										initializeIteratorQuery(myOffset, myMaxResultsToFetch);
 									}
 								}
 							}
@@ -1191,11 +1189,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		private void initializeIteratorQuery(Integer theMaxResultsToFetch) {
+		private void initializeIteratorQuery(Integer theOffset, Integer theMaxResultsToFetch) {
 			if (myQueryList.isEmpty()) {
 				// Capture times for Lucene/Elasticsearch queries as well
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
-				myQueryList = createQuery(myParams, mySort, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
+				myQueryList = createQuery(myParams, mySort, theOffset, theMaxResultsToFetch, false, myRequest, mySearchRuntimeDetails);
 			}
 
 			mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
