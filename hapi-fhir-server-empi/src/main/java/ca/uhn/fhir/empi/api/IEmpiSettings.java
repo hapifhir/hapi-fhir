@@ -24,7 +24,8 @@ import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 
 public interface IEmpiSettings {
 	String EMPI_CHANNEL_NAME = "empi";
-	int EMPI_DEFAULT_CONCURRENT_CONSUMERS = 5;
+	// Parallel processing of EMPI can result in missed matches.  Best to single-thread.
+	int EMPI_DEFAULT_CONCURRENT_CONSUMERS = 1;
 
 	boolean isEnabled();
 
