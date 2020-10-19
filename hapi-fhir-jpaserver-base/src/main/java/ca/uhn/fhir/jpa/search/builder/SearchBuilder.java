@@ -189,7 +189,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myMaxResultsToFetch = theMaxResultsToFetch;
 	}
 
-	private void searchForIdsWithAndOr(SearchQueryBuilder theSearchSqlBuilder, QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+	private void searchForIdsWithAndOr(SearchQueryBuilder theSearchSqlBuilder, QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		myParams = theParams;
 
 		// Remove any empty parameters
@@ -202,7 +202,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Attempt to lookup via composite unique key.
 		if (isCompositeUniqueSpCandidate()) {
-			attemptCompositeUniqueSpProcessing(theQueryStack3, theParams, theRequest);
+			attemptCompositeUniqueSpProcessing(theQueryStack, theParams, theRequest);
 		}
 
 		// Handle each parameter

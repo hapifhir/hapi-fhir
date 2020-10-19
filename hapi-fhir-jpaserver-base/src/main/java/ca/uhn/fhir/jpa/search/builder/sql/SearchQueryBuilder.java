@@ -227,6 +227,7 @@ public class SearchQueryBuilder {
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a STRING search parameter
 	 */
+	// FIXME: rename selector to predicatebuilder everywhere
 	public StringPredicateBuilder addStringSelector(@Nullable DbColumn theSourceJoinColumn) {
 		StringPredicateBuilder retVal = mySqlBuilderFactory.stringIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
