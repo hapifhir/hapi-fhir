@@ -228,7 +228,7 @@ public class SearchBuilder implements ISearchBuilder {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
-			Condition predicate = theQueryStack3.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
+			Condition predicate = theQueryStack.searchForIdsWithAndOr(null, myResourceName, nextParamName, andOrParams, theRequest, myRequestPartitionId);
 			if (predicate != null) {
 				theSearchSqlBuilder.addPredicate(predicate);
 			}
