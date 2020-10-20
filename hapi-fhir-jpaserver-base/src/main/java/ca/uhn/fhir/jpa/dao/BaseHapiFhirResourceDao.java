@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
+import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -51,6 +52,7 @@ import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -102,6 +104,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -151,6 +154,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private HapiTransactionService myTransactionService;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private DeleteExpungeService myDeleteExpungeService;
 
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
@@ -456,6 +463,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
+
 		if (theTransactionDetails.isAcceptingDeferredInterceptorBroadcasts()) {
 			theTransactionDetails.addDeferredInterceptorBroadcast(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 		} else {
@@ -499,14 +507,31 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Nonnull
 	private DeleteMethodOutcome doDeleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
-		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType, theRequest);
+		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(myResourceType);
+		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theUrl, resourceDef);
+		paramMap.setLoadSynchronous(true);
+
+		Set<ResourcePersistentId> resourceIds = myMatchResourceUrlService.search(paramMap, myResourceType, theRequest);
+
 		if (resourceIds.size() > 1) {
 			if (!myDaoConfig.isAllowMultipleDelete()) {
 				throw new PreconditionFailedException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
 			}
 		}
 
-		return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
+		if (paramMap.isDeleteExpunge()) {
+			return deleteExpunge(theUrl, theRequest, resourceIds);
+		} else {
+			return deletePidList(theUrl, resourceIds, deleteConflicts, theRequest);
+		}
+	}
+
+	private DeleteMethodOutcome deleteExpunge(String theUrl, RequestDetails theTheRequest, Set<ResourcePersistentId> theResourceIds) {
+		if (!myDaoConfig.isExpungeEnabled() || !myDaoConfig.isDeleteExpungeEnabled()) {
+			throw new MethodNotAllowedException("_expunge is not enabled on this server");
+		}
+
+		return myDeleteExpungeService.expungeByResourcePids(theUrl, myResourceName, new SliceImpl<>(ResourcePersistentId.toLongList(theResourceIds)), theTheRequest);
 	}
 
 	@NotNull

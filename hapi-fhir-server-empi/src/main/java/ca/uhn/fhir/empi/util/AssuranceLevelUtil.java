@@ -60,6 +60,7 @@ public final class AssuranceLevelUtil {
 	private static CanonicalIdentityAssuranceLevel getAssuranceFromManualResult(EmpiMatchResultEnum theMatchResult) {
 		switch (theMatchResult) {
 			case MATCH:
+			case REDIRECT:
 				return CanonicalIdentityAssuranceLevel.LEVEL3;
 			case NO_MATCH:
 			case POSSIBLE_DUPLICATE:

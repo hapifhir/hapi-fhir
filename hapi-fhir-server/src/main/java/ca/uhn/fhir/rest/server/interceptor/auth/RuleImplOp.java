@@ -67,6 +67,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 	private Collection<IIdType> myAppliesToInstances;
 	private boolean myAppliesToDeleteCascade;
+	private boolean myAppliesToDeleteExpunge;
 
 	/**
 	 * Constructor
@@ -229,6 +230,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				break;
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
+					if (thePointcut == Pointcut.STORAGE_PRE_DELETE_EXPUNGE && myAppliesToDeleteExpunge) {
+						return newVerdict(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource);
+					}
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
 						return null;
 					}
@@ -623,4 +627,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		myAppliesToDeleteCascade = theAppliesToDeleteCascade;
 	}
 
+	void setAppliesToDeleteExpunge(boolean theAppliesToDeleteExpunge) {
+		myAppliesToDeleteExpunge = theAppliesToDeleteExpunge;
+	}
 }

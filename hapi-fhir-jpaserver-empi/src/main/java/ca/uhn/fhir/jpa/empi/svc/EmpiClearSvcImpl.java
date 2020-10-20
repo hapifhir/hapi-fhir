@@ -23,9 +23,11 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.util.EmpiUtil;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -48,14 +50,13 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	}
 
 	@Override
-	public long expungeAllEmpiLinksOfTargetType(String theResourceType) {
+	public long expungeAllEmpiLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails) {
 		throwExceptionIfInvalidTargetType(theResourceType);
 		ourLog.info("Clearing all EMPI Links for resource type {}...", theResourceType);
-		List<Long> longs = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
-		myEmpiPersonDeletingSvcImpl.deletePersonResourcesAndHandleConflicts(longs);
-		myEmpiPersonDeletingSvcImpl.expungeHistoricalAndCurrentVersionsOfIds(longs);
-		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links.", longs.size());
-		return longs.size();
+		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
+		DeleteMethodOutcome deleteOutcome = myEmpiPersonDeletingSvcImpl.expungePersonPids(personPids, theRequestDetails);
+		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links and {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
+		return personPids.size();
 	}
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
@@ -65,12 +66,11 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	}
 
 	@Override
-	public long removeAllEmpiLinks() {
+	public long expungeAllEmpiLinks(ServletRequestDetails theRequestDetails) {
 		ourLog.info("Clearing all EMPI Links...");
 		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
-		myEmpiPersonDeletingSvcImpl.deletePersonResourcesAndHandleConflicts(personPids);
-		myEmpiPersonDeletingSvcImpl.expungeHistoricalAndCurrentVersionsOfIds(personPids);
-		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links.", personPids.size());
+		DeleteMethodOutcome deleteOutcome = myEmpiPersonDeletingSvcImpl.expungePersonPids(personPids, theRequestDetails);
+		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links and expunged {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
 		return personPids.size();
 	}
 }

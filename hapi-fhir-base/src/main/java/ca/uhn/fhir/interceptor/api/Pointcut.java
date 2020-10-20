@@ -918,6 +918,95 @@ public enum Pointcut {
 
 	/**
 	 * <b>Storage Hook:</b>
+	 * Invoked when a set of resources are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * java.lang.String - Contains the url used to delete and expunge the resources
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>. They may choose to throw an exception however, in
+	 * which case the delete expunge will not occur.
+	 * </p>
+	 */
+
+	STORAGE_PRE_DELETE_EXPUNGE(
+		void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"java.lang.String"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a batch of resource pids are about to be deleted and expunged via url like http://localhost/Patient?active=false&_expunge=true
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * java.lang.String - the name of the resource type being deleted
+	 * </li>
+	 * <li>
+	 * java.util.List - the list of Long pids of the resources about to be deleted
+	 * </li>
+	 * <li>
+	 * java.util.concurrent.atomic.AtomicLong - holds a running tally of all entities deleted so far.
+	 * If the pointcut callback deletes any entities, then this parameter should be incremented by the total number
+	 * of additional entities deleted.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * java.lang.String - Contains the url used to delete and expunge the resources
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>. They may choose to throw an exception however, in
+	 * which case the delete expunge will not occur.
+	 * </p>
+	 */
+
+	STORAGE_PRE_DELETE_EXPUNGE_PID_LIST(
+		void.class,
+		"java.lang.String",
+		"java.util.List",
+		"java.util.concurrent.atomic.AtomicLong",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
+	 * <b>Storage Hook:</b>
 	 * Invoked when one or more resources may be returned to the user, whether as a part of a READ,
 	 * a SEARCH, or even as the response to a CREATE/UPDATE, etc.
 	 * <p>

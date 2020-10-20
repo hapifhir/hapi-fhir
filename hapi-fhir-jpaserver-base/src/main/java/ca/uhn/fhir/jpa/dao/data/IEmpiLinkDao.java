@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -32,4 +33,8 @@ public interface IEmpiLinkDao extends JpaRepository<EmpiLink, Long> {
 	@Modifying
 	@Query("DELETE FROM EmpiLink f WHERE myPersonPid = :pid OR myTargetPid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
+
+	@Modifying
+	@Query("DELETE FROM EmpiLink f WHERE (myPersonPid = :pid OR myTargetPid = :pid) AND myMatchResult <> :matchResult")
+	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult")EmpiMatchResultEnum theMatchResult);
 }

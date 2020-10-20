@@ -8,6 +8,7 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
@@ -43,6 +44,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,8 +105,15 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	EmpiSearchParameterLoader myEmpiSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	protected ServletRequestDetails myRequestDetails = new ServletRequestDetails(null);
+	protected ServletRequestDetails myRequestDetails;
+
+	@BeforeEach
+	public void beforeSetRequestDetails() {
+		myRequestDetails = new ServletRequestDetails(myInterceptorBroadcaster);
+	}
 
 	@Override
 	@AfterEach
@@ -159,6 +168,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		patient.setId(outcome.getId());
 		return patient;
 	}
+
 	@Nonnull
 	protected Practitioner createPractitioner(Practitioner thePractitioner) {
 		//Note that since our empi-rules block on active=true, all patients must be active.

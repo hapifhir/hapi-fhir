@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.term.api;
  */
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -63,4 +62,5 @@ public interface ITermDeferredStorageSvc {
 	 */
 	void saveAllDeferred();
 
+	void logQueueForUnitTest();
 }

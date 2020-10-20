@@ -27,12 +27,12 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -55,23 +55,24 @@ public class MatchResourceUrlService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public <R extends IBaseResource> Set<ResourcePersistentId> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
-		StopWatch sw = new StopWatch();
-
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
-
 		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
-		paramMap.setLoadSynchronous(true);
-
 		if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
 			throw new InvalidRequestException("Invalid match URL[" + theMatchUrl + "] - URL has no search parameters");
 		}
+		paramMap.setLoadSynchronous(true);
 
+		return search(paramMap, theResourceType, theRequest);
+	}
+
+	public <R extends IBaseResource> Set<ResourcePersistentId> search(SearchParameterMap theParamMap, Class<R> theResourceType, RequestDetails theRequest) {
+		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = myDaoRegistry.getResourceDao(theResourceType);
 		if (dao == null) {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		Set<ResourcePersistentId> retVal = dao.searchForIds(paramMap, theRequest);
+		Set<ResourcePersistentId> retVal = dao.searchForIds(theParamMap, theRequest);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
 		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {

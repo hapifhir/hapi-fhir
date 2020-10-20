@@ -38,10 +38,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class EmpiLinkDaoSvc {
@@ -87,10 +89,10 @@ public class EmpiLinkDaoSvc {
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
-			EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink();
-			empiLink.setPersonPid(thePersonPid);
-			empiLink.setTargetPid(theResourcePid);
-			return empiLink;
+			EmpiLink newLink = myEmpiLinkFactory.newEmpiLink();
+			newLink.setPersonPid(thePersonPid);
+			newLink.setTargetPid(theResourcePid);
+			return newLink;
 		}
 	}
 
@@ -192,8 +194,8 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Optional.empty();
 		}
-		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
-		Example<EmpiLink> example = Example.of(empiLink);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findOne(example);
 	}
 
@@ -220,8 +222,8 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
-		Example<EmpiLink> example = Example.of(empiLink);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
 
@@ -237,11 +239,12 @@ public class EmpiLinkDaoSvc {
 	}
 
 	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
-		List<Long> collect = theLinks.stream().map(EmpiLink::getPersonPid).distinct().collect(Collectors.toList());
+		Set<Long> persons = theLinks.stream().map(EmpiLink::getPersonPid).collect(Collectors.toSet());
+		persons.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
 		ourLog.info("Deleting {} EMPI link records...", theLinks.size());
 		myEmpiLinkDao.deleteAll(theLinks);
 		ourLog.info("{} EMPI link records deleted", theLinks.size());
-		return collect;
+		return new ArrayList<>(persons);
 	}
 
 	/**
@@ -300,8 +303,8 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink empiLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
-		Example<EmpiLink> example = Example.of(empiLink);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
 
@@ -313,5 +316,4 @@ public class EmpiLinkDaoSvc {
 	public EmpiLink newEmpiLink() {
 		return myEmpiLinkFactory.newEmpiLink();
 	}
-
 }

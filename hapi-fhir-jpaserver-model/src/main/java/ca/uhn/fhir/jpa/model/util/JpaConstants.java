@@ -186,6 +186,13 @@ public class JpaConstants {
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
+
+	/**
+	 * Parameter for delete to indicate the deleted resources should also be expunged
+	 */
+
+	public static final String PARAM_DELETE_EXPUNGE = "_expunge";
+
 	/**
 	 * URL for extension on a SearchParameter indicating that text values should not be indexed
 	 */

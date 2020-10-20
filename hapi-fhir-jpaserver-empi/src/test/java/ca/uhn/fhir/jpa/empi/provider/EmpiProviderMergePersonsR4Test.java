@@ -51,7 +51,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		List<Person.PersonLinkComponent> links = fromPerson.getLink();
 		assertThat(links, hasSize(1));
 		assertThat(links.get(0).getTarget().getReference(), is (myToPerson.getIdElement().toUnqualifiedVersionless().getValue()));
-		assertThat(links.get(0).getAssurance(), is (AssuranceLevelUtil.getAssuranceLevel(EmpiMatchResultEnum.MATCH, EmpiLinkSourceEnum.MANUAL).toR4()));
+		assertThat(links.get(0).getAssurance(), is (AssuranceLevelUtil.getAssuranceLevel(EmpiMatchResultEnum.REDIRECT, EmpiLinkSourceEnum.MANUAL).toR4()));
 	}
 
 	@Test

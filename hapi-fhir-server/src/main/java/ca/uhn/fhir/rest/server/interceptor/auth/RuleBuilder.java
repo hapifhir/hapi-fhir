@@ -368,6 +368,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			private final RuleOpEnum myRuleOp;
 			private RuleBuilderRuleOpClassifier myInstancesBuilder;
 			private boolean myOnCascade;
+			private boolean myOnExpunge;
 
 			RuleBuilderRuleOp(RuleOpEnum theRuleOp) {
 				myRuleOp = theRuleOp;
@@ -428,6 +429,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return this;
 			}
 
+			@Override
+			public IAuthRuleBuilderRuleOp onExpunge() {
+				myOnExpunge = true;
+				return this;
+			}
+
 			private class RuleBuilderRuleOpClassifier implements IAuthRuleBuilderRuleOpClassifier {
 
 				private final AppliesTypeEnum myAppliesTo;
@@ -468,6 +475,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRule.setClassifierCompartmentName(myInCompartmentName);
 					myRule.setClassifierCompartmentOwners(myInCompartmentOwners);
 					myRule.setAppliesToDeleteCascade(myOnCascade);
+					myRule.setAppliesToDeleteExpunge(myOnExpunge);
 					myRules.add(myRule);
 
 					return new RuleBuilderFinished(myRule);

@@ -22,20 +22,15 @@ package ca.uhn.fhir.jpa.empi.svc;
 
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DeleteConflict;
-import ca.uhn.fhir.jpa.api.model.DeleteConflictList;
-import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
+import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -52,57 +47,10 @@ public class EmpiPersonDeletingSvc {
 	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private ExpungeService myExpungeService;
+	@Autowired
+	DeleteExpungeService myDeleteExpungeService;
 
-	/**
-	 * Function which will delete all resources by their PIDs, and also delete any resources that were undeletable due to
-	 * VersionConflictException
-	 *
-	 * @param theResourcePids
-	 */
-	@Transactional
-	public void deletePersonResourcesAndHandleConflicts(List<Long> theResourcePids) {
-		List<ResourcePersistentId> resourceIds = ResourcePersistentId.fromLongList(theResourcePids);
-		ourLog.info("Deleting {} Person resources...", resourceIds.size());
-		DeleteConflictList
-			deleteConflictList = new DeleteConflictList();
-
-		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao("Person");
-		resourceDao.deletePidList(ProviderConstants.EMPI_CLEAR, resourceIds, deleteConflictList, null);
-
-		IFhirResourceDao personDao = myDaoRegistry.getResourceDao("Person");
-		int batchCount = 0;
-		while (!deleteConflictList.isEmpty()) {
-			deleteConflictBatch(deleteConflictList, personDao);
-			batchCount += 1;
-			if (batchCount > MAXIMUM_DELETE_ATTEMPTS) {
-				throw new IllegalStateException("Person deletion seems to have entered an infinite loop. Aborting");
-			}
-		}
-		ourLog.info("Deleted {} Person resources in {} batches", resourceIds.size(), batchCount);
-	}
-
-	/**
-	 * Use the expunge service to expunge all historical and current versions of the resources associated to the PIDs.
-	 */
-	public void expungeHistoricalAndCurrentVersionsOfIds(List<Long> theLongs) {
-		ourLog.info("Expunging historical versions of {} Person resources...", theLongs.size());
-		ExpungeOptions options = new ExpungeOptions();
-		options.setExpungeDeletedResources(true);
-		options.setExpungeOldVersions(true);
-		theLongs
-			.forEach(personId -> myExpungeService.expunge("Person", personId, null, options, null));
-		ourLog.info("Expunged historical versions of {} Person resources", theLongs.size());
-	}
-
-	private void deleteConflictBatch(DeleteConflictList theDcl, IFhirResourceDao<IBaseResource> theDao) {
-		DeleteConflictList newBatch = new DeleteConflictList();
-		TransactionDetails transactionDetails = new TransactionDetails();
-		for (DeleteConflict next : theDcl) {
-			IdDt nextSource = next.getSourceId();
-			ourLog.info("Have delete conflict {} - Cascading delete", nextSource);
-			theDao.delete(nextSource.toVersionless(), newBatch, null, transactionDetails);
-		}
-		theDcl.removeAll();
-		theDcl.addAll(newBatch);
+	public DeleteMethodOutcome expungePersonPids(List<Long> thePersonPids, ServletRequestDetails theRequestDetails) {
+		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.EMPI_CLEAR, "Person", new SliceImpl<>(thePersonPids), theRequestDetails);
 	}
 }

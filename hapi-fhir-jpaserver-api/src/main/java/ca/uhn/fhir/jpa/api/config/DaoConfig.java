@@ -144,6 +144,7 @@ public class DaoConfig {
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
+	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
@@ -1306,6 +1307,42 @@ public class DaoConfig {
 	 */
 	public boolean isExpungeEnabled() {
 		return myExpungeEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the _expunge parameter on the DELETE
+	 * operation will be enabled on this server. DELETE _expunge removes all data associated with a resource in a highly performant
+	 * way, skipping most of the the checks that are enforced with usual DELETE operations.  The only check
+	 * that is performed before deleting the resources and their indexes is that no other resources reference the resources about to
+	 * be deleted.  This operation is potentially dangerous since it allows
+	 * a client to physically delete data in a way that can not be recovered (without resorting
+	 * to backups).
+	 * <p>
+	 * It is recommended to not enable this setting without appropriate security
+	 * in place on your server to prevent non-administrators from using this
+	 * operation.
+	 * </p>
+	 */
+	public void setDeleteExpungeEnabled(boolean theDeleteExpungeEnabled) {
+		myDeleteExpungeEnabled = theDeleteExpungeEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is <code>false</code>), the _expunge parameter on the DELETE
+	 * operation will be enabled on this server. DELETE _expunge removes all data associated with a resource in a highly performant
+	 * way, skipping most of the the checks that are enforced with usual DELETE operations.  The only check
+	 * that is performed before deleting the data is that no other resources reference the resources about to
+	 * be deleted.  This operation is potentially dangerous since it allows
+	 * a client to physically delete data in a way that can not be recovered (without resorting
+	 * to backups).
+	 * <p>
+	 * It is recommended to not enable this setting without appropriate security
+	 * in place on your server to prevent non-administrators from using this
+	 * operation.
+	 * </p>
+	 */
+	public boolean isDeleteExpungeEnabled() {
+		return myDeleteExpungeEnabled;
 	}
 
 	/**
