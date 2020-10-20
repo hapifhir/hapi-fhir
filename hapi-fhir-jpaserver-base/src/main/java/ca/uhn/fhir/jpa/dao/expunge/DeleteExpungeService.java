@@ -147,7 +147,7 @@ public class DeleteExpungeService {
 			.add(AtomicLong.class, theExpungedEntitiesCount)
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_DELETE_EXPUNGE_PID_LIST, params);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRE_DELETE_EXPUNGE_PID_LIST, params);
 
 		String pidListString = thePids.toString().replace("[", "(").replace("]", ")");
 		List<ResourceForeignKey> resourceForeignKeys = myResourceTableFKProvider.getResourceForeignKeys();

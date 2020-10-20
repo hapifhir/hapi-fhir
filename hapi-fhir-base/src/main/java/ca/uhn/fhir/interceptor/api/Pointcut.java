@@ -996,7 +996,7 @@ public enum Pointcut {
 	 * </p>
 	 */
 
-	STORAGE_DELETE_EXPUNGE_PID_LIST(
+	STORAGE_PRE_DELETE_EXPUNGE_PID_LIST(
 		void.class,
 		"java.lang.String",
 		"java.util.List",
