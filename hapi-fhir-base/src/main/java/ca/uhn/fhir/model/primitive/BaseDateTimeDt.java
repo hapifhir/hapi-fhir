@@ -104,7 +104,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 		}
 		GregorianCalendar cal;
 		if (myTimeZoneZulu) {
-			cal = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+			cal = new GregorianCalendar(getTimeZone("GMT"));
 		} else if (myTimeZone != null) {
 			cal = new GregorianCalendar(myTimeZone);
 		} else {
@@ -268,7 +268,7 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	 */
 	public TimeZone getTimeZone() {
 		if (myTimeZoneZulu) {
-			return TimeZone.getTimeZone("GMT");
+			return getTimeZone("GMT");
 		}
 		return myTimeZone;
 	}
