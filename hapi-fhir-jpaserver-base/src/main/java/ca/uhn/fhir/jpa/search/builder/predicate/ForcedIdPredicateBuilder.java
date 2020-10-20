@@ -20,21 +20,16 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class ForcedIdPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ForcedIdPredicateBuilder.class);
 	private final DbColumn myColumnResourceId;
 	private final DbColumn myColumnForcedId;
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	/**
 	 * Constructor

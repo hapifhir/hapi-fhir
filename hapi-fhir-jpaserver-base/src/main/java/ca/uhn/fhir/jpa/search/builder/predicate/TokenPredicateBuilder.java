@@ -28,7 +28,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -70,8 +69,6 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	private final DbColumn myColumnSystem;
 	private final DbColumn myColumnValue;
 
-	@Autowired
-	private ModelConfig myModelConfig;
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
 
