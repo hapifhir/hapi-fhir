@@ -189,7 +189,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
@@ -208,7 +212,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
@@ -226,7 +234,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 			count++;
 		}
 
@@ -253,8 +265,8 @@ public class ValidationDataUploader extends BaseCommand {
 			ourLog.info("Uploading StructureDefinition {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
-			} catch (Exception e) {
-				ourLog.warn("Failed to upload {} - {}", next.getIdElement().getValue(), e.getMessage());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -323,8 +335,8 @@ public class ValidationDataUploader extends BaseCommand {
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
 			try {
 				client.update().resource(next).execute();
-			} catch (Exception e) {
-				ourLog.error("Failed to upload: {}", e.toString());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -346,7 +358,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 			count++;
 		}
 
@@ -398,6 +414,8 @@ public class ValidationDataUploader extends BaseCommand {
 				ourLog.info("  - Got ID: {}", id.getValue());
 			} catch (UnprocessableEntityException e) {
 				ourLog.warn("UnprocessableEntityException: " + e.toString());
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
 			}
 			count++;
 		}
@@ -417,7 +435,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v3-codesystems ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
@@ -439,7 +461,11 @@ public class ValidationDataUploader extends BaseCommand {
 			next.setId(next.getIdElement().toUnqualifiedVersionless());
 
 			ourLog.info("Uploading v2-tables ValueSet {}/{} : {}", new Object[] {count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 			count++;
 		}
 
@@ -500,7 +526,11 @@ public class ValidationDataUploader extends BaseCommand {
 			}
 
 			ourLog.info("Uploading {} StructureDefinition {}/{} : {}", new Object[] {theName, count, total, next.getIdElement().getValue()});
-			client.update().resource(next).execute();
+			try {
+				client.update().resource(next).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.warn("Server responded HTTP " + e.getStatusCode() + ": " + e.toString());
+			}
 
 			count++;
 		}
