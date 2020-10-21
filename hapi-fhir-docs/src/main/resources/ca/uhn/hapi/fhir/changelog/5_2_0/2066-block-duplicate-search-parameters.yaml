@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2066
+title: The JPA server will now block the creation of duplicate SearchParameter resources, where the resource being
+   created matches the base and/or code of an existing SearchParameter. Previously these were not blocked, but duplicates
+   caused nondeterministic behaviour.

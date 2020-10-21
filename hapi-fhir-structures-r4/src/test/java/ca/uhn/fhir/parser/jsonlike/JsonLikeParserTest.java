@@ -10,6 +10,7 @@ import ca.uhn.fhir.parser.json.JsonLikeValue;
 import ca.uhn.fhir.parser.json.JsonLikeWriter;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.parser.view.ExtPatient;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -47,7 +48,7 @@ public class JsonLikeParserTest {
 	 */
 	@Test
 	public void testJsonLikeParseAndEncodeResourceFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonLikeParserTest.class.getResourceAsStream("/extension-on-line.txt"));
+		String content = IOUtils.toString(JsonLikeParserTest.class.getResourceAsStream("/extension-on-line.txt"), Constants.CHARSET_UTF8);
 		
 		IBaseResource parsed = ourCtx.newJsonParser().parseResource(content);
 

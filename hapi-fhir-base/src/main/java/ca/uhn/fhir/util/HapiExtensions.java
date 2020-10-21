@@ -102,6 +102,21 @@ public class HapiExtensions {
 	public static final String EXT_SP_UNIQUE = "http://hapifhir.io/fhir/StructureDefinition/sp-unique";
 
 	/**
+	 * URL for extension on a Phonetic String SearchParameter indicating that text values should be phonetically indexed with the named encoder
+	 */
+	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
+
+	/**
+	 * Pre-index (write indexes, but don't use them yet) for tag negation
+	 */
+	public static final String EXT_SEARCHPARAM_PREINDEX_TAG_NEGATION = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-preindex-tag-nagation";
+
+	/**
+	 * Index (write indexes, and use them in searches) for tag negation
+	 */
+	public static final String EXT_SEARCHPARAM_INDEX_TAG_NEGATION = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-index-tag-nagation";
+
+	/**
 	 * Non instantiable
 	 */
 	private HapiExtensions() {

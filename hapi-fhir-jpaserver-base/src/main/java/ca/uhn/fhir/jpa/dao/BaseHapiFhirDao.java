@@ -113,6 +113,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -400,13 +403,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * <code>null</code> will only be returned if the scheme and tag are both blank
 	 */
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+
 		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
 			return null;
 		}
 
 		Pair<String, String> key = Pair.of(theScheme, theTerm);
-		return myMemoryCacheService.get(MemoryCacheService.CacheEnum.TAG_DEFINITION, key, k -> {
+		TagDefinition tagDefinition = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, key);
 
+		if (tagDefinition == null) {
 			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<TagDefinition> cq = builder.createQuery(TagDefinition.class);
 			Root<TagDefinition> from = cq.from(TagDefinition.class);
@@ -427,14 +433,24 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 			TypedQuery<TagDefinition> q = myEntityManager.createQuery(cq);
 			try {
-				return q.getSingleResult();
+				tagDefinition = q.getSingleResult();
 			} catch (NoResultException e) {
-				TagDefinition retVal = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
-				myEntityManager.persist(retVal);
-				return retVal;
+				tagDefinition = new TagDefinition(theTagType, theScheme, theTerm, theLabel);
+				myEntityManager.persist(tagDefinition);
 			}
 
-		});
+			// Only add the definition to the cache after a successful commit in order to avoid
+			// conflicts
+			TagDefinition finalTagDefinition = tagDefinition;
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					myMemoryCacheService.put(MemoryCacheService.CacheEnum.TAG_DEFINITION, key, finalTagDefinition);
+				}
+			});
+		}
+
+		return tagDefinition;
 	}
 
 	protected IBundleProvider history(RequestDetails theRequest, String theResourceType, Long theResourcePid, Date theRangeStartInclusive, Date theRangeEndInclusive) {
