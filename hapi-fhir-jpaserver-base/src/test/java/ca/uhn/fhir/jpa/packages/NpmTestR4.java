@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -62,6 +61,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class NpmTestR4 extends BaseJpaR4Test {
 
@@ -270,6 +270,25 @@ public class NpmTestR4 extends BaseJpaR4Test {
 			assertEquals(1, result.sizeOrThrowNpe());
 		});
 
+	}
+
+	@Test
+	public void testInstallR4Package_NoIdentifierNoUrl() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-missing-identifier-package.tgz");
+		myFakeNpmServlet.myResponses.put("/test-organizations/1.0.0", bytes);
+
+		List<String> resourceList = new ArrayList<>();
+		resourceList.add("Organization");
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		spec.setInstallResourceTypes(resourceList);
+		try {
+			PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+			fail();
+		} catch (ImplementationGuideInstallationException theE) {
+			assertThat(theE.getMessage(), containsString("Resources in a package must have a url or identifier to be loaded by the package installer."));
+		}
 	}
 
 	@Test

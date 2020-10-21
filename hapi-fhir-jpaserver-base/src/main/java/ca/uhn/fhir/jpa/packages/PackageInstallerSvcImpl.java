@@ -421,8 +421,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private TokenParam extractIdentifierFromOtherResourceTypes(IBaseResource resource) {
 		FhirTerser terser = myFhirContext.newTerser();
-		Identifier myIdentifier = (Identifier) terser.getSingleValueOrNull(resource, "identifier");
-		return new TokenParam(myIdentifier.getSystem(), myIdentifier.getValue());
+		Identifier identifier = (Identifier) terser.getSingleValueOrNull(resource, "identifier");
+		if (identifier != null) {
+			return new TokenParam(identifier.getSystem(), identifier.getValue());
+		} else {
+			throw new UnsupportedOperationException("Resources in a package must have a url or identifier to be loaded by the package installer.");
+		}
 	}
 
 	private boolean resourceHasUrlElement(IBaseResource resource) {
