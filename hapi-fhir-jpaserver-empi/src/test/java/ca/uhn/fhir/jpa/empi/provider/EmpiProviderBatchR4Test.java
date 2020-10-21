@@ -52,21 +52,21 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	@Test
 	public void testBatchRunOnAllPractitioners() throws InterruptedException {
 		StringType criteria = null;
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerType(criteria, null));
 		assertLinkCount(1);
 	}
 	@Test
 	public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPractitionerInstance(myPractitioner.getIdElement(), null));
 		assertLinkCount(1);
 	}
 
 	@Test
 	public void testBatchRunOnNonExistentSpecificPractitioner() {
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		try {
 			myEmpiProviderR4.empiBatchPractitionerInstance(new IdType("Practitioner/999"), null);
 			fail();
@@ -77,7 +77,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnAllPatients() throws InterruptedException {
 		assertLinkCount(2);
 		StringType criteria = null;
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientType(criteria, null));
 		assertLinkCount(1);
 	}
@@ -85,7 +85,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	@Test
 	public void testBatchRunOnSpecificPatient() throws InterruptedException {
 		assertLinkCount(2);
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientInstance(myPatient.getIdElement(), null));
 		assertLinkCount(1);
 	}
@@ -93,7 +93,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	@Test
 	public void testBatchRunOnNonExistentSpecificPatient() {
 		assertLinkCount(2);
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		try {
 			myEmpiProviderR4.empiBatchPatientInstance(new IdType("Patient/999"), null);
 			fail();
@@ -104,7 +104,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnAllTypes() throws InterruptedException {
 		assertLinkCount(2);
 		StringType criteria = new StringType("");
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(2, () -> {
 			myEmpiProviderR4.empiBatchOnAllTargets(criteria, null);
 		});
@@ -115,7 +115,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnAllTypesWithInvalidCriteria() {
 		assertLinkCount(2);
 		StringType criteria = new StringType("death-date=2020-06-01");
-		myEmpiProviderR4.clearEmpiLinks(null);
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 
 		try {
 			myEmpiProviderR4.empiBatchPractitionerType(criteria, null);

@@ -30,4 +30,9 @@ public interface IAuthRuleBuilderRuleOpDelete extends IAuthRuleBuilderRuleOp {
 	 */
 	IAuthRuleBuilderRuleOp onCascade();
 
+	/**
+	 * Specifies that this rule applies to delete expunges as opposed to regular
+	 * deletes.  A delete expunge is a delete operation called with the _expunge=true parameter.
+	 */
+	IAuthRuleBuilderRuleOp onExpunge();
 }

@@ -67,6 +67,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void before() throws Exception {
 		super.before();
 		myDaoConfig.setAllowMultipleDelete(true);
+		myDaoConfig.setExpungeEnabled(true);
+		myDaoConfig.setDeleteExpungeEnabled(true);
 	}
 
 	/**
@@ -604,7 +606,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			obs.getSubject().setReferenceElement(patientId);
 			myClient.create().resource(obs).execute();
 
-			// Allow any deletes, but don't allow cascade
+			// Allow any deletes and allow cascade
 			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 				@Override
 				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1155,5 +1157,59 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}
 	}
 
+	@Test
+	public void testDeleteExpungeBlocked() {
+		// Create Patient, and Observation that refers to it
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Siobhan");
+		myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
+		// Allow any deletes, but don't allow expunge
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().delete().allResources().withAnyId().andThen()
+					.build();
+			}
+		});
+
+		try {
+			myClient
+				.delete()
+				.resourceConditionalByUrl("Patient?name=Siobhan&_expunge=true")
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
+	// FIXME KHS
+	@Test
+	public void testDeleteExpungeAllowed() {
+
+		// Create Patient, and Observation that refers to it
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		// Allow deletes and allow expunge
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().delete().allResources().withAnyId().andThen()
+					.allow().delete().onExpunge().allResources().withAnyId().andThen()
+					.build();
+			}
+		});
+
+		myClient
+			.delete()
+			.resourceConditionalByUrl("Patient?name=Siobhan&_expunge=true")
+			.execute();
+	}
 }

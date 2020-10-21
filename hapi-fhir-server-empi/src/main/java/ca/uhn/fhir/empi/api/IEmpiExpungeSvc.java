@@ -20,6 +20,8 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+
 public interface IEmpiExpungeSvc {
 
 	/**
@@ -27,15 +29,17 @@ public interface IEmpiExpungeSvc {
 	 *
 	 * @param theResourceType The type of resources
 	 *
+	 * @param theRequestDetails
 	 * @return the count of deleted EMPI links
 	 */
-	long expungeAllEmpiLinksOfTargetType(String theResourceType);
+	long expungeAllEmpiLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails);
 
 	/**
 	 * Delete all EMPI links, and their related Person objects.
 	 *
 	 *
 	 * @return the count of deleted EMPI links
+	 * @param theRequestDetails
 	 */
-	long removeAllEmpiLinks();
+	long expungeAllEmpiLinks(ServletRequestDetails theRequestDetails);
 }

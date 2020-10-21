@@ -160,12 +160,13 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	@Operation(name = ProviderConstants.EMPI_CLEAR, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
 	})
-	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType) {
+	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
+												ServletRequestDetails theRequestDetails) {
 		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
-			resetCount = myEmpiResetSvc.removeAllEmpiLinks();
+			resetCount = myEmpiResetSvc.expungeAllEmpiLinks(theRequestDetails);
 		} else {
-			resetCount = myEmpiResetSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull());
+			resetCount = myEmpiResetSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull(), theRequestDetails);
 		}
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_DELETED_COUNT)

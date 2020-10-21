@@ -462,7 +462,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, dates.get(1).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_LINK
-			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForResourceId(patientId);
+			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForSourceResourceId(patientId);
 			assertEquals(1, resourceLinks.size());
 			assertEquals(myPartitionId, resourceLinks.get(0).getPartitionId().getPartitionId().intValue());
 			assertEquals(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());
@@ -546,7 +546,7 @@ public class PartitioningR4Test extends BaseJpaR4SystemTest {
 			assertEquals(myPartitionDate, dates.get(1).getPartitionId().getPartitionDate());
 
 			// HFJ_RES_LINK
-			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForResourceId(patientId);
+			List<ResourceLink> resourceLinks = myResourceLinkDao.findAllForSourceResourceId(patientId);
 			assertEquals(1, resourceLinks.size());
 			assertEquals(null, resourceLinks.get(0).getPartitionId().getPartitionId());
 			assertEquals(myPartitionDate, resourceLinks.get(0).getPartitionId().getPartitionDate());

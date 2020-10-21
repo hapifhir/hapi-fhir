@@ -184,6 +184,10 @@ public class EmpiLink {
 		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_MATCH;
 	}
 
+	public boolean isRedirect() {
+		return myMatchResult == EmpiMatchResultEnum.REDIRECT;
+	}
+
 	public boolean isPossibleDuplicate() {
 		return myMatchResult == EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
 	}
@@ -276,9 +280,15 @@ public class EmpiLink {
 		return this;
 	}
 
+	public EmpiLink setEmpiTargetType(String theEmpiTargetType) {
+		myEmpiTargetType = theEmpiTargetType;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
+			.append("myId", myId)
 			.append("myPersonPid", myPersonPid)
 			.append("myTargetPid", myTargetPid)
 			.append("myEmpiTargetType", myEmpiTargetType)
@@ -292,9 +302,5 @@ public class EmpiLink {
 
 	public String getEmpiTargetType() {
 		return myEmpiTargetType;
-	}
-
-	public void setEmpiTargetType(String theEmpiTargetType) {
-		myEmpiTargetType = theEmpiTargetType;
 	}
 }

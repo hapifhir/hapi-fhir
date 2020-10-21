@@ -62,7 +62,6 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
 		mergeLinks(theFromPerson, theToPerson, toPersonPid, theEmpiTransactionContext);
-
 		refreshLinksAndUpdatePerson(theToPerson, theEmpiTransactionContext);
 
 		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFromPerson);
@@ -75,11 +74,11 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		return theToPerson;
 	}
 
-	private void addMergeLink(Long theFromPersonPid, Long theToPersonPid) {
-		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setPersonPid(theFromPersonPid)
-			.setTargetPid(theToPersonPid)
-			.setMatchResult(EmpiMatchResultEnum.MATCH)
+	private void addMergeLink(Long theDeactivatedPersonPid, Long theActivePersonPid) {
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getOrCreateEmpiLinkByPersonPidAndTargetPid(theDeactivatedPersonPid, theActivePersonPid);
+		empiLink
+			.setEmpiTargetType("Person")
+			.setMatchResult(EmpiMatchResultEnum.REDIRECT)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
 	}
@@ -90,25 +89,25 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	}
 
 	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, Long theToPersonPid, EmpiTransactionContext theEmpiTransactionContext) {
-		List<EmpiLink> incomingLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(theFromPerson);
-		List<EmpiLink> origLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(theToPerson);
+		List<EmpiLink> fromLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(theFromPerson);
+		List<EmpiLink> toLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(theToPerson);
 
 		// For each incomingLink, either ignore it, move it, or replace the original one
 
-		for (EmpiLink incomingLink : incomingLinks) {
-			Optional<EmpiLink> optionalOrigLink = findLinkWithMatchingTarget(origLinks, incomingLink);
-			if (optionalOrigLink.isPresent()) {
+		for (EmpiLink fromLink : fromLinks) {
+			Optional<EmpiLink> optionalToLink = findFirstLinkWithMatchingTarget(toLinks, fromLink);
+			if (optionalToLink.isPresent()) {
 				// The original links already contain this target, so move it over to the toPerson
-				EmpiLink origLink = optionalOrigLink.get();
-				if (incomingLink.isManual()) {
-					switch (origLink.getLinkSource()) {
+				EmpiLink toLink = optionalToLink.get();
+				if (fromLink.isManual()) {
+					switch (toLink.getLinkSource()) {
 						case AUTO:
-							ourLog.trace("MANUAL overrides AUT0.  Deleting link {}", origLink);
-							myEmpiLinkDaoSvc.deleteLink(origLink);
+							ourLog.trace("MANUAL overrides AUT0.  Deleting link {}", toLink);
+							myEmpiLinkDaoSvc.deleteLink(toLink);
 							break;
 						case MANUAL:
-							if (incomingLink.getMatchResult() != origLink.getMatchResult()) {
-								throw new InvalidRequestException("A MANUAL " + incomingLink.getMatchResult() + " link may not be merged into a MANUAL " + origLink.getMatchResult() + " link for the same target");
+							if (fromLink.getMatchResult() != toLink.getMatchResult()) {
+								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
 							}
 					}
 				} else {
@@ -117,13 +116,13 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 				}
 			}
 			// The original links didn't contain this target, so move it over to the toPerson
-			incomingLink.setPersonPid(theToPersonPid);
-			ourLog.trace("Saving link {}", incomingLink);
-			myEmpiLinkDaoSvc.save(incomingLink);
+			fromLink.setPersonPid(theToPersonPid);
+			ourLog.trace("Saving link {}", fromLink);
+			myEmpiLinkDaoSvc.save(fromLink);
 		}
 	}
 
-	private Optional<EmpiLink> findLinkWithMatchingTarget(List<EmpiLink> theEmpiLinks, EmpiLink theLinkWithTargetToMatch) {
+	private Optional<EmpiLink> findFirstLinkWithMatchingTarget(List<EmpiLink> theEmpiLinks, EmpiLink theLinkWithTargetToMatch) {
 		return theEmpiLinks.stream()
 			.filter(empiLink -> empiLink.getTargetPid().equals(theLinkWithTargetToMatch.getTargetPid()))
 			.findFirst();

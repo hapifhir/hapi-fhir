@@ -45,6 +45,13 @@ public enum EmpiMatchResultEnum {
 	 * Link between Person and Target pointing to the Golden Record for that Person
 	 */
 
-	GOLDEN_RECORD
+	GOLDEN_RECORD,
+
+	/**
+	 * Link between two Person resources resulting from a merge.  The Person points to the active person after the merge
+	 * and the Target points to the inactive person after the merge.
+	 */
+
+	REDIRECT
 	// Stored in database as ORDINAL.  Only add new values to bottom!
 }
