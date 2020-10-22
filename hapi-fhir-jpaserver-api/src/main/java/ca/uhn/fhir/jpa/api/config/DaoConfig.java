@@ -42,7 +42,7 @@ import java.util.TreeSet;
  */
 
 public class DaoConfig {
-
+	EmpiLinkDeleteSvc
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
