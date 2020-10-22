@@ -137,7 +137,15 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			ourLog.info("Beginning LOINC processing");
 
-			return processLoincFiles(descriptors, theRequestDetails, uploadProperties);
+
+			String codeSystemVersionId = uploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			if (codeSystemVersionId != null ) {
+				// Load the code system with version and then remove the version property.
+				processLoincFiles(descriptors, theRequestDetails, uploadProperties, false);
+				uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
+			}
+			// Load the same code system with null version. This will become the default version.
+			return processLoincFiles(descriptors, theRequestDetails, uploadProperties, true);
 		}
 	}
 
@@ -372,7 +380,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 //		return new UploadStatistics(conceptCount, target);
 	}
 
-	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails, Properties theUploadProperties) {
+	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails, Properties theUploadProperties, Boolean theCloseFiles) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
 		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
@@ -483,7 +491,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_PRIMARY.getCode(), LOINC_PART_LINK_FILE_PRIMARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 		iterateOverZipFileOptional(theDescriptors, theUploadProperties.getProperty(LOINC_PART_LINK_FILE_SUPPLEMENTARY.getCode(), LOINC_PART_LINK_FILE_SUPPLEMENTARY_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
-		IOUtils.closeQuietly(theDescriptors);
+		if (theCloseFiles) {
+			IOUtils.closeQuietly(theDescriptors);
+		}
 
 		valueSets.add(getValueSetLoincAll(theUploadProperties));
 
