@@ -26,6 +26,14 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
 			<version>${project.version}</version>
+			<!--
+            <exclusions>
+                <exclusion>
+                    <groupId>ca.uhn.hapi.fhir</groupId>
+                    <artifactId>org.hl7.fhir.utilities</artifactId>
+                </exclusion>
+            </exclusions>
+        	-->
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -46,16 +54,76 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
+			<!--
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.activation</groupId>
+                    <artifactId>javax.activation</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>istack-commons-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.opencds.cqf</groupId>
+                    <artifactId>dstu3</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.opencds.cqf</groupId>
+                    <artifactId>r4</artifactId>
+                </exclusion>
+            </exclusions>
+        	-->
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf</groupId>
 			<artifactId>dstu3</artifactId>
 			<version>0.4.0</version>
+			<!--
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.bliki.wiki</groupId>
+                    <artifactId>bliki-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>istack-commons-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.opencds.cqf</groupId>
+                    <artifactId>r4</artifactId>
+                </exclusion>
+            </exclusions>
+        	-->
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf</groupId>
 			<artifactId>r4</artifactId>
 			<version>0.4.0</version>
+			<!--
+            <exclusions>
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>info.bliki.wiki</groupId>
+                    <artifactId>bliki-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.istack</groupId>
+                    <artifactId>istack-commons-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.opencds.cqf</groupId>
+                    <artifactId>dstu3</artifactId>
+                </exclusion>
+            </exclusions>
+        	-->
 		</dependency>
 		<!-- test -->
 		<dependency>
@@ -76,20 +144,14 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>animal-sniffer-maven-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.basepom.maven</groupId>
 				<artifactId>duplicate-finder-maven-plugin</artifactId>
 				<configuration>
-					<skip>true</skip>
+					<checkCompileClasspath>false</checkCompileClasspath>
 				</configuration>
 			</plugin>
 		</plugins>
