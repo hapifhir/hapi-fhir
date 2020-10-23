@@ -20,26 +20,27 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
+import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.ScrollMode;
+import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContextType;
+import javax.persistence.Query;
 import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 
@@ -49,12 +50,17 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
 	private final Integer myMaxResultsToFetch;
-	@Autowired
-	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+
+	// FIXME: remove
+	//	@Autowired
+//	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
 	private boolean myQueryInitialized;
 	private Connection myConnection;
 	private PreparedStatement myStatement;
-	private ResultSet myResultSet;
+	private ScrollableResultsIterator<Number> myResultSet;
 	private Long myNext;
 
 	/**
@@ -81,13 +87,16 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	@Override
 	public void close() {
 		IoUtil.closeQuietly(myResultSet);
-		JdbcUtils.closeStatement(myStatement);
-		if (myEntityManagerFactory != null) {
-			DataSourceUtils.releaseConnection(myConnection, myEntityManagerFactory.getDataSource());
-		}
-		myResultSet = null;
-		myStatement = null;
-		myConnection = null;
+
+		// FIXME: remove
+//		IoUtil.closeQuietly(myResultSet);
+//		JdbcUtils.closeStatement(myStatement);
+//		if (myEntityManagerFactory != null) {
+//			DataSourceUtils.releaseConnection(myConnection, myEntityManagerFactory.getDataSource());
+//		}
+//		myResultSet = null;
+//		myStatement = null;
+//		myConnection = null;
 	}
 
 	@Override
@@ -118,34 +127,68 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 					 * is managed by Spring has been started before this method is called.
 					 */
 					assert TransactionSynchronizationManager.isSynchronizationActive();
-					myConnection = DataSourceUtils.getConnection(myEntityManagerFactory.getDataSource());
-					myStatement = myConnection.prepareStatement(sql);
 
-					if (myMaxResultsToFetch != null) {
-						myStatement.setMaxRows(myMaxResultsToFetch);
-					}
-
-					for (int i = 0; i < args.length; i++) {
-						Object nextObject = args[i];
-						if (nextObject instanceof Date) {
-							Timestamp ts = new Timestamp(((Date) nextObject).getTime());
-							myStatement.setTimestamp(i + 1, ts);
-						} else {
-							myStatement.setObject(i + 1, nextObject);
+					// Run an explain plan
+					{
+						ourLog.info("About to execute SQL: explain {}", sql);
+						Query nativeQuery = myEntityManager.createNativeQuery("explain " + sql);
+						for (int i = 1; i <= args.length; i++) {
+							nativeQuery.setParameter(i, args[i - 1]);
 						}
+						List outcome = nativeQuery.getResultList();
+						ourLog.info("Explain plan: {}", outcome);
 					}
-					myResultSet = myStatement.executeQuery();
+
+					Query nativeQuery = myEntityManager.createNativeQuery(sql);
+					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
+					for (int i = 1; i <= args.length; i++) {
+						hibernateQuery.setParameter(i, args[i - 1]);
+					}
+
+					ourLog.info("About to execute SQL: {}", sql);
+
+					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
 					myQueryInitialized = true;
+
+					// FIXME: remove
+//					myConnection = DataSourceUtils.getConnection(myEntityManagerFactory.getDataSource());
+//					myStatement = myConnection.prepareStatement(sql);
+//
+//					if (myMaxResultsToFetch != null) {
+//						myStatement.setMaxRows(myMaxResultsToFetch);
+//					}
+//
+//					for (int i = 0; i < args.length; i++) {
+//						Object nextObject = args[i];
+//						if (nextObject instanceof Date) {
+//							Timestamp ts = new Timestamp(((Date) nextObject).getTime());
+//							myStatement.setTimestamp(i + 1, ts);
+//						} else {
+//							myStatement.setObject(i + 1, nextObject);
+//						}
+//					}
+//					myResultSet = myStatement.executeQuery();
+//					myQueryInitialized = true;
 				}
 
-				if (myResultSet == null || !myResultSet.next()) {
+				if (myResultSet == null || !myResultSet.hasNext()) {
 					myNext = NO_MORE;
 				} else {
-					myNext = myResultSet.getLong(1);
+					Number next = myResultSet.next();
+					myNext = next.longValue();
 				}
 
 
-			} catch (SQLException e) {
+				// FIXME: remove
+//				if (myResultSet == null || !myResultSet.next()) {
+//					myNext = NO_MORE;
+//				} else {
+//					myNext = myResultSet.getLong(1);
+//				}
+
+
+			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
 				close();
 				throw new InternalErrorException(e);
