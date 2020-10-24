@@ -37,7 +37,7 @@ public class HibernateDialectProvider {
 		if (dialect == null) {
 			String dialectClass = (String) myEntityManagerFactory.getJpaPropertyMap().get("hibernate.dialect");
 			dialect = ReflectionUtil.newInstanceOrReturnNull(dialectClass, Dialect.class);
-			Validate.notNull(dialect, "Unable to create class: %s", dialectClass);
+			Validate.notNull(dialect, "Unable to create instance of class: %s", dialectClass);
 			myDialect = dialect;
 		}
 		return dialect;
