@@ -83,9 +83,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-public class PartitioningR4Test extends BaseJpaR4SystemTest {
+public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningSqlR4Test.class);
 
 	private MyReadWriteInterceptor myPartitionInterceptor;
 	private LocalDate myPartitionDate;
