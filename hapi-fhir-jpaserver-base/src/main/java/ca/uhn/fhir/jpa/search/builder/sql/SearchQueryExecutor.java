@@ -28,8 +28,6 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.datasource.DataSourceUtils;
-import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
@@ -40,7 +38,6 @@ import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.Iterator;
-import java.util.List;
 
 public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 
@@ -50,10 +47,6 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryExecutor.class);
 	private final GeneratedSql myGeneratedSql;
 	private final Integer myMaxResultsToFetch;
-
-	// FIXME: remove
-	//	@Autowired
-//	private HapiFhirLocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
@@ -87,16 +80,6 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 	@Override
 	public void close() {
 		IoUtil.closeQuietly(myResultSet);
-
-		// FIXME: remove
-//		IoUtil.closeQuietly(myResultSet);
-//		JdbcUtils.closeStatement(myStatement);
-//		if (myEntityManagerFactory != null) {
-//			DataSourceUtils.releaseConnection(myConnection, myEntityManagerFactory.getDataSource());
-//		}
-//		myResultSet = null;
-//		myStatement = null;
-//		myConnection = null;
 	}
 
 	@Override
@@ -128,48 +111,22 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 					 */
 					assert TransactionSynchronizationManager.isSynchronizationActive();
 
-					// Run an explain plan
-					{
-						ourLog.info("About to execute SQL: explain {}", sql);
-						Query nativeQuery = myEntityManager.createNativeQuery("explain " + sql);
-						for (int i = 1; i <= args.length; i++) {
-							nativeQuery.setParameter(i, args[i - 1]);
-						}
-						List outcome = nativeQuery.getResultList();
-						ourLog.info("Explain plan: {}", outcome);
-					}
-
 					Query nativeQuery = myEntityManager.createNativeQuery(sql);
 					org.hibernate.query.Query<?> hibernateQuery = (org.hibernate.query.Query<?>) nativeQuery;
 					for (int i = 1; i <= args.length; i++) {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
 
-					ourLog.info("About to execute SQL: {}", sql);
+					if (myMaxResultsToFetch != null) {
+						hibernateQuery.setMaxResults(myMaxResultsToFetch);
+					}
+
+					ourLog.trace("About to execute SQL: {}", sql);
 
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);
 					myQueryInitialized = true;
 
-					// FIXME: remove
-//					myConnection = DataSourceUtils.getConnection(myEntityManagerFactory.getDataSource());
-//					myStatement = myConnection.prepareStatement(sql);
-//
-//					if (myMaxResultsToFetch != null) {
-//						myStatement.setMaxRows(myMaxResultsToFetch);
-//					}
-//
-//					for (int i = 0; i < args.length; i++) {
-//						Object nextObject = args[i];
-//						if (nextObject instanceof Date) {
-//							Timestamp ts = new Timestamp(((Date) nextObject).getTime());
-//							myStatement.setTimestamp(i + 1, ts);
-//						} else {
-//							myStatement.setObject(i + 1, nextObject);
-//						}
-//					}
-//					myResultSet = myStatement.executeQuery();
-//					myQueryInitialized = true;
 				}
 
 				if (myResultSet == null || !myResultSet.hasNext()) {
@@ -178,15 +135,6 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 					Number next = myResultSet.next();
 					myNext = next.longValue();
 				}
-
-
-				// FIXME: remove
-//				if (myResultSet == null || !myResultSet.next()) {
-//					myNext = NO_MORE;
-//				} else {
-//					myNext = myResultSet.getLong(1);
-//				}
-
 
 			} catch (Exception e) {
 				ourLog.error("Failed to create or execute SQL query", e);
