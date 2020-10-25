@@ -880,44 +880,6 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testRead_PidId_AllPartitionsBecauseNoReadInterceptor() {
-		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
-		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
-
-		myInterceptorRegistry.unregisterInterceptor(myPartitionInterceptor);
-		MyWriteInterceptor writeInterceptor = new MyWriteInterceptor();
-		myInterceptorRegistry.registerInterceptor(writeInterceptor);
-		try {
-			{
-				myCaptureQueriesListener.clear();
-				IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
-				assertEquals(patientId1, gotId1);
-
-				String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-				ourLog.info("Search SQL:\n{}", searchSql);
-
-				// Only the read columns should be used, no criteria use partition
-				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
-				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-			}
-			{
-				IdType gotId2 = myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
-				assertEquals(patientId2, gotId2);
-
-				String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-				ourLog.info("Search SQL:\n{}", searchSql);
-
-				// Only the read columns should be used, no criteria use partition
-				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
-				assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-			}
-		} finally {
-			myInterceptorRegistry.unregisterInterceptor(writeInterceptor);
-		}
-	}
-
-
-	@Test
 	public void testRead_PidId_DefaultPartition() {
 		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
 		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
