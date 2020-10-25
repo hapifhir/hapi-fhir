@@ -158,6 +158,26 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSubmit_MultipleTypeFiltersForSameType() {
+		try {
+			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Patient?name=a", "Patient?active=true"));
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testSubmit_TypeFilterForNonSelectedType() {
+		try {
+			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient"), null, Sets.newHashSet("Observation?code=123"));
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("A", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testSubmit_ReusesExisting() {
 
 		// Submit
@@ -276,14 +296,14 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		// Create a bulk job
 		HashSet<String> types = Sets.newHashSet("Patient");
-		Set<String> typeFilters = Sets.newHashSet("Patient?_has:Observation:patient:name=FAM3");
+		Set<String> typeFilters = Sets.newHashSet("Patient?_has:Observation:patient:identifier=SYS|VAL3");
 		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, types, null, typeFilters);
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
-		assertEquals("", status.getRequest());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient&_typeFilter=Patient%3F_has%3AObservation%3Apatient%3Aidentifier%3DSYS%7CVAL3", status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
@@ -455,6 +475,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 			Observation obs = new Observation();
 			obs.setId("OBS" + i);
+			obs.addIdentifier().setSystem("SYS").setValue("VAL" + i);
 			obs.setStatus(Observation.ObservationStatus.FINAL);
 			obs.getSubject().setReference(patId.getValue());
 			myObservationDao.update(obs);
