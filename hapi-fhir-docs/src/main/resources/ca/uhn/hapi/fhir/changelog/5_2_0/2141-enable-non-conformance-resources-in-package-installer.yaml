@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2141
+title: "The Package Installer has been enhanced to allow resources that do not have a url element to be loaded
+   from a package. Resources without url will instead use identifier element."

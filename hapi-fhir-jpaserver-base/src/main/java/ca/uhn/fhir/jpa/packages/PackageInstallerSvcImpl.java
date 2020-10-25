@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -46,6 +49,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.utilities.cache.IPackageCacheManager;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.slf4j.Logger;
@@ -384,9 +388,12 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		} else if (resource.getClass().getSimpleName().equals("Subscription")) {
 			String id = extractIdFromSubscription(resource);
 			return SearchParameterMap.newSynchronous().add("_id", new TokenParam(id));
-		} else {
+		} else if (resourceHasUrlElement(resource)) {
 			String url = extractUniqueUrlFromMetadataResource(resource);
 			return SearchParameterMap.newSynchronous().add("url", new UriParam(url));
+		} else {
+			TokenParam identifierToken = extractIdentifierFromOtherResourceTypes(resource);
+			return SearchParameterMap.newSynchronous().add("identifier", identifierToken);
 		}
 	}
 
@@ -410,6 +417,26 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 		FhirTerser terser = myFhirContext.newTerser();
 		IPrimitiveType<?> asPrimitiveType = (IPrimitiveType<?>) terser.getSingleValueOrNull(resource, "url");
 		return (String) asPrimitiveType.getValue();
+	}
+
+	private TokenParam extractIdentifierFromOtherResourceTypes(IBaseResource resource) {
+		FhirTerser terser = myFhirContext.newTerser();
+		Identifier identifier = (Identifier) terser.getSingleValueOrNull(resource, "identifier");
+		if (identifier != null) {
+			return new TokenParam(identifier.getSystem(), identifier.getValue());
+		} else {
+			throw new UnsupportedOperationException("Resources in a package must have a url or identifier to be loaded by the package installer.");
+		}
+	}
+
+	private boolean resourceHasUrlElement(IBaseResource resource) {
+		BaseRuntimeElementDefinition<?> def = myFhirContext.getElementDefinition(resource.getClass());
+		if (!(def instanceof BaseRuntimeElementCompositeDefinition)) {
+			throw new IllegalArgumentException("Resource is not a composite type: " + resource.getClass().getName());
+		}
+		BaseRuntimeElementCompositeDefinition<?> currentDef = (BaseRuntimeElementCompositeDefinition<?>) def;
+		BaseRuntimeChildDefinition nextDef = currentDef.getChildByName("url");
+		return nextDef != null;
 	}
 
 	@VisibleForTesting

@@ -81,6 +81,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		Validate.notNull(theRestfulServer);
 		Validate.notNull(theSystemDao);
 		Validate.notNull(theDaoConfig);
+		Validate.notNull(theSearchParamRegistry);
 
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
