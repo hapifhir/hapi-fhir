@@ -117,10 +117,6 @@ public class SearchQueryExecutor implements Iterator<Long>, Closeable {
 						hibernateQuery.setParameter(i, args[i - 1]);
 					}
 
-					if (myMaxResultsToFetch != null) {
-						hibernateQuery.setMaxResults(myMaxResultsToFetch);
-					}
-
 					ourLog.trace("About to execute SQL: {}", sql);
 
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
