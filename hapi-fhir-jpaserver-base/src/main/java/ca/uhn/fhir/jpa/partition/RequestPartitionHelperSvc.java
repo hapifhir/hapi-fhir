@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -35,11 +36,9 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.transaction.Transactional;
 import java.util.HashSet;
 
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
@@ -78,7 +77,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	/**
 	 * Invoke the {@link Pointcut#STORAGE_PARTITION_IDENTIFY_READ} interceptor pointcut to determine the tenant for a read request.
-	 *
+	 * <p>
 	 * If no interceptors are registered with a hook for {@link Pointcut#STORAGE_PARTITION_IDENTIFY_READ}, return
 	 * {@link RequestPartitionId#allPartitions()} instead.
 	 */
@@ -100,7 +99,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 					.addIfMatchesType(ServletRequestDetails.class, theRequest);
 				requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_READ, params);
 			} else {
-				requestPartitionId = RequestPartitionId.allPartitions();
+				requestPartitionId = null;
 			}
 
 			validatePartition(requestPartitionId, theResourceType, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
@@ -189,8 +188,10 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	}
 
-	private void validatePartition(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
-		Validate.notNull(theRequestPartitionId, "Interceptor did not provide a value for pointcut: %s", thePointcut);
+	private void validatePartition(RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
+		if (theRequestPartitionId == null) {
+			throw new InternalErrorException("No interceptor provided a value for pointcut: " + thePointcut);
+		}
 
 		if (theRequestPartitionId.getPartitionId() != null) {
 
