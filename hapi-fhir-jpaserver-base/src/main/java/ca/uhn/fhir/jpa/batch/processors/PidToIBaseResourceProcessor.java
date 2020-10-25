@@ -57,15 +57,17 @@ public class PidToIBaseResourceProcessor implements ItemProcessor<List<ResourceP
 	private FhirContext myContext;
 
 	@Override
-	public List<IBaseResource> process(List<ResourcePersistentId> theResourcePersistentId) throws Exception {
+	public List<IBaseResource> process(List<ResourcePersistentId> theResourcePersistentId) {
 
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(myResourceType);
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(myResourceType);
 		Class<? extends IBaseResource> resourceTypeClass = myContext.getResourceDefinition(myResourceType).getImplementingClass();
 
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, resourceTypeClass);
 		List<IBaseResource> outgoing = new ArrayList<>();
 		sb.loadResourcesByPid(theResourcePersistentId, Collections.emptyList(), outgoing, false, null);
-		ourLog.trace("Loaded resources: {}", outgoing.stream().map(Object::toString).collect(Collectors.joining(", ")));
+
+		ourLog.trace("Loaded resources: {}", outgoing.stream().map(t->t.getIdElement().getValue()).collect(Collectors.joining(", ")));
+
 		return outgoing;
 
 	}

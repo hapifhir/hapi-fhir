@@ -29,26 +29,25 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Will run before and after a job to set the status to whatever is appropriate.
  */
-public class BulkExportJobStartedListener implements StepExecutionListener {
-
-	@Value("#{jobExecutionContext['jobUUID']}")
-	private String myJobUUID;
+public class BulkExportCreateEntityStepListener implements StepExecutionListener {
 
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
 	@Override
 	public void beforeStep(StepExecution theStepExecution) {
+		String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString("jobUUID");
+		assert isNotBlank(jobUuid);
+		myBulkExportDaoSvc.setJobToStatus(jobUuid, BulkJobStatusEnum.BUILDING);
 	}
 
 	@Override
 	public ExitStatus afterStep(StepExecution theStepExecution) {
-		if (theStepExecution.getStatus() == BatchStatus.STARTING) {
-			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.BUILDING);
-		}
 		return ExitStatus.EXECUTING;
 	}
 }

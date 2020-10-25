@@ -49,12 +49,12 @@ public class BatchJobSubmitterImpl implements IBatchJobSubmitter {
 	public JobExecution runJob(Job theJob, JobParameters theJobParameters) throws JobParametersInvalidException{
 		try {
 			return myJobLauncher.run(theJob, theJobParameters);
-		} catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException theE) {
-			ourLog.warn("Job {} was already running, ignoring the call to start.", theJob.getName());
+		} catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException e) {
+			ourLog.warn("Job {} was already running, ignoring the call to start: {}", theJob.getName(), e.toString());
 			return myJobRepository.getLastJobExecution(theJob.getName(), theJobParameters);
-		} catch (JobParametersInvalidException theE) {
-			ourLog.error("Job Parameters passed to this job were invalid: {}", theE.getMessage());
-			throw theE;
+		} catch (JobParametersInvalidException e) {
+			ourLog.error("Job Parameters passed to this job were invalid: {}", e.getMessage());
+			throw e;
 		}
 	}
 }

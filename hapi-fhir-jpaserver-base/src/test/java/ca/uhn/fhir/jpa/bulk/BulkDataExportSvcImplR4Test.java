@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.job.BulkExportJobParametersBuilder;
@@ -190,6 +192,44 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(jobDetails1.getJobId(), jobDetails2.getJobId());
 	}
+
+	@Test
+	public void testGenerateBulkExport_FailureDuringGeneration() {
+
+		// Register an interceptor that will force the resource search to fail unexpectedly
+		IAnonymousInterceptor interceptor = (pointcut, args) -> {
+			throw new NullPointerException("help i'm a bug");
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
+
+		try {
+
+			// Create some resources to load
+			createResources();
+
+			// Create a bulk job
+			IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient"), null, null);
+			assertNotNull(jobDetails.getJobId());
+
+			// Check the status
+			IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+			assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+
+			// Run a scheduled pass to build the export
+			myBulkDataExportSvc.buildExportFiles();
+
+			awaitAllBulkJobCompletions();
+
+			// Fetch the job again
+			status = myBulkDataExportSvc.getJobInfoOrThrowResourceNotFound(jobDetails.getJobId());
+			assertEquals(BulkJobStatusEnum.ERROR, status.getStatus());
+			assertThat(status.getStatusMessage(), containsString("help i'm a bug"));
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
 
 	@Test
 	public void testGenerateBulkExport_SpecificResources() {
@@ -414,13 +454,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	public void awaitJobCompletions(Collection<JobExecution> theJobs) {
-		theJobs.stream().forEach(jobExecution -> {
-			try {
-				awaitJobCompletion(jobExecution);
-			} catch (InterruptedException theE) {
-				fail();
-			}
-		});
+		theJobs.forEach(jobExecution -> awaitJobCompletion(jobExecution));
 	}
 
 	@Test
@@ -451,17 +485,18 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBatchJobSubmitter.runJob(myBulkJob, paramBuilder.toJobParameters());
 			fail("Should have had invalid parameter execption!");
 		} catch (JobParametersInvalidException e) {
+			// good
 		}
 
 	}
 	//Note that if the job is generated, and doesnt rely on an existed persisted BulkExportJobEntity, it will need to
 	//create one itself, which means that its jobUUID isnt known until it starts. to get around this, we move
 
-	public void awaitJobCompletion(JobExecution theJobExecution) throws InterruptedException {
+	private void awaitJobCompletion(JobExecution theJobExecution) {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			JobExecution jobExecution = myJobExplorer.getJobExecution(theJobExecution.getId());
 			ourLog.info("JobExecution {} currently has status: {}", theJobExecution.getId(), jobExecution.getStatus());
-			return jobExecution.getStatus() == BatchStatus.COMPLETED;
+			return jobExecution.getStatus() == BatchStatus.COMPLETED || jobExecution.getStatus() == BatchStatus.FAILED;
 		});
 	}
 

@@ -196,6 +196,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			.addLong("readChunkSize", READ_CHUNK_SIZE)
 			.toJobParameters();
 
+		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
+
 		try {
 			myJobSubmitter.runJob(myBulkExportJob, parameters);
 		} catch (JobParametersInvalidException theE) {
@@ -217,16 +219,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
-	}
-
-	public static class Job implements HapiJob {
-		@Autowired
-		private IBulkDataExportSvc myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.buildExportFiles();
-		}
 	}
 
 	@Transactional
@@ -316,7 +308,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		return new JobInfo().setJobId(theJob.getJobId());
 	}
 
-
 	private void updateExpiry(BulkExportJobEntity theJob) {
 		theJob.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));
 	}
@@ -374,5 +365,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			myBulkExportJobDao.deleteAllFiles();
 			return null;
 		});
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private IBulkDataExportSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.buildExportFiles();
+		}
 	}
 }

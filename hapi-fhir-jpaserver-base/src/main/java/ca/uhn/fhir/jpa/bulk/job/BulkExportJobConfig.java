@@ -69,7 +69,7 @@ public class BulkExportJobConfig {
 	public Step createBulkExportEntityStep() {
 		return myStepBuilderFactory.get("createBulkExportEntityStep")
 			.tasklet(createBulkExportEntityTasklet())
-			.listener(bulkExportJobStartedListener())
+			.listener(bulkExportCreateEntityStepListener())
 			.build();
 	}
 
@@ -90,6 +90,7 @@ public class BulkExportJobConfig {
 			.reader(bulkItemReader())
 			.processor(myPidToIBaseResourceProcessor)
 			.writer(resourceToFileWriter())
+			.listener(bulkExportGenrateResourceFilesStepListener())
 			.build();
 	}
 
@@ -108,8 +109,14 @@ public class BulkExportJobConfig {
 
 	@Bean
 	@JobScope
-	public BulkExportJobStartedListener bulkExportJobStartedListener() {
-		return new BulkExportJobStartedListener();
+	public BulkExportCreateEntityStepListener bulkExportCreateEntityStepListener() {
+		return new BulkExportCreateEntityStepListener();
+	}
+
+	@Bean
+	@JobScope
+	public BulkExportGenrateResourceFilesStepListener bulkExportGenrateResourceFilesStepListener() {
+		return new BulkExportGenrateResourceFilesStepListener();
 	}
 
 	@Bean
