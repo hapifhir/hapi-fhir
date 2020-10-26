@@ -61,6 +61,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -283,14 +284,35 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		job.setCreated(new Date());
 		job.setRequest(request);
 
-		updateExpiry(job);
-		myBulkExportJobDao.save(job);
-
+		// Validate types
 		for (String nextType : resourceTypes) {
 			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
 				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
 				throw new InvalidRequestException(msg);
 			}
+		}
+
+		// Validate type filter
+		if (theFilters != null) {
+			Set<String> types = new HashSet<>();
+			for (String next : theFilters) {
+				if (!next.contains("?")) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
+				}
+				String resourceType = next.substring(0, next.indexOf("?"));
+				if (!resourceTypes.contains(resourceType)) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE + " list");
+				}
+				if (!types.add(resourceType)) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);
+				}
+			}
+		}
+
+		updateExpiry(job);
+		myBulkExportJobDao.save(job);
+
+		for (String nextType : resourceTypes) {
 
 			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
 			collection.setJob(job);

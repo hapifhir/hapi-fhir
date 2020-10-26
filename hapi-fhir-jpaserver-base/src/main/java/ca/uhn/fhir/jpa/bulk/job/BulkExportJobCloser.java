@@ -42,7 +42,7 @@ public class BulkExportJobCloser implements Tasklet {
 	private BulkExportDaoSvc myBulkExportDaoSvc;
 
 	@Override
-	public RepeatStatus execute(StepContribution theStepContribution, ChunkContext theChunkContext) throws Exception {
+	public RepeatStatus execute(StepContribution theStepContribution, ChunkContext theChunkContext) {
 		if (theChunkContext.getStepContext().getStepExecution().getJobExecution().getStatus() == BatchStatus.STARTED) {
 			myBulkExportDaoSvc.setJobToStatus(myJobUUID, BulkJobStatusEnum.COMPLETE);
 		} else {
