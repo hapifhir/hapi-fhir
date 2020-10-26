@@ -445,7 +445,6 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		BulkExportJobParametersBuilder paramBuilder = new BulkExportJobParametersBuilder();
 		paramBuilder
 			.setReadChunkSize(100L)
-			.setJobUUID("000-111")
 			.setOutputFormat(Constants.CT_FHIR_NDJSON)
 			.setResourceTypes(Arrays.asList("Patient", "Observation"));
 

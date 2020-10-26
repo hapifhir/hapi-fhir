@@ -42,8 +42,9 @@ public class BulkExportCreateEntityStepListener implements StepExecutionListener
 	@Override
 	public void beforeStep(StepExecution theStepExecution) {
 		String jobUuid = theStepExecution.getJobExecution().getJobParameters().getString("jobUUID");
-		assert isNotBlank(jobUuid);
-		myBulkExportDaoSvc.setJobToStatus(jobUuid, BulkJobStatusEnum.BUILDING);
+		if (jobUuid != null) {
+			myBulkExportDaoSvc.setJobToStatus(jobUuid, BulkJobStatusEnum.BUILDING);
+		}
 	}
 
 	@Override
