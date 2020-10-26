@@ -61,12 +61,14 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
+import static ca.uhn.fhir.util.UrlUtil.escapeUrlParams;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
@@ -195,6 +197,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			.addLong("readChunkSize", READ_CHUNK_SIZE)
 			.toJobParameters();
 
+		ourLog.info("Submitting bulk export job {} to job scheduler", theJobUuid);
+
 		try {
 			myJobSubmitter.runJob(myBulkExportJob, parameters);
 		} catch (JobParametersInvalidException theE) {
@@ -213,19 +217,14 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(getClass().getName());
+		jobDetail.setId(Job.class.getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
-	}
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private IBulkDataExportSvc myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.buildExportFiles();
-		}
+		jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
+		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
+		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
 	}
 
 	@Transactional
@@ -244,14 +243,14 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
 		Set<String> resourceTypes = theResourceTypes;
 		if (resourceTypes != null) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", resourceTypes));
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", escapeUrlParams(resourceTypes)));
 		}
 		Date since = theSince;
 		if (since != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
 		if (theFilters != null && theFilters.size() > 0) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", theFilters));
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theFilters)));
 		}
 		String request = requestBuilder.toString();
 
@@ -290,14 +289,14 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		job.setCreated(new Date());
 		job.setRequest(request);
 
+		// Validate types
+		validateTypes(resourceTypes);
+		validateTypeFilters(theFilters, resourceTypes);
+
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
 		for (String nextType : resourceTypes) {
-			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
-				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
-				throw new InvalidRequestException(msg);
-			}
 
 			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
 			collection.setJob(job);
@@ -311,10 +310,36 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		return toSubmittedJobInfo(job);
 	}
 
+	public void validateTypes(Set<String> theResourceTypes) {
+		for (String nextType : theResourceTypes) {
+			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
+				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
+				throw new InvalidRequestException(msg);
+			}
+		}
+	}
+
+	public void validateTypeFilters(Set<String> theTheFilters, Set<String> theResourceTypes) {
+		if (theTheFilters != null) {
+			Set<String> types = new HashSet<>();
+			for (String next : theTheFilters) {
+				if (!next.contains("?")) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
+				}
+				String resourceType = next.substring(0, next.indexOf("?"));
+				if (!theResourceTypes.contains(resourceType)) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE + " list");
+				}
+				if (!types.add(resourceType)) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);
+				}
+			}
+		}
+	}
+
 	private JobInfo toSubmittedJobInfo(BulkExportJobEntity theJob) {
 		return new JobInfo().setJobId(theJob.getJobId());
 	}
-
 
 	private void updateExpiry(BulkExportJobEntity theJob) {
 		theJob.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));
@@ -374,4 +399,25 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return null;
 		});
 	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private IBulkDataExportSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.buildExportFiles();
+		}
+	}
+
+	public static class PurgeExpiredFilesJob implements HapiJob {
+		@Autowired
+		private IBulkDataExportSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.purgeExpiredFiles();
+		}
+	}
+
 }
