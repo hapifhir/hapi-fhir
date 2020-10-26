@@ -32,7 +32,7 @@ When creating resources, the contents of the resource can also be factored into 
 
 This is an example of a simple interceptor that causes read/search/history requests to always use all partitions. This would be useful if partitioning is being used for use cases that do not involve data segregation for end users.
 
-This interceptor only provides the [`STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut, so a separate interceptor would have to be added to provide the [`STORAGE_PARTITION_IDENTIFY_WRITE`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_WRITE) pointcut in order to be able to write data to the server.
+This interceptor only provides the [`STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut, so a separate interceptor would have to be added to provide the [`STORAGE_PARTITION_IDENTIFY_CREATE`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_CREATE) pointcut in order to be able to write data to the server.
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorReadAllPartitions}}
