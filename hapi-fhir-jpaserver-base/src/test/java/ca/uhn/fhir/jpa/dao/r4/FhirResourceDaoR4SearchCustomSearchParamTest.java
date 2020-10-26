@@ -70,11 +70,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -807,27 +809,45 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		SearchParameterMap map;
 		IBundleProvider results;
 		List<String> foundResources;
+		String sql;
 
 		// Search by ref
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("sibling", new ReferenceParam(p1id.getValue()));
+		myCaptureQueriesListener.clear();
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
+		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(1));
+		assertThat(sql, countMatches(sql, "t0.SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "t0.TARGET_RESOURCE_ID = '"), equalTo(1));
 
 		// Search by chain
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("sibling", new ReferenceParam("name", "P1"));
+		myCaptureQueriesListener.clear();
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, contains(p2id.getValue()));
+		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(2));
+		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "HASH_NORM_PREFIX = '"), equalTo(39));
+		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE "), equalTo(39));
 
 		// Search by two level chain
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add("patient", new ReferenceParam("sibling.name", "P1"));
+		myCaptureQueriesListener.clear();
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
 		assertThat(foundResources, containsInAnyOrder(appid.getValue()));
+		sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(3));
+		assertThat(sql, countMatches(sql, "SRC_PATH = 'Appointment.participant.actor.where(resolve() is Patient)'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "SRC_PATH = 'Patient.extension('http://acme.org/sibling')'"), equalTo(1));
+		assertThat(sql, countMatches(sql, "SP_VALUE_NORMALIZED LIKE 'P1%'"), equalTo(39));
 
 	}
 
@@ -1426,7 +1446,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -1464,7 +1484,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 		// Try with normal gender SP

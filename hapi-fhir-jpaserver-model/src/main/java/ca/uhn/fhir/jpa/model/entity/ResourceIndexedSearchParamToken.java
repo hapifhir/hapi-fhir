@@ -246,9 +246,15 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
-		b.append("system", getSystem());
-		b.append("value", getValue());
+		if (isMissing()) {
+			b.append("missing", true);
+		} else {
+			b.append("system", getSystem());
+			b.append("value", getValue());
+		}
 		b.append("hashIdentity", myHashIdentity);
+		b.append("hashSystem", myHashSystem);
+		b.append("hashValue", myHashValue);
 		return b.build();
 	}
 

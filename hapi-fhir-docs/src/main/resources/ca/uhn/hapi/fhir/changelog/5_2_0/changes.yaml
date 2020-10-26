@@ -12,3 +12,17 @@
         <li>MomentJS (Testpage Overlay): 2.15.1 -&gt; 2.27.0</li>
         <li>Select2 (Testpage Overlay): 4.0.3 -&gt; 4.0.13</li>
     </ul>"
+- item:
+     type: "add"
+     title: "The JPA Server SQL generator for handling FHIR search operations has been completely rewritten to
+     no longer depend on the Hibernate QueryBuilder APIs. This rewrite produces much more efficient SQL in many cases
+     and should dramatically increase performance in such cases. For example, a 10x speedup has been observed on
+     Postgresql when searching a very large database where the search URL has multiple chained search params.
+     <br/><br/>
+     This new SQL builder will be disabled by default in HAPI FHIR 5.2.0 and Smile CDR 2020.11.R01, and can be enabled
+     via a setting in the DaoConfig (HAPI FHIR) and Storage Module config (Smile CDR). Snapshot/prerelease builds will
+     ship with this new SQL builder enabled by default, and the intention is to make this the default and ultimately
+     remove the legacy SQL builder in the next quarterly release.
+     <br/><br/>
+     We highly encourage testing of this new feature, and welcome feedback on how it performs in your environment.
+     "

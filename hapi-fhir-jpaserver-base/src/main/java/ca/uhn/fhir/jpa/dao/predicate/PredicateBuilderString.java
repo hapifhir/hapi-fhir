@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IPrimitiveDatatype;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -43,7 +44,7 @@ import java.util.List;
 @Component
 @Scope("prototype")
 class PredicateBuilderString extends BasePredicateBuilder implements IPredicateBuilder {
-	PredicateBuilderString(SearchBuilder theSearchBuilder) {
+	PredicateBuilderString(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

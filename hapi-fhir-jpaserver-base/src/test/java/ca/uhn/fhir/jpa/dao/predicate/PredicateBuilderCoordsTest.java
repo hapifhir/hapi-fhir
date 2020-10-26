@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.predicate;
 
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.jpa.util.CoordCalculatorTest;
 import ca.uhn.fhir.jpa.util.SearchBox;
@@ -27,13 +27,13 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class PredicateBuilderCoordsTest {
 	PredicateBuilderCoords myPredicateBuilderCoords;
-	private SearchBuilder mySearchBuilder;
+	private LegacySearchBuilder mySearchBuilder;
 	private CriteriaBuilder myBuilder;
 	private From myFrom;
 
 	@BeforeEach
 	public void before() {
-		mySearchBuilder = mock(SearchBuilder.class);
+		mySearchBuilder = mock(LegacySearchBuilder.class);
 		myBuilder = mock(CriteriaBuilder.class);
 		myFrom = mock(From.class);
 		myPredicateBuilderCoords = new PredicateBuilderCoords(mySearchBuilder);

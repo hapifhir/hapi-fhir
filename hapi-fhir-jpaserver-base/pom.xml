@@ -183,6 +183,13 @@
 			<artifactId>javassist</artifactId>
 		</dependency>
 
+		<!-- SQL Builder -->
+		<dependency>
+			<groupId>com.healthmarketscience.sqlbuilder</groupId>
+			<artifactId>sqlbuilder</artifactId>
+		</dependency>
+
+
 		<!-- Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

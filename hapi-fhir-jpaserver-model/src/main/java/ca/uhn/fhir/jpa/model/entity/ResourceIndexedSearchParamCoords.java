@@ -169,8 +169,12 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
-		b.append("lat", getLatitude());
-		b.append("lon", getLongitude());
+		if (isMissing()) {
+			b.append("missing", isMissing());
+		} else {
+			b.append("lat", getLatitude());
+			b.append("lon", getLongitude());
+		}
 		return b.build();
 	}
 

@@ -493,14 +493,16 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		assertThat(foundResources, contains(p2id.getValue()));
 
 		// Search by chain
-		map = new SearchParameterMap();
+		myCaptureQueriesListener.clear();
+		map = new SearchParameterMap().setLoadSynchronous(true);
 		map.add("sibling", new ReferenceParam("name", "P1"));
 		results = myPatientDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(foundResources, contains(p2id.getValue()));
 
 		// Search by two level chain
-		map = new SearchParameterMap();
+		map = new SearchParameterMap().setLoadSynchronous(true);
 		map.add("patient", new ReferenceParam("sibling.name", "P1"));
 		results = myAppointmentDao.search(map);
 		foundResources = toUnqualifiedVersionlessIdValues(results);
@@ -1031,7 +1033,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -1068,7 +1070,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 			myPatientDao.search(map).size();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 
 		// Try with normal gender SP

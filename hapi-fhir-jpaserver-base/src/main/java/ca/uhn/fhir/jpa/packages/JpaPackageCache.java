@@ -91,7 +91,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.jpa.dao.SearchBuilder.toPredicateArray;
+import static ca.uhn.fhir.jpa.dao.LegacySearchBuilder.toPredicateArray;
 import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

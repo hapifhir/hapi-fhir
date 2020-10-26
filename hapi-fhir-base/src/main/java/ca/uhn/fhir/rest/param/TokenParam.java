@@ -208,7 +208,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	}
 
 	public boolean isEmpty() {
-		return StringUtils.isEmpty(myValue);
+		return StringUtils.isBlank(mySystem) && StringUtils.isBlank(myValue) && getMissing() == null;
 	}
 
 	/**

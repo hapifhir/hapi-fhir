@@ -439,6 +439,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myGroupDao.update(group);
 
 		Patient patient = new Patient();
+		patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Hello</div>");
 		patient.setId("DEF");
 		patient.setActive(true);
 		myPatientDao.update(patient);
@@ -450,7 +451,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		Observation obs = new Observation();
 		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
-		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Hello</div>");
 		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
 		obs.addPerformer(new Reference("Practitioner/P"));
 		obs.setEffective(DateTimeType.now());
@@ -459,9 +460,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
 
+		OperationOutcome oo;
+
 		// Non-existent target
 		obs.setSubject(new Reference("Group/123"));
-		OperationOutcome oo = validateAndReturnOutcome(obs);
+		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
@@ -523,9 +526,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("123-4").setDisplay("Display 3");
 
+		OperationOutcome oo;
+
 		// Non-existent target
 		obs.setSubject(new Reference("Group/123"));
-		OperationOutcome oo = validateAndReturnOutcome(obs);
+		oo = validateAndReturnOutcome(obs);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertEquals("Unable to resolve resource 'Group/123'", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
