@@ -285,29 +285,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		job.setRequest(request);
 
 		// Validate types
-		for (String nextType : resourceTypes) {
-			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
-				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
-				throw new InvalidRequestException(msg);
-			}
-		}
-
-		// Validate type filter
-		if (theFilters != null) {
-			Set<String> types = new HashSet<>();
-			for (String next : theFilters) {
-				if (!next.contains("?")) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
-				}
-				String resourceType = next.substring(0, next.indexOf("?"));
-				if (!resourceTypes.contains(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE + " list");
-				}
-				if (!types.add(resourceType)) {
-					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);
-				}
-			}
-		}
+		validateTypes(resourceTypes);
+		validateTypeFilters(theFilters, resourceTypes);
 
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
@@ -324,6 +303,33 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		ourLog.info("Bulk export job submitted: {}", job.toString());
 
 		return toSubmittedJobInfo(job);
+	}
+
+	public void validateTypes(Set<String> theResourceTypes) {
+		for (String nextType : theResourceTypes) {
+			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
+				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
+				throw new InvalidRequestException(msg);
+			}
+		}
+	}
+
+	public void validateTypeFilters(Set<String> theTheFilters, Set<String> theResourceTypes) {
+		if (theTheFilters != null) {
+			Set<String> types = new HashSet<>();
+			for (String next : theTheFilters) {
+				if (!next.contains("?")) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Must be in the form [ResourceType]?[params]");
+				}
+				String resourceType = next.substring(0, next.indexOf("?"));
+				if (!theResourceTypes.contains(resourceType)) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Resource type does not appear in " + JpaConstants.PARAM_EXPORT_TYPE + " list");
+				}
+				if (!types.add(resourceType)) {
+					throw new InvalidRequestException("Invalid " + JpaConstants.PARAM_EXPORT_TYPE_FILTER + " value \"" + next + "\". Multiple filters found for type " + resourceType);
+				}
+			}
+		}
 	}
 
 	private JobInfo toSubmittedJobInfo(BulkExportJobEntity theJob) {

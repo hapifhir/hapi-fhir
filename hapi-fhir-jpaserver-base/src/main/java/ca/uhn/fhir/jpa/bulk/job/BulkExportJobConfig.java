@@ -115,8 +115,8 @@ public class BulkExportJobConfig {
 
 	@Bean
 	@JobScope
-	public BulkExportGenrateResourceFilesStepListener bulkExportGenrateResourceFilesStepListener() {
-		return new BulkExportGenrateResourceFilesStepListener();
+	public BulkExportGenerateResourceFilesStepListener bulkExportGenrateResourceFilesStepListener() {
+		return new BulkExportGenerateResourceFilesStepListener();
 	}
 
 	@Bean

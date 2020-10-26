@@ -11,7 +11,11 @@ import javax.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class BulkExportGenrateResourceFilesStepListener  implements StepExecutionListener {
+/**
+ * This class sets the job status to ERROR if any failures occur while actually
+ * generating the export files.
+ */
+public class BulkExportGenerateResourceFilesStepListener implements StepExecutionListener {
 
 	@Autowired
 	private BulkExportDaoSvc myBulkExportDaoSvc;

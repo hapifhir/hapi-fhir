@@ -88,16 +88,7 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 		Class<? extends IBaseResource> nextTypeClass = def.getImplementingClass();
 		ISearchBuilder sb = mySearchBuilderFactory.newSearchBuilder(dao, myResourceType, nextTypeClass);
 
-		SearchParameterMap map = new SearchParameterMap();
-		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(jobEntity.getRequest());
-		String[] typeFilters = requestUrl.get(JpaConstants.PARAM_EXPORT_TYPE_FILTER);
-		if (typeFilters != null) {
-			Optional<String> filter = Arrays.stream(typeFilters).filter(t -> t.startsWith(myResourceType + "?")).findFirst();
-			if (filter.isPresent()) {
-				String matchUrl = filter.get();
-				map = myMatchUrlService.translateMatchUrl(matchUrl, def);
-			}
-		}
+		SearchParameterMap map = createSearchParameterMapFromTypeFilter(jobEntity, def);
 
 		if (jobEntity.getSince() != null) {
 			map.setLastUpdated(new DateRangeParam(jobEntity.getSince(), null));
@@ -110,6 +101,20 @@ public class BulkItemReader implements ItemReader<List<ResourcePersistentId>> {
 			myReadPids.add(myResultIterator.next());
 		}
 		myPidIterator = myReadPids.iterator();
+	}
+
+	private SearchParameterMap createSearchParameterMapFromTypeFilter(BulkExportJobEntity theJobEntity, RuntimeResourceDefinition theDef) {
+		SearchParameterMap map = new SearchParameterMap();
+		Map<String, String[]> requestUrl = UrlUtil.parseQueryStrings(theJobEntity.getRequest());
+		String[] typeFilters = requestUrl.get(JpaConstants.PARAM_EXPORT_TYPE_FILTER);
+		if (typeFilters != null) {
+			Optional<String> filter = Arrays.stream(typeFilters).filter(t -> t.startsWith(myResourceType + "?")).findFirst();
+			if (filter.isPresent()) {
+				String matchUrl = filter.get();
+				map = myMatchUrlService.translateMatchUrl(matchUrl, theDef);
+			}
+		}
+		return map;
 	}
 
 	@Override
