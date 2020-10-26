@@ -217,9 +217,14 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		myTxTemplate = new TransactionTemplate(myTxManager);
 
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(getClass().getName());
+		jobDetail.setId(Job.class.getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+
+		jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(PurgeExpiredFilesJob.class.getName());
+		jobDetail.setJobClass(PurgeExpiredFilesJob.class);
+		mySchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_HOUR, jobDetail);
 	}
 
 	@Transactional
@@ -404,4 +409,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			myTarget.buildExportFiles();
 		}
 	}
+
+	public static class PurgeExpiredFilesJob implements HapiJob {
+		@Autowired
+		private IBulkDataExportSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.purgeExpiredFiles();
+		}
+	}
+
 }
