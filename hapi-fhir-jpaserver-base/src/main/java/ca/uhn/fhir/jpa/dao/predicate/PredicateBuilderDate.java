@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -50,7 +50,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
 
-	PredicateBuilderDate(SearchBuilder theSearchBuilder) {
+	PredicateBuilderDate(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

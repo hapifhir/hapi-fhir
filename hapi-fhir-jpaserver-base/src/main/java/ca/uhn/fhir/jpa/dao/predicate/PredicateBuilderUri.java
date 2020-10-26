@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -48,7 +48,7 @@ class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuil
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
-	PredicateBuilderUri(SearchBuilder theSearchBuilder) {
+	PredicateBuilderUri(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

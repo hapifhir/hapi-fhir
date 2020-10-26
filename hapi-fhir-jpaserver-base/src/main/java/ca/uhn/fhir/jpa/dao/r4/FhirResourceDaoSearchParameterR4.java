@@ -166,7 +166,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 							try {
 								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
 							} catch (Exception e) {
-								String msg = theContext.getLocalizer().getMessage(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
+								String msg = theContext.getLocalizer().getMessageSanitized(FhirResourceDaoSearchParameterR4.class, "invalidSearchParamExpression", nextPath, e.getMessage());
 								throw new UnprocessableEntityException(msg, e);
 							}
 						}

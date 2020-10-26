@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
@@ -72,6 +73,7 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
@@ -203,6 +205,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
 	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	@Autowired
+	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
 	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
 	@Autowired
@@ -458,6 +462,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IdHelperService myIdHelperService;
 	@Autowired
 	protected IBatchJobSubmitter myBatchJobSubmitter;
+	@Autowired
+	protected ValidationSettings myValidationSettings;
 
 	@AfterEach()
 	public void afterCleanupDao() {
@@ -532,6 +538,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myValidationSettings.setLocalReferenceValidationDefaultPolicy(new ValidationSettings().getLocalReferenceValidationDefaultPolicy());
 	}
 
 	@Override

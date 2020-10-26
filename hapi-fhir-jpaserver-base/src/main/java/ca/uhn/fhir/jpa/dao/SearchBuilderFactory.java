@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -30,9 +31,11 @@ public class SearchBuilderFactory {
 
 	@Autowired
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	public ISearchBuilder newSearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
-		return (ISearchBuilder) myApplicationContext.getBean(BaseConfig.SEARCH_BUILDER, theDao, theResourceName, theResourceType);
+		return (ISearchBuilder) myApplicationContext.getBean(BaseConfig.SEARCH_BUILDER, theDao, theResourceName, theResourceType, myDaoConfig);
 	}
 
 }

@@ -90,6 +90,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
@@ -535,8 +536,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			 * individually for pages as we return them to clients
 			 */
 			final Set<ResourcePersistentId> includedPids = new HashSet<>();
+			if (theParams.getEverythingMode() == null) {
+				includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+			}
 			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+
 			List<ResourcePersistentId> includedPidsList = new ArrayList<>(includedPids);
 
 			List<IBaseResource> resources = new ArrayList<>();
@@ -944,6 +948,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			try {
 				// Create an initial search in the DB and give it an ID
 				saveSearch();
+
+				assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);

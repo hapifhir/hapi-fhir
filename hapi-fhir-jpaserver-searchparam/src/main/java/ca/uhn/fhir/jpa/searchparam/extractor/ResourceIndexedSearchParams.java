@@ -265,6 +265,7 @@ public final class ResourceIndexedSearchParams {
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.SPECIAL, myCoordsParams);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -303,10 +304,16 @@ public final class ResourceIndexedSearchParams {
 						case URI:
 							param = new ResourceIndexedSearchParamUri();
 							break;
+						case SPECIAL:
+							if (BaseSearchParamExtractor.COORDS_INDEX_PATHS.contains(nextEntry.getValue().getPath())) {
+								param = new ResourceIndexedSearchParamCoords();
+								break;
+							} else {
+								continue;
+							}
 						case COMPOSITE:
 						case HAS:
 						case REFERENCE:
-						case SPECIAL:
 						default:
 							continue;
 					}

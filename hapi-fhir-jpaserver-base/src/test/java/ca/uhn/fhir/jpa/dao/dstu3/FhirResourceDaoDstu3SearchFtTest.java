@@ -457,7 +457,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
 		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, null, param, null, null, mockSrd()));
-		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId1, obsId4, devId1)));
+		assertThat(actual, containsInAnyOrder(toValues(ptId1, ptId2, obsId1, obsId4, devId1)));
 
 		/*
 		 * Make one previous match no longer match

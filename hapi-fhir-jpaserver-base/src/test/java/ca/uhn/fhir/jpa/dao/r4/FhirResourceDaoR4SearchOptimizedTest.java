@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
@@ -8,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -18,13 +20,15 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.framework.AopProxyUtils;
@@ -41,8 +45,15 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
@@ -53,6 +64,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	private ISearchDao mySearchEntityDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@BeforeEach
 	public void before() {
@@ -123,8 +136,22 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid;
 		List<String> ids;
 
-		// Search with count only
-		params = new SearchParameterMap();
+		// Search with count only (synchronous)
+		params = new SearchParameterMap().setLoadSynchronous(true);
+		params.add(Patient.SP_NAME, new StringParam("FAM"));
+		params.setSummaryMode((SummaryEnum.COUNT));
+		myCaptureQueriesListener.clear();
+		results = myPatientDao.search(params);
+		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, containsString("COUNT(DISTINCT "));
+		uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
+		assertEquals(201, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertThat(ids, empty());
+
+		// Search with count only (non-synchronous)
+		params = new SearchParameterMap().setLoadSynchronous(false);
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSummaryMode((SummaryEnum.COUNT));
 		results = myPatientDao.search(params);
@@ -744,13 +771,28 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String resultingQueryNotFormatted = queries.get(0);
 		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("TARGET_RESOURCE_ID in ('" + ids.get(0) + "' , '" + ids.get(1) + "' , '" + ids.get(2) + "' , '" + ids.get(3) + "' , '" + ids.get(4) + "')"));
+		assertThat(resultingQueryNotFormatted, containsString("TARGET_RESOURCE_ID IN ('" + ids.get(0) + "','" + ids.get(1) + "','" + ids.get(2) + "','" + ids.get(3) + "','" + ids.get(4) + "')"));
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
 
 	}
 
+	@Test
+	public void testChainedSearchUsesJoinNotSubselect() {
+		myCaptureQueriesListener.clear();
+
+		RuntimeResourceDefinition resourceDef = myFhirCtx.getResourceDefinition("Observation");
+		SearchParameterMap params = myMatchUrlService.translateMatchUrl("/Observation?subject:patient.identifier=urn:oid:ZOOP.MRN.OID|1234", resourceDef, null);
+		params.setLoadSynchronous(true);
+		myObservationDao.search(params);
+		myCaptureQueriesListener.logSelectQueries();
+
+		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
+		ourLog.info(selectQuery);
+		assertEquals(2, StringUtils.countMatches(selectQuery, "JOIN"));
+		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));
+	}
 
 	@AfterEach
 	public void afterResetDao() {
@@ -1128,7 +1170,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		// The search itself
 		resultingQueryNotFormatted = queries.get(1);
 		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, matchesPattern(".*TARGET_RESOURCE_ID in \\('[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+'\\).*"));
+		assertThat(resultingQueryNotFormatted, matchesPattern(".*TARGET_RESOURCE_ID IN \\('[0-9]+','[0-9]+','[0-9]+','[0-9]+','[0-9]+'\\).*"));
 
 		// Ensure that the search actually worked
 		assertEquals(5, search.size().intValue());
