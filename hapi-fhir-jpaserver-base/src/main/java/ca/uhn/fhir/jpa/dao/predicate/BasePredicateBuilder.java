@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.predicate.querystack.QueryStack;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BasePartitionable;
@@ -63,7 +63,7 @@ abstract class BasePredicateBuilder {
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
-	BasePredicateBuilder(SearchBuilder theSearchBuilder) {
+	BasePredicateBuilder(LegacySearchBuilder theSearchBuilder) {
 		myCriteriaBuilder = theSearchBuilder.getBuilder();
 		myQueryStack = theSearchBuilder.getQueryStack();
 		myResourceType = theSearchBuilder.getResourceType();
@@ -172,7 +172,7 @@ abstract class BasePredicateBuilder {
 			case ENDS_BEFORE:
 			case STARTS_AFTER:
 			default:
-				String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
+				String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, invalidMessageName, thePrefix.getValue(), theParam.getValueAsQueryToken(myContext));
 				throw new InvalidRequestException(msg);
 		}
 

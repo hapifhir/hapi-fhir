@@ -680,6 +680,10 @@
 			<name>Eric Prud'hommeaux</name>
 			<organization>Janeiro Digital</organization>
 		</developer>
+		<developer>
+			<id>blangley28</id>
+			<organization>MITRE</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1003,6 +1007,11 @@
 				<groupId>com.google.code.findbugs</groupId>
 				<artifactId>jsr305</artifactId>
 				<version>3.0.2</version>
+			</dependency>
+			<dependency>
+				<groupId>com.healthmarketscience.sqlbuilder</groupId>
+				<artifactId>sqlbuilder</artifactId>
+				<version>3.0.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>

@@ -121,10 +121,12 @@ public class PagingMultinodeProviderDstu3Test extends BaseResourceProviderDstu3T
 		assertThat(found.getLink().stream().filter(l -> l.getRelation().equals("next")).map(l -> l.getUrl()).findAny()
 			.orElseThrow(() -> new IllegalStateException("No next page link")).contains("_offset=10"), is(true));
 
+		myCaptureQueriesListener.clear();
 		found = ourClient
 			.loadPage()
 			.next(found)
 			.execute();
+		myCaptureQueriesListener.logSelectQueries();
 		assertThat(toUnqualifiedVersionlessIdValues(found), contains("Patient/A010", "Patient/A011", "Patient/A012", "Patient/A013", "Patient/A014", "Patient/A015", "Patient/A016", "Patient/A017", "Patient/A018", "Patient/A019"));
 
 		found = ourClient

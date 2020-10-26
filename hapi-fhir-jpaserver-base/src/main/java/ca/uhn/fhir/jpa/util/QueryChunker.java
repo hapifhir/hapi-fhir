@@ -20,7 +20,8 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 
 import java.util.List;
 import java.util.function.Consumer;

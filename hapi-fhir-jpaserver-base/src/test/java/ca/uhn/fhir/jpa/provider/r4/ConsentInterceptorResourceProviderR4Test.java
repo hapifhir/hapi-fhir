@@ -561,15 +561,15 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
 
-		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
-
 		runInTransaction(()->{
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(()->new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
 		});
+
+		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
+		assertNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
 	}
 
 	/**

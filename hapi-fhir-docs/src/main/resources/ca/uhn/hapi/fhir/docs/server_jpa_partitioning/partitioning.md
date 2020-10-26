@@ -67,32 +67,9 @@ The criteria for determining the partition will depend on your use case. For exa
 
 A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
 
-## Example: Partitioning based on Tenant ID
+## Examples
 
-The [RequestTenantPartitionInterceptor](/docs/interceptors/built_in_server_interceptors.html#request-tenant-partition-interceptor) uses the request tenant ID to determine the partition name. A simplified version of its source is shown below:
-
-```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorRequestPartition}}
-```
-
-## Example: Partitioning based on headers
-
-If requests are coming from a trusted system, that system might be relied on to determine the partition for reads and writes.
-
-The following example shows a simple partition interceptor that determines the partition name by looking at a custom HTTP header:
-
-```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorHeaders}}
-```
-
-## Example: Using Resource Contents
-
-When creating resources, the contents of the resource can also be factored into the decision on which tenant to use. The following example shows a very simple algorithm, placing resources into one of three partitions based on the resource type. Other contents in the resource could also be used instead.
-
-```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorResourceContents}}
-```
-
+See [Partition Interceptor Examples](./partition_interceptor_examples.html) for various samples of how partitioning interceptors can be set up.
 
 # Complete Example: Using Request Tenants
 

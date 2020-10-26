@@ -20,30 +20,30 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 
 @Service
 public abstract class PredicateBuilderFactory {
 	@Lookup
-	public abstract PredicateBuilderCoords newPredicateBuilderCoords(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderCoords newPredicateBuilderCoords(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderDate newPredicateBuilderDate(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderDate newPredicateBuilderDate(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderNumber newPredicateBuilderNumber(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderNumber newPredicateBuilderNumber(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderQuantity newPredicateBuilderQuantity(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderQuantity newPredicateBuilderQuantity(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderReference newPredicateBuilderReference(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder);
+	public abstract PredicateBuilderReference newPredicateBuilderReference(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder);
 	@Lookup
-	public abstract PredicateBuilderResourceId newPredicateBuilderResourceId(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderResourceId newPredicateBuilderResourceId(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderString newPredicateBuilderString(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderString newPredicateBuilderString(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderTag newPredicateBuilderTag(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderTag newPredicateBuilderTag(LegacySearchBuilder theSearchBuilder);
 	@Lookup
-	public abstract PredicateBuilderToken newPredicateBuilderToken(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder);
+	public abstract PredicateBuilderToken newPredicateBuilderToken(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder);
 	@Lookup
-	public abstract PredicateBuilderUri newPredicateBuilderUri(SearchBuilder theSearchBuilder);
+	public abstract PredicateBuilderUri newPredicateBuilderUri(LegacySearchBuilder theSearchBuilder);
 }

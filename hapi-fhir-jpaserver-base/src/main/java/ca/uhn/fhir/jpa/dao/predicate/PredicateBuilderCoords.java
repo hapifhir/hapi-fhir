@@ -22,8 +22,9 @@ package ca.uhn.fhir.jpa.dao.predicate;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
 import ca.uhn.fhir.jpa.util.SearchBox;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -50,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class PredicateBuilderCoords extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderCoords.class);
 
-	PredicateBuilderCoords(SearchBuilder theSearchBuilder) {
+	PredicateBuilderCoords(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

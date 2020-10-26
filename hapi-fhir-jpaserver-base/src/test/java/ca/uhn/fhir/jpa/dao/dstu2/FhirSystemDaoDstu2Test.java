@@ -49,6 +49,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -429,7 +430,14 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
 
 		try {
+			myCaptureQueriesListener.clear();
 			mySystemDao.transaction(mySrd, request);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+
+			runInTransaction(()->{
+				ourLog.info("Tokens:\n * {}", myResourceIndexedSearchParamTokenDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			});
+
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(e.getMessage(), "Unable to process Transaction - Request would cause multiple resources to match URL: \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateWithDuplicateMatchUrl01\". Does transaction request contain duplicates?");

@@ -2050,13 +2050,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		c.getSubject().setReferenceElement(pId);
 		IIdType cId = myClient.create().resource(c).execute().getId().toUnqualifiedVersionless();
 
+		ourLog.info("Resource IDs:\n * {}\n * {}\n * {}", oId, pId, cId);
+		runInTransaction(() -> {
+			ourLog.info("Resource Links:\n * {}", myResourceLinkDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Resources:\n * {}", myResourceTableDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		Thread.sleep(10);
 		long time3 = System.currentTimeMillis();
 
 		// %3E=> %3C=<
 
+		myCaptureQueriesListener.clear();
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString());
 		CloseableHttpResponse response = ourHttpClient.execute(get);
+		myCaptureQueriesListener.logSelectQueries();
 		try {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -2918,6 +2926,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Disabled
 	@Test
 	public void testPagingOverEverythingSetWithNoPagingProvider() {
 		ourRestServer.setPagingProvider(null);
@@ -2956,7 +2965,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(null, response.getTotalElement().getValue());
 		assertThat(response.getLink("next").getUrl(), not(emptyString()));
 
+		myCaptureQueriesListener.clear();
 		response = myClient.fetchResourceFromUrl(Bundle.class, response.getLink("next").getUrl());
+		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotalElement().getValue().intValue());
@@ -4493,6 +4504,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Unable to handle number prefix \"eb\" for value: eb100"));
+		}
+
+		try {
+			myClient
+				.search()
+				.forResource(MolecularSequence.class)
+				.where(MolecularSequence.VARIANT_END.withPrefix(ParamPrefixEnum.STARTS_AFTER).number(100))
+				.prettyPrint()
+				.returnBundle(Bundle.class)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Unable to handle number prefix \"sa\" for value: sa100"));
 		}
 	}
 

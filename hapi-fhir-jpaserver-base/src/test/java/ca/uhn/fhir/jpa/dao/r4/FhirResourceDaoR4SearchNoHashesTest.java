@@ -93,7 +93,6 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.Substance;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -501,8 +500,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			.collect(Collectors.toList());
 		String resultingQueryNotFormatted = queries.get(0);
 
-		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"), resultingQueryNotFormatted);
-		assertThat(resultingQueryNotFormatted, containsString("SP_VALUE in ('BAR' , 'FOO')"));
+		assertEquals(0, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"), resultingQueryNotFormatted);
+		assertEquals(1, StringUtils.countMatches(resultingQueryNotFormatted, "HASH_VALUE"), resultingQueryNotFormatted);
+		assertThat(resultingQueryNotFormatted, containsString("HASH_VALUE IN ('3140583648400062149','4929264259256651518')"));
 
 		// Ensure that the search actually worked
 		assertEquals(2, search.size().intValue());
@@ -2362,36 +2362,38 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam1");
 		patient.addCommunication().getLanguage().setText("testSearchTokenParamComText").addCoding().setCode("testSearchTokenParamCode").setSystem("testSearchTokenParamSystem")
 			.setDisplay("testSearchTokenParamDisplay");
-		myPatientDao.create(patient, mySrd);
+		String id1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		myPatientDao.create(patient, mySrd);
+		String id2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue(null);
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		myPatientDao.create(patient, mySrd);
+		String id3 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
-		myPatientDao.create(patient, mySrd);
+		String id4 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 
 		{
-			// Match system="urn:system" and value = *
-			SearchParameterMap map = new SearchParameterMap();
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
-			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(2, retrieved.size().intValue());
+			myCaptureQueriesListener.clear();
+			List<String> values = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+			assertThat(values, containsInAnyOrder(id1, id2));
 		}
 		{
-			// Match system="urn:system" and value = ""
-			SearchParameterMap map = new SearchParameterMap();
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
-			IBundleProvider retrieved = myPatientDao.search(map);
-			assertEquals(2, retrieved.size().intValue());
+			myCaptureQueriesListener.clear();
+			List<String> values = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+			assertThat(values, containsInAnyOrder(id1, id2));
 		}
 	}
 

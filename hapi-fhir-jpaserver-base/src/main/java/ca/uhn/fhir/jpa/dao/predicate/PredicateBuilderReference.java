@@ -35,7 +35,7 @@ import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
@@ -109,6 +109,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 @Component
 @Scope("prototype")
+public
 class PredicateBuilderReference extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderReference.class);
 	private final PredicateBuilder myPredicateBuilder;
@@ -125,7 +126,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	PredicateBuilderReference(SearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
+	PredicateBuilderReference(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
 		super(theSearchBuilder);
 		myPredicateBuilder = thePredicateBuilder;
 	}
@@ -682,7 +683,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 						}
 
 					} else {
-						String validNames = new TreeSet<>(mySearchParamRegistry.getActiveSearchParams(theResourceName).keySet()).toString();
+						Collection<String> validNames = mySearchParamRegistry.getValidSearchParameterNamesIncludingMeta(theResourceName);
 						String msg = myContext.getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", theParamName, theResourceName, validNames);
 						throw new InvalidRequestException(msg);
 					}
@@ -881,7 +882,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 		assert theOperation == SearchFilterParser.CompareOperation.eq;
 
 		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
-			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
+			String msg = myContext.getLocalizer().getMessage(LegacySearchBuilder.class, "sourceParamDisabled");
 			throw new InvalidRequestException(msg);
 		}
 

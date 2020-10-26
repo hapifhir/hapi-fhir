@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -51,7 +51,7 @@ class PredicateBuilderResourceId extends BasePredicateBuilder {
 	@Autowired
 	IdHelperService myIdHelperService;
 
-	PredicateBuilderResourceId(SearchBuilder theSearchBuilder) {
+	PredicateBuilderResourceId(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

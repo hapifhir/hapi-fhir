@@ -190,10 +190,15 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 	ValueSet getValueSet(String theValueSetId, String theValueSetUri, String theValueSetName, String theVersionPropertyName) {
 
 		String version;
+		String codeSystemVersion = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (isNotBlank(theVersionPropertyName)) {
-			version = myUploadProperties.getProperty(theVersionPropertyName);
+			if (codeSystemVersion != null) {
+				version = myUploadProperties.getProperty(theVersionPropertyName) + "-" + codeSystemVersion;
+			} else {
+				version = myUploadProperties.getProperty(theVersionPropertyName);
+			}
 		} else {
-			version = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+			version = codeSystemVersion;
 		}
 
 		ValueSet vs;

@@ -66,6 +66,15 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	/**
+	 * Constructor that provides only a size but no actual data (useful for _count = 0)
+	 */
+	public SimpleBundleProvider(int theSize) {
+		myList = Collections.emptyList();
+		myUuid = null;
+		setSize(theSize);
+	}
+
+	/**
 	 * Returns the results stored in this provider
 	 */
 	protected List<? extends IBaseResource> getList() {

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.api.config;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
@@ -83,9 +82,8 @@ public class DaoConfig {
 	private static final Integer DEFAULT_MAXIMUM_TRANSACTION_BUNDLE_SIZE = null;
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
-	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
-
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 	/**
 	 * Child Configurations
 	 */
@@ -196,6 +194,32 @@ public class DaoConfig {
 	 * @since 5.0.0
 	 */
 	private boolean myDeleteEnabled = true;
+	/**
+	 * @since 5.1.0
+	 */
+	private boolean myLastNEnabled = false;
+	/**
+	 * @since 5.2.0
+	 */
+	private boolean myUseLegacySearchBuilder = false;
+
+	/**
+	 * Constructor
+	 */
+	public DaoConfig() {
+		setSubscriptionEnabled(true);
+		setSubscriptionPollDelay(0);
+		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
+		setMarkResourcesForReindexingUponSearchParameterChange(true);
+		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
+		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
+		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
+
+		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
+			ourLog.info("Status based reindexing is DISABLED");
+			setStatusBasedReindexingDisabled(true);
+		}
+	}
 
 	/**
 	 * If set to <code>true</code> (default is <code>false</code>) the <code>$lastn</code> operation will be enabled for
@@ -222,26 +246,27 @@ public class DaoConfig {
 	}
 
 	/**
-	 * @since 5.1.0
+	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
+	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
+	 * legacy SQL builder based on Hibernate.
+	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
+	 *
+	 * @since 5.3.0
 	 */
-	private boolean myLastNEnabled = false;
+	public boolean isUseLegacySearchBuilder() {
+		return myUseLegacySearchBuilder;
+	}
 
 	/**
-	 * Constructor
+	 * This method controls whether to use the new non-hibernate search SQL builder that was introduced in HAPI FHIR 5.2.0.
+	 * By default this will be <code>false</code> meaning that the new SQL builder is used. Set to <code>true</code> to use the
+	 * legacy SQL builder based on Hibernate.
+	 * <p>Note that this method will be removed in HAPI FHIR 5.4.0</p>
+	 *
+	 * @since 5.3.0
 	 */
-	public DaoConfig() {
-		setSubscriptionEnabled(true);
-		setSubscriptionPollDelay(0);
-		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
-		setMarkResourcesForReindexingUponSearchParameterChange(true);
-		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
-		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
-		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
-
-		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
-			ourLog.info("Status based reindexing is DISABLED");
-			setStatusBasedReindexingDisabled(true);
-		}
+	public void setUseLegacySearchBuilder(boolean theUseLegacySearchBuilder) {
+		myUseLegacySearchBuilder = theUseLegacySearchBuilder;
 	}
 
 	/**
@@ -995,43 +1020,6 @@ public class DaoConfig {
 		myModelConfig.setAllowExternalReferences(theAllowExternalReferences);
 	}
 
-	/**
-	 * <p>
-	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
-	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
-	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
-	 *
-	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
-	 * ordinal {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
-	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
-	 * </p>
-	 * Default is {@literal true} beginning in HAPI FHIR 5.0
-	 * </p>
-	 *
-	 * @since 5.0
-	 */
-	public void setUseOrdinalDatesForDayPrecisionSearches(boolean theUseOrdinalDates) {
-		myModelConfig.setUseOrdinalDatesForDayPrecisionSearches(theUseOrdinalDates);
-	}
-
-	/**
-	 * <p>
-	 * Should searches use the integer field {@code SP_VALUE_LOW_DATE_ORDINAL} and {@code SP_VALUE_HIGH_DATE_ORDINAL} in
-	 * {@link ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate} when resolving searches where all predicates are using
-	 * precision of {@link ca.uhn.fhir.model.api.TemporalPrecisionEnum#DAY}.
-	 *
-	 * For example, if enabled, the search of {@code Observation?date=2020-02-25} will cause the date to be collapsed down to an
-	 *  integer representing the ordinal date {@code 20200225}. It would then be compared against {@link ResourceIndexedSearchParamDate#getValueLowDateOrdinal()}
-	 * and {@link ResourceIndexedSearchParamDate#getValueHighDateOrdinal()}
-	 * </p>
-	 * Default is {@literal true} beginning in HAPI FHIR 5.0
-	 * </p>
-	 *
-	 * @since 5.0
-	 */
-	public boolean getUseOrdinalDatesForDayPrecisionSearches() {
-		return myModelConfig.getUseOrdinalDatesForDayPrecisionSearches();
-	}
 	/**
 	 * @see #setAllowInlineMatchUrlReferences(boolean)
 	 */
@@ -2033,8 +2021,8 @@ public class DaoConfig {
 	 *
 	 * @since 5.0.0
 	 */
-	public void setDeleteEnabled(boolean theDeleteEnabled) {
-		myDeleteEnabled = theDeleteEnabled;
+	public boolean isDeleteEnabled() {
+		return myDeleteEnabled;
 	}
 
 	/**
@@ -2046,11 +2034,60 @@ public class DaoConfig {
 	 *
 	 * @since 5.0.0
 	 */
-	public boolean isDeleteEnabled() {
-		return myDeleteEnabled;
+	public void setDeleteEnabled(boolean theDeleteEnabled) {
+		myDeleteEnabled = theDeleteEnabled;
 	}
 
-    public enum StoreMetaSourceInformationEnum {
+	/**
+	 * <p>
+	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 60}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public Integer getMaximumDeleteConflictQueryCount() {
+		return myMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 60}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 */
+	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
+		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
+	}
+
+	/**
+	 * <p>
+	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
+	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
+	 * in advance.
+	 * </p>
+	 * <p>
+	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 *
+	 * @since 5.1.0
+	 * @deprecated In 5.2.0 this setting no longer does anything
+	 */
+	@Deprecated
+	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
+		// ignore
+	}
+
+	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
@@ -2118,55 +2155,6 @@ public class DaoConfig {
 		 * </P>
 		 */
 		ANY
-	}
-
-	/**
-	 * <p>
-	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code 60}.
-	 * </p>
-	 *
-	 * @since 5.1.0
-	 */
-	public Integer getMaximumDeleteConflictQueryCount() {
-		return myMaximumDeleteConflictQueryCount;
-	}
-
-	/**
-	 * <p>
-	 * This determines the maximum number of conflicts that should be fetched and handled while retrying a delete of a resource.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code 60}.
-	 * </p>
-	 *
-	 * @since 5.1.0
-	 */
-	public void setMaximumDeleteConflictQueryCount(Integer theMaximumDeleteConflictQueryCount) {
-		myMaximumDeleteConflictQueryCount = theMaximumDeleteConflictQueryCount;
-	}
-
-	/**
-	 * <p>
-	 * This determines whether $binary-access-write operations should first load the InputStream into memory before persisting the
-	 * contents to the database. This needs to be enabled for MS SQL Server as this DB requires that the blob size be known
-	 * in advance.
-	 * </p>
-	 * <p>
-	 * Note that this setting should be enabled with caution as it can lead to significant demands on memory.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}.
-	 * </p>
-	 *
-	 * @since 5.1.0
-	 * @deprecated In 5.2.0 this setting no longer does anything
-	 */
-	@Deprecated
-	public void setPreloadBlobFromInputStream(Boolean thePreloadBlobFromInputStream) {
-		// ignore
 	}
 
 }
