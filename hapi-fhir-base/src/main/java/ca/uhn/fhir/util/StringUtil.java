@@ -27,6 +27,17 @@ import java.util.Arrays;
 
 public class StringUtil {
 
+	/**
+	 * If a string ends with a given character, remove that character from the end of the string (as many times as it occurs at the end)
+	 */
+	public static String chompCharacter(String theInput, char theCharacter) {
+		String retVal = theInput;
+		while (retVal != null && retVal.length() > 0 && retVal.charAt(retVal.length() - 1) == theCharacter) {
+			retVal = retVal.substring(0, retVal.length() - 1);
+		}
+		return retVal;
+	}
+
 	public static String normalizeStringForSearchIndexing(String theString) {
 		if (theString == null) {
 			return null;
@@ -56,7 +67,6 @@ public class StringUtil {
 
 		return new String(outBuffer.toCharArray()).toUpperCase();
 	}
-
 
 	public static String toUtf8String(byte[] theBytes) {
 		byte[] bytes = theBytes;

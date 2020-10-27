@@ -1,6 +1,5 @@
-package ca.uhn.fhir.jpa.model.util;
+package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.util.StringUtil;
 import com.google.common.base.Charsets;
 import org.junit.jupiter.api.Test;
 
@@ -41,5 +40,15 @@ public class StringUtilTest {
 		assertEquals("help i'm a bug", output);
 	}
 
+
+	@Test
+	public void testChompCharacter() {
+		assertEquals(null, StringUtil.chompCharacter(null, '/'));
+		assertEquals("", StringUtil.chompCharacter("", '/'));
+		assertEquals("", StringUtil.chompCharacter("/", '/'));
+		assertEquals("a", StringUtil.chompCharacter("a/", '/'));
+		assertEquals("a/a", StringUtil.chompCharacter("a/a/", '/'));
+		assertEquals("a/a", StringUtil.chompCharacter("a/a////", '/'));
+	}
 
 }
