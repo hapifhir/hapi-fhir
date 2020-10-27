@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2142
+title: "A null check was added to the R4 CapabilityStatement generator, in order to improve the error
+   message when a mandatory parameter is missed. Thanks to GitHub user @blangley28 for the contribution!"

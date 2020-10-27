@@ -22,22 +22,41 @@ package ca.uhn.fhir.cql.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import com.google.common.annotations.VisibleForTesting;
 import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
 import org.opencds.cqf.common.providers.LibraryResolutionProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 @Service
-public class CqlProviderLoader {
+public class CqlProviderLoader implements ApplicationContextAware {
+	private static final Logger myLogger = LoggerFactory.getLogger(CqlProviderLoader.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
-	@Autowired
-	DaoRegistry myDaoRegistry;
+	// TODO KBD Remove this
+	//@Autowired
+	//DaoRegistry myDaoRegistry;
+	//@Autowired
+	private ApplicationContext myApplicationContext;
+
+	private Lock myProviderRegistrationMutex = new ReentrantLock();
+	private boolean myStarted;
+	private final List<Object> myPlainProviders = new ArrayList<>();
+	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 
 	public void loadProvider() {
 		EvaluationProviderFactory evaluationProviderFactory = null;
@@ -56,20 +75,22 @@ public class CqlProviderLoader {
 
 	@VisibleForTesting
 	org.opencds.cqf.dstu3.providers.MeasureOperationsProvider buildDstu3Provider(EvaluationProviderFactory theEvaluationProviderFactory) {
-		org.opencds.cqf.tooling.library.stu3.NarrativeProvider narrativeProviderDstu3 = null;
-		org.opencds.cqf.dstu3.providers.HQMFProvider hqmfProviderDstu3 = null;
-		ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider measureResourceProviderDstu3 = null;
-		LibraryResolutionProvider<org.hl7.fhir.dstu3.model.Library> libraryResolutionProviderDstu3 = null;
-		return new org.opencds.cqf.dstu3.providers.MeasureOperationsProvider(myDaoRegistry, theEvaluationProviderFactory, narrativeProviderDstu3, hqmfProviderDstu3, libraryResolutionProviderDstu3, measureResourceProviderDstu3);
+		return new CqlProviderDstu3(myApplicationContext).getMeasureOperationsProvider();
 	}
 
 	@VisibleForTesting
 	org.opencds.cqf.r4.providers.MeasureOperationsProvider buildR4Provider(EvaluationProviderFactory theEvaluationProviderFactory) {
-		org.opencds.cqf.tooling.library.r4.NarrativeProvider narrativeProviderR4 = null;
-		org.opencds.cqf.r4.providers.HQMFProvider hqmfProviderR4 = null;
+		org.opencds.cqf.tooling.library.r4.NarrativeProvider narrativeProviderR4 =
+			new org.opencds.cqf.tooling.library.r4.NarrativeProvider();
+		org.opencds.cqf.r4.providers.HQMFProvider hqmfProviderR4 = new org.opencds.cqf.r4.providers.HQMFProvider();
 		ca.uhn.fhir.jpa.rp.r4.MeasureResourceProvider measureResourceProviderR4 = null;
 		LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResolutionProviderR4 = null;
-		return new org.opencds.cqf.r4.providers.MeasureOperationsProvider(myDaoRegistry, theEvaluationProviderFactory, narrativeProviderR4, hqmfProviderR4, libraryResolutionProviderR4, measureResourceProviderR4);
+		//return new org.opencds.cqf.r4.providers.MeasureOperationsProvider(myDaoRegistry, theEvaluationProviderFactory, narrativeProviderR4, hqmfProviderR4, libraryResolutionProviderR4, measureResourceProviderR4);
+		return null;
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
+		myApplicationContext = theApplicationContext;
 	}
 }
-

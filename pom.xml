@@ -680,6 +680,10 @@
 			<name>Eric Prud'hommeaux</name>
 			<organization>Janeiro Digital</organization>
 		</developer>
+		<developer>
+			<id>blangley28</id>
+			<organization>MITRE</organization>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -77,8 +77,16 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 		String extCodeSystemVersion = trim(theRecord.get("ExtCodeSystemVersion"));
 		String extCodeSystemCopyrightNotice = trim(theRecord.get("ExtCodeSystemCopyrightNotice"));
 
+		// CodeSystem version from properties file
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+
 		// ConceptMap version from properties files
-		String loincPartMapVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		String loincPartMapVersion;
+		if (codeSystemVersionId != null) {
+			loincPartMapVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
+		} else {
+			loincPartMapVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		}
 		
 		Enumerations.ConceptMapEquivalence equivalence;
 		switch (trim(defaultString(mapType))) {
@@ -131,7 +139,6 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 				break;
 		}
 		String conceptMapId;
-		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (codeSystemVersionId != null) {
 			conceptMapId = loincPartMapId + "-" + codeSystemVersionId;
 		} else {

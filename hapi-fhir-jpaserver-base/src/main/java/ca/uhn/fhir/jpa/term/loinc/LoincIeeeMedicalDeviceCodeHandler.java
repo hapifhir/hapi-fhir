@@ -53,7 +53,13 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 	@Override
 	public void accept(CSVRecord theRecord) {
 
-		String loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
+		String loincIeeeCmVersion;
+		if (codeSystemVersionId != null) {
+			loincIeeeCmVersion =  myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()) + "-" + codeSystemVersionId;
+		} else {
+			loincIeeeCmVersion = myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode());
+		}
 		String loincNumber = trim(theRecord.get("LOINC_NUM"));
 		String longCommonName = trim(theRecord.get("LOINC_LONG_COMMON_NAME"));
 		String ieeeCode = trim(theRecord.get("IEEE_CF_CODE10"));
@@ -63,7 +69,6 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
 		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
 		String conceptMapId;
-		String codeSystemVersionId = myUploadProperties.getProperty(LOINC_CODESYSTEM_VERSION.getCode());
 		if (codeSystemVersionId != null) {
 			conceptMapId = LOINC_IEEE_CM_ID + "-" + codeSystemVersionId;
 		} else {

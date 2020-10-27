@@ -7,5 +7,5 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @Import({SubscriptionSubmitterConfig.class, SubscriptionChannelConfig.class})
-public class TestCqlConfigR4 {
+public class TestCqlConfig {
 }
