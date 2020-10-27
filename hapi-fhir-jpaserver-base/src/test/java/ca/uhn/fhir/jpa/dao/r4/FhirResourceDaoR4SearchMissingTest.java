@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -31,11 +32,24 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testIndexMissingFieldsDisabledDontAllowInSearch() {
+	public void testIndexMissingFieldsDisabledDontAllowInSearch_NonReference() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 
 		SearchParameterMap params = new SearchParameterMap();
-		params.add("foo", new StringParam().setMissing(true));
+		params.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
+		try {
+			myPatientDao.search(params);
+		} catch (MethodNotAllowedException e) {
+			assertEquals(":missing modifier is disabled on this server", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testIndexMissingFieldsDisabledDontAllowInSearch_Reference() {
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_ORGANIZATION, new StringParam().setMissing(true));
 		try {
 			myPatientDao.search(params);
 		} catch (MethodNotAllowedException e) {
@@ -159,6 +173,39 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+	}
+
+	@Test
+	public void testSearchWithMissingCoords() {
+		String locId = myLocationDao.create(new Location(), mySrd).getId().toUnqualifiedVersionless().getValue();
+		String locId2 = myLocationDao.create(new Location().setPosition(new Location.LocationPositionComponent(new DecimalType(10), new DecimalType(10))), mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		runInTransaction(()->{
+			ourLog.info("Coords:\n * {}", myResourceIndexedSearchParamCoordsDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			TokenParam param = new TokenParam();
+			param.setMissing(true);
+			params.add(Location.SP_NEAR, param);
+			myCaptureQueriesListener.clear();
+			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+			assertThat(patients, containsInRelativeOrder(locId));
+			assertThat(patients, not(containsInRelativeOrder(locId2)));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			TokenParam param = new TokenParam();
+			param.setMissing(false);
+			params.add(Location.SP_NEAR, param);
+			List<String> patients = toUnqualifiedVersionlessIdValues(myLocationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(locId2));
+			assertThat(patients, not(containsInRelativeOrder(locId)));
 		}
 	}
 

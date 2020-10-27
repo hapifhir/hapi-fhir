@@ -98,7 +98,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Timing;
 import org.hl7.fhir.r4.model.UriType;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -122,12 +121,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
@@ -2385,7 +2386,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			found = toList(myPatientDao.search(new SearchParameterMap(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01")).setLoadSynchronous(true)));
 			assertEquals(0, found.size());
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
 		}
 	}
 
@@ -3029,16 +3030,14 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		// Nulls first for H2
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		// Nulls first for H2
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
@@ -3046,7 +3045,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id3, id2, id1, id4));
-//		assertThat(actual, contains(id4, id3, id2, id1));
 
 	}
 
@@ -3085,6 +3083,20 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSortByInvalidParameter() {
+
+		SearchParameterMap pm = SearchParameterMap.newSynchronous();
+		pm.setSort(new SortSpec("hello", SortOrderEnum.DESC));
+		try {
+			myObservationDao.search(pm);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown _sort parameter value \"hello\" for resource type \"Observation\" (Note: sort parameters values must use a valid Search Parameter). Valid values for this search are: [_id, _language, _lastUpdated, based-on, category, code, code-value-concept, code-value-date, code-value-quantity, code-value-string, combo-code, combo-code-value-concept, combo-code-value-quantity, combo-data-absent-reason, combo-value-concept, combo-value-quantity, component-code, component-code-value-concept, component-code-value-quantity, component-data-absent-reason, component-value-concept, component-value-quantity, data-absent-reason, date, derived-from, device, encounter, focus, has-member, identifier, method, part-of, patient, performer, specimen, status, subject, value-concept, value-date, value-quantity, value-string]", e.getMessage());
+		}
+	}
+
+
+	@Test
 	public void testSortById() {
 		String methodName = "testSortBTyId";
 
@@ -3097,14 +3109,20 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.setId(methodName);
+		p.setId(methodName+"1");
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName, idMethodName.getIdPart());
+		IIdType idMethodName1 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
+		assertEquals(methodName+"1", idMethodName1.getIdPart());
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = new Patient();
+		p.setId(methodName+"2");
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		IIdType idMethodName2 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
+		assertEquals(methodName+"2", idMethodName2.getIdPart());
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
@@ -3113,26 +3131,26 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		SearchParameterMap pm;
 		List<IIdType> actual;
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(5, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4, idMethodName));
+		assertEquals(6, actual.size());
+		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(5, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4, idMethodName));
+		assertEquals(6, actual.size());
+		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(5, actual.size());
-		assertThat(actual, contains(idMethodName, id4, id3, id2, id1));
+		assertEquals(6, actual.size());
+		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
 	}
 
 	@Test
@@ -3140,6 +3158,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		String methodName = "testSortByLastUpdated";
 
 		Patient p = new Patient();
+		p.setActive(true);
 		p.addIdentifier().setSystem("urn:system1").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -3147,6 +3166,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		TestUtil.sleepOneClick();
 
 		p = new Patient();
+		p.setActive(true);
 		p.addIdentifier().setSystem("urn:system2").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -3154,6 +3174,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		TestUtil.sleepOneClick();
 
 		p = new Patient();
+		p.setActive(true);
 		p.addIdentifier().setSystem("urn:system3").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -3161,6 +3182,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		TestUtil.sleepOneClick();
 
 		p = new Patient();
+		p.setActive(true);
 		p.addIdentifier().setSystem("urn:system4").setValue(methodName);
 		p.addName().setFamily(methodName);
 		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
@@ -3168,22 +3190,30 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		SearchParameterMap pm;
 		List<IIdType> actual;
 
-		pm = new SearchParameterMap();
+		// With no search parameter
+		pm = SearchParameterMap.newSynchronous();
 		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual, contains(id1, id2, id3, id4));
 
-		pm = new SearchParameterMap();
+		// With a search parameter
+		pm = SearchParameterMap.newSynchronous();
+		pm.add(Patient.SP_ACTIVE, new TokenParam("true"));
+		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED));
+		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = SearchParameterMap.newSynchronous();
 		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual, contains(id1, id2, id3, id4));
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertThat(actual, contains(id4, id3, id2, id1));
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam(null, methodName));
 		pm.setSort(new SortSpec(Patient.SP_NAME).setChain(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.DESC)));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
@@ -3224,7 +3254,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSortByQuantity() {
 		Observation res;
 
@@ -3246,13 +3275,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY));
-		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.ASC));
-		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
+		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
 
@@ -3353,27 +3382,30 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		SearchParameterMap pm;
 		List<IIdType> actual;
 
-		pm = new SearchParameterMap();
+		myCaptureQueriesListener.clear();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
+		String sql = myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+		assertThat(sql, countMatches(sql, "JOIN"), equalTo(2));
+		assertThat(sql, countMatches(sql, "ORDER BY"), equalTo(1));
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id4, id1, id2, id3));
+		assertThat(actual, contains(id1, id2, id3, id4));
 
-		pm = new SearchParameterMap();
+		pm = SearchParameterMap.newSynchronous();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id3, id2, id1, id4));
-//		assertThat(actual, contains(id4, id3, id2, id1));
 	}
 
 	/**
@@ -3492,32 +3524,31 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testSortByUri() {
 		ConceptMap res = new ConceptMap();
-		res.addGroup().setSource("http://foo2");
+		res.setUrl("http://foo2");
 		IIdType id2 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addGroup().setSource("http://foo1");
+		res.setUrl("http://foo1");
 		IIdType id1 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addGroup().setSource("http://bar3");
+		res.setUrl("http://foo3");
 		IIdType id3 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		res = new ConceptMap();
-		res.addGroup().setSource("http://bar4");
+		res.setUrl("http://foo4");
 		IIdType id4 = myConceptMapDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(ConceptMap.SP_SOURCE));
+		pm.setSort(new SortSpec(ConceptMap.SP_URL));
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id1, id2, id3, id4));
 
 		pm = new SearchParameterMap();
-		pm.setSort(new SortSpec(Encounter.SP_LENGTH, SortOrderEnum.DESC));
+		pm.setSort(new SortSpec(ConceptMap.SP_URL, SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1));
@@ -3534,13 +3565,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		SearchParameterMap map;
 
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add(IAnyResource.SP_RES_ID, new StringParam(id1.getIdPart()));
 		map.setLastUpdated(new DateRangeParam("2001", "2003"));
 		map.setSort(new SortSpec(Constants.PARAM_LASTUPDATED));
 		assertThat(toUnqualifiedVersionlessIds(myPatientDao.search(map)), empty());
 
-		map = new SearchParameterMap();
+		map = SearchParameterMap.newSynchronous();
 		map.add(IAnyResource.SP_RES_ID, new StringParam(id1.getIdPart()));
 		map.setLastUpdated(new DateRangeParam("2001", "2003"));
 		map.setSort(new SortSpec(Patient.SP_NAME));

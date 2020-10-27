@@ -26,12 +26,16 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
 
 @SuppressWarnings("InnerClassMayBeStatic")
 public class PartitionExamples {
@@ -102,6 +106,43 @@ public class PartitionExamples {
 
 	}
 	// END SNIPPET: partitionInterceptorResourceContents
+
+
+	// START SNIPPET: partitionInterceptorReadAllPartitions
+	@Interceptor
+	public class PartitionInterceptorReadAllPartitions {
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public RequestPartitionId readPartition() {
+			return RequestPartitionId.allPartitions();
+		}
+
+	}
+	// END SNIPPET: partitionInterceptorReadAllPartitions
+
+
+	// START SNIPPET: partitionInterceptorReadBasedOnScopes
+	@Interceptor
+	public class PartitionInterceptorReadPartitionsBasedOnScopes {
+
+		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
+		public RequestPartitionId readPartition(ServletRequestDetails theRequest) {
+
+			HttpServletRequest servletRequest = theRequest.getServletRequest();
+			Set<String> approvedScopes = (Set<String>) servletRequest.getAttribute("ca.cdr.servletattribute.session.oidc.approved_scopes");
+
+			String partition = approvedScopes
+				.stream()
+				.filter(t->t.startsWith("partition-"))
+				.map(t->t.substring("partition-".length()))
+				.findFirst()
+				.orElseThrow(()->new InvalidRequestException("No partition scopes found in request"));
+			return RequestPartitionId.fromPartitionName(partition);
+
+		}
+
+	}
+	// END SNIPPET: partitionInterceptorReadBasedOnScopes
 
 
 	// START SNIPPET: multitenantServer

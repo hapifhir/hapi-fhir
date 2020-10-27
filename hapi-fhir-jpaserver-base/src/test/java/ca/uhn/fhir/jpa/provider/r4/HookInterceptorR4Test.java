@@ -32,6 +32,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	IdHelperService myIdHelperService;
 
+	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
@@ -39,6 +40,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setExpungeEnabled(true);
 	}
 
+	@Override
 	@AfterEach
 	public void after() throws Exception {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());

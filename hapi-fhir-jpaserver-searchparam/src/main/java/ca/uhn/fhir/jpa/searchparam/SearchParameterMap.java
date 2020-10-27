@@ -58,6 +58,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParameterMap implements Serializable {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMap.class);
+	public static final Integer INTEGER_0 = 0;
 
 	private final HashMap<String, List<List<IQueryParameterType>>> mySearchParameterMap = new LinkedHashMap<>();
 
@@ -563,6 +564,10 @@ public class SearchParameterMap implements Serializable {
 		return myNearDistanceParam;
 	}
 
+	public boolean isWantOnlyCount() {
+		return SummaryEnum.COUNT.equals(getSummaryMode()) || INTEGER_0.equals(getCount());
+	}
+
 	public boolean isDeleteExpunge() {
 		return myDeleteExpunge;
 	}
@@ -607,7 +612,7 @@ public class SearchParameterMap implements Serializable {
 		}
 	}
 
-	public class IncludeComparator implements Comparator<Include> {
+	public static class IncludeComparator implements Comparator<Include> {
 
 		@Override
 		public int compare(Include theO1, Include theO2) {
@@ -623,7 +628,7 @@ public class SearchParameterMap implements Serializable {
 
 	}
 
-	public class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
+	public static class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
 		private final FhirContext myCtx;
 
 		QueryParameterOrComparator(FhirContext theCtx) {
@@ -638,7 +643,7 @@ public class SearchParameterMap implements Serializable {
 
 	}
 
-	public class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
+	public static class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
 
 		private final FhirContext myCtx;
 

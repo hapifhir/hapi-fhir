@@ -1009,6 +1009,11 @@
 				<version>3.0.2</version>
 			</dependency>
 			<dependency>
+				<groupId>com.healthmarketscience.sqlbuilder</groupId>
+				<artifactId>sqlbuilder</artifactId>
+				<version>3.0.1</version>
+			</dependency>
+			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
 				<version>7.4.1.jre8</version>

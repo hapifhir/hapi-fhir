@@ -21,13 +21,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SearchBuilderTest {
+public class LegacySearchBuilderTest {
 
 
 	@Test
 	public void testIncludeIterator() {
 		BaseHapiFhirDao<?> mockDao = mock(BaseHapiFhirDao.class);
-		SearchBuilder searchBuilder = new SearchBuilder(mockDao, null, null);
+		LegacySearchBuilder searchBuilder = new LegacySearchBuilder(mockDao, null, null);
 		searchBuilder.setDaoConfigForUnitTest(new DaoConfig());
 		searchBuilder.setParamsForUnitTest(new SearchParameterMap());
 		EntityManager mockEntityManager = mock(EntityManager.class);
@@ -46,7 +46,7 @@ public class SearchBuilderTest {
 		resultList.add(link);
 		when(mockQuery.getResultList()).thenReturn(resultList);
 
-		SearchBuilder.IncludesIterator includesIterator = searchBuilder.new IncludesIterator(pidSet, null);
+		LegacySearchBuilder.IncludesIterator includesIterator = searchBuilder.new IncludesIterator(pidSet, null);
 		// hasNext() should return false if the pid added was already on our list going in.
 		assertFalse(includesIterator.hasNext());
 	}

@@ -257,6 +257,8 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		b.append("resourceId", getResourcePid());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
+		b.append("ordLow", myValueLowDateOrdinal);
+		b.append("ordHigh", myValueHighDateOrdinal);
 		b.append("hashIdentity", myHashIdentity);
 		b.append("missing", isMissing());
 		return b.build();

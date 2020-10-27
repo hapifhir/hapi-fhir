@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.SearchBuilder;
+import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 class PredicateBuilderTag extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderTag.class);
 
-	PredicateBuilderTag(SearchBuilder theSearchBuilder) {
+	PredicateBuilderTag(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
