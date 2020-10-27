@@ -105,6 +105,21 @@ public final class EmpiMatchOutcome {
 		return this;
 	}
 
+	/**
+	 * Gets normalized score that is in the range from zero to one
+	 *
+	 * @return
+	 * 	Returns the normalized score
+	 */
+	public Double getNormalizedScore() {
+		if (vector == 0) {
+			return 0.0;
+		} else if (score > vector) {
+			return 1.0;
+		}
+		return score / vector;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)

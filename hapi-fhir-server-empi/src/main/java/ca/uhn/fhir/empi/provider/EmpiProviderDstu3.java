@@ -26,6 +26,7 @@ import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
 import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
+import ca.uhn.fhir.empi.api.MatchedTarget;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Parameters;
@@ -45,10 +47,12 @@ import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.hl7.fhir.dstu3.model.codesystems.MatchGrade;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -77,18 +81,43 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		Collection<IAnyResource> matches = myEmpiMatchFinderSvc.findMatches("Patient", thePatient);
+		List<MatchedTarget> matches = myEmpiMatchFinderSvc.getMatchedTargets("Patient", thePatient);
 
 		Bundle retVal = new Bundle();
 		retVal.setType(Bundle.BundleType.SEARCHSET);
 		retVal.setId(UUID.randomUUID().toString());
 		retVal.getMeta().setLastUpdatedElement(InstantType.now());
 
-		for (IAnyResource next : matches) {
-			retVal.addEntry().setResource((Resource) next);
+		for (MatchedTarget next : matches) {
+			boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
+			if (!shouldKeepThisEntry) {
+				continue;
+			}
+
+			Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
+			entry.setResource((Resource) next.getTarget());
+			entry.setSearch(toBundleEntrySearchComponent(next));
+
+			retVal.addEntry(entry);
 		}
 
 		return retVal;
+	}
+
+	private Bundle.BundleEntrySearchComponent toBundleEntrySearchComponent(MatchedTarget next) {
+		Bundle.BundleEntrySearchComponent searchComponent = new Bundle.BundleEntrySearchComponent();
+		searchComponent.setMode(Bundle.SearchEntryMode.MATCH);
+		searchComponent.setScore(next.getMatchResult().getNormalizedScore());
+
+		MatchGrade matchGrade = MatchGrade.PROBABLE;
+		if (next.isMatch()) {
+			matchGrade = MatchGrade.CERTAIN;
+		} else if (next.isPossibleMatch()) {
+			matchGrade = MatchGrade.POSSIBLE;
+		}
+		searchComponent.addExtension("http://hl7.org/fhir/StructureDefinition/match-grade",
+			new CodeType(matchGrade.toCode()));
+		return searchComponent;
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
