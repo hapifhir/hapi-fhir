@@ -744,7 +744,7 @@
 		<lucene_version>5.5.5</lucene_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
-		<httpclient_version>4.5.12</httpclient_version>
+		<httpclient_version>4.5.13</httpclient_version>
 		<jackson_version>2.11.2</jackson_version>
 		<jackson_databind_version>2.11.2</jackson_databind_version>
 		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
