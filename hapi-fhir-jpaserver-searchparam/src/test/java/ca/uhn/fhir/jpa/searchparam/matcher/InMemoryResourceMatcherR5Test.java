@@ -50,6 +50,7 @@ public class InMemoryResourceMatcherR5Test {
 	private static final String SOURCE_URI = "urn:source:0";
 	private static final String REQUEST_ID = "a_request_id";
 	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
+
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -97,6 +98,27 @@ public class InMemoryResourceMatcherR5Test {
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams);
 			assertTrue(result.matched());
+		}
+	}
+
+	@Test
+	public void testSupportedSource_ResourceWithNoSourceValue() {
+		myObservation.getMeta().getSourceElement().setValue(null);
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + TEST_SOURCE, myObservation, mySearchParams);
+			assertFalse(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + SOURCE_URI, myObservation, mySearchParams);
+			assertFalse(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + REQUEST_ID, myObservation, mySearchParams);
+			assertFalse(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams);
+			assertFalse(result.matched());
 		}
 	}
 

@@ -4,11 +4,9 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.SubscribableChannel;
 
 import javax.annotation.PreDestroy;
 
@@ -35,8 +33,8 @@ import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.Subscription
  */
 
 public class MatchingQueueSubscriberLoader {
+	protected IChannelReceiver myMatchingChannel;
 	private Logger ourLog = LoggerFactory.getLogger(MatchingQueueSubscriberLoader.class);
-
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
@@ -45,8 +43,6 @@ public class MatchingQueueSubscriberLoader {
 	private SubscriptionRegisteringSubscriber mySubscriptionRegisteringSubscriber;
 	@Autowired
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
-
-	protected IChannelReceiver myMatchingChannel;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void handleContextRefreshEvent() {
