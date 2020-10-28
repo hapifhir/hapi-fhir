@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
 
 import ca.uhn.fhir.rest.api.Constants;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.left;
 
 /*
@@ -35,19 +36,19 @@ public class SourceParam {
 	private final String myRequestId;
 
 	public SourceParam(String theParameterValue) {
-		myParameterValue = theParameterValue;
+		myParameterValue = defaultString(theParameterValue);
 		String requestId;
-		int lastHashValueIndex = theParameterValue.lastIndexOf('#');
+		int lastHashValueIndex = myParameterValue.lastIndexOf('#');
 		if (lastHashValueIndex == -1) {
-			mySourceUri = theParameterValue;
+			mySourceUri = myParameterValue;
 			requestId = null;
 		} else {
 			if (lastHashValueIndex == 0) {
 				mySourceUri = null;
 			} else {
-				mySourceUri = theParameterValue.substring(0, lastHashValueIndex);
+				mySourceUri = myParameterValue.substring(0, lastHashValueIndex);
 			}
-			requestId = theParameterValue.substring(lastHashValueIndex + 1);
+			requestId = myParameterValue.substring(lastHashValueIndex + 1);
 		}
 		myRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
 	}
