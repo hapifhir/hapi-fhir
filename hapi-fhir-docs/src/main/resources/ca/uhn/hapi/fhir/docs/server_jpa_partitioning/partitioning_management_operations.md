@@ -117,7 +117,7 @@ The `$partition-management-update-partition` operation can be used to update an 
 An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-http://example.com/$partition-management-create-partition 
+http://example.com/$partition-management-update-partition 
 ```
 
 The following request body could be used:

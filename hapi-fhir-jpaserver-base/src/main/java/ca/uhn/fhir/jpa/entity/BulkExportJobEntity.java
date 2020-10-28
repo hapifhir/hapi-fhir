@@ -47,6 +47,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
@@ -105,7 +106,7 @@ public class BulkExportJobEntity implements Serializable {
 	}
 
 	public void setStatusMessage(String theStatusMessage) {
-		myStatusMessage = theStatusMessage;
+		myStatusMessage = left(theStatusMessage, STATUS_MESSAGE_LEN);
 	}
 
 	public String getRequest() {

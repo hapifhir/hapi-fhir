@@ -12,16 +12,19 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -161,6 +164,18 @@ public class UrlUtil {
 		}
 		return PARAMETER_ESCAPER.escape(theUnescaped);
 	}
+
+	/**
+	 * Applies the same encodong as {@link #escapeUrlParam(String)} but against all
+	 * values in a collection
+	 */
+	public static List<String> escapeUrlParams(@Nonnull Collection<String> theUnescaped) {
+		return theUnescaped
+			.stream()
+			.map(t -> PARAMETER_ESCAPER.escape(t))
+			.collect(Collectors.toList());
+	}
+
 
 	public static boolean isAbsolute(String theValue) {
 		String value = theValue.toLowerCase();

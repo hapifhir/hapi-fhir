@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2147
+title: "The `_typeFilter` parameter did not correctly work for JPA Bulk Export jobs. This has been corrected."
