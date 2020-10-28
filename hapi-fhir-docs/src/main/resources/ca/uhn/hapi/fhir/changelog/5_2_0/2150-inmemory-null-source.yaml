@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2150
+title: "The In Memory search matcher (used for Subscriptions) could crash if a subscription was registered using the
+  `_source` search parameter, and a resource was processed with no source value. This has been corrected."
