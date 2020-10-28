@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.IEmpiControllerSvc;
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
@@ -54,6 +55,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -85,6 +87,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		}
 
 		List<MatchedTarget> matches = myEmpiMatchFinderSvc.getMatchedTargets("Patient", thePatient);
+		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 
 		Bundle retVal = new Bundle();
 		retVal.setType(Bundle.BundleType.SEARCHSET);
@@ -107,19 +110,19 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return retVal;
 	}
 
-	private Bundle.BundleEntrySearchComponent toBundleEntrySearchComponent(MatchedTarget next) {
+	private Bundle.BundleEntrySearchComponent toBundleEntrySearchComponent(MatchedTarget theMatchedTarget) {
 		Bundle.BundleEntrySearchComponent searchComponent = new Bundle.BundleEntrySearchComponent();
 		searchComponent.setMode(Bundle.SearchEntryMode.MATCH);
-		searchComponent.setScore(next.getMatchResult().getNormalizedScore());
+		searchComponent.setScore(theMatchedTarget.getMatchResult().getNormalizedScore());
 
 		MatchGrade matchGrade = MatchGrade.PROBABLE;
-		if (next.isMatch()) {
+		if (theMatchedTarget.isMatch()) {
 			matchGrade = MatchGrade.CERTAIN;
-		} else if (next.isPossibleMatch()) {
+		} else if (theMatchedTarget.isPossibleMatch()) {
 			matchGrade = MatchGrade.POSSIBLE;
 		}
-		searchComponent.addExtension("http://hl7.org/fhir/StructureDefinition/match-grade",
-			new CodeType(matchGrade.toCode()));
+
+		searchComponent.addExtension(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE, new CodeType(matchGrade.toCode()));
 		return searchComponent;
 	}
 

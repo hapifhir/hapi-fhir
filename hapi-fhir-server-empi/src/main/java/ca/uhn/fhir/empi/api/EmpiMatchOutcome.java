@@ -117,7 +117,12 @@ public final class EmpiMatchOutcome {
 		} else if (score > vector) {
 			return 1.0;
 		}
-		return score / vector;
+
+		double retVal = score / vector;
+		if (retVal < 0) {
+			retVal = 0.0;
+		}
+		return retVal;
 	}
 
 	@Override

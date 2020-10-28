@@ -1,22 +1,27 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
-import ca.uhn.fhir.parser.IParser;
+import ca.uhn.fhir.empi.api.EmpiConstants;
+import com.google.common.collect.Ordering;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(EmpiProviderMatchR4Test.class);
+
+	public static final String NAME_GIVEN_JANET = NAME_GIVEN_JANE + "t";
 
 	@Override
 	@BeforeEach
@@ -41,10 +46,36 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
-		assertEquals(2.0/3.0, searchComponent.getScore().doubleValue(), 0.01);
-		Extension matchGradeExtension = searchComponent.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/match-grade");
+		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
+		Extension matchGradeExtension = searchComponent.getExtensionByUrl(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+	}
+
+	@Test
+	public void testMatchOrder() throws Exception {
+		Patient jane0 = buildJanePatient();
+		Patient createdJane1 = createPatient(jane0);
+
+		Patient jane1 = buildPatientWithNameAndId(NAME_GIVEN_JANET, JANE_ID);
+		jane1.setActive(true);
+		Patient createdJane2 = createPatient(jane1);
+
+		Patient newJane = buildJanePatient();
+
+		Bundle result = myEmpiProviderR4.match(newJane);
+		assertEquals(2, result.getEntry().size());
+
+		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
+		assertTrue(jane0.getId().equals(((Patient) entry0.getResource()).getId()), "First match should be Jane");
+		Bundle.BundleEntryComponent entry1 = result.getEntry().get(1);
+		assertTrue(jane1.getId().equals(((Patient) entry1.getResource()).getId()), "Second match should be Janet");
+
+		List<Double> scores = result.getEntry()
+			.stream()
+			.map(bec -> bec.getSearch().getScore().doubleValue())
+			.collect(Collectors.toList());
+		assertTrue(Ordering.<Double>natural().reverse().isOrdered(scores), "Match scores must be descending");
 	}
 
 	@Test
