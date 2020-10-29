@@ -9,6 +9,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CqlDstu3Config.class, TestCqlConfig.class, SubscriptionProcessorConfig.class})
+@ContextConfiguration(classes = {TestCqlConfig.class, SubscriptionProcessorConfig.class, CqlDstu3Config.class})
 public class BaseCqlDstu3Test extends BaseJpaDstu3Test {
 }

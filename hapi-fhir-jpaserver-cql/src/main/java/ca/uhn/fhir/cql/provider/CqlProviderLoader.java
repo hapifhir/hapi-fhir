@@ -25,14 +25,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import com.google.common.annotations.VisibleForTesting;
-import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
-import org.opencds.cqf.common.providers.LibraryResolutionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,6 +43,8 @@ public class CqlProviderLoader {
 	private FhirContext myFhirContext;
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;
+	@Autowired
+	private CqlProviderFactory myCqlProviderFactory;
 	@Autowired
 	private ApplicationContext myApplicationContext;
 
@@ -70,11 +68,12 @@ public class CqlProviderLoader {
 
 	@VisibleForTesting
 	org.opencds.cqf.dstu3.providers.MeasureOperationsProvider buildDstu3Provider() {
-		return myApplicationContext.getBean(org.opencds.cqf.dstu3.providers.MeasureOperationsProvider.class);
+		return myCqlProviderFactory.getMeasureOperationsProviderDstu3();
 	}
 
 	@VisibleForTesting
 	org.opencds.cqf.r4.providers.MeasureOperationsProvider buildR4Provider() {
+		// FIXME KHS do like KBD
 		return myApplicationContext.getBean(org.opencds.cqf.r4.providers.MeasureOperationsProvider.class);
 	}
 }
