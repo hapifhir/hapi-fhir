@@ -101,7 +101,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 
 	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
 		for (ConceptSetComponent nextExclude : listToValidate) {
-			if (isBlank(nextExclude.getSystem()) && !ElementUtil.isEmpty(nextExclude.getConcept(), nextExclude.getFilter())) {
+			if (isBlank(nextExclude.getSystem()) && nextExclude.getValueSet().isEmpty() && !ElementUtil.isEmpty(nextExclude.getConcept(), nextExclude.getFilter())) {
 				throw new InvalidRequestException("ValueSet contains " + name + " criteria with no system defined");
 			}
 		}
@@ -116,14 +116,13 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-		source.getCompose().addInclude().addValueSet(theUri);
-
 		if (isNotBlank(theFilter)) {
-			ConceptSetComponent include = source.getCompose().addInclude();
-			ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
+		} else {
+			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		return doExpand(source);
@@ -150,14 +149,13 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-		source.getCompose().addInclude().addValueSet(theUri);
-
 		if (isNotBlank(theFilter)) {
-			ConceptSetComponent include = source.getCompose().addInclude();
-			ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
+		} else {
+			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		return doExpand(source, theOffset, theCount);
