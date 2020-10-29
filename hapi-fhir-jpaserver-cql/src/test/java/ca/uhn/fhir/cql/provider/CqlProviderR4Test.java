@@ -43,7 +43,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
 
 		// FIXME KBD
-		String periodStart = "";
+		String periodStart = "0";
 		String periodEnd = StringUtils.defaultToString(System.currentTimeMillis());
 		String subject = "Patient";
 		MeasureReport measureReport = myProvider.evaluateMeasure((IdType) patientId.toVersionless(), periodStart,

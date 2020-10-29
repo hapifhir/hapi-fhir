@@ -42,8 +42,10 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		// FIXME KBD add something to patient we want to measure
 		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
 
+		Patient patientInstance = myDaoRegistry.getResourceDao(Patient.class).read(patientId);
+
 		// FIXME KBD
-		String periodStart = "";
+		String periodStart = "0";
 		String periodEnd = StringUtils.defaultToString(System.currentTimeMillis());
 		String subject = "Patient";
 		MeasureReport measureReport = myProvider.evaluateMeasure((IdType) patientId.toVersionless(), periodStart,
