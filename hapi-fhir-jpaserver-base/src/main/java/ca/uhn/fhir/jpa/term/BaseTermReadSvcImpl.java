@@ -248,14 +248,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return cs != null;
 	}
 
-	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
+	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter, String theValueSetIncludeVersion) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
-		String codeSystemVersion = theConcept.getCodeSystemVersion().getCodeSystemVersionId();
 		String code = theConcept.getCode();
 		String display = theConcept.getDisplay();
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
-		if (StringUtils.isNotEmpty(codeSystemVersion)) {
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem + "|" + codeSystemVersion, code, display);
+		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
+			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem + "|" + theValueSetIncludeVersion, code, display);
 		} else {
 			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem, code, display);
 		}
@@ -785,7 +784,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 							myConceptDao
 								.findByCodeSystemAndCode(termCodeSystemVersion, nextConcept.getCode())
 								.ifPresent(concept ->
-									addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
+									addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter, nextConcept.getSystemVersion())
 								);
 						} else {
 							// This will happen if we're expanding against a built-in (part of FHIR) ValueSet that
@@ -812,12 +811,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@Nonnull
 	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex, FhirVersionIndependentConcept theWantConceptOrNull, String theSystem, TermCodeSystem theCs) {
-		String codeSystemVersion = theIncludeOrExclude.getVersion();
+		String includeOrExcludeVersion = theIncludeOrExclude.getVersion();
 		TermCodeSystemVersion csv;
-		if (isEmpty(codeSystemVersion)) {
+		if (isEmpty(includeOrExcludeVersion)) {
 			csv = theCs.getCurrentVersion();
 		} else {
-			csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), codeSystemVersion);
+			csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
 		}
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
@@ -846,8 +845,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * Filters
 		 */
 		String codeSystemUrlAndVersion;
-		if (codeSystemVersion != null) {
-			codeSystemUrlAndVersion = theSystem + "|" + codeSystemVersion;
+		if (includeOrExcludeVersion != null) {
+			codeSystemUrlAndVersion = theSystem + "|" + includeOrExcludeVersion;
 		} else {
 			codeSystemUrlAndVersion = theSystem;
 		}
@@ -926,7 +925,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			countForBatch.incrementAndGet();
 			TermConcept concept = (TermConcept) next;
 			try {
-				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter, includeOrExcludeVersion);
 			} catch (ExpansionTooCostlyException e) {
 				return false;
 			}
@@ -1278,7 +1277,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (theInclude.getConcept().isEmpty()) {
 			for (TermConcept next : theVersion.getConcepts()) {
-				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, theVersion.getCodeSystemVersionId(), next.getCode(), next.getDisplay());
+				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, theInclude.getVersion(), next.getCode(), next.getDisplay());
 			}
 		}
 
@@ -1286,7 +1285,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			if (!theSystem.equals(theInclude.getSystem()) && isNotBlank(theSystem)) {
 				continue;
 			}
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, theVersion.getCodeSystemVersionId(), next.getCode(), next.getDisplay());
+			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, theInclude.getVersion(), next.getCode(), next.getDisplay());
 		}
 
 
@@ -1378,7 +1377,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(ResourcePersistentId theResourcePid, String theSystem, String theCode) {
 		List<TermValueSetConcept> retVal = new ArrayList<>();
-		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
+		Optional<TermValueSetConcept> optionalTermValueSetConcept;
+		int versionIndex = theSystem.indexOf("|");
+		if (versionIndex >= 0) {
+			String systemUrl = theSystem.substring(0, versionIndex);
+			String systemVersion = theSystem.substring(versionIndex+1);
+			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(theResourcePid.getIdAsLong(), systemUrl, systemVersion, theCode);
+		} else {
+			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
+		}
 		optionalTermValueSetConcept.ifPresent(retVal::add);
 		return retVal;
 	}
