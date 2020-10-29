@@ -157,10 +157,15 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				throw new ResourceNotFoundException(msg);
 			}
 
-			if (retVal.getPartitionId() != null) {
-				Validate.isTrue(retVal.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", retVal.getPartitionName(), retVal.getPartitionId());
+			if (partition == null) {
+				Validate.isTrue(retVal.getPartitionId() == null, "Partition must be %s", PartitionLookupSvcImpl.DEFAULT_PARTITION_NAME);
+				retVal = RequestPartitionId.defaultPartition();
 			} else {
-				retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), retVal.getPartitionName(), retVal.getPartitionDate());
+				if (retVal.getPartitionId() != null) {
+					Validate.isTrue(retVal.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", retVal.getPartitionName(), retVal.getPartitionId());
+				} else {
+					retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), retVal.getPartitionName(), retVal.getPartitionDate());
+				}
 			}
 
 		} else if (retVal.getPartitionId() != null) {

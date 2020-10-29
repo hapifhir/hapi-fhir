@@ -36,6 +36,7 @@ public class RequestPartitionId {
 	private final LocalDate myPartitionDate;
 	private final boolean myAllPartitions;
 	private final Integer myPartitionId;
+	private final Collection<Integer> myAdditionalPartitionIds;
 	private final String myPartitionName;
 
 	/**

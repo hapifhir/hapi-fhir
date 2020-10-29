@@ -47,9 +47,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
-	public static final int DEFAULT_PERSISTED_PARTITION_ID = 0;
-	public static final String DEFAULT_PERSISTED_PARTITION_NAME = "DEFAULT";
-	private static final String DEFAULT_PERSISTED_PARTITION_DESC = "Default partition";
+	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
 	private static final Pattern PARTITION_NAME_VALID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
@@ -76,23 +74,14 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			.expireAfterWrite(1, TimeUnit.MINUTES)
 			.build(new IdToPartitionCacheLoader());
 		myTxTemplate = new TransactionTemplate(myTxManager);
-
-		// Create default partition definition if it doesn't already exist
-		myTxTemplate.executeWithoutResult(t -> {
-			if (myPartitionDao.findById(DEFAULT_PERSISTED_PARTITION_ID).isPresent() == false) {
-				ourLog.info("Creating default partition definition");
-				PartitionEntity partitionEntity = new PartitionEntity();
-				partitionEntity.setId(DEFAULT_PERSISTED_PARTITION_ID);
-				partitionEntity.setName(DEFAULT_PERSISTED_PARTITION_NAME);
-				partitionEntity.setDescription(DEFAULT_PERSISTED_PARTITION_DESC);
-				myPartitionDao.save(partitionEntity);
-			}
-		});
 	}
 
 	@Override
 	public PartitionEntity getPartitionByName(String theName) {
 		Validate.notBlank(theName, "The name must not be null or blank");
+		if (DEFAULT_PARTITION_NAME.equals(theName)) {
+			return null;
+		}
 		return myNameToPartitionCache.get(theName);
 	}
 
@@ -113,11 +102,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	public PartitionEntity createPartition(PartitionEntity thePartition) {
 		validateHaveValidPartitionIdAndName(thePartition);
 		validatePartitionNameDoesntAlreadyExist(thePartition.getName());
-
-		if (thePartition.getId() == DEFAULT_PERSISTED_PARTITION_ID) {
-			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "cantCreatePartition0");
-			throw new InvalidRequestException(msg);
-		}
 
 		ourLog.info("Creating new partition with ID {} and Name {}", thePartition.getId(), thePartition.getName());
 
@@ -141,13 +125,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			validatePartitionNameDoesntAlreadyExist(thePartition.getName());
 		}
 
-		if (DEFAULT_PERSISTED_PARTITION_ID == thePartition.getId()) {
-			if (!DEFAULT_PERSISTED_PARTITION_NAME.equals(thePartition.getName())) {
-				String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantRenameDefaultPartition");
-				throw new InvalidRequestException(msg);
-			}
-		}
-
 		existingPartition.setName(thePartition.getName());
 		existingPartition.setDescription(thePartition.getDescription());
 		myPartitionDao.save(existingPartition);
@@ -159,11 +136,6 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Transactional
 	public void deletePartition(Integer thePartitionId) {
 		validatePartitionIdSupplied(myFhirCtx, thePartitionId);
-
-		if (DEFAULT_PERSISTED_PARTITION_ID == thePartitionId) {
-			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantDeleteDefaultPartition");
-			throw new InvalidRequestException(msg);
-		}
 
 		Optional<PartitionEntity> partition = myPartitionDao.findById(thePartitionId);
 		if (!partition.isPresent()) {
@@ -186,6 +158,11 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	private void validateHaveValidPartitionIdAndName(PartitionEntity thePartition) {
 		if (thePartition.getId() == null || isBlank(thePartition.getName())) {
 			String msg = myFhirCtx.getLocalizer().getMessage(PartitionLookupSvcImpl.class, "missingPartitionIdOrName");
+			throw new InvalidRequestException(msg);
+		}
+
+		if (thePartition.getName().equals(DEFAULT_PARTITION_NAME)) {
+			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
 			throw new InvalidRequestException(msg);
 		}
 

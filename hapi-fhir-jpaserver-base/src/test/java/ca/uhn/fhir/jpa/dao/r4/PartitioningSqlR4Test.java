@@ -884,6 +884,50 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testRead_PidId_MultiplePartitions() {
+		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+
+		// Read in correct Partition
+		{
+			myCaptureQueriesListener.clear();
+			myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionId(1, null));
+			IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
+			assertEquals(patientId1, gotId1);
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+			ourLog.info("Search SQL:\n{}", searchSql);
+
+			// Only the read columns should be used, no criteria use partition
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID as "));
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+		}
+
+		// Read in null Partition
+		{
+			addReadPartition(1);
+			try {
+				myPatientDao.read(patientIdNull, mySrd).getIdElement().toUnqualifiedVersionless();
+				fail();
+			} catch (ResourceNotFoundException e) {
+				assertThat(e.getMessage(), matchesPattern("Resource Patient/[0-9]+ is not known"));
+			}
+		}
+
+		// Read in wrong Partition
+		{
+			addReadPartition(1);
+			try {
+				myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
+				fail();
+			} catch (ResourceNotFoundException e) {
+				assertThat(e.getMessage(), matchesPattern("Resource Patient/[0-9]+ is not known"));
+			}
+		}
+	}
+
+	@Test
 	public void testRead_PidId_DefaultPartition() {
 		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
 		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
