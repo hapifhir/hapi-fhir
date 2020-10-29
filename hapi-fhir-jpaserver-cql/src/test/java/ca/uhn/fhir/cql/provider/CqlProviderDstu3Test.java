@@ -3,15 +3,20 @@ package ca.uhn.fhir.cql.provider;
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.StringUtils;
 import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
 import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
@@ -28,7 +33,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 
 	@BeforeEach
 	public void before() {
-		myProvider = myCqlProviderLoader.buildDstu3Provider(evaluationProviderFactory);
+		myProvider = myCqlProviderLoader.buildDstu3Provider();
 	}
 
 	@Test
@@ -38,7 +43,13 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
 
 		// FIXME KBD
-//		MeasureReport measureReport = myProvider.evaluateMeasure(patientId, ...);
+		String periodStart = "";
+		String periodEnd = StringUtils.defaultToString(System.currentTimeMillis());
+		String subject = "Patient";
+		MeasureReport measureReport = myProvider.evaluateMeasure((IdType) patientId.toVersionless(), periodStart,
+			periodEnd, null, "patient", subject, null, null,
+			null, null, null, null);
+		assertNotNull(measureReport);
 		// FIXME KBD assert on stuff in measureReport
 	}
 }

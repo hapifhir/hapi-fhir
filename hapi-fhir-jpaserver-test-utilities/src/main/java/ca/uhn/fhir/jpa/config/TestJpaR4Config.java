@@ -45,6 +45,7 @@ import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+// TODO KBD Can we remove this Class entirely and just use a Generic one (same for TestJpaDstu3Config)?
 @Import(TestJpaConfig.class)
 public class TestJpaR4Config extends BaseJavaConfigR4 {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaR4Config.class);

@@ -186,10 +186,6 @@ public class CqlProviderDstu3 {
 		}
 	}
 
-	public MeasureOperationsProvider getMeasureOperationsProvider () {
-		return new MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProvider, myHQMFProvider, myLibraryOperationsProvider, myMeasureResourceProvider);
-	}
-
 	// TODO KBD Move To Base Class
 	@SuppressWarnings("unchecked")
 	protected <T extends IBaseResource> BaseJpaResourceProvider<T> getResourceProvider(Class<T> clazz) {
