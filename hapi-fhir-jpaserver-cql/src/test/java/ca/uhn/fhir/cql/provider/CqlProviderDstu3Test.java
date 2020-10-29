@@ -86,7 +86,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
 		assertEquals(entries.get(23).getResponse().getStatus(), "201 Created");
 
-		IdType measureId = new IdType("Measure", "measureId-asf");
+		IdType measureId = new IdType("Measure", "measure-asf");
 		String patient = "Patient/Patient-6529";
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";

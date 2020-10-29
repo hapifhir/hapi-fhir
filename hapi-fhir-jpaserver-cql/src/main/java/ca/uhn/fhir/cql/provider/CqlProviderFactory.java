@@ -26,6 +26,8 @@ public class CqlProviderFactory {
 	private MeasureResourceProvider myMeasureResourceProvider;
 
 	public MeasureOperationsProvider getMeasureOperationsProviderDstu3() {
+		// FIXME KBD Can we find a way to remove this?
+		myMeasureResourceProvider.setDao(myDaoRegistry.getResourceDao("Measure"));
 		return new MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProvider, myHQMFProvider, myLibraryOperationsProvider, myMeasureResourceProvider);
 	}
 
