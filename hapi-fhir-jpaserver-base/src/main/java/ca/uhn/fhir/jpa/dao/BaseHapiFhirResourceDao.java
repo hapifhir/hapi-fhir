@@ -93,6 +93,7 @@ import ca.uhn.fhir.validation.ValidationOptions;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
+import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -988,6 +989,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public void postConstruct() {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
 		myResourceName = def.getName();
+		if (Measure.class.equals(myResourceType)) {
+			ourLog.info(">>> Setting resourceName on Measure DAO {} to {}", this, myResourceName);
+		}
 	}
 
 	/**
