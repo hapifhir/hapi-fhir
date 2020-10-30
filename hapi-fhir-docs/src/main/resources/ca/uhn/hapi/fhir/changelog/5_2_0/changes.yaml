@@ -6,8 +6,9 @@
     <ul>
         <li>Jackson (Base): 2.10.0 -&gt; 2.11.2</li>
         <li>Flyway (JPA): 6.4.1 -&gt; 6.5.4</li>
-        <li>UCUM (JPA): 1.0.2 -&gt; 1.0.3</li>
         <li>JQuery (Testpage Overlay): 3.3.1 -&gt; 3.5.1</li>
+        <li>UCUM (JPA): 1.0.2 -&gt; 1.0.3</li>
+        <li>HttpClient (Client): 4.5.12 -&gt; 4.5.13</li>
         <li>Awesome Bootstrap Checkbos (Testpage Overlay): 1.0.1 -&gt; 1.0.2</li>
         <li>MomentJS (Testpage Overlay): 2.15.1 -&gt; 2.27.0</li>
         <li>Select2 (Testpage Overlay): 4.0.3 -&gt; 4.0.13</li>

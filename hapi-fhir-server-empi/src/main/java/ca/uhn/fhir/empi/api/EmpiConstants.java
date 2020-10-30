@@ -32,5 +32,6 @@ public class EmpiConstants {
 	public static final String HAPI_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
 	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "*";
 
+	public static final String FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE = "http://hl7.org/fhir/StructureDefinition/match-grade";
 
 }
