@@ -263,12 +263,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, AtomicInteger theCodeCounter, String theCodeSystem, String theCodeSystemVersion, String theCode, String theDisplay) {
 		if (StringUtils.isNotEmpty(theCodeSystemVersion)) {
 			if (isNoneBlank(theCodeSystem, theCode)) {
-				if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode + "|" + theCodeSystemVersion)) {
+				if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
 					theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem + "|" + theCodeSystemVersion, theCode, theDisplay, theDesignations);
 					theCodeCounter.incrementAndGet();
 				}
 
-				if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode + "|" + theCodeSystemVersion)) {
+				if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
 					theValueSetCodeAccumulator.excludeConcept(theCodeSystem + "|" + theCodeSystemVersion, theCode);
 					theCodeCounter.decrementAndGet();
 				}
