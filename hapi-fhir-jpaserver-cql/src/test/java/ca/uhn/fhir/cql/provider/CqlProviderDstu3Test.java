@@ -5,6 +5,9 @@ import ca.uhn.fhir.cql.BaseCqlDstu3Test;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
+import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -46,23 +49,36 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	FhirContext myFhirContext;
 	@Autowired
 	IFhirSystemDao mySystemDao;
+	@Autowired
+	private LibraryResourceProvider myLibraryResourceProvider;
+	@Autowired
+	private MeasureResourceProvider myMeasureResourceProvider;
+	@Autowired
+	private ValueSetResourceProvider myValueSetResourceProvider;
 
 	private EvaluationProviderFactory evaluationProviderFactory;
 	MeasureOperationsProvider myProvider;
 
 	@BeforeEach
 	public void before() throws IOException {
+		// FIXME KBD Can we find a way to remove these?
+		myMeasureResourceProvider.setDao(myDaoRegistry.getResourceDao("Measure"));
+		myLibraryResourceProvider.setDao(myDaoRegistry.getResourceDao("Library"));
+		myValueSetResourceProvider.setDao(myDaoRegistry.getResourceDao("ValueSet"));
+
 		myProvider = myCqlProviderLoader.buildDstu3Provider();
 
 		// Load terminology for measure tests (HEDIS measures)
-
-		// FIXME KBD why won't this load?
 		loadBundle("measure-terminology-bundle.json");
+
+		// Load libraries
+		loadResource("library/library-fhir-model-definition.json");
+		loadResource("library/library-fhir-helpers.json");
+		loadResource("library/library-asf-logic.json");
 
 		// load test data and conversion library for $apply operation tests
 		loadResource("general-practitioner.json");
 		loadResource("general-patient.json");
-		loadResource("general-fhirhelpers-3.json");
 	}
 
 	@Test
@@ -89,19 +105,17 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		Bundle result = loadBundle("patient-measure-test-bundle.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-		assertThat(entries, hasSize(24));
+		assertThat(entries, hasSize(23));
 		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-		assertEquals(entries.get(23).getResponse().getStatus(), "201 Created");
+		assertEquals(entries.get(22).getResponse().getStatus(), "201 Created");
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String patient = "Patient/Patient-6529";
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
-		MeasureReport report =
-			runInTransaction(() ->
-				myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-					patient, null, null, null, null, null, null));
+		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
+					patient, null, null, null, null, null, null);
 
 		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
 			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {

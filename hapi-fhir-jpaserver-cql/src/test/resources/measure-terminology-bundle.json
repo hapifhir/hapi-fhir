@@ -6,7 +6,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1123.17",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1123.17",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1123.17",
         "status": "active",
         "compose": {
           "include": [
@@ -154,7 +154,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1123.18",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1123.18",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1123.18",
         "status": "active",
         "compose": {
           "include": [
@@ -185,7 +185,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1123.19",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1123.19",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1123.19",
         "status": "active",
         "compose": {
           "include": [
@@ -219,7 +219,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1102.39",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1102.39",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1102.39",
         "status": "active",
         "compose": {
           "include": [
@@ -244,7 +244,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1335.16",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1335.16",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1335.16",
         "status": "active",
         "compose": {
           "include": [
@@ -269,7 +269,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1064.30",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1064.30",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1064.30",
         "status": "active",
         "compose": {
           "include": [
@@ -297,7 +297,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1330.2",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1330.2",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1330.2",
         "status": "active",
         "compose": {
           "include": [
@@ -322,7 +322,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1064.31",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1064.31",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1064.31",
         "status": "active",
         "compose": {
           "include": [
@@ -359,7 +359,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1102.38",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1102.38",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1102.38",
         "status": "active",
         "compose": {
           "include": [
@@ -432,7 +432,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1250.46",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1250.46",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1250.46",
         "status": "active",
         "compose": {
           "include": [
@@ -463,7 +463,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1250.44",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1250.44",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1250.44",
         "status": "active",
         "compose": {
           "include": [
@@ -518,7 +518,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1250.45",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1250.45",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1250.45",
         "status": "active",
         "compose": {
           "include": [
@@ -552,7 +552,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1383",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1383",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1383",
         "status": "draft",
         "compose": {
           "include": [
@@ -1688,7 +1688,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1102.40",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1102.40",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1102.40",
         "status": "active",
         "compose": {
           "include": [
@@ -1713,7 +1713,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1346",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1346",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1346",
         "status": "draft",
         "compose": {
           "include": [
@@ -2699,7 +2699,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1347",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1347",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1347",
         "status": "draft",
         "compose": {
           "include": [
@@ -4125,7 +4125,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1389",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1389",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1389",
         "status": "draft",
         "compose": {
           "include": [
@@ -4441,7 +4441,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1386",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1386",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1386",
         "status": "draft",
         "compose": {
           "include": [
@@ -4477,7 +4477,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1023",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1023",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1023",
         "status": "draft",
         "compose": {
           "include": [
@@ -4503,7 +4503,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1387",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1387",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1387",
         "status": "draft",
         "compose": {
           "include": [
@@ -4539,7 +4539,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1024",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1024",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1024",
         "status": "draft",
         "compose": {
           "include": [
@@ -4595,7 +4595,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1384",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1384",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1384",
         "status": "draft",
         "compose": {
           "include": [
@@ -4841,7 +4841,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1385",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1385",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1385",
         "status": "draft",
         "compose": {
           "include": [
@@ -5547,7 +5547,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1148.7",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1148.7",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1148.7",
         "status": "active",
         "compose": {
           "include": [
@@ -5572,7 +5572,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1168.11",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1168.11",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1168.11",
         "status": "active",
         "compose": {
           "include": [
@@ -5600,7 +5600,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1420.35",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1420.35",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1420.35",
         "status": "active",
         "compose": {
           "include": [
@@ -5625,7 +5625,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1418",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1418",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1418",
         "status": "draft",
         "compose": {
           "include": [
@@ -6511,7 +6511,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1420.37",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1420.37",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1420.37",
         "status": "active",
         "compose": {
           "include": [
@@ -6539,7 +6539,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1168.10",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1168.10",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1168.10",
         "status": "active",
         "compose": {
           "include": [
@@ -6567,7 +6567,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1420.36",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1420.36",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1420.36",
         "status": "active",
         "compose": {
           "include": [
@@ -6592,7 +6592,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1339",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1339",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339",
         "status": "draft",
         "compose": {
           "include": [
@@ -7528,7 +7528,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1334.15",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1334.15",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1334.15",
         "status": "active",
         "compose": {
           "include": [
@@ -7553,7 +7553,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1337",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1337",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337",
         "status": "draft",
         "compose": {
           "include": [
@@ -7749,7 +7749,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1139",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1139",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1139",
         "status": "draft",
         "compose": {
           "include": [
@@ -8415,7 +8415,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1123.20",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1123.20",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1123.20",
         "status": "active",
         "compose": {
           "include": [
@@ -8449,7 +8449,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1123.21",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1123.21",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1123.21",
         "status": "active",
         "compose": {
           "include": [
@@ -8498,7 +8498,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1256.13",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1256.13",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1256.13",
         "status": "active",
         "compose": {
           "include": [
@@ -8547,7 +8547,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1256.14",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1256.14",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1256.14",
         "status": "active",
         "compose": {
           "include": [
@@ -8581,7 +8581,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1042.3",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1042.3",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1042.3",
         "status": "active",
         "compose": {
           "include": [
@@ -8606,7 +8606,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1042.4",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1042.4",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1042.4",
         "status": "active",
         "compose": {
           "include": [
@@ -8640,7 +8640,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1208.22",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1208.22",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1208.22",
         "status": "active",
         "compose": {
           "include": [
@@ -8707,7 +8707,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1179",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1179",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1179",
         "status": "draft",
         "compose": {
           "include": [
@@ -10223,7 +10223,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1256",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1256",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1256",
         "status": "active",
         "compose": {
           "include": [
@@ -10290,7 +10290,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1453",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1453",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1453",
         "status": "draft",
         "compose": {
           "include": [
@@ -18276,7 +18276,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1208.25",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1208.25",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1208.25",
         "status": "active",
         "compose": {
           "include": [
@@ -18301,7 +18301,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1208.24",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1208.24",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1208.24",
         "status": "active",
         "compose": {
           "include": [
@@ -18353,7 +18353,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1208.23",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1208.23",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1208.23",
         "status": "active",
         "compose": {
           "include": [
@@ -18408,7 +18408,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1449",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1449",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1449",
         "status": "draft",
         "compose": {
           "include": [
@@ -19554,7 +19554,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1208",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1208",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1208",
         "status": "active",
         "compose": {
           "include": [
@@ -19705,7 +19705,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1421.34",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1421.34",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1421.34",
         "status": "active",
         "compose": {
           "include": [
@@ -19730,7 +19730,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1326",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1326",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1326",
         "status": "draft",
         "compose": {
           "include": [
@@ -19776,7 +19776,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1447",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1447",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1447",
         "status": "draft",
         "compose": {
           "include": [
@@ -20042,7 +20042,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1448",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1448",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1448",
         "status": "draft",
         "compose": {
           "include": [
@@ -20188,7 +20188,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1230.12",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1230.12",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1230.12",
         "status": "active",
         "compose": {
           "include": [
@@ -20213,7 +20213,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1042",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1042",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1042",
         "status": "active",
         "compose": {
           "include": [
@@ -20256,7 +20256,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1331.6",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1331.6",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1331.6",
         "status": "active",
         "compose": {
           "include": [
@@ -20281,7 +20281,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1401",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1401",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1401",
         "status": "draft",
         "compose": {
           "include": [
@@ -20327,7 +20327,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1325",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1325",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1325",
         "status": "draft",
         "compose": {
           "include": [
@@ -21223,7 +21223,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1168",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1168",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1168",
         "status": "active",
         "compose": {
           "include": [
@@ -21311,7 +21311,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1441",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1441",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1441",
         "status": "draft",
         "compose": {
           "include": [
@@ -21747,7 +21747,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1442",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1442",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1442",
         "status": "draft",
         "compose": {
           "include": [
@@ -21923,7 +21923,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1168.9",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1168.9",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1168.9",
         "status": "active",
         "compose": {
           "include": [
@@ -21954,7 +21954,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1044",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1044",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1044",
         "status": "draft",
         "compose": {
           "include": [
@@ -22670,7 +22670,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1168.8",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1168.8",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1168.8",
         "status": "active",
         "compose": {
           "include": [
@@ -22719,7 +22719,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1440",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1440",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1440",
         "status": "draft",
         "compose": {
           "include": [
@@ -22755,7 +22755,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1064.29",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1064.29",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1064.29",
         "status": "active",
         "compose": {
           "include": [
@@ -22879,7 +22879,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1439",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1439",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1439",
         "status": "draft",
         "compose": {
           "include": [
@@ -22925,7 +22925,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1437",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1437",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437",
         "status": "draft",
         "compose": {
           "include": [
@@ -23221,7 +23221,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1065.32",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1065.32",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1065.32",
         "status": "active",
         "compose": {
           "include": [
@@ -23297,7 +23297,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1065.33",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1065.33",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1065.33",
         "status": "active",
         "compose": {
           "include": [
@@ -23364,7 +23364,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1074",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1074",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074",
         "status": "draft",
         "compose": {
           "include": [
@@ -23830,7 +23830,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1390",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1390",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1390",
         "status": "draft",
         "compose": {
           "include": [
@@ -24826,7 +24826,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1329.1",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1329.1",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1329.1",
         "status": "active",
         "compose": {
           "include": [
@@ -24851,7 +24851,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1043.5",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1043.5",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1043.5",
         "status": "active",
         "compose": {
           "include": [
@@ -24876,7 +24876,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1399",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1399",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1399",
         "status": "draft",
         "compose": {
           "include": [
@@ -24962,7 +24962,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1355",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1355",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1355",
         "status": "draft",
         "compose": {
           "include": [
@@ -25178,7 +25178,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1356",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1356",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1356",
         "status": "draft",
         "compose": {
           "include": [
@@ -25424,7 +25424,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1265.28",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1265.28",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1265.28",
         "status": "active",
         "compose": {
           "include": [
@@ -25488,7 +25488,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1093.43",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1093.43",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1093.43",
         "status": "active",
         "compose": {
           "include": [
@@ -25558,7 +25558,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1351",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1351",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1351",
         "status": "draft",
         "compose": {
           "include": [
@@ -26484,7 +26484,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1265.26",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1265.26",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1265.26",
         "status": "active",
         "compose": {
           "include": [
@@ -26521,7 +26521,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1093.41",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1093.41",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1093.41",
         "status": "active",
         "compose": {
           "include": [
@@ -26549,7 +26549,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1352",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1352",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1352",
         "status": "draft",
         "compose": {
           "include": [
@@ -28035,7 +28035,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1265.27",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1265.27",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1265.27",
         "status": "active",
         "compose": {
           "include": [
@@ -28060,7 +28060,7 @@
       "resource": {
         "resourceType": "ValueSet",
         "id": "2.16.840.1.113883.3.464.1004.1093.42",
-        "url": "ValueSet/2.16.840.1.113883.3.464.1004.1093.42",
+        "url": "http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1093.42",
         "status": "active",
         "compose": {
           "include": [
