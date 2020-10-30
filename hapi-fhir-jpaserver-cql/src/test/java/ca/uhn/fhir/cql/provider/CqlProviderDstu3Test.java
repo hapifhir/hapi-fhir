@@ -68,7 +68,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		myProvider = myCqlProviderLoader.buildDstu3Provider();
 
 		// Load terminology for measure tests (HEDIS measures)
-		loadBundle("measure-terminology-bundle.json");
+		loadBundle("hedis-valuesets-bundle.json");
 
 		// Load libraries
 		loadResource("library/library-fhir-model-definition.json");
@@ -101,12 +101,14 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 
 	@Test
 	public void evaluatePatientBundleMeasure() throws IOException {
-		Bundle result = loadBundle("patient-measure-test-bundle.json");
+		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
+		loadResource("measure-asf.json");
+		Bundle result = loadBundle("test-patient-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-		assertThat(entries, hasSize(23));
+		assertThat(entries, hasSize(22));
 		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-		assertEquals(entries.get(22).getResponse().getStatus(), "201 Created");
+		assertEquals(entries.get(21).getResponse().getStatus(), "201 Created");
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String patient = "Patient/Patient-6529";
