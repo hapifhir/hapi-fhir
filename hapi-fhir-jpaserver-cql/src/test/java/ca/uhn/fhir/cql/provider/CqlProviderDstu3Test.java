@@ -128,10 +128,10 @@ Direct Reference Codes:
 	 */
 
 	@Test
-	public void evaluatePatientBundleMeasure() throws IOException {
+	public void evaluatePatientMeasure() throws IOException {
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource("measure-asf.json");
-		Bundle result = loadBundle("test-patient-data.json");
+		Bundle result = loadBundle("test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		assertThat(entries, hasSize(22));
@@ -162,6 +162,44 @@ Direct Reference Codes:
 		for (int i = 0; i < runCount; ++i) {
 			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
 				patient, null, null, null, null, null, null);
+		}
+
+		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
+
+	}
+
+
+	@Test
+	public void evaluatePopulationMeasure() throws IOException {
+		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
+		loadResource("measure-asf.json");
+		loadBundle("test-patient-6529-data.json");
+		// Add a second patient with the same data
+		loadBundle("test-patient-9999-x-data.json");
+
+		IdType measureId = new IdType("Measure", "measure-asf");
+		String periodStart = "2003-01-01";
+		String periodEnd = "2003-12-31";
+
+		// First run to absorb startup costs
+		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
+			null, null, null, null, null, null, null);
+		// Assert it worked
+		assertThat(report.getGroup(), hasSize(1));
+		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
+			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
+				assertTrue(population.getCount() > 0);
+			}
+		}
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+
+		// Now timed runs
+		int runCount = 10;
+		StopWatch sw = new StopWatch();
+		for (int i = 0; i < runCount; ++i) {
+			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
+				null, null, null, null, null, null, null);
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
