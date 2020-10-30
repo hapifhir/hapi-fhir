@@ -11,6 +11,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,8 +51,18 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	MeasureOperationsProvider myProvider;
 
 	@BeforeEach
-	public void before() {
+	public void before() throws IOException {
 		myProvider = myCqlProviderLoader.buildDstu3Provider();
+
+		// Load terminology for measure tests (HEDIS measures)
+
+		// FIXME KBD why won't this load?
+		loadBundle("measure-terminology-bundle.json");
+
+		// load test data and conversion library for $apply operation tests
+		loadResource("general-practitioner.json");
+		loadResource("general-patient.json");
+		loadResource("general-fhirhelpers-3.json");
 	}
 
 	@Test
@@ -75,11 +86,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 
 	@Test
 	public void evaluatePatientBundleMeasure() throws IOException {
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("patient-measure-test-bundle.json");
-		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
-		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
+		Bundle result = loadBundle("patient-measure-test-bundle.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		assertThat(entries, hasSize(24));
@@ -102,4 +109,26 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 			}
 		}
 	}
+
+	private Bundle loadBundle(String theLocation) throws IOException {
+		String json = stringFromResource(theLocation);
+		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
+		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
+		return result;
+	}
+
+	private String stringFromResource(String theLocation) throws IOException {
+		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
+		Resource resource = resourceLoader.getResource(theLocation);
+		return IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
+	}
+
+	private IBaseResource loadResource(String theLocation) throws IOException {
+		String json = stringFromResource(theLocation);
+		IBaseResource resource = myFhirContext.newJsonParser().parseResource(json);
+		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resource.getIdElement().getResourceType());
+		dao.update(resource);
+		return resource;
+	}
+
 }

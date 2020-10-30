@@ -1202,13 +1202,15 @@
       "resource": {
         "resourceType": "Library",
         "id": "library-asf-logic",
+			"name": "library-asf-logic",
         "version": "1.0.0",
         "status": "active",
         "experimental": true,
         "type": {
           "coding": [
             {
-              "code": "logic-library"
+					"system": "http://hl7.org/fhir/library-type",
+               "code": "logic-library"
             }
           ]
         },

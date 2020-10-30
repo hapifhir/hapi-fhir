@@ -1,0 +1,120 @@
+{
+  "resourceType": "Practitioner",
+  "id": "Practitioner-12208",
+  "identifier": [
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/identifier-type",
+            "code": "SB",
+            "display": "Social Beneficiary Identifier"
+          }
+        ],
+        "text": "US Social Security Number"
+      },
+      "system": "http://hl7.org/fhir/sid/us-ssn",
+      "value": "000012208"
+    },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/v2/0203",
+            "code": "PRN",
+            "display": "Provider number"
+          }
+        ],
+        "text": "US National Provider Identifier"
+      },
+      "system": "http://hl7.org/fhir/sid/us-npi",
+      "value": "9999912208"
+    },
+    {
+      "use": "official",
+      "type": {
+        "coding": [
+          {
+            "system": "http://hl7.org/fhir/identifier-type",
+            "code": "SB",
+            "display": "Social Beneficiary Identifier"
+          }
+        ],
+        "text": "Michigan Common Key Service Identifier"
+      },
+      "system": "http://mihin.org/fhir/cks",
+      "value": "c6cc1bbaf5ea41c5a0d267e3a655def1"
+    }
+  ],
+  "name": [
+    {
+      "family": "Sawyer",
+      "given": [
+        "Jay",
+        "McCann"
+      ],
+      "suffix": [
+        "MD"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "989-555-8443",
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "value": "989-555-5764",
+      "use": "work"
+    }
+  ],
+  "address": [
+    {
+      "line": [
+        "77 S Pine Place"
+      ],
+      "city": "Beaverton",
+      "state": "MI",
+      "postalCode": "48612"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1970-08-07",
+  "qualification": [
+    {
+      "identifier": [
+        {
+          "use": "official",
+          "type": {
+            "coding": [
+              {
+                "system": "http://hl7.org/fhir/v2/0203",
+                "code": "MD",
+                "display": "Medical License number"
+              }
+            ],
+            "text": "Michigan Medical License"
+          },
+          "system": "http://michigan.gov/fhir/medical-license",
+          "value": "LARA-12208",
+          "assigner": {
+            "display": "State of Michigan"
+          }
+        }
+      ],
+      "code": {
+        "coding": [
+          {
+            "system": "http://michigan.gov/lara/license-type",
+            "code": "4305",
+            "display": "Medical Doctor"
+          }
+        ]
+      }
+    }
+  ]
+}
