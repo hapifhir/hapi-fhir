@@ -2582,10 +2582,7 @@
 		<profile>
 			<id>CI</id>
 			<properties>
-				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m
-					-XX:TieredStopAtLevel=1 -Xverify:none -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M
-					-XX:MaxMetaspaceSize=2048M
-				</surefire_jvm_args>
+				<surefire_jvm_args>-Dspring.test.context.cache.maxSize=2 -Dfile.encoding=UTF-8 -Xmx2648m -XX:TieredStopAtLevel=1 -Xverify:none -Dfile.encoding=UTF-8 -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M</surefire_jvm_args>
 			</properties>
 			<build>
 				<plugins>

@@ -38,21 +38,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
-import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Required;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseJpaResourceProvider.class);
 
 
 	private IFhirResourceDao<T> myDao;
@@ -88,9 +84,6 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 
 	@Required
 	public void setDao(IFhirResourceDao<T> theDao) {
-		if (Measure.class.equals(this.getResourceType())) {
-			ourLog.info(">>> Setting dao on {} to {}", this, theDao);
-		}
 		myDao = theDao;
 	}
 
