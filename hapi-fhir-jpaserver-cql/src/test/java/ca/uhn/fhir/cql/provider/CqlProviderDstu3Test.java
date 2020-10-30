@@ -113,19 +113,29 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
-		StopWatch sw = new StopWatch();
-
+		// First run to absorb startup costs
 		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-					patient, null, null, null, null, null, null);
-
-		ourLog.info("Completed evaluateMeasure() in {}", sw);
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
-
+			patient, null, null, null, null, null, null);
+		// Assert it worked
+		assertThat(report.getGroup(), hasSize(1));
+		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
 		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
 			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
 				assertTrue(population.getCount() > 0);
 			}
 		}
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+
+		// Now timed runs
+		int runCount = 10;
+		StopWatch sw = new StopWatch();
+		for (int i = 0; i < runCount; ++i) {
+			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
+				patient, null, null, null, null, null, null);
+		}
+
+		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
+
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {
