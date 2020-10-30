@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
+import ca.uhn.fhir.util.StopWatch;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -19,7 +20,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.platform.commons.util.StringUtils;
-import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
 import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +56,6 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	@Autowired
 	private ValueSetResourceProvider myValueSetResourceProvider;
 
-	private EvaluationProviderFactory evaluationProviderFactory;
 	MeasureOperationsProvider myProvider;
 
 	@BeforeEach
@@ -114,8 +113,13 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
+		StopWatch sw = new StopWatch();
+
 		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
 					patient, null, null, null, null, null, null);
+
+		ourLog.info("Completed evaluateMeasure() in {}", sw);
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
 			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
