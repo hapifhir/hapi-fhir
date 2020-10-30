@@ -253,6 +253,7 @@ public abstract class BaseParser implements IParser {
 
 	protected void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
+		Boolean populated = false;
 
 		if (theResource instanceof IResource) {
 			List<? extends IResource> containedResources = ((IResource) theResource).getContained().getContainedResources();
@@ -264,7 +265,9 @@ public abstract class BaseParser implements IParser {
 					}
 					contained.getExistingIdToContainedResource().put(nextId, next);
 				}
+				contained.addContained(next);
 			}
+			populated = true;
 		} else if (theResource instanceof IDomainResource) {
 			List<? extends IAnyResource> containedResources = ((IDomainResource) theResource).getContained();
 			for (IAnyResource next : containedResources) {
@@ -275,10 +278,13 @@ public abstract class BaseParser implements IParser {
 					}
 					contained.getExistingIdToContainedResource().put(nextId, next);
 				}
+				contained.addContained(next);
 			}
+			populated = true;
 		}
 
-		containResourcesForEncoding(contained, theResource, theResource);
+		if (!populated)
+			containResourcesForEncoding(contained, theResource, theResource);
 		contained.assignIdsToContainedResources();
 		myContainedResources = contained;
 
