@@ -126,6 +126,11 @@ public class SearchParamPresent extends BasePartitionable implements Serializabl
 		myPartitionSettings = thePartitionSettings;
 	}
 
+	public static long calculateHashPresence(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashPresence(thePartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
+	}
+
 	public static long calculateHashPresence(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, Boolean thePresent) {
 		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
 		return BaseResourceIndexedSearchParam.hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);

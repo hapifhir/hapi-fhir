@@ -270,8 +270,18 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
 	}
 
+	public static long calculateHashExact(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValueExact) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashExact(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
+	}
+
 	public static long calculateHashExact(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theValueExact) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
+	}
+
+	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashNormalized(thePartitionSettings, requestPartitionId, theModelConfig, theResourceType, theParamName, theValueNormalized);
 	}
 
 	public static long calculateHashNormalized(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, ModelConfig theModelConfig, String theResourceType, String theParamName, String theValueNormalized) {

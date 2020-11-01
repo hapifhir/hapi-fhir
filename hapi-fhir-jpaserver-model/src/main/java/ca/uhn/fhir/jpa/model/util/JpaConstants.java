@@ -204,6 +204,11 @@ public class JpaConstants {
 	public static final String EXT_SEARCHPARAM_PHONETIC_ENCODER = "http://hapifhir.io/fhir/StructureDefinition/searchparameter-phonetic-encoder";
 
 	/**
+	 * The name of the default partition
+	 */
+	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

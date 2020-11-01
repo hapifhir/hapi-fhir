@@ -27,9 +27,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -39,7 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooks;
 import static ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster.doCallHooksAndReturnObject;
@@ -102,9 +105,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				requestPartitionId = null;
 			}
 
-			validatePartition(requestPartitionId, theResourceType, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
-
-			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
 		}
 
 		return RequestPartitionId.allPartitions();
@@ -132,53 +133,29 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			requestPartitionId = (RequestPartitionId) doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE, params);
 
 			String resourceName = myFhirContext.getResourceType(theResource);
-			validatePartition(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
+			validateSinglePartitionForCreate(requestPartitionId, resourceName, Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE);
 
-			return normalizeAndNotifyHooks(requestPartitionId, theRequest);
+			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
 		}
 
 		return RequestPartitionId.allPartitions();
 	}
 
 	/**
-	 * If the partition only has a name but not an ID, this method resolves the ID
+	 * If the partition only has a name but not an ID, this method resolves the ID.
+	 * <p>
+	 * If the partition has an ID but not a name, the name is resolved.
+	 * <p>
+	 * If the partition has both, they are validated to ensure that they correspond.
 	 */
 	@Nonnull
-	private RequestPartitionId normalizeAndNotifyHooks(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest) {
+	private RequestPartitionId validateNormalizeAndNotifyHooksForRead(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest) {
 		RequestPartitionId retVal = theRequestPartitionId;
 
-		if (retVal.getPartitionName() != null) {
-
-			PartitionEntity partition;
-			try {
-				partition = myPartitionConfigSvc.getPartitionByName(retVal.getPartitionName());
-			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionName", retVal.getPartitionName());
-				throw new ResourceNotFoundException(msg);
-			}
-
-			if (partition == null) {
-				Validate.isTrue(retVal.getPartitionId() == null, "Partition must be %s", PartitionLookupSvcImpl.DEFAULT_PARTITION_NAME);
-				retVal = RequestPartitionId.defaultPartition();
-			} else {
-				if (retVal.getPartitionId() != null) {
-					Validate.isTrue(retVal.getPartitionId().equals(partition.getId()), "Partition name %s does not match ID %n", retVal.getPartitionName(), retVal.getPartitionId());
-				} else {
-					retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), retVal.getPartitionName(), retVal.getPartitionDate());
-				}
-			}
-
-		} else if (retVal.getPartitionId() != null) {
-
-			PartitionEntity partition;
-			try {
-				partition = myPartitionConfigSvc.getPartitionById(retVal.getPartitionId());
-			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionId", retVal.getPartitionId());
-				throw new ResourceNotFoundException(msg);
-			}
-			retVal = RequestPartitionId.forPartitionIdAndName(partition.getId(), partition.getName(), retVal.getPartitionDate());
-
+		if (retVal.getPartitionNames() != null) {
+			retVal = validateAndNormalizePartitionNames(retVal);
+		} else if (retVal.getPartitionIds() != null) {
+			retVal = validateAndNormalizePartitionIds(retVal);
 		}
 
 		// Note: It's still possible that the partition only has a date but no name/id
@@ -193,27 +170,111 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 	}
 
-	private void validatePartition(RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
+	private RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+		List<String> names = null;
+		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
+
+			PartitionEntity partition;
+			Integer id = theRequestPartitionId.getPartitionIds().get(i);
+			if (id == null) {
+				partition = null;
+			} else {
+				try {
+					partition = myPartitionConfigSvc.getPartitionById(id);
+				} catch (IllegalArgumentException e) {
+					String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionIds().get(i));
+					throw new ResourceNotFoundException(msg);
+				}
+			}
+
+			if (theRequestPartitionId.getPartitionNames() != null) {
+				if (partition == null) {
+					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
+				} else {
+					Validate.isTrue(Objects.equals(theRequestPartitionId.getPartitionIds().get(i), partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionNames().get(i), theRequestPartitionId.getPartitionIds().get(i));
+				}
+			} else {
+				if (names == null) {
+					names = new ArrayList<>();
+				}
+				if (partition != null) {
+					names.add(partition.getName());
+				} else {
+					names.add(null);
+				}
+			}
+
+		}
+
+		if (names != null) {
+			return RequestPartitionId.forPartitionIdsAndNames(names, theRequestPartitionId.getPartitionIds(), theRequestPartitionId.getPartitionDate());
+		}
+
+		return theRequestPartitionId;
+	}
+
+	private RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+		List<Integer> ids = null;
+		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
+
+			PartitionEntity partition;
+			try {
+				partition = myPartitionConfigSvc.getPartitionByName(theRequestPartitionId.getPartitionNames().get(i));
+			} catch (IllegalArgumentException e) {
+				String msg = myFhirContext.getLocalizer().getMessage(RequestPartitionHelperSvc.class, "unknownPartitionName", theRequestPartitionId.getPartitionNames().get(i));
+				throw new ResourceNotFoundException(msg);
+			}
+
+			if (theRequestPartitionId.getPartitionIds() != null) {
+				if (partition == null) {
+					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
+				} else {
+					Validate.isTrue(Objects.equals(theRequestPartitionId.getPartitionIds().get(i), partition.getId()), "Partition name %s does not match ID %n", theRequestPartitionId.getPartitionNames().get(i), theRequestPartitionId.getPartitionIds().get(i));
+				}
+			} else {
+				if (ids == null) {
+					ids = new ArrayList<>();
+				}
+				if (partition != null) {
+					ids.add(partition.getId());
+				} else {
+					ids.add(null);
+				}
+			}
+
+		}
+
+		if (ids != null) {
+			return RequestPartitionId.forPartitionIdsAndNames(theRequestPartitionId.getPartitionNames(), ids, theRequestPartitionId.getPartitionDate());
+		}
+
+		return theRequestPartitionId;
+	}
+
+	private void validateSinglePartitionForCreate(RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
 		if (theRequestPartitionId == null) {
 			throw new InternalErrorException("No interceptor provided a value for pointcut: " + thePointcut);
 		}
 
-		if (theRequestPartitionId.getPartitionId() != null) {
+		validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionIds());
+		validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionNames());
 
-			// Make sure we're not using one of the conformance resources in a non-default partition
+		// Make sure we're not using one of the conformance resources in a non-default partition
+		if ((theRequestPartitionId.getPartitionIds() != null && theRequestPartitionId.getPartitionIds().get(0) != null) ||
+			theRequestPartitionId.getPartitionNames() != null && !JpaConstants.DEFAULT_PARTITION_NAME.equals(theRequestPartitionId.getPartitionNames().get(0))) {
+
 			if (myPartitioningBlacklist.contains(theResourceName)) {
 				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "blacklistedResourceTypeForPartitioning", theResourceName);
 				throw new UnprocessableEntityException(msg);
 			}
 
-			// Make sure the partition exists
-			try {
-				myPartitionConfigSvc.getPartitionById(theRequestPartitionId.getPartitionId());
-			} catch (IllegalArgumentException e) {
-				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "unknownPartitionId", theRequestPartitionId.getPartitionId());
-				throw new InvalidRequestException(msg);
-			}
+		}
 
+	}
+
+	private void validateSinglePartitionIdOrNameForCreate(@Nullable List<?> thePartitionIds) {
+		if (thePartitionIds != null && thePartitionIds.size() != 1) {
+			throw new InternalErrorException("RequestPartitionId must contain a single partition for create operations, found: " + thePartitionIds);
 		}
 	}
 }

@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -78,7 +78,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Create patients
 
-		IIdType idA = createPatient(withTenant(PartitionLookupSvcImpl.DEFAULT_PARTITION_NAME), withActiveTrue());
+		IIdType idA = createPatient(withTenant(JpaConstants.DEFAULT_PARTITION_NAME), withActiveTrue());
 		createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		runInTransaction(() -> {
@@ -89,7 +89,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Now read back
 
-		myTenantClientInterceptor.setTenantId(PartitionLookupSvcImpl.DEFAULT_PARTITION_NAME);
+		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
 		assertTrue(response.getActive());
 

@@ -26,6 +26,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @since 5.0.0
@@ -35,16 +39,26 @@ public class RequestPartitionId {
 	private static final RequestPartitionId ALL_PARTITIONS = new RequestPartitionId();
 	private final LocalDate myPartitionDate;
 	private final boolean myAllPartitions;
-	private final Integer myPartitionId;
-	private final Collection<Integer> myAdditionalPartitionIds;
-	private final String myPartitionName;
+	private final List<Integer> myPartitionIds;
+	private final List<String> myPartitionNames;
 
 	/**
 	 * Constructor for a single partition
 	 */
 	private RequestPartitionId(@Nullable String thePartitionName, @Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		myPartitionId = thePartitionId;
-		myPartitionName = thePartitionName;
+		myPartitionIds = toListOrNull(thePartitionId);
+		myPartitionNames = toListOrNull(thePartitionName);
+		myPartitionDate = thePartitionDate;
+		myAllPartitions = false;
+	}
+
+	/**
+	 * Constructor for a multiple partition
+	 */
+	// FIXME: don't allow mixed null and non-null, and document this
+	private RequestPartitionId(@Nullable List<String> thePartitionName, @Nullable List<Integer> thePartitionId, @Nullable LocalDate thePartitionDate) {
+		myPartitionIds = toListOrNull(thePartitionId);
+		myPartitionNames = toListOrNull(thePartitionName);
 		myPartitionDate = thePartitionDate;
 		myAllPartitions = false;
 	}
@@ -55,8 +69,8 @@ public class RequestPartitionId {
 	private RequestPartitionId() {
 		super();
 		myPartitionDate = null;
-		myPartitionName = null;
-		myPartitionId = null;
+		myPartitionNames = null;
+		myPartitionIds = null;
 		myAllPartitions = true;
 	}
 
@@ -70,28 +84,18 @@ public class RequestPartitionId {
 	}
 
 	@Nullable
-	public String getPartitionName() {
-		return myPartitionName;
+	public List<String> getPartitionNames() {
+		return myPartitionNames;
 	}
 
 	@Nullable
-	public Integer getPartitionId() {
-		return myPartitionId;
+	public List<Integer> getPartitionIds() {
+		return myPartitionIds;
 	}
 
 	@Override
 	public String toString() {
-		return "RequestPartitionId[id=" + getPartitionId() + ", name=" + getPartitionName() + "]";
-	}
-
-	/**
-	 * Returns the partition ID (numeric) as a string, or the string "null"
-	 */
-	public String getPartitionIdStringOrNullString() {
-		if (myPartitionId == null) {
-			return "null";
-		}
-		return myPartitionId.toString();
+		return "RequestPartitionId[id=" + getPartitionIds() + ", name=" + getPartitionNames() + "]";
 	}
 
 	@Override
@@ -109,8 +113,8 @@ public class RequestPartitionId {
 		return new EqualsBuilder()
 			.append(myAllPartitions, that.myAllPartitions)
 			.append(myPartitionDate, that.myPartitionDate)
-			.append(myPartitionId, that.myPartitionId)
-			.append(myPartitionName, that.myPartitionName)
+			.append(myPartitionIds, that.myPartitionIds)
+			.append(myPartitionNames, that.myPartitionNames)
 			.isEquals();
 	}
 
@@ -119,9 +123,46 @@ public class RequestPartitionId {
 		return new HashCodeBuilder(17, 37)
 			.append(myPartitionDate)
 			.append(myAllPartitions)
-			.append(myPartitionId)
-			.append(myPartitionName)
+			.append(myPartitionIds)
+			.append(myPartitionNames)
 			.toHashCode();
+	}
+
+	public Integer getFirstPartitionIdOrNull() {
+		if (myPartitionIds != null) {
+			return myPartitionIds.get(0);
+		}
+		return null;
+	}
+
+	public String getFirstPartitionNameOrNull() {
+		if (myPartitionNames != null) {
+			return myPartitionNames.get(0);
+		}
+		return null;
+	}
+
+	public boolean isDefaultPartition() {
+		return getFirstPartitionIdOrNull() == null;
+	}
+
+	@Nullable
+	private static <T> List<T> toListOrNull(@Nullable List<T> theList) {
+		if (theList != null) {
+			if (theList.size() == 1) {
+				return Collections.singletonList(theList.get(0));
+			}
+			return Collections.unmodifiableList(new ArrayList<>(theList));
+		}
+		return null;
+	}
+
+	@Nullable
+	private static <T> List<T> toListOrNull(@Nullable T theObject) {
+		if (theObject != null) {
+			return Collections.singletonList(theObject);
+		}
+		return null;
 	}
 
 	@Nonnull
@@ -164,13 +205,26 @@ public class RequestPartitionId {
 		return new RequestPartitionId(thePartitionName, thePartitionId, thePartitionDate);
 	}
 
+	@Nonnull
+	public static RequestPartitionId forPartitionIdsAndNames(List<String> thePartitionNames, List<Integer> thePartitionIds, LocalDate thePartitionDate) {
+		return new RequestPartitionId(thePartitionNames, thePartitionIds, thePartitionDate);
+	}
+
 	/**
 	 * Create a string representation suitable for use as a cache key. Null aware.
+	 * <p>
+	 * Returns the partition IDs (numeric) as a joined string with a space between, using the string "null" for any null values
 	 */
-	public static String stringifyForKey(RequestPartitionId theRequestPartitionId) {
-		String retVal = "(null)";
+	public static String stringifyForKey(@Nullable RequestPartitionId theRequestPartitionId) {
+		String retVal = "(no partition)";
 		if (theRequestPartitionId != null) {
-			retVal = theRequestPartitionId.getPartitionIdStringOrNullString();
+			String result;
+			if (theRequestPartitionId.myPartitionIds != null) {
+				result = theRequestPartitionId.myPartitionIds.stream().map(t -> t.toString()).collect(Collectors.joining(" "));
+			} else {
+				result = "null";
+			}
+			retVal = result;
 		}
 		return retVal;
 	}

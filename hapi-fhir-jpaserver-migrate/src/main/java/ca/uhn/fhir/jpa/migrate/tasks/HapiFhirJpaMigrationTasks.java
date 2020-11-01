@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
@@ -855,7 +856,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
 					.setColumnName("HASH_NORM_PREFIX")
 					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new PartitionSettings(), null, new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
-					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
+					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(new PartitionSettings(), (ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId) null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 				);
 		}
 
@@ -903,7 +904,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.39")
 					.setColumnName("HASH_IDENTITY")
 					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
-					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
+					.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), (ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId) null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")))
 					.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")))
 					.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), null, t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")))
 				);
@@ -932,8 +933,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxUri
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.44")
 					.setColumnName("HASH_IDENTITY")
-					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME")))
-					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(new PartitionSettings(), null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
+					.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), (RequestPartitionId)null, t.getResourceType(), t.getString("SP_NAME")))
+					.addCalculator("HASH_URI", t -> ResourceIndexedSearchParamUri.calculateHashUri(new PartitionSettings(), (RequestPartitionId)null, t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_URI")))
 				);
 		}
 
@@ -966,7 +967,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
-			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), null, resType, paramName, present);
+			Long hash = SearchParamPresent.calculateHashPresence(new PartitionSettings(), (RequestPartitionId)null, resType, paramName, present);
 			consolidateSearchParamPresenceIndexesTask.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);

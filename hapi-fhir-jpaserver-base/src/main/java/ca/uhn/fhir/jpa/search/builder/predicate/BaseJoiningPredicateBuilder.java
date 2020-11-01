@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -70,12 +71,11 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 	public Condition createPartitionIdPredicate(RequestPartitionId theRequestPartitionId) {
 		if (theRequestPartitionId != null && !theRequestPartitionId.isAllPartitions()) {
 			Condition condition;
-			Integer partitionId = theRequestPartitionId.getPartitionId();
-			if (partitionId != null) {
-				Object placeholder = generatePlaceholder(partitionId);
-				condition = BinaryCondition.equalTo(getPartitionIdColumn(), placeholder);
-			} else {
+			if (theRequestPartitionId.isDefaultPartition()) {
 				condition = UnaryCondition.isNull(getPartitionIdColumn());
+			} else {
+				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIds());
+				condition = new InCondition(getPartitionIdColumn(), placeholders);
 			}
 			return condition;
 		} else {

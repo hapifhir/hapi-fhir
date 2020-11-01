@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.github.benmanes.caffeine.cache.CacheLoader;
@@ -47,7 +48,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 
-	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
 	private static final Pattern PARTITION_NAME_VALID_PATTERN = Pattern.compile("[a-zA-Z0-9_-]+");
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionLookupSvcImpl.class);
 
@@ -79,7 +79,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 	@Override
 	public PartitionEntity getPartitionByName(String theName) {
 		Validate.notBlank(theName, "The name must not be null or blank");
-		if (DEFAULT_PARTITION_NAME.equals(theName)) {
+		if (JpaConstants.DEFAULT_PARTITION_NAME.equals(theName)) {
 			return null;
 		}
 		return myNameToPartitionCache.get(theName);
@@ -161,7 +161,7 @@ public class PartitionLookupSvcImpl implements IPartitionLookupSvc {
 			throw new InvalidRequestException(msg);
 		}
 
-		if (thePartition.getName().equals(DEFAULT_PARTITION_NAME)) {
+		if (thePartition.getName().equals(JpaConstants.DEFAULT_PARTITION_NAME)) {
 			String msg = myFhirCtx.getLocalizer().getMessageSanitized(PartitionLookupSvcImpl.class, "cantCreateDefaultPartition");
 			throw new InvalidRequestException(msg);
 		}

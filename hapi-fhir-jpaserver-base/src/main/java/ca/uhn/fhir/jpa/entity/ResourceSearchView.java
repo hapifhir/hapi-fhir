@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -32,6 +33,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -199,8 +201,13 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	}
 
 	@Override
-	public RequestPartitionId getPartitionId() {
-		return RequestPartitionId.fromPartitionId(myPartitionId);
+	@Nullable
+	public PartitionablePartitionId getPartitionId() {
+		if (myPartitionId != null) {
+			return new PartitionablePartitionId(myPartitionId, null);
+		} else {
+			return null;
+		}
 	}
 
 	public byte[] getResource() {

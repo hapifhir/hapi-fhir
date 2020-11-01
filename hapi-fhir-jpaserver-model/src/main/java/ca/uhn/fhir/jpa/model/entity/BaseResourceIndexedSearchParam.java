@@ -179,6 +179,11 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return myModelConfig;
 	}
 
+	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName);
+	}
+
 	public static long calculateHashIdentity(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
 	}
@@ -190,8 +195,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
 		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionId() != null) {
-				hasher.putInt(theRequestPartitionId.getPartitionId());
+			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
+			if (partitionId != null) {
+				hasher.putInt(partitionId);
 			}
 		}
 

@@ -341,7 +341,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
-			assertNull(resourceTable.getPartitionId().getPartitionId());
+			assertNull(resourceTable.getPartitionId());
 			assertEquals(myPartitionDate, resourceTable.getPartitionId().getPartitionDate());
 		});
 	}
@@ -2458,8 +2458,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
 
 			RequestPartitionId partitionId = captor.getValue().get(RequestPartitionId.class);
-			assertEquals(1, partitionId.getPartitionId().intValue());
-			assertEquals("PART-1", partitionId.getPartitionName());
+			assertEquals(1, partitionId.getPartitionIds().get(0).intValue());
+			assertEquals("PART-1", partitionId.getPartitionNames().get(0));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

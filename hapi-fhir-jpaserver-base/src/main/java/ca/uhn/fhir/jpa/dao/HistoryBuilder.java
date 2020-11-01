@@ -142,8 +142,8 @@ public class HistoryBuilder {
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (!thePartitionId.isAllPartitions()) {
-			if (thePartitionId.getPartitionId() != null) {
-				predicates.add(theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue").as(Integer.class), thePartitionId.getPartitionId()));
+			if (thePartitionId.getFirstPartitionIdOrNull() != null) {
+				predicates.add(theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue").as(Integer.class), thePartitionId.getFirstPartitionIdOrNull()));
 			} else {
 				predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue").as(Integer.class)));
 			}

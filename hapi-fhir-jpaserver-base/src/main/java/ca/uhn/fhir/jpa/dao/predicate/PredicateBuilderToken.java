@@ -151,7 +151,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 			theBuilder,
 			theFrom,
 			null,
-                theRequestPartitionId);
+			theRequestPartitionId);
 	}
 
 	private Collection<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters,

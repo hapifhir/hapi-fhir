@@ -44,8 +44,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
@@ -62,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -87,7 +84,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Service
 public class IdHelperService {
-	private static final Logger ourLog = LoggerFactory.getLogger(IdHelperService.class);
 	private static final String RESOURCE_PID = "RESOURCE_PID";
 
 	@Autowired
@@ -203,8 +199,8 @@ public class IdHelperService {
 					if (theRequestPartitionId.isAllPartitions()) {
 						views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
 					} else {
-						if (theRequestPartitionId.getPartitionId() != null) {
-							views = myForcedIdDao.findByTypeAndForcedIdInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionId());
+						if (theRequestPartitionId.getPartitionIds() != null) {
+							views = myForcedIdDao.findByTypeAndForcedIdInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
 						} else {
 							views = myForcedIdDao.findByTypeAndForcedIdInPartitionNull(nextResourceType, nextIds);
 						}
@@ -276,10 +272,10 @@ public class IdHelperService {
 				throw new PreconditionFailedException(msg);
 			}
 		} else {
-			if (theRequestPartitionId.getPartitionId() == null) {
+			if (theRequestPartitionId.getPartitionIds() == null) {
 				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
 			} else {
-				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionId(), theResourceType, theId);
+				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionIds(), theResourceType, theId);
 			}
 		}
 
@@ -333,8 +329,8 @@ public class IdHelperService {
 				if (theRequestPartitionId.isAllPartitions()) {
 					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 				} else {
-					if (theRequestPartitionId.getPartitionId() != null) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionId());
+					if (theRequestPartitionId.getPartitionIds() != null) {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
 					} else {
 						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
 					}
@@ -379,8 +375,8 @@ public class IdHelperService {
 			if (theRequestPartitionId.isAllPartitions()) {
 				lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
 			} else {
-				if (theRequestPartitionId.getPartitionId() != null) {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionId());
+				if (theRequestPartitionId.getPartitionIds() != null) {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionIds());
 				} else {
 					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
 				}
@@ -448,23 +444,14 @@ public class IdHelperService {
 
 	@Nonnull
 	public Long getPidOrThrowException(IIdType theId) {
-		return getPidOrThrowException(theId, null);
-	}
-
-	@Nonnull
-	public Long getPidOrThrowException(IAnyResource theResource) {
-		return (Long) theResource.getUserData(RESOURCE_PID);
-	}
-
-	@Nonnull
-	public Long getPidOrThrowException(IIdType theId, RequestDetails theRequestDetails) {
 		List<IIdType> ids = Collections.singletonList(theId);
 		List<ResourcePersistentId> resourcePersistentIds = this.resolveResourcePersistentIdsWithCache(RequestPartitionId.allPartitions(), ids);
 		return resourcePersistentIds.get(0).getIdAsLong();
 	}
 
-	public Map<Long, IIdType> getPidToIdMap(Collection<IIdType> theIds, RequestDetails theRequestDetails) {
-		return theIds.stream().collect(Collectors.toMap(this::getPidOrThrowException, Function.identity()));
+	@Nonnull
+	public Long getPidOrThrowException(IAnyResource theResource) {
+		return (Long) theResource.getUserData(RESOURCE_PID);
 	}
 
 	public IIdType resourceIdFromPidOrThrowException(Long thePid) {
