@@ -650,8 +650,9 @@ public class FhirInstanceValidatorDstu3Test {
 
 			ourLog.info("Validating {}", next.getId());
 			ourLog.trace(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next));
+			String reEncoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(next);
 
-			ValidationResult output = myVal.validateWithResult(next);
+			ValidationResult output = myVal.validateWithResult(reEncoded);
 			List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 			errors = errors
@@ -660,13 +661,23 @@ public class FhirInstanceValidatorDstu3Test {
 					if (t.getLocationString().contains("example")) {
 						ourLog.warn("Ignoring error in example path: {}", t);
 						return false;
+					} else if (t.getMessage().contains("ValueSet as a URI SHALL start with http:// or https:// or urn:")) {
+						// Some DSTU3 structures have missing binding information
+						return false;
 					} else {
 						return true;
 					}
 				})
 				.collect(Collectors.toList());
-			;
 
+			if (errors.size() > 0) {
+				StringBuilder b = new StringBuilder();
+				int line = 0;
+				for (String nextLine : reEncoded.split("\n")) {
+					b.append(line++).append(": ").append(nextLine).append("\n");
+				}
+				ourLog.info("Failing validation:\n{}", b);
+			}
 
 			assertThat("Failed to validate " + i.getFullUrl() + " - " + errors, errors, empty());
 		}
@@ -680,7 +691,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.getMessages().toString(), containsString("Element 'Bundle.type': minimum required = 1"));
+		assertThat(output.getMessages().toString(), containsString("Bundle.type: minimum required = 1, but only found 0"));
 	}
 
 	@Test
@@ -819,7 +830,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Element 'Medication.ingredient[0].item[x]': minimum required = 1"));
+		assertThat(outcome.toString(), containsString("Medication.ingredient.item[x]: minimum required = 1, but only found 0"));
 
 	}
 
@@ -1106,9 +1117,9 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element 'Observation.context': max allowed = 0, but found 1"));
-		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("Observation.subject: minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("Observation.context: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Observation.device: minimum required = 1, but only found 0"));
 	}
 
 	@Test
@@ -1137,7 +1148,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Profile http://hl7.org/fhir/StructureDefinition/Observation, Element 'Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
 
 	}
 
@@ -1265,7 +1276,7 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
-			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)",
+			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type), and a code should come from this value set unless it has no suitable code and the validator cannot judge what is suitable) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

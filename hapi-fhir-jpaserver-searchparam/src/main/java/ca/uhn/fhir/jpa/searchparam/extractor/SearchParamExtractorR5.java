@@ -116,7 +116,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
+		public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
 			return null;
 		}
 
