@@ -114,13 +114,13 @@ public final class EmpiMatchOutcome {
 	public Double getNormalizedScore() {
 		if (vector == 0) {
 			return 0.0;
-		} else if (score > vector) {
-			return 1.0;
 		}
 
-		double retVal = score / vector;
+		double retVal = score / Long.bitCount(vector);
 		if (retVal < 0) {
 			retVal = 0.0;
+		} else if (retVal > 1.0) {
+			return 1.0;
 		}
 		return retVal;
 	}
