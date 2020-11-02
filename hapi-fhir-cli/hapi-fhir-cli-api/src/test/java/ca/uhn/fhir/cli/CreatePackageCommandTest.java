@@ -11,7 +11,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.utilities.cache.NpmPackage;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,14 +32,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CreatePackageCommandTest extends BaseTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CreatePackageCommandTest.class);
-	private File myWorkDirectory;
-	private FhirContext myContext = FhirContext.forR4();
-	private File myTargetDirectory;
-	private File myExtractDirectory;
 
 	static {
 		System.setProperty("test", "true");
 	}
+
+	private File myWorkDirectory;
+	private FhirContext myContext = FhirContext.forR4();
+	private File myTargetDirectory;
+	private File myExtractDirectory;
 
 	@BeforeEach
 	public void start() {
