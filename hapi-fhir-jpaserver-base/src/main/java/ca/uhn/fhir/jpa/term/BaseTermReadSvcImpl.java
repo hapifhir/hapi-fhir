@@ -81,10 +81,10 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
@@ -93,7 +93,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queries.TermsQuery;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -1076,7 +1075,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private void addLoincFilterParentChildEqual(BooleanJunction<?> theBool, String theProperty, String theValue) {
 		logFilteringValueOnProperty(theValue, theProperty);
-		theBool.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));
+		// FIXME KHS
+//		theBool.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));
 	}
 
 	private void addLoincFilterParentChildIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1086,7 +1086,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			logFilteringValueOnProperty(value, theFilter.getProperty());
 			terms.add(getPropertyTerm(theFilter.getProperty(), value));
 		}
-		theBool.must(new TermsQuery(terms));
+		// FIXME KHS
+//		theBool.must(new TermsQuery(terms));
 	}
 
 	private Term getPropertyTerm(String theProperty, String theValue) {
@@ -1113,7 +1114,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private void addLoincFilterAncestorEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
 		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
-		theBool.must(new TermsQuery(terms));
+		// FIXME KHS
+//		theBool.must(new TermsQuery(terms));
 	}
 
 	private void addLoincFilterAncestorIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1122,7 +1124,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (String value : values) {
 			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
 		}
-		theBool.must(new TermsQuery(terms));
+		// FIXME KHS
+//		theBool.must(new TermsQuery(terms));
 	}
 
 	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
@@ -1157,7 +1160,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
 		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
-		theBool.must(new TermsQuery(terms));
+		// FIXME KHS
+//		theBool.must(new TermsQuery(terms));
 	}
 
 	private void addLoincFilterDescendantIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1166,7 +1170,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (String value : values) {
 			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
 		}
-		theBool.must(new TermsQuery(terms));
+		// FIXME KHS
+//		theBool.must(new TermsQuery(terms));
 	}
 
 	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
@@ -1260,7 +1265,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 			String value = theFilter.getValue();
 			Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
-			theBool.must(new TermsQuery(term));
+			// FIXME KHS
+//			theBool.must(new TermsQuery(term));
 
 		}
 	}

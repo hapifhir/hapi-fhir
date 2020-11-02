@@ -739,9 +739,8 @@
 		<flyway_version>6.5.4</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.4.22.Final</hibernate_version>
-		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
-		<lucene_version>5.5.5</lucene_version>
+		<!-- FIXME KHS can this go higher? -->
+		<lucene_version>7.5.0</lucene_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
@@ -1416,17 +1415,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-orm</artifactId>
-				<version>${hibernate_search_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-search-elasticsearch</artifactId>
-				<version>${hibernate_search_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-engine</artifactId>
 				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>

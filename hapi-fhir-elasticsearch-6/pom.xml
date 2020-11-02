@@ -33,8 +33,9 @@
 			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
 			<version>6.5.4</version>
+			<!-- The following all need to be excluded to avoid conflicts with Hibernate-Search -->
+			<!--
 			<exclusions>
-				<!-- The following all need to be excluded to avoid conflicts with Hibernate-Search -->
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
 					<artifactId>jackson-core</artifactId>
@@ -96,49 +97,7 @@
 					<artifactId>snakeyaml</artifactId>
 				</exclusion>
 			</exclusions>
+		-->
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>shaded6</shadedClassifierName> <!-- Any name that makes sense -->
-							<relocations>
-								<relocation>
-									<pattern>com.carrotsearch.hppc</pattern>
-									<shadedPattern>com.shadehapi.carrotsearch.hppc</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>org.apache.logging.log4j</pattern>
-									<shadedPattern>org.shadehapi.apache.logging.log4j</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>org.apache.lucene</pattern>
-									<shadedPattern>org.shadehapi.apache.lucene</shadedPattern>
-								</relocation>
-								<relocation>
-									<pattern>org.elasticsearch</pattern>
-									<shadedPattern>org.shadehapi.elasticsearch</shadedPattern>
-								</relocation>
-								<reloaction>
-									<pattern>org.joda</pattern>
-									<shadedPattern>org.shadehapi.joda</shadedPattern>
-								</reloaction>
-							</relocations>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
 </project>

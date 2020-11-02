@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
-import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +10,6 @@ import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +22,8 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 	protected final String elasticsearchUserId = "";
 	protected final String elasticsearchPassword = "";
 
-
+// FIXME KHS
+	/*
 	@Override
 	@Bean
 	public Properties jpaProperties() {
@@ -49,7 +46,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 		return retVal;
 	}
-
+*/
 	@Bean
 	public EmbeddedElastic embeddedElasticSearch() {
 		EmbeddedElastic embeddedElastic = null;
