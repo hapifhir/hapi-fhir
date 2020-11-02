@@ -16,6 +16,10 @@
 
 	<name>HAPI FHIR - Clinical Quality Language</name>
 
+	<properties>
+		<opencds-cqf.version>0.4.0-SNAPSHOT</opencds-cqf.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -26,14 +30,6 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
 			<version>${project.version}</version>
-			<!--
-            <exclusions>
-                <exclusion>
-                    <groupId>ca.uhn.hapi.fhir</groupId>
-                    <artifactId>org.hl7.fhir.utilities</artifactId>
-                </exclusion>
-            </exclusions>
-        	-->
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -54,77 +50,18 @@
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-jpaserver-base</artifactId>
 			<version>${project.version}</version>
-			<!--
-            <exclusions>
-                <exclusion>
-                    <groupId>com.sun.activation</groupId>
-                    <artifactId>javax.activation</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.istack</groupId>
-                    <artifactId>istack-commons-runtime</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.opencds.cqf</groupId>
-                    <artifactId>dstu3</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.opencds.cqf</groupId>
-                    <artifactId>r4</artifactId>
-                </exclusion>
-            </exclusions>
-        	-->
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf</groupId>
 			<artifactId>dstu3</artifactId>
-			<version>0.4.0</version>
-			<!--
-            <exclusions>
-                <exclusion>
-                    <groupId>jakarta.xml.bind</groupId>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>info.bliki.wiki</groupId>
-                    <artifactId>bliki-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.istack</groupId>
-                    <artifactId>istack-commons-runtime</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.opencds.cqf</groupId>
-                    <artifactId>r4</artifactId>
-                </exclusion>
-            </exclusions>
-        	-->
+			<version>${opencds-cqf.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.opencds.cqf</groupId>
 			<artifactId>r4</artifactId>
-			<version>0.4.0</version>
-			<!--
-            <exclusions>
-                <exclusion>
-                    <groupId>jakarta.xml.bind</groupId>
-                    <artifactId>jakarta.xml.bind-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>info.bliki.wiki</groupId>
-                    <artifactId>bliki-core</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.sun.istack</groupId>
-                    <artifactId>istack-commons-runtime</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.opencds.cqf</groupId>
-                    <artifactId>dstu3</artifactId>
-                </exclusion>
-            </exclusions>
-        	-->
+			<version>${opencds-cqf.version}</version>
 		</dependency>
+
 		<!-- test -->
 		<dependency>
 			<groupId>org.springframework</groupId>
