@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * This data object captures the final outcome of an EMPI match
  */
 public final class EmpiMatchOutcome {
+
 	public static final EmpiMatchOutcome POSSIBLE_DUPLICATE = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final EmpiMatchOutcome NO_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.NO_MATCH);
 	public static final EmpiMatchOutcome NEW_PERSON_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.MATCH).setNewPerson(true);
@@ -57,6 +58,11 @@ public final class EmpiMatchOutcome {
 	 * Based on the EMPI Rules, what was the final match result?
 	 */
 	private EmpiMatchResultEnum myMatchResultEnum;
+
+	/**
+	 * Total number of EMPI rules checked for this outcome
+	 */
+	private int myEmpiRuleCount;
 
 	public EmpiMatchOutcome(Long theVector, Double theScore) {
 		vector = theVector;
@@ -99,6 +105,19 @@ public final class EmpiMatchOutcome {
 		return myEidMatch;
 	}
 
+	/**
+	 * Sets the number of EMPI rules checked for this match outcome
+	 *
+	 * @param theEmpiRuleCount
+	 * 	Number of EMPI rules that were checked for this match outcome
+	 * @return
+	 * 	Returns this instance
+	 */
+	public EmpiMatchOutcome setEmpiRuleCount(int theEmpiRuleCount) {
+		myEmpiRuleCount = theEmpiRuleCount;
+		return this;
+	}
+
 	/** @param theEidMatch the link was established via a shared EID */
 	public EmpiMatchOutcome setEidMatch(boolean theEidMatch) {
 		myEidMatch = theEidMatch;
@@ -112,11 +131,11 @@ public final class EmpiMatchOutcome {
 	 * 	Returns the normalized score
 	 */
 	public Double getNormalizedScore() {
-		if (vector == 0) {
+		if (myEmpiRuleCount == 0) {
 			return 0.0;
 		}
 
-		double retVal = score / Long.bitCount(vector);
+		double retVal = score / myEmpiRuleCount;
 		if (retVal < 0) {
 			retVal = 0.0;
 		} else if (retVal > 1.0) {
