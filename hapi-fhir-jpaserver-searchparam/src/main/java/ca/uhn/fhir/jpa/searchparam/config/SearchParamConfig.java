@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.searchparam.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.cache.ResourceVersionCacheSvc;
+import ca.uhn.fhir.jpa.searchparam.cache.VersionChangeConsumerRegistry;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
@@ -103,4 +105,13 @@ public class SearchParamConfig {
 		return new SearchParamMatcher();
 	}
 
+	@Bean
+	public ResourceVersionCacheSvc resourceVersionCacheSvc() {
+		return new ResourceVersionCacheSvc();
+	}
+
+	@Bean
+	public VersionChangeConsumerRegistry versionChangeConsumerRegistry() {
+		return new VersionChangeConsumerRegistry();
+	}
 }

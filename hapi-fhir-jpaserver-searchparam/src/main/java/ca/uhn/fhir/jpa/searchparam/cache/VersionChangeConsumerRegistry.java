@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.quartz.JobExecutionContext;
@@ -43,7 +44,8 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 
 	private RefreshVersionCacheAndNotifyConsumersOnUpdate myInterceptor;
 
-	void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeConsumer theVersionChangeConsumer) {
+	@Override
+	public void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeConsumer theVersionChangeConsumer) {
 		myConsumers.computeIfAbsent(theResourceType, consumer -> new HashMap<>());
 		myConsumers.get(theResourceType).put(theVersionChangeConsumer, map);
 	}
@@ -76,6 +78,25 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	@Override
+	@VisibleForTesting
+	public void clearConsumersForUnitTest() {
+		myConsumers.clear();
+	}
+
+	@Override
+	public void forceRefresh() {
+		requestRefresh();
+		refreshCacheWithRetry();
+	}
+
+	@Override
+	public void requestRefresh() {
+		synchronized (this) {
+			myLastRefresh = 0;
 		}
 	}
 
