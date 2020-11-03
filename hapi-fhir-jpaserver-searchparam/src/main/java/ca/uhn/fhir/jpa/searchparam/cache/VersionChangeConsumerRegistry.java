@@ -35,6 +35,8 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
 	private ISchedulerService mySchedulerService;
+	@Autowired
+	private ResourceVersionCacheSvc myResourceVersionCacheSvc;
 
 	private final Map<String, Map<IVersionChangeConsumer, SearchParameterMap>> myConsumers = new HashMap<>();
 	private final VersionChangeCache myVersionChangeCache = new VersionChangeCache();
@@ -91,7 +93,7 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 			return 0;
 		}
 		StopWatch sw = new StopWatch();
-		// FIXME KHS do the thing
+		// FIXME KHS call myResourceVersionCacheSvc and store the results in myVersionChangeCache
 		myLastRefresh = System.currentTimeMillis();
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 		// FIXME KHS return something
