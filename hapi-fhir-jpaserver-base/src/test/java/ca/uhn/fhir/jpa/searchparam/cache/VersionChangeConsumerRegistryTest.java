@@ -43,26 +43,31 @@ public class VersionChangeConsumerRegistryTest extends BaseJpaR4Test {
 		patient.setActive(true);
 
 		IIdType patientId = createPatientWithLatch(patient);
-		IIdType resourceId = myTestCallback.getResourceId();
-		BaseResourceMessage.OperationTypeEnum operationTypeEnum = myTestCallback.getOperationTypeEnum();
-		assertEquals(resourceId, patientId);
-		assertEquals(1L, resourceId.getVersionIdPartAsLong());
-		assertEquals(operationTypeEnum, BaseResourceMessage.OperationTypeEnum.CREATE);
+		assertEquals(myTestCallback.getResourceId().toString(), patientId.toString());
+		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
 		patient.setActive(false);
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
+		myTestCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
-		assertEquals(2L, resourceId.getVersionIdPartAsLong());
-		assertEquals(operationTypeEnum, BaseResourceMessage.OperationTypeEnum.UPDATE);
+		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
+		myTestCallback.awaitExpected();
+		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
 
-		myPatientDao.delete(patientId);
-		assertEquals(2L, resourceId.getVersionIdPartAsLong());
-		assertEquals(operationTypeEnum, BaseResourceMessage.OperationTypeEnum.DELETE);
+		myTestCallback.setExpectedCount(1);
+		myPatientDao.delete(patientId.toVersionless());
+		myTestCallback.awaitExpected();
+		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
+		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
 	}
 
 	private IIdType createPatientWithLatch(Patient thePatient) throws InterruptedException {
 		myTestCallback.setExpectedCount(1);
 		IIdType retval = myPatientDao.create(thePatient).getId();
+		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
 		myTestCallback.awaitExpected();
 		return retval;
 	}
@@ -72,12 +77,10 @@ public class VersionChangeConsumerRegistryTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = createPatientWithLatch(patient);
-		IIdType resourceId = myTestCallback.getResourceId();
-		BaseResourceMessage.OperationTypeEnum operationTypeEnum = myTestCallback.getOperationTypeEnum();
 
-		assertEquals(resourceId, patientId);
-		assertEquals(1L, resourceId.getVersionIdPartAsLong());
-		assertEquals(operationTypeEnum, BaseResourceMessage.OperationTypeEnum.CREATE);
+		assertEquals(myTestCallback.getResourceId().toString(), patientId.toString());
+		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
 		myTestCallback.setExpectedCount(1);
 		myVersionChangeConsumerRegistry.forceRefresh();

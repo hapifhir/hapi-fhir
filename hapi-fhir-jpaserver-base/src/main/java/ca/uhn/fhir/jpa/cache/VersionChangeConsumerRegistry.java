@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -21,9 +22,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
 
+// FIXME KHS retool searchparam and subscription to use this
 @Repository
 public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeConsumerRegistry.class);
@@ -38,16 +40,17 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ResourceVersionCacheSvc myResourceVersionCacheSvc;
+	@Autowired
+	private FhirContext myFhirContext;
 
-	private final Map<String, Map<IVersionChangeConsumer, SearchParameterMap>> myConsumers = new HashMap<>();
-	private final VersionChangeCache myVersionChangeCache = new VersionChangeCache();
+	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
+	private final VersionChangeConsumerMap myConsumerMap = new VersionChangeConsumerMap();
 
 	private RefreshVersionCacheAndNotifyConsumersOnUpdate myInterceptor;
 
 	@Override
 	public void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeConsumer theVersionChangeConsumer) {
-		myConsumers.computeIfAbsent(theResourceType, consumer -> new HashMap<>());
-		myConsumers.get(theResourceType).put(theVersionChangeConsumer, map);
+		myConsumerMap.add(theResourceType, theVersionChangeConsumer, map);
 	}
 
 	@PostConstruct
@@ -72,9 +75,9 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 	}
 
 	@Override
-	public boolean refreshCacheIfNecessary() {
+	public boolean refreshAllCachesIfNecessary() {
 		if (myLastRefresh == 0 || System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
-			refreshCacheWithRetry();
+			refreshAllCachesWithRetry();
 			return true;
 		} else {
 			return false;
@@ -84,13 +87,13 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 	@Override
 	@VisibleForTesting
 	public void clearConsumersForUnitTest() {
-		myConsumers.clear();
+		myConsumerMap.clearConsumersForUnitTest();
 	}
 
 	@Override
 	public void forceRefresh() {
 		requestRefresh();
-		refreshCacheWithRetry();
+		refreshAllCachesWithRetry();
 	}
 
 	@Override
@@ -100,25 +103,49 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 		}
 	}
 
-	private int refreshCacheWithRetry() {
+	private void requestRefresh(String theResourceName) {
+		// FIXME KHS this should be resourceName specific.  For now, just refresh all of them.
+		requestRefresh();
+	}
+
+	private int refreshAllCachesWithRetry() {
 		Retrier<Integer> refreshCacheRetrier = new Retrier<>(() -> {
-			synchronized (VersionChangeConsumerRegistry.this) {
-				return doRefresh(REFRESH_INTERVAL);
+			synchronized (this) {
+				return doRefreshAllCaches(REFRESH_INTERVAL);
 			}
 		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
 	}
 
-	public int doRefresh(long theRefreshInterval) {
+	public int doRefreshAllCaches(long theRefreshInterval) {
 		if (System.currentTimeMillis() - theRefreshInterval <= myLastRefresh) {
 			return 0;
 		}
 		StopWatch sw = new StopWatch();
 		// FIXME KHS call myResourceVersionCacheSvc and store the results in myVersionChangeCache
 		myLastRefresh = System.currentTimeMillis();
-		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
-		// FIXME KHS return something
-		return 0;
+
+		int count = 0;
+		for (String resourceType : myConsumerMap.keySet()) {
+			count += doRefresh(resourceType);
+		}
+		ourLog.debug("Refreshed all caches in {}ms", sw.getMillis());
+		return count;
+	}
+
+	private long doRefresh(String theResourceName) {
+		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
+		Map<IVersionChangeConsumer, SearchParameterMap> map = myConsumerMap.getConsumerMap(theResourceName);
+		long count = 0;
+		for (IVersionChangeConsumer consumer : map.keySet()) {
+			try {
+				IResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, resourceType, map.get(consumer));
+				count += resourceVersionMap.populateInto(myResourceVersionCache, consumer);
+			} catch (IOException e) {
+				ourLog.error("Failed to refresh {}", theResourceName, e);
+			}
+		}
+		return count;
 	}
 
 	@Interceptor
@@ -140,11 +167,15 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 		}
 
 		private void handle(IBaseResource theResource) {
-			// FIXME KHS do something like this
-//			if (theResource != null && myFhirContext.getResourceType(theResource).equals("SearchParameter")) {
-//				requestRefresh();
-//			}
+			if (theResource == null) {
+				return;
+			}
+			String resourceName = myFhirContext.getResourceType(theResource);
+			if (myConsumerMap.hasConsumersFor(resourceName)) {
+				synchronized (this) {
+					requestRefresh(resourceName);
+				}
+			}
 		}
-
 	}
 }

@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 public interface IVersionChangeConsumerRegistry {
 	void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeConsumer theVersionChangeConsumer);
 
-	boolean refreshCacheIfNecessary();
+	boolean refreshAllCachesIfNecessary();
 
 	void clearConsumersForUnitTest();
 

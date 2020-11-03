@@ -6,4 +6,6 @@ public interface IResourceVersionMap {
 	Long getVersion(IIdType theResourceId);
 
 	int size();
+
+	long populateInto(ResourceVersionCache theResourceVersionCache, IVersionChangeConsumer theConsumer);
 }
