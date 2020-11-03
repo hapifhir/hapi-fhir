@@ -17,6 +17,8 @@ import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.cache.ResourceVersionCacheSvc;
+import ca.uhn.fhir.jpa.cache.VersionChangeConsumerRegistry;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -588,6 +590,18 @@ public abstract class BaseConfig {
 	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
+
+
+	@Bean
+	public ResourceVersionCacheSvc resourceVersionCacheSvc() {
+		return new ResourceVersionCacheSvc();
+	}
+
+	@Bean
+	public VersionChangeConsumerRegistry versionChangeConsumerRegistry() {
+		return new VersionChangeConsumerRegistry();
+	}
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
