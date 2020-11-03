@@ -14,7 +14,7 @@
   
   
   
-  <ActiveSheet>9</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1109,11 +1109,11 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Appointment.reasonCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">Appointment.reason</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">CodeableReference(Condition|Procedure|Observation|ImmunizationRecommendation)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">ApptReason</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1122,8 +1122,8 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Coded reason this appointment is scheduled</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">The coded reason that this appointment is being scheduled. This is more clinical than administrative</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Reason this appointment is scheduled</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">The reason that this appointment is being scheduled. This is more clinical than administrative. This can be coded, or as specified using information from another resource. When the patient arrives and the encounter begins it may be used as the admission diagnosis. The indication will typically be a Condition (with other resources referenced in the evidence.detail), or a Procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1138,7 +1138,7 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">Appointment.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">!Appointment.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3966,9 +3966,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
+   <TopRowBottomPane>8</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>13</LeftColumnRightPane>
+   <LeftColumnRightPane>15</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -4595,14 +4595,14 @@
     <Cell ss:StyleID="s123"><Data ss:Type="String">reason-reference</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">Appointment.reasonReference</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Appointment.reason.reference</Data></Cell>
     <Cell ss:StyleID="s125"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s123"><Data ss:Type="String">reason-code</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s124"><Data ss:Type="String">Appointment.reasonCode</Data></Cell>
+    <Cell ss:StyleID="s124"><Data ss:Type="String">Appointment.reason.concept</Data></Cell>
     <Cell ss:StyleID="s125"/>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -4716,6 +4716,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6271,8 +6272,7 @@
   <Table ss:ExpandedColumnCount="17" ss:ExpandedRowCount="29" ss:StyleID="s118" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s118" ss:Width="116.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s118" ss:Width="275.0"/>
-   <Column ss:StyleID="s118" ss:Width="51.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s118" ss:Width="83.0"/>
+   <Column ss:AutoFitWidth="0" ss:Index="4" ss:StyleID="s118" ss:Width="83.0"/>
    <Column ss:StyleID="s118" ss:Width="257.0"/>
    <Column ss:StyleID="s118" ss:Width="173.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s118" ss:Width="98.0"/>
@@ -7318,7 +7318,6 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>

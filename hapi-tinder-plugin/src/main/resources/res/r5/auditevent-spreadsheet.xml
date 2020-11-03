@@ -3,7 +3,7 @@
   <Author>Grahame</Author>
   <LastAuthor>John Moehrke</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2019-10-03T20:31:06Z</LastSaved>
+  <LastSaved>2020-08-04T23:37:52Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -14,8 +14,8 @@
   
   
   
-  <ActiveSheet>7</ActiveSheet>
-  <FirstVisibleSheet>2</FirstVisibleSheet>
+  <ActiveSheet>8</ActiveSheet>
+  <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1119,7 +1119,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">Emergency | Alert | Critical | Error | Warning | Notice | Informational | Debug</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">emergency | alert | critical | error | warning | notice | informational | debug</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">Indicates and enables segmentation of various severity including debugging from critical.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">ATNA will map this to the SYSLOG PRI element</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1198,7 +1198,7 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">AuditEventOutcome</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1208,13 +1208,13 @@
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Whether the event succeeded or failed</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s91"><Data ss:Type="String">Indicates whether the event succeeded or failed</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">Indicates whether the event succeeded or failed. A free text descripiton can be given in outcome.text.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">when a code is given there must be one code from the given codeSystem, and may be other equivilant codes from other codeSystems (for example http response codes such as 2xx, 4xx, or 5xx)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><Data ss:Type="String">In some cases a "success" may be partial, for example, an incomplete or interrupted transfer of a radiological study. For the purpose of establishing accountability, these distinctions are not relevant</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">.actionNegationInd</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">.outboundRelationship[typeCode=OUT].target.text</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">EventOutcomeIndicator</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">EventOutcomeIndicator EventOutcomeIndicator</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1224,7 +1224,7 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
-    <Cell ss:StyleID="s89"><Data ss:Type="String">AuditEvent.outcomeDesc</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s89"><Data ss:Type="String">!AuditEvent.outcomeDesc</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1242,8 +1242,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s91"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">.outboundRelationship[typeCode=OUT].target.text</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="20" ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">EventOutcomeDescription</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4146,9 +4145,9 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>2</TopRowBottomPane>
+   <TopRowBottomPane>22</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>13</LeftColumnRightPane>
+   <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -6356,7 +6355,6 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -6375,12 +6373,12 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Bindings!R1C1:R1C13"/>
   </Names>
-  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="30" ss:StyleID="s151" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="27" ss:StyleID="s151" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="143.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="371.0"/>
    <Column ss:StyleID="s151" ss:Width="51.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="60.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="239.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="415.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="221.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="98.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s151" ss:Width="89.0"/>
@@ -6426,7 +6424,7 @@
     <Cell ss:StyleID="s155"><Data ss:Type="String">#audit-event-action</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">DICOM Audit Event Action</Data></Cell>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:HRef="http://build.fhir.org/codesystem-dicom-dcim.html" ss:StyleID="s62"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
@@ -6437,11 +6435,11 @@
     <Cell ss:StyleID="s157"><Data ss:Type="String">AuditEventOutcome</Data></Cell>
     <Cell ss:StyleID="s158"><Data ss:Type="String">Indicates whether the event succeeded or failed</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">code list</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">required</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">extensible</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">#audit-event-outcome</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">DICOM Audit Event Outcome</Data></Cell>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:HRef="http://build.fhir.org/codesystem-dicom-dcim.html" ss:StyleID="s62"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
@@ -6456,7 +6454,7 @@
     <Cell ss:StyleID="s155"><Data ss:Type="String">#network-type</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">DICOM Audit Event Network Type</Data></Cell>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:HRef="http://build.fhir.org/codesystem-dicom-dcim.html" ss:StyleID="s62"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
@@ -6471,7 +6469,7 @@
     <Cell ss:StyleID="s155"><Data ss:Type="String">valueset-audit-entity-type</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">DICOM Audit Event Entity Type</Data></Cell>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:HRef="http://build.fhir.org/codesystem-dicom-dcim.html" ss:StyleID="s62"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
@@ -6486,7 +6484,7 @@
     <Cell ss:StyleID="s155"><Data ss:Type="String">#object-role</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">DICOM Audit Event Entity Role</Data></Cell>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:HRef="http://build.fhir.org/codesystem-dicom-dcim.html" ss:StyleID="s62"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
+    <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
@@ -6503,7 +6501,7 @@
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s160"/>
@@ -6518,7 +6516,7 @@
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s160"/>
@@ -6533,22 +6531,7 @@
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s160"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s157"><Data ss:Type="String">!DICOMRoleId</Data></Cell>
-    <Cell ss:StyleID="s158"><Data ss:Type="String">How the agent participated in the event. </Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">extensible</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">valueset-dicm-402-roleid</Data></Cell>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s160"/>
@@ -6558,12 +6541,12 @@
     <Cell ss:StyleID="s158"><Data ss:Type="String">Used when the event is about exporting/importing onto media.</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s155"><Data ss:Type="String">extensible</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">valueset-dicm-405-mediatype</Data></Cell>
+    <Cell ss:StyleID="s161"><Data ss:Type="String">valueset-audit-media-type</Data></Cell>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">DICOM Media Types</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s160"/>
@@ -6578,37 +6561,7 @@
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s160"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s157"><Data ss:Type="String">!DICOMAlertType</Data></Cell>
-    <Cell ss:StyleID="s158"><Data ss:Type="String">The type of source where event originated.</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">valueset-dicm-403-alerttype</Data></Cell>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s160"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s157"><Data ss:Type="String">!DICOMObjectIdType</Data></Cell>
-    <Cell ss:StyleID="s158"><Data ss:Type="String">Describes the identifier.</Data></Cell>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"><Data ss:Type="String">valueset-dicm-404-objectidtype</Data></Cell>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s160"/>
@@ -6653,7 +6606,7 @@
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
-    <Cell ss:StyleID="s155"/>
+    <Cell ss:StyleID="s155"><Data ss:Type="String">These codes are excerpted from Digital Imaging and Communications in Medicine (DICOM) Standard, Part 16: Content Mapping Resource, Copyright © 2011 by the National Electrical Manufacturers Association.</Data></Cell>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s155"/>
     <Cell ss:StyleID="s160"/>
@@ -6836,12 +6789,13 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>5</LeftColumnRightPane>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -6874,7 +6828,7 @@
     <Cell ss:StyleID="s108"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s144"><Data ss:Type="String">Emergency</Data></Cell>
+    <Cell ss:StyleID="s144"><Data ss:Type="String">emergency</Data></Cell>
     <Cell ss:StyleID="s133"><Data ss:Type="Number">0</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s168"/>
@@ -6885,7 +6839,7 @@
     <Cell ss:StyleID="s145"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Alert</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">alert</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">1</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
@@ -6896,7 +6850,7 @@
     <Cell ss:StyleID="s147"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Critical</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">critical</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">2</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
@@ -6907,7 +6861,7 @@
     <Cell ss:StyleID="s147"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Error</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">3</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
@@ -6918,7 +6872,7 @@
     <Cell ss:StyleID="s147"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Warning</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">warning</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">4</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
@@ -6929,7 +6883,7 @@
     <Cell ss:StyleID="s147"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Notice</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">notice</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">5</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
@@ -6940,7 +6894,7 @@
     <Cell ss:StyleID="s147"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Informational</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">informational</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">6</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>
@@ -6951,7 +6905,7 @@
     <Cell ss:StyleID="s147"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s146"><Data ss:Type="String">Debug</Data></Cell>
+    <Cell ss:StyleID="s146"><Data ss:Type="String">debug</Data></Cell>
     <Cell ss:StyleID="s136"><Data ss:Type="Number">7</Data></Cell>
     <Cell ss:StyleID="s62"/>
     <Cell ss:StyleID="s169"/>

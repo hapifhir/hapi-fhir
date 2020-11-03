@@ -50,7 +50,7 @@ public class ValidatorAcrossVersionsTest {
 		ourLog.info(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
 		assertEquals(2, result.getMessages().size());
-		assertEquals("Profile http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse, Element 'QuestionnaireResponse.status': minimum required = 1, but only found 0", result.getMessages().get(0).getMessage());
+		assertEquals("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)", result.getMessages().get(0).getMessage());
 		assertEquals("No questionnaire is identified, so no validation can be performed against the base questionnaire", result.getMessages().get(1).getMessage());
 	}
 

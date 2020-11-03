@@ -984,7 +984,7 @@
     <Cell ss:StyleID="s78"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s78"><Data ss:Type="String">MetadataResource</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s78"><Data ss:Type="String">CanonicalResource</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -4352,7 +4352,7 @@
     <Cell ss:StyleID="s143"/>
     <Cell><Data ss:Type="String">$expand-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$expand-response.txt</Data></Cell>
-    <Cell><Data ss:Type="String">4.1.0</Data></Cell>
+    <Cell><Data ss:Type="String">4.0.0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
     <Cell ss:StyleID="s126"><Data ss:Type="String">expand.url</Data></Cell>
@@ -4862,7 +4862,7 @@
     <Cell ss:StyleID="s143"/>
     <Cell><Data ss:Type="String">$validate-code-request.txt</Data></Cell>
     <Cell><Data ss:Type="String">$validate-code-response.txt</Data></Cell>
-    <Cell><Data ss:Type="String">4.1.0</Data></Cell>
+    <Cell><Data ss:Type="String">4.0.0</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="75">
     <Cell ss:StyleID="s126"><Data ss:Type="String">validate-code.url</Data></Cell>

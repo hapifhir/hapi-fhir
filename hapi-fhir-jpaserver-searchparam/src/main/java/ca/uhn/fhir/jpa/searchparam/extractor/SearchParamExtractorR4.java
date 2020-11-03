@@ -124,9 +124,10 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		}
 
 		@Override
-		public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
+		public List<Base> executeFunction(Object appContext, List<Base> focus, String functionName, List<List<Base>> parameters) {
 			return null;
 		}
+
 
 		@Override
 		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
