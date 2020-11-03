@@ -118,6 +118,16 @@ public final class EmpiMatchOutcome {
 		return this;
 	}
 
+	/**
+	 * Gets the number of EMPI rules checked for this match outcome
+	 *
+	 * @return
+	 * 	Returns the number of rules
+	 */
+	public int getEmpiRuleCount() {
+		return myEmpiRuleCount;
+	}
+
 	/** @param theEidMatch the link was established via a shared EID */
 	public EmpiMatchOutcome setEidMatch(boolean theEidMatch) {
 		myEidMatch = theEidMatch;
@@ -134,14 +144,7 @@ public final class EmpiMatchOutcome {
 		if (myEmpiRuleCount == 0) {
 			return 0.0;
 		}
-
-		double retVal = score / myEmpiRuleCount;
-		if (retVal < 0) {
-			retVal = 0.0;
-		} else if (retVal > 1.0) {
-			return 1.0;
-		}
-		return retVal;
+		return score / myEmpiRuleCount;
 	}
 
 	@Override
