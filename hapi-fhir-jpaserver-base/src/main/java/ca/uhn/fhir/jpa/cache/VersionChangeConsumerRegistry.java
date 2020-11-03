@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam.cache;
+package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;

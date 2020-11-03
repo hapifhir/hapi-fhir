@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.searchparam.cache;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.cache.IVersionChangeConsumer;
+import ca.uhn.fhir.jpa.cache.IVersionChangeConsumerRegistry;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;

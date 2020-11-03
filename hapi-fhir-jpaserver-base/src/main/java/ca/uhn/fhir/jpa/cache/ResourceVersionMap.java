@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.searchparam.cache;
+package ca.uhn.fhir.jpa.cache;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -16,5 +16,9 @@ public class ResourceVersionMap implements IResourceVersionMap {
 	@Override
 	public int size() {
 		return myMap.size();
+	}
+
+	public void add(IIdType theId) {
+		myMap.put(theId.toUnqualifiedVersionless(), theId.getVersionIdPartAsLong());
 	}
 }
