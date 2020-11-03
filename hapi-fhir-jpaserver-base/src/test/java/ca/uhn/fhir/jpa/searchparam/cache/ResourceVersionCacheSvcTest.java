@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
@@ -16,12 +18,12 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 	ResourceVersionCacheSvc myResourceVersionCacheSvc;
 
 	@Test
-	public void testGetVersionLookup() {
+	public void testGetVersionLookup() throws IOException {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient).getId();
-		IResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionLookup("Patient", SearchParameterMap.newSynchronous());
+		IResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionLookup("Patient", Patient.class, SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
-		assertEquals(patientId.getVersionIdPartAsLong(), versionMap.getVersion(patientId.toVersionless()));
+		assertEquals(patientId.getVersionIdPartAsLong(), versionMap.getVersion(patientId));
 	}
 }

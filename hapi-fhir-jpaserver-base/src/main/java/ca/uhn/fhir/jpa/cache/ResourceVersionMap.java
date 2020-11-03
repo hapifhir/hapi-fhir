@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceVersionMap implements IResourceVersionMap {
-	private final Map<IIdType, Long> myMap = new HashMap<>();
+	private final Map<String, Long> myMap = new HashMap<>();
 
 	@Override
 	public Long getVersion(IIdType theResourceId) {
-		return myMap.get(theResourceId);
+		return myMap.get(theResourceId.toUnqualifiedVersionless().toString());
 	}
 
 	@Override
@@ -19,6 +19,6 @@ public class ResourceVersionMap implements IResourceVersionMap {
 	}
 
 	public void add(IIdType theId) {
-		myMap.put(theId.toUnqualifiedVersionless(), theId.getVersionIdPartAsLong());
+		myMap.put(theId.toUnqualifiedVersionless().toString(), theId.getVersionIdPartAsLong());
 	}
 }
