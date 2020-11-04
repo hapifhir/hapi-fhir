@@ -9,15 +9,14 @@ import fr.inria.lille.shexjava.schema.parsing.GenParser;
 import fr.inria.lille.shexjava.validation.RecursiveValidation;
 import fr.inria.lille.shexjava.validation.ValidationAlgorithm;
 import org.apache.commons.rdf.api.Graph;
-import org.apache.commons.rdf.api.IRI;
+import org.apache.commons.rdf.api.RDFTerm;
 import org.apache.commons.rdf.rdf4j.RDF4J;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
-import org.hl7.fhir.r4.model.DomainResource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,8 +24,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,6 +54,15 @@ public class RDFParserTest extends BaseTest {
 		fhirSchema = GenParser.parseSchema(schemaFile, Collections.emptyList());
 	}
 
+	// If we can't round-trip JSON, we skip the Turtle round-trip test.
+	private static ArrayList<String> jsonRoundTripErrors = new ArrayList<String>();
+	@AfterAll
+	static void reportJsonRoundTripErrors() {
+		System.out.println(jsonRoundTripErrors.size() + " tests disqualified because of JSON round-trip errors");
+		for (String e : jsonRoundTripErrors)
+			System.out.println(e);
+	}
+
 	/**
 	 * This test method has a method source for each JSON file in the resources/rdf-test-input directory (see #getInputFiles).
 	 * Each input file is expected to be a JSON representation of an R4 FHIR resource.
@@ -62,71 +72,48 @@ public class RDFParserTest extends BaseTest {
 	 * 3. Perform a graph validation on the resulting RDF using ShEx and ShEx-java -- ensure validation passed
 	 * 4. Parse the RDF string into the HAPI object model -- ensure resource instance is not null
 	 * 5. Perform deep equals comparison of JSON-originated instance and RDF-originated instance -- ensure equality
-	 * @param inputFile -- path to resource file to be tested
+	 * @param referenceFilePath -- path to resource file to be tested
 	 * @throws IOException -- thrown when parsing RDF string into graph model
 	 */
 	@ParameterizedTest
 	@MethodSource("getInputFiles")
-	public void testRDFRoundTrip(String inputFile) throws IOException {
-		FileInputStream inputStream = new FileInputStream(inputFile);
-		IBaseResource resource;
-		String resourceType;
-		// Parse JSON input as Resource
-		resource = ourCtx.newJsonParser().parseResource(inputStream);
-		assertNotNull(resource);
-		resourceType = resource.fhirType();
-
-		// Write the resource out to an RDF String
-		String rdfContent = ourCtx.newRDFParser().encodeResourceToString(resource);
-		assertNotNull(rdfContent);
+	public void testRDFRoundTrip(String referenceFilePath) throws IOException {
+		String referenceFileName = referenceFilePath.substring(referenceFilePath.lastIndexOf("/")+1);
+		IBaseResource referenceResource = parseJson(new FileInputStream(referenceFilePath));
+		String referenceJson = serializeJson(ourCtx, referenceResource);
 
 		// Perform ShEx validation on RDF
-		RDF4J factory = new RDF4J();
-		GlobalFactory.RDFFactory = factory; //set the global factory used in shexjava
+		String turtleString = serializeRdf(ourCtx, referenceResource);
+		validateRdf(turtleString, referenceFileName, referenceResource);
 
-		// load the model
-		String baseIRI = "http://a.example.shex/";
-		Model data = Rio.parse(new StringReader(rdfContent), baseIRI, RDFFormat.TURTLE);
+		// If we can round-trip JSON
+		IBaseResource viaJsonResource = parseJson(new ByteArrayInputStream(referenceJson.getBytes()));
+		if (((Base)viaJsonResource).equalsDeep((Base)referenceResource)) {
 
-		String rootSubjectIri = null;
-		for (org.eclipse.rdf4j.model.Resource resourceStream : data.subjects()) {
-			if (resourceStream instanceof SimpleIRI) {
-				Model filteredModel = data.filter(resourceStream, factory.getValueFactory().createIRI(NODE_ROLE_IRI), factory.getValueFactory().createIRI(TREE_ROOT_IRI), (org.eclipse.rdf4j.model.Resource)null);
-				if (filteredModel != null && filteredModel.subjects().size() == 1) {
-					Optional<org.eclipse.rdf4j.model.Resource> rootResource = filteredModel.subjects().stream().findFirst();
-					if (rootResource.isPresent()) {
-						rootSubjectIri = rootResource.get().stringValue();
-						break;
-					}
+			// Parse RDF content as resource
+			IBaseResource viaTurtleResource = parseRdf(ourCtx, new StringReader(turtleString));
+			assertNotNull(viaTurtleResource);
 
-				}
+			// Compare original JSON-based resource against RDF-based resource
+			String viaTurtleJson = serializeJson(ourCtx, viaTurtleResource);
+			if (!((Base)viaTurtleResource).equalsDeep((Base)referenceResource)) {
+				String failMessage = referenceFileName + ": failed to round-trip Turtle ";
+				if (referenceJson.equals(viaTurtleJson))
+					throw new Error(failMessage
+						+ "\nttl: " + turtleString
+						+ "\nexp: " + referenceJson);
+				else
+					assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
 			}
-		}
-
-		// create the graph
-		Graph dataGraph = factory.asGraph(data);
-
-		// choose focus node and shapelabel
-		IRI focusNode = factory.createIRI(rootSubjectIri);
-		Label shapeLabel = new Label(factory.createIRI(FHIR_SHAPE_PREFIX + resourceType));
-
-		ValidationAlgorithm validation = new RecursiveValidation(fhirSchema, dataGraph);
-		validation.validate(focusNode, shapeLabel);
-		boolean result = validation.getTyping().isConformant(focusNode, shapeLabel);
-		assertTrue(result);
-
-		// Parse RDF content as resource
-		IBaseResource parsedResource = ourCtx.newRDFParser().parseResource(new StringReader(rdfContent));
-		assertNotNull(parsedResource);
-
-		// Compare original JSON-based resource against RDF-based resource
-		if (parsedResource instanceof DomainResource) {
-			// This is a hack because this initializes the collection if it is empty
-			((DomainResource) parsedResource).getContained();
-			boolean deepEquals = ((Base)parsedResource).equalsDeep((Base)resource);
-			assertTrue(deepEquals);
 		} else {
-			ourLog.warn("Input JSON did not yield a DomainResource");
+			String gotString = serializeJson(ourCtx, viaJsonResource);
+			String skipMessage = referenceFileName + ": failed to round-trip JSON" +
+				(referenceJson.equals(gotString)
+					? "\ngot: " + gotString + "\nexp: " + referenceJson
+					: "\nsome inequality not visible in: " + referenceJson);
+			System.out.println(referenceFileName + " skipped");
+			// Specific messages are printed at end of run.
+			jsonRoundTripErrors.add(skipMessage);
 		}
 	}
 
@@ -135,11 +122,98 @@ public class RDFParserTest extends BaseTest {
 		List<String> resourceList = new ArrayList<>();
 		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(cl);
 		Resource[] resources = resolver.getResources("classpath:rdf-test-input/*.json") ;
-		for (Resource resource: resources){
+		for (Resource resource: resources)
 			resourceList.add(resource.getFile().getPath());
-		}
 
 		return resourceList.stream();
+	}
+
+	// JSON functions
+	public IBaseResource parseJson(InputStream inputStream) {
+		IParser refParser = ourCtx.newJsonParser();
+		refParser.setStripVersionsFromReferences(false);
+		// parser.setDontStripVersionsFromReferencesAtPaths();
+		IBaseResource ret = refParser.parseResource(inputStream);
+		assertNotNull(ret);
+		return ret;
+	}
+
+	public String serializeJson(FhirContext ctx, IBaseResource resource) {
+		IParser jsonParser = ctx.newJsonParser();
+		jsonParser.setStripVersionsFromReferences(false);
+		String ret = jsonParser.encodeResourceToString(resource);
+		assertNotNull(ret);
+		return ret;
+	}
+
+	// Rdf (Turtle) functions
+	public IBaseResource parseRdf(FhirContext ctx, StringReader inputStream) {
+		IParser refParser = ctx.newRDFParser();
+		IBaseResource ret = refParser.parseResource(inputStream);
+		assertNotNull(ret);
+		return ret;
+	}
+
+	public String serializeRdf(FhirContext ctx, IBaseResource resource) {
+		IParser rdfParser = ourCtx.newRDFParser();
+		rdfParser.setStripVersionsFromReferences(false);
+		rdfParser.setServerBaseUrl("http://a.example/fhir/");
+		String ret = rdfParser.encodeResourceToString(resource);
+		assertNotNull(ret);
+		return ret;
+	}
+
+	public void validateRdf(String rdfContent, String referenceFileName, IBaseResource referenceResource) throws IOException {
+		String baseIRI = "http://a.example/shex/";
+		RDF4J factory = new RDF4J();
+		GlobalFactory.RDFFactory = factory; //set the global factory used in shexjava
+		Model data = Rio.parse(new StringReader(rdfContent), baseIRI, RDFFormat.TURTLE);
+		FixedShapeMapEntry fixedMapEntry = new FixedShapeMapEntry(factory, data, referenceResource.fhirType(), baseIRI);
+		Graph dataGraph = factory.asGraph(data); // create the graph
+		ValidationAlgorithm validation = new RecursiveValidation(fhirSchema, dataGraph);
+		validation.validate(fixedMapEntry.node, fixedMapEntry.shape);
+		boolean result = validation.getTyping().isConformant(fixedMapEntry.node, fixedMapEntry.shape);
+		assertTrue(result,
+			   referenceFileName + ": failed to validate " + fixedMapEntry
+			   + "\n" + referenceFileName
+			   + "\n" + rdfContent
+			   );
+	}
+
+	// Shape Expressions functions
+	class FixedShapeMapEntry {
+		RDFTerm node;
+		Label shape;
+
+		FixedShapeMapEntry(RDF4J factory, Model data, String resourceType, String baseIRI) {
+			String rootSubjectIri = null;
+			// StmtIterator i = data.listStatements();
+			for (org.eclipse.rdf4j.model.Resource resourceStream : data.subjects()) {
+//				if (resourceStream instanceof SimpleIRI) {
+					Model filteredModel = data.filter(resourceStream, factory.getValueFactory().createIRI(NODE_ROLE_IRI), factory.getValueFactory().createIRI(TREE_ROOT_IRI), (org.eclipse.rdf4j.model.Resource)null);
+					if (filteredModel != null && filteredModel.subjects().size() == 1) {
+						Optional<org.eclipse.rdf4j.model.Resource> rootResource = filteredModel.subjects().stream().findFirst();
+						if (rootResource.isPresent()) {
+							rootSubjectIri = rootResource.get().stringValue();
+							break;
+						}
+
+					}
+//				}
+			}
+
+			// choose focus node and shapelabel
+			this.node = rootSubjectIri.indexOf(":") == -1
+				? factory.createBlankNode(rootSubjectIri)
+			 	: factory.createIRI(rootSubjectIri);
+			Label shapeLabel = new Label(factory.createIRI(FHIR_SHAPE_PREFIX + resourceType));
+//			this.node = focusNode;
+			this.shape = shapeLabel;
+		}
+
+		public String toString() {
+			return "<" + node.toString() + ">@" + shape.toPrettyString();
+		}
 	}
 
 }

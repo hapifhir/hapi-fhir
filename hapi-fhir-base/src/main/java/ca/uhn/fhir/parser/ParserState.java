@@ -1260,10 +1260,12 @@ class ParserState<T> {
 				String versionId = elem.getMeta().getVersionId();
 				if (StringUtils.isBlank(elem.getIdElement().getIdPart())) {
 					// Resource has no ID
-				} else if (StringUtils.isNotBlank(versionId)) {
-					elem.getIdElement().setValue(resourceName + "/" + elem.getIdElement().getIdPart() + "/_history/" + versionId);
-				} else {
-					elem.getIdElement().setValue(resourceName + "/" + elem.getIdElement().getIdPart());
+				} else if (!elem.getIdElement().getIdPart().startsWith("urn:")) {
+					if (StringUtils.isNotBlank(versionId)) {
+						elem.getIdElement().setValue(resourceName + "/" + elem.getIdElement().getIdPart() + "/_history/" + versionId);
+					} else {
+						elem.getIdElement().setValue(resourceName + "/" + elem.getIdElement().getIdPart());
+					}
 				}
 			}
 		}
