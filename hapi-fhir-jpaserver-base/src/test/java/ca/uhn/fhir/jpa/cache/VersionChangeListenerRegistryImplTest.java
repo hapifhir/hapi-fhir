@@ -1,8 +1,6 @@
-package ca.uhn.fhir.jpa.searchparam.cache;
+package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.cache.IVersionChangeConsumerRegistry;
-import ca.uhn.fhir.jpa.cache.IVersionChangeListener;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -21,21 +19,23 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class VersionChangeConsumerRegistryImplTest extends BaseJpaR4Test {
+public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
-	IVersionChangeConsumerRegistry myVersionChangeConsumerRegistry;
+	IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
 
 	private final TestCallback myTestCallback = new TestCallback();
 
 	@BeforeEach
 	public void before() {
 		myTestCallback.clear();
-		myVersionChangeConsumerRegistry.registerResourceVersionChangeConsumer("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
 	}
 
 	@AfterEach
 	public void after() {
-		myVersionChangeConsumerRegistry.clearConsumersForUnitTest();
+		myVersionChangeListenerRegistry.clearListenersForUnitTest();
+		myVersionChangeListenerRegistry.clearCacheForUnitTest();
+		myVersionChangeListenerRegistry.requestRefresh();
 	}
 
 	@Test
@@ -52,23 +52,23 @@ public class VersionChangeConsumerRegistryImplTest extends BaseJpaR4Test {
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		myTestCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
-		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
+		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
 		myTestCallback.awaitExpected();
 		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
 
 		myTestCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
+		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
 		myTestCallback.awaitExpected();
-		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
-		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(patientId.toVersionless(), myTestCallback.getResourceId());
 		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
 	}
 
 	private IdDt createPatientWithLatch(Patient thePatient) throws InterruptedException {
 		myTestCallback.setExpectedCount(1);
 		IIdType retval = myPatientDao.create(thePatient).getId();
-		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
+		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
 		myTestCallback.awaitExpected();
 		return new IdDt(retval);
 	}
@@ -84,16 +84,16 @@ public class VersionChangeConsumerRegistryImplTest extends BaseJpaR4Test {
 		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
-		myVersionChangeConsumerRegistry.clearCacheForUnitTest();
+		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		myTestCallback.setExpectedCount(1);
-		myVersionChangeConsumerRegistry.forceRefresh();
+		myVersionChangeListenerRegistry.forceRefresh();
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientId, calledWithId);
 	}
 
 	private static class TestCallback implements IVersionChangeListener, IPointcutLatch {
-		private final PointcutLatch myLatch = new PointcutLatch("VersionChangeConsumer called");
+		private final PointcutLatch myLatch = new PointcutLatch("VersionChangeListener called");
 
 		private IIdType myResourceId;
 		private BaseResourceMessage.OperationTypeEnum myOperationTypeEnum;

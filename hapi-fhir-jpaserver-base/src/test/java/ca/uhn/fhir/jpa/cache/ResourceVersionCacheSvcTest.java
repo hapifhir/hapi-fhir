@@ -1,7 +1,5 @@
-package ca.uhn.fhir.jpa.searchparam.cache;
+package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.jpa.cache.IResourceVersionMap;
-import ca.uhn.fhir.jpa.cache.ResourceVersionCacheSvc;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -22,8 +20,8 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient).getId();
-		IResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionLookup("Patient", Patient.class, SearchParameterMap.newSynchronous());
+		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionLookup("Patient", Patient.class, SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
-		assertEquals(patientId.getVersionIdPartAsLong(), versionMap.getVersion(patientId));
+		assertEquals(patientId.getVersionIdPart(), versionMap.getVersion(patientId));
 	}
 }

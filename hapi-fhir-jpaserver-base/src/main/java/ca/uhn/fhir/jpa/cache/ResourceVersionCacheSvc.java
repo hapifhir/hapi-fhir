@@ -20,7 +20,7 @@ public class ResourceVersionCacheSvc {
 	@Autowired
 	IResourceTableDao myResourceTableDao;
 
-	public IResourceVersionMap getVersionLookup(String theResourceName, Class<? extends IBaseResource> theResourceType, SearchParameterMap theSearchParamMap) throws IOException {
+	public ResourceVersionMap getVersionLookup(String theResourceName, Class<? extends IBaseResource> theResourceType, SearchParameterMap theSearchParamMap) throws IOException {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 
 		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, null).stream()

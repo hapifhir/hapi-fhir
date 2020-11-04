@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -27,8 +26,8 @@ import java.util.Map;
 
 // FIXME KHS retool searchparam and subscription to use this
 @Repository
-public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumerRegistry {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeConsumerRegistryImpl.class);
+public class VersionChangeListenerRegistryImpl implements IVersionChangeListenerRegistry {
+	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerRegistryImpl.class);
 
 	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
@@ -41,21 +40,23 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 	@Autowired
 	private ResourceVersionCacheSvc myResourceVersionCacheSvc;
 	@Autowired
+	private ListenerNotifier myListenerNotifier;
+	@Autowired
 	private FhirContext myFhirContext;
 
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
-	private final VersionChangeConsumerMap myConsumerMap = new VersionChangeConsumerMap();
+	private final VersionChangeListenerMap myListenerMap = new VersionChangeListenerMap();
 
-	private RefreshVersionCacheAndNotifyConsumersOnUpdate myInterceptor;
+	private RefreshVersionCacheAndNotifyListenersOnUpdate myInterceptor;
 
 	@Override
-	public void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeConsumer) {
-		myConsumerMap.add(theResourceType, theVersionChangeConsumer, map);
+	public void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeListener) {
+		myListenerMap.add(theResourceType, theVersionChangeListener, map);
 	}
 
 	@PostConstruct
 	public void start() {
-		myInterceptor = new RefreshVersionCacheAndNotifyConsumersOnUpdate();
+		myInterceptor = new RefreshVersionCacheAndNotifyListenersOnUpdate();
 		myInterceptorBroadcaster.registerInterceptor(myInterceptor);
 
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
@@ -66,11 +67,11 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 
 	public static class Job implements HapiJob {
 		@Autowired
-		private ISearchParamRegistry myTarget;
+		private IVersionChangeListenerRegistry myTarget;
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTarget.refreshCacheIfNecessary();
+			myTarget.refreshAllCachesIfNecessary();
 		}
 	}
 
@@ -86,8 +87,8 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 
 	@Override
 	@VisibleForTesting
-	public void clearConsumersForUnitTest() {
-		myConsumerMap.clearConsumersForUnitTest();
+	public void clearListenersForUnitTest() {
+		myListenerMap.clearListenersForUnitTest();
 	}
 
 	@Override
@@ -132,7 +133,7 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 		myLastRefresh = System.currentTimeMillis();
 
 		int count = 0;
-		for (String resourceType : myConsumerMap.keySet()) {
+		for (String resourceType : myListenerMap.keySet()) {
 			count += doRefresh(resourceType);
 		}
 		ourLog.debug("Refreshed all caches in {}ms", sw.getMillis());
@@ -141,12 +142,12 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 
 	private long doRefresh(String theResourceName) {
 		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
-		Map<IVersionChangeListener, SearchParameterMap> map = myConsumerMap.getConsumerMap(theResourceName);
+		Map<IVersionChangeListener, SearchParameterMap> map = myListenerMap.getListenerMap(theResourceName);
 		long count = 0;
-		for (IVersionChangeListener consumer : map.keySet()) {
+		for (IVersionChangeListener listener : map.keySet()) {
 			try {
-				IResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, resourceType, map.get(consumer));
-				count += resourceVersionMap.populateInto(myResourceVersionCache, consumer);
+				ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, resourceType, map.get(listener));
+				count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
 			} catch (IOException e) {
 				ourLog.error("Failed to refresh {}", theResourceName, e);
 			}
@@ -155,7 +156,7 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 	}
 
 	@Interceptor
-	public class RefreshVersionCacheAndNotifyConsumersOnUpdate {
+	public class RefreshVersionCacheAndNotifyListenersOnUpdate {
 
 		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 		public void created(IBaseResource theResource) {
@@ -177,7 +178,7 @@ public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumer
 				return;
 			}
 			String resourceName = myFhirContext.getResourceType(theResource);
-			if (myConsumerMap.hasConsumersFor(resourceName)) {
+			if (myListenerMap.hasListenersFor(resourceName)) {
 				synchronized (this) {
 					requestRefresh(resourceName);
 				}

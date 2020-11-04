@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 
-public interface IVersionChangeConsumerRegistry {
-	void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeConsumer);
+public interface IVersionChangeListenerRegistry {
+	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeListener);
 
 	boolean refreshAllCachesIfNecessary();
 
@@ -13,7 +13,7 @@ public interface IVersionChangeConsumerRegistry {
 	void requestRefresh();
 
 	@VisibleForTesting
-	void clearConsumersForUnitTest();
+	void clearListenersForUnitTest();
 
 	@VisibleForTesting
 	void clearCacheForUnitTest();

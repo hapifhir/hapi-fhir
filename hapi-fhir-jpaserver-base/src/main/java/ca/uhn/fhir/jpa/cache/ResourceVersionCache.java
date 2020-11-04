@@ -5,6 +5,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ResourceVersionCache {
 	private final Map<IdDt, String> myVersionMap = new HashMap<>();
@@ -33,5 +34,9 @@ public class ResourceVersionCache {
 
 	public void clearForUnitTest() {
 		myVersionMap.clear();
+	}
+
+	public Set<IdDt> keySet() {
+		return myVersionMap.keySet();
 	}
 }
