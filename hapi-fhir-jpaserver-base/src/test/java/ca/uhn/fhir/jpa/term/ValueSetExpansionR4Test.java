@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -31,9 +32,11 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -85,6 +88,102 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
+	}
+
+
+	@Test
+	public void testExpandInline_IncludeCodeSystem_FilterOnDisplay_NoFilter() throws Exception {
+		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.setSystem("http://acme.org");
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(24, expandedValueSet.getExpansion().getTotal());
+	}
+
+	@Test
+	public void testExpandInline_IncludeCodeSystem_FilterOnDisplay_ExactFilter() throws Exception {
+		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.setSystem("http://acme.org")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("Systolic blood pressure--inspiration");
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(1, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getDisplay()).collect(Collectors.toList()), containsInAnyOrder(
+			"Systolic blood pressure--inspiration"
+		));
+	}
+
+	@Test
+	public void testExpandInline_IncludeCodeSystem_FilterOnDisplay_LeftMatchFilter() throws Exception {
+		loadAndPersistCodeSystemWithDesignations(HttpVerb.PUT);
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.setSystem("http://acme.org")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("Systolic blood pressure 1");
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(3, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getDisplay()).collect(Collectors.toList()), containsInAnyOrder(
+			"Systolic blood pressure 1 hour minimum",
+			"Systolic blood pressure 1 hour mean",
+			"Systolic blood pressure 1 hour maximum"
+		));
+	}
+
+	@Test
+	public void testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch() {
+		myDaoConfig.setPreExpandValueSets(true);
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CustomTerminologySet additions = new CustomTerminologySet();
+		for (int i = 0; i < 100; i++) {
+			additions.addRootConcept("code" + i, "display value " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", additions);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo/vs");
+		vs.getCompose().addInclude().setSystem("http://foo/cs");
+		myValueSetDao.create(vs);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.addValueSet("http://foo/vs")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("display value 9");
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(10, expandedValueSet.getExpansion().getContains().size());
+		assertEquals(10, expandedValueSet.getExpansion().getTotal());
 	}
 
 	@SuppressWarnings("SpellCheckingInspection")
