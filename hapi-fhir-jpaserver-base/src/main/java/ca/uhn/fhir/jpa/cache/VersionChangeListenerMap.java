@@ -20,15 +20,15 @@ public class VersionChangeListenerMap {
 		myListenersByResourcetype.clear();
 	}
 
-	public Set<String> keySet() {
+	public Set<String> resourceNames() {
 		return myListenersByResourcetype.keySet();
 	}
 
-	public Map<IVersionChangeListener, SearchParameterMap> getListenerMap(String theResourceType) {
-		return myListenersByResourcetype.get(theResourceType);
+	public Map<IVersionChangeListener, SearchParameterMap> getListenerMap(String theResourceName) {
+		return myListenersByResourcetype.get(theResourceName);
 	}
 
-	public boolean hasListenersFor(String theResourceName) {
+	public boolean hasListenersForResourceName(String theResourceName) {
 		return myListenersByResourcetype.containsKey(theResourceName) && !myListenersByResourcetype.get(theResourceName).isEmpty();
 	}
 }

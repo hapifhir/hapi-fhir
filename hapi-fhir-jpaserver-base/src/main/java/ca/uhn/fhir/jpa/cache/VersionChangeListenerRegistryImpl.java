@@ -132,7 +132,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		myLastRefresh = System.currentTimeMillis();
 
 		int count = 0;
-		for (String resourceType : myListenerMap.keySet()) {
+		for (String resourceType : myListenerMap.resourceNames()) {
 			count += doRefresh(resourceType);
 		}
 		ourLog.debug("Refreshed all caches in {}ms", sw.getMillis());
@@ -177,7 +177,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 				return;
 			}
 			String resourceName = myFhirContext.getResourceType(theResource);
-			if (myListenerMap.hasListenersFor(resourceName)) {
+			if (myListenerMap.hasListenersForResourceName(resourceName)) {
 				synchronized (this) {
 					requestRefresh(resourceName);
 				}

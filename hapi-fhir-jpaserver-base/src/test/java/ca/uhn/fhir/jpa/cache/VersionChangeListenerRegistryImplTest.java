@@ -92,6 +92,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertEquals(patientId, calledWithId);
 	}
 
+	// FIXME KBD add a tests for a non-empty searchparametermap and confirm listener is only called when matching resources come through.  Add this test for both interceptor and polling cases
+
 	private static class TestCallback implements IVersionChangeListener, IPointcutLatch {
 		private final PointcutLatch myLatch = new PointcutLatch("VersionChangeListener called");
 
