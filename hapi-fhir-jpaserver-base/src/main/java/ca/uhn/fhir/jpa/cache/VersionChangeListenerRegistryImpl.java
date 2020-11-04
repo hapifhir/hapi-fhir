@@ -111,7 +111,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	private void requestRefresh(String theResourceName) {
-		// FIXME KHS this should be resourceName specific.  For now, just refresh all of them.
+		// FIXME KBD this should be resourceName specific.
 		requestRefresh();
 	}
 
@@ -129,7 +129,6 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 			return 0;
 		}
 		StopWatch sw = new StopWatch();
-		// FIXME KHS call myResourceVersionCacheSvc and store the results in myVersionChangeCache
 		myLastRefresh = System.currentTimeMillis();
 
 		int count = 0;
