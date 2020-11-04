@@ -17,8 +17,6 @@ import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
-import ca.uhn.fhir.jpa.cache.ResourceVersionCacheSvc;
-import ca.uhn.fhir.jpa.cache.VersionChangeConsumerRegistry;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -90,9 +88,8 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
-import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -591,18 +588,6 @@ public abstract class BaseConfig {
 	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
-
-
-	@Bean
-	public ResourceVersionCacheSvc resourceVersionCacheSvc() {
-		return new ResourceVersionCacheSvc();
-	}
-
-	@Bean
-	public VersionChangeConsumerRegistry versionChangeConsumerRegistry() {
-		return new VersionChangeConsumerRegistry();
-	}
-
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

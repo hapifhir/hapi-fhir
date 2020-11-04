@@ -1,18 +1,17 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceVersionMap implements IResourceVersionMap {
-	private final Map<String, Long> myMap = new HashMap<>();
+	private final Map<IdDt, String> myMap = new HashMap<>();
 
 	@Override
-	public Long getVersion(IIdType theResourceId) {
-		return myMap.get(theResourceId.toUnqualifiedVersionless().toString());
+	public String getVersion(IIdType theResourceId) {
+		return myMap.get(new IdDt(theResourceId));
 	}
 
 	@Override
@@ -21,21 +20,21 @@ public class ResourceVersionMap implements IResourceVersionMap {
 	}
 
 	public void add(IIdType theId) {
-		myMap.put(theId.toUnqualifiedVersionless().toString(), theId.getVersionIdPartAsLong());
+		IdDt id = new IdDt(theId);
+		myMap.put(id.toUnqualifiedVersionless(), id.getVersionIdPart());
 	}
 
 	@Override
-	public long populateInto(ResourceVersionCache theResourceVersionCache, IVersionChangeConsumer theConsumer) {
+	public long populateInto(ResourceVersionCache theResourceVersionCache, IVersionChangeListener theListener) {
 		long count = 0;
-		for (String id : myMap.keySet()) {
-			Long previousValue = theResourceVersionCache.addOrUpdate(id, myMap.get(id));
-			// FIXME KHS this is clunky.  Maybe we should switch our map keys back to IIdTypes...
-			String newId = id + "/_history/" + myMap.get(id);
+		for (IdDt id : myMap.keySet()) {
+			String previousValue = theResourceVersionCache.addOrUpdate(id, myMap.get(id));
+			IdDt newId = id.withVersion(myMap.get(id));
 			if (previousValue == null) {
-				theConsumer.accept(new IdDt(newId), BaseResourceMessage.OperationTypeEnum.CREATE);
+				theListener.handleCreate(newId);
 				++count;
 			} else if (!myMap.get(id).equals(previousValue)) {
-				theConsumer.accept(new IdDt(newId), BaseResourceMessage.OperationTypeEnum.UPDATE);
+				theListener.handleUpdate(newId);
 				++count;
 			}
 		}

@@ -17,7 +17,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -57,6 +59,7 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	private boolean myHaveComponentParts;
 	private String myResourceType;
 	private String myUnqualifiedId;
+
 	private String myUnqualifiedVersionId;
 
 	/**
@@ -154,10 +157,15 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		myResourceType = theResourceType;
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
-		myHaveComponentParts = true;
-		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
-			myHaveComponentParts = false;
-		}
+		setHaveComponentParts(this);
+	}
+
+	public IdDt(IIdType theId) {
+		myBaseUrl = theId.getBaseUrl();
+		myResourceType = theId.getResourceType();
+		myUnqualifiedId = theId.getIdPart();
+		myUnqualifiedVersionId = theId.getVersionIdPart();
+		setHaveComponentParts(this);
 	}
 
 	/**
@@ -165,6 +173,18 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	 */
 	public IdDt(UriDt theUrl) {
 		setValue(theUrl.getValueAsString());
+	}
+
+	@Override
+	protected Object clone() {
+		return new IdDt(myBaseUrl, myResourceType, myUnqualifiedId, myUnqualifiedVersionId);
+	}
+
+	private void setHaveComponentParts(IdDt theIdDt) {
+		myHaveComponentParts = true;
+		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
+			myHaveComponentParts = false;
+		}
 	}
 
 	@Override
@@ -642,7 +662,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 			value = existingValue;
 		}
 
-		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
+		IdDt retval = (IdDt) clone();
+		retval.myUnqualifiedVersionId = theVersion;
+		return retval;
 	}
 
 	public static boolean isValidLong(String id) {

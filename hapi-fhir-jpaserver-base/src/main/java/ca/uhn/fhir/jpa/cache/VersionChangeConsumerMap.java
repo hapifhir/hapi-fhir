@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class VersionChangeConsumerMap {
-	private final Map<String, Map<IVersionChangeConsumer, SearchParameterMap>> myConsumersByResourcetype = new HashMap<>();
+	private final Map<String, Map<IVersionChangeListener, SearchParameterMap>> myConsumersByResourcetype = new HashMap<>();
 
-	public void add(String theResourceType, IVersionChangeConsumer theVersionChangeConsumer,SearchParameterMap theMap) {
+	public void add(String theResourceType, IVersionChangeListener theVersionChangeConsumer, SearchParameterMap theMap) {
 		myConsumersByResourcetype.computeIfAbsent(theResourceType, consumer -> new HashMap<>());
 		myConsumersByResourcetype.get(theResourceType).put(theVersionChangeConsumer, theMap);
 	}
@@ -24,7 +24,7 @@ public class VersionChangeConsumerMap {
 		return myConsumersByResourcetype.keySet();
 	}
 
-	public Map<IVersionChangeConsumer, SearchParameterMap> getConsumerMap(String theResourceType) {
+	public Map<IVersionChangeListener, SearchParameterMap> getConsumerMap(String theResourceType) {
 		return myConsumersByResourcetype.get(theResourceType);
 	}
 

@@ -27,8 +27,8 @@ import java.util.Map;
 
 // FIXME KHS retool searchparam and subscription to use this
 @Repository
-public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegistry {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeConsumerRegistry.class);
+public class VersionChangeConsumerRegistryImpl implements IVersionChangeConsumerRegistry {
+	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeConsumerRegistryImpl.class);
 
 	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
@@ -49,7 +49,7 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 	private RefreshVersionCacheAndNotifyConsumersOnUpdate myInterceptor;
 
 	@Override
-	public void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeConsumer theVersionChangeConsumer) {
+	public void registerResourceVersionChangeConsumer(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeConsumer) {
 		myConsumerMap.add(theResourceType, theVersionChangeConsumer, map);
 	}
 
@@ -88,6 +88,12 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 	@VisibleForTesting
 	public void clearConsumersForUnitTest() {
 		myConsumerMap.clearConsumersForUnitTest();
+	}
+
+	@Override
+	@VisibleForTesting
+	public void clearCacheForUnitTest() {
+		myResourceVersionCache.clearForUnitTest();
 	}
 
 	@Override
@@ -135,9 +141,9 @@ public class VersionChangeConsumerRegistry implements IVersionChangeConsumerRegi
 
 	private long doRefresh(String theResourceName) {
 		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
-		Map<IVersionChangeConsumer, SearchParameterMap> map = myConsumerMap.getConsumerMap(theResourceName);
+		Map<IVersionChangeListener, SearchParameterMap> map = myConsumerMap.getConsumerMap(theResourceName);
 		long count = 0;
-		for (IVersionChangeConsumer consumer : map.keySet()) {
+		for (IVersionChangeListener consumer : map.keySet()) {
 			try {
 				IResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, resourceType, map.get(consumer));
 				count += resourceVersionMap.populateInto(myResourceVersionCache, consumer);

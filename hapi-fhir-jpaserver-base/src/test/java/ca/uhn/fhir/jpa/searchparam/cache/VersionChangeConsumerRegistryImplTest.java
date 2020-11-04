@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.searchparam.cache;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.cache.IVersionChangeConsumer;
 import ca.uhn.fhir.jpa.cache.IVersionChangeConsumerRegistry;
+import ca.uhn.fhir.jpa.cache.IVersionChangeListener;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -20,7 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class VersionChangeConsumerRegistryTest extends BaseJpaR4Test {
+public class VersionChangeConsumerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
 	IVersionChangeConsumerRegistry myVersionChangeConsumerRegistry;
 
@@ -42,7 +43,7 @@ public class VersionChangeConsumerRegistryTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		IIdType patientId = createPatientWithLatch(patient);
+		IdDt patientId = createPatientWithLatch(patient);
 		assertEquals(myTestCallback.getResourceId().toString(), patientId.toString());
 		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
@@ -64,42 +65,58 @@ public class VersionChangeConsumerRegistryTest extends BaseJpaR4Test {
 		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
 	}
 
-	private IIdType createPatientWithLatch(Patient thePatient) throws InterruptedException {
+	private IdDt createPatientWithLatch(Patient thePatient) throws InterruptedException {
 		myTestCallback.setExpectedCount(1);
 		IIdType retval = myPatientDao.create(thePatient).getId();
 		myVersionChangeConsumerRegistry.refreshAllCachesIfNecessary();
 		myTestCallback.awaitExpected();
-		return retval;
+		return new IdDt(retval);
 	}
 
 	@Test
 	public void testRegisterPolling() throws InterruptedException {
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType patientId = createPatientWithLatch(patient);
+		IdDt patientId = createPatientWithLatch(patient);
 
 		assertEquals(myTestCallback.getResourceId().toString(), patientId.toString());
 		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
+		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
+		myVersionChangeConsumerRegistry.clearCacheForUnitTest();
 		myTestCallback.setExpectedCount(1);
 		myVersionChangeConsumerRegistry.forceRefresh();
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
-		IIdType calledWithId  = (IIdType) PointcutLatch.getLatchInvocationParameter(calledWith);
+		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientId, calledWithId);
 	}
 
-	private static class TestCallback implements IVersionChangeConsumer, IPointcutLatch {
+	private static class TestCallback implements IVersionChangeListener, IPointcutLatch {
 		private final PointcutLatch myLatch = new PointcutLatch("VersionChangeConsumer called");
 
 		private IIdType myResourceId;
 		private BaseResourceMessage.OperationTypeEnum myOperationTypeEnum;
 
 		@Override
-		public void accept(IIdType theResourceId, BaseResourceMessage.OperationTypeEnum theOperationType) {
-			myResourceId = theResourceId;
-			myOperationTypeEnum = theOperationType;
-			myLatch.call(theResourceId);
+		public void handleCreate(IdDt theResourceId) {
+			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.CREATE);
+		}
+
+		@Override
+		public void handleUpdate(IdDt theResourceId) {
+			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.UPDATE);
+		}
+
+		@Override
+		public void handleDelete(IdDt theResourceId) {
+			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.DELETE);
+		}
+
+		private void handle(IIdType theTheResourceId, BaseResourceMessage.OperationTypeEnum theOperationTypeEnum) {
+			myResourceId = theTheResourceId;
+			myOperationTypeEnum = theOperationTypeEnum;
+			myLatch.call(theTheResourceId);
 		}
 
 		@Override

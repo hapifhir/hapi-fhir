@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceVersionCache {
-	private final Map<String, Long> myVersionMap = new HashMap<>();
+	private final Map<IdDt, String> myVersionMap = new HashMap<>();
 
 	public void clear() {
 		myVersionMap.clear();
@@ -16,15 +19,19 @@ public class ResourceVersionCache {
 	 * @param theVersion
 	 * @return previous value
 	 */
-	public Long addOrUpdate(String theResourceId, Long theVersion) {
-		return myVersionMap.put(theResourceId, theVersion);
+	public String addOrUpdate(IIdType theResourceId, String theVersion) {
+		return myVersionMap.put(new IdDt(theResourceId), theVersion);
 	}
 
-	public Long get(String theResourceId) {
-		return myVersionMap.get(theResourceId);
+	public String get(IIdType theResourceId) {
+		return myVersionMap.get(new IdDt(theResourceId));
 	}
 
-	public Long remove(String theResourceId) {
-		return myVersionMap.remove(theResourceId);
+	public String remove(IIdType theResourceId) {
+		return myVersionMap.remove(new IdDt(theResourceId));
+	}
+
+	public void clearForUnitTest() {
+		myVersionMap.clear();
 	}
 }
