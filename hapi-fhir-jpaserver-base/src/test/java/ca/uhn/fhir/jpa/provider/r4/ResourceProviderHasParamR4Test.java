@@ -483,6 +483,116 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		assertEquals(0, ids.size());
 	}
 	
+	@Test
+	public void testMultipleHasParameterWithCompositeOfSameType() throws Exception {
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			
+			Quantity q = new Quantity();
+			q.setValue(200);
+			obs.setValue(q);
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setValue("DEVICEID");
+			IIdType devId = myDeviceDao.create(device, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setDevice(new Reference(devId));
+			myObservationDao.create(obs, mySrd);
+		}
+
+		String uri = ourServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:identifier=" + UrlUtil.escapeUrlParam("urn:system|FOO");
+		
+		ourLog.info("uri = " + uri);
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertThat(ids, contains(pid0.getValue()));
+	}
+	
+	@Test
+	public void testMultipleHasParameterWithCompositeOfDifferentType() throws Exception {
+		
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+			
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			
+			Quantity q = new Quantity();
+			q.setValue(200);
+			obs.setValue(q);
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		{
+			Device device = new Device();
+			device.addIdentifier().setValue("DEVICEID");
+			IIdType devId = myDeviceDao.create(device, mySrd).getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("NOLINK");
+			obs.setDevice(new Reference(devId));
+			myObservationDao.create(obs, mySrd);
+		}
+
+		{
+			Encounter encounter = new Encounter();
+			encounter.addIdentifier().setValue("theEncounter");
+			encounter.getClass_().setCode("IMP").setSystem("urn:system");
+			encounter.getPeriod().setStartElement(new DateTimeType("2020-01-01")).setEndElement(new DateTimeType("2020-09-30"));
+			encounter.setSubject(new Reference(pid0));
+						
+			myEncounterDao.create(encounter, mySrd);
+			ourLog.info("Encounter: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(encounter));
+		}
+		
+		String uri = ourServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");
+		
+		ourLog.info("uri = " + uri);
+		
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertThat(ids, contains(pid0.getValue()));
+	}
+	
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
