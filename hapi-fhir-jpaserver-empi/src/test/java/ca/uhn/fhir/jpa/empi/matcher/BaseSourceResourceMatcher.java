@@ -34,9 +34,15 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 	protected Long getMatchedResourcePidFromResource(IAnyResource theResource) {
 		Long retval;
 		EmpiLink matchLink = getMatchedEmpiLink(theResource);
-		myTargetType = matchLink.getEmpiTargetType();
 		//TODO if this is already a golden record resource, we can just use its PID instead of doing a lookup.
-		retval = matchLink == null ? null : matchLink.getSourceResourcePid();
+
+		if (matchLink == null) {
+			retval = myIdHelperService.getPidOrNull(theResource);
+			myTargetType = "unkown";
+		} else {
+			retval = matchLink.getSourceResourcePid();
+			myTargetType = matchLink.getEmpiTargetType();
+		}
 		return retval;
 	}
 

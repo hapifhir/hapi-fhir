@@ -6,11 +6,11 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
-	protected Person myPractitionerPerson;
+	protected IAnyResource myPractitionerPerson;
 	protected StringType myPractitionerPersonId;
 
 	@BeforeEach
@@ -37,7 +37,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myPractitionerPerson = getPersonFromTarget(myPractitioner);
+		myPractitionerPerson = getSourceResourceFromTargetResource(myPractitioner);
 		myPractitionerPersonId = new StringType(myPractitionerPerson.getIdElement().getValue());
 	}
 
@@ -81,11 +81,11 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
-		Person person = getPersonFromTarget(patientAndUpdateLinks);
+		IAnyResource person = getSourceResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(person, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
-		person = getPersonFromTarget(patientAndUpdateLinks);
+		person = getSourceResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(person, is(nullValue()));
 	}
 
@@ -95,8 +95,8 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
 
-		Person personFromTarget = getPersonFromTarget(patientAndUpdateLinks);
-		Person personFromTarget2 = getPersonFromTarget(patientAndUpdateLinks1);
+		IAnyResource personFromTarget = getSourceResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource personFromTarget2 = getSourceResourceFromTargetResource(patientAndUpdateLinks1);
 		linkPersons(personFromTarget, personFromTarget2);
 
 		//SUT
@@ -113,9 +113,9 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks2 = createPatientAndUpdateLinks(buildFrankPatient());
 
-		Person personFromTarget = getPersonFromTarget(patientAndUpdateLinks);
-		Person personFromTarget1 = getPersonFromTarget(patientAndUpdateLinks1);
-		Person personFromTarget2 = getPersonFromTarget(patientAndUpdateLinks2);
+		IAnyResource personFromTarget = getSourceResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource personFromTarget1 = getSourceResourceFromTargetResource(patientAndUpdateLinks1);
+		IAnyResource personFromTarget2 = getSourceResourceFromTargetResource(patientAndUpdateLinks2);
 
 		// A -> B -> C -> A linkages.
 		linkPersons(personFromTarget, personFromTarget1);
@@ -130,12 +130,9 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 
 	}
 
-	private void linkPersons(Person theSourcePerson, Person theTargetPerson) {
-		Person.PersonLinkComponent plc1 = new Person.PersonLinkComponent();
-		plc1.setAssurance(Person.IdentityAssuranceLevel.LEVEL2);
-		plc1.setTarget(new Reference(theTargetPerson.getIdElement().toUnqualifiedVersionless()));
-		theSourcePerson.getLink().add(plc1);
-		myPersonDao.update(theSourcePerson);
+	//TODO GGG
+	private void linkPersons(IAnyResource theSourcePerson, IAnyResource theTargetPerson) {
+		throw new UnsupportedOperationException("We need to fix this!");
 	}
 
 	@Test

@@ -5,6 +5,8 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -68,8 +70,8 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		// Add a third patient
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		IdType patientId = patient.getIdElement().toVersionless();
-		Person person = getPersonFromTarget(patient);
-		IdType personId = person.getIdElement().toVersionless();
+		IAnyResource person = getSourceResourceFromTargetResource(patient);
+		IIdType personId = person.getIdElement().toVersionless();
 
 		Parameters result = myEmpiProviderR4.queryLinks(null, null, null, myLinkSource, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));

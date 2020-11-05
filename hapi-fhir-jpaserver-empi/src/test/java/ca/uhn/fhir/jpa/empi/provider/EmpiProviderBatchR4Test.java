@@ -5,8 +5,8 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -25,7 +25,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
-	protected Person myPractitionerPerson;
+	protected IAnyResource myPractitionerPerson;
 	protected StringType myPractitionerPersonId;
 
 	@Autowired
@@ -38,7 +38,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myPractitionerPerson = getPersonFromTarget(myPractitioner);
+		myPractitionerPerson = getSourceResourceFromTargetResource(myPractitioner);
 		myPractitionerPersonId = new StringType(myPractitionerPerson.getIdElement().getValue());
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, afterEmpiLatch);
 	}

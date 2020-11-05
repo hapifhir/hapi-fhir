@@ -4,8 +4,8 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	DaoConfig myDaoConfig;
 
 	protected Patient myPatient;
-	protected Person myPerson;
+	protected IAnyResource myPerson;
 	protected EmpiLink myLink;
 	protected StringType myPatientId;
 	protected StringType myPersonId;
@@ -41,7 +41,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
 		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
-		myPerson = getPersonFromTarget(myPatient);
+		myPerson = getSourceResourceFromTargetResource(myPatient);
 		myPersonId = new StringType(myPerson.getIdElement().getValue());
 		myVersionlessPersonId = new StringType(myPerson.getIdElement().toVersionless().getValue());
 

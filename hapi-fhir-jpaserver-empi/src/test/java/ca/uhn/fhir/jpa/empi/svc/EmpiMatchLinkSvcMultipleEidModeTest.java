@@ -5,9 +5,9 @@ import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
-		Person janePerson = getPersonFromTarget(patient);
+		IAnyResource janePerson = getSourceResourceFromTargetResource(patient);
 		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
 		String foundHapiEid = hapiEid.get(0).getValue();
 
@@ -65,9 +65,9 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(sameSourceResourceAs(janePatient)));
 
-		Person person = getPersonFromTarget(patient);
+		Patient sourcePatient = (Patient)getSourceResourceFromTargetResource(patient);
 
-		List<Identifier> identifier = person.getIdentifier();
+		List<Identifier> identifier = sourcePatient.getIdentifier();
 
 		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
@@ -112,7 +112,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "id_6");
 
 		//At this point, there should be 5 EIDs on the person
-		Person personFromTarget = getPersonFromTarget(patient2);
+		Patient personFromTarget = (Patient)getSourceResourceFromTargetResource(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(5));
 
 		updatePatientAndUpdateLinks(patient2);
@@ -122,7 +122,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 
-		personFromTarget = getPersonFromTarget(patient2);
+		personFromTarget = (Patient) getSourceResourceFromTargetResource(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(6));
 	}
 
@@ -149,7 +149,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(possibleDuplicates, hasSize(1));
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
-			.map(this::getPersonFromTarget)
+			.map(this::getSourceResourceFromTargetResource)
 			.map(myIdHelperService::getPidOrNull)
 			.collect(Collectors.toList());
 

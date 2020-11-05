@@ -9,6 +9,7 @@ import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
@@ -109,6 +110,9 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	protected ServletRequestDetails myRequestDetails;
+
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@BeforeEach
 	public void beforeSetRequestDetails() {
@@ -269,11 +273,14 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		assertEquals(theExpectedCount, myEmpiLinkDao.count());
 	}
 
-	protected Person getPersonFromTarget(IAnyResource theBaseResource) {
+	protected IAnyResource getSourceResourceFromTargetResource(IAnyResource theBaseResource) {
+		String resourceType = theBaseResource.getIdElement().getResourceType();
+		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
+
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
-			Long personPid = matchedLinkForTargetPid.get().getSourceResourcePid();
-			return (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
+			Long sourceResourcePid = matchedLinkForTargetPid.get().getSourceResourcePid();
+			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(sourceResourcePid));
 		} else {
 			return null;
 		}
