@@ -20,15 +20,22 @@ package ca.uhn.fhir.empi.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
@@ -218,6 +225,30 @@ public class PersonHelper {
 		if (eidsToApply.isEmpty()) {
 			eidsToApply.add(myEIDHelper.createHapiEid());
 		}
+
+		// get a ref to the actual ID Field
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
+		IBaseResource newSourceResource = resourceDefinition.newInstance();
+
+		// FHIR terser - clone into
+		// hapi has 2 metamodels: for children and types
+		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
+		// FHIR choice types - fields within fhir where we have a choice of ids
+		BaseRuntimeElementCompositeDefinition<?> childIdentifier =
+			(BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
+
+		FhirTerser terser = myFhirContext.newTerser();
+		List<IBase> sourceResourceEids = sourceResourceIdentifier.getAccessor().getValues(theSourceResource);
+		for (IBase base : sourceResourceEids) {
+			IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
+			terser.cloneInto(base, sourceResourceNewIdentifier, true);
+
+			sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
+		}
+		// now we have all IDs pulled into it
+		// terser.getValues() - we will need to add values into the target manually, use mutator for that
+
+
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 //				Person personR4 = new Person();
