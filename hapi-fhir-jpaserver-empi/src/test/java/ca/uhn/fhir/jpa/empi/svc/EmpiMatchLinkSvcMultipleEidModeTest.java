@@ -47,7 +47,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinksMatchResult(MATCH);
-		assertLinksNewPerson(true);
+		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
 		Person janePerson = getPersonFromTarget(patient);
@@ -59,11 +59,11 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(janePatient, "67890");
 		createPatientAndUpdateLinks(janePatient);
 		assertLinksMatchResult(MATCH, MATCH);
-		assertLinksNewPerson(true, false);
+		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
 
 		//We want to make sure the patients were linked to the same person.
-		assertThat(patient, is(samePersonAs(janePatient)));
+		assertThat(patient, is(sameSourceResourceAs(janePatient)));
 
 		Person person = getPersonFromTarget(patient);
 
@@ -95,7 +95,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient1, "id_4");
 		createPatientAndUpdateLinks(patient1);
 		assertLinksMatchResult(MATCH);
-		assertLinksNewPerson(true);
+		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
 		Patient patient2 = buildPaulPatient();
@@ -103,10 +103,10 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "id_1");
 		patient2 = createPatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH);
-		assertLinksNewPerson(true, false);
+		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, true);
 
-		assertThat(patient1, is(samePersonAs(patient2)));
+		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 
 		clearExternalEIDs(patient2);
 		addExternalEID(patient2, "id_6");
@@ -117,10 +117,10 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 		updatePatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH);
-		assertLinksNewPerson(true, false);
+		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, true);
 
-		assertThat(patient1, is(samePersonAs(patient2)));
+		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 
 		personFromTarget = getPersonFromTarget(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(6));
@@ -134,7 +134,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient1, "eid-11");
 		patient1 = createPatientAndUpdateLinks(patient1);
 		assertLinksMatchResult(MATCH);
-		assertLinksNewPerson(true);
+		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
 		Patient patient2 = buildJanePatient();
@@ -142,7 +142,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "eid-22");
 		patient2 = createPatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH, POSSIBLE_DUPLICATE);
-		assertLinksNewPerson(true, true, false);
+		assertLinksCreatedNewResource(true, true, false);
 		assertLinksMatchedByEid(false, false, true);
 
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
@@ -155,7 +155,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE EmpiLink.
 		EmpiLink empiLink = possibleDuplicates.get(0);
-		assertThat(empiLink.getPersonPid(), is(in(duplicatePids)));
+		assertThat(empiLink.getSourceResourcePid(), is(in(duplicatePids)));
 		assertThat(empiLink.getTargetPid(), is(in(duplicatePids)));
 	}
 
@@ -167,7 +167,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient1, "eid-11");
 		patient1 = createPatientAndUpdateLinks(patient1);
 		assertLinksMatchResult(MATCH);
-		assertLinksNewPerson(true);
+		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
 		Patient patient2 = buildPaulPatient();
@@ -175,18 +175,18 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "eid-22");
 		patient2 = createPatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH);
-		assertLinksNewPerson(true, true);
+		assertLinksCreatedNewResource(true, true);
 		assertLinksMatchedByEid(false, false);
 
 		Patient patient3 = buildPaulPatient();
 		addExternalEID(patient3, "eid-22");
 		patient3 = createPatientAndUpdateLinks(patient3);
 		assertLinksMatchResult(MATCH, MATCH, MATCH);
-		assertLinksNewPerson(true, true, false);
+		assertLinksCreatedNewResource(true, true, false);
 		assertLinksMatchedByEid(false, false, true);
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
-		assertThat(patient2, is(samePersonAs(patient3)));
+		assertThat(patient2, is(sameSourceResourceAs(patient3)));
 
 		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
 		//This should create a situation in which the incoming EIDs are matched to _two_ different persons. In this case, we want to
@@ -197,7 +197,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		patient2 = updatePatientAndUpdateLinks(patient2);
 		logAllLinks();
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
-		assertLinksNewPerson(true, true, false, false, false);
+		assertLinksCreatedNewResource(true, true, false, false, false);
 		assertLinksMatchedByEid(false, true, true, true, true);
 
 		assertThat(patient2, is(not(matchedToAPerson())));

@@ -103,7 +103,7 @@ public class EmpiEidUpdateService {
 	}
 
 	private boolean candidateIsSameAsEmpiLinkPerson(EmpiLink theExistingMatchLink, MatchedPersonCandidate thePersonCandidate) {
-		return theExistingMatchLink.getPersonPid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
+		return theExistingMatchLink.getSourceResourcePid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
 	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext, IAnyResource theOldPerson) {
@@ -151,7 +151,7 @@ public class EmpiEidUpdateService {
 			myExistingPerson = null;
 
 			if (theExistingMatchLink.isPresent()) {
-				Long existingPersonPid = theExistingMatchLink.get().getPersonPid();
+				Long existingPersonPid = theExistingMatchLink.get().getSourceResourcePid();
 				myExistingPerson =  myEmpiResourceDaoSvc.readPersonByPid(new ResourcePersistentId(existingPersonPid));
 				myRemainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(theExistingMatchLink.get(), theMatchedPersonCandidate);
 			} else {

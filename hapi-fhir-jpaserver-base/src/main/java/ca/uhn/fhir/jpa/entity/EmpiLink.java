@@ -61,6 +61,13 @@ public class EmpiLink {
 	private Long myId;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(name = "SOURCE_RESOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_SOURCE_RESOURCE"), insertable=false, updatable=false, nullable=false)
+	private ResourceTable mySourceResource;
+
+	@Column(name = "SOURCE_RESOURCE_PID", nullable=false)
+	private Long mySourceResourcePid;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "PERSON_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"), insertable=false, updatable=false, nullable=false)
 	private ResourceTable myPerson;
 
@@ -99,13 +106,17 @@ public class EmpiLink {
 
 	/** This link created a new person **/
 	@Column(name = "NEW_PERSON")
-	private Boolean myNewPerson;
+	private Boolean myHadToCreateNewResource;
 
 	@Column(name = "VECTOR")
 	private Long myVector;
 
 	@Column(name = "SCORE")
 	private Double myScore;
+
+	//TODO GGG GL-1340
+	@Column(name = "RULE_COUNT")
+	private Long myRuleCount;
 
 	public EmpiLink() {}
 
@@ -125,22 +136,27 @@ public class EmpiLink {
 		return this;
 	}
 
-	public ResourceTable getPerson() {
-		return myPerson;
+	public ResourceTable getSourceResource() {
+		return mySourceResource;
 	}
 
-	public EmpiLink setPerson(ResourceTable thePerson) {
-		myPerson = thePerson;
-		myPersonPid = thePerson.getId();
+	public EmpiLink setSourceResource(ResourceTable theSourceResource) {
+		mySourceResource = theSourceResource;
+		mySourceResourcePid = theSourceResource.getId();
 		return this;
 	}
 
-	public Long getPersonPid() {
-		return myPersonPid;
+	public Long getSourceResourcePid() {
+		return mySourceResourcePid;
 	}
 
 	public EmpiLink setPersonPid(Long thePersonPid) {
 		myPersonPid = thePersonPid;
+		return this;
+	}
+
+	public EmpiLink setSourceResourcePid(Long theSourceResourcePid) {
+		mySourceResourcePid = theSourceResourcePid;
 		return this;
 	}
 
@@ -267,16 +283,12 @@ public class EmpiLink {
 		return this;
 	}
 
-	public Boolean getNewPerson() {
-		return myNewPerson;
+	public boolean getHadToCreateNewResource() {
+		return myHadToCreateNewResource != null && myHadToCreateNewResource;
 	}
 
-	public boolean isNewPerson() {
-		return myNewPerson != null && myNewPerson;
-	}
-
-	public EmpiLink setNewPerson(Boolean theNewPerson) {
-		myNewPerson = theNewPerson;
+	public EmpiLink setHadToCreateNewResource(Boolean theHadToCreateNewResource) {
+		myHadToCreateNewResource = theHadToCreateNewResource;
 		return this;
 	}
 
@@ -289,18 +301,26 @@ public class EmpiLink {
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("myId", myId)
-			.append("myPersonPid", myPersonPid)
+			.append("myPersonPid", mySourceResourcePid)
 			.append("myTargetPid", myTargetPid)
 			.append("myEmpiTargetType", myEmpiTargetType)
 			.append("myMatchResult", myMatchResult)
 			.append("myLinkSource", myLinkSource)
 			.append("myEidMatch", myEidMatch)
-			.append("myNewPerson", myNewPerson)
+			.append("myNewPerson", myHadToCreateNewResource)
 			.append("myScore", myScore)
 			.toString();
 	}
 
 	public String getEmpiTargetType() {
 		return myEmpiTargetType;
+	}
+
+	public Long getRuleCount() {
+		return myRuleCount;
+	}
+
+	public void setRuleCount(Long theRuleCount) {
+		myRuleCount = theRuleCount;
 	}
 }

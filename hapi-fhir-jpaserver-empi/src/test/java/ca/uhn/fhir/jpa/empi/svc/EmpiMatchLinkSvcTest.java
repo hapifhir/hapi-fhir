@@ -41,6 +41,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -63,19 +65,21 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(1);
 		assertLinksMatchResult(MATCH);
-		assertLinksNewPerson(true);
+		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 	}
 
 	@Test
-	public void testAddPatientLinksToNewPersonIfNoMatch() {
+	public void testAddPatientLinksToNewlyCreatedResourceIfNoMatch() {
 		Patient patient1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patient2 = createPatientAndUpdateLinks(buildPaulPatient());
 
 		assertLinkCount(2);
-		assertThat(patient1, is(not(samePersonAs(patient2))));
+
+		assertThat(patient1, is(not(sameSourceResourceAs(patient2))));
+
 		assertLinksMatchResult(MATCH, MATCH);
-		assertLinksNewPerson(true, true);
+		assertLinksCreatedNewResource(true, true);
 		assertLinksMatchedByEid(false, false);
 	}
 
@@ -87,9 +91,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient2 = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(2);
 
-		assertThat(patient1, is(samePersonAs(patient2)));
+		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 		assertLinksMatchResult(MATCH, MATCH);
-		assertLinksNewPerson(true, false);
+		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
 	}
 
@@ -106,11 +110,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//rerun EMPI rules against unmatchedJane.
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedJane, createContextForCreate());
 
-		assertThat(unmatchedJane, is(not(samePersonAs(janePerson))));
+		assertThat(unmatchedJane, is(not(sameSourceResourceAs(janePerson))));
 		assertThat(unmatchedJane, is(not(linkedTo(originalJane))));
 
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
-		assertLinksNewPerson(true, false, true);
+		assertLinksCreatedNewResource(true, false, true);
 		assertLinksMatchedByEid(false, false, false);
 	}
 
@@ -130,11 +134,11 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//should cause a whole new Person to be created.
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedPatient, createContextForCreate());
 
-		assertThat(unmatchedPatient, is(not(samePersonAs(janePerson))));
+		assertThat(unmatchedPatient, is(not(sameSourceResourceAs(janePerson))));
 		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
 
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
-		assertLinksNewPerson(true, false, true);
+		assertLinksCreatedNewResource(true, false, true);
 		assertLinksMatchedByEid(false, false, false);
 	}
 
@@ -184,7 +188,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testPatientMatchingAnotherPatientLinksToSamePerson() {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient sameJanePatient = createPatientAndUpdateLinks(buildJanePatient());
-		assertThat(janePatient, is(samePersonAs(sameJanePatient)));
+		assertThat(janePatient, is(sameSourceResourceAs(sameJanePatient)));
 	}
 
 	@Test
@@ -200,7 +204,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		createPatientAndUpdateLinks(janePatient);
 
 		//We want to make sure the patients were linked to the same person.
-		assertThat(patient, is(samePersonAs(janePatient)));
+		assertThat(patient, is(sameSourceResourceAs(janePatient)));
 
 		Person person = getPersonFromTarget(patient);
 
@@ -225,7 +229,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient2 = addExternalEID(buildPaulPatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient2);
 
-		assertThat(patient1, is(samePersonAs(patient2)));
+		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 	}
 
 	@Test
@@ -243,7 +247,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "id_1");
 		createPatientAndUpdateLinks(patient2);
 
-		assertThat(patient1, is(samePersonAs(patient2)));
+		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 	}
 
 	@Test
@@ -266,7 +270,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE EmpiLink.
 		EmpiLink empiLink = possibleDuplicates.get(0);
-		assertThat(empiLink.getPersonPid(), is(in(duplicatePids)));
+		assertThat(empiLink.getSourceResourcePid(), is(in(duplicatePids)));
 		assertThat(empiLink.getTargetPid(), is(in(duplicatePids)));
 	}
 
@@ -285,7 +289,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Practitioner janePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
 
 		assertLinkCount(2);
-		assertThat(janePatient, is(not(samePersonAs(janePractitioner))));
+		assertThat(janePatient, is(not(sameSourceResourceAs(janePractitioner))));
 	}
 
 	@Test
@@ -294,7 +298,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Practitioner anotherJanePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
 
 		assertLinkCount(2);
-		assertThat(anotherJanePractitioner, is(samePersonAs(janePractitioner)));
+		assertThat(anotherJanePractitioner, is(sameSourceResourceAs(janePractitioner)));
 	}
 
 	@Test
@@ -319,10 +323,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
 
 		assertLinkCount(2);
-		assertThat(janePatient, is(samePersonAs(janePatient2)));
+		assertThat(janePatient, is(sameSourceResourceAs(janePatient2)));
 
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
-		assertThat(incomingJanePatient, is(samePersonAs(janePatient, janePatient2)));
+		assertThat(incomingJanePatient, is(sameSourceResourceAs(janePatient, janePatient2)));
 		assertThat(incomingJanePatient, is(linkedTo(janePatient, janePatient2)));
 	}
 
@@ -340,7 +344,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//own individual Persons for the purpose of this test.
 		IAnyResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
 		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
-		assertThat(janePatient, is(not(samePersonAs(janePatient2))));
+		assertThat(janePatient, is(not(sameSourceResourceAs(janePatient2))));
 
 		//In theory, this will match both Persons!
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
@@ -357,7 +361,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		logAllLinks();
 		assertLinksMatchResult(MATCH, MATCH, POSSIBLE_MATCH, POSSIBLE_MATCH, POSSIBLE_DUPLICATE);
-		assertLinksNewPerson(true, true, false, false, false);
+		assertLinksCreatedNewResource(true, true, false, false, false);
 		assertLinksMatchedByEid(false, false, false, false, false);
 	}
 
@@ -370,7 +374,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
 		patient = createPatientAndUpdateLinks(patient);
-		assertThat(patient, is(samePersonAs(patient)));
+		assertThat(patient, is(sameSourceResourceAs(patient)));
 
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
@@ -393,7 +397,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertEquals(Person.IdentityAssuranceLevel.LEVEL1, person.getLink().get(2).getAssurance());
 
 		assertLinksMatchResult(MATCH, POSSIBLE_MATCH, POSSIBLE_MATCH);
-		assertLinksNewPerson(true, false, false);
+		assertLinksCreatedNewResource(true, false, false);
 		assertLinksMatchedByEid(false, false, false);
 	}
 
@@ -402,7 +406,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
 		patient = createPatientAndUpdateLinks(patient);
-		assertThat(patient, is(samePersonAs(patient)));
+		assertThat(patient, is(sameSourceResourceAs(patient)));
 
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
@@ -412,9 +416,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient3.getNameFirstRep().setFamily("familyone");
 		patient3 = createPatientAndUpdateLinks(patient3);
 
-		assertThat(patient2, is(not(samePersonAs(patient))));
+		assertThat(patient2, is(not(sameSourceResourceAs(patient))));
 		assertThat(patient2, is(possibleMatchWith(patient)));
-		assertThat(patient3, is(samePersonAs(patient)));
+		assertThat(patient3, is(sameSourceResourceAs(patient)));
 	}
 
 	@Test
@@ -451,7 +455,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient1.setId(janePatient.getId());
 		Patient janePaulPatient = updatePatientAndUpdateLinks(patient1);
 
-		assertThat(janePerson, is(samePersonAs(janePaulPatient)));
+		assertThat(janePerson, is(sameSourceResourceAs(janePaulPatient)));
 
 		//Ensure the related person was updated with new info.
 		Person personFromTarget = getPersonFromTarget(janePaulPatient);
@@ -472,7 +476,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		paul2.setGender(Enumerations.AdministrativeGender.FEMALE);
 		paul2 = createPatientAndUpdateLinks(paul2);
 
-		assertThat(paul2, is(samePersonAs(paul)));
+		assertThat(paul2, is(sameSourceResourceAs(paul)));
 
 		//Newly matched patients aren't allowed to overwrite Person Attributes unless they are empty, so gender should still be set to male.
 		Person paul2Person = getPersonFromTarget(paul2);
@@ -517,7 +521,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		updatePatientAndUpdateLinks(paul);
 
 		assertThat(originalJanePerson, is(possibleDuplicateOf(originalPaulPerson)));
-		assertThat(jane, is(samePersonAs(paul)));
+		assertThat(jane, is(sameSourceResourceAs(paul)));
 	}
 
 	@Test
@@ -539,7 +543,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertNoDuplicates();
 
 		Person newlyFoundPaulPerson = getPersonFromTarget(paul);
-		assertThat(originalPaulPerson, is(samePersonAs(newlyFoundPaulPerson)));
+		assertThat(originalPaulPerson, is(sameSourceResourceAs(newlyFoundPaulPerson)));
 		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPerson).get(0).getValue();
 		assertThat(newEid, is(equalTo(EID_2)));
 	}
@@ -565,7 +569,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient3 = createPatientAndUpdateLinks(patient3);
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
-		assertThat(patient2, is(samePersonAs(patient3)));
+		assertThat(patient2, is(sameSourceResourceAs(patient3)));
 		assertNoDuplicates();
 		//	Person A -> {P1}
 		//	Person B -> {P2, P3}
@@ -578,11 +582,35 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		// Person B -> {P3}
 		// Possible duplicates A<->B
 
-		assertThat(patient2, is(samePersonAs(patient1)));
+		assertThat(patient2, is(sameSourceResourceAs(patient1)));
 
 		List<EmpiLink> possibleDuplicates = myEmpiLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 
+	}
+
+	@Test
+	public void testPatientUpdatesCauseCandidateSearchToContainExistingLinksAndNewFinds() {
+		Date today = new Date();
+		Patient jane = buildJaneWithBirthday(today);
+
+		jane.setActive(true);
+		Patient janePatient = createPatientAndUpdateLinks(jane);
+		Person janePerson = getPersonFromTarget(janePatient);
+
+		Patient paul = buildPaulPatient();
+		paul.setActive(true);
+		Patient paulPatient = createPatientAndUpdateLinks(paul);
+		Person paulPerson = getPersonFromTarget(paulPatient);
+
+		paulPatient.setBirthDate(jane.getBirthDate());
+		paulPatient.setName(jane.getName());
+
+
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(paulPatient, createContextForUpdate());
+		assertThat(paulPerson.getBirthDate(), is(nullValue()));
+		paulPerson = getPersonFromTarget(paulPatient);
+		assertThat(paulPerson.getBirthDate(), is(notNullValue()));
 	}
 }

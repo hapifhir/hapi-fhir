@@ -49,7 +49,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 		if (targetPid != null) {
 			Optional<EmpiLink> oLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
 			if (oLink.isPresent()) {
-				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getPersonPid());
+				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getSourceResourcePid());
 				ourLog.debug("Resource previously linked. Using existing link.");
 					retval.add(new MatchedPersonCandidate(personPid, oLink.get()));
 			}

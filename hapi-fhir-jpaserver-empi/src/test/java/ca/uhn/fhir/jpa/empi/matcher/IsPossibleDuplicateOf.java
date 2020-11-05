@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class IsPossibleDuplicateOf extends BasePersonMatcher {
+public class IsPossibleDuplicateOf extends BaseSourceResourceMatcher {
 	/**
 	 * Matcher with tells us if there is an EmpiLink with between these two resources that are considered POSSIBLE DUPLICATE.
 	 * For use only on persons.
@@ -26,10 +26,10 @@ public class IsPossibleDuplicateOf extends BasePersonMatcher {
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 
-		incomingPersonPid = getMatchedPersonPidFromResource(theIncomingResource);
+		incomingPersonPid = getMatchedResourcePidFromResource(theIncomingResource);
 
 		List<Long> personPidsToMatch = myBaseResources.stream()
-			.map(this::getMatchedPersonPidFromResource)
+			.map(this::getMatchedResourcePidFromResource)
 			.collect(Collectors.toList());
 
 

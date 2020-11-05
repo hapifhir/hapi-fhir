@@ -174,7 +174,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 
 		//Updating a Person who was created via EMPI should fail.
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
-		Long personPid = empiLink.getPersonPid();
+		Long personPid = empiLink.getSourceResourcePid();
 		Person empiPerson = (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
 		try {

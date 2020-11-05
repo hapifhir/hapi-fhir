@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Matcher with tells us if there is an EmpiLink with between these two resources that are considered POSSIBLE_MATCH
  */
-public class IsPossibleMatchWith extends BasePersonMatcher {
+public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
 
 	protected IsPossibleMatchWith(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theEmpiLinkDaoSvc, theBaseResource);
@@ -26,17 +26,17 @@ public class IsPossibleMatchWith extends BasePersonMatcher {
 		List<EmpiLink> empiLinks = getEmpiLinksForTarget(theIncomingResource, EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 		List<Long> personPidsToMatch = myBaseResources.stream()
-			.map(this::getMatchedPersonPidFromResource)
+			.map(this::getMatchedResourcePidFromResource)
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
 
 		if (personPidsToMatch.isEmpty()) {
 			personPidsToMatch = myBaseResources.stream()
-				.flatMap(iBaseResource -> getPossibleMatchedPersonPidsFromTarget(iBaseResource).stream())
+				.flatMap(iBaseResource -> getPossibleMatchedSourceResourcePidsFromTarget(iBaseResource).stream())
 				.collect(Collectors.toList());
 		}
 
-		List<Long> empiLinkSourcePersonPids = empiLinks.stream().map(EmpiLink::getPersonPid).collect(Collectors.toList());
+		List<Long> empiLinkSourcePersonPids = empiLinks.stream().map(EmpiLink::getSourceResourcePid).collect(Collectors.toList());
 
 		return empiLinkSourcePersonPids.containsAll(personPidsToMatch);
 	}

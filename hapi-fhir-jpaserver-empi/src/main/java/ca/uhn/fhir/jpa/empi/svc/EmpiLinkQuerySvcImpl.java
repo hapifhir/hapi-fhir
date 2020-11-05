@@ -52,8 +52,6 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 			.map(this::toJson);
 	}
 
-
-
 	@Override
 	public Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
@@ -64,13 +62,13 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 		EmpiLinkJson retval = new EmpiLinkJson();
 		String targetId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getTargetPid()).toVersionless().getValue();
 		retval.setTargetId(targetId);
-		String personId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getPersonPid()).toVersionless().getValue();
+		String personId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourceResourcePid()).toVersionless().getValue();
 		retval.setPersonId(personId);
 		retval.setCreated(theLink.getCreated());
 		retval.setEidMatch(theLink.getEidMatch());
 		retval.setLinkSource(theLink.getLinkSource());
 		retval.setMatchResult(theLink.getMatchResult());
-		retval.setNewPerson(theLink.getNewPerson());
+		retval.setNewPerson(theLink.getHadToCreateNewResource());
 		retval.setScore(theLink.getScore());
 		retval.setUpdated(theLink.getUpdated());
 		retval.setVector(theLink.getVector());
@@ -81,7 +79,7 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	private Example<EmpiLink> exampleLinkFromParameters(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		if (thePersonId != null) {
-			empiLink.setPersonPid(myIdHelperService.getPidOrThrowException(thePersonId));
+			empiLink.setSourceResourcePid(myIdHelperService.getPidOrThrowException(thePersonId));
 		}
 		if (theTargetId != null) {
 			empiLink.setTargetPid(myIdHelperService.getPidOrThrowException(theTargetId));

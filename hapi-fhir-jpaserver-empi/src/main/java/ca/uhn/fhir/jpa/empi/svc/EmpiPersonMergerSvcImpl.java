@@ -116,7 +116,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 				}
 			}
 			// The original links didn't contain this target, so move it over to the toPerson
-			fromLink.setPersonPid(theToPersonPid);
+			fromLink.setSourceResourcePid(theToPersonPid);
 			ourLog.trace("Saving link {}", fromLink);
 			myEmpiLinkDaoSvc.save(fromLink);
 		}

@@ -23,7 +23,7 @@ public class EmpiLinkHelper {
 		List<EmpiLink> links = myEmpiLinkDao.findAll();
 		ourLog.info("All EMPI Links:");
 		for (EmpiLink link : links) {
-			IdDt personId = link.getPerson().getIdDt().toVersionless();
+			IdDt personId = link.getSourceResource().getIdDt().toVersionless();
 			IdDt targetId = link.getTarget().getIdDt().toVersionless();
 			ourLog.info("{}: {}, {}, {}, {}", link.getId(), personId, targetId, link.getMatchResult(), link.getLinkSource());
 		}

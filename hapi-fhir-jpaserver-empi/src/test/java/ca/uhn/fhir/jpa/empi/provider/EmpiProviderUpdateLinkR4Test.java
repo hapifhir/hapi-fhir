@@ -33,7 +33,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		assertEquals(EmpiMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 		assertEquals(EmpiLinkSourceEnum.AUTO, links.get(1).getLinkSource());
 		assertEquals(EmpiMatchResultEnum.MATCH, links.get(1).getMatchResult());
-		assertNotEquals(links.get(0).getPersonPid(), links.get(1).getPersonPid());
+		assertNotEquals(links.get(0).getSourceResourcePid(), links.get(1).getSourceResourcePid());
 	}
 
 	@Test

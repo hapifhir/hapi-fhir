@@ -42,7 +42,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	public void testMerge() {
 		Person mergedPerson = myEmpiProviderR4.mergePersons(myFromPersonId, myToPersonId, myRequestDetails);
 		assertEquals(myToPerson.getIdElement(), mergedPerson.getIdElement());
-		assertThat(mergedPerson, is(samePersonAs(myToPerson)));
+		assertThat(mergedPerson, is(sameSourceResourceAs(myToPerson)));
 		assertEquals(2, getAllPersons().size());
 		assertEquals(1, getAllActivePersons().size());
 

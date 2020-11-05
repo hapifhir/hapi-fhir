@@ -68,7 +68,7 @@ public class EmpiLinkDaoSvc {
 		empiLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
 		empiLink.setEidMatch(theMatchOutcome.isEidMatch() | empiLink.isEidMatch());
-		empiLink.setNewPerson(theMatchOutcome.isNewPerson() | empiLink.isNewPerson());
+		empiLink.setHadToCreateNewResource(theMatchOutcome.isNewPerson() | empiLink.getHadToCreateNewResource());
 		empiLink.setEmpiTargetType(myFhirContext.getResourceType(theTarget));
 		if (empiLink.getScore() != null) {
 			empiLink.setScore(Math.max(theMatchOutcome.score, empiLink.getScore()));
@@ -90,6 +90,7 @@ public class EmpiLinkDaoSvc {
 			return oExisting.get();
 		} else {
 			EmpiLink newLink = myEmpiLinkFactory.newEmpiLink();
+			newLink.setSourceResourcePid(thePersonPid);
 			newLink.setPersonPid(thePersonPid);
 			newLink.setTargetPid(theResourcePid);
 			return newLink;
@@ -103,7 +104,7 @@ public class EmpiLinkDaoSvc {
 		}
 		EmpiLink link = myEmpiLinkFactory.newEmpiLink();
 		link.setTargetPid(theTargetPid);
-		link.setPersonPid(thePersonPid);
+		link.setSourceResourcePid(thePersonPid);
 		Example<EmpiLink> example = Example.of(link);
 		return myEmpiLinkDao.findOne(example);
 	}
@@ -170,7 +171,7 @@ public class EmpiLinkDaoSvc {
 	 */
 	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
 		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
-		exampleLink.setPersonPid(thePersonPid);
+		exampleLink.setSourceResourcePid(thePersonPid);
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -222,7 +223,7 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setPersonPid(pid);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setSourceResourcePid(pid);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
@@ -239,7 +240,7 @@ public class EmpiLinkDaoSvc {
 	}
 
 	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
-		Set<Long> persons = theLinks.stream().map(EmpiLink::getPersonPid).collect(Collectors.toSet());
+		Set<Long> persons = theLinks.stream().map(EmpiLink::getSourceResourcePid).collect(Collectors.toSet());
 		persons.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
 		ourLog.info("Deleting {} EMPI link records...", theLinks.size());
 		myEmpiLinkDao.deleteAll(theLinks);

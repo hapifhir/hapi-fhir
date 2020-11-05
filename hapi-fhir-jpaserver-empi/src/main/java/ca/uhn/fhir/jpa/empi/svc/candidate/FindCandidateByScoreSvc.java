@@ -82,12 +82,12 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 			}
 
 			EmpiLink matchEmpiLink = optMatchEmpiLink.get();
-			if (personPidsToExclude.contains(matchEmpiLink.getPersonPid())) {
-				ourLog.info("Skipping EMPI on candidate person with PID {} due to manual NO_MATCH", matchEmpiLink.getPersonPid());
+			if (personPidsToExclude.contains(matchEmpiLink.getSourceResourcePid())) {
+				ourLog.info("Skipping EMPI on candidate person with PID {} due to manual NO_MATCH", matchEmpiLink.getSourceResourcePid());
 				continue;
 			}
 
-			MatchedPersonCandidate candidate = new MatchedPersonCandidate(getResourcePersistentId(matchEmpiLink.getPersonPid()), match.getMatchResult());
+			MatchedPersonCandidate candidate = new MatchedPersonCandidate(getResourcePersistentId(matchEmpiLink.getSourceResourcePid()), match.getMatchResult());
 			retval.add(candidate);
 		}
 		return retval;
@@ -97,7 +97,7 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
 		return myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(targetPid, EmpiMatchResultEnum.NO_MATCH)
 			.stream()
-			.map(EmpiLink::getPersonPid)
+			.map(EmpiLink::getSourceResourcePid)
 			.collect(Collectors.toList());
 	}
 

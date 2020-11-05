@@ -23,7 +23,7 @@ import ca.uhn.fhir.jpa.empi.matcher.IsMatchedToAPerson;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleDuplicateOf;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.empi.matcher.IsPossibleMatchWith;
-import ca.uhn.fhir.jpa.empi.matcher.IsSamePersonAs;
+import ca.uhn.fhir.jpa.empi.matcher.IsSameSourceResourceAs;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -272,7 +272,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Person getPersonFromTarget(IAnyResource theBaseResource) {
 		Optional<EmpiLink> matchedLinkForTargetPid = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
-			Long personPid = matchedLinkForTargetPid.get().getPersonPid();
+			Long personPid = matchedLinkForTargetPid.get().getSourceResourcePid();
 			return (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
 		} else {
 			return null;
@@ -280,7 +280,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected Person getPersonFromEmpiLink(EmpiLink theEmpiLink) {
-		return (Person) myPersonDao.readByPid(new ResourcePersistentId(theEmpiLink.getPersonPid()));
+		return (Person) myPersonDao.readByPid(new ResourcePersistentId(theEmpiLink.getSourceResourcePid()));
 	}
 
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
@@ -332,8 +332,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return thePractitioner;
 	}
 
-	protected Matcher<IAnyResource> samePersonAs(IAnyResource... theBaseResource) {
-		return IsSamePersonAs.samePersonAs(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
+	protected Matcher<IAnyResource> sameSourceResourceAs(IAnyResource... theBaseResource) {
+		return IsSameSourceResourceAs.sameSourceResourceAs(myIdHelperService, myEmpiLinkDaoSvc, theBaseResource);
 	}
 
 	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {
@@ -391,7 +391,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		empiLink.setPersonPid(myIdHelperService.getPidOrNull(person));
+		empiLink.setSourceResourcePid(myIdHelperService.getPidOrNull(person));
 		empiLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
 		return empiLink;
 	}
@@ -413,8 +413,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		assertFields(EmpiLink::getMatchResult, theExpectedValues);
 	}
 
-	protected void assertLinksNewPerson(Boolean... theExpectedValues) {
-		assertFields(EmpiLink::getNewPerson, theExpectedValues);
+	protected void assertLinksCreatedNewResource(Boolean... theExpectedValues) {
+		assertFields(EmpiLink::getHadToCreateNewResource, theExpectedValues);
 	}
 
 	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {

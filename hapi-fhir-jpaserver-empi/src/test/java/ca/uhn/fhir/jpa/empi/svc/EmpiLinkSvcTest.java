@@ -116,7 +116,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	private void saveNoMatchLink(Long thePersonPid, Long theTargetPid) {
 		EmpiLink noMatchLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setPersonPid(thePersonPid)
+			.setSourceResourcePid(thePersonPid)
 			.setTargetPid(theTargetPid)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL)
 			.setMatchResult(EmpiMatchResultEnum.NO_MATCH);

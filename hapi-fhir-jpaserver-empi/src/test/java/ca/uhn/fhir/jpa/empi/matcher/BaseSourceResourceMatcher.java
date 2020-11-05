@@ -16,40 +16,32 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class BasePersonMatcher extends TypeSafeMatcher<IAnyResource> {
-	private static final Logger ourLog = LoggerFactory.getLogger(BasePersonMatcher.class);
+public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyResource> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSourceResourceMatcher.class);
 
 	protected IdHelperService myIdHelperService;
 	protected EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	protected Collection<IAnyResource> myBaseResources;
+	protected String myTargetType;
 
-	protected BasePersonMatcher(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected BaseSourceResourceMatcher(IdHelperService theIdHelperService, EmpiLinkDaoSvc theEmpiLinkDaoSvc, IAnyResource... theBaseResource) {
 		myIdHelperService = theIdHelperService;
 		myEmpiLinkDaoSvc = theEmpiLinkDaoSvc;
 		myBaseResources = Arrays.stream(theBaseResource).collect(Collectors.toList());
 	}
 
 	@Nullable
-	protected Long getMatchedPersonPidFromResource(IAnyResource theResource) {
+	protected Long getMatchedResourcePidFromResource(IAnyResource theResource) {
 		Long retval;
-		if (isPatientOrPractitioner(theResource)) {
-			EmpiLink matchLink = getMatchedEmpiLink(theResource);
-			retval = matchLink == null ? null : matchLink.getPersonPid();
-		} else if (isPerson(theResource)) {
-			retval = myIdHelperService.getPidOrNull(theResource);
-		} else {
-			throw new IllegalArgumentException("Resources of type " + theResource.getIdElement().getResourceType() + " cannot be persons!");
-		}
+		EmpiLink matchLink = getMatchedEmpiLink(theResource);
+		myTargetType = matchLink.getEmpiTargetType();
+		//TODO if this is already a golden record resource, we can just use its PID instead of doing a lookup.
+		retval = matchLink == null ? null : matchLink.getSourceResourcePid();
 		return retval;
 	}
 
-	protected List<Long> getPossibleMatchedPersonPidsFromTarget(IAnyResource theBaseResource) {
-		return getEmpiLinksForTarget(theBaseResource, EmpiMatchResultEnum.POSSIBLE_MATCH).stream().map(EmpiLink::getPersonPid).collect(Collectors.toList());
-	}
-
-	protected boolean isPatientOrPractitioner(IAnyResource theResource) {
-		String resourceType = theResource.getIdElement().getResourceType();
-		return (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner"));
+	protected List<Long> getPossibleMatchedSourceResourcePidsFromTarget(IAnyResource theBaseResource) {
+		return getEmpiLinksForTarget(theBaseResource, EmpiMatchResultEnum.POSSIBLE_MATCH).stream().map(EmpiLink::getSourceResourcePid).collect(Collectors.toList());
 	}
 
 	protected EmpiLink getMatchedEmpiLink(IAnyResource thePatientOrPractitionerResource) {
@@ -61,10 +53,6 @@ public abstract class BasePersonMatcher extends TypeSafeMatcher<IAnyResource> {
 		} else {
 			throw new IllegalStateException("Its illegal to have more than 1 match for a given target! we found " + empiLinks.size() + " for resource with id: " + thePatientOrPractitionerResource.getIdElement().toUnqualifiedVersionless());
 		}
-	}
-
-	protected boolean isPerson(IAnyResource theIncomingResource) {
-		return (theIncomingResource.getIdElement().getResourceType().equalsIgnoreCase("Person"));
 	}
 
 	protected List<EmpiLink> getEmpiLinksForTarget(IAnyResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * is linked to a set of patients/practitioners via a person.
  *
  */
-public class IsLinkedTo extends BasePersonMatcher {
+public class IsLinkedTo extends BaseSourceResourceMatcher {
 
 	private List<Long> baseResourcePersonPids;
 	private Long incomingResourcePersonPid;
@@ -26,11 +26,11 @@ public class IsLinkedTo extends BasePersonMatcher {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		incomingResourcePersonPid =  getMatchedPersonPidFromResource(theIncomingResource);
+		incomingResourcePersonPid =  getMatchedResourcePidFromResource(theIncomingResource);
 
 		//OK, lets grab all the person pids of the resources passed in via the constructor.
 		baseResourcePersonPids = myBaseResources.stream()
-			.map(this::getMatchedPersonPidFromResource)
+			.map(this::getMatchedResourcePidFromResource)
 			.collect(Collectors.toList());
 
 		//The resources are linked if all person pids match the incoming person pid.
