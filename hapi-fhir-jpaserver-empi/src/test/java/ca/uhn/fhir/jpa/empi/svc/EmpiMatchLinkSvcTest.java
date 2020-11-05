@@ -205,7 +205,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(sameSourceResourceAs(janePatient)));
 
-		Patient sourcePatient = (Patient)getSourceResourceFromTargetResource(patient);
+		Patient sourcePatient = (Patient) getSourceResourceFromTargetResource(patient);
 
 		List<Identifier> identifier = sourcePatient.getIdentifier();
 
@@ -424,7 +424,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPatientUpdateOverwritesPersonDataOnChanges() {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
-		Patient janeSourcePatient = (Patient)getSourceResourceFromTargetResource(janePatient);
+		Patient janeSourcePatient = (Patient) getSourceResourceFromTargetResource(janePatient);
 
 		//Change Jane's name to paul.
 		Patient patient1 = buildPaulPatient();
@@ -434,7 +434,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(janeSourcePatient, is(sameSourceResourceAs(janePaulPatient)));
 
 		//Ensure the related person was updated with new info.
-		Patient sourcePatientFromTarget = (Patient) t geetSourceResourceFromTargetResource(janePaulPatient);
+		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(janePaulPatient);
 		HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
 		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
 	}
@@ -445,8 +445,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		paul.setGender(Enumerations.AdministrativeGender.MALE);
 		paul = createPatientAndUpdateLinks(paul);
 
-		Person personFromTarget = getSourceResourceFromTargetResource(paul);
-		assertThat(personFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
+		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(paul);
+		assertThat(sourcePatientFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
 
 		Patient paul2 = buildPaulPatient();
 		paul2.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -455,7 +455,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(paul2, is(sameSourceResourceAs(paul)));
 
 		//Newly matched patients aren't allowed to overwrite Person Attributes unless they are empty, so gender should still be set to male.
-		Person paul2Person = getSourceResourceFromTargetResource(paul2);
+		Patient paul2Person = (Patient) getSourceResourceFromTargetResource(paul2);
 		assertThat(paul2Person.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
 	}
 
@@ -467,16 +467,16 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		paul.getBirthDateElement().setValueAsString(incorrectBirthdate);
 		paul = createPatientAndUpdateLinks(paul);
 
-		Person personFromTarget = getSourceResourceFromTargetResource(paul);
-		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
+		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(paul);
+		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
 
 		String correctBirthdate = "1990-06-28";
 		paul.getBirthDateElement().setValueAsString(correctBirthdate);
 
 		paul = updatePatientAndUpdateLinks(paul);
 
-		personFromTarget = getSourceResourceFromTargetResource(paul);
-		assertThat(personFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
+		sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(paul);
+		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
 	}
 
@@ -487,16 +487,16 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		String EID_2 = "456";
 
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
-		Person originalPaulPerson = getSourceResourceFromTargetResource(paul);
+		Patient originalPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
 
 		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
-		Person originalJanePerson = getSourceResourceFromTargetResource(jane);
+		Patient originalJanePatient = (Patient) getSourceResourceFromTargetResource(jane);
 
 		clearExternalEIDs(paul);
 		addExternalEID(paul, EID_2);
 		updatePatientAndUpdateLinks(paul);
 
-		assertThat(originalJanePerson, is(possibleDuplicateOf(originalPaulPerson)));
+		assertThat(originalJanePatient, is(possibleDuplicateOf(originalPaulPatient)));
 		assertThat(jane, is(sameSourceResourceAs(paul)));
 	}
 
@@ -507,8 +507,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		String EID_2 = "456";
 
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
-		Person originalPaulPerson = getSourceResourceFromTargetResource(paul);
-		String oldEid = myEidHelper.getExternalEid(originalPaulPerson).get(0).getValue();
+		Patient originalPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
+		String oldEid = myEidHelper.getExternalEid(originalPaulPatient).get(0).getValue();
 		assertThat(oldEid, is(equalTo(EID_1)));
 
 		clearExternalEIDs(paul);
@@ -518,9 +518,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		assertNoDuplicates();
 
-		Person newlyFoundPaulPerson = getSourceResourceFromTargetResource(paul);
-		assertThat(originalPaulPerson, is(sameSourceResourceAs(newlyFoundPaulPerson)));
-		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPerson).get(0).getValue();
+		Patient newlyFoundPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
+		assertThat(originalPaulPatient, is(sameSourceResourceAs(newlyFoundPaulPatient)));
+		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPatient).get(0).getValue();
 		assertThat(newEid, is(equalTo(EID_2)));
 	}
 
@@ -564,29 +564,5 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
 
-	}
-
-	@Test
-	public void testPatientUpdatesCauseCandidateSearchToContainExistingLinksAndNewFinds() {
-		Date today = new Date();
-		Patient jane = buildJaneWithBirthday(today);
-
-		jane.setActive(true);
-		Patient janePatient = createPatientAndUpdateLinks(jane);
-		Person janePerson = getSourceResourceFromTargetResource(janePatient);
-
-		Patient paul = buildPaulPatient();
-		paul.setActive(true);
-		Patient paulPatient = createPatientAndUpdateLinks(paul);
-		Person paulPerson = getSourceResourceFromTargetResource(paulPatient);
-
-		paulPatient.setBirthDate(jane.getBirthDate());
-		paulPatient.setName(jane.getName());
-
-
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(paulPatient, createContextForUpdate());
-		assertThat(paulPerson.getBirthDate(), is(nullValue()));
-		paulPerson = getSourceResourceFromTargetResource(paulPatient);
-		assertThat(paulPerson.getBirthDate(), is(notNullValue()));
 	}
 }

@@ -120,8 +120,12 @@ public class EmpiMatchLinkSvc {
 	}
 
 	private void handleEmpiWithNoCandidates(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		log(theEmpiTransactionContext, "There were no matched candidates for EMPI, creating a new Person.");
+		log(theEmpiTransactionContext, String.format("There were no matched candidates for EMPI, creating a new %s.", theResource.getIdElement().getResourceType()));
 		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+		// TODO GGG :)
+		// 1. Get the right helper
+		// 2. Create source resoruce for the EMPI target
+		// 3. UPDATE EMPI LINK TABLE
 
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}

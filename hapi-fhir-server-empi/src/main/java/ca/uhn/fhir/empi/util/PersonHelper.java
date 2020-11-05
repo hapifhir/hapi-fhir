@@ -220,13 +220,15 @@ public class PersonHelper {
 		}
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				Person personR4 = new Person();
-
-				personR4.setActive(true);
-				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
-				personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
-				copyEmpiTargetDataIntoPerson(theSourceResource, personR4, true);
-				return personR4;
+//				Person personR4 = new Person();
+//
+//				personR4.setActive(true);
+//				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
+//				personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
+//				copyEmpiTargetDataIntoPerson(theSourceResource, personR4, true);
+//				return personR4;
+//				IAnyResource sourceResource = theSourceResource;
+				return null;
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Person personDstu3 = new org.hl7.fhir.dstu3.model.Person();
 				personDstu3.setActive(true);
