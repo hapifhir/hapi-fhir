@@ -265,25 +265,36 @@ public class QueryStack {
 		return new PredicateBuilderCacheLookupResult<>(cacheHit, (T) retVal);
 	}
 
-	private Condition createPredicateComposite(@Nullable DbColumn theSourceJoinColumn, String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
-		// TODO: fail if missing is set for a composite query
+ 	private Condition createPredicateComposite(@Nullable DbColumn theSourceJoinColumn, String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
 
-		IQueryParameterType or = theNextAnd.get(0);
-		if (!(or instanceof CompositeParam<?, ?>)) {
-			throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + or.getClass());
+ 		Condition orCondidtion = null;
+		for (IQueryParameterType next : theNextAnd) {
+			
+			if (!(next instanceof CompositeParam<?, ?>)) {
+				throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + next.getClass());
+			}
+			CompositeParam<?, ?> cp = (CompositeParam<?, ?>) next;
+	
+			RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
+			IQueryParameterType leftValue = cp.getLeftValue();
+			Condition leftPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, left, leftValue, theRequestPartitionId);
+	
+			RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
+			IQueryParameterType rightValue = cp.getRightValue();
+			Condition rightPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, right, rightValue, theRequestPartitionId);
+	
+			Condition andCondition = toAndPredicate(leftPredicate, rightPredicate);
+			
+			if (orCondidtion == null) {
+				orCondidtion = toOrPredicate(andCondition);
+			} else {
+				orCondidtion = toOrPredicate(orCondidtion, andCondition);
+			}
 		}
-		CompositeParam<?, ?> cp = (CompositeParam<?, ?>) or;
-
-		RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
-		IQueryParameterType leftValue = cp.getLeftValue();
-		Condition leftPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, left, leftValue, theRequestPartitionId);
-
-		RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
-		IQueryParameterType rightValue = cp.getRightValue();
-		Condition rightPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, right, rightValue, theRequestPartitionId);
-
-		return toAndPredicate(leftPredicate, rightPredicate);
+		
+		return orCondidtion;
 	}
+
 
 	private Condition createPredicateCompositePart(@Nullable DbColumn theSourceJoinColumn, String theResourceName, RuntimeSearchParam theParam, IQueryParameterType theParamValue, RequestPartitionId theRequestPartitionId) {
 
