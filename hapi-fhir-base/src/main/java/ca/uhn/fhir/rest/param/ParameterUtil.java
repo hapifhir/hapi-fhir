@@ -1,5 +1,16 @@
 package ca.uhn.fhir.rest.param;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -15,16 +26,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /*
  * #%L
@@ -114,11 +115,70 @@ public class ParameterUtil {
 	 * This is a utility method intended provided to help the JPA module.
 	 */
 	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
-																		  String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+
 		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
-		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
+
+		if (paramType == RestSearchParameterTypeEnum.COMPOSITE) {
+
+			List<RuntimeSearchParam> theCompositList = theParamDef.getCompositeOf();
+
+			if (theCompositList == null) {
+				throw new ConfigurationException("Search parameter of type " + theUnqualifiedParamName
+						+ " can be found in parameter annotation, found ");
+			}
+
+			if (theCompositList.size() != 2) {
+				throw new ConfigurationException("Search parameter of type " + theUnqualifiedParamName
+						+ " must have 2 composite types declared in parameter annotation, found "
+						+ theCompositList.size());
+			}
+
+			RuntimeSearchParam left = theCompositList.get(0);
+			RuntimeSearchParam right = theCompositList.get(1);
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			CompositeAndListParam<IQueryParameterType, IQueryParameterType> cp = new CompositeAndListParam(
+					getCompositBindingClass(left.getParamType(), left.getName()),
+					getCompositBindingClass(right.getParamType(), right.getName()));
+
+			cp.setValuesAsQueryTokens(theContext, theUnqualifiedParamName, theParameters);
+
+			return cp;
+		} else {
+			return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
+		}
 	}
 
+	private static Class<?> getCompositBindingClass(RestSearchParameterTypeEnum paramType,
+			String theUnqualifiedParamName) {
+
+		switch (paramType) {
+		case DATE:
+			return DateParam.class;
+		case NUMBER:
+			return NumberParam.class;
+		case QUANTITY:
+			return QuantityParam.class;
+		case REFERENCE:
+			return ReferenceParam.class;
+		case STRING:
+			return StringParam.class;
+		case TOKEN:
+			return TokenParam.class;
+		case URI:
+			return UriParam.class;
+		case HAS:
+			return HasParam.class;
+		case SPECIAL:
+			return SpecialParam.class;
+			
+		default:
+			throw new IllegalArgumentException("Parameter '" + theUnqualifiedParamName + "' has type " + paramType
+					+ " which is currently not supported.");
+		}
+	}
+			
 	/**
 	 * Removes :modifiers and .chains from URL parameter names
 	 */
