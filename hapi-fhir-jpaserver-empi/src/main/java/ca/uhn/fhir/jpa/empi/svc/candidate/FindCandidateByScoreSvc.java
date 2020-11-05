@@ -66,6 +66,8 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 		List<MatchedPersonCandidate> retval = new ArrayList<>();
 
 		List<Long> personPidsToExclude = getNoMatchPersonPids(theTarget);
+
+
 		List<MatchedTarget> matchedCandidates = myEmpiMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget);
 
 		//Convert all possible match targets to their equivalent Persons by looking up in the EmpiLink table,

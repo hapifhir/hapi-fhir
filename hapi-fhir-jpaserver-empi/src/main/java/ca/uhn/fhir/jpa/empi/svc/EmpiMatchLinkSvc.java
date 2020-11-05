@@ -76,6 +76,7 @@ public class EmpiMatchLinkSvc {
 
 	private EmpiTransactionContext doEmpiUpdate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		CandidateList candidateList = myEmpiPersonFindingSvc.findPersonCandidates(theResource);
+
 		if (candidateList.isEmpty()) {
 			handleEmpiWithNoCandidates(theResource, theEmpiTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
@@ -121,6 +122,7 @@ public class EmpiMatchLinkSvc {
 	private void handleEmpiWithNoCandidates(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, "There were no matched candidates for EMPI, creating a new Person.");
 		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 

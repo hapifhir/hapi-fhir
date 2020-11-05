@@ -38,8 +38,10 @@ public class EmpiPersonFindingSvc {
 
 	@Autowired
 	private FindCandidateByEidSvc myFindCandidateByEidSvc;
+
 	@Autowired
 	private FindCandidateByLinkSvc myFindCandidateByLinkSvc;
+
 	@Autowired
 	private FindCandidateByScoreSvc myFindCandidateByScoreSvc;
 
@@ -63,12 +65,14 @@ public class EmpiPersonFindingSvc {
 		if (matchedPersonCandidates.isEmpty()) {
 			matchedPersonCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
 		}
+
 		if (matchedPersonCandidates.isEmpty()) {
 			//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
 			//matches by following EMPI rules.
 
 			matchedPersonCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
 		}
+
 		return matchedPersonCandidates;
 	}
 

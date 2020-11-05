@@ -214,7 +214,6 @@ public class PersonHelper {
 	 * @return the Person that is created.
 	 */
 	public IAnyResource createPersonFromEmpiTarget(IAnyResource theSourceResource) {
-		String eidSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theSourceResource);
 		if (eidsToApply.isEmpty()) {
 			eidsToApply.add(myEIDHelper.createHapiEid());
@@ -222,6 +221,7 @@ public class PersonHelper {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person personR4 = new Person();
+
 				personR4.setActive(true);
 				eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
 				personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
@@ -395,7 +395,6 @@ public class PersonHelper {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theEmpiTarget);
 		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(thePerson);
-
 
 		if (!incomingTargetEid.isEmpty()) {
 			if (personOfficialEid.isEmpty() || !myEmpiConfig.isPreventMultipleEids()) {

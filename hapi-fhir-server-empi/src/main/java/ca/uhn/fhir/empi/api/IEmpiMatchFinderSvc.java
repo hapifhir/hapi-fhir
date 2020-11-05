@@ -21,14 +21,13 @@ package ca.uhn.fhir.empi.api;
  */
 
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface IEmpiMatchFinderSvc {
 	/**
-	 * Retrieve a list of possible Patient/Practitioner candidates for matching, based on the given {@link IBaseResource}
+	 * Retrieve a list of possible Patient/Practitioner candidates for matching, based on the given {@link IAnyResource}
 	 * Internally, performs all EMPI matching rules on the type of the resource.
 	 *
 	 * @param theResourceType the type of the resource.
