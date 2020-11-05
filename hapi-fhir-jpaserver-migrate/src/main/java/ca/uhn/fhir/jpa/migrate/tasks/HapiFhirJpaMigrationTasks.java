@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -157,6 +158,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, TermValueSet.MAX_VER_LENGTH);
 		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL");
 		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VER");
+
+		//Term ValueSet Component add system version
+		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
+		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, TermCodeSystemVersion.MAX_VERSION_LENGTH);
+		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
+		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL");
 	}
 
 	protected void init510_20200725() {

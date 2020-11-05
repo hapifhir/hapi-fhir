@@ -278,7 +278,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Element 'QuestionnaireResponse.item[0].linkId': minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.linkId: minimum required = 1, but only found 0"));
 	}
 
 	@Test

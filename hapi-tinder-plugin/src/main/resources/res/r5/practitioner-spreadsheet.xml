@@ -6098,7 +6098,7 @@
     <Cell ss:StyleID="s87"><Data ss:Type="String">Specific qualification the practitioner has to provide a service</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s118"><Data ss:Type="String">example</Data></Cell>
-    <Cell ss:StyleID="s118"><Data ss:Type="String">http://terminology.hl7.org/ValueSet/v2-2.7-0360</Data></Cell>
+    <Cell ss:StyleID="s118"><Data ss:Type="String">http://terminology.hl7.org/ValueSet/v2-0360</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s118"/>

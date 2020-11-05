@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Grahame Grieve</LastAuthor>
+  <LastAuthor>Jose Costa Teixeira</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2019-05-31T20:06:03Z</LastSaved>
+  <LastSaved>2020-04-30T20:54:29Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -22,7 +22,7 @@
   
   
   
-  <ActiveSheet>1</ActiveSheet>
+  <ActiveSheet>3</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -1173,11 +1173,11 @@
     <Cell><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Request.code</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">code</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">DeviceRequest.code[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">DeviceRequest.code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Reference(Device) | CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">CodeableReference(Device | DeviceDefinition )</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1478,12 +1478,12 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:StyleID="s72">
     <Cell ss:Index="2" ss:StyleID="s87"><Data ss:Type="String">Request.reasonCode</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">reasonCode</Data></Cell>
-    <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s87"><Data ss:Type="String">DeviceRequest.reasonCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">reason</Data></Cell>
+    <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s87"><Data ss:Type="String">DeviceRequest.reason</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">CodeableReference(Condition|Observation|DiagnosticReport|DocumentReference)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1493,7 +1493,7 @@
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">Coded Reason for request</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s88"><Data ss:Type="String">Coded/Linked Reason for request</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><Data ss:Type="String">Reason or justification for the use of this device. </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s90"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1509,7 +1509,7 @@
    <Row ss:AutoFitHeight="0" ss:StyleID="s72">
     <Cell ss:Index="2" ss:StyleID="s87"><Data ss:Type="String">Request.reasonReference</Data></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">reasonReference</Data></Cell>
-    <Cell ss:Formula="=R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s87"><Data ss:Type="String">DeviceRequest.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Formula="=&#34;!&#34;&amp;R2C4&amp;&#34;.&#34;&amp;RC[-1]" ss:StyleID="s87"><Data ss:Type="String">!DeviceRequest.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1950,13 +1950,12 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <Zoom>110</Zoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>4</SplitVertical>
-   <LeftColumnRightPane>15</LeftColumnRightPane>
+   <LeftColumnRightPane>8</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -2549,7 +2548,7 @@
     <Cell ss:StyleID="s125"><Data ss:Type="String">code</Data></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">token</Data></Cell>
     <Cell ss:StyleID="s93"/>
-    <Cell ss:StyleID="s128"><Data ss:Type="String">DeviceRequest.codeCodeableConcept</Data></Cell>
+    <Cell ss:StyleID="s128"><Data ss:Type="String">DeviceRequest.code.concept</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">Code for what is being requested/ordered</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -2623,7 +2622,7 @@
     <Cell ss:StyleID="s125"><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">reference</Data></Cell>
     <Cell ss:StyleID="s93"/>
-    <Cell ss:StyleID="s128"><Data ss:Type="String">DeviceRequest.codeReference</Data></Cell>
+    <Cell ss:StyleID="s128"><Data ss:Type="String">DeviceRequest.code.reference</Data></Cell>
     <Cell ss:StyleID="s129"><Data ss:Type="String">Reference to resource that is being requested/ordered</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
@@ -2754,6 +2753,7 @@
     <HorizontalResolution>600</HorizontalResolution>
     <VerticalResolution>600</VerticalResolution>
    </Print>
+   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -4302,8 +4302,7 @@
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="28" ss:StyleID="s119" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s119" ss:Width="158.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s119" ss:Width="275.0"/>
-   <Column ss:StyleID="s119" ss:Width="51.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s119" ss:Width="113.0"/>
+   <Column ss:AutoFitWidth="0" ss:Index="4" ss:StyleID="s119" ss:Width="113.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s119" ss:Width="280.0"/>
    <Column ss:StyleID="s119" ss:Width="173.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s119" ss:Width="98.0"/>

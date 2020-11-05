@@ -1112,7 +1112,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|1", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("1", concept.getSystemVersion());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
@@ -1134,7 +1135,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|1", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("1", concept.getSystemVersion());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1144,7 +1146,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|1", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("1", concept.getSystemVersion());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
@@ -1159,7 +1162,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|1", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("1", concept.getSystemVersion());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1185,7 +1189,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|2", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("2", concept.getSystemVersion());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration v2", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
@@ -1207,7 +1212,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(1);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|2", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("2", concept.getSystemVersion());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter v2", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
@@ -1217,7 +1223,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|2", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("2", concept.getSystemVersion());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum v2", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
@@ -1232,7 +1239,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 			concept = termValueSet.getConcepts().get(23);
 			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org|2", concept.getSystem());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("2", concept.getSystemVersion());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum v2", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());

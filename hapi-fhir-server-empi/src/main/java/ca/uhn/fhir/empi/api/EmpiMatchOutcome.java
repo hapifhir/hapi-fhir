@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  * This data object captures the final outcome of an EMPI match
  */
 public final class EmpiMatchOutcome {
+
 	public static final EmpiMatchOutcome POSSIBLE_DUPLICATE = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final EmpiMatchOutcome NO_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.NO_MATCH);
 	public static final EmpiMatchOutcome NEW_PERSON_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.MATCH).setNewPerson(true);
@@ -57,6 +58,11 @@ public final class EmpiMatchOutcome {
 	 * Based on the EMPI Rules, what was the final match result?
 	 */
 	private EmpiMatchResultEnum myMatchResultEnum;
+
+	/**
+	 * Total number of EMPI rules checked for this outcome
+	 */
+	private int myEmpiRuleCount;
 
 	public EmpiMatchOutcome(Long theVector, Double theScore) {
 		vector = theVector;
@@ -99,10 +105,46 @@ public final class EmpiMatchOutcome {
 		return myEidMatch;
 	}
 
+	/**
+	 * Sets the number of EMPI rules checked for this match outcome
+	 *
+	 * @param theEmpiRuleCount
+	 * 	Number of EMPI rules that were checked for this match outcome
+	 * @return
+	 * 	Returns this instance
+	 */
+	public EmpiMatchOutcome setEmpiRuleCount(int theEmpiRuleCount) {
+		myEmpiRuleCount = theEmpiRuleCount;
+		return this;
+	}
+
+	/**
+	 * Gets the number of EMPI rules checked for this match outcome
+	 *
+	 * @return
+	 * 	Returns the number of rules
+	 */
+	public int getEmpiRuleCount() {
+		return myEmpiRuleCount;
+	}
+
 	/** @param theEidMatch the link was established via a shared EID */
 	public EmpiMatchOutcome setEidMatch(boolean theEidMatch) {
 		myEidMatch = theEidMatch;
 		return this;
+	}
+
+	/**
+	 * Gets normalized score that is in the range from zero to one
+	 *
+	 * @return
+	 * 	Returns the normalized score
+	 */
+	public Double getNormalizedScore() {
+		if (myEmpiRuleCount == 0) {
+			return 0.0;
+		}
+		return score / myEmpiRuleCount;
 	}
 
 	@Override

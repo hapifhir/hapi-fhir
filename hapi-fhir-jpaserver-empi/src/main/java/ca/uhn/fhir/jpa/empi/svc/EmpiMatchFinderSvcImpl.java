@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
+
 	@Autowired
 	private EmpiCandidateSearchSvc myEmpiCandidateSearchSvc;
 	@Autowired
@@ -50,13 +51,4 @@ public class EmpiMatchFinderSvcImpl implements IEmpiMatchFinderSvc {
 			.collect(Collectors.toList());
 	}
 
-	@Override
-	@Nonnull
-	public List<IAnyResource> findMatches(String theResourceType, IAnyResource theResource) {
-		List<MatchedTarget> targetCandidates = getMatchedTargets(theResourceType, theResource);
-		return targetCandidates.stream()
-			.filter(candidate -> candidate.isMatch())
-			.map(MatchedTarget::getTarget)
-			.collect(Collectors.toList());
-	}
 }

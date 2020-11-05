@@ -708,7 +708,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.getMessages().toString(), containsString("Element 'Bundle.type': minimum required = 1"));
+		assertThat(output.getMessages().toString(), containsString("Bundle.type: minimum required = 1, but only found 0"));
 	}
 
 	/**
@@ -1131,10 +1131,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertThat(errors.toString(), containsString("Element 'Observation.subject': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString("Element 'Observation.encounter': max allowed = 0, but found 1"));
-		assertThat(errors.toString(), containsString("Element 'Observation.device': minimum required = 1, but only found 0"));
-		assertThat(errors.toString(), containsString(""));
+		assertThat(errors.toString(), containsString("Observation.subject: minimum required = 1, but only found 0"));
+		assertThat(errors.toString(), containsString("Observation.encounter: max allowed = 0, but found 1"));
+		assertThat(errors.toString(), containsString("Observation.device: minimum required = 1, but only found 0"));
 	}
 
 	@Test
@@ -1168,7 +1167,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size(), greaterThan(0));
-		assertEquals("Profile http://hl7.org/fhir/StructureDefinition/Observation, Element 'Observation.status': minimum required = 1, but only found 0", output.getMessages().get(0).getMessage());
+		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
 
 	}
 

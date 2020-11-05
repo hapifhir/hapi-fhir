@@ -37,16 +37,4 @@ public interface IEmpiMatchFinderSvc {
 	 */
 	@Nonnull
 	List<MatchedTarget> getMatchedTargets(String theResourceType, IAnyResource theResource);
-
-	/**
-	 * Used by the $match operation.
-	 * Retrieve a list of Patient/Practitioner matches, based on the given {@link IAnyResource}
-	 * Internally, performs all EMPI matching rules on the type of the resource then returns only those
-	 * with a match result of MATCHED.
-	 *
-	 * @param theResourceType the type of the resource.
-	 * @param theResource the resource that we are attempting to find matches for.
-	 * @return a List of {@link IAnyResource} representing all people who had a MATCH outcome.
-	 */
-	List<IAnyResource> findMatches(String theResourceType, IAnyResource theResource);
 }

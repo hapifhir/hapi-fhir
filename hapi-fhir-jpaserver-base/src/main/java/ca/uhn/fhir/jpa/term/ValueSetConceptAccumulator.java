@@ -87,7 +87,15 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSetConcept> optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
+		Optional<TermValueSetConcept> optionalConcept;
+		int versionIdx = theSystem.indexOf("|");
+		if (versionIdx >= 0) {
+			String systemUrl = theSystem.substring(0,versionIdx);
+			String systemVersion = theSystem.substring(versionIdx+1);
+			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCodeWithVersion(myTermValueSet.getId(), systemUrl, systemVersion,theCode);
+		} else {
+			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
+		}
 
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();
@@ -115,7 +123,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		TermValueSetConcept concept = new TermValueSetConcept();
 		concept.setValueSet(myTermValueSet);
 		concept.setOrder(myConceptsSaved);
-		concept.setSystem(theSystem);
+		int versionIndex = theSystem.indexOf("|");
+		if (versionIndex >= 0) {
+			concept.setSystem(theSystem.substring(0, versionIndex));
+			concept.setSystemVersion(theSystem.substring(versionIndex+1));
+		} else {
+			concept.setSystem(theSystem);
+		}
 		concept.setCode(theCode);
 		if (isNotBlank(theDisplay)) {
 			concept.setDisplay(theDisplay);
