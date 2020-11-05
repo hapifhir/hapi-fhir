@@ -34,16 +34,9 @@ import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
@@ -341,7 +334,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
-		IAnyResource person = myPersonHelper.createPersonFromEmpiTarget(janePatient2);
+		IAnyResource person = myPersonHelper.createSourceResourceFromEmpiTarget(janePatient2);
 		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
 		assertThat(janePatient, is(not(sameSourceResourceAs(janePatient2))));
 
@@ -418,6 +411,24 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(patient2, is(not(sameSourceResourceAs(patient))));
 		assertThat(patient2, is(possibleMatchWith(patient)));
 		assertThat(patient3, is(sameSourceResourceAs(patient)));
+	}
+
+	@Test
+	public void testCreateSourceResourceFromEmpiTarget() {
+		Patient janePatient = buildJanePatient();
+		Patient janeSourceResourcePatient = myPersonHelper.createSourceResourceFromEmpiTarget(janePatient);
+
+		assertThat("Resource must not be identical", janePatient != janeSourceResourcePatient);
+		assertFalse(janePatient.getIdentifier().isEmpty());
+		assertFalse(janeSourceResourcePatient.getIdentifier().isEmpty());
+
+		Identifier janeId = janePatient.getIdentifier().get(0);
+		Identifier janeSourceResourceId = janeSourceResourcePatient.getIdentifier().get(0);
+
+		assertEquals(janeId.getValue(), janeSourceResourceId.getValue());
+		assertEquals(janeId.getSystem(), janeSourceResourceId.getSystem());
+
+
 	}
 
 	//Case #1

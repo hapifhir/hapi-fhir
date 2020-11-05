@@ -121,7 +121,7 @@ public class EmpiMatchLinkSvc {
 
 	private void handleEmpiWithNoCandidates(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
 		log(theEmpiTransactionContext, String.format("There were no matched candidates for EMPI, creating a new %s.", theResource.getIdElement().getResourceType()));
-		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+		IAnyResource newPerson = myPersonHelper.createSourceResourceFromEmpiTarget(theResource);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resoruce for the EMPI target
@@ -135,7 +135,7 @@ public class EmpiMatchLinkSvc {
 		IAnyResource person = myEmpiPersonFindingSvc.getPersonFromMatchedPersonCandidate(thePersonCandidate);
 		if (myPersonHelper.isPotentialDuplicate(person, theResource)) {
 			log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-			IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+			IAnyResource newPerson = myPersonHelper.createSourceResourceFromEmpiTarget(theResource);
 			myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 			myEmpiLinkSvc.updateLink(newPerson, person, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		} else {

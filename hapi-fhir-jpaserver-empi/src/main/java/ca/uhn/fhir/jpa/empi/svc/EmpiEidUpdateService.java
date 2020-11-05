@@ -108,7 +108,8 @@ public class EmpiEidUpdateService {
 
 	private void createNewPersonAndFlagAsDuplicate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext, IAnyResource theOldPerson) {
 		log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		IAnyResource newPerson = myPersonHelper.createPersonFromEmpiTarget(theResource);
+		IAnyResource newPerson = myPersonHelper.createSourceResourceFromEmpiTarget(theResource);
+
 		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 		myEmpiLinkSvc.updateLink(newPerson, theOldPerson, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
