@@ -57,7 +57,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceFilteringSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchSvc;
-import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiSourceResourceFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.FindCandidateByScoreSvc;
@@ -122,8 +122,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiPersonFindingSvc empiPersonFindingSvc() {
-		return new EmpiPersonFindingSvc();
+    EmpiSourceResourceFindingSvc empiPersonFindingSvc() {
+		return new EmpiSourceResourceFindingSvc();
 	}
 
 	@Bean

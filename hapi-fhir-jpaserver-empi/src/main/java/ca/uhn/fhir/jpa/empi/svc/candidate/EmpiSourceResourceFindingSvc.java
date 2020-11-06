@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmpiPersonFindingSvc {
+public class EmpiSourceResourceFindingSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -46,7 +46,7 @@ public class EmpiPersonFindingSvc {
 	private FindCandidateByScoreSvc myFindCandidateByScoreSvc;
 
 	/**
-	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedPersonCandidate}
+	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedSourceResourceCandidate}
 	 * indicating possible candidates for a matching Person. Uses several separate methods for finding candidates:
 	 * <p>
 	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
@@ -57,27 +57,27 @@ public class EmpiPersonFindingSvc {
 	 * field matchers.
 	 *
 	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
-	 * @return A list of {@link MatchedPersonCandidate} indicating all potential Person matches.
+	 * @return A list of {@link MatchedSourceResourceCandidate} indicating all potential Person matches.
 	 */
-	public CandidateList findPersonCandidates(IAnyResource theResource) {
-		CandidateList matchedPersonCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
+	public CandidateList findSourceResourceCandidates(IAnyResource theResource) {
+		CandidateList matchedSourceResourceCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
 
-		if (matchedPersonCandidates.isEmpty()) {
-			matchedPersonCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
+		if (matchedSourceResourceCandidates.isEmpty()) {
+			matchedSourceResourceCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
 		}
 
-		if (matchedPersonCandidates.isEmpty()) {
+		if (matchedSourceResourceCandidates.isEmpty()) {
 			//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
 			//matches by following EMPI rules.
 
-			matchedPersonCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
+			matchedSourceResourceCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
 		}
 
-		return matchedPersonCandidates;
+		return matchedSourceResourceCandidates;
 	}
 
-	public IAnyResource getPersonFromMatchedPersonCandidate(MatchedPersonCandidate theMatchedPersonCandidate) {
-		ResourcePersistentId personPid = theMatchedPersonCandidate.getCandidatePersonPid();
-		return myEmpiResourceDaoSvc.readPersonByPid(personPid);
+	public IAnyResource getSourceResourceFromMatchedSourceResourceCandidate(MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, String theResourceType) {
+		ResourcePersistentId personPid = theMatchedSourceResourceCandidate.getCandidatePersonPid();
+		return myEmpiResourceDaoSvc.readSourceResourceByPid(personPid, theResourceType);
 	}
 }

@@ -24,22 +24,23 @@ import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 
-public class MatchedPersonCandidate {
-	private final ResourcePersistentId myCandidatePersonPid;
+public class MatchedSourceResourceCandidate {
+
+	private final ResourcePersistentId myCandidateSourceResourcePid;
 	private final EmpiMatchOutcome myEmpiMatchOutcome;
 
-	public MatchedPersonCandidate(ResourcePersistentId theCandidate, EmpiMatchOutcome theEmpiMatchOutcome) {
-		myCandidatePersonPid = theCandidate;
+	public MatchedSourceResourceCandidate(ResourcePersistentId theCandidate, EmpiMatchOutcome theEmpiMatchOutcome) {
+		myCandidateSourceResourcePid = theCandidate;
 		myEmpiMatchOutcome = theEmpiMatchOutcome;
 	}
 
-	public MatchedPersonCandidate(ResourcePersistentId thePersonPid, EmpiLink theEmpiLink) {
-		myCandidatePersonPid = thePersonPid;
+	public MatchedSourceResourceCandidate(ResourcePersistentId thePersonPid, EmpiLink theEmpiLink) {
+		myCandidateSourceResourcePid = thePersonPid;
 		myEmpiMatchOutcome = new EmpiMatchOutcome(theEmpiLink.getVector(), theEmpiLink.getScore()).setMatchResultEnum(theEmpiLink.getMatchResult());
 	}
 
 	public ResourcePersistentId getCandidatePersonPid() {
-		return myCandidatePersonPid;
+		return myCandidateSourceResourcePid;
 	}
 
 	public EmpiMatchOutcome getMatchResult() {

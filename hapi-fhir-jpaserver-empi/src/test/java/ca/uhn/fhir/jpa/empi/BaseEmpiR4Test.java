@@ -308,27 +308,29 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate());
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate("Patient"));
 		return thePatient;
 	}
 
-	protected EmpiTransactionContext createContextForCreate() {
+	protected EmpiTransactionContext createContextForCreate(String theResourceType) {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE_RESOURCE);
+		ctx.setResourceType(theResourceType);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}
 
-	protected EmpiTransactionContext createContextForUpdate() {
+	protected EmpiTransactionContext createContextForUpdate(String theResourceType) {
 		EmpiTransactionContext ctx = new EmpiTransactionContext();
 		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE_RESOURCE);
 		ctx.setTransactionLogMessages(null);
+		ctx.setResourceType(theResourceType);
 		return ctx;
 	}
 
 	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
 		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForUpdate());
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForUpdate(thePatient.getIdElement().getResourceType()));
 		return thePatient;
 	}
 
@@ -336,7 +338,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, createContextForCreate());
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePractitioner, createContextForCreate("Practitioner"));
 		return thePractitioner;
 	}
 

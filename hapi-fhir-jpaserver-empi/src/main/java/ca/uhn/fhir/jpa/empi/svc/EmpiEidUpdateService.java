@@ -30,8 +30,8 @@ import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
-import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
-import ca.uhn.fhir.jpa.empi.svc.candidate.MatchedPersonCandidate;
+import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiSourceResourceFindingSvc;
+import ca.uhn.fhir.jpa.empi.svc.candidate.MatchedSourceResourceCandidate;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -51,7 +51,7 @@ public class EmpiEidUpdateService {
 	@Autowired
 	private IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
-	private EmpiPersonFindingSvc myEmpiPersonFindingSvc;
+	private EmpiSourceResourceFindingSvc myEmpiSourceResourceFindingSvc;
 	@Autowired
 	private PersonHelper myPersonHelper;
 	@Autowired
@@ -61,17 +61,18 @@ public class EmpiEidUpdateService {
 	@Autowired
 	private IEmpiSettings myEmpiSettings;
 
-	void handleEmpiUpdate(IAnyResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
+	void handleEmpiUpdate(IAnyResource theResource, MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, EmpiTransactionContext theEmpiTransactionContext) {
 
-		EmpiUpdateContext updateContext = new EmpiUpdateContext(theMatchedPersonCandidate, theResource);
+		EmpiUpdateContext updateContext = new EmpiUpdateContext(theMatchedSourceResourceCandidate, theResource);
 
 		if (updateContext.isRemainsMatchedToSamePerson()) {
-			myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
+			// TODO NG - Eventually this call will use terser to clone data in, once the surviorship rules for copying data will be confirmed
+			// myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
-				myEmpiLinkSvc.updateLink(updateContext.getMatchedPerson(), theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				myEmpiLinkSvc.updateLink(updateContext.getMatchedPerson(), theResource, theMatchedSourceResourceCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 			} else if (!updateContext.isHasEidsInCommon()) {
-				handleNoEidsInCommon(theResource, theMatchedPersonCandidate, theEmpiTransactionContext, updateContext);
+				handleNoEidsInCommon(theResource, theMatchedSourceResourceCandidate, theEmpiTransactionContext, updateContext);
 			}
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
@@ -80,7 +81,7 @@ public class EmpiEidUpdateService {
 		}
 	}
 
-	private void handleNoEidsInCommon(IAnyResource theResource, MatchedPersonCandidate theMatchedPersonCandidate, EmpiTransactionContext theEmpiTransactionContext, EmpiUpdateContext theUpdateContext) {
+	private void handleNoEidsInCommon(IAnyResource theResource, MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, EmpiTransactionContext theEmpiTransactionContext, EmpiUpdateContext theUpdateContext) {
 		// the user is simply updating their EID. We propagate this change to the Person.
 		//overwrite. No EIDS in common, but still same person.
 		if (myEmpiSettings.isPreventMultipleEids()) {
@@ -92,7 +93,7 @@ public class EmpiEidUpdateService {
 		} else {
 			myPersonHelper.handleExternalEidAddition(theUpdateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 		}
-		myEmpiLinkSvc.updateLink(theUpdateContext.getMatchedPerson(), theResource, theMatchedPersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(theUpdateContext.getMatchedPerson(), theResource, theMatchedSourceResourceCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void handleExternalEidOverwrite(IAnyResource thePerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
@@ -102,7 +103,7 @@ public class EmpiEidUpdateService {
 		}
 	}
 
-	private boolean candidateIsSameAsEmpiLinkPerson(EmpiLink theExistingMatchLink, MatchedPersonCandidate thePersonCandidate) {
+	private boolean candidateIsSameAsEmpiLinkPerson(EmpiLink theExistingMatchLink, MatchedSourceResourceCandidate thePersonCandidate) {
 		return theExistingMatchLink.getSourceResourcePid().equals(thePersonCandidate.getCandidatePersonPid().getIdAsLong());
 	}
 
@@ -142,8 +143,9 @@ public class EmpiEidUpdateService {
 
 		private final IAnyResource myMatchedPerson;
 
-		EmpiUpdateContext(MatchedPersonCandidate theMatchedPersonCandidate, IAnyResource theResource) {
-			myMatchedPerson = myEmpiPersonFindingSvc.getPersonFromMatchedPersonCandidate(theMatchedPersonCandidate);
+		EmpiUpdateContext(MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, IAnyResource theResource) {
+			final String resourceType = theResource.getIdElement().getResourceType();
+			myMatchedPerson = myEmpiSourceResourceFindingSvc.getSourceResourceFromMatchedSourceResourceCandidate(theMatchedSourceResourceCandidate, resourceType);
 
 			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedPerson, theResource);
 			myIncomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
@@ -152,9 +154,10 @@ public class EmpiEidUpdateService {
 			myExistingPerson = null;
 
 			if (theExistingMatchLink.isPresent()) {
-				Long existingPersonPid = theExistingMatchLink.get().getSourceResourcePid();
-				myExistingPerson =  myEmpiResourceDaoSvc.readPersonByPid(new ResourcePersistentId(existingPersonPid));
-				myRemainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(theExistingMatchLink.get(), theMatchedPersonCandidate);
+				EmpiLink empiLink = theExistingMatchLink.get();
+				Long existingPersonPid = empiLink.getSourceResourcePid();
+				myExistingPerson =  myEmpiResourceDaoSvc.readSourceResourceByPid(new ResourcePersistentId(existingPersonPid), resourceType);
+				myRemainsMatchedToSamePerson = candidateIsSameAsEmpiLinkPerson(empiLink, theMatchedSourceResourceCandidate);
 			} else {
 				myRemainsMatchedToSamePerson = false;
 			}

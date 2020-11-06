@@ -39,11 +39,11 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	 * Attempt to find a currently matching Person, based on the presence of an {@link EmpiLink} entity.
 	 *
 	 * @param theTarget the {@link IAnyResource} that we want to find candidate Persons for.
-	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
+	 * @return an Optional list of {@link MatchedSourceResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedPersonCandidate> findMatchPersonCandidates(IAnyResource theTarget) {
-		List<MatchedPersonCandidate> retval = new ArrayList<>();
+	protected List<MatchedSourceResourceCandidate> findMatchSourceResourceCandidates(IAnyResource theTarget) {
+		List<MatchedSourceResourceCandidate> retval = new ArrayList<>();
 
 		Long targetPid = myIdHelperService.getPidOrNull(theTarget);
 		if (targetPid != null) {
@@ -51,7 +51,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 			if (oLink.isPresent()) {
 				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getSourceResourcePid());
 				ourLog.debug("Resource previously linked. Using existing link.");
-					retval.add(new MatchedPersonCandidate(personPid, oLink.get()));
+					retval.add(new MatchedSourceResourceCandidate(personPid, oLink.get()));
 			}
 		}
 		return retval;

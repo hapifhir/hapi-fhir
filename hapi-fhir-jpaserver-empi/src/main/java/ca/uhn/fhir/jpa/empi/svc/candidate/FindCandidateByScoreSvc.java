@@ -59,11 +59,11 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 	 * entries in the EmpiLink table, and returns all the matches found therein.
 	 *
 	 * @param theTarget the {@link IBaseResource} which we want to find candidate Persons for.
-	 * @return an Optional list of {@link MatchedPersonCandidate} indicating matches.
+	 * @return an Optional list of {@link MatchedSourceResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedPersonCandidate> findMatchPersonCandidates(IAnyResource theTarget) {
-		List<MatchedPersonCandidate> retval = new ArrayList<>();
+	protected List<MatchedSourceResourceCandidate> findMatchSourceResourceCandidates(IAnyResource theTarget) {
+		List<MatchedSourceResourceCandidate> retval = new ArrayList<>();
 
 		List<Long> personPidsToExclude = getNoMatchPersonPids(theTarget);
 
@@ -87,7 +87,7 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 				continue;
 			}
 
-			MatchedPersonCandidate candidate = new MatchedPersonCandidate(getResourcePersistentId(matchEmpiLink.getSourceResourcePid()), match.getMatchResult());
+			MatchedSourceResourceCandidate candidate = new MatchedSourceResourceCandidate(getResourcePersistentId(matchEmpiLink.getSourceResourcePid()), match.getMatchResult());
 			retval.add(candidate);
 		}
 		return retval;

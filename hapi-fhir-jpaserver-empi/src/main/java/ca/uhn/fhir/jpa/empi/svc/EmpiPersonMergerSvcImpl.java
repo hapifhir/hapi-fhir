@@ -75,7 +75,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	}
 
 	private void addMergeLink(Long theDeactivatedPersonPid, Long theActivePersonPid) {
-		EmpiLink empiLink = myEmpiLinkDaoSvc.getOrCreateEmpiLinkByPersonPidAndTargetPid(theDeactivatedPersonPid, theActivePersonPid);
+		EmpiLink empiLink = myEmpiLinkDaoSvc.getOrCreateEmpiLinkBySourceResourcePidAndTargetResourcePid(theDeactivatedPersonPid, theActivePersonPid);
 		empiLink
 			.setEmpiTargetType("Person")
 			.setMatchResult(EmpiMatchResultEnum.REDIRECT)
@@ -85,7 +85,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
-		myEmpiResourceDaoSvc.updatePerson(theToPerson);
+		myEmpiResourceDaoSvc.upsertSourceResource(theToPerson, theEmpiTransactionContext.getResourceType());
 	}
 
 	private void mergeLinks(IAnyResource theFromPerson, IAnyResource theToPerson, Long theToPersonPid, EmpiTransactionContext theEmpiTransactionContext) {

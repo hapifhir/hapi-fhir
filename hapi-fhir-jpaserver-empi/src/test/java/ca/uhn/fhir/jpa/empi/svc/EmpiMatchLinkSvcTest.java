@@ -97,10 +97,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//Create a manual NO_MATCH between janePerson and unmatchedJane.
 		Patient unmatchedJane = createPatient(buildJanePatient());
-		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		//rerun EMPI rules against unmatchedJane.
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedJane, createContextForCreate());
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedJane, createContextForCreate("Patient"));
 
 		assertThat(unmatchedJane, is(not(sameSourceResourceAs(janePerson))));
 		assertThat(unmatchedJane, is(not(linkedTo(originalJane))));
@@ -119,12 +119,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient unmatchedPatient = createPatient(buildJanePatient());
 
 		//This simulates an admin specifically saying that unmatchedPatient does NOT match janePerson.
-		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		//TODO change this so that it will only partially match.
 
 		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
 		//should cause a whole new Person to be created.
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedPatient, createContextForCreate());
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedPatient, createContextForCreate("Patient"));
 
 		assertThat(unmatchedPatient, is(not(sameSourceResourceAs(janePerson))));
 		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
@@ -335,7 +335,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
 		IAnyResource person = myPersonHelper.createSourceResourceFromEmpiTarget(janePatient2);
-		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertThat(janePatient, is(not(sameSourceResourceAs(janePatient2))));
 
 		//In theory, this will match both Persons!
@@ -447,7 +447,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//Ensure the related person was updated with new info.
 		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(janePaulPatient);
 		HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
-		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
+
+		// TODO NG  attribute propagation has been removed - revisit once source survivorship rules are defined
+		// assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
 	}
 
 	@Test

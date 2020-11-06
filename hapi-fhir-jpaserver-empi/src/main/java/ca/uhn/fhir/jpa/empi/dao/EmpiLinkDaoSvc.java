@@ -59,24 +59,24 @@ public class EmpiLinkDaoSvc {
 	private FhirContext myFhirContext;
 
 	@Transactional
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theTarget, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
-		Long personPid = myIdHelperService.getPidOrNull(thePerson);
-		Long resourcePid = myIdHelperService.getPidOrNull(theTarget);
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
+		Long targetResourcePid = myIdHelperService.getPidOrNull(theTargetResource);
 
-		EmpiLink empiLink = getOrCreateEmpiLinkByPersonPidAndTargetPid(personPid, resourcePid);
+		EmpiLink empiLink = getOrCreateEmpiLinkBySourceResourcePidAndTargetResourcePid(sourceResourcePid, targetResourcePid);
 		empiLink.setLinkSource(theLinkSource);
 		empiLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
 		empiLink.setEidMatch(theMatchOutcome.isEidMatch() | empiLink.isEidMatch());
 		empiLink.setHadToCreateNewResource(theMatchOutcome.isNewPerson() | empiLink.getHadToCreateNewResource());
-		empiLink.setEmpiTargetType(myFhirContext.getResourceType(theTarget));
+		empiLink.setEmpiTargetType(myFhirContext.getResourceType(theTargetResource));
 		if (empiLink.getScore() != null) {
 			empiLink.setScore(Math.max(theMatchOutcome.score, empiLink.getScore()));
 		} else {
 			empiLink.setScore(theMatchOutcome.score);
 		}
 
-		String message = String.format("Creating EmpiLink from %s to %s -> %s", thePerson.getIdElement().toUnqualifiedVersionless(), theTarget.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
+		String message = String.format("Creating EmpiLink from %s to %s -> %s", theSourceResource.getIdElement().toUnqualifiedVersionless(), theTargetResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
 		theEmpiTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(empiLink);
@@ -84,27 +84,26 @@ public class EmpiLinkDaoSvc {
 	}
 
 	@Nonnull
-	public EmpiLink getOrCreateEmpiLinkByPersonPidAndTargetPid(Long thePersonPid, Long theResourcePid) {
-		Optional<EmpiLink> oExisting = getLinkByPersonPidAndTargetPid(thePersonPid, theResourcePid);
+	public EmpiLink getOrCreateEmpiLinkBySourceResourcePidAndTargetResourcePid(Long theSourceResourcePid, Long theTargetResourcePid) {
+		Optional<EmpiLink> oExisting = getLinkBySourceResourcePidAndTargetResourcePid(theSourceResourcePid, theTargetResourcePid);
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
 			EmpiLink newLink = myEmpiLinkFactory.newEmpiLink();
-			newLink.setSourceResourcePid(thePersonPid);
-			newLink.setPersonPid(thePersonPid);
-			newLink.setTargetPid(theResourcePid);
+			newLink.setSourceResourcePid(theSourceResourcePid);
+			newLink.setPersonPid(theSourceResourcePid);
+			newLink.setTargetPid(theTargetResourcePid);
 			return newLink;
 		}
 	}
 
-	public Optional<EmpiLink> getLinkByPersonPidAndTargetPid(Long thePersonPid, Long theTargetPid) {
-
-		if (theTargetPid == null || thePersonPid == null) {
+	public Optional<EmpiLink> getLinkBySourceResourcePidAndTargetResourcePid(Long theSourceResourcePid, Long theTargetResourcePid) {
+		if (theTargetResourcePid == null || theSourceResourcePid == null) {
 			return Optional.empty();
 		}
 		EmpiLink link = myEmpiLinkFactory.newEmpiLink();
-		link.setTargetPid(theTargetPid);
-		link.setSourceResourcePid(thePersonPid);
+		link.setTargetPid(theTargetResourcePid);
+		link.setSourceResourcePid(theSourceResourcePid);
 		Example<EmpiLink> example = Example.of(link);
 		return myEmpiLinkDao.findOne(example);
 	}

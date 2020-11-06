@@ -67,7 +67,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personId, targetId);
+		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personId, targetId);
 		if (!oEmpiLink.isPresent()) {
 			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
 		}
@@ -82,7 +82,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
 		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
-		myEmpiResourceDaoSvc.updatePerson(thePerson);
+		myEmpiResourceDaoSvc.upsertSourceResource(thePerson, theEmpiContext.getResourceType());
 		if (theMatchResult == EmpiMatchResultEnum.NO_MATCH) {
 			// Need to find a new Person to link this target to
 			myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theTarget, theEmpiContext);
@@ -121,7 +121,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personId, targetId);
+		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personId, targetId);
 		if (!oEmpiLink.isPresent()) {
 			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
 		}

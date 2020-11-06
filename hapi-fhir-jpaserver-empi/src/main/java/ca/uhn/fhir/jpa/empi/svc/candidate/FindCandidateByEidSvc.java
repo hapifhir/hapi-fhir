@@ -44,8 +44,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 
-	protected List<MatchedPersonCandidate> findMatchPersonCandidates(IAnyResource theBaseResource) {
-		List<MatchedPersonCandidate> retval = new ArrayList<>();
+	protected List<MatchedSourceResourceCandidate> findMatchSourceResourceCandidates(IAnyResource theBaseResource) {
+		List<MatchedSourceResourceCandidate> retval = new ArrayList<>();
 
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
@@ -54,7 +54,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 				if (oFoundPerson.isPresent()) {
 					IAnyResource foundPerson = oFoundPerson.get();
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundPerson);
-					MatchedPersonCandidate mpc = new MatchedPersonCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchOutcome.EID_MATCH);
+					MatchedSourceResourceCandidate mpc = new MatchedSourceResourceCandidate(new ResourcePersistentId(pidOrNull), EmpiMatchOutcome.EID_MATCH);
 					ourLog.debug("Matched {} by EID {}", foundPerson.getIdElement(), eid);
 					retval.add(mpc);
 				}

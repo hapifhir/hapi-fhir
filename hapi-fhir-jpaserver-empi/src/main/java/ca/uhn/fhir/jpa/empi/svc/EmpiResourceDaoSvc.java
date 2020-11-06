@@ -73,16 +73,18 @@ public class EmpiResourceDaoSvc {
 		return (IAnyResource) myPractitionerDao.read(theId);
 	}
 
-	public DaoMethodOutcome updatePerson(IAnyResource thePerson) {
-		if (thePerson.getIdElement().hasIdPart()) {
-			return myPersonDao.update(thePerson);
+	public DaoMethodOutcome upsertSourceResource(IAnyResource theSourceResource, String theResourceType) {
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		if (theSourceResource.getIdElement().hasIdPart()) {
+			return resourceDao.update(theSourceResource);
 		} else {
-			return myPersonDao.create(thePerson);
+			return resourceDao.create(theSourceResource);
 		}
 	}
 
-	public IAnyResource readPersonByPid(ResourcePersistentId thePersonPid) {
-		return (IAnyResource) myPersonDao.readByPid(thePersonPid);
+	public IAnyResource readSourceResourceByPid(ResourcePersistentId theSourceResourcePid, String theResourceType) {
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		return (IAnyResource) resourceDao.readByPid(theSourceResourcePid);
 	}
 
 	public Optional<IAnyResource> searchPersonByEid(String theEid) {

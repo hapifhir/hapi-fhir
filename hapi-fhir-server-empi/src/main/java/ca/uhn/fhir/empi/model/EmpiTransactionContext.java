@@ -24,14 +24,6 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 public class EmpiTransactionContext {
 
-	/**
-	 * Any EMPI methods may add transaction log messages.
-	 */
-	private TransactionLogMessages myTransactionLogMessages;
-
-	private OperationType myRestOperation;
-
-
 	public enum OperationType {
 		CREATE_RESOURCE,
 		UPDATE_RESOURCE,
@@ -42,6 +34,16 @@ public class EmpiTransactionContext {
 		NOT_DUPLICATE,
 		MERGE_PERSONS
 	}
+
+	/**
+	 * Any EMPI methods may add transaction log messages.
+	 */
+	private TransactionLogMessages myTransactionLogMessages;
+
+	private OperationType myRestOperation;
+
+	private String myResourceType;
+
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
 	}
@@ -52,6 +54,11 @@ public class EmpiTransactionContext {
 	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
 		myTransactionLogMessages = theTransactionLogMessages;
 		myRestOperation = theRestOperation;
+	}
+
+	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
+		this(theTransactionLogMessages, theRestOperation);
+		setResourceType(theResourceType);
 	}
 
 	public void addTransactionLogMessage(String theMessage) {
@@ -72,4 +79,13 @@ public class EmpiTransactionContext {
 	public void setRestOperation(OperationType theRestOperation) {
 		myRestOperation = theRestOperation;
 	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public void setResourceType(String myResourceType) {
+		this.myResourceType = myResourceType;
+	}
+
 }

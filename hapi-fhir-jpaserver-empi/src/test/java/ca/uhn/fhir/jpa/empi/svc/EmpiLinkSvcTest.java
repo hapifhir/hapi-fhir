@@ -53,14 +53,14 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient = createPatient();
 
 		{
-			myEmpiLinkSvc.updateLink(person, patient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+			myEmpiLinkSvc.updateLink(person, patient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(1, newPerson.getLink().size());
 		}
 
 		{
-			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 			assertLinkCount(1);
 			Person newPerson = myPersonDao.read(personId);
 			assertEquals(0, newPerson.getLink().size());
@@ -73,8 +73,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 		Person person = createPerson();
 		Person target = createPerson();
-
-		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		// TODO NOT VALID
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
 		assertLinkCount(1);
 	}
 
@@ -86,12 +86,12 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 		Long personPid = myIdHelperService.getPidOrNull(person);
 		Long targetPid = myIdHelperService.getPidOrNull(target);
-		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personPid, targetPid).isPresent());
-		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(targetPid, personPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personPid, targetPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(targetPid, personPid).isPresent());
 
 		saveNoMatchLink(personPid, targetPid);
 
-		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
 		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
@@ -104,12 +104,12 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 		Long personPid = myIdHelperService.getPidOrNull(person);
 		Long targetPid = myIdHelperService.getPidOrNull(target);
-		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(personPid, targetPid).isPresent());
-		assertFalse(myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(targetPid, personPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personPid, targetPid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(targetPid, personPid).isPresent());
 
 		saveNoMatchLink(targetPid, personPid);
 
-		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate());
+		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
 		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(personPid, targetPid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
@@ -128,7 +128,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Person person = createPerson(buildJanePerson());
 		Patient patient = createPatient(buildJanePatient());
 
-		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
+		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		try {
 			myEmpiLinkSvc.updateLink(person, patient, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, null);
 			fail();
@@ -158,9 +158,9 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient2 = createPatient(buildJanePatient());
 		assertEquals(0, myEmpiLinkDao.count());
 
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient1, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient2, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate());
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person, createContextForCreate());
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient1, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(person, patient2, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(person, createContextForCreate("Patient"));
 		assertTrue(person.hasLink());
 		assertEquals(patient1.getIdElement().toVersionless().getValue(), person.getLinkFirstRep().getTarget().getReference());
 	}

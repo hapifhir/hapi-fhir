@@ -77,7 +77,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
 		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
-		EmpiTransactionContext empiContext =  createEmpiContext(theMsg);
+		EmpiTransactionContext empiContext =  createEmpiContext(theMsg, resourceType);
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
@@ -106,7 +106,7 @@ public class EmpiMessageHandler implements MessageHandler {
 		}
 	}
 
-	private EmpiTransactionContext createEmpiContext(ResourceModifiedMessage theMsg) {
+	private EmpiTransactionContext createEmpiContext(ResourceModifiedMessage theMsg, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
 		EmpiTransactionContext.OperationType empiOperation;
 		switch (theMsg.getOperationType()) {
@@ -124,7 +124,7 @@ public class EmpiMessageHandler implements MessageHandler {
 				ourLog.trace("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
 				throw new InvalidRequestException("We can't handle non-update/create operations in EMPI");
 		}
-		return new EmpiTransactionContext(transactionLogMessages, empiOperation);
+		return new EmpiTransactionContext(transactionLogMessages, empiOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {

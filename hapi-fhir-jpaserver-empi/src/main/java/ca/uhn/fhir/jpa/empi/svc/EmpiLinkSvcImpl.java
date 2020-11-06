@@ -74,23 +74,23 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				" not linking as POSSIBLE_DUPLICATE.");
 			return;
 		}
-		EmpiMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
-		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
-		switch (matchResultEnum) {
-			case MATCH:
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(matchResultEnum, theLinkSource), theEmpiTransactionContext);
-				myEmpiResourceDaoSvc.updatePerson(thePerson);
-				break;
-			case POSSIBLE_MATCH:
-				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(matchResultEnum, theLinkSource), theEmpiTransactionContext);
-				break;
-			case NO_MATCH:
-				myPersonHelper.removeLink(thePerson, resourceId, theEmpiTransactionContext);
-				break;
-			case POSSIBLE_DUPLICATE:
-				break;
-		}
-		myEmpiResourceDaoSvc.updatePerson(thePerson);
+//		EmpiMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
+//		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
+//		switch (matchResultEnum) {
+//			case MATCH:
+//				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(matchResultEnum, theLinkSource), theEmpiTransactionContext);
+//				myEmpiResourceDaoSvc.updatePerson(thePerson);
+//				break;
+//			case POSSIBLE_MATCH:
+//				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(matchResultEnum, theLinkSource), theEmpiTransactionContext);
+//				break;
+//			case NO_MATCH:
+//				myPersonHelper.removeLink(thePerson, resourceId, theEmpiTransactionContext);
+//				break;
+//			case POSSIBLE_DUPLICATE:
+//				break;
+//		}
+		myEmpiResourceDaoSvc.upsertSourceResource(thePerson, theEmpiTransactionContext.getResourceType());
 		createOrUpdateLinkEntity(thePerson, theTarget, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
 	}
 
@@ -171,15 +171,15 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		if (thePerson.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
-			return myEmpiLinkDaoSvc.getLinkByPersonPidAndTargetPid(
+			return myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(
 				myIdHelperService.getPidOrNull(thePerson),
 				myIdHelperService.getPidOrNull(theCandidate)
 			);
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource thePerson, IBaseResource theResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(thePerson, theResource, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
+	private void createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theSourceResource, theTargetResource, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
 	}
 
 	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
