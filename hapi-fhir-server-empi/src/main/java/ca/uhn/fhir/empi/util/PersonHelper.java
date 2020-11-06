@@ -41,7 +41,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Address;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -444,7 +443,7 @@ public class PersonHelper {
 		if (!incomingTargetEid.isEmpty()) {
 			if (personOfficialEid.isEmpty() || !myEmpiConfig.isPreventMultipleEids()) {
 				log(theEmpiTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Person, as this person does not yet have an external EID");
-				addCanonicalEidsToPersonIfAbsent(theSourceResource, incomingTargetEid);
+				addCanonicalEidsToSourceResourceIfAbsent(theSourceResource, incomingTargetEid);
 			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
 				log(theEmpiTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite person, as this EID is already present");
 			} else {
@@ -456,7 +455,7 @@ public class PersonHelper {
 
 	public IBaseResource overwriteExternalEids(IBaseResource thePerson, List<CanonicalEID> theNewEid) {
 		clearExternalEids(thePerson);
-		addCanonicalEidsToPersonIfAbsent(thePerson, theNewEid);
+		addCanonicalEidsToSourceResourceIfAbsent(thePerson, theNewEid);
 		return thePerson;
 	}
 
@@ -475,13 +474,18 @@ public class PersonHelper {
 		}
 	}
 
-	private void addCanonicalEidsToPersonIfAbsent(IBaseResource thePerson, List<CanonicalEID> theIncomingTargetEid) {
+	private void addCanonicalEidsToSourceResourceIfAbsent(IBaseResource theSourceResource, List<CanonicalEID> theIncomingTargetEid) {
+		for (CanonicalEID eid : theIncomingTargetEid) {
+			List<CanonicalEID> sourceResourceEids = myEIDHelper.getExternalEid(theSourceResource);
+			
+		}
+
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person) thePerson, eid.toR4()));
+				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person) theSourceResource, eid.toR4()));
 				break;
 			case DSTU3:
-				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person) thePerson, eid.toDSTU3()));
+				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person) theSourceResource, eid.toDSTU3()));
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
@@ -504,12 +508,13 @@ public class PersonHelper {
 		}
 	}
 
-	private void addIdentifierIfAbsent(Person thePerson, Identifier theIdentifier) {
-		Optional<Identifier> first = thePerson.getIdentifier().stream().filter(identifier -> identifier.getSystem().equals(theIdentifier.getSystem())).filter(identifier -> identifier.getValue().equals(theIdentifier.getValue())).findFirst();
+	private void addIdentifierIfAbsent(IAnyResource theSourceResource, Identifier theIdentifier) {
+
+		Optional<Identifier> first = theSourceResource.getIdentifier().stream().filter(identifier -> identifier.getSystem().equals(theIdentifier.getSystem())).filter(identifier -> identifier.getValue().equals(theIdentifier.getValue())).findFirst();
 		if (first.isPresent()) {
 			return;
 		} else {
-			thePerson.addIdentifier(theIdentifier);
+			theSourceResource.addIdentifier(theIdentifier);
 		}
 	}
 
