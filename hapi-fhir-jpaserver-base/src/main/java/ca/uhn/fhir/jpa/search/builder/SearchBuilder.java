@@ -705,6 +705,8 @@ public class SearchBuilder implements ISearchBuilder {
 						List<Long> results = q.getResultList();
 						for (Long resourceLink : results) {
 							if (resourceLink == null) {
+								// This can happen if there are outgoing references which are canonical or point to
+								// other servers
 								continue;
 							}
 							if (theReverseMode) {
