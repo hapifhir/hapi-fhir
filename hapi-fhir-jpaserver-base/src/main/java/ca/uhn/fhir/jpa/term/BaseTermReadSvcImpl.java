@@ -306,7 +306,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, @Nonnull ExpansionFilter theExpansionFilter) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
 			if (isNoneBlank(theSystem, next.getCode())) {
-				if (theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(next.getCode())) {
+				if (theExpansionFilter.hasCode() && theExpansionFilter.getCode().equals(next.getCode())) {
 					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, next.getCode(), next.getDisplay());
 				}
 			}
@@ -790,7 +790,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				if (!theIncludeOrExclude.getConcept().isEmpty()) {
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
-						if (theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(nextCode)) {
+						if (theExpansionFilter.hasCode() && theExpansionFilter.getCode().equals(nextCode)) {
 							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
 
 								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
