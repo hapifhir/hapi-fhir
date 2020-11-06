@@ -55,6 +55,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -278,9 +279,15 @@ public class PersonHelper {
 		for (IBase base : sourceResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				if (system.get().equals(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())) {
+				String empiSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
+				String baseSystem = system.get().getValueAsString();
+				if (Objects.equals(baseSystem, empiSystem)) {
 					cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, base, newSourceResource);
+				} else {
+					ourLog.debug(String.format("System %s differs from system in the EMPI rules %s", baseSystem, empiSystem));
 				}
+			} else {
+				ourLog.debug("System is missing, skipping");
 			}
 		}
 	}

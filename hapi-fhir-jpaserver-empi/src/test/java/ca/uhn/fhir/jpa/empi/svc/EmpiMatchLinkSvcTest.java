@@ -8,10 +8,12 @@ import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
+import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -35,8 +37,7 @@ import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.empi.api.EmpiMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
@@ -47,6 +48,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private EIDHelper myEidHelper;
 	@Autowired
 	private PersonHelper myPersonHelper;
+
+	@Autowired
+	private EmpiResourceDaoSvc myEmpiResourceDaoSvc; // TODO NG - remove?
 
 	@BeforeEach
 	public void before() {
@@ -221,6 +225,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient1 = addExternalEID(buildJanePatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient1);
 		// state is now > Patient/uniqueid[name=jane] <--> Patient/uniqueid[name=jane]
+
+		List<CanonicalEID> eid = myEidHelper.getExternalEid(patient1);
+
+		Optional<IAnyResource> iAnyResource = myEmpiResourceDaoSvc.searchPersonByEid(eid.get(0).getValue());
+		assertTrue(iAnyResource.isPresent());
+		assertTrue(iAnyResource.get().equals(patient1));
 
 		Patient patient2 = addExternalEID(buildPaulPatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient2);
@@ -518,6 +528,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(jane, is(sameSourceResourceAs(paul)));
 	}
 
+	private void print(IBaseResource theResource) {
+		System.out.println(myFhirContext.newJsonParser().encodeResourceToString(theResource));
+	}
+
 	@Test
 	//Test Case #2
 	public void testSinglyLinkedPersonThatGetsAnUpdatedEidSimplyUpdatesEID() {
@@ -525,7 +539,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		String EID_2 = "456";
 
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
+		print(paul);
 		Patient originalPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
+		print(originalPaulPatient);
+
 		String oldEid = myEidHelper.getExternalEid(originalPaulPatient).get(0).getValue();
 		assertThat(oldEid, is(equalTo(EID_1)));
 
