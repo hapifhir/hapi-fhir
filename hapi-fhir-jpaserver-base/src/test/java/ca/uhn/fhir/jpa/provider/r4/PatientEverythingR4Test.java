@@ -48,6 +48,9 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
+
 	}
 
 	@Override
@@ -123,6 +126,28 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
 		assertThat(actual, not(hasItem(myWrongPatId)));
 		assertThat(actual, not(hasItem(myWrongEnc1)));
+	}
+
+	@Test
+	public void testEverythingWithNullReferences() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://example.com/Organization/123"));
+		String patientId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		Bundle bundle = fetchBundle(ourServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+
+		assertNull(bundle.getLink("next"));
+
+		Set<String> actual = new TreeSet<String>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+
+		ourLog.info("Found IDs: {}", actual);
+
+		assertThat(actual, contains(patientId));
 	}
 
 	/**
