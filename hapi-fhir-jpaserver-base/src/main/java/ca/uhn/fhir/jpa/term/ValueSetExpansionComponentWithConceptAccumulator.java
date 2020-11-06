@@ -25,13 +25,14 @@ import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Block()
 public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.ValueSetExpansionComponent implements IValueSetConceptAccumulator {
@@ -39,6 +40,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	private final FhirContext myContext;
 	private int mySkipCountRemaining;
 	private int myHardExpansionMaximumSize;
+	private List<String> myMessages;
 
 	/**
 	 * Constructor
@@ -57,11 +59,19 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		return (myMaxCapacity - getTotal()) + mySkipCountRemaining;
 	}
 
+	public List<String> getMessages() {
+		if (myMessages == null) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(myMessages);
+	}
+
 	@Override
 	public void addMessage(String theMessage) {
-		addExtension()
-			.setUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE)
-			.setValue(new StringType(theMessage));
+		if (myMessages == null) {
+			myMessages = new ArrayList<>();
+		}
+		myMessages.add(theMessage);
 	}
 
 	@Override
