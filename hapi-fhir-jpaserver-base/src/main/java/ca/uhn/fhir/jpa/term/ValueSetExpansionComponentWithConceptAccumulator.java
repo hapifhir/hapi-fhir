@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,6 +42,8 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	private int mySkipCountRemaining;
 	private int myHardExpansionMaximumSize;
 	private List<String> myMessages;
+	private int myAddedConcepts;
+	private Integer myTotalConcepts;
 
 	/**
 	 * Constructor
@@ -56,7 +59,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	@Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
-		return (myMaxCapacity - getTotal()) + mySkipCountRemaining;
+		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;
 	}
 
 	public List<String> getMessages() {
@@ -117,7 +120,18 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void excludeConcept(String theSystem, String theCode) {
+	public void consumeSkipCount(int theSkipCountToConsume) {
+		mySkipCountRemaining -= theSkipCountToConsume;
+	}
+
+	@Nullable
+	@Override
+	public Integer getSkipCountRemaining() {
+		return mySkipCountRemaining;
+	}
+
+	@Override
+	public boolean excludeConcept(String theSystem, String theCode) {
 		String excludeSystem;
 		String excludeSystemVersion;
 		int versionSeparator = theSystem.indexOf("|");
@@ -129,12 +143,12 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			excludeSystemVersion = null;
 		}
 		if (excludeSystemVersion != null) {
-			this.getContains().removeIf(t ->
+			return this.getContains().removeIf(t ->
 				excludeSystem.equals(t.getSystem()) &&
 					theCode.equals(t.getCode()) &&
 					excludeSystemVersion.equals(t.getVersion()));
 		} else {
-			this.getContains().removeIf(t ->
+			return this.getContains().removeIf(t ->
 				theSystem.equals(t.getSystem()) &&
 					theCode.equals(t.getCode()));
 		}
@@ -147,13 +161,29 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			throw new ExpansionTooCostlyException(msg);
 		}
 
-		if (myHardExpansionMaximumSize > 0 && getTotal() > myHardExpansionMaximumSize) {
+		if (myHardExpansionMaximumSize > 0 && myAddedConcepts > myHardExpansionMaximumSize) {
 			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myHardExpansionMaximumSize);
 			throw new ExpansionTooCostlyException(msg);
 		}
 
-		int newTotal = getTotal() + 1;
-		setTotal(newTotal);
+		myAddedConcepts++;
+	}
+
+	public Integer getTotalConcepts() {
+		return myTotalConcepts;
+	}
+
+	@Override
+	public void incrementOrDecrementTotalConcepts(boolean theAdd, int theDelta) {
+		int delta = theDelta;
+		if (!theAdd) {
+			delta = -delta;
+		}
+		if (myTotalConcepts == null) {
+			myTotalConcepts = delta;
+		} else {
+			myTotalConcepts = myTotalConcepts + delta;
+		}
 	}
 
 	private void setSystemAndVersion(String theSystemAndVersion, ValueSet.ValueSetExpansionContainsComponent myComponent) {

@@ -35,6 +35,6 @@ public interface ITermValueSetConceptViewDao extends JpaRepository<TermValueSetC
 	List<TermValueSetConceptView> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
 
 	@Query("SELECT v FROM TermValueSetConceptView v WHERE v.myConceptValueSetPid = :pid AND v.myConceptDisplay LIKE :display ORDER BY v.myConceptOrder")
-	List<TermValueSetConceptView> findByTermValueSetId(Pageable thePageable, @Param("pid") Long theValueSetId, @Param("display") String theDisplay);
+	List<TermValueSetConceptView> findByTermValueSetId(@Param("pid") Long theValueSetId, @Param("display") String theDisplay);
 
 }

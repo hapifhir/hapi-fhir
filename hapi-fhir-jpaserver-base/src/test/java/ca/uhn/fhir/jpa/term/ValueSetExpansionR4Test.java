@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -175,7 +176,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			"code9", "code90", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99"
 		));
 		assertEquals(11, expandedValueSet.getExpansion().getContains().size(), toCodes(expandedValueSet).toString());
-		assertNull(expandedValueSet.getExpansion().getTotalElement().getValueAsString());
+		assertEquals(11, expandedValueSet.getExpansion().getTotal());
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -209,7 +210,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			"code92", "code93", "code94", "code95"
 		));
 		assertEquals(4, expandedValueSet.getExpansion().getContains().size(), toCodes(expandedValueSet).toString());
-		assertNull(expandedValueSet.getExpansion().getTotalElement().getValueAsString());
+		assertEquals(11, expandedValueSet.getExpansion().getTotal());
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -217,6 +218,80 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(lastSelectQuery, containsString("concept_display like 'display value 9%'"));
 
 	}
+
+
+	@Test
+	public void testExpandInline_IncludePreExpandedValueSetByUri_ExcludeCodes_FilterOnDisplay_LeftMatch_SelectAll() {
+		myDaoConfig.setPreExpandValueSets(true);
+		create100ConceptsCodeSystemAndValueSet();
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.addValueSet("http://foo/vs")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("display value 9");
+		input.getCompose()
+			.addExclude()
+			.addValueSet("http://foo/vs")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("display value 90");
+
+		myCaptureQueriesListener.clear();
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), contains(
+			"code9", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99"
+		));
+		assertEquals(10, expandedValueSet.getExpansion().getContains().size(), toCodes(expandedValueSet).toString());
+		assertEquals(10, expandedValueSet.getExpansion().getTotal());
+
+		// Make sure we used the pre-expanded version
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
+		assertThat(lastSelectQuery, containsString("concept_display like 'display value 90%'"));
+
+	}
+
+
+	@Test
+	public void testExpandInline_IncludePreExpandedValueSetByUri_ExcludeCodes_FilterOnDisplay_LeftMatch_SelectRange() {
+		myDaoConfig.setPreExpandValueSets(true);
+		create100ConceptsCodeSystemAndValueSet();
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.addValueSet("http://foo/vs")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("display value 9");
+		input.getCompose()
+			.addExclude()
+			.addValueSet("http://foo/vs")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("display value 90");
+
+		myCaptureQueriesListener.clear();
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions();
+		options.setOffset(3);
+		options.setCount(4);
+		try {
+			myTermSvc.expandValueSet(options, input);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("ValueSet expansion van not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
+		}
+	}
+
 
 	public void create100ConceptsCodeSystemAndValueSet() {
 		CodeSystem cs = new CodeSystem();
@@ -300,11 +375,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
 
@@ -522,11 +593,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
 
@@ -981,7 +1048,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 
-		Extension extensionByUrl = outcome.getExpansion().getExtensionByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE);
+		Extension extensionByUrl = outcome.getMeta().getExtensionByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE);
 		assertEquals("Unknown CodeSystem URI \"http://unknown-system\" referenced from ValueSet", extensionByUrl.getValueAsPrimitive().getValueAsString());
 	}
 

@@ -67,7 +67,6 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -93,6 +92,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -175,6 +175,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -252,15 +253,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return cs != null;
 	}
 
-	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, String theValueSetIncludeVersion) {
+	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, String theValueSetIncludeVersion) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
 		String code = theConcept.getCode();
 		String display = theConcept.getDisplay();
 		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
 		if (StringUtils.isNotEmpty(theValueSetIncludeVersion)) {
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem + "|" + theValueSetIncludeVersion, code, display);
+			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem + "|" + theValueSetIncludeVersion, code, display);
 		} else {
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem, code, display);
+			return addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, codeSystem, code, display);
 		}
 	}
 
@@ -286,16 +287,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, String theCodeSystem, String theCode, String theDisplay) {
+	private boolean addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, String theCodeSystem, String theCode, String theDisplay) {
 		if (isNoneBlank(theCodeSystem, theCode)) {
 			if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
 				theValueSetCodeAccumulator.includeConceptWithDesignations(theCodeSystem, theCode, theDisplay, theDesignations);
+				return true;
 			}
 
 			if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
 				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
+				return true;
 			}
 		}
+
+		return false;
 	}
 
 	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, @Nonnull ExpansionFilter theExpansionFilter) {
@@ -419,32 +424,36 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		accumulator.setTimestamp(new Date());
 		accumulator.setOffset(offset);
 
-		if (theExpansionOptions != null && theExpansionOptions.getOffset() > 0) {
+		if (theExpansionOptions != null) {
 			accumulator.addParameter().setName("offset").setValue(new IntegerType(offset));
 		}
-		if (theExpansionOptions != null && theExpansionOptions.getCount() > 0) {
+		if (theExpansionOptions != null) {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
 		ExpansionFilter filter = ExpansionFilter.NO_FILTER;
 
-		expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, filter, count, offset);
+		expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, filter, true);
+
+		if (accumulator.getTotalConcepts() != null) {
+			accumulator.setTotal(accumulator.getTotalConcepts());
+		}
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(accumulator);
 
-		accumulator.getMessages().forEach(msg->{
+		for (String next : accumulator.getMessages()) {
 			valueSet.getMeta().addExtension()
 				.setUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE)
-				.setValue(new StringType(msg));
-		});
+				.setValue(new StringType(next));
+		}
 
 		return valueSet;
 	}
 
-	public void expandValueSetIntoAccumulator(ValueSet theValueSetToExpand, ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theAccumulator, ExpansionFilter theFilter, int theCount, int theOffset) {
+	private void expandValueSetIntoAccumulator(ValueSet theValueSetToExpand, ValueSetExpansionOptions theExpansionOptions, IValueSetConceptAccumulator theAccumulator, ExpansionFilter theFilter, boolean theAdd) {
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasUrl()) {
 			if (theValueSetToExpand.hasVersion()) {
@@ -484,26 +493,34 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * ValueSet is pre-expanded in database so let's use that
 		 */
-		expandConcepts(theAccumulator, termValueSet, theOffset, theCount, theFilter);
+		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd);
 	}
 
 
-	private void expandConcepts(IValueSetConceptAccumulator theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount, ExpansionFilter theFilter) {
-		if (theCount == 0) {
-			return;
-		}
+	private void expandConcepts(IValueSetConceptAccumulator theAccumulator, TermValueSet theTermValueSet, ExpansionFilter theFilter, boolean theAdd) {
+		Integer offset = theAccumulator.getSkipCountRemaining();
+		offset = ObjectUtils.defaultIfNull(offset, 0);
+		offset = Math.min(offset, theTermValueSet.getTotalConcepts().intValue());
+
+		Integer count = theAccumulator.getCapacityRemaining();
+		count = defaultIfNull(count, myDaoConfig.getMaximumExpansionSize());
 
 		int conceptsExpanded = 0;
 		int designationsExpanded = 0;
-		int toIndex = theOffset + theCount;
+		int toIndex = offset + count;
 
 		Collection<TermValueSetConceptView> conceptViews;
+		boolean wasFilteredResult = false;
 		if (!theFilter.getFilters().isEmpty() && JpaConstants.VALUESET_FILTER_DISPLAY.equals(theFilter.getFilters().get(0).getProperty()) && theFilter.getFilters().get(0).getOp() == ValueSet.FilterOperator.EQUAL) {
 			String displayValue = theFilter.getFilters().get(0).getValue().replace("%", "[%]") + "%";
-			Pageable page = SearchCoordinatorSvcImpl.toPage(theOffset, toIndex);
-			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(page, theTermValueSet.getId(), displayValue);
+			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
+			wasFilteredResult = true;
 		} else {
-			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSet.getId());
+			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());
+			theAccumulator.consumeSkipCount(offset);
+			if (theAdd) {
+				theAccumulator.incrementOrDecrementTotalConcepts(true, theTermValueSet.getTotalConcepts().intValue());
+			}
 		}
 
 		if (conceptViews.isEmpty()) {
@@ -551,7 +568,25 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			String system = concept.getSystem();
 			String code = concept.getCode();
 			String display = concept.getDisplay();
-			theExpansionComponent.includeConceptWithDesignations(system, code, display, designations);
+
+			if (theAdd) {
+				if (theAccumulator.getCapacityRemaining() != null) {
+					if (theAccumulator.getCapacityRemaining() == 0) {
+						break;
+					}
+				}
+
+				theAccumulator.includeConceptWithDesignations(system, code, display, designations);
+			} else {
+				boolean removed = theAccumulator.excludeConcept(system, code);
+				if (removed) {
+					theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
+				}
+			}
+		}
+
+		if (wasFilteredResult && theAdd) {
+			theAccumulator.incrementOrDecrementTotalConcepts(true, pidToConcept.size());
 		}
 
 		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
@@ -583,6 +618,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		StopWatch sw = new StopWatch();
 		String valueSetInfo = getValueSetInfo(theValueSetToExpand);
 		ourLog.debug("Working with {}", valueSetInfo);
+
+		// Offset can't be combined with excludes
+		Integer skipCountRemaining = theValueSetCodeAccumulator.getSkipCountRemaining();
+		if (skipCountRemaining != null && skipCountRemaining > 0) {
+			if (theValueSetToExpand.getCompose().getExclude().size() > 0) {
+				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetNotYetExpanded_OffsetNotAllowed", valueSetInfo);
+				throw new InvalidRequestException(msg);
+			}
+		}
 
 		// Handle includes
 		ourLog.debug("Handling includes");
@@ -647,8 +691,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	protected List<FhirVersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpandR4, @Nonnull ExpansionFilter theExpansionFilter) {
-		// FIXME: pull from somewhere
-		int maxCapacity = 1000;
+		int maxCapacity = myDaoConfig.getMaximumExpansionSize();
 		ValueSetExpansionComponentWithConceptAccumulator accumulator = new ValueSetExpansionComponentWithConceptAccumulator(myContext, maxCapacity);
 		expandValueSet(theExpansionOptions, theValueSetToExpandR4, accumulator, theExpansionFilter);
 
@@ -782,11 +825,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 					throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(valueSetUrl));
 				}
 
-				Integer capacityRemaining = theValueSetCodeAccumulator.getCapacityRemaining();
-				if (capacityRemaining == null) {
-					capacityRemaining = 1000;
-				}
-				expandValueSetIntoAccumulator(valueSet, theExpansionOptions, theValueSetCodeAccumulator, subExpansionFilter, capacityRemaining, 0);
+				expandValueSetIntoAccumulator(valueSet, theExpansionOptions, theValueSetCodeAccumulator, subExpansionFilter, theAdd);
 
 			}
 
@@ -915,14 +954,19 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<?> resultList = jpaQuery.getResultList();
 		int resultsInBatch = resultList.size();
 		int firstResult = jpaQuery.getFirstResult();
+		int delta = 0;
 		for (Object next : resultList) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
 			TermConcept concept = (TermConcept) next;
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
+			boolean added = addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
+			if (added) {
+				delta++;
+			}
 		}
 
 		ourLog.debug("Batch expansion for {} with starting index of {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), firstResult, countForBatch, swForBatch.getMillis());
+		theValueSetCodeAccumulator.incrementOrDecrementTotalConcepts(theAdd, delta);
 
 		if (resultsInBatch < maxResultsPerBatch) {
 			ourLog.debug("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
