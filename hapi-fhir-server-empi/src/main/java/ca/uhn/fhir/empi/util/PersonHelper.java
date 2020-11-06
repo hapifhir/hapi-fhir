@@ -31,6 +31,7 @@ import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -40,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.HumanName;
@@ -223,52 +225,26 @@ public class PersonHelper {
 	 * a randomly generated UUID EID will be created.
 	 *
 	 * @param <T>               Supported MDM resource type (e.g. Patient, Practitioner)
-	 * @param theSourceResource The resource that will be used as the starting point for the MDM linking.
+	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
 	 */
-	public <T extends IAnyResource> T createSourceResourceFromEmpiTarget(T theSourceResource) {
-		ensureContextSupported();
+	public <T extends IAnyResource> T createSourceResourceFromEmpiTarget(T theIncomingResource) {
+		validateContextSupported();
 
 		// get a ref to the actual ID Field
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theIncomingResource);
 		IBaseResource newSourceResource = resourceDefinition.newInstance();
 
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
 
-		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifier =
-			(BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
+		cloneAllExternalEidsIntoNewSourceResource(sourceResourceIdentifier, theIncomingResource, newSourceResource);
 
-		FhirTerser terser = myFhirContext.newTerser();
-		List<IBase> sourceResourceEids = sourceResourceIdentifier.getAccessor().getValues(theSourceResource);
-		for (IBase base : sourceResourceEids) {
-			IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
-			terser.cloneInto(base, sourceResourceNewIdentifier, true);
+		addHapiEidIfNoExternalEidIsPresent(newSourceResource, sourceResourceIdentifier);
 
-			sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
-		}
-
-		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theSourceResource);
-		if (eidsToApply.isEmpty()) {
-			eidsToApply.add(myEIDHelper.createHapiEid());
-		}
-		for (CanonicalEID eid : eidsToApply) {
-			switch (myFhirContext.getVersion().getVersion()) {
-				case R4:
-					sourceResourceIdentifier.getMutator().addValue(newSourceResource, eid.toR4());
-					break;
-				case DSTU3:
-					sourceResourceIdentifier.getMutator().addValue(newSourceResource, eid.toDSTU3());
-					break;
-			}
-		}
-
-		IBaseCoding tag = newSourceResource.getMeta().addTag();
-		tag.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
-		tag.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
-		tag.setDisplay(EmpiConstants.DISPLAY_HAPI_EMPI_MANAGED);
+		populateMetaTag(newSourceResource);
 
 		return (T) newSourceResource;
+
 
 //		switch (myFhirContext.getVersion().getVersion()) {
 //			case R4:
@@ -293,7 +269,65 @@ public class PersonHelper {
 //		}
 	}
 
-	private void ensureContextSupported() {
+	/**
+	 * If there are no external EIDs on the incoming resource, create a new HAPI EID on the new SourceResource.
+	 */
+	//TODO GGG ask james if there is any way we can convert this canonical EID into a generic STU-agnostic IBase.
+	private <T extends IAnyResource> void addHapiEidIfNoExternalEidIsPresent(IBaseResource theNewSourceResource, BaseRuntimeChildDefinition theSourceResourceIdentifier) {
+		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theNewSourceResource);
+		if (eidsToApply.isEmpty()) {
+			CanonicalEID hapiEid = myEIDHelper.createHapiEid();
+			switch (myFhirContext.getVersion().getVersion()) {
+				case R4:
+					theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, hapiEid.toR4());
+					break;
+				case DSTU3:
+					theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, hapiEid.toDSTU3());
+					break;
+			}
+		}
+	}
+
+	/**
+	 * Given an Child Definition of `identifier`, a R4/DSTU3 EID Identifier, and a new resource, clone the EID into that resources' identifier list.
+	 */
+	private void cloneExternalEidIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theEid, IBaseResource newSourceResource){
+		// FHIR choice types - fields within fhir where we have a choice of ids
+		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
+		FhirTerser terser = myFhirContext.newTerser();
+		IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
+		terser.cloneInto(theEid, sourceResourceNewIdentifier, true);
+		sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
+	}
+
+	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theSourceResource, IBase newSourceResource){
+		// FHIR choice types - fields within fhir where we have a choice of ids
+	BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
+
+		FhirTerser terser = myFhirContext.newTerser();
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		List<IBase> sourceResourceIdentifiers = sourceResourceIdentifier.getAccessor().getValues(theSourceResource);
+
+		for (IBase base : sourceResourceIdentifiers) {
+			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
+			if (system.isPresent()) {
+				if (system.get().equals(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())) {
+					IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
+					terser.cloneInto(base, sourceResourceNewIdentifier, true);
+					sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
+				}
+			}
+		}
+	}
+
+	private void populateMetaTag(IBaseResource theResource) {
+		IBaseCoding tag = theResource.getMeta().addTag();
+		tag.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
+		tag.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		tag.setDisplay(EmpiConstants.DISPLAY_HAPI_EMPI_MANAGED);
+	}
+
+	private void validateContextSupported() {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();
 		if (fhirVersion == R4 || fhirVersion == DSTU3) {
 			return;
@@ -442,7 +476,7 @@ public class PersonHelper {
 
 		if (!incomingTargetEid.isEmpty()) {
 			if (personOfficialEid.isEmpty() || !myEmpiConfig.isPreventMultipleEids()) {
-				log(theEmpiTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Person, as this person does not yet have an external EID");
+				log(theEmpiTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
 				addCanonicalEidsToSourceResourceIfAbsent(theSourceResource, incomingTargetEid);
 			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
 				log(theEmpiTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite person, as this EID is already present");
@@ -474,22 +508,42 @@ public class PersonHelper {
 		}
 	}
 
-	private void addCanonicalEidsToSourceResourceIfAbsent(IBaseResource theSourceResource, List<CanonicalEID> theIncomingTargetEid) {
-		for (CanonicalEID eid : theIncomingTargetEid) {
-			List<CanonicalEID> sourceResourceEids = myEIDHelper.getExternalEid(theSourceResource);
-			
+	/**
+	 * Given a list of incoming External EIDs, and a Source Resource, apply all the EIDs to this resource, which did not already exist on it.
+	 */
+	private void addCanonicalEidsToSourceResourceIfAbsent(IBaseResource theSourceResource, List<CanonicalEID> theIncomingTargetExternalEids) {
+		List<CanonicalEID> sourceResourceExternalEids = myEIDHelper.getExternalEid(theSourceResource);
+
+		for (CanonicalEID incomingExternalEid : theIncomingTargetExternalEids) {
+			if (sourceResourceExternalEids.contains(incomingExternalEid)) {
+				continue;
+			} else {
+				// get a ref to the actual ID Field
+				RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
+				// hapi has 2 metamodels: for children and types
+				BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
+				switch(myFhirContext.getVersion().getVersion()) {
+					case R4:
+						cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, incomingExternalEid.toR4(), theSourceResource);
+						break;
+					case DSTU3:
+						cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, incomingExternalEid.toDSTU3(), theSourceResource);
+						break;
+				}
+			}
 		}
 
+		/**
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((Person) theSourceResource, eid.toR4()));
+				theIncomingTargetExternalEids.forEach(eid -> addIdentifierIfAbsent((Person) theSourceResource, eid.toR4()));
 				break;
 			case DSTU3:
-				theIncomingTargetEid.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person) theSourceResource, eid.toDSTU3()));
+				theIncomingTargetExternalEids.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person) theSourceResource, eid.toDSTU3()));
 				break;
 			default:
 				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
+		}*/
 	}
 
 	/**
@@ -508,15 +562,6 @@ public class PersonHelper {
 		}
 	}
 
-	private void addIdentifierIfAbsent(IAnyResource theSourceResource, Identifier theIdentifier) {
-
-		Optional<Identifier> first = theSourceResource.getIdentifier().stream().filter(identifier -> identifier.getSystem().equals(theIdentifier.getSystem())).filter(identifier -> identifier.getValue().equals(theIdentifier.getValue())).findFirst();
-		if (first.isPresent()) {
-			return;
-		} else {
-			theSourceResource.addIdentifier(theIdentifier);
-		}
-	}
 
 	public void mergePersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
 		switch (myFhirContext.getVersion().getVersion()) {

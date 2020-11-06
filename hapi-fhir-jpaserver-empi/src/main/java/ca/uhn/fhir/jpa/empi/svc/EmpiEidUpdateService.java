@@ -66,6 +66,7 @@ public class EmpiEidUpdateService {
 		EmpiUpdateContext updateContext = new EmpiUpdateContext(theMatchedSourceResourceCandidate, theResource);
 
 		if (updateContext.isRemainsMatchedToSamePerson()) {
+			// Copy over any new external EIDs which don't already exist.
 			// TODO NG - Eventually this call will use terser to clone data in, once the surviorship rules for copying data will be confirmed
 			// myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {

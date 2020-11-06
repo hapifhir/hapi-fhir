@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class CanonicalEID {
@@ -135,5 +136,16 @@ public class CanonicalEID {
 		return evaluate.stream()
 			.map(ibase -> new CanonicalEID(fhirPath, ibase))
 			.collect(Collectors.toList());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof CanonicalEID)) {
+			return false;
+		}
+		CanonicalEID otherEid = (CanonicalEID)o;
+		return Objects.equals(otherEid.getSystem(), this.getSystem())
+			&& Objects.equals(otherEid.getValue(), this.getValue())
+			&& Objects.equals(otherEid.getUse(), this.getUse());
 	}
 }
