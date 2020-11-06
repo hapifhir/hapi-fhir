@@ -90,7 +90,6 @@ public class PersonHelper {
 		// TODO we can't rely on links anymore, as the provided resource is likely not to have thoem
 		// need a way to pull those from the underlying MDM functionality
 		// how do we pull link IDs now???
-
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				Person personR4 = (Person) thePerson;
@@ -224,7 +223,7 @@ public class PersonHelper {
 	 * Creates a copy of the specified resource. This method will carry over resource EID if it exists. If it does not exist,
 	 * a randomly generated UUID EID will be created.
 	 *
-	 * @param <T>               Supported MDM resource type (e.g. Patient, Practitioner)
+	 * @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
 	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
 	 */
 	public <T extends IAnyResource> T createSourceResourceFromEmpiTarget(T theIncomingResource) {
@@ -244,29 +243,6 @@ public class PersonHelper {
 		populateMetaTag(newSourceResource);
 
 		return (T) newSourceResource;
-
-
-//		switch (myFhirContext.getVersion().getVersion()) {
-//			case R4:
-//				Person personR4 = new Person();
-//
-//				personR4.setActive(true);
-//				>> eidsToApply.forEach(eid -> personR4.addIdentifier(eid.toR4()));
-//				>> personR4.getMeta().addTag((Coding) buildEmpiManagedTag());
-//				copyEmpiTargetDataIntoPerson(theSourceResource, personR4, true);
-//				return personR4;
-//				IAnyResource sourceResource = theSourceResource;
-//				return null;
-//			case DSTU3:
-//				org.hl7.fhir.dstu3.model.Person personDstu3 = new org.hl7.fhir.dstu3.model.Person();
-//				personDstu3.setActive(true);
-//				eidsToApply.forEach(eid -> personDstu3.addIdentifier(eid.toDSTU3()));
-//				personDstu3.getMeta().addTag((org.hl7.fhir.dstu3.model.Coding) buildEmpiManagedTag());
-//				copyEmpiTargetDataIntoPerson(theSourceResource, personDstu3, true);
-//				return personDstu3;
-//			default:
-//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-//		}
 	}
 
 	/**
@@ -275,23 +251,17 @@ public class PersonHelper {
 	//TODO GGG ask james if there is any way we can convert this canonical EID into a generic STU-agnostic IBase.
 	private <T extends IAnyResource> void addHapiEidIfNoExternalEidIsPresent(IBaseResource theNewSourceResource, BaseRuntimeChildDefinition theSourceResourceIdentifier) {
 		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theNewSourceResource);
-		if (eidsToApply.isEmpty()) {
-			CanonicalEID hapiEid = myEIDHelper.createHapiEid();
-			switch (myFhirContext.getVersion().getVersion()) {
-				case R4:
-					theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, hapiEid.toR4());
-					break;
-				case DSTU3:
-					theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, hapiEid.toDSTU3());
-					break;
-			}
+		if (!eidsToApply.isEmpty()) {
+			return;
 		}
+		CanonicalEID hapiEid = myEIDHelper.createHapiEid();
+		theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, toId(hapiEid));
 	}
 
 	/**
 	 * Given an Child Definition of `identifier`, a R4/DSTU3 EID Identifier, and a new resource, clone the EID into that resources' identifier list.
 	 */
-	private void cloneExternalEidIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theEid, IBaseResource newSourceResource){
+	private void cloneExternalEidIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theEid, IBase newSourceResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
 		FhirTerser terser = myFhirContext.newTerser();
@@ -300,11 +270,8 @@ public class PersonHelper {
 		sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
 	}
 
-	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theSourceResource, IBase newSourceResource){
+	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theSourceResource, IBase newSourceResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
-	BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
-
-		FhirTerser terser = myFhirContext.newTerser();
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
 		List<IBase> sourceResourceIdentifiers = sourceResourceIdentifier.getAccessor().getValues(theSourceResource);
 
@@ -312,9 +279,7 @@ public class PersonHelper {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
 				if (system.get().equals(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem())) {
-					IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
-					terser.cloneInto(base, sourceResourceNewIdentifier, true);
-					sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
+					cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, base, newSourceResource);
 				}
 			}
 		}
@@ -335,129 +300,6 @@ public class PersonHelper {
 		throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 	}
 
-//		/**
-//		 * This will copy over all attributes that are copiable from Patient/Practitioner to Person.
-//		 *
-//		 * @param theBaseResource     The incoming {@link Patient} or {@link Practitioner} who's data we want to copy into Person.
-//		 * @param thePerson           The incoming {@link Person} who needs to have their data updated.
-//		 * @param theAllowOverwriting If enabled, will overwrite existing values on the person. Otherwise, will set them only if they are currently empty/null.
-//		 */
-//		private void copyEmpiTargetDataIntoPerson (IBaseResource theBaseResource, IBaseResource thePerson, Boolean
-//		theAllowOverwriting){
-//			switch (myFhirContext.getVersion().getVersion()) {
-//				case R4:
-//					copyR4TargetInformation(theBaseResource, thePerson, theAllowOverwriting);
-//					break;
-//				case DSTU3:
-//					copyDSTU3TargetInformation(theBaseResource, thePerson, theAllowOverwriting);
-//					break;
-//				default:
-//					throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-//			}
-//		}
-
-//		private void copyR4TargetInformation (IBaseResource theBaseResource, IBaseResource thePerson, boolean theAllowOverwriting){
-//			Person person = (Person) thePerson;
-//			switch (myFhirContext.getResourceType(theBaseResource)) {
-//				case "Patient":
-//					Patient patient = (Patient) theBaseResource;
-//					if (theAllowOverwriting || person.getName().isEmpty()) {
-//						person.setName(patient.getName());
-//					}
-//					if (theAllowOverwriting || person.getAddress().isEmpty()) {
-//						person.setAddress(patient.getAddress());
-//					}
-//					if (theAllowOverwriting || person.getTelecom().isEmpty()) {
-//						person.setTelecom(patient.getTelecom());
-//					}
-//					if (theAllowOverwriting || person.getBirthDate() == null) {
-//						person.setBirthDate(patient.getBirthDate());
-//					}
-//					if (theAllowOverwriting || person.getGender() == null) {
-//						person.setGender(patient.getGender());
-//					}
-//					if (theAllowOverwriting || person.getPhoto().isEmpty()) {
-//						person.setPhoto(patient.getPhotoFirstRep());
-//					}
-//					break;
-//				case "Practitioner":
-//					Practitioner practitioner = (Practitioner) theBaseResource;
-//					if (theAllowOverwriting || person.getName().isEmpty()) {
-//						person.setName(practitioner.getName());
-//					}
-//					if (theAllowOverwriting || person.getAddress().isEmpty()) {
-//						person.setAddress(practitioner.getAddress());
-//					}
-//					if (theAllowOverwriting || person.getTelecom().isEmpty()) {
-//						person.setTelecom(practitioner.getTelecom());
-//					}
-//					if (theAllowOverwriting || person.getBirthDate() == null) {
-//						person.setBirthDate(practitioner.getBirthDate());
-//					}
-//					if (theAllowOverwriting || person.getGender() == null) {
-//						person.setGender(practitioner.getGender());
-//					}
-//					if (theAllowOverwriting || person.getPhoto().isEmpty()) {
-//						person.setPhoto(practitioner.getPhotoFirstRep());
-//					}
-//					break;
-//				default:
-//					throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceType(theBaseResource));
-//			}
-//		}
-
-//		private void copyDSTU3TargetInformation (IBaseResource theBaseResource, IBaseResource thePerson,
-//		boolean theAllowOverwriting){
-//			org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePerson;
-//			switch (myFhirContext.getResourceType(theBaseResource)) {
-//				case "Patient":
-//					org.hl7.fhir.dstu3.model.Patient patient = (org.hl7.fhir.dstu3.model.Patient) theBaseResource;
-//
-//					if (theAllowOverwriting || person.getName().isEmpty()) {
-//						person.setName(patient.getName());
-//					}
-//					if (theAllowOverwriting || person.getAddress().isEmpty()) {
-//						person.setAddress(patient.getAddress());
-//					}
-//					if (theAllowOverwriting || person.getTelecom().isEmpty()) {
-//						person.setTelecom(patient.getTelecom());
-//					}
-//					if (theAllowOverwriting || person.getBirthDate() == null) {
-//						person.setBirthDate(patient.getBirthDate());
-//					}
-//					if (theAllowOverwriting || person.getGender() == null) {
-//						person.setGender(patient.getGender());
-//					}
-//					if (theAllowOverwriting || person.getPhoto().isEmpty()) {
-//						person.setPhoto(patient.getPhotoFirstRep());
-//					}
-//					break;
-//				case "Practitioner":
-//					org.hl7.fhir.dstu3.model.Practitioner practitioner = (org.hl7.fhir.dstu3.model.Practitioner) theBaseResource;
-//					if (theAllowOverwriting || person.getName().isEmpty()) {
-//						person.setName(practitioner.getName());
-//					}
-//					if (theAllowOverwriting || person.getAddress().isEmpty()) {
-//						person.setAddress(practitioner.getAddress());
-//					}
-//					if (theAllowOverwriting || person.getTelecom().isEmpty()) {
-//						person.setTelecom(practitioner.getTelecom());
-//					}
-//					if (theAllowOverwriting || person.getBirthDate() == null) {
-//						person.setBirthDate(practitioner.getBirthDate());
-//					}
-//					if (theAllowOverwriting || person.getGender() == null) {
-//						person.setGender(practitioner.getGender());
-//					}
-//					if (theAllowOverwriting || person.getPhoto().isEmpty()) {
-//						person.setPhoto(practitioner.getPhotoFirstRep());
-//					}
-//					break;
-//				default:
-//					throw new UnsupportedOperationException("EMPI targets are limited to Practitioner/Patient. This is a : " + myFhirContext.getResourceType(theBaseResource));
-//			}
-//		}
-
 	/**
 	 * Update a Person's EID based on the incoming target resource. If the incoming resource has an external EID, it is applied
 	 * to the Person, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
@@ -465,7 +307,7 @@ public class PersonHelper {
 	 * If running in multiple EID mode, then incoming EIDs are simply added to the Person without checking for matches.
 	 *
 	 * @param theSourceResource The person to update the external EID on.
-	 * @param theTargetResource     The target we will retrieve the external EID from.
+	 * @param theTargetResource The target we will retrieve the external EID from.
 	 * @return the modified {@link IBaseResource} representing the person.
 	 */
 	public IAnyResource updateSourceResourceExternalEidFromTargetResource(IAnyResource theSourceResource, IAnyResource
@@ -522,28 +364,19 @@ public class PersonHelper {
 				RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
 				// hapi has 2 metamodels: for children and types
 				BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
-				switch(myFhirContext.getVersion().getVersion()) {
-					case R4:
-						cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, incomingExternalEid.toR4(), theSourceResource);
-						break;
-					case DSTU3:
-						cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, incomingExternalEid.toDSTU3(), theSourceResource);
-						break;
-				}
+				cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, toId(incomingExternalEid), theSourceResource);
 			}
 		}
+	}
 
-		/**
+	private <T> T toId(CanonicalEID eid) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				theIncomingTargetExternalEids.forEach(eid -> addIdentifierIfAbsent((Person) theSourceResource, eid.toR4()));
-				break;
+				return (T) eid.toR4();
 			case DSTU3:
-				theIncomingTargetExternalEids.forEach(eid -> addIdentifierIfAbsent((org.hl7.fhir.dstu3.model.Person) theSourceResource, eid.toDSTU3()));
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}*/
+				return (T) eid.toDSTU3();
+		}
+		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
 	}
 
 	/**
@@ -561,7 +394,6 @@ public class PersonHelper {
 			thePerson.addIdentifier(theIdentifier);
 		}
 	}
-
 
 	public void mergePersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
@@ -694,16 +526,6 @@ public class PersonHelper {
 		List<Person.PersonLinkComponent> links = (List<Person.PersonLinkComponent>) (List<?>) theLinks;
 		person.setLink(links);
 	}
-
-//	public void updatePersonFromNewlyCreatedEmpiTarget(IBaseResource thePerson, IBaseResource
-//		theResource, EmpiTransactionContext theEmpiTransactionContext) {
-//		copyEmpiTargetDataIntoPerson(theResource, thePerson, false);
-//	}
-
-//	public void updatePersonFromUpdatedEmpiTarget(IBaseResource thePerson, IBaseResource
-//		theResource, EmpiTransactionContext theEmpiTransactionContext) {
-//		// copyEmpiTargetDataIntoPerson(theResource, thePerson, true);
-//	}
 
 	public int getLinkCount(IAnyResource thePerson) {
 		switch (myFhirContext.getVersion().getVersion()) {

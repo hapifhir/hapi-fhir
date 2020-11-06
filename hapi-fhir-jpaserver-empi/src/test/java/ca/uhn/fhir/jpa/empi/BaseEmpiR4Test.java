@@ -287,8 +287,9 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	protected Person getPersonFromEmpiLink(EmpiLink theEmpiLink) {
-		return (Person) myPersonDao.readByPid(new ResourcePersistentId(theEmpiLink.getSourceResourcePid()));
+	protected <T extends IBaseResource> T getTargetResourceFromEmpiLink(EmpiLink theEmpiLink, String theResourceType) {
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		return (T) resourceDao.readByPid(new ResourcePersistentId(theEmpiLink.getSourceResourcePid()));
 	}
 
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
