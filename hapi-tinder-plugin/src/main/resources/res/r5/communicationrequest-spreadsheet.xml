@@ -19,6 +19,7 @@
   
   
   <ActiveSheet>1</ActiveSheet>
+  <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
  </ExcelWorkbook>
@@ -1409,11 +1410,11 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">GF#14064, GF#22626, GF#22631, GF#22630</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">CommunicationRequest.reasonCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s86"><Data ss:Type="String">CommunicationRequest.reason</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">CodeableReference(Any)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1434,7 +1435,7 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="29">
-    <Cell ss:StyleID="s86"><Data ss:Type="String">CommunicationRequest.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s86"><Data ss:Type="String">!CommunicationRequest.reasonReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3714,7 +3715,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>16</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>17</LeftColumnRightPane>
+   <LeftColumnRightPane>12</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -6058,8 +6059,7 @@
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="199.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="314.0"/>
    <Column ss:StyleID="s111" ss:Width="58.0"/>
-   <Column ss:StyleID="s111" ss:Width="51.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="251.0"/>
+   <Column ss:AutoFitWidth="0" ss:Index="5" ss:StyleID="s111" ss:Width="251.0"/>
    <Column ss:StyleID="s111" ss:Width="197.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="111.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s111" ss:Width="101.0"/>

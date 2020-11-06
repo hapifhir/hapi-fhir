@@ -1417,6 +1417,50 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	}
 
+	@Test
+	public void testExpandByValueSetWithFilter() throws IOException {
+		loadAndPersistCodeSystem(HTTPVerb.POST);
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("filter", new StringType("blood"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+	}
+
+	@Test
+	public void testExpandByUrlWithFilter() throws Exception {
+		loadAndPersistCodeSystemAndValueSet(HTTPVerb.POST);
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("filter", new StringType("first"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, stringContainsInOrder(
+			"<code value=\"11378-7\"/>",
+			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+
+	}
+
 	@AfterEach
 	public void afterResetPreExpansionDefault() {
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());

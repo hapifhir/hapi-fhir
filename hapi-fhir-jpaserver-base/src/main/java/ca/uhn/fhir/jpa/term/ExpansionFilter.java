@@ -18,7 +18,6 @@ class ExpansionFilter {
 	private final String mySystem;
 	private final List<ValueSet.ConceptSetFilterComponent> myFilters;
 	private final Integer myMaxCount;
-
 	/**
 	 * Constructor
 	 */
@@ -44,6 +43,10 @@ class ExpansionFilter {
 		myCode = theCode;
 		myFilters = theFilters;
 		myMaxCount = theMaxCount;
+	}
+
+	public List<ValueSet.ConceptSetFilterComponent> getFilters() {
+		return myFilters;
 	}
 
 	boolean hasCode() {

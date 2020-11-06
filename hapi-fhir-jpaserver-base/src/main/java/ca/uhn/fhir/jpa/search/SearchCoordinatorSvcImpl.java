@@ -37,8 +37,6 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -47,6 +45,7 @@ import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.InterceptorUtil;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
@@ -468,7 +467,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		return txTemplate.execute(t -> {
-				
+
 			// Load the results synchronously
 			final List<ResourcePersistentId> pids = new ArrayList<>();
 
@@ -668,6 +667,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myRequestPartitionHelperService = theRequestPartitionHelperService;
 	}
 
+	private boolean isWantCount(SearchParameterMap myParams, boolean wantOnlyCount) {
+		return wantOnlyCount ||
+			SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
+			(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
+	}
+
 	/**
 	 * A search task is a Callable task that runs in
 	 * a thread pool to handle an individual search. One instance
@@ -691,6 +696,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private final ArrayList<ResourcePersistentId> myUnsyncedPids = new ArrayList<>();
 		private final RequestDetails myRequest;
 		private final RequestPartitionId myRequestPartitionId;
+		private final SearchRuntimeDetails mySearchRuntimeDetails;
+		private final Transaction myParentTransaction;
 		private Search mySearch;
 		private boolean myAbortRequested;
 		private int myCountSavedTotal = 0;
@@ -699,8 +706,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private boolean myAdditionalPrefetchThresholdsRemaining;
 		private List<ResourcePersistentId> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
-		private final SearchRuntimeDetails mySearchRuntimeDetails;
-		private final Transaction myParentTransaction;
 
 		/**
 		 * Constructor
@@ -1193,17 +1198,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 	}
 
-	private boolean isWantCount(SearchParameterMap myParams, boolean wantOnlyCount) {
-		return wantOnlyCount ||
-			SearchTotalModeEnum.ACCURATE.equals(myParams.getSearchTotalMode()) ||
-			(myParams.getSearchTotalMode() == null && SearchTotalModeEnum.ACCURATE.equals(myDaoConfig.getDefaultTotalMode()));
-	}
-
-	private static boolean isWantOnlyCount(SearchParameterMap myParams) {
-		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
-			| INTEGER_0.equals(myParams.getCount());
-	}
-
 	public class SearchContinuationTask extends SearchTask {
 
 		public SearchContinuationTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
@@ -1242,6 +1236,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	}
 
+	private static boolean isWantOnlyCount(SearchParameterMap myParams) {
+		return SummaryEnum.COUNT.equals(myParams.getSummaryMode())
+			| INTEGER_0.equals(myParams.getCount());
+	}
 
 	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch) {
 		theSearch.setDeleted(false);
@@ -1270,8 +1268,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	 * Creates a {@link Pageable} using a start and end index
 	 */
 	@SuppressWarnings("WeakerAccess")
-	public static @Nullable
-	Pageable toPage(final int theFromIndex, int theToIndex) {
+	@Nullable
+	public static Pageable toPage(final int theFromIndex, int theToIndex) {
 		int pageSize = theToIndex - theFromIndex;
 		if (pageSize < 1) {
 			return null;

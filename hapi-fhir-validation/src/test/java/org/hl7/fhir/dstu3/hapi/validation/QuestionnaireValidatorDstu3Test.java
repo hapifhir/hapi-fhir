@@ -118,7 +118,7 @@ public class QuestionnaireValidatorDstu3Test {
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
 			assertThat(errors.isSuccessful(), Matchers.is(true));
-			assertThat(errors.getMessages().get(0).getMessage(), containsString("and a code should come from this value set unless it has no suitable code) (codes = null#text-box)"));
+			assertThat(errors.getMessages().get(0).getMessage(), containsString("and a code should come from this value set unless it has no suitable code and the validator cannot judge what is suitable) (codes = null#text-box)"));
 		}
 	}
 

@@ -14,7 +14,6 @@
   
   
   
-  <ActiveSheet>1</ActiveSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -623,14 +622,6 @@
    <Font ss:Color="#333399" ss:FontName="Calibri" ss:Size="11" x:Family="Swiss"/>
    <Interior/>
   </Style>
-  <Style ss:ID="s138">
-   <Alignment ss:Horizontal="Left" ss:Vertical="Top"/>
-   <Borders>
-    <Border ss:LineStyle="Continuous" ss:Position="Right" ss:Weight="3"/>
-   </Borders>
-   <Font ss:Bold="1" ss:Color="#000000" ss:FontName="Calibri" ss:Size="11" x:Family="Swiss"/>
-   <Interior/>
-  </Style>
   <Style ss:ID="s139">
    <Alignment ss:Horizontal="Left" ss:Vertical="Top" ss:WrapText="1"/>
   </Style>
@@ -777,6 +768,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   <Selected/>
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
    <x:Print>    </x:Print>
@@ -3793,11 +3785,10 @@
     <VerticalResolution>600</VerticalResolution>
    </Print>
    <Zoom>130</Zoom>
-   <Selected/>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>6</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -5401,7 +5392,7 @@
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
-  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="37" ss:StyleID="s113" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="35" ss:StyleID="s113" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s113" ss:Width="232.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s113" ss:Width="281.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s113" ss:Width="252.0"/>
@@ -5424,20 +5415,6 @@
     <Cell ss:StyleID="s118"><Data ss:Type="String">diagnosticreport-extensions</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">diagnosticreport-extensions.xml</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">diagnosticreport-extensions-spreadsheet.xml</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">spreadsheet</Data></Cell>
-    <Cell><Data ss:Type="String">core</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s138"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">diagnosticreport-genetics-profile-spreadsheet.xml</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">diagnosticreport-genetics-profile-spreadsheet.xml</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">spreadsheet</Data></Cell>
-    <Cell><Data ss:Type="String">core</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s118"><Data ss:Type="String">Profile for HLA Genotyping Results</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">diagnosticreport-hla-genotyping-results-spreadsheet.xml</Data></Cell>
-    <Cell ss:StyleID="s119"><Data ss:Type="String">diagnosticreport-hla-genotyping-results-spreadsheet.xml</Data></Cell>
     <Cell ss:StyleID="s120"><Data ss:Type="String">spreadsheet</Data></Cell>
     <Cell><Data ss:Type="String">core</Data></Cell>
    </Row>
@@ -5658,7 +5635,7 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Examples!R1C1:R2C7"/>
   </Names>
-  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="39" ss:StyleID="s139" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="7" ss:ExpandedRowCount="35" ss:StyleID="s139" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s139" ss:Width="149.0"/>
    <Column ss:StyleID="s139" ss:Width="45.0"/>
    <Column ss:StyleID="s139" ss:Width="301.0"/>
@@ -5667,7 +5644,7 @@
    <Column ss:StyleID="s139" ss:Width="162.0"/>
    <Column ss:StyleID="s139" ss:Width="57.0"/>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s103"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Descriptive Name</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s103"><Data ss:Type="String">Name</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40"><Font html:Color="#000000">        </Font><Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Descriptive Name</Font><Font html:Color="#000000">       </Font></ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Type</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Default = XML.  Leave at default unless told otherwise</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s140"><Data ss:Type="String">Description</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Description of content/purposes of example</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s104"><Data ss:Type="String">Identity</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">resource id</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -5784,33 +5761,6 @@
     <Cell ss:StyleID="s144"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s143"><Data ss:Type="String">Genetics -with family</Data></Cell>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a genetics test report with Family member history</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">dg2</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-genetics-example-2-familyhistory.xml</Data></Cell>
-    <Cell ss:StyleID="s138"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
-    <Cell ss:StyleID="s144"><Data ss:Type="String">n</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s143"><Data ss:Type="String">HLA genotyping</Data></Cell>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a HLA genotyping results report </Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">hla-1</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-hla-genetics-results-example.xml</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">Profile for HLA Genotyping Results</Data></Cell>
-    <Cell ss:StyleID="s144"><Data ss:Type="String">n</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s143"><Data ss:Type="String">Comprehensive report</Data></Cell>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a comprehensive bone marrow report</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">report</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-genetics-comprehensive-bone-marrow-report.xml</Data></Cell>
-    <Cell ss:StyleID="s138"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
-    <Cell ss:StyleID="s144"><Data ss:Type="String">n</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s143"><Data ss:Type="String">Pap smear</Data></Cell>
     <Cell ss:StyleID="s87"/>
     <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a  principally narrative anatomic pathology report</Data></Cell>
@@ -5818,15 +5768,6 @@
     <Cell ss:StyleID="s78"><Data ss:Type="String">diagnosticreport-example-papsmear.xml</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s144"><Data ss:Type="String">y</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s143"><Data ss:Type="String">PGx Example </Data></Cell>
-    <Cell ss:StyleID="s87"/>
-    <Cell ss:StyleID="s88"><Data ss:Type="String">An example of a PGx haplotype report</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">example-pgx</Data></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">diagnosticreport-example-pgx.xml</Data></Cell>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">Diagnostic Report-Genetics</Data></Cell>
-    <Cell ss:StyleID="s144"><Data ss:Type="String">n</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s143"><Data ss:Type="String">Gingival Mass</Data></Cell>
@@ -7121,7 +7062,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>4</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
