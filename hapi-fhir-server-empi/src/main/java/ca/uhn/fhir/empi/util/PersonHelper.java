@@ -240,6 +240,7 @@ public class PersonHelper {
 
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
+
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		BaseRuntimeElementCompositeDefinition<?> childIdentifier =
 			(BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
@@ -253,6 +254,8 @@ public class PersonHelper {
 		}
 
 		// now we have all IDs pulled into it
+		//Turns out this call actually literally fully clones the resource, and we don't quite want to do that.
+		//Overall this looks great though!
 		terser.cloneInto(theSourceResource, newSourceResource, true);
 		return (T) newSourceResource;
 
