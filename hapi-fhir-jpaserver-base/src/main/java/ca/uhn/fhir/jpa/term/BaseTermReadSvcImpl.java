@@ -141,6 +141,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
@@ -171,8 +173,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -306,7 +310,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd, @Nonnull ExpansionFilter theExpansionFilter) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
 			if (isNoneBlank(theSystem, next.getCode())) {
-				if (theExpansionFilter.hasCode() && theExpansionFilter.getCode().equals(next.getCode())) {
+				if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(next.getCode())) {
 					addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, next.getCode(), next.getDisplay());
 				}
 			}
@@ -633,7 +637,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
 			for (int i = 0; ; i++) {
 				int queryIndex = i;
-				Boolean shouldContinue = myTxTemplate.execute(t -> {
+				Boolean shouldContinue = executeInNewTransactionIfNeeded(() -> {
 					boolean add = true;
 					return expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes, include, add, queryIndex, theExpansionFilter);
 				});
@@ -648,7 +652,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
 			for (int i = 0; ; i++) {
 				int queryIndex = i;
-				Boolean shouldContinue = myTxTemplate.execute(t -> {
+				Boolean shouldContinue = executeInNewTransactionIfNeeded(() -> {
 					boolean add = false;
 					ExpansionFilter expansionFilter = ExpansionFilter.NO_FILTER;
 					return expandValueSetHandleIncludeOrExclude(theExpansionOptions, theValueSetCodeAccumulator, addedCodes, exclude, add, queryIndex, expansionFilter);
@@ -664,6 +668,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		ourLog.debug("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
+	}
+
+	/**
+	 * Execute in a new transasction only if we aren't already in one. We do this because in some cases
+	 * when performing a VS expansion we throw an {@link ExpansionTooCostlyException} and we don't want
+	 * this to cause the TX to be marked a rollback prematurely.
+	 */
+	private <T> T executeInNewTransactionIfNeeded(Supplier<T> theAction) {
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			return theAction.get();
+		}
+		return myTxTemplate.execute(t->theAction.get());
 	}
 
 	private String getValueSetInfo(ValueSet theValueSet) {
@@ -790,7 +806,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				if (!theIncludeOrExclude.getConcept().isEmpty()) {
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
-						if (theExpansionFilter.hasCode() && theExpansionFilter.getCode().equals(nextCode)) {
+						if (!theExpansionFilter.hasCode() || theExpansionFilter.getCode().equals(nextCode)) {
 							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
 
 								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
