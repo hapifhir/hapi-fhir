@@ -1016,10 +1016,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		SearchParameterMap params;
 
-		// FIXME: restore
-//		params = new SearchParameterMap();
-//		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active"));
-//		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
+		params = new SearchParameterMap();
+		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active"));
+		assertThat(toUnqualifiedVersionlessIdValues(myAllergyIntoleranceDao.search(params)), containsInAnyOrder(id1));
 
 		params = new SearchParameterMap();
 		params.add(AllergyIntolerance.SP_CLINICAL_STATUS, new TokenParam(null, "active").setModifier(TokenParamModifier.BELOW));
