@@ -37,6 +37,7 @@ import java.util.Optional;
 
 @Service
 public class FindCandidateByEidSvc extends BaseCandidateFinder {
+
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -50,7 +51,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundPerson = myEmpiResourceDaoSvc.searchPersonByEid(eid.getValue());
+				Optional<IAnyResource> oFoundPerson = myEmpiResourceDaoSvc.searchSourceResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType());
 				if (oFoundPerson.isPresent()) {
 					IAnyResource foundPerson = oFoundPerson.get();
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundPerson);

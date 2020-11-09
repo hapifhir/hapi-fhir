@@ -221,20 +221,35 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testIncomingPatientWithEidMatchesAnotherPatientWithSameEIDAreLinked() {
-		// Use Case #3
+		// Create Use Case #3
 		Patient patient1 = addExternalEID(buildJanePatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient1);
-		// state is now > Patient/uniqueid[name=jane] <--> Patient/uniqueid[name=jane]
 
-		List<CanonicalEID> eid = myEidHelper.getExternalEid(patient1);
+		// state is now > Patient/ID.JANE.123[name=jane & EID = uniqueid] <-- EMPI Link -- Patient/[name=jane & EDI = uniqueid & EMPI_MANAGED = true]
+		IBundleProvider bundle = myPatientDao.search(new SearchParameterMap());
+		List<IBaseResource> resources = bundle.getResources(0, bundle.size());
+		resources.forEach(r -> {
+			print(r);
+			assertFalse(myEidHelper.getExternalEid(r).isEmpty());
+		});
+		assertEquals(2, resources.size());
 
-		Optional<IAnyResource> iAnyResource = myEmpiResourceDaoSvc.searchPersonByEid(eid.get(0).getValue());
-		assertTrue(iAnyResource.isPresent());
-		assertTrue(iAnyResource.get().equals(patient1));
+		IBaseResource testPatient1 = resources.get(0);
+		IBaseResource testPatient2 = resources.get(1);
+
+		assertThat((Patient) testPatient1, is(sameSourceResourceAs((Patient) testPatient2)));
+
+		Optional<EmpiLink> empiLinkByTarget = myEmpiLinkDaoSvc.findEmpiLinkByTarget(patient1);
+		assertTrue(empiLinkByTarget.isPresent());
 
 		Patient patient2 = addExternalEID(buildPaulPatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient2);
-      // state should be > Patient/uniqueid[name=jane] <--> Patient/uniqueid[name=jane] <--> Patient/uniqueid[name=paul]
+      // state should be > Patient/ID.JANE.123[name=jane & EID = uniqueid] <--> Patient/[name=jane & EDI = uniqueid] <--> Patient/[name=paul & EDI = uniqueid]
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
+		search.getResources(0, search.size()).forEach( r -> {
+				print(r);
+			}
+		);
 
 		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 	}

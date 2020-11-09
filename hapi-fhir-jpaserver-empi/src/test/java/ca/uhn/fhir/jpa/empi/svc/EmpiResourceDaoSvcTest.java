@@ -32,7 +32,7 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 		badPerson.setActive(false);
 		myPersonDao.update(badPerson);
 
-		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchPersonByEid(TEST_EID);
+		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Person");
 		assertTrue(foundPerson.isPresent());
 		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
@@ -45,7 +45,7 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 		Person badPerson = addExternalEID(createPerson(new Person(), false), TEST_EID);
 		myPersonDao.update(badPerson);
 
-		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchPersonByEid(TEST_EID);
+		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Person");
 		assertTrue(foundPerson.isPresent());
 		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
 	}

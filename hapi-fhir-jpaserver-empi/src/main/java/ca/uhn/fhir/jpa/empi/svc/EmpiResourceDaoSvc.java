@@ -44,34 +44,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class EmpiResourceDaoSvc {
+
 	private static final int MAX_MATCHING_PERSONS = 1000;
+
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
 	IEmpiSettings myEmpiConfig;
-
-	private IFhirResourceDao<IBaseResource> myPatientDao;
-	private IFhirResourceDao<IBaseResource> myPersonDao;
-	private IFhirResourceDao<IBaseResource> myPractitionerDao;
-
-	@PostConstruct
-	public void postConstruct() {
-		myPatientDao = myDaoRegistry.getResourceDao("Patient");
-		myPersonDao = myDaoRegistry.getResourceDao("Person");
-		myPractitionerDao = myDaoRegistry.getResourceDao("Practitioner");
-	}
-
-	public IAnyResource readPatient(IIdType theId) {
-		return (IAnyResource) myPatientDao.read(theId);
-	}
-
-	public IAnyResource readPerson(IIdType theId) {
-		return (IAnyResource) myPersonDao.read(theId);
-	}
-
-	public IAnyResource readPractitioner(IIdType theId) {
-		return (IAnyResource) myPractitionerDao.read(theId);
-	}
 
 	public DaoMethodOutcome upsertSourceResource(IAnyResource theSourceResource, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
@@ -87,12 +66,14 @@ public class EmpiResourceDaoSvc {
 		return (IAnyResource) resourceDao.readByPid(theSourceResourcePid);
 	}
 
-	public Optional<IAnyResource> searchPersonByEid(String theEid) {
+	public Optional<IAnyResource> searchSourceResourceByEID(String theEid, String theResourceType) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEid));
 		map.add("active", new TokenParam("true"));
-		IBundleProvider search = myPersonDao.search(map);
+
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
+		IBundleProvider search = resourceDao.search(map);
 
 		// Could add the meta tag to the query, but it's probably more efficient to filter on it afterwards since in practice
 		// it will always be present.
@@ -111,7 +92,7 @@ public class EmpiResourceDaoSvc {
 				list.get(0).getIdElement().getValue() +
 				", " +
 				list.get(1).getIdElement().getValue()
-				);
+			);
 		} else {
 			return Optional.of((IAnyResource) list.get(0));
 		}
