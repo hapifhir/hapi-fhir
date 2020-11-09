@@ -15,7 +15,6 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Patient;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.util.Map;
 
 // FIXME KHS retool searchparam and subscription to use this
@@ -31,7 +29,8 @@ import java.util.Map;
 public class VersionChangeListenerRegistryImpl implements IVersionChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerRegistryImpl.class);
 
-	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	static long LOCAL_REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	static long REMOTE_REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
 	private volatile long myLastRefresh;
 
@@ -79,7 +78,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	@Override
 	public boolean refreshAllCachesIfNecessary() {
-		if (myLastRefresh == 0 || System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
+		if (myLastRefresh == 0 || System.currentTimeMillis() - LOCAL_REFRESH_INTERVAL > myLastRefresh) {
 			refreshAllCachesWithRetry();
 			return true;
 		} else {
@@ -127,7 +126,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	private int refreshAllCachesWithRetry() {
 		Retrier<Integer> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (this) {
-				return doRefreshAllCaches(REFRESH_INTERVAL);
+				return doRefreshAllCaches(LOCAL_REFRESH_INTERVAL);
 			}
 		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
