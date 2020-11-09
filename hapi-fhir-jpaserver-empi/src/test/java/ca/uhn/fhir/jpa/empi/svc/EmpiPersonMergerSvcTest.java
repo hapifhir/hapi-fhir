@@ -66,10 +66,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void before() {
 		super.loadEmpiSearchParameters();
 
-		myFromPerson = createPerson();
+		myFromPerson = createSourceResourcePatient();
 		IdType fromPersonId = myFromPerson.getIdElement().toUnqualifiedVersionless();
 		myFromPersonPid = myIdHelperService.getPidOrThrowException(fromPersonId);
-		myToPerson = createPerson();
+		myToPerson = createSourceResourcePatient();
 		IdType toPersonId = myToPerson.getIdElement().toUnqualifiedVersionless();
 		myToPersonPid = myIdHelperService.getPidOrThrowException(toPersonId);
 

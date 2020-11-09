@@ -32,9 +32,9 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		super.before();
 		super.loadEmpiSearchParameters();
 
-		myFromPerson = createPerson();
+		myFromPerson = createSourceResourcePatient();
 		myFromPersonId = new StringType(myFromPerson.getIdElement().getValue());
-		myToPerson = createPerson();
+		myToPerson = createSourceResourcePatient();
 		myToPersonId = new StringType(myToPerson.getIdElement().getValue());
 	}
 

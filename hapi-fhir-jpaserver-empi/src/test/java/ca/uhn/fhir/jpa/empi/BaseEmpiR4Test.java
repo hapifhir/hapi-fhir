@@ -133,12 +133,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Person createUnmanagedPerson() {
-		return createPerson(new Person(), false);
+		return createSourceResourcePatient(new Person(), false);
 	}
 
 	@Nonnull
-	protected Person createPerson() {
-		return createPerson(new Person(), true);
+	protected Person createSourceResourcePatient() {
+		return createSourceResourcePatient(new Patient(), true);
 	}
 
 	@Nonnull
@@ -147,17 +147,17 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Person createPerson(Person thePerson) {
-		return createPerson(thePerson, true);
+	protected Person createSourceResourcePatient(Person thePerson) {
+		return createSourceResourcePatient(thePerson, true);
 	}
 
 	@Nonnull
-	protected Person createPerson(Person thePerson, boolean theEmpiManaged) {
+	protected Person createSourceResourcePatient(Patient theSourceResourcePatient, boolean theEmpiManaged) {
 		if (theEmpiManaged) {
-			thePerson.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
-			thePerson.setActive(true);
+			theSourceResourcePatient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+			theSourceResourcePatient.setActive(true);
 		}
-		DaoMethodOutcome outcome = myPersonDao.create(thePerson);
+		DaoMethodOutcome outcome = myPatientDao.create(theSourceResourcePatient);
 		Person person = (Person) outcome.getResource();
 		person.setId(outcome.getId());
 		return person;
@@ -396,7 +396,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected EmpiLink createResourcesAndBuildTestEmpiLink() {
-		Person person = createPerson();
+		Person person = createSourceResourcePatient();
 		Patient patient = createPatient();
 
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
