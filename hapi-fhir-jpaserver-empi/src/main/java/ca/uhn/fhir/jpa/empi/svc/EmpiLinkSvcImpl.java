@@ -105,7 +105,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	@Override
 	@Transactional
 	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext) {
-		int origLinkCount = myPersonHelper.getLinkCount(thePersonResource);
+		// int origLinkCount = myPersonHelper.getLinkCount(thePersonResource);
+		int origLinkCount = myEmpiLinkDaoSvc.findEmpiMatchLinksBySource(thePersonResource).size();
 
 		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(thePersonResource);
 

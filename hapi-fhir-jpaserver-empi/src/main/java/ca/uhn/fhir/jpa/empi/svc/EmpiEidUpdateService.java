@@ -71,14 +71,14 @@ public class EmpiEidUpdateService {
 			// myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
-				myEmpiLinkSvc.updateLink(updateContext.getMatchedPerson(), theResource, theMatchedSourceResourceCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				myEmpiLinkSvc.updateLink(updateContext.getMatchedSourceResource(), theResource, theMatchedSourceResourceCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 			} else if (!updateContext.isHasEidsInCommon()) {
 				handleNoEidsInCommon(theResource, theMatchedSourceResourceCandidate, theEmpiTransactionContext, updateContext);
 			}
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new person. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the persons possible duplicates
-			linkToNewPersonAndFlagAsDuplicate(theResource, updateContext.getExistingPerson(), updateContext.getMatchedPerson(), theEmpiTransactionContext);
+			linkToNewPersonAndFlagAsDuplicate(theResource, updateContext.getExistingPerson(), updateContext.getMatchedSourceResource(), theEmpiTransactionContext);
 		}
 	}
 
@@ -86,15 +86,16 @@ public class EmpiEidUpdateService {
 		// the user is simply updating their EID. We propagate this change to the Person.
 		//overwrite. No EIDS in common, but still same person.
 		if (myEmpiSettings.isPreventMultipleEids()) {
-			if (myPersonHelper.getLinkCount(theUpdateContext.getMatchedPerson()) <= 1) { // If there is only 0/1 link on the person, we can safely overwrite the EID.
-				handleExternalEidOverwrite(theUpdateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
+			if (myEmpiLinkDaoSvc.findEmpiMatchLinksBySource(theUpdateContext.getMatchedSourceResource()).size() <= 1) { // If there is only 0/1 link on the person, we can safely overwrite the EID.
+			// if (myPersonHelper.getLinkCount(theUpdateContext.getMatchedSourceResource()) <= 1) { // If there is only 0/1 link on the person, we can safely overwrite the EID.
+				handleExternalEidOverwrite(theUpdateContext.getMatchedSourceResource(), theResource, theEmpiTransactionContext);
 			} else { // If the person has multiple patients tied to it, we can't just overwrite the EID, so we split the person.
 				createNewPersonAndFlagAsDuplicate(theResource, theEmpiTransactionContext, theUpdateContext.getExistingPerson());
 			}
 		} else {
-			myPersonHelper.handleExternalEidAddition(theUpdateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
+			myPersonHelper.handleExternalEidAddition(theUpdateContext.getMatchedSourceResource(), theResource, theEmpiTransactionContext);
 		}
-		myEmpiLinkSvc.updateLink(theUpdateContext.getMatchedPerson(), theResource, theMatchedSourceResourceCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(theUpdateContext.getMatchedSourceResource(), theResource, theMatchedSourceResourceCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
 	}
 
 	private void handleExternalEidOverwrite(IAnyResource thePerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
@@ -138,17 +139,17 @@ public class EmpiEidUpdateService {
 		private IAnyResource myExistingPerson;
 		private boolean myRemainsMatchedToSamePerson;
 
-		public IAnyResource getMatchedPerson() {
-			return myMatchedPerson;
+		public IAnyResource getMatchedSourceResource() {
+			return myMatchedSourceResource;
 		}
 
-		private final IAnyResource myMatchedPerson;
+		private final IAnyResource myMatchedSourceResource;
 
 		EmpiUpdateContext(MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, IAnyResource theResource) {
 			final String resourceType = theResource.getIdElement().getResourceType();
-			myMatchedPerson = myEmpiSourceResourceFindingSvc.getSourceResourceFromMatchedSourceResourceCandidate(theMatchedSourceResourceCandidate, resourceType);
+			myMatchedSourceResource = myEmpiSourceResourceFindingSvc.getSourceResourceFromMatchedSourceResourceCandidate(theMatchedSourceResourceCandidate, resourceType);
 
-			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedPerson, theResource);
+			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedSourceResource, theResource);
 			myIncomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 
 			Optional<EmpiLink> theExistingMatchLink = myEmpiLinkDaoSvc.getMatchedLinkForTarget(theResource);

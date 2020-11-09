@@ -73,8 +73,8 @@ public class EmpiResourceDaoSvc {
 		map.setLoadSynchronous(true);
 		map.add("identifier", new TokenParam(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem(), theEid));
 		// TODO NG - During person dedup do we set this to false? We might be setting a person to inactive...
-		// map.add("active", new TokenParam("true"));
-		map.add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
+		map.add("active", new TokenParam("true"));
+//		map.add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(map);

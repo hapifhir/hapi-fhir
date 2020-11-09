@@ -24,7 +24,7 @@ public class IsSameSourceResourceAs extends BaseSourceResourceMatcher {
 		sourceResourcePidsToMatch = myBaseResources.stream().map(this::getMatchedResourcePidFromResource).collect(Collectors.toList());
 		boolean allToCheckAreSame = sourceResourcePidsToMatch.stream().allMatch(pid -> pid.equals(sourceResourcePidsToMatch.get(0)));
 		if (!allToCheckAreSame) {
-			throw new IllegalStateException("You wanted to do a source resource comparison, but the pool of persons you submitted for checking don't match! We won't even check the incoming person against them.");
+			throw new IllegalStateException("You wanted to do a source resource comparison, but the pool of source resources you submitted for checking don't match! We won't even check the incoming source resource against them.");
 		}
 		return sourceResourcePidsToMatch.contains(incomingSourceResourcePid);
 	}

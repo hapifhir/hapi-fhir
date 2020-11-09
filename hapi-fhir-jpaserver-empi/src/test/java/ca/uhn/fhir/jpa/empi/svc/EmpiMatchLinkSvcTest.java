@@ -41,14 +41,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
+
 	private static final Logger ourLog = getLogger(EmpiMatchLinkSvcTest.class);
+
 	@Autowired
 	IEmpiLinkSvc myEmpiLinkSvc;
 	@Autowired
 	private EIDHelper myEidHelper;
 	@Autowired
 	private PersonHelper myPersonHelper;
-
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc; // TODO NG - remove?
 
@@ -117,18 +118,25 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testWhenPOSSIBLE_MATCHOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
-		IBundleProvider search = myPersonDao.search(new SearchParameterMap());
+
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
 		IAnyResource janePerson = (IAnyResource) search.getResources(0, 1).get(0);
 
 		Patient unmatchedPatient = createPatient(buildJanePatient());
 
 		//This simulates an admin specifically saying that unmatchedPatient does NOT match janePerson.
 		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
-		//TODO change this so that it will only partially match.
+		// TODO change this so that it will only partially match.
 
 		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
 		//should cause a whole new Person to be created.
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedPatient, createContextForCreate("Patient"));
+
+		System.out.println("Unmatched Patient");
+		print(unmatchedPatient);
+
+		System.out.println("Jane");
+		print(janePerson);
 
 		assertThat(unmatchedPatient, is(not(sameSourceResourceAs(janePerson))));
 		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
@@ -225,35 +233,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient1 = addExternalEID(buildJanePatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient1);
 
-		{
-			// state is now > Patient/ID.JANE.123[name=jane & EID = uniqueid] <-- EMPI Link -- Patient/[name=jane & EDI = uniqueid & EMPI_MANAGED = true]
-			IBundleProvider bundle = myPatientDao.search(new SearchParameterMap());
-			List<IBaseResource> resources = bundle.getResources(0, bundle.size());
-			resources.forEach(r -> {
-				print(r);
-				assertFalse(myEidHelper.getExternalEid(r).isEmpty());
-			});
-			assertEquals(2, resources.size());
-
-			IBaseResource testPatient1 = resources.get(0);
-			IBaseResource testPatient2 = resources.get(1);
-
-			assertThat((Patient) testPatient1, is(sameSourceResourceAs((Patient) testPatient2)));
-
-			Optional<EmpiLink> empiLinkByTarget = myEmpiLinkDaoSvc.findEmpiLinkByTarget(patient1);
-			assertTrue(empiLinkByTarget.isPresent());
-			System.out.println(empiLinkByTarget.get());
-		}
 		Patient patient2 = buildPaulPatient();
-		patient2.setActive(true);
 		patient2 = addExternalEID(patient2, "uniqueid");
 		createPatientAndUpdateLinks(patient2);
-      // state should be > Patient/ID.JANE.123[name=jane & EID = uniqueid] <--> Patient/[name=jane & EDI = uniqueid] <--> Patient/[name=paul & EDI = uniqueid]
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
-		search.getResources(0, search.size()).forEach( r -> {
-				print(r);
-			}
-		);
 
 		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 	}
@@ -552,8 +534,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	//Test Case #2
 	public void testSinglyLinkedPersonThatGetsAnUpdatedEidSimplyUpdatesEID() {
+		//Use Case # 2
 		String EID_1 = "123";
 		String EID_2 = "456";
 
@@ -568,7 +550,12 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		clearExternalEIDs(paul);
 		addExternalEID(paul, EID_2);
 
+		System.out.println("Paul Before");
+		print(paul);
+		Patient pailTemp = paul;
 		paul = updatePatientAndUpdateLinks(paul);
+		System.out.println("Paul After");
+		print(pailTemp);
 
 		assertNoDuplicates();
 
