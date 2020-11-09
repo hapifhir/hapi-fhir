@@ -225,24 +225,28 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		Patient patient1 = addExternalEID(buildJanePatient(), "uniqueid");
 		createPatientAndUpdateLinks(patient1);
 
-		// state is now > Patient/ID.JANE.123[name=jane & EID = uniqueid] <-- EMPI Link -- Patient/[name=jane & EDI = uniqueid & EMPI_MANAGED = true]
-		IBundleProvider bundle = myPatientDao.search(new SearchParameterMap());
-		List<IBaseResource> resources = bundle.getResources(0, bundle.size());
-		resources.forEach(r -> {
-			print(r);
-			assertFalse(myEidHelper.getExternalEid(r).isEmpty());
-		});
-		assertEquals(2, resources.size());
+		{
+			// state is now > Patient/ID.JANE.123[name=jane & EID = uniqueid] <-- EMPI Link -- Patient/[name=jane & EDI = uniqueid & EMPI_MANAGED = true]
+			IBundleProvider bundle = myPatientDao.search(new SearchParameterMap());
+			List<IBaseResource> resources = bundle.getResources(0, bundle.size());
+			resources.forEach(r -> {
+				print(r);
+				assertFalse(myEidHelper.getExternalEid(r).isEmpty());
+			});
+			assertEquals(2, resources.size());
 
-		IBaseResource testPatient1 = resources.get(0);
-		IBaseResource testPatient2 = resources.get(1);
+			IBaseResource testPatient1 = resources.get(0);
+			IBaseResource testPatient2 = resources.get(1);
 
-		assertThat((Patient) testPatient1, is(sameSourceResourceAs((Patient) testPatient2)));
+			assertThat((Patient) testPatient1, is(sameSourceResourceAs((Patient) testPatient2)));
 
-		Optional<EmpiLink> empiLinkByTarget = myEmpiLinkDaoSvc.findEmpiLinkByTarget(patient1);
-		assertTrue(empiLinkByTarget.isPresent());
-
-		Patient patient2 = addExternalEID(buildPaulPatient(), "uniqueid");
+			Optional<EmpiLink> empiLinkByTarget = myEmpiLinkDaoSvc.findEmpiLinkByTarget(patient1);
+			assertTrue(empiLinkByTarget.isPresent());
+			System.out.println(empiLinkByTarget.get());
+		}
+		Patient patient2 = buildPaulPatient();
+		patient2.setActive(true);
+		patient2 = addExternalEID(patient2, "uniqueid");
 		createPatientAndUpdateLinks(patient2);
       // state should be > Patient/ID.JANE.123[name=jane & EID = uniqueid] <--> Patient/[name=jane & EDI = uniqueid] <--> Patient/[name=paul & EDI = uniqueid]
 		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
