@@ -47,7 +47,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testCreateRemoveLink() {
 		assertLinkCount(0);
-		Person person = createPerson();
+		Person person = createSourceResourcePatient();
 		IdType personId = person.getIdElement().toUnqualifiedVersionless();
 		assertEquals(0, person.getLink().size());
 		Patient patient = createPatient();
@@ -71,8 +71,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPossibleDuplicate() {
 		assertLinkCount(0);
-		Person person = createPerson();
-		Person target = createPerson();
+		Person person = createSourceResourcePatient();
+		Person target = createSourceResourcePatient();
 		// TODO NOT VALID
 		myEmpiLinkSvc.updateLink(person, target, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
 		assertLinkCount(1);
@@ -81,8 +81,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testNoMatchBlocksPossibleDuplicate() {
 		assertLinkCount(0);
-		Person person = createPerson();
-		Person target = createPerson();
+		Person person = createSourceResourcePatient();
+		Person target = createSourceResourcePatient();
 
 		Long personPid = myIdHelperService.getPidOrNull(person);
 		Long targetPid = myIdHelperService.getPidOrNull(target);
@@ -99,8 +99,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testNoMatchBlocksPossibleDuplicateReversed() {
 		assertLinkCount(0);
-		Person person = createPerson();
-		Person target = createPerson();
+		Person person = createSourceResourcePatient();
+		Person target = createSourceResourcePatient();
 
 		Long personPid = myIdHelperService.getPidOrNull(person);
 		Long targetPid = myIdHelperService.getPidOrNull(target);
@@ -125,7 +125,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testManualEmpiLinksCannotBeModifiedBySystem() {
-		Person person = createPerson(buildJanePerson());
+		Person person = createSourceResourcePatient(buildJanePerson());
 		Patient patient = createPatient(buildJanePatient());
 
 		myEmpiLinkSvc.updateLink(person, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
@@ -139,7 +139,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
-		Person person = createPerson(buildJanePerson());
+		Person person = createSourceResourcePatient(buildJanePerson());
 		Patient patient = createPatient(buildJanePatient());
 
 		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
@@ -153,7 +153,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testSyncDoesNotSyncNoMatchLinks() {
-		Person person = createPerson(buildJanePerson());
+		Person person = createSourceResourcePatient(buildJanePerson());
 		Patient patient1 = createPatient(buildJanePatient());
 		Patient patient2 = createPatient(buildJanePatient());
 		assertEquals(0, myEmpiLinkDao.count());

@@ -43,10 +43,10 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 		// Add a possible duplicate
 		myLinkSource = new StringType(EmpiLinkSourceEnum.AUTO.name());
-		Person person1 = createPerson();
+		Person person1 = createSourceResourcePatient();
 		myPerson1Id = new StringType(person1.getIdElement().toVersionless().getValue());
 		Long person1Pid = myIdHelperService.getPidOrNull(person1);
-		Person person2 = createPerson();
+		Person person2 = createSourceResourcePatient();
 		myPerson2Id = new StringType(person2.getIdElement().toVersionless().getValue());
 		Long person2Pid = myIdHelperService.getPidOrNull(person2);
 
