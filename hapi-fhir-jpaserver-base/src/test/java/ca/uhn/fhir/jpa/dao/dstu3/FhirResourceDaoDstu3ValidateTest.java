@@ -102,7 +102,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 
 	@Test
-	public void testValidateQuestionnaireResponseWithValueSetIncludingCompleteCodeSystem() throws IOException {
+	public void testExpandLocalCodeSystemWithExplicitCodes() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml");
 		myCodeSystemDao.create(cs);
 
@@ -113,20 +113,8 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertThat(expansion.getExpansion().getContains().stream().map(t->t.getCode()).collect(Collectors.toList()), containsInAnyOrder(
-			"CDN", "PR", "TR", "REF"
+			"CDN", "PR", "TR", "REF", "UNK", "ASKU"
 		));
-//		Questionnaire q = loadResourceFromClasspath(Questionnaire.class,"/dstu3/iar/Questionnaire-iar-test.xml" );
-//		myQuestionnaireDao.create(q);
-//
-//
-//
-//		Bundle bundleForValidation = loadResourceFromClasspath(Bundle.class, "/dstu3/iar/Bundle-for-validation.xml");
-//		try {
-//			MethodOutcome outcome = myBundleDao.validate(bundleForValidation, null, null, null, null, null, null);
-//			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
-//		} catch (PreconditionFailedException e) {
-//			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-//		}
 	}
 
 
