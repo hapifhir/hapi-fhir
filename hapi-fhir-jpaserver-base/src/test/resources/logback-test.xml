@@ -48,6 +48,10 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
+	<logger name="ca.uhn.fhir.jpa.cache" additivity="false" level="debug">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
 	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>

@@ -48,7 +48,6 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertTrue(myVersionChangeListenerRegistry.cacheContainsKey(new IdDt(iIdType)));
 	}
 
-	// FIXME KBD This always passes when run by itself but always fails when run as part of the entire Class.
 	@Test
 	public void testRegisterInterceptor() throws InterruptedException {
 		TestCallback testCallback = new TestCallback();
@@ -66,14 +65,14 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		testCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
-		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
+		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
 		testCallback.awaitExpected();
 		assertEquals(2L, testCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
 
 		testCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
-		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
+		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
 		testCallback.awaitExpected();
 		assertEquals(patientId.toVersionless(), testCallback.getResourceId());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);

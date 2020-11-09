@@ -22,6 +22,8 @@ public interface IVersionChangeListenerRegistry {
 
 	void requestRefresh(String theResourceName);
 
+	int doRefreshAllCaches(long theRefreshInterval);
+
 	boolean cacheContainsKey(IdDt theIdDt);
 
 	@VisibleForTesting

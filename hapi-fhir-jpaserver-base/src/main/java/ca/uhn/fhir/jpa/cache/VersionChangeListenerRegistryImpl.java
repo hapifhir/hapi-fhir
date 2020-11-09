@@ -78,6 +78,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	@Override
 	public boolean refreshAllCachesIfNecessary() {
+		System.out.println("myLastRefresh = " + myLastRefresh);
 		if (myLastRefresh == 0 || System.currentTimeMillis() - LOCAL_REFRESH_INTERVAL > myLastRefresh) {
 			refreshAllCachesWithRetry();
 			return true;
@@ -132,6 +133,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		return refreshCacheRetrier.runWithRetry();
 	}
 
+	@Override
 	public int doRefreshAllCaches(long theRefreshInterval) {
 		if (System.currentTimeMillis() - theRefreshInterval <= myLastRefresh) {
 			return 0;
@@ -156,6 +158,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
 		Map<IVersionChangeListener, SearchParameterMap> map = myListenerMap.getListenerMap(theResourceName);
 		long count = 0;
+		System.out.println("map.isEmpty() = " + map.isEmpty());
 		if (map.isEmpty()) {
 			// FIXME KBD Ask KHS if this is what he intended for this part...
 			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, SearchParameterMap.newSynchronous());
