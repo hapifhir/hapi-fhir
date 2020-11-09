@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -13,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
@@ -108,8 +109,6 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertEquals(patientId, calledWithId);
 	}
 
-	// FIXME KBD Add 2 more tests (Polling & Interceptor) for a non-empty searchparametermap and confirm listener is only called when matching resources come through.
-	// FIXME KBD Add this test for both interceptor and polling cases
 	@Test
 	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
 		TestCallback testCallback = new TestCallback();
@@ -133,6 +132,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
+		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
 		assertNotNull(patientIdFemale.toString());
 		assertNull(testCallback.getResourceId());
 		assertNull(testCallback.getOperationTypeEnum());
@@ -159,12 +159,13 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
+		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
 		assertNotNull(patientIdFemale.toString());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		testCallback.setExpectedCount(1);
-		myVersionChangeListenerRegistry.forceRefresh();
+		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
 		List<HookParams> calledWith = testCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientIdMale, calledWithId);
