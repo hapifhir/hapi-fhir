@@ -552,10 +552,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		System.out.println("Paul Before");
 		print(paul);
-		Patient pailTemp = paul;
 		paul = updatePatientAndUpdateLinks(paul);
 		System.out.println("Paul After");
-		print(pailTemp);
+		print(paul); // TODO NG - Paul after still has the EID - is it ok?
 
 		assertNoDuplicates();
 

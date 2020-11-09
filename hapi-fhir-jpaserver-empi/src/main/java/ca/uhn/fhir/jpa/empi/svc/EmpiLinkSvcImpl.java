@@ -124,12 +124,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	}
 
 	@Override
-	public void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		myPersonHelper.removeLink(theExistingPerson, theResource.getIdElement(), theEmpiTransactionContext);
-		Optional<EmpiLink> oEmpiLink = getEmpiLinkForPersonTargetPair(theExistingPerson, theResource);
+	public void deleteLink(IAnyResource theSourceResource, IAnyResource theTargetResource, EmpiTransactionContext theEmpiTransactionContext) {
+		// myPersonHelper.removeLink(theExistingPerson, theResource.getIdElement(), theEmpiTransactionContext);
+//		 myEmpiLinkDaoSvc.deleteEmpiLinks(theSourceResource, theTargetResource);
+
+		Optional<EmpiLink> oEmpiLink = getEmpiLinkForPersonTargetPair(theSourceResource, theTargetResource);
 		if (oEmpiLink.isPresent()) {
 			EmpiLink empiLink = oEmpiLink.get();
-			log(theEmpiTransactionContext, "Deleting EmpiLink [" + theExistingPerson.getIdElement().toVersionless() + " -> " + theResource.getIdElement().toVersionless() + "] with result: " + empiLink.getMatchResult());
+			log(theEmpiTransactionContext, "Deleting EmpiLink [" + theSourceResource.getIdElement().toVersionless() + " -> " + theTargetResource.getIdElement().toVersionless() + "] with result: " + empiLink.getMatchResult());
 			myEmpiLinkDaoSvc.deleteLink(empiLink);
 		}
 	}

@@ -166,8 +166,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myFromSourcePatient, myTargetPatient1);
 
 		Person mergedPerson = mergePersons();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
-		assertEquals(1, links.size());
+		fail("FIXME");
+//		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
+//		assertEquals(1, links.size());
 		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToSourcePatient.getLink().size());
 	}
@@ -177,8 +178,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToSourcePatient, myTargetPatient1);
 
 		Person mergedPerson = mergePersons();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
-		assertEquals(1, links.size());
+		fail("FIXME");
+//		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
+//		assertEquals(1, links.size());
 		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToSourcePatient.getLink().size());
 	}
