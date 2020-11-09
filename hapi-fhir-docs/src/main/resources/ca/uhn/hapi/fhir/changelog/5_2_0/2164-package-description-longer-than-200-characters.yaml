@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2164
+title: "The JPA Package loader was failing if the package had a description longer than 200 characters. This has been fixed."
