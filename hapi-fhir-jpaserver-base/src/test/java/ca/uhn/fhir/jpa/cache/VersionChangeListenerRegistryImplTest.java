@@ -27,13 +27,6 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
 	IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
 
-	private final TestCallback myTestCallback = new TestCallback();
-
-	@BeforeEach
-	public void before() {
-		myTestCallback.clear();
-	}
-
 	@AfterEach
 	public void after() {
 		myVersionChangeListenerRegistry.clearListenersForUnitTest();
@@ -51,65 +44,67 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		IIdType patientIdMale = new IdDt(myPatientDao.create(patientMale).getId());
 
 		myVersionChangeListenerRegistry.requestRefresh(patientIdMale.getResourceType());
-		// TODO KBD 
 		IIdType iIdType = patientIdMale.toUnqualifiedVersionless();
 		assertTrue(myVersionChangeListenerRegistry.cacheContainsKey(new IdDt(iIdType)));
 	}
 
+	// FIXME KBD This always passes when run by itself but always fails when run as part of the entire Class.
 	@Test
 	public void testRegisterInterceptor() throws InterruptedException {
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
+		TestCallback testCallback = new TestCallback();
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), testCallback);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		IdDt patientId = createPatientWithLatch(patient);
-		assertEquals(myTestCallback.getResourceId().toString(), patientId.toString());
-		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
-		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
+		IdDt patientId = createPatientWithLatch(patient, testCallback);
+		assertEquals(testCallback.getResourceId().toString(), patientId.toString());
+		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
 		patient.setActive(false);
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-		myTestCallback.setExpectedCount(1);
+		testCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
 		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
-		myTestCallback.awaitExpected();
-		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
-		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
+		testCallback.awaitExpected();
+		assertEquals(2L, testCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
 
-		myTestCallback.setExpectedCount(1);
+		testCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
 		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
-		myTestCallback.awaitExpected();
-		assertEquals(patientId.toVersionless(), myTestCallback.getResourceId());
-		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
+		testCallback.awaitExpected();
+		assertEquals(patientId.toVersionless(), testCallback.getResourceId());
+		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
 	}
 
-	private IdDt createPatientWithLatch(Patient thePatient) throws InterruptedException {
-		myTestCallback.setExpectedCount(1);
+	private IdDt createPatientWithLatch(Patient thePatient, TestCallback theTestCallback) throws InterruptedException {
+		theTestCallback.setExpectedCount(1);
 		IIdType retval = myPatientDao.create(thePatient).getId();
 		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
-		myTestCallback.awaitExpected();
+		theTestCallback.awaitExpected();
 		return new IdDt(retval);
 	}
 
 	@Test
 	public void testRegisterPolling() throws InterruptedException {
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
+		TestCallback testCallback = new TestCallback();
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), testCallback);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IdDt patientId = createPatientWithLatch(patient);
+		IdDt patientId = createPatientWithLatch(patient, testCallback);
 
-		assertEquals(myTestCallback.getResourceId().toString(), patientId.toString());
-		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
-		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
+		assertEquals(testCallback.getResourceId().toString(), patientId.toString());
+		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
-		myTestCallback.setExpectedCount(1);
+		testCallback.setExpectedCount(1);
 		myVersionChangeListenerRegistry.forceRefresh();
-		List<HookParams> calledWith = myTestCallback.awaitExpected();
+		List<HookParams> calledWith = testCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientId, calledWithId);
 	}
@@ -118,37 +113,62 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	// FIXME KBD Add this test for both interceptor and polling cases
 	@Test
 	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
+		TestCallback testCallback = new TestCallback();
 		myVersionChangeListenerRegistry
 			.registerResourceVersionChangeListener("Patient",
 				createSearchParameterMap(Enumerations.AdministrativeGender.MALE),
-				myTestCallback);
+				testCallback);
 
 		Patient patientMale = new Patient();
 		patientMale.setActive(true);
 		patientMale.setGender(Enumerations.AdministrativeGender.MALE);
-		IdDt patientIdMale = createPatientWithLatch(patientMale);
-		assertEquals(myTestCallback.getResourceId().toString(), patientIdMale.toString());
-		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
-		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
+		IdDt patientIdMale = createPatientWithLatch(patientMale, testCallback);
+		assertEquals(testCallback.getResourceId().toString(), patientIdMale.toString());
+		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
 
-		myTestCallback.clear();
+		testCallback.clear();
 
 		Patient patientFemale = new Patient();
 		patientFemale.setActive(true);
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
-		// NOTE: This scenario does not invoke the myTestCallback listener so just call the DAO directly
+		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		assertNotNull(patientIdFemale.toString());
-		assertNull(myTestCallback.getResourceId());
-		assertNull(myTestCallback.getOperationTypeEnum());
+		assertNull(testCallback.getResourceId());
+		assertNull(testCallback.getOperationTypeEnum());
 	}
 
-	private IdDt deletePatientWithLatch(Patient thePatient) throws InterruptedException {
-		myTestCallback.setExpectedCount(1);
-		DaoMethodOutcome retval = myPatientDao.delete(thePatient.getIdElement());
-		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
-		myTestCallback.awaitExpected();
-		return new IdDt(retval.getId());
+	@Test
+	public void testRegisterPollingFor2Patients() throws InterruptedException {
+		TestCallback testCallback = new TestCallback();
+		myVersionChangeListenerRegistry
+			.registerResourceVersionChangeListener("Patient",
+				createSearchParameterMap(Enumerations.AdministrativeGender.MALE),
+				testCallback);
+
+		Patient patientMale = new Patient();
+		patientMale.setActive(true);
+		patientMale.setGender(Enumerations.AdministrativeGender.MALE);
+		IdDt patientIdMale = createPatientWithLatch(patientMale, testCallback);
+		assertEquals(testCallback.getResourceId().toString(), patientIdMale.toString());
+		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
+
+		Patient patientFemale = new Patient();
+		patientFemale.setActive(true);
+		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
+		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
+		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
+		assertNotNull(patientIdFemale.toString());
+
+		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
+		myVersionChangeListenerRegistry.clearCacheForUnitTest();
+		testCallback.setExpectedCount(1);
+		myVersionChangeListenerRegistry.forceRefresh();
+		List<HookParams> calledWith = testCallback.awaitExpected();
+		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
+		assertEquals(patientIdMale, calledWithId);
 	}
 
 	private SearchParameterMap createSearchParameterMap(Enumerations.AdministrativeGender theGender) {
