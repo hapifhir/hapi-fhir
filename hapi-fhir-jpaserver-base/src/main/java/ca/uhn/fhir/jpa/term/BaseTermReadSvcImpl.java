@@ -671,7 +671,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Execute in a new transasction only if we aren't already in one. We do this because in some cases
+	 * Execute in a new transaction only if we aren't already in one. We do this because in some cases
 	 * when performing a VS expansion we throw an {@link ExpansionTooCostlyException} and we don't want
 	 * this to cause the TX to be marked a rollback prematurely.
 	 */
