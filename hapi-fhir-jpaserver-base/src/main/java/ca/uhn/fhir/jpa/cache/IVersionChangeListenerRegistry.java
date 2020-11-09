@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 
 public interface IVersionChangeListenerRegistry {
-	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeListener);
+	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
 
 	boolean refreshAllCachesIfNecessary();
 
