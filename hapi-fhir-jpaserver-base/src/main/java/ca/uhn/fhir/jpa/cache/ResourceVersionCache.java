@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * This maintains a mapping of resource id to resource version.  We cache these in order to detect resources that were
+ * modified on remote servers in our cluster.
+ */
 public class ResourceVersionCache {
 	private final Map<IdDt, String> myVersionMap = new HashMap<>();
 

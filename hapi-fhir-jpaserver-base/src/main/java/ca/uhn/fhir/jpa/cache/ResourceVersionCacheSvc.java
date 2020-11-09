@@ -5,16 +5,17 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * In-memory cache of resource versions used to detect when resources have changed by remote processes
+ */
 @Service
 public class ResourceVersionCacheSvc {
 	private static final Logger myLogger = LoggerFactory.getLogger(ResourceVersionMap.class);
@@ -33,9 +34,6 @@ public class ResourceVersionCacheSvc {
 			.collect(Collectors.toList());
 		myLogger.info("Found " + matchingIds.size() + " '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
 
-		ResourceVersionMap retval = new ResourceVersionMap();
-		myResourceTableDao.findAllById(matchingIds)
-			.forEach(entity -> retval.add(entity.getIdDt()));
-		return retval;
+		return ResourceVersionMap.fromResourceIds(myResourceTableDao.findAllById(matchingIds));
 	}
 }
