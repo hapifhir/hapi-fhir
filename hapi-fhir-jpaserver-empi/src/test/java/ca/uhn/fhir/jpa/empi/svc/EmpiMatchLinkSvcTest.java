@@ -7,6 +7,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
+import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -52,6 +53,8 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private PersonHelper myPersonHelper;
 	@Autowired
 	private EmpiResourceDaoSvc myEmpiResourceDaoSvc; // TODO NG - remove?
+	@Autowired
+	private IEmpiLinkDao myEmpiLinkDao;
 
 	@BeforeEach
 	public void before() {
@@ -374,7 +377,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoPersonIsCreated() {
+	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoSourceREsourceIsCreated() {
 		/**
 		 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person link is added.
@@ -384,15 +387,30 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		patient = createPatientAndUpdateLinks(patient);
 		assertThat(patient, is(sameSourceResourceAs(patient)));
 
+		System.out.println("Created patient");
+		print(patient);
+
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
 		patient2 = createPatientAndUpdateLinks(patient2);
-
 		assertThat(patient2, is(possibleMatchWith(patient)));
+
+		System.out.println("Created patient2");
+		print(patient2);
+
+		myEmpiLinkDao.findAll().forEach(empiLink -> {
+			System.out.println(empiLink);
+		});
 
 		Patient patient3 = buildJanePatient();
 		patient3.getNameFirstRep().setFamily("pleasedonotmatchatall");
 		patient3 = createPatientAndUpdateLinks(patient3);
+		System.out.println("Created patient3");
+		print(patient3);
+
+		myEmpiLinkDao.findAll().forEach(empiLink -> {
+			System.out.println(empiLink);
+		});
 
 		assertThat(patient3, is(possibleMatchWith(patient2)));
 		assertThat(patient3, is(possibleMatchWith(patient)));
