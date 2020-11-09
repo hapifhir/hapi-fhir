@@ -10,10 +10,12 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Patient;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,11 +110,18 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		synchronized (this) {
 			myLastRefresh = 0;
 		}
+		// FIXME KHS Refresh after Tx completes when an Interceptor calls this code (after Tx closes?)
 	}
 
-	private void requestRefresh(String theResourceName) {
-		// FIXME KBD this should be resourceName specific.
-		requestRefresh();
+	@Override
+	public void requestRefresh(String theResourceName) {
+		// TODO KBD Is this what KHS intended when suggesting that this should only refresh specific Resource Types?
+		if (myListenerMap.hasListenersForResourceName(theResourceName)) {
+			requestRefresh();
+		} else {
+			// This will add a new Resource to the cache without affecting any existing entries
+			doRefresh(theResourceName);
+		}
 	}
 
 	private int refreshAllCachesWithRetry() {
@@ -139,16 +148,25 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		return count;
 	}
 
+	// FIXME KBD I don't think this class is supposed to expose the Cache, so find another way to allow access to it
+	public boolean cacheContainsKey(IdDt theIdDt) {
+		return myResourceVersionCache.keySet().contains(theIdDt);
+	}
+
 	private long doRefresh(String theResourceName) {
 		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
 		Map<IVersionChangeListener, SearchParameterMap> map = myListenerMap.getListenerMap(theResourceName);
 		long count = 0;
-		for (IVersionChangeListener listener : map.keySet()) {
-			try {
-				ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, resourceType, map.get(listener));
+		if (map.isEmpty()) {
+			// FIXME KBD Ask KHS if this is what he intended for this part...
+			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, SearchParameterMap.newSynchronous());
+			IdDt resourceId = resourceVersionMap.keySet().stream().findFirst().get();
+			String resourceVersion = resourceVersionMap.get(resourceId);
+			myResourceVersionCache.addOrUpdate(resourceId, resourceVersion);
+		} else {
+			for (IVersionChangeListener listener : map.keySet()) {
+				ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, map.get(listener));
 				count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
-			} catch (IOException e) {
-				ourLog.error("Failed to refresh {}", theResourceName, e);
 			}
 		}
 		return count;

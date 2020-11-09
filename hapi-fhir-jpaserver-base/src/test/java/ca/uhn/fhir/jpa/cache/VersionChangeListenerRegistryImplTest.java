@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
@@ -13,11 +15,13 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
@@ -28,7 +32,6 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void before() {
 		myTestCallback.clear();
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
 	}
 
 	@AfterEach
@@ -39,7 +42,24 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testThatAddingANewResourceAlsoAddsANewCacheEntry() {
+		myVersionChangeListenerRegistry.clearCacheForUnitTest();
+
+		Patient patientMale = new Patient();
+		patientMale.setActive(true);
+		patientMale.setGender(Enumerations.AdministrativeGender.FEMALE);
+		IIdType patientIdMale = new IdDt(myPatientDao.create(patientMale).getId());
+
+		myVersionChangeListenerRegistry.requestRefresh(patientIdMale.getResourceType());
+		// TODO KBD 
+		IIdType iIdType = patientIdMale.toUnqualifiedVersionless();
+		assertTrue(myVersionChangeListenerRegistry.cacheContainsKey(new IdDt(iIdType)));
+	}
+
+	@Test
 	public void testRegisterInterceptor() throws InterruptedException {
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
+
 		Patient patient = new Patient();
 		patient.setActive(true);
 
@@ -75,6 +95,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterPolling() throws InterruptedException {
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", SearchParameterMap.newSynchronous(), myTestCallback);
+
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IdDt patientId = createPatientWithLatch(patient);
@@ -92,9 +114,59 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertEquals(patientId, calledWithId);
 	}
 
-	// FIXME KBD add a tests for a non-empty searchparametermap and confirm listener is only called when matching resources come through.  Add this test for both interceptor and polling cases
+	// FIXME KBD Add 2 more tests (Polling & Interceptor) for a non-empty searchparametermap and confirm listener is only called when matching resources come through.
+	// FIXME KBD Add this test for both interceptor and polling cases
+	@Test
+	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
+		myVersionChangeListenerRegistry
+			.registerResourceVersionChangeListener("Patient",
+				createSearchParameterMap(Enumerations.AdministrativeGender.MALE),
+				myTestCallback);
+
+		Patient patientMale = new Patient();
+		patientMale.setActive(true);
+		patientMale.setGender(Enumerations.AdministrativeGender.MALE);
+		IdDt patientIdMale = createPatientWithLatch(patientMale);
+		assertEquals(myTestCallback.getResourceId().toString(), patientIdMale.toString());
+		assertEquals(1L, myTestCallback.getResourceId().getVersionIdPartAsLong());
+		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
+
+		myTestCallback.clear();
+
+		Patient patientFemale = new Patient();
+		patientFemale.setActive(true);
+		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
+		// NOTE: This scenario does not invoke the myTestCallback listener so just call the DAO directly
+		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
+		assertNotNull(patientIdFemale.toString());
+		assertNull(myTestCallback.getResourceId());
+		assertNull(myTestCallback.getOperationTypeEnum());
+
+		// FIXME KBD This always fails when run as part of the Class, but Passes when run as a single Unit Test
+		IdDt deleteResult = deletePatientWithLatch(patientMale);
+		assertEquals("1", deleteResult.getIdPart());
+		assertEquals(1L, myTestCallback.getResourceId().getIdPartAsLong());
+		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
+	}
+
+	private IdDt deletePatientWithLatch(Patient thePatient) throws InterruptedException {
+		myTestCallback.setExpectedCount(1);
+		DaoMethodOutcome retval = myPatientDao.delete(thePatient.getIdElement());
+		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
+		myTestCallback.awaitExpected();
+		return new IdDt(retval.getId());
+	}
+
+	private SearchParameterMap createSearchParameterMap(Enumerations.AdministrativeGender theGender) {
+		SearchParameterMap theSearchParamMap = new SearchParameterMap();
+		theSearchParamMap.setLoadSynchronous(true);
+		theSearchParamMap.add(Patient.SP_GENDER,
+			new TokenParam(null, org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender.MALE.toCode()));
+		return theSearchParamMap;
+	}
 
 	private static class TestCallback implements IVersionChangeListener, IPointcutLatch {
+		private static final Logger ourLog = LoggerFactory.getLogger(TestCallback.class);
 		private final PointcutLatch myLatch = new PointcutLatch("VersionChangeListener called");
 
 		private IIdType myResourceId;
@@ -115,10 +187,11 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.DELETE);
 		}
 
-		private void handle(IIdType theTheResourceId, BaseResourceMessage.OperationTypeEnum theOperationTypeEnum) {
-			myResourceId = theTheResourceId;
+		private void handle(IIdType theResourceId, BaseResourceMessage.OperationTypeEnum theOperationTypeEnum) {
+			ourLog.debug("TestCallback.handle('{}', '{}') called...", theResourceId, theOperationTypeEnum);
+			myResourceId = theResourceId;
 			myOperationTypeEnum = theOperationTypeEnum;
-			myLatch.call(theTheResourceId);
+			myLatch.call(theResourceId);
 		}
 
 		@Override

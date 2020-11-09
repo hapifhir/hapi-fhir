@@ -30,7 +30,7 @@
 	<logger name="ca.uhn.fhir.jpa.dao" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
-	
+
 	<!-- Set to 'trace' to enable SQL logging -->
 	<logger name="org.hibernate.SQL" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />

@@ -190,6 +190,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
+		ourLog.debug("PointcutLatch.invoke('{}', '{}') called...", thePointcut, theArgs);
 		myLastInvoke.set(System.currentTimeMillis());
 		
 		CountDownLatch latch = myCountdownLatch.get();
@@ -206,7 +207,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		if (myCalledWith.get() != null) {
 			myCalledWith.get().add(theArgs);
 		}
-		ourLog.info("Called {} {} with {}", myName, latch, hookParamsToString(theArgs));
+		ourLog.debug("PointcutLatch {} using {} with args {}", myName, latch, hookParamsToString(theArgs));
 
 		latch.countDown();
 	}

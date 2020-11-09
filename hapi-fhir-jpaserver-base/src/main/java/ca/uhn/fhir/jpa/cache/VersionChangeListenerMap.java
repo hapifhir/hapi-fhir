@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -24,8 +25,12 @@ public class VersionChangeListenerMap {
 		return myListenersByResourcetype.keySet();
 	}
 
-	public Map<IVersionChangeListener, SearchParameterMap> getListenerMap(String theResourceName) {
-		return myListenersByResourcetype.get(theResourceName);
+	@Nonnull
+	public Map<IVersionChangeListener, SearchParameterMap> getListenerMap(String theResourceType) {
+		if (!myListenersByResourcetype.containsKey(theResourceType)) {
+			myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new HashMap<>());
+		}
+		return myListenersByResourcetype.get(theResourceType);
 	}
 
 	public boolean hasListenersForResourceName(String theResourceName) {

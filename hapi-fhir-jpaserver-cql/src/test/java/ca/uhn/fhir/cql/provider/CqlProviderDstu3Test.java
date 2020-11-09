@@ -81,9 +81,11 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	}
 
 	@Test
-	public void evaluateMeasure() {
+	public void evaluateMeasure() throws IOException {
 		Patient patient = new Patient();
 		// FIXME KBD add something to patient we want to measure
+		loadResource("measure-asf.json");
+
 		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
 
 		Patient patientInstance = myDaoRegistry.getResourceDao(Patient.class).read(patientId);
