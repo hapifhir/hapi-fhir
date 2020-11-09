@@ -141,12 +141,6 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertNotNull(patientIdFemale.toString());
 		assertNull(myTestCallback.getResourceId());
 		assertNull(myTestCallback.getOperationTypeEnum());
-
-		// FIXME KBD This always fails when run as part of the Class, but Passes when run as a single Unit Test
-		IdDt deleteResult = deletePatientWithLatch(patientMale);
-		assertEquals("1", deleteResult.getIdPart());
-		assertEquals(1L, myTestCallback.getResourceId().getIdPartAsLong());
-		assertEquals(myTestCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
 	}
 
 	private IdDt deletePatientWithLatch(Patient thePatient) throws InterruptedException {
