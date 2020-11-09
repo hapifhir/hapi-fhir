@@ -32,6 +32,7 @@ import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
+import ca.uhn.fhir.model.primitive.BooleanDt;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -43,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -243,7 +245,18 @@ public class PersonHelper {
 
 		populateMetaTag(newSourceResource);
 
+		setActive(newSourceResource, resourceDefinition);
+
 		return (T) newSourceResource;
+	}
+
+	private void setActive(IBaseResource theNewSourceResource, RuntimeResourceDefinition theResourceDefinition) {
+		BaseRuntimeChildDefinition activeChildDefinition = theResourceDefinition.getChildByName("active");
+		if (activeChildDefinition == null) {
+			ourLog.warn(String.format("Unable to set active flag on the provided source resource %s.", theNewSourceResource));
+			return;
+		}
+		activeChildDefinition.getMutator().setValue(theNewSourceResource, toBooleanType(true));
 	}
 
 	/**
@@ -262,19 +275,19 @@ public class PersonHelper {
 	/**
 	 * Given an Child Definition of `identifier`, a R4/DSTU3 EID Identifier, and a new resource, clone the EID into that resources' identifier list.
 	 */
-	private void cloneExternalEidIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theEid, IBase newSourceResource) {
+	private void cloneExternalEidIntoNewSourceResource(BaseRuntimeChildDefinition theSourceResourceIdentifier, IBase theEid, IBase theNewSourceResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) sourceResourceIdentifier.getChildByName("identifier");
+		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) theSourceResourceIdentifier.getChildByName("identifier");
 		FhirTerser terser = myFhirContext.newTerser();
 		IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
 		terser.cloneInto(theEid, sourceResourceNewIdentifier, true);
-		sourceResourceIdentifier.getMutator().addValue(newSourceResource, sourceResourceNewIdentifier);
+		theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, sourceResourceNewIdentifier);
 	}
 
-	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition sourceResourceIdentifier, IBase theSourceResource, IBase newSourceResource) {
+	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition theSourceResourceIdentifier, IBase theSourceResource, IBase theNewSourceResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> sourceResourceIdentifiers = sourceResourceIdentifier.getAccessor().getValues(theSourceResource);
+		List<IBase> sourceResourceIdentifiers = theSourceResourceIdentifier.getAccessor().getValues(theSourceResource);
 
 		for (IBase base : sourceResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
@@ -282,8 +295,8 @@ public class PersonHelper {
 				String empiSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, empiSystem)) {
-					cloneExternalEidIntoNewSourceResource(sourceResourceIdentifier, base, newSourceResource);
-				} else {
+					cloneExternalEidIntoNewSourceResource(theSourceResourceIdentifier, base, theNewSourceResource);
+				} else if (ourLog.isDebugEnabled()) {
 					ourLog.debug(String.format("System %s differs from system in the EMPI rules %s", baseSystem, empiSystem));
 				}
 			} else {
@@ -336,25 +349,67 @@ public class PersonHelper {
 		return theSourceResource;
 	}
 
-	public IBaseResource overwriteExternalEids(IBaseResource thePerson, List<CanonicalEID> theNewEid) {
-		clearExternalEids(thePerson);
-		addCanonicalEidsToSourceResourceIfAbsent(thePerson, theNewEid);
-		return thePerson;
+	public IBaseResource overwriteExternalEids(IBaseResource theSourceResource, List<CanonicalEID> theNewEid) {
+		clearExternalEids(theSourceResource);
+		addCanonicalEidsToSourceResourceIfAbsent(theSourceResource, theNewEid);
+		return theSourceResource;
 	}
 
-	private void clearExternalEids(IBaseResource thePerson) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				Person personR4 = (Person) thePerson;
-				personR4.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
-				break;
-			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				personDstu3.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+	private void clearExternalEidsFromTheSourceResource(BaseRuntimeChildDefinition theSourceResourceIdentifier, IBase theSourceResource) {
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		List<IBase> sourceResourceIdentifiers = theSourceResourceIdentifier.getAccessor().getValues(theSourceResource);
+		List<IBase> clonedIdentifiers = new ArrayList<>();
+
+		for (IBase base : sourceResourceIdentifiers) {
+			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
+			if (system.isPresent()) {
+				String empiSystem = myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem();
+				String baseSystem = system.get().getValueAsString();
+				if (Objects.equals(baseSystem, empiSystem)) {
+					if (ourLog.isDebugEnabled()) {
+						ourLog.debug(String.format("Found EID confirming to EMPI rules %s. It should not be copied, skipping", baseSystem));
+					}
+					continue;
+				}
+			}
+			if (ourLog.isDebugEnabled()) {
+				ourLog.debug("Copying non-EMPI EID");
+			}
+
+			BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>)
+				theSourceResourceIdentifier.getChildByName("identifier");
+			FhirTerser terser = myFhirContext.newTerser();
+			IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
+			terser.cloneInto(base, sourceResourceNewIdentifier, true);
+
+			clonedIdentifiers.add(sourceResourceNewIdentifier);
 		}
+
+		sourceResourceIdentifiers.clear();
+		sourceResourceIdentifiers.addAll(clonedIdentifiers);
+	}
+
+	private void clearExternalEids(IBaseResource theSourceResource) {
+		// validate the system - if it's set to EID system - then clear it - type and STU version
+		validateContextSupported();
+
+		// get a ref to the actual ID Field
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
+		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
+		clearExternalEidsFromTheSourceResource(sourceResourceIdentifier, theSourceResource);
+
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				Person personR4 = (Person) theSourceResource;
+//				personR4.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
+//				break;
+//			case DSTU3:
+//				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) theSourceResource;
+//				personDstu3.getIdentifier().removeIf(theIdentifier -> theIdentifier.getSystem().equalsIgnoreCase(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()));
+//				break;
+//			default:
+//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+//		}
 	}
 
 	/**
@@ -376,12 +431,25 @@ public class PersonHelper {
 		}
 	}
 
+
+
 	private <T> T toId(CanonicalEID eid) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				return (T) eid.toR4();
 			case DSTU3:
 				return (T) eid.toDSTU3();
+		}
+		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
+	}
+
+
+	private <T extends IBase> T toBooleanType(boolean theFlag) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				return (T) new BooleanType(theFlag);
+			case DSTU3:
+				return (T) new org.hl7.fhir.dstu3.model.BooleanType(theFlag);
 		}
 		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
 	}
@@ -534,18 +602,18 @@ public class PersonHelper {
 		person.setLink(links);
 	}
 
-	public int getLinkCount(IAnyResource thePerson) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				Person personR4 = (Person) thePerson;
-				return personR4.getLink().size();
-			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				return personStu3.getLink().size();
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
-	}
+//	public int getLinkCount(IAnyResource theSourceResource) {
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				Person personR4 = (Person) theSourceResource;
+//				return personR4.getLink().size();
+//			case DSTU3:
+//				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) theSourceResource;
+//				return personStu3.getLink().size();
+//			default:
+//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+//		}
+//	}
 
 	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
 		theEmpiTransactionContext.addTransactionLogMessage(theMessage);

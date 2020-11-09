@@ -48,5 +48,4 @@ public interface IEmpiLinkSvc {
 	 * @param theResource
 	 */
 	void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext);
-
 }

@@ -29,6 +29,8 @@ import ca.uhn.fhir.empi.model.EmpiTransactionContext;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -304,6 +306,26 @@ public class EmpiLinkDaoSvc {
 			return Collections.emptyList();
 		}
 		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(pid);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findAll(example);
+	}
+
+
+	/**
+	 * Finds all {@link EmpiLink} entities in which theSourceResource's PID is the source
+	 * of the relationship.
+	 *
+	 * @param theSourceResource the source resource to find links for.
+	 *
+	 * @return all links for the source.
+	 */
+	public List<EmpiLink> findEmpiMatchLinksBySource(IBaseResource theSourceResource) {
+		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
+		if (pid == null) {
+			return Collections.emptyList();
+		}
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setSourceResourcePid(pid);
+		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
