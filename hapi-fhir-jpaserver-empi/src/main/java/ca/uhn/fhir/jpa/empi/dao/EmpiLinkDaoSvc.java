@@ -217,7 +217,7 @@ public class EmpiLinkDaoSvc {
 	 *
 	 * @return A list of all {@link EmpiLink} entities in which thePersonResource is the source Person.
 	 */
-	public List<EmpiLink> findEmpiLinksByPerson(IBaseResource thePersonResource) {
+	public List<EmpiLink> findEmpiLinksBySourceResource(IBaseResource thePersonResource) {
 		Long pid = myIdHelperService.getPidOrNull(thePersonResource);
 		if (pid == null) {
 			return Collections.emptyList();

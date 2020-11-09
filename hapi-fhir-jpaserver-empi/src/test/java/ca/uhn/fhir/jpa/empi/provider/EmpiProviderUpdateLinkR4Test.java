@@ -118,12 +118,12 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testUpdateStrangePerson() {
-		Person person = createUnmanagedPerson();
+		Patient person = createUnmanagedSourceResource();
 		try {
 			myEmpiProviderR4.updateLink(new StringType(person.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi", e.getMessage());
+			assertEquals("Only EMPI Managed Person resources may be updated via this operation.  The Source Resource provided is not tagged as managed by hapi-empi", e.getMessage());
 		}
 	}
 

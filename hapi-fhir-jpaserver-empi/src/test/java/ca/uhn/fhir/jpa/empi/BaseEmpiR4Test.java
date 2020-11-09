@@ -132,12 +132,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Person createUnmanagedPerson() {
-		return createSourceResourcePatient(new Person(), false);
+	protected Patient createUnmanagedSourceResource() {
+		return createSourceResourcePatient(new Patient(), false);
 	}
 
 	@Nonnull
-	protected Person createSourceResourcePatient() {
+	protected Patient createSourceResourcePatient() {
 		return createSourceResourcePatient(new Patient(), true);
 	}
 
@@ -147,20 +147,20 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Person createSourceResourcePatient(Person thePerson) {
-		return createSourceResourcePatient(thePerson, true);
+	protected Patient createSourceResourcePatient(Patient theSourceResourcePatient) {
+		return createSourceResourcePatient(theSourceResourcePatient, true);
 	}
 
 	@Nonnull
-	protected Person createSourceResourcePatient(Patient theSourceResourcePatient, boolean theEmpiManaged) {
+	protected Patient createSourceResourcePatient(Patient theSourceResourcePatient, boolean theEmpiManaged) {
 		if (theEmpiManaged) {
 			theSourceResourcePatient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
 			theSourceResourcePatient.setActive(true);
 		}
 		DaoMethodOutcome outcome = myPatientDao.create(theSourceResourcePatient);
-		Person person = (Person) outcome.getResource();
-		person.setId(outcome.getId());
-		return person;
+		Patient patient = (Patient) outcome.getResource();
+		patient.setId(outcome.getId());
+		return patient;
 	}
 
 	@Nonnull
@@ -194,8 +194,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Person buildPersonWithNameAndId(String theGivenName, String theId) {
-		return buildPersonWithNameIdAndBirthday(theGivenName, theId, null);
+	protected Patient buildSourcePaitentWithNameAndId(String theGivenName, String theId) {
+		return buildSourcePatientWithNameIdAndBirthday(theGivenName, theId, null);
 	}
 
 
@@ -228,16 +228,16 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Person buildPersonWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
-		Person person = new Person();
-		person.addName().addGiven(theGivenName);
-		person.addName().setFamily(TEST_NAME_FAMILY);
-		person.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
-		person.setBirthDate(theBirthday);
+	protected Patient buildSourcePatientWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
+		Patient patient = new Patient();
+		patient.addName().addGiven(theGivenName);
+		patient.addName().setFamily(TEST_NAME_FAMILY);
+		patient.addIdentifier().setSystem(TEST_ID_SYSTEM).setValue(theId);
+		patient.setBirthDate(theBirthday);
 		DateType dateType = new DateType(theBirthday);
 		dateType.setPrecision(TemporalPrecisionEnum.DAY);
-		person.setBirthDateElement(dateType);
-		return person;
+		patient.setBirthDateElement(dateType);
+		return patient;
 	}
 
 	@Nonnull
@@ -251,8 +251,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Person buildJanePerson() {
-		return buildPersonWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
+	protected Patient buildJaneSourcePatient() {
+		return buildSourcePaitentWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 	}
 
 	@Nonnull
@@ -295,11 +295,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Patient addExternalEID(Patient thePatient, String theEID) {
 		thePatient.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
 		return thePatient;
-	}
-
-	protected Person addExternalEID(Person thePerson, String theEID) {
-		thePerson.addIdentifier().setSystem(myEmpiConfig.getEmpiRules().getEnterpriseEIDSystem()).setValue(theEID);
-		return thePerson;
 	}
 
 	protected Patient clearExternalEIDs(Patient thePatient) {
@@ -368,41 +363,43 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected Person getOnlyActivePerson() {
-		List<IBaseResource> resources = getAllActivePersons();
+		List<IBaseResource> resources = getAllActiveSourcePatients();
 		assertEquals(1, resources.size());
 		return (Person) resources.get(0);
 	}
 
 	@Nonnull
-	protected List<IBaseResource> getAllActivePersons() {
-		return getAllPersons(true);
+	protected List<IBaseResource> getAllActiveSourcePatients() {
+		return getAllSourcePatients(true);
 	}
 
 	@Nonnull
-	protected List<IBaseResource> getAllPersons() {
-		return getAllPersons(false);
+	protected List<IBaseResource> getAllSourcePatients() {
+		return getAllSourcePatients(false);
 	}
 
 	@Nonnull
-	private List<IBaseResource> getAllPersons(boolean theOnlyActive) {
+	private List<IBaseResource> getAllSourcePatients(boolean theOnlyActive) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
+		//TODO GGG ensure that this tag search works effectively.
+		map.add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
 		if (theOnlyActive) {
 			map.add("active", new TokenParam().setValue("true"));
 		}
-		IBundleProvider bundle = myPersonDao.search(map);
+		IBundleProvider bundle = myPatientDao.search(map);
 		return bundle.getResources(0, 999);
 	}
 
 	@Nonnull
 	protected EmpiLink createResourcesAndBuildTestEmpiLink() {
-		Person person = createSourceResourcePatient();
+		Patient sourcePatient = createSourceResourcePatient();
 		Patient patient = createPatient();
 
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		empiLink.setSourceResourcePid(myIdHelperService.getPidOrNull(person));
+		empiLink.setSourceResourcePid(myIdHelperService.getPidOrNull(sourcePatient));
 		empiLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
 		return empiLink;
 	}

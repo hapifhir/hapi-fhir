@@ -5,6 +5,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
-	private Person myFromPerson;
-	private StringType myFromPersonId;
-	private Person myToPerson;
-	private StringType myToPersonId;
+	private Patient myFromSourcePatient;
+	private StringType myFromSourcePatientId;
+	private Patient myToSourcePatient;
+	private StringType myToSourcePatientId;
 
 	@Override
 	@BeforeEach
@@ -32,32 +33,32 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		super.before();
 		super.loadEmpiSearchParameters();
 
-		myFromPerson = createSourceResourcePatient();
-		myFromPersonId = new StringType(myFromPerson.getIdElement().getValue());
-		myToPerson = createSourceResourcePatient();
-		myToPersonId = new StringType(myToPerson.getIdElement().getValue());
+		myFromSourcePatient = createSourceResourcePatient();
+		myFromSourcePatientId = new StringType(myFromSourcePatient.getIdElement().getValue());
+		myToSourcePatient = createSourceResourcePatient();
+		myToSourcePatientId = new StringType(myToSourcePatient.getIdElement().getValue());
 	}
 
 	@Test
 	public void testMerge() {
-		Person mergedPerson = myEmpiProviderR4.mergePersons(myFromPersonId, myToPersonId, myRequestDetails);
-		assertEquals(myToPerson.getIdElement(), mergedPerson.getIdElement());
-		assertThat(mergedPerson, is(sameSourceResourceAs(myToPerson)));
-		assertEquals(2, getAllPersons().size());
-		assertEquals(1, getAllActivePersons().size());
+		Person mergedPerson = myEmpiProviderR4.mergePersons(myFromSourcePatientId, myToSourcePatientId, myRequestDetails);
+		assertEquals(myToSourcePatient.getIdElement(), mergedPerson.getIdElement());
+		assertThat(mergedPerson, is(sameSourceResourceAs(myToSourcePatient)));
+		assertEquals(2, getAllSourcePatients().size());
+		assertEquals(1, getAllActiveSourcePatients().size());
 
-		Person fromPerson = myPersonDao.read(myFromPerson.getIdElement().toUnqualifiedVersionless());
+		Person fromPerson = myPersonDao.read(myFromSourcePatient.getIdElement().toUnqualifiedVersionless());
 		assertThat(fromPerson.getActive(), is(false));
 		List<Person.PersonLinkComponent> links = fromPerson.getLink();
 		assertThat(links, hasSize(1));
-		assertThat(links.get(0).getTarget().getReference(), is (myToPerson.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(links.get(0).getTarget().getReference(), is (myToSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 		assertThat(links.get(0).getAssurance(), is (AssuranceLevelUtil.getAssuranceLevel(EmpiMatchResultEnum.REDIRECT, EmpiLinkSourceEnum.MANUAL).toR4()));
 	}
 
 	@Test
 	public void testUnmanagedMerge() {
-		StringType fromPersonId = new StringType(createUnmanagedPerson().getIdElement().getValue());
-		StringType toPersonId = new StringType(createUnmanagedPerson().getIdElement().getValue());
+		StringType fromPersonId = new StringType(createUnmanagedSourceResource().getIdElement().getValue());
+		StringType toPersonId = new StringType(createUnmanagedSourceResource().getIdElement().getValue());
 		try {
 			myEmpiProviderR4.mergePersons(fromPersonId, toPersonId, myRequestDetails);
 			fail();
@@ -88,13 +89,13 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 			assertEquals("fromPersonId cannot be null", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(null, myToPersonId, myRequestDetails);
+			myEmpiProviderR4.mergePersons(null, myToSourcePatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("fromPersonId cannot be null", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myFromPersonId, null, myRequestDetails);
+			myEmpiProviderR4.mergePersons(myFromSourcePatientId, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("toPersonId cannot be null", e.getMessage());
@@ -110,7 +111,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 			assertThat(e.getMessage(), endsWith(" must have form Person/<id> where <id> is the id of the person"));
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myFromPersonId, new StringType("Patient/2"), myRequestDetails);
+			myEmpiProviderR4.mergePersons(myFromSourcePatientId, new StringType("Patient/2"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), endsWith(" must have form Person/<id> where <id> is the id of the person"));
@@ -122,13 +123,13 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 			assertEquals("fromPersonId must be different from toPersonId", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(new StringType("Person/abc"), myToPersonId, myRequestDetails);
+			myEmpiProviderR4.mergePersons(new StringType("Person/abc"), myToSourcePatientId, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Person/abc is not known", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myFromPersonId, new StringType("Person/abc"), myRequestDetails);
+			myEmpiProviderR4.mergePersons(myFromSourcePatientId, new StringType("Person/abc"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Person/abc is not known", e.getMessage());

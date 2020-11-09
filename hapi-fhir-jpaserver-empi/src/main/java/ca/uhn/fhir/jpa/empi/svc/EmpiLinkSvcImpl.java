@@ -107,7 +107,7 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext) {
 		int origLinkCount = myPersonHelper.getLinkCount(thePersonResource);
 
-		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksByPerson(thePersonResource);
+		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(thePersonResource);
 
 		List<IBaseBackboneElement> newLinks = empiLinks.stream()
 			.filter(link -> link.isMatch() || link.isPossibleMatch() || link.isRedirect())

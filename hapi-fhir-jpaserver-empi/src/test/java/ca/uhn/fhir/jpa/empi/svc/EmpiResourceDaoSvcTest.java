@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,28 +25,28 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testSearchPersonByEidExcludesInactive() {
-		Person goodPerson = addExternalEID(createSourceResourcePatient(), TEST_EID);
-		myPersonDao.update(goodPerson);
+		Patient goodSourcePatient = addExternalEID(createSourceResourcePatient(), TEST_EID);
+		myPatientDao.update(goodSourcePatient);
 
-		Person badPerson = addExternalEID(createSourceResourcePatient(), TEST_EID);
-		badPerson.setActive(false);
-		myPersonDao.update(badPerson);
+		Patient badSourcePatient = addExternalEID(createSourceResourcePatient(), TEST_EID);
+		badSourcePatient.setActive(false);
+		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Person");
 		assertTrue(foundPerson.isPresent());
-		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
+		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 
 	@Test
 	public void testSearchPersonByEidExcludesNonEmpiManaged() {
-		Person goodPerson = addExternalEID(createSourceResourcePatient(), TEST_EID);
-		myPersonDao.update(goodPerson);
+		Patient goodSourcePatient = addExternalEID(createSourceResourcePatient(), TEST_EID);
+		myPatientDao.update(goodSourcePatient);
 
-		Person badPerson = addExternalEID(createSourceResourcePatient(new Patient(), false), TEST_EID);
-		myPersonDao.update(badPerson);
+		Patient badSourcePatient = addExternalEID(createSourceResourcePatient(new Patient(), false), TEST_EID);
+		myPatientDao.update(badSourcePatient);
 
-		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Person");
-		assertTrue(foundPerson.isPresent());
-		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodPerson.getIdElement().toUnqualifiedVersionless().getValue()));
+		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Patient");
+		assertTrue(foundSourcePatient.isPresent());
+		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 }

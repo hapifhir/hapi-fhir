@@ -11,7 +11,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,14 +42,14 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 		// Add a possible duplicate
 		myLinkSource = new StringType(EmpiLinkSourceEnum.AUTO.name());
-		Person person1 = createSourceResourcePatient();
-		myPerson1Id = new StringType(person1.getIdElement().toVersionless().getValue());
-		Long person1Pid = myIdHelperService.getPidOrNull(person1);
-		Person person2 = createSourceResourcePatient();
-		myPerson2Id = new StringType(person2.getIdElement().toVersionless().getValue());
-		Long person2Pid = myIdHelperService.getPidOrNull(person2);
+		Patient sourcePatient1 = createSourceResourcePatient();
+		myPerson1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
+		Long sourcePatient1Pid = myIdHelperService.getPidOrNull(sourcePatient1);
+		Patient sourcePatient2 = createSourceResourcePatient();
+		myPerson2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
+		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
 
-		EmpiLink possibleDuplicateEmpiLink = myEmpiLinkDaoSvc.newEmpiLink().setSourceResourcePid(person1Pid).setTargetPid(person2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		EmpiLink possibleDuplicateEmpiLink = myEmpiLinkDaoSvc.newEmpiLink().setSourceResourcePid(sourcePatient1Pid).setTargetPid(sourcePatient2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(possibleDuplicateEmpiLink);
 	}
 
