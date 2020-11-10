@@ -1,12 +1,7 @@
 package ca.uhn.fhir.cql.provider;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
-import org.opencds.cqf.dstu3.providers.HQMFProvider;
-import org.opencds.cqf.dstu3.providers.LibraryOperationsProvider;
-import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
-import org.opencds.cqf.tooling.library.stu3.NarrativeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +10,21 @@ public class CqlProviderFactory {
 	@Autowired
 	private EvaluationProviderFactory myEvaluationProviderFactory;
 	@Autowired
-	private NarrativeProvider myNarrativeProvider;
+	private org.opencds.cqf.tooling.library.stu3.NarrativeProvider myNarrativeProviderDstu3;
 	@Autowired
-	private HQMFProvider myHQMFProvider;
+	private org.opencds.cqf.dstu3.providers.HQMFProvider myHQMFProviderDstu3;
 	@Autowired
-	private LibraryOperationsProvider myLibraryOperationsProvider;
+	private org.opencds.cqf.dstu3.providers.LibraryOperationsProvider myLibraryOperationsProviderDstu3;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private MeasureResourceProvider myMeasureResourceProvider;
+	private ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider myMeasureResourceProviderDstu3;
 
-
-	public MeasureOperationsProvider getMeasureOperationsProviderDstu3() {
-		return new MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProvider, myHQMFProvider, myLibraryOperationsProvider, myMeasureResourceProvider);
+	public org.opencds.cqf.dstu3.providers.MeasureOperationsProvider getMeasureOperationsProviderDstu3() {
+		return new org.opencds.cqf.dstu3.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderDstu3, myHQMFProviderDstu3, myLibraryOperationsProviderDstu3, myMeasureResourceProviderDstu3);
 	}
 
+	public org.opencds.cqf.r4.providers.MeasureOperationsProvider getMeasureOperationsProviderR4() {
+		return null;
+	}
 }

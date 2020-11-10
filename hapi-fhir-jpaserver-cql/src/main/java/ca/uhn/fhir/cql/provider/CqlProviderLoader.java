@@ -74,6 +74,6 @@ public class CqlProviderLoader {
 	@VisibleForTesting
 	org.opencds.cqf.r4.providers.MeasureOperationsProvider buildR4Provider() {
 		// FIXME KBD do like Dstu3
-		return myApplicationContext.getBean(org.opencds.cqf.r4.providers.MeasureOperationsProvider.class);
+		return myCqlProviderFactory.getMeasureOperationsProviderR4();
 	}
 }
