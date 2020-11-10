@@ -130,7 +130,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testWhenPOSSIBLE_MATCHOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
+		IBundleProvider search = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 		IAnyResource janePerson = (IAnyResource) search.getResources(0, 1).get(0);
 
 		Patient unmatchedPatient = createPatient(buildJanePatient());
@@ -142,20 +142,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
 		//should cause a whole new Person to be created.
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(unmatchedPatient, createContextForCreate("Patient"));
-		printLinks();
-		printResources("Patient");
-
-		System.out.println("=====");
-
-		System.out.println("Original Jane");
-		print(originalJane);
-		System.out.println("Jane");
-		print(janePerson);
-		System.out.println("Unmatched Patient");
-		print(unmatchedPatient);
-
-		boolean matches = sameSourceResourceAs(janePerson).matches(unmatchedPatient);
-		System.out.println(matches);
 
 		assertThat(unmatchedPatient, is(not(sameSourceResourceAs(janePerson))));
 		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
@@ -570,8 +556,9 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	private void printLinks() {
 		myEmpiLinkDao.findAll().forEach(empiLink -> {
-			System.out.println(String.format(" %s (s/r) <-- %s -- %s (targ.)",
-				empiLink.getSourceResourcePid(), empiLink.getMatchResult(), empiLink.getTargetPid()));
+			System.out.println(empiLink);
+//			System.out.println(String.format(" %s (s/r) <-- %s -- %s (targ.)",
+//				empiLink.getSourceResourcePid(), empiLink.getMatchResult(), empiLink.getTargetPid()));
 		});
 	}
 
