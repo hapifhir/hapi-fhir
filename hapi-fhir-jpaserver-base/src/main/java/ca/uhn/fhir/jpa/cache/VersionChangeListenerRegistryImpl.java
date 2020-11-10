@@ -106,7 +106,9 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	@Override
 	public void requestRefresh(String theResourceName) {
-		doRefresh(theResourceName);
+		synchronized (this) {
+			myLastRefreshPerResourceType.put(theResourceName, 0L);
+		}
 	}
 
 	@Override
@@ -120,9 +122,9 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public int refreshAllCachesImmediately() {
+	public long refreshAllCachesImmediately() {
 		StopWatch sw = new StopWatch();
-		int count = 0;
+		long count = 0;
 		for (String resourceType : myListenerMap.resourceNames()) {
 			count += doRefresh(resourceType);
 		}
@@ -137,7 +139,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		}
 		long count = 0;
 		for (IVersionChangeListener listener : map.keySet()) {
-			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, map.get(listener));
+			SearchParameterMap searchParamMap = map.get(listener);
+			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionMap(theResourceName, searchParamMap);
 			count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
 		}
 		myLastRefreshPerResourceType.put(theResourceName, System.currentTimeMillis());

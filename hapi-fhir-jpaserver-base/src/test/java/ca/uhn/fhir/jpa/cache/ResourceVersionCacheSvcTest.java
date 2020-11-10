@@ -20,7 +20,7 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient).getId();
-		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionLookup("Patient", SearchParameterMap.newSynchronous());
+		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionMap("Patient", SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
 		assertEquals(patientId.getVersionIdPart(), versionMap.getVersion(patientId));
 	}

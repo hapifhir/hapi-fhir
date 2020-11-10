@@ -25,7 +25,7 @@ public class ResourceVersionCacheSvc {
 	@Autowired
 	IResourceTableDao myResourceTableDao;
 
-	public ResourceVersionMap getVersionLookup(String theResourceName, SearchParameterMap theSearchParamMap) {
+	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 
 		myLogger.info("About to search for '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");

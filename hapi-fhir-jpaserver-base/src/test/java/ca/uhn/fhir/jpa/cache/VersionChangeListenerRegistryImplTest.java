@@ -42,7 +42,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		IdDt patientId = createPatientWithLatch(patient, testCallback);
+		IdDt patientId = createPatientWithLatch(patient, testCallback, 1);
 		assertEquals(testCallback.getResourceId().toString(), patientId.toString());
 		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
@@ -51,23 +51,26 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		testCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		long count = myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		assertEquals(1, count);
 		testCallback.awaitExpected();
 		assertEquals(2L, testCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
 
 		testCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		count = myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		assertEquals(1, count);
 		testCallback.awaitExpected();
 		assertEquals(patientId.toVersionless(), testCallback.getResourceId());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
 	}
 
-	private IdDt createPatientWithLatch(Patient thePatient, TestCallback theTestCallback) throws InterruptedException {
+	private IdDt createPatientWithLatch(Patient thePatient, TestCallback theTestCallback, long theExpectedCount) throws InterruptedException {
 		theTestCallback.setExpectedCount(1);
 		IIdType retval = myPatientDao.create(thePatient).getId();
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		long count = myVersionChangeListenerRegistry.refreshCacheWithRetry("Patient");
+		assertEquals(theExpectedCount, count);
 		theTestCallback.awaitExpected();
 		return new IdDt(retval);
 	}
@@ -79,7 +82,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IdDt patientId = createPatientWithLatch(patient, testCallback);
+		IdDt patientId = createPatientWithLatch(patient, testCallback, 1);
 
 		assertEquals(testCallback.getResourceId().toString(), patientId.toString());
 		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
@@ -88,7 +91,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		testCallback.setExpectedCount(1);
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		long count = myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		assertEquals(1, count);
 		List<HookParams> calledWith = testCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientId, calledWithId);
@@ -105,7 +109,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		Patient patientMale = new Patient();
 		patientMale.setActive(true);
 		patientMale.setGender(Enumerations.AdministrativeGender.MALE);
-		IdDt patientIdMale = createPatientWithLatch(patientMale, testCallback);
+		IdDt patientIdMale = createPatientWithLatch(patientMale, testCallback, 1);
 		assertEquals(testCallback.getResourceId().toString(), patientIdMale.toString());
 		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
@@ -117,7 +121,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		long count = myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		assertEquals(0, count);
 		assertNotNull(patientIdFemale.toString());
 		assertNull(testCallback.getResourceId());
 		assertNull(testCallback.getOperationTypeEnum());
@@ -135,7 +140,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		Patient patientMale = new Patient();
 		patientMale.setActive(true);
 		patientMale.setGender(Enumerations.AdministrativeGender.MALE);
-		IdDt patientIdMale = createPatientWithLatch(patientMale, testCallback);
+		IdDt patientIdMale = createPatientWithLatch(patientMale, testCallback, 1);
 		assertEquals(testCallback.getResourceId().toString(), patientIdMale.toString());
 		assertEquals(1L, testCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.CREATE);
@@ -145,13 +150,15 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		long count = myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		assertEquals(0, count);
 		assertNotNull(patientIdFemale.toString());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		testCallback.setExpectedCount(1);
-		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		count = myVersionChangeListenerRegistry.refreshAllCachesImmediately();
+		assertEquals(1, count);
 		List<HookParams> calledWith = testCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientIdMale, calledWithId);

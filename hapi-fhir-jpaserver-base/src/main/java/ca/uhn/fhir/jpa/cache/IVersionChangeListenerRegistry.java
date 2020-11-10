@@ -19,7 +19,7 @@ public interface IVersionChangeListenerRegistry {
 
 	boolean refreshAllCachesIfNecessary();
 
-	int refreshAllCachesImmediately();
+	long refreshAllCachesImmediately();
 
 	long refreshCacheWithRetry(String theResourceName);
 
