@@ -30,7 +30,7 @@ import java.util.Map;
 public class VersionChangeListenerRegistryImpl implements IVersionChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerRegistryImpl.class);
 
-	static long LOCAL_REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+	static long LOCAL_REFRESH_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	static long REMOTE_REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
 	private static volatile Map<String, Long> myLastRefreshPerResourceType = new HashMap<>();
@@ -64,7 +64,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_SECOND, jobDetail);
+		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL, jobDetail);
 	}
 
 	public static class Job implements HapiJob {
@@ -95,7 +95,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		boolean result = false;
 		for (IdDt resourceType : myResourceVersionCache.keySet()) {
 			long lastRefresh = myLastRefreshPerResourceType.get(resourceType);
-			if (lastRefresh == 0 || System.currentTimeMillis() - LOCAL_REFRESH_INTERVAL > lastRefresh) {
+			if (lastRefresh == 0 || System.currentTimeMillis() - REMOTE_REFRESH_INTERVAL > lastRefresh) {
 				refreshCacheWithRetry(resourceType.getResourceType());
 				result = true;
 			}
@@ -126,30 +126,19 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		for (String resourceType : myListenerMap.resourceNames()) {
 			count += doRefresh(resourceType);
 		}
-		ourLog.debug("Refreshed all caches in {}ms", sw.getMillis());
+		ourLog.debug("Refreshed all caches.  Updated {} entries in {}ms", count, sw.getMillis());
 		return count;
 	}
 
-	@VisibleForTesting
-	public boolean cacheContainsKey(IdDt theIdDt) {
-		return myResourceVersionCache.keySet().contains(theIdDt);
-	}
-
 	private synchronized long doRefresh(String theResourceName) {
-		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
 		Map<IVersionChangeListener, SearchParameterMap> map = myListenerMap.getListenerMap(theResourceName);
-		long count = 0;
 		if (map.isEmpty()) {
-			// FIXME KBD Ask KHS if this is what he intended for this section of the code...
-			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, SearchParameterMap.newSynchronous());
-			IdDt resourceId = resourceVersionMap.keySet().stream().findFirst().get();
-			String resourceVersion = resourceVersionMap.get(resourceId);
-			myResourceVersionCache.addOrUpdate(resourceId, resourceVersion);
-		} else {
-			for (IVersionChangeListener listener : map.keySet()) {
-				ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, map.get(listener));
-				count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
-			}
+			return 0;
+		}
+		long count = 0;
+		for (IVersionChangeListener listener : map.keySet()) {
+			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, map.get(listener));
+			count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
 		}
 		myLastRefreshPerResourceType.put(theResourceName, System.currentTimeMillis());
 		return count;

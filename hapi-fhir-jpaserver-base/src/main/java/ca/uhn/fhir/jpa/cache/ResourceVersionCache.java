@@ -12,6 +12,7 @@ import java.util.Set;
  * modified on remote servers in our cluster.
  */
 public class ResourceVersionCache {
+	// FIXME KBD change this to Map<String, Map<IdDt, String>> with first key = resourceName
 	private final Map<IdDt, String> myVersionMap = new HashMap<>();
 
 	public void clear() {

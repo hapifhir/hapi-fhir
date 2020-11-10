@@ -22,7 +22,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
@@ -33,20 +32,6 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		myVersionChangeListenerRegistry.clearListenersForUnitTest();
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
-	}
-
-	@Test
-	public void testThatAddingANewResourceAlsoAddsANewCacheEntry() {
-		myVersionChangeListenerRegistry.clearCacheForUnitTest();
-
-		Patient patientMale = new Patient();
-		patientMale.setActive(true);
-		patientMale.setGender(Enumerations.AdministrativeGender.FEMALE);
-		IIdType patientIdMale = new IdDt(myPatientDao.create(patientMale).getId());
-
-		myVersionChangeListenerRegistry.requestRefresh(patientIdMale.getResourceType());
-		IIdType iIdType = patientIdMale.toUnqualifiedVersionless();
-		assertTrue(myVersionChangeListenerRegistry.cacheContainsKey(new IdDt(iIdType)));
 	}
 
 	@Test
@@ -138,6 +123,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertNull(testCallback.getOperationTypeEnum());
 	}
 
+	// FIXME KHS review
 	@Test
 	public void testRegisterPollingFor2Patients() throws InterruptedException {
 		TestCallback testCallback = new TestCallback();

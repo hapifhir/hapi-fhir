@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.annotations.VisibleForTesting;
 
 /**
@@ -12,10 +11,6 @@ import com.google.common.annotations.VisibleForTesting;
  * of the change happening.
  */
 public interface IVersionChangeListenerRegistry {
-
-	@VisibleForTesting
-	boolean cacheContainsKey(IdDt theIdDt);
-
 	@VisibleForTesting
 	void clearCacheForUnitTest();
 

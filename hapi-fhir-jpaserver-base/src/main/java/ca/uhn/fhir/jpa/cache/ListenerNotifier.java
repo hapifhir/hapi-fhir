@@ -23,8 +23,7 @@ public class ListenerNotifier {
 		for (IdDt id : theOldResourceVersionCache.keySet()) {
 			if (!theNewResourceVersionMap.containsKey(id)) {
 				theListener.handleDelete(id);
-				// FIXME KBD Should we decrement the count here or increment it to indicate that a changed occurred?
-				//++count;
+				++count;
 			}
 		}
 		return count;
