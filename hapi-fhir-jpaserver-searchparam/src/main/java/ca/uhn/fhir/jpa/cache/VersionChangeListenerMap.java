@@ -4,16 +4,17 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class VersionChangeListenerMap {
-	private final Map<String, Map<IVersionChangeListener, SearchParameterMap>> myListenersByResourcetype = new HashMap<>();
+	private final Map<String, List<VersionChangeListenerEntry>> myListenersByResourcetype = new HashMap<>();
 
 	public void add(String theResourceType, IVersionChangeListener theVersionChangeListener, SearchParameterMap theMap) {
-		myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new HashMap<>());
-		myListenersByResourcetype.get(theResourceType).put(theVersionChangeListener, theMap);
+		getListenerEntries(theResourceType).add(new VersionChangeListenerEntry(theVersionChangeListener, theMap));
 	}
 
 	@VisibleForTesting
@@ -26,14 +27,7 @@ public class VersionChangeListenerMap {
 	}
 
 	@Nonnull
-	public Map<IVersionChangeListener, SearchParameterMap> getListenerMap(String theResourceType) {
-		if (!myListenersByResourcetype.containsKey(theResourceType)) {
-			myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new HashMap<>());
-		}
-		return myListenersByResourcetype.get(theResourceType);
-	}
-
-	public boolean hasListenersForResourceName(String theResourceName) {
-		return myListenersByResourcetype.containsKey(theResourceName) && !myListenersByResourcetype.get(theResourceName).isEmpty();
+	public List<VersionChangeListenerEntry> getListenerEntries(String theResourceType) {
+		return myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new ArrayList<>());
 	}
 }

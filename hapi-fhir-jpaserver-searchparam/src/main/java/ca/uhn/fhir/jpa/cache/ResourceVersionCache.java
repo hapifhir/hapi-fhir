@@ -44,4 +44,8 @@ public class ResourceVersionCache {
 	public Set<IdDt> keySet() {
 		return myVersionMap.keySet();
 	}
+
+	public void initialize(ResourceVersionMap theResourceVersionMap) {
+		theResourceVersionMap.keySet().forEach(key -> addOrUpdate(key, theResourceVersionMap.get(key)));
+	}
 }

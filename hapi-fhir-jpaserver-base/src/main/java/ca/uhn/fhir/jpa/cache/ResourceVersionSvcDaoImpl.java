@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * In-memory cache of resource versions used to detect when resources have changed by remote processes
  */
 @Service
-public class ResourceVersionCacheSvc {
+public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	private static final Logger myLogger = LoggerFactory.getLogger(ResourceVersionMap.class);
 
 	@Autowired
@@ -29,9 +29,11 @@ public class ResourceVersionCacheSvc {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
 
 		myLogger.info("About to search for '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
+
 		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, null).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
+
 		myLogger.info("Found " + matchingIds.size() + " '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
 
 		return ResourceVersionMap.fromResourceIds(myResourceTableDao.findAllById(matchingIds));

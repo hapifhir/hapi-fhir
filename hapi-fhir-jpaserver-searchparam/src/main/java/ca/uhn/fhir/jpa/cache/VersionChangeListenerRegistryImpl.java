@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
@@ -22,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // FIXME KHS retool searchparam and subscription to use this
@@ -40,7 +41,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Autowired
 	private ISchedulerService mySchedulerService;
 	@Autowired
-	private ResourceVersionCacheSvc myResourceVersionCacheSvc;
+	private IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
 	private ListenerNotifier myListenerNotifier;
 	@Autowired
@@ -52,8 +53,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	private RefreshVersionCacheAndNotifyListenersOnUpdate myInterceptor;
 
 	@Override
-	public void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap map, IVersionChangeListener theVersionChangeListener) {
-		myListenerMap.add(theResourceType, theVersionChangeListener, map);
+	public void registerResourceVersionChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IVersionChangeListener theVersionChangeListener) {
+		myListenerMap.add(theResourceName, theVersionChangeListener, theSearchParamMap);
 	}
 
 	@PostConstruct
@@ -65,6 +66,11 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL, jobDetail);
+	}
+
+	@PreDestroy
+	public void stop() {
+		myInterceptorBroadcaster.unregisterInterceptor(myInterceptor);
 	}
 
 	public static class Job implements HapiJob {
@@ -91,17 +97,23 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public boolean refreshAllCachesIfNecessary() {
-		boolean result = false;
-		for (IdDt resourceType : myResourceVersionCache.keySet()) {
-			long lastRefresh = myLastRefreshPerResourceType.get(resourceType);
-			if (lastRefresh == 0 || System.currentTimeMillis() - REMOTE_REFRESH_INTERVAL > lastRefresh) {
-				refreshCacheWithRetry(resourceType.getResourceType());
-				result = true;
-			}
+	public long refreshAllCachesIfNecessary() {
+		long retval = 0;
+		for (String resourceName : myListenerMap.resourceNames()) {
+			retval += refreshCacheIfNecessary(resourceName);
 		}
 		// This will return true if at least 1 of the Resource Caches was refreshed
-		return result;
+		return retval;
+	}
+
+	@Override
+	public long refreshCacheIfNecessary(String theResourceName) {
+		long retval = 0;
+		long lastRefresh = myLastRefreshPerResourceType.computeIfAbsent(theResourceName, key -> 0L);
+		if (lastRefresh == 0 || System.currentTimeMillis() - REMOTE_REFRESH_INTERVAL > lastRefresh) {
+			retval = refreshCacheWithRetry(theResourceName);
+		}
+		return retval;
 	}
 
 	@Override
@@ -112,10 +124,16 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
+	public long forceRefresh(String theResourceName) {
+		requestRefresh(theResourceName);
+		return refreshCacheWithRetry(theResourceName);
+	}
+
+	@Override
 	public long refreshCacheWithRetry(String theResourceName) {
 		Retrier<Long> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (this) {
-				return doRefresh(theResourceName);
+				return doRefreshCachesAndNotifyListeners(theResourceName);
 			}
 		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
@@ -126,22 +144,22 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		StopWatch sw = new StopWatch();
 		long count = 0;
 		for (String resourceType : myListenerMap.resourceNames()) {
-			count += doRefresh(resourceType);
+			count += doRefreshCachesAndNotifyListeners(resourceType);
 		}
 		ourLog.debug("Refreshed all caches.  Updated {} entries in {}ms", count, sw.getMillis());
 		return count;
 	}
 
-	private synchronized long doRefresh(String theResourceName) {
-		Map<IVersionChangeListener, SearchParameterMap> map = myListenerMap.getListenerMap(theResourceName);
-		if (map.isEmpty()) {
+	private synchronized long doRefreshCachesAndNotifyListeners(String theResourceName) {
+		List<VersionChangeListenerEntry> listenerEntries = myListenerMap.getListenerEntries(theResourceName);
+		if (listenerEntries.isEmpty()) {
 			return 0;
 		}
 		long count = 0;
-		for (IVersionChangeListener listener : map.keySet()) {
-			SearchParameterMap searchParamMap = map.get(listener);
-			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionMap(theResourceName, searchParamMap);
-			count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
+		for (VersionChangeListenerEntry listenerEntry : listenerEntries) {
+			SearchParameterMap searchParamMap = listenerEntry.getSearchParameterMap();
+			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
+			count += listenerEntry.notifyListener(myResourceVersionCache, newResourceVersionMap);
 		}
 		myLastRefreshPerResourceType.put(theResourceName, System.currentTimeMillis());
 		return count;

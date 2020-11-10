@@ -17,7 +17,7 @@ public interface IVersionChangeListenerRegistry {
 	@VisibleForTesting
 	void clearListenersForUnitTest();
 
-	boolean refreshAllCachesIfNecessary();
+	long refreshAllCachesIfNecessary();
 
 	/**
 	 * Request that all caches be refreshed now, in the current thread
@@ -28,9 +28,12 @@ public interface IVersionChangeListenerRegistry {
 
 	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
 
+	long refreshCacheIfNecessary(String theResourceName);
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
 	void requestRefresh(String theResourceName);
+
+	long forceRefresh(String theResourceName);
 }

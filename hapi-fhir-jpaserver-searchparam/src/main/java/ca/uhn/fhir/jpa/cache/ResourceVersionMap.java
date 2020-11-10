@@ -6,6 +6,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import java.util.Set;
  * Immutable copy of current resource versions read from the repository
  */
 public class ResourceVersionMap {
+	private final Set<IdDt> mySourceIds = new HashSet<>();
 	private final Map<IdDt, String> myMap = new HashMap<>();
 	private ResourceVersionMap() {}
 
@@ -25,6 +27,7 @@ public class ResourceVersionMap {
 
 	private void add(IIdType theId) {
 		IdDt id = new IdDt(theId);
+		mySourceIds.add(id);
 		myMap.put(id.toUnqualifiedVersionless(), id.getVersionIdPart());
 	}
 
@@ -38,6 +41,10 @@ public class ResourceVersionMap {
 
 	public Set<IdDt> keySet() {
 		return Collections.unmodifiableSet(myMap.keySet());
+	}
+
+	public Set<IdDt> getSourceIds() {
+		return Collections.unmodifiableSet(mySourceIds);
 	}
 
 	public String get(IdDt theId) {

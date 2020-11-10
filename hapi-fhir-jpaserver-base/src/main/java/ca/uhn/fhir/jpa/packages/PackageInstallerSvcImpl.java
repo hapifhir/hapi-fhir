@@ -30,10 +30,10 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -50,13 +50,12 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -101,7 +100,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
-	private ISearchParamRegistry mySearchParamRegistry;
+	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
 
 	/**
 	 * Constructor
@@ -171,7 +170,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					install(npmPackage, theInstallationSpec, retVal);
 
 					// If any SearchParameters were installed, let's load them right away
-					mySearchParamRegistry.refreshCacheIfNecessary();
+					myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
 				}
 
 			} catch (IOException e) {

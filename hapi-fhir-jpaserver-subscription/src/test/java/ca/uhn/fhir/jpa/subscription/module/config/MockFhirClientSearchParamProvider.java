@@ -3,7 +3,9 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MockFhirClientSearchParamProvider implements ISearchParamProvider {
@@ -27,7 +29,13 @@ public class MockFhirClientSearchParamProvider implements ISearchParamProvider {
 
 	@Override
 	public int refreshCache(SearchParamRegistryImpl theSearchParamRegistry, long theRefreshInterval) {
-		mySearchParamRegistry.doRefresh(0);
+		// FIXME KHS
+//		mySearchParamRegistry.doRefresh();
 		return 0;
+	}
+
+	@Override
+	public IBaseResource read(IdDt theId) {
+		return myMockProvider.read(theId);
 	}
 }

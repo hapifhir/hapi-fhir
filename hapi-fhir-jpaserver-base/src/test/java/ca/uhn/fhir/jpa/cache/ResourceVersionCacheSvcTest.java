@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 	@Autowired
-	ResourceVersionCacheSvc myResourceVersionCacheSvc;
+	IResourceVersionSvc myResourceVersionCacheSvc;
 
 	@Test
 	public void testGetVersionLookup() throws IOException {

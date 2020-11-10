@@ -245,12 +245,6 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public boolean refreshCacheIfNecessary() {
-			// nothing
-			return false;
-		}
-
-		@Override
 		public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 			throw new UnsupportedOperationException();
 		}
