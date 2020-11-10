@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+// FIXME KBD
+@Disabled
 public class CqlProviderR4Test extends BaseCqlR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
 
@@ -37,8 +39,6 @@ public class CqlProviderR4Test extends BaseCqlR4Test {
 		myProvider = myCqlProviderLoader.buildR4Provider();
 	}
 
-	// FIXME KBD
-	@Disabled
 	@Test
 	public void evaluateMeasure() {
 		Patient patient = new Patient();
