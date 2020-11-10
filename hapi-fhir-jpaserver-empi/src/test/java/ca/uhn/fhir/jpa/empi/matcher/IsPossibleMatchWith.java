@@ -37,7 +37,6 @@ public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
 		}
 
 		List<Long> empiLinkSourcePersonPids = empiLinks.stream().map(EmpiLink::getSourceResourcePid).collect(Collectors.toList());
-
 		return empiLinkSourcePersonPids.containsAll(personPidsToMatch);
 	}
 

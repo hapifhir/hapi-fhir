@@ -62,24 +62,27 @@ public class ProviderConstants {
 	 * EMPI Operations
 	 */
 	public static final String EMPI_MATCH = "$match";
+	//TODO GGG MDM: implement a server-level MDM match to complement the FHIR-spec $match for /Patient
+	public static final String MDM_MATCH = "$mdm-match";
 	public static final String EMPI_MATCH_RESOURCE = "resource";
 
-	public static final String EMPI_MERGE_PERSONS = "$empi-merge-persons";
-	public static final String EMPI_MERGE_PERSONS_FROM_PERSON_ID = "fromPersonId";
-	public static final String EMPI_MERGE_PERSONS_TO_PERSON_ID = "toPersonId";
+	//TODO GGG MDM: rename all these vars
+	public static final String EMPI_MERGE_PERSONS = "$empi-merge-golden-resources";
+	public static final String EMPI_MERGE_PERSONS_FROM_PERSON_ID = "fromGoldenResourceId";
+	public static final String EMPI_MERGE_PERSONS_TO_PERSON_ID = "toGoldenResourceId";
 
 	public static final String EMPI_UPDATE_LINK = "$empi-update-link";
-	public static final String EMPI_UPDATE_LINK_PERSON_ID = "personId";
-	public static final String EMPI_UPDATE_LINK_TARGET_ID = "targetId";
+	public static final String EMPI_UPDATE_LINK_PERSON_ID = "goldenResourceId";
+	public static final String EMPI_UPDATE_LINK_TARGET_ID = "resourceId";
 	public static final String EMPI_UPDATE_LINK_MATCH_RESULT = "matchResult";
 
 	public static final String EMPI_QUERY_LINKS = "$empi-query-links";
-	public static final String EMPI_QUERY_LINKS_PERSON_ID = "personId";
-	public static final String EMPI_QUERY_LINKS_TARGET_ID = "targetId";
+	public static final String EMPI_QUERY_LINKS_PERSON_ID = "goldenResourceId";
+	public static final String EMPI_QUERY_LINKS_TARGET_ID = "resourceId";
 	public static final String EMPI_QUERY_LINKS_MATCH_RESULT = "matchResult";
 	public static final String EMPI_QUERY_LINKS_LINK_SOURCE = "linkSource";
 
-	public static final String EMPI_DUPLICATE_PERSONS = "$empi-duplicate-persons";
+	public static final String EMPI_DUPLICATE_PERSONS = "$empi-duplicate-golden-resources";
 	public static final String EMPI_NOT_DUPLICATE = "$empi-not-duplicate";
 
 	public static final String EMPI_CLEAR = "$empi-clear";

@@ -49,10 +49,8 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.codesystems.MatchGrade;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;

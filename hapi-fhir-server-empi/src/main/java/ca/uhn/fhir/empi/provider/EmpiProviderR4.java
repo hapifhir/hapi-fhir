@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
@@ -123,11 +124,11 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return searchComponent;
 	}
 
-	//TODO GGG ask ken, what is the best way to genericize this? Return Parameters??
-	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
-	public Person mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, min = 1, max = 1) StringType theFromPersonId,
-										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,
-										RequestDetails theRequestDetails) {
+	//TODO GGG ask ken, what is the best way to genericize this? Return
+	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS)
+	public IBaseResource mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, min = 1, max = 1) StringType theFromPersonId,
+												 @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,
+												 RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromPersonId, theToPersonId);
 
 		return (Person) myEmpiControllerSvc.mergePersons(theFromPersonId.getValue(), theToPersonId.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.MERGE_PERSONS));

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.matcher;
 
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -33,12 +34,14 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 	@Nullable
 	protected Long getMatchedResourcePidFromResource(IAnyResource theResource) {
 		Long retval;
+		boolean isGoldenRecord= theResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equals(EmpiConstants.SYSTEM_EMPI_MANAGED));
+		if (isGoldenRecord) {
+			return myIdHelperService.getPidOrNull(theResource);
+		}
 		EmpiLink matchLink = getMatchedEmpiLink(theResource);
-		//TODO if this is already a golden record resource, we can just use its PID instead of doing a lookup.
 
 		if (matchLink == null) {
-			retval = myIdHelperService.getPidOrNull(theResource);
-			myTargetType = "unkown";
+			return null;
 		} else {
 			retval = matchLink.getSourceResourcePid();
 			myTargetType = matchLink.getEmpiTargetType();
