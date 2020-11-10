@@ -32,7 +32,9 @@ import org.springframework.test.util.AopTestUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -100,7 +102,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 
 	@Test
-	public void testValidateQuestionnaireResponseWithValueSetIncludingCompleteCodeSystem() throws IOException {
+	public void testExpandLocalCodeSystemWithExplicitCodes() throws IOException {
 		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/dstu3/iar/CodeSystem-iar-citizenship-status.xml");
 		myCodeSystemDao.create(cs);
 
@@ -110,18 +112,9 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-//		Questionnaire q = loadResourceFromClasspath(Questionnaire.class,"/dstu3/iar/Questionnaire-iar-test.xml" );
-//		myQuestionnaireDao.create(q);
-//
-//
-//
-//		Bundle bundleForValidation = loadResourceFromClasspath(Bundle.class, "/dstu3/iar/Bundle-for-validation.xml");
-//		try {
-//			MethodOutcome outcome = myBundleDao.validate(bundleForValidation, null, null, null, null, null, null);
-//			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
-//		} catch (PreconditionFailedException e) {
-//			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-//		}
+		assertThat(expansion.getExpansion().getContains().stream().map(t->t.getCode()).collect(Collectors.toList()), containsInAnyOrder(
+			"CDN", "PR", "TR", "REF", "UNK", "ASKU"
+		));
 	}
 
 
