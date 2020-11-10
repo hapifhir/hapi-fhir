@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,22 +47,22 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	public void testCreateRemoveLink() {
 		assertLinkCount(0);
 		Patient sourcePatient = createSourceResourcePatient();
-		IdType personId = sourcePatient.getIdElement().toUnqualifiedVersionless();
+		IdType sourcePatientId = sourcePatient.getIdElement().toUnqualifiedVersionless();
 		assertEquals(0, sourcePatient.getLink().size());
 		Patient patient = createPatient();
 
 		{
 			myEmpiLinkSvc.updateLink(sourcePatient, patient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertLinkCount(1);
-			Person newPerson = myPersonDao.read(personId);
-			assertEquals(1, newPerson.getLink().size());
+			Patient newSourcePatient = myPatientDao.read(sourcePatientId);
+			assertEquals(1, newSourcePatient.getLink().size());
 		}
 
 		{
 			myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 			assertLinkCount(1);
-			Person newPerson = myPersonDao.read(personId);
-			assertEquals(0, newPerson.getLink().size());
+			Patient newSourcePatient = myPatientDao.read(sourcePatientId);
+			assertEquals(0, newSourcePatient.getLink().size());
 		}
 	}
 
@@ -73,7 +72,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 		Patient sourcePatient1 = createSourceResourcePatient();
 		Patient sourcePatient2 = createSourceResourcePatient();
-		// TODO NOT VALID
+		// TODO GGG MDM NOT VALID
 		myEmpiLinkSvc.updateLink(sourcePatient1, sourcePatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertLinkCount(1);
 	}
