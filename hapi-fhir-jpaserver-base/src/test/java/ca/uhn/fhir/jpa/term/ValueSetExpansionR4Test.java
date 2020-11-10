@@ -288,7 +288,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myTermSvc.expandValueSet(options, input);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("ValueSet expansion van not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
+			assertEquals("ValueSet expansion can not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
 		}
 	}
 
