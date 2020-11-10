@@ -113,9 +113,8 @@ public class EmpiLinkDaoSvc {
 	/**
 	 * Given a Target Pid, and a match result, return all links that match these criteria.
 	 *
-	 * @param theTargetPid the target of the relationship.
+	 * @param theTargetPid   the target of the relationship.
 	 * @param theMatchResult the Match Result of the relationship
-	 *
 	 * @return a list of {@link EmpiLink} entities matching these criteria.
 	 */
 	public List<EmpiLink> getEmpiLinksByTargetPidAndMatchResult(Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
@@ -164,10 +163,9 @@ public class EmpiLinkDaoSvc {
 	/**
 	 * Given a person a target and a match result, return the matching EmpiLink, if it exists.
 	 *
-	 * @param thePersonPid The Pid of the Person in the relationship
-	 * @param theTargetPid The Pid of the target in the relationship
+	 * @param thePersonPid   The Pid of the Person in the relationship
+	 * @param theTargetPid   The Pid of the target in the relationship
 	 * @param theMatchResult The MatchResult you are looking for.
-	 *
 	 * @return an Optional {@link EmpiLink} containing the matched link if it exists.
 	 */
 	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
@@ -216,7 +214,6 @@ public class EmpiLinkDaoSvc {
 	 * Given a Person, return all links in which they are the source Person of the {@link EmpiLink}
 	 *
 	 * @param thePersonResource The {@link IBaseResource} Person who's links you would like to retrieve.
-	 *
 	 * @return A list of all {@link EmpiLink} entities in which thePersonResource is the source Person.
 	 */
 	public List<EmpiLink> findEmpiLinksBySourceResource(IBaseResource thePersonResource) {
@@ -254,7 +251,6 @@ public class EmpiLinkDaoSvc {
 	 * for the Person resources which were the sources of the links.
 	 *
 	 * @param theTargetType the type of relationship you would like to delete.
-	 *
 	 * @return A list of longs representing the Pids of the Person resources used as the sources of the relationships that were deleted.
 	 */
 	public List<Long> deleteAllEmpiLinksOfTypeAndReturnPersonPids(String theTargetType) {
@@ -269,7 +265,6 @@ public class EmpiLinkDaoSvc {
 	 * Persist an EmpiLink to the database.
 	 *
 	 * @param theEmpiLink the link to save.
-	 *
 	 * @return the persisted {@link EmpiLink} entity.
 	 */
 	public EmpiLink save(EmpiLink theEmpiLink) {
@@ -285,19 +280,17 @@ public class EmpiLinkDaoSvc {
 	 * Given an example {@link EmpiLink}, return all links from the database which match the example.
 	 *
 	 * @param theExampleLink The EmpiLink containing the data we would like to search for.
-	 *
 	 * @return a list of {@link EmpiLink} entities which match the example.
 	 */
-   public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {
+	public List<EmpiLink> findEmpiLinkByExample(Example<EmpiLink> theExampleLink) {
 		return myEmpiLinkDao.findAll(theExampleLink);
-   }
+	}
 
 	/**
 	 * Given a target {@link IBaseResource}, return all {@link EmpiLink} entities in which this target is the target
 	 * of the relationship. This will show you all links for a given Patient/Practitioner.
 	 *
 	 * @param theTargetResource the target resource to find links for.
-	 *
 	 * @return all links for the target.
 	 */
 	public List<EmpiLink> findEmpiLinksByTarget(IBaseResource theTargetResource) {
@@ -316,7 +309,6 @@ public class EmpiLinkDaoSvc {
 	 * of the relationship.
 	 *
 	 * @param theSourceResource the source resource to find links for.
-	 *
 	 * @return all links for the source.
 	 */
 	public List<EmpiLink> findEmpiMatchLinksBySource(IBaseResource theSourceResource) {
@@ -333,9 +325,40 @@ public class EmpiLinkDaoSvc {
 	/**
 	 * Factory delegation method, whenever you need a new EmpiLink, use this factory method.
 	 * //TODO Should we make the constructor private for EmpiLink? or work out some way to ensure they can only be instantiated via factory.
+	 *
 	 * @return A new {@link EmpiLink}.
 	 */
 	public EmpiLink newEmpiLink() {
 		return myEmpiLinkFactory.newEmpiLink();
 	}
+
+//	@Transactional
+//	public List<EmpiLink> deleteEmpiLinks(IAnyResource theSourceResource, IAnyResource theTargetResource) {
+//		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
+//		if (sourceResourcePid == null) {
+//			if (ourLog.isDebugEnabled()) {
+//				ourLog.debug(String.format("Unable to find source resource for ID %s, no links deleted", sourceResourcePid));
+//			}
+//			return new ArrayList<>();
+//		}
+//
+//		Long targetResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
+//		if (targetResourcePid == null) {
+//			if (ourLog.isDebugEnabled()) {
+//				ourLog.debug(String.format("Unable to find target resource for ID %s, no links deleted", targetResourcePid));
+//			}
+//
+//			return new ArrayList<>();
+//		}
+//
+//		EmpiLink exampleLink = myEmpiLinkFactory
+//			.newEmpiLink()
+//			.setSourceResourcePid(sourceResourcePid)
+//			.setTargetPid(targetResourcePid);
+//
+//		Example<EmpiLink> example = Example.of(exampleLink);
+//		List<EmpiLink> linksToDelete = myEmpiLinkDao.findAll(example);
+//		myEmpiLinkDao.deleteAll(linksToDelete);
+//		return linksToDelete;
+//	}
 }

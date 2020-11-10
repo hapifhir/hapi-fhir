@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
@@ -76,6 +77,8 @@ public class PersonHelper {
 	@Autowired
 	private EIDHelper myEIDHelper;
 
+	private IEmpiLinkQuerySvc queyr;
+
 	private final FhirContext myFhirContext;
 
 	@Autowired
@@ -83,87 +86,87 @@ public class PersonHelper {
 		myFhirContext = theFhirContext;
 	}
 
-	/**
-	 * Given a Person, extract all {@link IIdType}s for the linked targets.
-	 *
-	 * @param thePerson the Person to extract link IDs from.
-	 * @return a Stream of {@link IIdType}.
-	 */
-	public Stream<IIdType> getLinkIds(IBaseResource thePerson) {
-		// TODO we can't rely on links anymore, as the provided resource is likely not to have thoem
-		// need a way to pull those from the underlying MDM functionality
-		// how do we pull link IDs now???
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				Person personR4 = (Person) thePerson;
-				return personR4.getLink().stream()
-					.map(Person.PersonLinkComponent::getTarget)
-					.map(IBaseReference::getReferenceElement)
-					.map(IIdType::toUnqualifiedVersionless);
-			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				return personStu3.getLink().stream()
-					.map(org.hl7.fhir.dstu3.model.Person.PersonLinkComponent::getTarget)
-					.map(IBaseReference::getReferenceElement)
-					.map(IIdType::toUnqualifiedVersionless);
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
-	}
+//	/**
+//	 * Given a source resource, extract all {@link IIdType}s for the linked targets.
+//	 *
+//	 * @param theSourceResource the source resource to extract link IDs from.
+//	 * @return a Stream of {@link IIdType}.
+//	 */
+//	public Stream<IIdType> getLinkIds(IBaseResource theSourceResource) {
+//		// TODO we can't rely on links anymore, as the provided resource is likely not to have thoem
+//		// need a way to pull those from the underlying MDM functionality
+//		// how do we pull link IDs now???
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				Person personR4 = (Person) theSourceResource;
+//				return personR4.getLink().stream()
+//					.map(Person.PersonLinkComponent::getTarget)
+//					.map(IBaseReference::getReferenceElement)
+//					.map(IIdType::toUnqualifiedVersionless);
+//			case DSTU3:
+//				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) theSourceResource;
+//				return personStu3.getLink().stream()
+//					.map(org.hl7.fhir.dstu3.model.Person.PersonLinkComponent::getTarget)
+//					.map(IBaseReference::getReferenceElement)
+//					.map(IIdType::toUnqualifiedVersionless);
+//			default:
+//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+//		}
+//	}
+//
+//	/**
+//	 * Determine whether or not the given {@link IBaseResource} person contains a link to a particular {@link IIdType}
+//	 *
+//	 * @param thePerson     The person to check
+//	 * @param theResourceId The ID to check.
+//	 * @return A boolean indicating whether or not there was a contained link.
+//	 */
+//	public boolean containsLinkTo(IBaseResource thePerson, IIdType theResourceId) {
+//		Stream<IIdType> links = getLinkIds(thePerson);
+//		return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
+//	}
 
-	/**
-	 * Determine whether or not the given {@link IBaseResource} person contains a link to a particular {@link IIdType}
-	 *
-	 * @param thePerson     The person to check
-	 * @param theResourceId The ID to check.
-	 * @return A boolean indicating whether or not there was a contained link.
-	 */
-	public boolean containsLinkTo(IBaseResource thePerson, IIdType theResourceId) {
-		Stream<IIdType> links = getLinkIds(thePerson);
-		return links.anyMatch(link -> link.getValue().equals(theResourceId.getValue()));
-	}
+//	/**
+//	 * Create or update a link from source {@link IBaseResource} to the target {@link IIdType}, with the given {@link CanonicalIdentityAssuranceLevel}.
+//	 *
+//	 * @param thePerson                 The person who's link needs to be updated.
+//	 * @param theResourceId             The target of the link
+//	 * @param canonicalAssuranceLevel   The level of certainty of this link.
+//	 * @param theEmpiTransactionContext
+//	 */
+//	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, @Nonnull CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
+//				break;
+//			case DSTU3:
+//				handleLinkUpdateDSTU3(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
+//				break;
+//			default:
+//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+//		}
+//	}
 
-	/**
-	 * Create or update a link from source {@link IBaseResource} to the target {@link IIdType}, with the given {@link CanonicalIdentityAssuranceLevel}.
-	 *
-	 * @param thePerson                 The person who's link needs to be updated.
-	 * @param theResourceId             The target of the link
-	 * @param canonicalAssuranceLevel   The level of certainty of this link.
-	 * @param theEmpiTransactionContext
-	 */
-	public void addOrUpdateLink(IBaseResource thePerson, IIdType theResourceId, @Nonnull CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				handleLinkUpdateR4(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
-				break;
-			case DSTU3:
-				handleLinkUpdateDSTU3(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
-	}
-
-	private void handleLinkUpdateDSTU3(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, EmpiTransactionContext theTransactionLogMessages) {
-		if (theCanonicalAssuranceLevel == null) {
-			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
-			return;
-		}
-
-		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePerson;
-		if (!containsLinkTo(thePerson, theResourceId)) {
-			person.addLink().setTarget(new org.hl7.fhir.dstu3.model.Reference(theResourceId)).setAssurance(theCanonicalAssuranceLevel.toDstu3());
-			logLinkAddMessage(thePerson, theResourceId, theCanonicalAssuranceLevel, theTransactionLogMessages);
-		} else {
-			person.getLink().stream()
-				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
-				.findFirst()
-				.ifPresent(link -> {
-					logLinkUpdateMessage(thePerson, theResourceId, theCanonicalAssuranceLevel, theTransactionLogMessages, link.getAssurance().toCode());
-					link.setAssurance(theCanonicalAssuranceLevel.toDstu3());
-				});
-		}
-	}
+//	private void handleLinkUpdateDSTU3(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, EmpiTransactionContext theTransactionLogMessages) {
+//		if (theCanonicalAssuranceLevel == null) {
+//			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
+//			return;
+//		}
+//
+//		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePerson;
+//		if (!containsLinkTo(thePerson, theResourceId)) {
+//			person.addLink().setTarget(new org.hl7.fhir.dstu3.model.Reference(theResourceId)).setAssurance(theCanonicalAssuranceLevel.toDstu3());
+//			logLinkAddMessage(thePerson, theResourceId, theCanonicalAssuranceLevel, theTransactionLogMessages);
+//		} else {
+//			person.getLink().stream()
+//				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
+//				.findFirst()
+//				.ifPresent(link -> {
+//					logLinkUpdateMessage(thePerson, theResourceId, theCanonicalAssuranceLevel, theTransactionLogMessages, link.getAssurance().toCode());
+//					link.setAssurance(theCanonicalAssuranceLevel.toDstu3());
+//				});
+//		}
+//	}
 
 	private void logLinkAddMessage(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel theCanonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
 		theEmpiTransactionContext.addTransactionLogMessage("Creating new link from " + (StringUtils.isBlank(thePerson.getIdElement().toUnqualifiedVersionless().getValue()) ? "new Person" : thePerson.getIdElement().toUnqualifiedVersionless()) + " -> " + theResourceId.toUnqualifiedVersionless() + " with IdentityAssuranceLevel: " + theCanonicalAssuranceLevel.name());
@@ -173,54 +176,54 @@ public class PersonHelper {
 		theEmpiTransactionContext.addTransactionLogMessage("Updating link from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless() + ". Changing IdentityAssuranceLevel: " + theOriginalAssuranceLevel + " -> " + canonicalAssuranceLevel.name());
 	}
 
-	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
-		if (canonicalAssuranceLevel == null) {
-			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
-			return;
-		}
+//	private void handleLinkUpdateR4(IBaseResource thePerson, IIdType theResourceId, CanonicalIdentityAssuranceLevel canonicalAssuranceLevel, EmpiTransactionContext theEmpiTransactionContext) {
+//		if (canonicalAssuranceLevel == null) {
+//			ourLog.warn("Refusing to update or add a link without an Assurance Level.");
+//			return;
+//		}
+//
+//		Person person = (Person) thePerson;
+//		if (!containsLinkTo(thePerson, theResourceId)) {
+//			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
+//			logLinkAddMessage(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
+//		} else {
+//			person.getLink().stream()
+//				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
+//				.findFirst()
+//				.ifPresent(link -> {
+//					logLinkUpdateMessage(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext, link.getAssurance().toCode());
+//					link.setAssurance(canonicalAssuranceLevel.toR4());
+//				});
+//		}
+//	}
 
-		Person person = (Person) thePerson;
-		if (!containsLinkTo(thePerson, theResourceId)) {
-			person.addLink().setTarget(new Reference(theResourceId)).setAssurance(canonicalAssuranceLevel.toR4());
-			logLinkAddMessage(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext);
-		} else {
-			person.getLink().stream()
-				.filter(link -> link.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()))
-				.findFirst()
-				.ifPresent(link -> {
-					logLinkUpdateMessage(thePerson, theResourceId, canonicalAssuranceLevel, theEmpiTransactionContext, link.getAssurance().toCode());
-					link.setAssurance(canonicalAssuranceLevel.toR4());
-				});
-		}
-	}
 
-
-	/**
-	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
-	 *
-	 * @param thePerson                 The person to remove the link from.
-	 * @param theResourceId             The target ID to remove.
-	 * @param theEmpiTransactionContext
-	 */
-	public void removeLink(IBaseResource thePerson, IIdType theResourceId, EmpiTransactionContext theEmpiTransactionContext) {
-		if (!containsLinkTo(thePerson, theResourceId)) {
-			return;
-		}
-		theEmpiTransactionContext.addTransactionLogMessage("Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				Person person = (Person) thePerson;
-				List<Person.PersonLinkComponent> links = person.getLink();
-				links.removeIf(component -> component.hasTarget() && component.getTarget().getReference().equals(theResourceId.getValue()));
-				break;
-			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				personDstu3.getLink().removeIf(component -> component.hasTarget() && component.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()));
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
-	}
+//	/**
+//	 * Removes a link from the given {@link IBaseResource} to the target {@link IIdType}.
+//	 *
+//	 * @param thePerson                 The person to remove the link from.
+//	 * @param theResourceId             The target ID to remove.
+//	 * @param theEmpiTransactionContext
+//	 */
+//	public void removeLink(IBaseResource thePerson, IIdType theResourceId, EmpiTransactionContext theEmpiTransactionContext) {
+//		if (!containsLinkTo(thePerson, theResourceId)) {
+//			return;
+//		}
+//		theEmpiTransactionContext.addTransactionLogMessage("Removing PersonLinkComponent from " + thePerson.getIdElement().toUnqualifiedVersionless() + " -> " + theResourceId.toUnqualifiedVersionless());
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				Person person = (Person) thePerson;
+//				List<Person.PersonLinkComponent> links = person.getLink();
+//				links.removeIf(component -> component.hasTarget() && component.getTarget().getReference().equals(theResourceId.getValue()));
+//				break;
+//			case DSTU3:
+//				org.hl7.fhir.dstu3.model.Person personDstu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+//				personDstu3.getLink().removeIf(component -> component.hasTarget() && component.getTarget().getReference().equalsIgnoreCase(theResourceId.getValue()));
+//				break;
+//			default:
+//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+//		}
+//	}
 
 	/**
 	 * Creates a copy of the specified resource. This method will carry over resource EID if it exists. If it does not exist,
