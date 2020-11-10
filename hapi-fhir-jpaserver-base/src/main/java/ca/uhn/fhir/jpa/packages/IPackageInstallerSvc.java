@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.packages;
  * #L%
  */
 
+import org.hl7.fhir.r4.model.Base64BinaryType;
+
 public interface IPackageInstallerSvc {
 
 	PackageInstallOutcomeJson install(PackageInstallationSpec theSpec);
-
+	PackageInstallOutcomeJson installByPackage(Base64BinaryType packageFile);
 }
