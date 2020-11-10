@@ -19,11 +19,18 @@ public interface IVersionChangeListenerRegistry {
 
 	boolean refreshAllCachesIfNecessary();
 
+	/**
+	 * Request that all caches be refreshed now, in the current thread
+	 */
 	long refreshAllCachesImmediately();
 
 	long refreshCacheWithRetry(String theResourceName);
 
 	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
 
+
+	/**
+	 * Request that the cache be refreshed at the next convenient time (in a different thread)
+	 */
 	void requestRefresh(String theResourceName);
 }
