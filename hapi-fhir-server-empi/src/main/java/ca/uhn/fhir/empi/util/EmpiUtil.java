@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public final class EmpiUtil {
@@ -56,6 +57,25 @@ public final class EmpiUtil {
 	 */
 	public static boolean isEmpiManaged(IBaseResource theBaseResource) {
 		return theBaseResource.getMeta().getTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED) != null;
+	}
+
+	/**
+	 * Sets the EMPI-managed tag, indicating the EMPI system has ownership of this
+	 * Resource. No changes are made if resource is already maanged by EMPI.
+	 *
+	 * @param theBaseResource resource to set the tag for
+	 * @return
+	 * 		Returns resource with the tag set.
+	 */
+	public static IBaseResource setEmpiManaged(IBaseResource theBaseResource) {
+		if (isEmpiManaged(theBaseResource)) {
+			return theBaseResource;
+		}
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED);
+		tag.setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		tag.setDisplay(EmpiConstants.DISPLAY_HAPI_EMPI_MANAGED);
+		return theBaseResource;
 	}
 
 	public static boolean isEmpiManagedPerson(FhirContext theFhirContext, IBaseResource theResource) {
