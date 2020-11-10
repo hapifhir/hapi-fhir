@@ -1130,7 +1130,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		include.setSystem(CS_URL);
 		try {
 			ValueSet expansion = myTermSvc.expandValueSet(null, vs);
-			fail("Expanded to " + expansion.getExpansion().getContains().size() + " but mas was " + myDaoConfig.getMaximumExpansionSize());
+			fail("Expanded to " + expansion.getExpansion().getContains().size() + " but max was " + myDaoConfig.getMaximumExpansionSize());
 		} catch (InternalErrorException e) {
 			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
 		}
