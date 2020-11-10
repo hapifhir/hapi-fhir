@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.empi.matcher;
 
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -34,7 +35,8 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 	@Nullable
 	protected Long getMatchedResourcePidFromResource(IAnyResource theResource) {
 		Long retval;
-		boolean isGoldenRecord= theResource.getMeta().getTag().stream().anyMatch(tag -> tag.getSystem().equals(EmpiConstants.SYSTEM_EMPI_MANAGED));
+
+		boolean isGoldenRecord = EmpiUtil.isEmpiManaged(theResource);
 		if (isGoldenRecord) {
 			return myIdHelperService.getPidOrNull(theResource);
 		}
