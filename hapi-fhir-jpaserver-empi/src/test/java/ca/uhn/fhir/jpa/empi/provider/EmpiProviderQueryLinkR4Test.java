@@ -56,12 +56,12 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testQueryLinkOneMatch() {
 
-		Parameters result = myEmpiProviderR4.queryLinks(myPersonId, myPatientId, null, null, myRequestDetails);
+		Parameters result = myEmpiProviderR4.queryLinks(mySourcePatientId, myPatientId, null, null, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertEmpiLink(7, part, myPersonId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
+		assertEmpiLink(7, part, mySourcePatientId.getValue(), myPatientId.getValue(), EmpiMatchResultEnum.POSSIBLE_MATCH, "false", "true", null);
 	}
 
 	@Test

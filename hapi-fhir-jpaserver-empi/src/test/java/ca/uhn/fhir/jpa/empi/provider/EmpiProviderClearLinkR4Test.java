@@ -1,15 +1,16 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,16 +30,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
-	protected IAnyResource myPractitionerPerson;
-	protected StringType myPractitionerPersonId;
+	protected IAnyResource myPractitionerSourceResource;
+	protected StringType myPractitionerSourceResourceId;
 
 	@BeforeEach
 	public void before() {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myPractitionerPerson = getSourceResourceFromTargetResource(myPractitioner);
-		myPractitionerPersonId = new StringType(myPractitionerPerson.getIdElement().getValue());
+		myPractitionerSourceResource = getSourceResourceFromTargetResource(myPractitioner);
+		myPractitionerSourceResourceId = new StringType(myPractitionerSourceResource.getIdElement().getValue());
 	}
 
 	@Test
@@ -64,12 +65,12 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
-		Person read = myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
+		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(new StringType("Patient"), myRequestDetails);
 		assertNoPatientLinksExist();
 		try {
-			myPersonDao.read(new IdDt(myPersonId.getValueAsString()).toVersionless());
+			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 			fail();
 		} catch (ResourceNotFoundException e) {}
 
@@ -103,8 +104,16 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 
 		assertNoPatientLinksExist();
-		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		IBundleProvider search = myPatientDao.search(buildSourceResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
+	}
+
+	/**
+	 * Build a SearchParameterMap which looks up Golden Records (Source resources).
+	 * @return
+	 */
+	private SearchParameterMap buildSourceResourceParameterMap() {
+		return new SearchParameterMap().setLoadSynchronous(true).add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
 	}
 
 	@Test
@@ -125,12 +134,12 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		//SUT
 		Parameters parameters = myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
-		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		IBundleProvider search = myPatientDao.search(buildSourceResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
 
 	}
 
-	//TODO GGG
+	//TODO GGG unclear if we actually need to reimplement this.
 	private void linkPersons(IAnyResource theSourcePerson, IAnyResource theTargetPerson) {
 		throw new UnsupportedOperationException("We need to fix this!");
 	}
@@ -138,12 +147,12 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
-		Person read = myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
+		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerSourceResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(new StringType("Practitioner"), myRequestDetails);
 		assertNoPractitionerLinksExist();
 		try {
-			myPersonDao.read(new IdDt(myPractitionerPersonId.getValueAsString()).toVersionless());
+			myPractitionerDao.read(new IdDt(myPractitionerSourceResourceId.getValueAsString()).toVersionless());
 			fail();
 		} catch (ResourceNotFoundException e) {}
 	}

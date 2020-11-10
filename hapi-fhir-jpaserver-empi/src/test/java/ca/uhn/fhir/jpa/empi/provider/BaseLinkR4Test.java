@@ -27,10 +27,10 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	DaoConfig myDaoConfig;
 
 	protected Patient myPatient;
-	protected IAnyResource myPerson;
+	protected IAnyResource mySourcePatient;
 	protected EmpiLink myLink;
 	protected StringType myPatientId;
-	protected StringType myPersonId;
+	protected StringType mySourcePatientId;
 	protected StringType myVersionlessPersonId;
 
 	@Override
@@ -41,9 +41,9 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
 		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
-		myPerson = getSourceResourceFromTargetResource(myPatient);
-		myPersonId = new StringType(myPerson.getIdElement().getValue());
-		myVersionlessPersonId = new StringType(myPerson.getIdElement().toVersionless().getValue());
+		mySourcePatient = getSourceResourceFromTargetResource(myPatient);
+		mySourcePatientId = new StringType(mySourcePatient.getIdElement().getValue());
+		myVersionlessPersonId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
 
 		myLink = getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH

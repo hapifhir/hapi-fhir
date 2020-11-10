@@ -69,17 +69,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testCreatePerson() {
-		myPersonDao.create(new Person());
-		assertLinkCount(0);
-	}
-
-	@Test
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
 		myEmpiHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
-		Person person = getOnlyActivePerson();
-		myPersonDao.delete(person.getIdElement());
+		Patient sourcePatient = getOnlyActiveSourcePatient();
+		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
 	}
 
@@ -140,7 +134,8 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		myEmpiHelper.createWithLatch(buildJanePatient());
 		myEmpiHelper.createWithLatch(buildPaulPatient());
 
-		IBundleProvider search = myPersonDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		//TODO GGG MDM: this test is out of date, since we now are using golden record Patients
+		IBundleProvider search = myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 		for (IBaseResource person : resources) {
@@ -175,11 +170,11 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 
 		//Updating a Person who was created via EMPI should fail.
 		EmpiLink empiLink = myEmpiLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
-		Long personPid = empiLink.getSourceResourcePid();
-		Person empiPerson = (Person) myPersonDao.readByPid(new ResourcePersistentId(personPid));
-		empiPerson.setGender(Enumerations.AdministrativeGender.MALE);
+		Long sourcePatientPid = empiLink.getSourceResourcePid();
+		Patient empiSourcePatient = (Patient) myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
+		empiSourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
-			myEmpiHelper.doUpdateResource(empiPerson, true);
+			myEmpiHelper.doUpdateResource(empiSourcePatient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("Cannot create or modify Resources that are managed by EMPI.", e.getMessage());

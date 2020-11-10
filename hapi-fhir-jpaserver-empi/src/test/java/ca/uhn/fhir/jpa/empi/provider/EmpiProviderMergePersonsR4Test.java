@@ -1,21 +1,19 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
-import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
-import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -41,18 +39,22 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMerge() {
-		Person mergedPerson = myEmpiProviderR4.mergePersons(myFromSourcePatientId, myToSourcePatientId, myRequestDetails);
-		assertEquals(myToSourcePatient.getIdElement(), mergedPerson.getIdElement());
-		assertThat(mergedPerson, is(sameSourceResourceAs(myToSourcePatient)));
+		//TODO GGG RP fix
+		Person mergedSourcePatient = myEmpiProviderR4.mergePersons(myFromSourcePatientId, myToSourcePatientId, myRequestDetails);
+		assertEquals(myToSourcePatient.getIdElement(), mergedSourcePatient.getIdElement());
+		assertThat(mergedSourcePatient, is(sameSourceResourceAs(myToSourcePatient)));
 		assertEquals(2, getAllSourcePatients().size());
 		assertEquals(1, getAllActiveSourcePatients().size());
 
-		Person fromPerson = myPersonDao.read(myFromSourcePatient.getIdElement().toUnqualifiedVersionless());
-		assertThat(fromPerson.getActive(), is(false));
-		List<Person.PersonLinkComponent> links = fromPerson.getLink();
-		assertThat(links, hasSize(1));
-		assertThat(links.get(0).getTarget().getReference(), is (myToSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
-		assertThat(links.get(0).getAssurance(), is (AssuranceLevelUtil.getAssuranceLevel(EmpiMatchResultEnum.REDIRECT, EmpiLinkSourceEnum.MANUAL).toR4()));
+		Patient fromSourcePatient = myPatientDao.read(myFromSourcePatient.getIdElement().toUnqualifiedVersionless());
+		assertThat(fromSourcePatient.getActive(), is(false));
+		//TODO GGG eventually this will need to check a redirect... this is a hack which doesnt work
+		Optional<Identifier> redirect = fromSourcePatient.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equals("REDIRECT")).findFirst();
+		assertThat(redirect.get().getValue(), is(equalTo(myToSourcePatient.getIdElement().toUnqualified().getValue())));
+		//List<Person.PersonLinkComponent> links = fromSourcePatient.getLink();
+		//assertThat(links, hasSize(1));
+      //assertThat(links.get(0).getTarget().getReference(), is (myToSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		//assertThat(links.get(0).getAssurance(), is (AssuranceLevelUtil.getAssuranceLevel(EmpiMatchResultEnum.REDIRECT, EmpiLinkSourceEnum.MANUAL).toR4()));
 	}
 
 	@Test

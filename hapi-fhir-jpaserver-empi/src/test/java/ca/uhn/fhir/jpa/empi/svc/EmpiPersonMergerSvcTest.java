@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,16 +93,16 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertEquals(2, getAllSourcePatients().size());
 		assertEquals(2, getAllActiveSourcePatients().size());
 
-		Person mergedPerson = mergePersons();
-		assertEquals(myToSourcePatient.getIdElement(), mergedPerson.getIdElement());
-		assertThat(mergedPerson, is(sameSourceResourceAs(mergedPerson)));
+		Patient mergedSourcePatients = mergeSourcePatients();
+		assertEquals(myToSourcePatient.getIdElement(), mergedSourcePatients.getIdElement());
+		assertThat(mergedSourcePatients, is(sameSourceResourceAs(mergedSourcePatients)));
 		assertEquals(2, getAllSourcePatients().size());
 		assertEquals(1, getAllActiveSourcePatients().size());
 	}
 
-	private Person mergePersons() {
+	private Patient mergeSourcePatients() {
 		assertEquals(0, redirectLinkCount());
-		Person retval = (Person) myEmpiPersonMergerSvc.mergePersons(myFromSourcePatient, myToSourcePatient, createEmpiContext());
+		Patient retval = (Patient) myEmpiPersonMergerSvc.mergePersons(myFromSourcePatient, myToSourcePatient, createEmpiContext());
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
@@ -129,7 +128,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 			assertEquals(EmpiMatchResultEnum.POSSIBLE_DUPLICATE, foundLinks.get(0).getMatchResult());
 		}
 
-		mergePersons();
+		mergeSourcePatients();
 
 		{
 			List<EmpiLink> foundLinks = myEmpiLinkDao.findAll();
@@ -142,11 +141,11 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void fullFromEmptyTo() {
 		populatePerson(myFromSourcePatient);
 
-		Person mergedPerson = mergePersons();
-		HumanName returnedName = mergedPerson.getNameFirstRep();
+		Patient mergedSourcePatient = mergeSourcePatients();
+		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
-		assertEquals(POSTAL_CODE, mergedPerson.getAddressFirstRep().getPostalCode());
+		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
 	}
 
 	@Test
@@ -154,21 +153,21 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myFromSourcePatient.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
 		populatePerson(myToSourcePatient);
 
-		Person mergedPerson = mergePersons();
-		HumanName returnedName = mergedPerson.getNameFirstRep();
+		Patient mergedSourcePatient = mergeSourcePatients();
+		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
-		assertEquals(POSTAL_CODE, mergedPerson.getAddressFirstRep().getPostalCode());
+		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
 	}
 
 	@Test
 	public void fromLinkToNoLink() {
 		createEmpiLink(myFromSourcePatient, myTargetPatient1);
 
-		Person mergedPerson = mergePersons();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
+		Patient mergedSourcePatient = mergeSourcePatients();
+		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedSourcePatient);
 		assertEquals(1, links.size());
-		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
+		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToSourcePatient.getLink().size());
 	}
 
@@ -176,10 +175,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void fromNoLinkToLink() {
 		createEmpiLink(myToSourcePatient, myTargetPatient1);
 
-		Person mergedPerson = mergePersons();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedPerson);
+		Patient mergedSourcePatient = mergeSourcePatients();
+		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedSourcePatient);
 		assertEquals(1, links.size());
-		assertThat(mergedPerson, is(possibleLinkedTo(myTargetPatient1)));
+		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 		assertEquals(1, myToSourcePatient.getLink().size());
 	}
 
@@ -192,7 +191,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		createEmpiLink(myToSourcePatient, myTargetPatient1);
 
-		mergePersons();
+		mergeSourcePatients();
 		List<EmpiLink> links = getNonRedirectLinksByPerson(myToSourcePatient);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
@@ -214,7 +213,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		createEmpiLink(myToSourcePatient, myTargetPatient1);
 
-		mergePersons();
+		mergeSourcePatients();
 		List<EmpiLink> links = getNonRedirectLinksByPerson(myToSourcePatient);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
@@ -229,7 +228,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		toLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		saveLink(toLink);
 
-		mergePersons();
+		mergeSourcePatients();
 		List<EmpiLink> links = getNonRedirectLinksByPerson(myToSourcePatient);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
@@ -248,7 +247,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		saveLink(toLink);
 
 		try {
-			mergePersons();
+			mergeSourcePatients();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("A MANUAL NO_MATCH link may not be merged into a MANUAL MATCH link for the same target", e.getMessage());
@@ -268,7 +267,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		saveLink(toLink);
 
 		try {
-			mergePersons();
+			mergeSourcePatients();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("A MANUAL MATCH link may not be merged into a MANUAL NO_MATCH link for the same target", e.getMessage());
@@ -287,7 +286,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		toLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		saveLink(toLink);
 
-		mergePersons();
+		mergeSourcePatients();
 		assertEquals(1, myToSourcePatient.getLink().size());
 		assertEquals(3, myEmpiLinkDao.count());
 	}
@@ -299,7 +298,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myFromSourcePatient, myTargetPatient3);
 		createEmpiLink(myToSourcePatient, myTargetPatient1);
 
-		mergePersons();
+		mergeSourcePatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
@@ -313,7 +312,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToSourcePatient, myTargetPatient2);
 		createEmpiLink(myToSourcePatient, myTargetPatient3);
 
-		mergePersons();
+		mergeSourcePatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
@@ -329,7 +328,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToSourcePatient, myTargetPatient2);
 		createEmpiLink(myToSourcePatient, myTargetPatient3);
 
-		mergePersons();
+		mergeSourcePatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
@@ -343,7 +342,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		createEmpiLink(myToSourcePatient, myTargetPatient2);
 		createEmpiLink(myToSourcePatient, myTargetPatient3);
 
-		mergePersons();
+		mergeSourcePatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
@@ -362,10 +361,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertThat(myToSourcePatient.getName(), hasSize(1));
 		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
 
-		Person mergedPerson = mergePersons();
-		assertThat(mergedPerson.getName(), hasSize(2));
-		assertThat(mergedPerson.getName().get(0).getGiven(), hasSize(2));
-		assertThat(mergedPerson.getName().get(1).getGiven(), hasSize(2));
+		Patient mergedSourcePatient = mergeSourcePatients();
+		assertThat(mergedSourcePatient.getName(), hasSize(2));
+		assertThat(mergedSourcePatient.getName().get(0).getGiven(), hasSize(2));
+		assertThat(mergedSourcePatient.getName().get(1).getGiven(), hasSize(2));
 	}
 
 	@Test
@@ -380,7 +379,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertThat(myToSourcePatient.getName(), hasSize(1));
 		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
 
-		mergePersons();
+		mergeSourcePatients();
 		assertThat(myToSourcePatient.getName(), hasSize(1));
 		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
 	}
@@ -395,7 +394,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myToSourcePatient.addIdentifier().setValue("ccc");
 		assertThat(myToSourcePatient.getIdentifier(), hasSize(2));
 
-		mergePersons();
+		mergeSourcePatients();
 		assertThat(myToSourcePatient.getIdentifier(), hasSize(3));
 	}
 

@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 	@Autowired
 	IEmpiLinkDao myEmpiLinkDao;
 	private ResourceTable myTargetEntity;
-	private ResourceTable myPersonEntity;
+	private ResourceTable mySourceEntity;
 	private IdDt myTargetId;
 
 	@BeforeEach
@@ -43,12 +42,12 @@ public class EmpiExpungeTest extends BaseEmpiR4Test {
 
 		myTargetEntity = (ResourceTable) myPatientDao.create(new Patient()).getEntity();
 		myTargetId = myTargetEntity.getIdDt().toVersionless();
-		myPersonEntity = (ResourceTable) myPersonDao.create(new Person()).getEntity();
+		mySourceEntity = (ResourceTable) myPatientDao.create(new Patient()).getEntity();
 
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		empiLink.setSourceResourcePid(myPersonEntity.getId());
+		empiLink.setSourceResourcePid(mySourceEntity.getId());
 		empiLink.setTargetPid(myTargetEntity.getId());
 		saveLink(empiLink);
 	}

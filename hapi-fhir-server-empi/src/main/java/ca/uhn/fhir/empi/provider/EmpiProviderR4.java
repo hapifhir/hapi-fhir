@@ -38,12 +38,10 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DecimalType;
-import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -54,7 +52,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -126,6 +123,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return searchComponent;
 	}
 
+	//TODO GGG ask ken, what is the best way to genericize this? Return Parameters??
 	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS, type = Person.class)
 	public Person mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, min = 1, max = 1) StringType theFromPersonId,
 										@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,

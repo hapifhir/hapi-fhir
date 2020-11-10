@@ -83,8 +83,6 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	@Autowired
 	protected FhirContext myFhirContext;
 	@Autowired
-	protected IFhirResourceDao<Person> myPersonDao;
-	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
@@ -362,10 +360,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
 	}
 
-	protected Person getOnlyActivePerson() {
+	protected Patient getOnlyActiveSourcePatient() {
 		List<IBaseResource> resources = getAllActiveSourcePatients();
 		assertEquals(1, resources.size());
-		return (Person) resources.get(0);
+		return (Patient) resources.get(0);
 	}
 
 	@Nonnull
