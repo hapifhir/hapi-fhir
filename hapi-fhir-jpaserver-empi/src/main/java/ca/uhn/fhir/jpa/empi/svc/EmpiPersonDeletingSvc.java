@@ -51,6 +51,6 @@ public class EmpiPersonDeletingSvc {
 	DeleteExpungeService myDeleteExpungeService;
 
 	public DeleteMethodOutcome expungePersonPids(List<Long> thePersonPids, ServletRequestDetails theRequestDetails) {
-		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.EMPI_CLEAR, "Person", new SliceImpl<>(thePersonPids), theRequestDetails);
+		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.MDM_CLEAR, "Person", new SliceImpl<>(thePersonPids), theRequestDetails);
 	}
 }

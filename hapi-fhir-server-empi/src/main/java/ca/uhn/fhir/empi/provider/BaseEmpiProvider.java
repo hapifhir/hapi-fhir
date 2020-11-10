@@ -44,8 +44,8 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected void validateMergeParameters(IPrimitiveType<String> theFromPersonId, IPrimitiveType<String> theToPersonId) {
-		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId);
-		validateNotNull(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId);
+		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
+		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
 		if (theFromPersonId.getValue().equals(theToPersonId.getValue())) {
 			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
 		}
@@ -58,23 +58,23 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected void validateUpdateLinkParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId, IPrimitiveType<String> theMatchResult) {
-		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
-		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
-		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT, theMatchResult);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, theMatchResult);
 		EmpiMatchResultEnum matchResult = EmpiMatchResultEnum.valueOf(theMatchResult.getValue());
 		switch (matchResult) {
 			case NO_MATCH:
 			case MATCH:
 				break;
 			default:
-				throw new InvalidRequestException(ProviderConstants.EMPI_UPDATE_LINK + " illegal " + ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT +
+				throw new InvalidRequestException(ProviderConstants.MDM_UPDATE_LINK + " illegal " + ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT +
 					" value '" + matchResult + "'.  Must be " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
 		}
 	}
 
 	protected void validateNotDuplicateParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId) {
-		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
-		validateNotNull(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
 	}
 
 	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails, EmpiTransactionContext.OperationType theOperationType) {

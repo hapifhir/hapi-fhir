@@ -73,8 +73,8 @@ public class EmpiControllerHelper {
 	}
 
 	public void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPerson);
-		validateIsEmpiManaged(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPerson);
+		validateIsEmpiManaged(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPerson);
+		validateIsEmpiManaged(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPerson);
 	}
 
 	public String toJson(IAnyResource theAnyResource) {

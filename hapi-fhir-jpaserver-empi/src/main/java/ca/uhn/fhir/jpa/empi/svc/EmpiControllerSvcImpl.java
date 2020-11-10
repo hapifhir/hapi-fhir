@@ -55,8 +55,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public IAnyResource mergePersons(String theFromPersonId, String theToPersonId, EmpiTransactionContext theEmpiTransactionContext) {
-		IAnyResource fromPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, theFromPersonId);
-		IAnyResource toPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, theToPersonId);
+		IAnyResource fromPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
+		IAnyResource toPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
 		myEmpiControllerHelper.validateMergeResources(fromPerson, toPerson);
 		myEmpiControllerHelper.validateSameVersion(fromPerson, theFromPersonId);
 		myEmpiControllerHelper.validateSameVersion(toPerson, theToPersonId);
@@ -66,8 +66,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public Stream<EmpiLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, EmpiTransactionContext theEmpiContext) {
-		IIdType personId = EmpiControllerUtil.extractPersonIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, thePersonId);
-		IIdType targetId = EmpiControllerUtil.extractTargetIdDtOrNull(ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, theTargetId);
+		IIdType personId = EmpiControllerUtil.extractPersonIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, thePersonId);
+		IIdType targetId = EmpiControllerUtil.extractTargetIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theTargetId);
 		EmpiMatchResultEnum matchResult = EmpiControllerUtil.extractMatchResultOrNull(theMatchResult);
 		EmpiLinkSourceEnum linkSource = EmpiControllerUtil.extractLinkSourceOrNull(theLinkSource);
 
@@ -82,8 +82,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	@Override
 	public IAnyResource updateLink(String thePersonId, String theTargetId, String theMatchResult, EmpiTransactionContext theEmpiContext) {
 		EmpiMatchResultEnum matchResult = EmpiControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
-		IAnyResource target = myEmpiControllerHelper.getLatestTargetFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetId);
+		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
+		IAnyResource target = myEmpiControllerHelper.getLatestTargetFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
 		myEmpiControllerHelper.validateSameVersion(person, thePersonId);
 		myEmpiControllerHelper.validateSameVersion(target, theTargetId);
 
@@ -92,8 +92,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public void notDuplicatePerson(String thePersonId, String theTargetPersonId, EmpiTransactionContext theEmpiContext) {
-		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, thePersonId);
-		IAnyResource target = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, theTargetPersonId);
+		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
+		IAnyResource target = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetPersonId);
 
 		myIEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, theEmpiContext);
 	}

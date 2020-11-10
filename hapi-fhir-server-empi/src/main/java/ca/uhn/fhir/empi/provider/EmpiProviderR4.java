@@ -47,7 +47,6 @@ import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
@@ -61,7 +60,7 @@ import java.util.stream.Stream;
 public class EmpiProviderR4 extends BaseEmpiProvider {
 	private final IEmpiControllerSvc myEmpiControllerSvc;
 	private final IEmpiMatchFinderSvc myEmpiMatchFinderSvc;
-	private final IEmpiExpungeSvc myEmpiExpungeSvc;
+	private final IEmpiExpungeSvc myMdmExpungeSvc;
 	private final IEmpiSubmitSvc myEmpiSubmitSvc;
 
 	/**
@@ -70,11 +69,11 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	 * Note that this is not a spring bean. Any necessary injections should
 	 * happen in the constructor
 	 */
-	public EmpiProviderR4(FhirContext theFhirContext, IEmpiControllerSvc theEmpiControllerSvc, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiExpungeSvc theEmpiExpungeSvc, IEmpiSubmitSvc theEmpiSubmitSvc) {
+	public EmpiProviderR4(FhirContext theFhirContext, IEmpiControllerSvc theEmpiControllerSvc, IEmpiMatchFinderSvc theEmpiMatchFinderSvc, IEmpiExpungeSvc theMdmExpungeSvc, IEmpiSubmitSvc theEmpiSubmitSvc) {
 		super(theFhirContext);
 		myEmpiControllerSvc = theEmpiControllerSvc;
 		myEmpiMatchFinderSvc = theEmpiMatchFinderSvc;
-		myEmpiExpungeSvc = theEmpiExpungeSvc;
+		myMdmExpungeSvc = theMdmExpungeSvc;
 		myEmpiSubmitSvc = theEmpiSubmitSvc;
 	}
 
@@ -125,46 +124,47 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	//TODO GGG ask ken, what is the best way to genericize this? Return
-	@Operation(name = ProviderConstants.EMPI_MERGE_PERSONS)
-	public IBaseResource mergePersons(@OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_FROM_PERSON_ID, min = 1, max = 1) StringType theFromPersonId,
-												 @OperationParam(name=ProviderConstants.EMPI_MERGE_PERSONS_TO_PERSON_ID, min = 1, max = 1) StringType theToPersonId,
-												 RequestDetails theRequestDetails) {
-		validateMergeParameters(theFromPersonId, theToPersonId);
+	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
+	public IBaseResource mergeGoldenResources(@OperationParam(name=ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theFromGoldenResourceId,
+															@OperationParam(name=ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theToGoldenResourceId,
+															RequestDetails theRequestDetails) {
+		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
-		return (Person) myEmpiControllerSvc.mergePersons(theFromPersonId.getValue(), theToPersonId.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.MERGE_PERSONS));
+		return myEmpiControllerSvc.mergePersons(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.MERGE_PERSONS));
 	}
 
-	@Operation(name = ProviderConstants.EMPI_UPDATE_LINK, type = Person.class)
-	public Person updateLink(@OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_PERSON_ID, min = 1, max = 1) StringType thePersonId,
-								  @OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_TARGET_ID, min = 1, max = 1) StringType theTargetId,
-								  @OperationParam(name=ProviderConstants.EMPI_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
+	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
+	public IBaseResource updateLink(@OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType thePersonId,
+								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) StringType theTargetId,
+								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
 								  ServletRequestDetails theRequestDetails) {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
 
-		return (Person) myEmpiControllerSvc.updateLink(thePersonId.getValueNotNull(), theTargetId.getValue(), theMatchResult.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.UPDATE_LINK));
+		return myEmpiControllerSvc.updateLink(thePersonId.getValueNotNull(), theTargetId.getValue(), theMatchResult.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.UPDATE_LINK));
 	}
 
-	@Operation(name = ProviderConstants.EMPI_CLEAR, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type=DecimalType.class)
+	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type=DecimalType.class)
 	})
-	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.EMPI_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
+	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
 												ServletRequestDetails theRequestDetails) {
 		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
-			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinks(theRequestDetails);
+			resetCount = myMdmExpungeSvc.expungeAllEmpiLinks(theRequestDetails);
 		} else {
-			resetCount = myEmpiExpungeSvc.expungeAllEmpiLinksOfTargetType(theTargetType.getValueNotNull(), theRequestDetails);
+			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfTargetType(theTargetType.getValueNotNull(), theRequestDetails);
 		}
 		Parameters parameters = new Parameters();
-		parameters.addParameter().setName(ProviderConstants.OPERATION_EMPI_CLEAR_OUT_PARAM_DELETED_COUNT)
+		parameters.addParameter().setName(ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT)
 			.setValue(new DecimalType(resetCount));
 		return parameters;
 	}
 
-	@Operation(name = ProviderConstants.EMPI_QUERY_LINKS, idempotent = true)
-	public Parameters queryLinks(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 0, max = 1) StringType thePersonId,
-									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 0, max = 1) StringType theTargetId,
+
+	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
+	public Parameters queryLinks(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1) StringType thePersonId,
+									 @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1) StringType theTargetId,
 									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theMatchResult,
 									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1) StringType theLinkSource,
 									 ServletRequestDetails theRequestDetails) {
@@ -180,8 +180,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE)
-	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_PERSON_ID, min = 1, max = 1) StringType thePersonId,
-											 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_TARGET_ID, min = 1, max = 1) StringType theTargetId,
+	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType thePersonId,
+											 @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1) StringType theTargetId,
 											 ServletRequestDetails theRequestDetails) {
 
 		validateNotDuplicateParameters(thePersonId, theTargetId);
@@ -193,7 +193,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
 	})
 	public Parameters empiBatchOnAllTargets(
 		@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
@@ -208,7 +208,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPatientInstance(
 		@IdParam IIdType theIdParam,
@@ -218,7 +218,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPatientType(
 		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
@@ -229,7 +229,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
@@ -239,7 +239,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
 	public Parameters empiBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
@@ -255,7 +255,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	private Parameters buildEmpiOutParametersWithCount(long theCount) {
 		Parameters parameters = new Parameters();
 		parameters.addParameter()
-			.setName(ProviderConstants.OPERATION_EMPI_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)
+			.setName(ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)
 			.setValue(new DecimalType(theCount));
 		return parameters;
 	}

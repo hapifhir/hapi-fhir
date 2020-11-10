@@ -40,7 +40,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	@Test
 	public void testMerge() {
 		//TODO GGG RP fix
-		IBaseResource mergedSourcePatient = myEmpiProviderR4.mergePersons(myFromSourcePatientId, myToSourcePatientId, myRequestDetails);
+		IBaseResource mergedSourcePatient = myEmpiProviderR4.mergeGoldenResources(myFromSourcePatientId, myToSourcePatientId, myRequestDetails);
 		assertEquals(myToSourcePatient.getIdElement(), mergedSourcePatient.getIdElement());
 //		TODO GGG RP FIX
 		//assertThat(mergedSourcePatient, is(sameSourceResourceAs(myToSourcePatient)));
@@ -63,7 +63,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		StringType fromPersonId = new StringType(createUnmanagedSourceResource().getIdElement().getValue());
 		StringType toPersonId = new StringType(createUnmanagedSourceResource().getIdElement().getValue());
 		try {
-			myEmpiProviderR4.mergePersons(fromPersonId, toPersonId, myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(fromPersonId, toPersonId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Only EMPI managed resources can be merged.  Empi managed resource have the HAPI-EMPI tag.", e.getMessage());
@@ -75,7 +75,7 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 		try {
 			StringType patientId = new StringType(createPatient().getIdElement().getValue());
 			StringType otherPatientId = new StringType(createPatient().getIdElement().getValue());
-			myEmpiProviderR4.mergePersons(patientId, otherPatientId, myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(patientId, otherPatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), endsWith("must have form Person/<id> where <id> is the id of the person"));
@@ -86,19 +86,19 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	@Test
 	public void testNullParams() {
 		try {
-			myEmpiProviderR4.mergePersons(null, null, myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(null, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("fromPersonId cannot be null", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(null, myToSourcePatientId, myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(null, myToSourcePatientId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("fromPersonId cannot be null", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myFromSourcePatientId, null, myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(myFromSourcePatientId, null, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("toPersonId cannot be null", e.getMessage());
@@ -108,31 +108,31 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 	@Test
 	public void testBadParams() {
 		try {
-			myEmpiProviderR4.mergePersons(new StringType("Patient/1"), new StringType("Patient/2"), myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(new StringType("Patient/1"), new StringType("Patient/2"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), endsWith(" must have form Person/<id> where <id> is the id of the person"));
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myFromSourcePatientId, new StringType("Patient/2"), myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(myFromSourcePatientId, new StringType("Patient/2"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), endsWith(" must have form Person/<id> where <id> is the id of the person"));
 		}
 		try {
-			myEmpiProviderR4.mergePersons(new StringType("Person/1"), new StringType("Person/1"), myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(new StringType("Person/1"), new StringType("Person/1"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("fromPersonId must be different from toPersonId", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(new StringType("Person/abc"), myToSourcePatientId, myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(new StringType("Person/abc"), myToSourcePatientId, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Person/abc is not known", e.getMessage());
 		}
 		try {
-			myEmpiProviderR4.mergePersons(myFromSourcePatientId, new StringType("Person/abc"), myRequestDetails);
+			myEmpiProviderR4.mergeGoldenResources(myFromSourcePatientId, new StringType("Person/abc"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Person/abc is not known", e.getMessage());

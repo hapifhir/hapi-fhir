@@ -98,10 +98,10 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		}
 
 		if (!"Person".equals(personType)) {
-			throw new InvalidRequestException("First argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Person.  Was " + personType);
+			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person.  Was " + personType);
 		}
 		if (!EmpiUtil.supportedTargetType(theTargetType)) {
-			throw new InvalidRequestException("Second argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Patient or Practitioner.  Was " + theTargetType);
+			throw new InvalidRequestException("Second argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Patient or Practitioner.  Was " + theTargetType);
 		}
 
 		if (!EmpiUtil.isEmpiManaged(thePerson)) {
@@ -139,10 +139,10 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		String personType = myFhirContext.getResourceType(thePerson);
 		String targetType = myFhirContext.getResourceType(theTarget);
 		if (!"Person".equals(personType)) {
-			throw new InvalidRequestException("First argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Person.  Was " + personType);
+			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person.  Was " + personType);
 		}
 		if (!"Person".equals(targetType)) {
-			throw new InvalidRequestException("Second argument to " + ProviderConstants.EMPI_UPDATE_LINK + " must be a Person .  Was " + targetType);
+			throw new InvalidRequestException("Second argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person .  Was " + targetType);
 		}
 
 		if (!EmpiUtil.isEmpiManaged(thePerson) || !EmpiUtil.isEmpiManaged(theTarget)) {

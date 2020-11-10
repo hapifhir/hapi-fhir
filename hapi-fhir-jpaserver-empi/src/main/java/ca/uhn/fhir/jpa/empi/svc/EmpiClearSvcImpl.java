@@ -50,7 +50,7 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	}
 
 	@Override
-	public long expungeAllEmpiLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails) {
+	public long expungeAllMdmLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails) {
 		throwExceptionIfInvalidTargetType(theResourceType);
 		ourLog.info("Clearing all EMPI Links for resource type {}...", theResourceType);
 		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksOfTypeAndReturnPersonPids(theResourceType);
@@ -61,7 +61,7 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
 		if (!EmpiUtil.supportedTargetType(theResourceType)) {
-			throw new InvalidRequestException(ProviderConstants.EMPI_CLEAR + " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(ProviderConstants.MDM_CLEAR + " does not support resource type: " + theResourceType);
 		}
 	}
 

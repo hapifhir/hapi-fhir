@@ -32,7 +32,7 @@ public interface IEmpiExpungeSvc {
 	 * @param theRequestDetails
 	 * @return the count of deleted EMPI links
 	 */
-	long expungeAllEmpiLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails);
+	long expungeAllMdmLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails);
 
 	/**
 	 * Delete all EMPI links, and their related Person objects.
