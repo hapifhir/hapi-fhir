@@ -32,7 +32,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	public void after() {
 		myVersionChangeListenerRegistry.clearListenersForUnitTest();
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
-		myVersionChangeListenerRegistry.requestRefresh();
+		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
 	}
 
 	@Test
@@ -66,14 +66,14 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		testCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
-		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		testCallback.awaitExpected();
 		assertEquals(2L, testCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.UPDATE);
 
 		testCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
-		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		testCallback.awaitExpected();
 		assertEquals(patientId.toVersionless(), testCallback.getResourceId());
 		assertEquals(testCallback.getOperationTypeEnum(), BaseResourceMessage.OperationTypeEnum.DELETE);
@@ -82,7 +82,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	private IdDt createPatientWithLatch(Patient thePatient, TestCallback theTestCallback) throws InterruptedException {
 		theTestCallback.setExpectedCount(1);
 		IIdType retval = myPatientDao.create(thePatient).getId();
-		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		theTestCallback.awaitExpected();
 		return new IdDt(retval);
 	}
@@ -103,7 +103,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		testCallback.setExpectedCount(1);
-		myVersionChangeListenerRegistry.forceRefresh();
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		List<HookParams> calledWith = testCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientId, calledWithId);
@@ -132,7 +132,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
-		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		assertNotNull(patientIdFemale.toString());
 		assertNull(testCallback.getResourceId());
 		assertNull(testCallback.getOperationTypeEnum());
@@ -159,13 +159,13 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the testCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
-		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		assertNotNull(patientIdFemale.toString());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		testCallback.setExpectedCount(1);
-		myVersionChangeListenerRegistry.doRefreshAllCaches(0);
+		myVersionChangeListenerRegistry.refreshAllCachesImmediately();
 		List<HookParams> calledWith = testCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientIdMale, calledWithId);

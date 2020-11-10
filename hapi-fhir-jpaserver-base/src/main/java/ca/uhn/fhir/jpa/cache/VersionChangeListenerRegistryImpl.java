@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.Map;
 
 // FIXME KHS retool searchparam and subscription to use this
@@ -32,7 +33,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	static long LOCAL_REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
 	static long REMOTE_REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
-	private volatile long myLastRefresh;
+	private static volatile Map<String, Long> myLastRefreshPerResourceType = new HashMap<>();
 
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
@@ -77,17 +78,6 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public boolean refreshAllCachesIfNecessary() {
-		System.out.println("myLastRefresh = " + myLastRefresh);
-		if (myLastRefresh == 0 || System.currentTimeMillis() - LOCAL_REFRESH_INTERVAL > myLastRefresh) {
-			refreshAllCachesWithRetry();
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
 	@VisibleForTesting
 	public void clearListenersForUnitTest() {
 		myListenerMap.clearListenersForUnitTest();
@@ -97,50 +87,41 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@VisibleForTesting
 	public void clearCacheForUnitTest() {
 		myResourceVersionCache.clearForUnitTest();
+		myLastRefreshPerResourceType.clear();
 	}
 
 	@Override
-	public void forceRefresh() {
-		requestRefresh();
-		refreshAllCachesWithRetry();
-	}
-
-	@Override
-	public void requestRefresh() {
-		synchronized (this) {
-			myLastRefresh = 0;
+	public boolean refreshAllCachesIfNecessary() {
+		boolean result = false;
+		for (IdDt resourceType : myResourceVersionCache.keySet()) {
+			long lastRefresh = myLastRefreshPerResourceType.get(resourceType);
+			if (lastRefresh == 0 || System.currentTimeMillis() - LOCAL_REFRESH_INTERVAL > lastRefresh) {
+				refreshCacheWithRetry(resourceType.getResourceType());
+				result = true;
+			}
 		}
-		// FIXME KHS Refresh after Tx completes when an Interceptor calls this code (after Tx closes?)
+		// This will return true if at least 1 of the Resource Caches was refreshed
+		return result;
 	}
 
 	@Override
 	public void requestRefresh(String theResourceName) {
-		// TODO KBD Is this what KHS intended when suggesting that this should only refresh specific Resource Types?
-		if (myListenerMap.hasListenersForResourceName(theResourceName)) {
-			requestRefresh();
-		} else {
-			// This will add a new Resource to the cache without affecting any existing entries
-			doRefresh(theResourceName);
-		}
+		doRefresh(theResourceName);
 	}
 
-	private int refreshAllCachesWithRetry() {
-		Retrier<Integer> refreshCacheRetrier = new Retrier<>(() -> {
+	@Override
+	public long refreshCacheWithRetry(String theResourceName) {
+		Retrier<Long> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (this) {
-				return doRefreshAllCaches(LOCAL_REFRESH_INTERVAL);
+				return doRefresh(theResourceName);
 			}
 		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
 	}
 
 	@Override
-	public int doRefreshAllCaches(long theRefreshInterval) {
-		if (System.currentTimeMillis() - theRefreshInterval <= myLastRefresh) {
-			return 0;
-		}
+	public int refreshAllCachesImmediately() {
 		StopWatch sw = new StopWatch();
-		myLastRefresh = System.currentTimeMillis();
-
 		int count = 0;
 		for (String resourceType : myListenerMap.resourceNames()) {
 			count += doRefresh(resourceType);
@@ -149,18 +130,17 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		return count;
 	}
 
-	// FIXME KBD I don't think this class is supposed to expose the Cache, so find another way to allow access to it
+	@VisibleForTesting
 	public boolean cacheContainsKey(IdDt theIdDt) {
 		return myResourceVersionCache.keySet().contains(theIdDt);
 	}
 
-	private long doRefresh(String theResourceName) {
+	private synchronized long doRefresh(String theResourceName) {
 		Class<? extends IBaseResource> resourceType = myFhirContext.getResourceDefinition(theResourceName).getImplementingClass();
 		Map<IVersionChangeListener, SearchParameterMap> map = myListenerMap.getListenerMap(theResourceName);
 		long count = 0;
-		System.out.println("map.isEmpty() = " + map.isEmpty());
 		if (map.isEmpty()) {
-			// FIXME KBD Ask KHS if this is what he intended for this part...
+			// FIXME KBD Ask KHS if this is what he intended for this section of the code...
 			ResourceVersionMap resourceVersionMap = myResourceVersionCacheSvc.getVersionLookup(theResourceName, SearchParameterMap.newSynchronous());
 			IdDt resourceId = resourceVersionMap.keySet().stream().findFirst().get();
 			String resourceVersion = resourceVersionMap.get(resourceId);
@@ -171,6 +151,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 				count += myListenerNotifier.compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(myResourceVersionCache, resourceVersionMap, listener);
 			}
 		}
+		myLastRefreshPerResourceType.put(theResourceName, System.currentTimeMillis());
 		return count;
 	}
 
@@ -197,10 +178,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 				return;
 			}
 			String resourceName = myFhirContext.getResourceType(theResource);
-			if (myListenerMap.hasListenersForResourceName(resourceName)) {
-				synchronized (this) {
-					requestRefresh(resourceName);
-				}
+			synchronized (this) {
+				requestRefresh(resourceName);
 			}
 		}
 	}

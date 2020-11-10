@@ -12,23 +12,23 @@ import com.google.common.annotations.VisibleForTesting;
  * of the change happening.
  */
 public interface IVersionChangeListenerRegistry {
-	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
 
-	boolean refreshAllCachesIfNecessary();
-
-	void forceRefresh();
-
-	void requestRefresh();
-
-	void requestRefresh(String theResourceName);
-
-	int doRefreshAllCaches(long theRefreshInterval);
-
+	@VisibleForTesting
 	boolean cacheContainsKey(IdDt theIdDt);
+
+	@VisibleForTesting
+	void clearCacheForUnitTest();
 
 	@VisibleForTesting
 	void clearListenersForUnitTest();
 
-	@VisibleForTesting
-	void clearCacheForUnitTest();
+	boolean refreshAllCachesIfNecessary();
+
+	int refreshAllCachesImmediately();
+
+	long refreshCacheWithRetry(String theResourceName);
+
+	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
+
+	void requestRefresh(String theResourceName);
 }
