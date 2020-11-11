@@ -38,6 +38,7 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		myVersionChangeListenerRegistry.refreshAllCachesIfNecessary();
 	}
 
+	// FIXME KBD please fix the failing tests--follow the pattern in the ones that pass
 	@Test
 	public void testRegisterInterceptor() throws InterruptedException {
 		TestCallback testCallback = new TestCallback();

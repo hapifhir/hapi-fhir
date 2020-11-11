@@ -21,6 +21,7 @@ public class VersionChangeListenerEntry {
 		return mySearchParameterMap;
 	}
 
+	// FIXME KHS ensure we reset cache
 	public long notifyListener(ResourceVersionCache theResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		long retval = 0;
 		if (myInitialized) {

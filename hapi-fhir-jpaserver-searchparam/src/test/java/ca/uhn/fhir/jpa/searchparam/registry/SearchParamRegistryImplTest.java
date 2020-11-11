@@ -165,6 +165,24 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testExtractExtensions() {
+		SearchParameter searchParameter = buildSearchParameter();
+
+		when(mySearchParamProvider.read(any())).thenReturn(searchParameter);
+		mySearchParamRegistry.forceRefresh();
+		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
+
+		RuntimeSearchParam converted = outcome.get("foo");
+		assertNotNull(converted);
+
+		assertEquals(1, converted.getExtensions("http://foo").size());
+		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
+		assertEquals("FOO", value.getValueAsString());
+	}
+
+	// FIXME KHS add tests
+
+	@Nonnull
+	private SearchParameter buildSearchParameter() {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setCode("foo");
 		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -177,18 +195,7 @@ public class SearchParamRegistryImplTest {
 		// Invalid entries
 		searchParameter.addExtension("http://bar", null);
 		searchParameter.addExtension(null, new StringType("BAR"));
-
-		when(mySearchParamProvider.read(any())).thenReturn(searchParameter);
-		myVersionChangeListenerRegistry.forceRefresh("SearchParameter");
-		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
-
-		RuntimeSearchParam converted = outcome.get("foo");
-		assertNotNull(converted);
-
-		assertEquals(1, converted.getExtensions("http://foo").size());
-		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
-		assertEquals("FOO", value.getValueAsString());
-
+		return searchParameter;
 	}
 
 }

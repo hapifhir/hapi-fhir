@@ -34,6 +34,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	static long LOCAL_REFRESH_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	static long REMOTE_REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
+	// FIXME KHS change Long to Instant
 	private static volatile Map<String, Long> myLastRefreshPerResourceType = new HashMap<>();
 
 	@Autowired
