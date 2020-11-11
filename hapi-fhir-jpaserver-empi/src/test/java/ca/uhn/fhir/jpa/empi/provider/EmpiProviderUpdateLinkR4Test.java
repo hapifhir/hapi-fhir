@@ -61,7 +61,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkTwiceWorksWhenNoVersionProvided() {
 		myEmpiProviderR4.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
-		Person person = (Person)myEmpiProviderR4.updateLink(myVersionlessPersonId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
+		Person person = (Person) myEmpiProviderR4.updateLink(myVersionlessPersonId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 		assertThat(person.getLink(), hasSize(0));
 	}
 

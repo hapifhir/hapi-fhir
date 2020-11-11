@@ -102,20 +102,24 @@ public class PersonHelper {
 
 		addHapiEidIfNoExternalEidIsPresent(newSourceResource, sourceResourceIdentifier, theIncomingResource);
 
-		setActive(newSourceResource, resourceDefinition);
+		setActive(newSourceResource, resourceDefinition, true);
 
 		EmpiUtil.setEmpiManaged(newSourceResource);
 
 		return (T) newSourceResource;
 	}
 
-	private void setActive(IBaseResource theNewSourceResource, RuntimeResourceDefinition theResourceDefinition) {
+	private void setActive(IBaseResource theResource, boolean theActiveFlag) {
+		setActive(theResource, myFhirContext.getResourceDefinition(theResource), theActiveFlag);
+	}
+
+	private void setActive(IBaseResource theNewSourceResource, RuntimeResourceDefinition theResourceDefinition, boolean theActiveFlag) {
 		BaseRuntimeChildDefinition activeChildDefinition = theResourceDefinition.getChildByName("active");
 		if (activeChildDefinition == null) {
 			ourLog.warn(String.format("Unable to set active flag on the provided source resource %s.", theNewSourceResource));
 			return;
 		}
-		activeChildDefinition.getMutator().setValue(theNewSourceResource, toBooleanType(true));
+		activeChildDefinition.getMutator().setValue(theNewSourceResource, toBooleanType(theActiveFlag));
 	}
 
 	/**
@@ -299,6 +303,16 @@ public class PersonHelper {
 		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
 	}
 
+	private <T extends IBase> boolean fromBooleanType(T theFlag) {
+		switch (myFhirContext.getVersion().getVersion()) {
+			case R4:
+				return ((BooleanType)theFlag).booleanValue();
+			case DSTU3:
+				return ((org.hl7.fhir.dstu3.model.BooleanType)theFlag).booleanValue();
+		}
+		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
+	}
+
 	/**
 	 * To avoid adding duplicate
 	 *
@@ -315,7 +329,7 @@ public class PersonHelper {
 		}
 	}
 
-	public void mergePersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
+	public void mergeFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				mergeR4PersonFields(theFromPerson, theToPerson);
@@ -460,31 +474,33 @@ public class PersonHelper {
 		}
 	}
 
-	public void deactivatePerson(IAnyResource thePerson) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				Person personR4 = (Person) thePerson;
-				personR4.setActive(false);
-				break;
-			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				personStu3.setActive(false);
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
+	public void deactivateResource(IAnyResource theResource) {
+		// get a ref to the actual ID Field
+		setActive(theResource, myFhirContext.getResourceDefinition(theResource), false);
 	}
 
 	public boolean isDeactivated(IBaseResource thePerson) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				Person personR4 = (Person) thePerson;
-				return !personR4.getActive();
-			case DSTU3:
-				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-				return !personStu3.getActive();
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(thePerson);
+		BaseRuntimeChildDefinition activeChildDefinition = resourceDefinition.getChildByName("active");
+
+		Optional<IBase> value = activeChildDefinition.getAccessor().getFirstValueOrNull(thePerson);
+		return value.map(v -> {
+			return !fromBooleanType(v);
+		}).orElseThrow(
+			() -> new UnsupportedOperationException(String.format("Resource %s does not support deactivation", resourceDefinition.getName()))
+		);
+
+//
+//		}
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				Person personR4 = (Person) thePerson;
+//				return !personR4.getActive();
+//			case DSTU3:
+//				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
+//				return !personStu3.getActive();
+//			default:
+//				throw
+//		}
 	}
 }

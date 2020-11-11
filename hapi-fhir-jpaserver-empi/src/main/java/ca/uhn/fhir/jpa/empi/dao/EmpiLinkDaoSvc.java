@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class EmpiLinkDaoSvc {
+
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -330,33 +331,4 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkFactory.newEmpiLink();
 	}
 
-//	@Transactional
-//	public List<EmpiLink> deleteEmpiLinks(IAnyResource theSourceResource, IAnyResource theTargetResource) {
-//		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
-//		if (sourceResourcePid == null) {
-//			if (ourLog.isDebugEnabled()) {
-//				ourLog.debug(String.format("Unable to find source resource for ID %s, no links deleted", sourceResourcePid));
-//			}
-//			return new ArrayList<>();
-//		}
-//
-//		Long targetResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
-//		if (targetResourcePid == null) {
-//			if (ourLog.isDebugEnabled()) {
-//				ourLog.debug(String.format("Unable to find target resource for ID %s, no links deleted", targetResourcePid));
-//			}
-//
-//			return new ArrayList<>();
-//		}
-//
-//		EmpiLink exampleLink = myEmpiLinkFactory
-//			.newEmpiLink()
-//			.setSourceResourcePid(sourceResourcePid)
-//			.setTargetPid(targetResourcePid);
-//
-//		Example<EmpiLink> example = Example.of(exampleLink);
-//		List<EmpiLink> linksToDelete = myEmpiLinkDao.findAll(example);
-//		myEmpiLinkDao.deleteAll(linksToDelete);
-//		return linksToDelete;
-//	}
 }
