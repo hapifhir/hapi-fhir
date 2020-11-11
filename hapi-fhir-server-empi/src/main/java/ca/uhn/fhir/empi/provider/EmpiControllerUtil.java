@@ -46,7 +46,7 @@ public class EmpiControllerUtil {
 		if (thePersonId == null) {
 			return null;
 		}
-		return getPersonIdDtOrThrowException(theName, thePersonId);
+		return getGoldenIdDtOrThrowException(theName, thePersonId);
 	}
 
 	public static IIdType extractTargetIdDtOrNull(String theName, String theTargetId) {
@@ -56,13 +56,13 @@ public class EmpiControllerUtil {
 		return getTargetIdDtOrThrowException(theName, theTargetId);
 	}
 
-	static IdDt getPersonIdDtOrThrowException(String theParamName, String theId) {
-		IdDt personId = new IdDt(theId);
-		if (!"Person".equals(personId.getResourceType()) ||
-			personId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form Person/<id> where <id> is the id of the person");
+	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
+		IdDt goldenResourceId = new IdDt(theId);
+		//TODO GGG MDM: maybe add a gate here to only consider resources that can possibly be EMPI'ed?
+		if (goldenResourceId.getIdPart() == null) {
+			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form <resourceType>/<id> where <id> is the id of the resource");
 		}
-		return personId;
+		return goldenResourceId;
 	}
 
 	public static IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {

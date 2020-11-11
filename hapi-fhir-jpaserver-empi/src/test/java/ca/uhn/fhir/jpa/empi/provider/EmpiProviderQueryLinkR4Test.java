@@ -82,7 +82,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryPossibleDuplicates() {
-		Parameters result = myEmpiProviderR4.getDuplicatePersons(myRequestDetails);
+		Parameters result = myEmpiProviderR4.getDuplicateGoldenResources(myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
@@ -93,7 +93,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testNotDuplicate() {
 		{
-			Parameters result = myEmpiProviderR4.getDuplicatePersons(myRequestDetails);
+			Parameters result = myEmpiProviderR4.getDuplicateGoldenResources(myRequestDetails);
 			List<Parameters.ParametersParameterComponent> list = result.getParameter();
 			assertThat(list, hasSize(1));
 		}
@@ -103,7 +103,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertEquals("success", result.getParameterFirstRep().getName());
 			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 		}
-		Parameters result = myEmpiProviderR4.getDuplicatePersons(myRequestDetails);
+		Parameters result = myEmpiProviderR4.getDuplicateGoldenResources(myRequestDetails);
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(0));
 	}
@@ -120,9 +120,9 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	private void assertEmpiLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, EmpiMatchResultEnum theMatchResult, String theEidMatch, String theNewPerson, String theScore) {
 		assertThat(thePart, hasSize(theExpectedSize));
-		assertThat(thePart.get(0).getName(), is("personId"));
+		assertThat(thePart.get(0).getName(), is("goldenResourceId"));
 		assertThat(thePart.get(0).getValue().toString(), is(removeVersion(thePersonId)));
-		assertThat(thePart.get(1).getName(), is("targetId"));
+		assertThat(thePart.get(1).getName(), is("targetResourceId"));
 		assertThat(thePart.get(1).getValue().toString(), is(removeVersion(theTargetId)));
 		if (theExpectedSize > 2) {
 			assertThat(thePart.get(2).getName(), is("matchResult"));
@@ -133,7 +133,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(thePart.get(4).getName(), is("eidMatch"));
 			assertThat(thePart.get(4).getValue().primitiveValue(), is(theEidMatch));
 
-			assertThat(thePart.get(5).getName(), is("newPerson"));
+			assertThat(thePart.get(5).getName(), is("hadToCreateNewResource"));
 			assertThat(thePart.get(5).getValue().primitiveValue(), is(theNewPerson));
 
 			assertThat(thePart.get(6).getName(), is("score"));

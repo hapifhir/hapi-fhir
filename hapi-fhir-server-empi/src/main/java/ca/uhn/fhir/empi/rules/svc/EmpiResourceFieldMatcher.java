@@ -23,12 +23,14 @@ package ca.uhn.fhir.empi.rules.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.util.FhirTerser;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.empi.api.EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
@@ -40,12 +42,14 @@ public class EmpiResourceFieldMatcher {
 	private final EmpiFieldMatchJson myEmpiFieldMatchJson;
 	private final String myResourceType;
 	private final String myResourcePath;
+	private final EmpiRulesJson myEmpiRulesJson;
 
-	public EmpiResourceFieldMatcher(FhirContext theFhirContext, EmpiFieldMatchJson theEmpiFieldMatchJson) {
+	public EmpiResourceFieldMatcher(FhirContext theFhirContext, EmpiFieldMatchJson theEmpiFieldMatchJson, EmpiRulesJson theEmpiRulesJson) {
 		myFhirContext = theFhirContext;
 		myEmpiFieldMatchJson = theEmpiFieldMatchJson;
 		myResourceType = theEmpiFieldMatchJson.getResourceType();
 		myResourcePath = theEmpiFieldMatchJson.getResourcePath();
+		myEmpiRulesJson = theEmpiRulesJson;
 	}
 
 	/**
@@ -88,11 +92,20 @@ public class EmpiResourceFieldMatcher {
 	private void validate(IBaseResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
 		Validate.notNull(resourceType, "Resource type may not be null");
+
 		if (ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(myResourceType)) {
-			Validate.isTrue("Patient".equalsIgnoreCase(resourceType) || "Practitioner".equalsIgnoreCase(resourceType),
-				"Expecting resource type Patient/Practitioner got resource type %s", resourceType);
+			boolean isMdmType = myEmpiRulesJson.getMdmTypes().stream().anyMatch(mdmType -> mdmType.equalsIgnoreCase(resourceType));
+			Validate.isTrue(isMdmType, "Expecting resource type %s, got resource type %s", myEmpiRulesJson.getMdmTypes().stream().collect(Collectors.joining(",")), resourceType);
 		} else {
 			Validate.isTrue(myResourceType.equals(resourceType), "Expecting resource type %s got resource type %s", myResourceType, resourceType);
 		}
+	}
+
+	public String getResourceType() {
+		return myResourceType;
+	}
+
+	public String getResourcePath() {
+		return myResourcePath;
 	}
 }

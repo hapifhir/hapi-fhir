@@ -49,6 +49,10 @@ public class EmpiRulesJson implements IModelJson {
 	@JsonProperty(value = "eidSystem")
 	String myEnterpriseEIDSystem;
 
+
+	@JsonProperty(value = "mdmTypes")
+	List<String> myMdmTypes;
+
 	transient VectorMatchResultMap myVectorMatchResultMap;
 
 	public void addMatchField(EmpiFieldMatchJson theMatchRuleName) {
@@ -174,4 +178,13 @@ public class EmpiRulesJson implements IModelJson {
 			return theEmpiRulesJson;
 		}
 	}
+
+	public List<String> getMdmTypes() {
+		return myMdmTypes;
+	}
+
+	public void setMdmTypes(List<String> theMdmTypes) {
+		myMdmTypes = theMdmTypes;
+	}
+
 }

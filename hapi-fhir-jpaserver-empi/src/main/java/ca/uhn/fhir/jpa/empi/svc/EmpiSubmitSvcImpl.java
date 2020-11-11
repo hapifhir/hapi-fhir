@@ -67,8 +67,8 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 	@Transactional
 	public long submitAllTargetTypesToEmpi(@Nullable String theCriteria) {
 		long submittedCount = 0;
-		submittedCount += submitPatientTypeToEmpi(theCriteria);
-		submittedCount += submitPractitionerTypeToEmpi(theCriteria);
+		submittedCount += submitPatientTypeToMdm(theCriteria);
+		submittedCount += submitPractitionerTypeToMdm(theCriteria);
 		return submittedCount;
 	}
 
@@ -97,7 +97,7 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 				total += loadPidsAndSubmitToEmpiChannel(theSearchBuilder, pidBatch);
 			} while (query.hasNext());
 		} catch (IOException theE) {
-			throw new InternalErrorException("Failure while attempting to query resources for " + ProviderConstants.OPERATION_EMPI_SUBMIT, theE);
+			throw new InternalErrorException("Failure while attempting to query resources for " + ProviderConstants.OPERATION_MDM_SUBMIT, theE);
 		}
 		ourLog.info("EMPI Submit complete.  Submitted a total of {} resources.", total);
 		return total;
@@ -123,19 +123,19 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 
 	@Override
 	@Transactional
-	public long submitPractitionerTypeToEmpi(@Nullable String theCriteria) {
+	public long submitPractitionerTypeToMdm(@Nullable String theCriteria) {
 		return submitTargetTypeToEmpi("Practitioner", theCriteria);
 	}
 
 	@Override
 	@Transactional
-	public long submitPatientTypeToEmpi(@Nullable String theCriteria) {
+	public long submitPatientTypeToMdm(@Nullable String theCriteria) {
 		return submitTargetTypeToEmpi("Patient", theCriteria);
 	}
 
 	@Override
 	@Transactional
-	public long submitTargetToEmpi(IIdType theId) {
+	public long submitTargetToMdm(IIdType theId) {
 		resolveTargetTypeOrThrowException(theId.getResourceType());
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource read = resourceDao.read(theId);
@@ -145,7 +145,7 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 
 	private void resolveTargetTypeOrThrowException(String theResourceType) {
 		if (!EmpiUtil.supportedTargetType(theResourceType)) {
-			throw new InvalidRequestException(ProviderConstants.OPERATION_EMPI_SUBMIT + " does not support resource type: " + theResourceType);
+			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}
 	}
 }

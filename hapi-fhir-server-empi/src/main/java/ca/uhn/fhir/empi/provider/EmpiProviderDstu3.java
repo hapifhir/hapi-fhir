@@ -49,8 +49,10 @@ import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.codesystems.MatchGrade;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -77,33 +79,23 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 	}
 
 	@Operation(name = ProviderConstants.EMPI_MATCH, type = Patient.class)
-	public Bundle match(@OperationParam(name = ProviderConstants.EMPI_MATCH_RESOURCE, min = 1, max = 1) Patient thePatient) {
+	public Bundle match(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) Patient thePatient) {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
 
-		List<MatchedTarget> matches = myEmpiMatchFinderSvc.getMatchedTargets("Patient", thePatient);
-		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
+		return getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
+	}
 
-		Bundle retVal = new Bundle();
-		retVal.setType(Bundle.BundleType.SEARCHSET);
-		retVal.setId(UUID.randomUUID().toString());
-		retVal.getMeta().setLastUpdatedElement(InstantType.now());
-
-		for (MatchedTarget next : matches) {
-			boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
-			if (!shouldKeepThisEntry) {
-				continue;
-			}
-
-			Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
-			entry.setResource((Resource) next.getTarget());
-			entry.setSearch(toBundleEntrySearchComponent(next));
-
-			retVal.addEntry(entry);
+	@Operation(name = ProviderConstants.MDM_MATCH)
+	public Bundle serverMatch(@OperationParam(name = ProviderConstants.MDM_MATCH_RESOURCE, min = 1, max = 1) IAnyResource theResource,
+									  @OperationParam(name = ProviderConstants.MDM_RESOURCE_TYPE, min = 1, max = 1) StringType theResourceType
+	) {
+		if (theResource == null) {
+			throw new InvalidRequestException("resource may not be null");
 		}
+		return getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueNotNull());
 
-		return retVal;
 	}
 
 	private Bundle.BundleEntrySearchComponent toBundleEntrySearchComponent(MatchedTarget theMatchedTarget) {
@@ -111,12 +103,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		searchComponent.setMode(Bundle.SearchEntryMode.MATCH);
 		searchComponent.setScore(theMatchedTarget.getMatchResult().getNormalizedScore());
 
-		MatchGrade matchGrade = MatchGrade.PROBABLE;
-		if (theMatchedTarget.isMatch()) {
-			matchGrade = MatchGrade.CERTAIN;
-		} else if (theMatchedTarget.isPossibleMatch()) {
-			matchGrade = MatchGrade.POSSIBLE;
-		}
+		MatchGrade matchGrade = getMatchGrade(theMatchedTarget);
 
 		searchComponent.addExtension(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE, new CodeType(matchGrade.toCode()));
 		return searchComponent;
@@ -128,7 +115,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 									  RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromPersonId, theToPersonId);
 
-		return (Person) myEmpiControllerSvc.mergePersons(theFromPersonId.getValue(), theToPersonId.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.MERGE_PERSONS));
+		return (Person) myEmpiControllerSvc.mergeGoldenResources(theFromPersonId.getValue(), theToPersonId.getValue(), createMdmContext(theRequestDetails, EmpiTransactionContext.OperationType.MERGE_PERSONS));
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK, type = Person.class)
@@ -139,7 +126,7 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 
 		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
 
-		return (Person) myEmpiControllerSvc.updateLink(thePersonId.getValue(), theTargetId.getValue(), theMatchResult.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.UPDATE_LINK));
+		return (Person) myEmpiControllerSvc.updateLink(thePersonId.getValue(), theTargetId.getValue(), theMatchResult.getValue(), createMdmContext(theRequestDetails, EmpiTransactionContext.OperationType.UPDATE_LINK));
 	}
 
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS)
@@ -149,35 +136,35 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 										  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theLinkSource,
 										  ServletRequestDetails theRequestDetails) {
 
-		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(thePersonId), extractStringOrNull(theTargetId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.QUERY_LINKS));
+		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(thePersonId), extractStringOrNull(theTargetId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createMdmContext(theRequestDetails, EmpiTransactionContext.OperationType.QUERY_LINKS));
 		return (Parameters) parametersFromEmpiLinks(empiLinkJson, true);
 	}
 
-	@Operation(name = ProviderConstants.EMPI_DUPLICATE_PERSONS)
+	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES)
 	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
-		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getDuplicatePersons(createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.QUERY_LINKS));
+		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, EmpiTransactionContext.OperationType.QUERY_LINKS));
 		return (Parameters) parametersFromEmpiLinks(possibleDuplicates, false);
 	}
 
-	@Operation(name = ProviderConstants.EMPI_NOT_DUPLICATE)
+	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)
 	// TODO KHS can this return void?
 	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType thePersonId,
 																		  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1) StringType theTargetId,
 																		  ServletRequestDetails theRequestDetails) {
 
 		validateNotDuplicateParameters(thePersonId, theTargetId);
-		myEmpiControllerSvc.notDuplicatePerson(thePersonId.getValue(), theTargetId.getValue(), createEmpiContext(theRequestDetails, EmpiTransactionContext.OperationType.NOT_DUPLICATE));
+		myEmpiControllerSvc.notDuplicateGoldenResource(thePersonId.getValue(), theTargetId.getValue(), createMdmContext(theRequestDetails, EmpiTransactionContext.OperationType.NOT_DUPLICATE));
 
 		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
 		return retval;
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
 	})
 	public Parameters empiBatchOnAllTargets(
-		@OperationParam(name= ProviderConstants.EMPI_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
+		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
 		ServletRequestDetails theRequestDetails) {
 		String criteria = convertCriteriaToString(theCriteria);
 		long submittedCount  = myEmpiBatchSvc.submitAllTargetTypesToEmpi(criteria);
@@ -205,45 +192,45 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		return parameters;
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
 	public Parameters empiBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myEmpiBatchSvc.submitTargetToEmpi(theIdParam);
+		long submittedCount = myEmpiBatchSvc.submitTargetToMdm(theIdParam);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
 	public Parameters empiBatchPatientType(
-		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
+		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount = myEmpiBatchSvc.submitPatientTypeToEmpi(criteria);
+		long submittedCount = myEmpiBatchSvc.submitPatientTypeToMdm(criteria);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
 	public Parameters empiBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myEmpiBatchSvc.submitTargetToEmpi(theIdParam);
+		long submittedCount = myEmpiBatchSvc.submitTargetToMdm(theIdParam);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
-	@Operation(name = ProviderConstants.OPERATION_EMPI_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
 	public Parameters empiBatchPractitionerType(
-		@OperationParam(name = ProviderConstants.EMPI_BATCH_RUN_CRITERIA) StringType theCriteria,
+		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount = myEmpiBatchSvc.submitPractitionerTypeToEmpi(criteria);
+		long submittedCount = myEmpiBatchSvc.submitPractitionerTypeToMdm(criteria);
 		return buildEmpiOutParametersWithCount(submittedCount);
 	}
 
@@ -256,5 +243,40 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 			.setName(ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)
 			.setValue(new DecimalType(theCount));
 		return parameters;
+	}
+
+	private Bundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType) {
+		List<MatchedTarget> matches = myEmpiMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
+		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
+
+		Bundle retVal = new Bundle();
+		retVal.setType(Bundle.BundleType.SEARCHSET);
+		retVal.setId(UUID.randomUUID().toString());
+		retVal.getMeta().setLastUpdatedElement(InstantType.now());
+
+		for (MatchedTarget next : matches) {
+			boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
+			if (!shouldKeepThisEntry) {
+				continue;
+			}
+
+			Bundle.BundleEntryComponent entry = new Bundle.BundleEntryComponent();
+			entry.setResource((Resource) next.getTarget());
+			entry.setSearch(toBundleEntrySearchComponent(next));
+
+			retVal.addEntry(entry);
+		}
+		return retVal;
+	}
+
+	@Nonnull
+	protected MatchGrade getMatchGrade(MatchedTarget theTheMatchedTarget) {
+		MatchGrade matchGrade = MatchGrade.PROBABLE;
+		if (theTheMatchedTarget.isMatch()) {
+			matchGrade = MatchGrade.CERTAIN;
+		} else if (theTheMatchedTarget.isPossibleMatch()) {
+			matchGrade = MatchGrade.POSSIBLE;
+		}
+		return matchGrade;
 	}
 }

@@ -57,7 +57,7 @@ public class EmpiControllerHelper {
 	}
 
 	public IAnyResource getLatestPersonFromIdOrThrowException(String theParamName, String theId) {
-		IdDt personId = EmpiControllerUtil.getPersonIdDtOrThrowException(theParamName, theId);
+		IdDt personId = EmpiControllerUtil.getGoldenIdDtOrThrowException(theParamName, theId);
 		return loadResource(personId.toUnqualifiedVersionless());
 	}
 

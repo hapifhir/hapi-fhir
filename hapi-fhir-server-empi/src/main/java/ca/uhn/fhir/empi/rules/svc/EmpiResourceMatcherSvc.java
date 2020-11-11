@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The EmpiResourceComparator is in charge of performing actual comparisons between left and right records.
@@ -66,7 +67,7 @@ public class EmpiResourceMatcherSvc {
 			throw new ConfigurationException("Failed to load EMPI Rules.  If EMPI is enabled, then EMPI rules must be available in context.");
 		}
 		for (EmpiFieldMatchJson matchFieldJson : myEmpiRulesJson.getMatchFields()) {
-			myFieldMatchers.add(new EmpiResourceFieldMatcher(myFhirContext, matchFieldJson));
+			myFieldMatchers.add(new EmpiResourceFieldMatcher( myFhirContext, matchFieldJson, myEmpiRulesJson));
 		}
 
 	}
@@ -116,9 +117,15 @@ public class EmpiResourceMatcherSvc {
 	private EmpiMatchOutcome getMatchOutcome(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long vector = 0;
 		double score = 0.0;
-		for (int i = 0; i < myFieldMatchers.size(); ++i) {
+		//TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
+		String resourceType = myFhirContext.getResourceType(theLeftResource);
+		List<EmpiResourceFieldMatcher> resourceRelevantFieldMatchers = myFieldMatchers.stream()
+			.filter(comp -> comp.getResourceType().equalsIgnoreCase("*") || comp.getResourceType().equalsIgnoreCase(resourceType))
+			.collect(Collectors.toList());
+
+		for (int i = 0; i < resourceRelevantFieldMatchers.size(); ++i) {
 			//any that are not for the resourceType in question.
-			EmpiResourceFieldMatcher fieldComparator = myFieldMatchers.get(i);
+			EmpiResourceFieldMatcher fieldComparator = resourceRelevantFieldMatchers.get(i);
 			EmpiMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
 			if (matchEvaluation.match) {
 				vector |= (1 << i);

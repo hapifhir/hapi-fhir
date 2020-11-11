@@ -3,9 +3,13 @@ package ca.uhn.fhir.jpa.empi.provider;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 
@@ -38,6 +44,63 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 		Patient newJane = buildJanePatient();
 
 		Bundle result = myEmpiProviderR4.match(newJane);
+		assertEquals(1, result.getEntry().size());
+
+		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
+		assertEquals(createdJane.getId(), entry0.getResource().getId());
+
+		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
+		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
+
+		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
+		Extension matchGradeExtension = searchComponent.getExtensionByUrl(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		assertNotNull(matchGradeExtension);
+		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+	}
+
+	@Test
+	public void testMedicationMatch() throws Exception {
+		Organization org = new Organization();
+		org.setId("Organization/mfr");
+		myOrganizationDao.update(org);
+
+		Medication medication = buildMedication();
+		Medication createdMedication = createMedication(medication);
+		Medication newMedication = buildMedication();
+
+		Bundle result = myEmpiProviderR4.serverMatch(newMedication, new StringType("Medication"));
+		assertEquals(1, result.getEntry().size());
+
+		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
+		assertEquals(createdMedication.getId(), entry0.getResource().getId());
+
+		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
+		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
+
+		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
+		Extension matchGradeExtension = searchComponent.getExtensionByUrl(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		assertNotNull(matchGradeExtension);
+		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+
+	}
+
+	private Medication buildMedication() {
+		Medication medication = new Medication();
+		medication.setManufacturer(new Reference("Organization/mfr"));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem("zoop").setCode("boop");
+		medication.setCode(codeableConcept);
+		return medication;
+	}
+
+	@Test
+	public void testServerLevelMatch() throws Exception {
+		Patient jane = buildJanePatient();
+		jane.setActive(true);
+		Patient createdJane = createPatient(jane);
+		Patient newJane = buildJanePatient();
+
+		Bundle result = myEmpiProviderR4.serverMatch(newJane, new StringType("Patient"));
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);

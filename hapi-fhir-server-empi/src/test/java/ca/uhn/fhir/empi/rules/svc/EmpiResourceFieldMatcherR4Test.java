@@ -1,6 +1,7 @@
 package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
+import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
 import ca.uhn.fhir.empi.rules.json.EmpiSimilarityJson;
 import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -8,6 +9,8 @@ import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
@@ -20,14 +23,17 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 	protected EmpiResourceFieldMatcher myComparator;
 	private Patient myJohn;
 	private Patient myJohny;
+	private EmpiRulesJson myEmpiRulesJson;
 
 	@Override
 	@BeforeEach
 	public void before() {
 		super.before();
 
-
-		myComparator = new EmpiResourceFieldMatcher(ourFhirContext, myGivenNameMatchField);
+		ArrayList<String>  myLegalMdmTypes = new ArrayList<>();
+		myLegalMdmTypes.add("Patient");
+		myEmpiRulesJson.setMdmTypes(myLegalMdmTypes);
+		myComparator = new EmpiResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myEmpiRulesJson);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
 	}
@@ -67,7 +73,7 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 				.setResourceType("Patient")
 				.setResourcePath("foo")
 				.setSimilarity(new EmpiSimilarityJson().setAlgorithm(EmpiSimilarityEnum.COSINE).setMatchThreshold(NAME_THRESHOLD));
-			EmpiResourceFieldMatcher comparator = new EmpiResourceFieldMatcher(ourFhirContext, matchField);
+			EmpiResourceFieldMatcher comparator = new EmpiResourceFieldMatcher(ourFhirContext, matchField, myEmpiRulesJson);
 			comparator.match(myJohn, myJohny);
 			fail();
 		} catch (DataFormatException e) {

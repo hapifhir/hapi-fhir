@@ -53,7 +53,7 @@ public interface IEmpiSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for EMPI processing.
 	 * @return the number of resources submitted for EMPI processing.
 	 */
-	long submitPractitionerTypeToEmpi(String theCriteria);
+	long submitPractitionerTypeToMdm(String theCriteria);
 
 	/**
 	 * Convenience method that calls {@link #submitTargetTypeToEmpi(String, String)} with the type pre-populated.
@@ -61,13 +61,13 @@ public interface IEmpiSubmitSvc {
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for EMPI processing.
 	 * @return the number of resources submitted for EMPI processing.
 	 */
-	long submitPatientTypeToEmpi(String theCriteria);
+	long submitPatientTypeToMdm(String theCriteria);
 
 	/**
 	 * Given an ID and a target type valid for EMPI, manually submit the given ID for EMPI processing.
 	 * @param theId the ID of the resource to process for EMPI.
 	 * @return the constant `1`, as if this function returns successfully, it will have processed one resource for EMPI.
 	 */
-	long submitTargetToEmpi(IIdType theId);
+	long submitTargetToMdm(IIdType theId);
 
 }

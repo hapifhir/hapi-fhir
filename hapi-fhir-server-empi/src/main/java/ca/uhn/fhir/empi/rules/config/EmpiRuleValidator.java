@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -63,9 +65,22 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 	}
 
 	public void validate(EmpiRulesJson theEmpiRulesJson) {
+		validateMdmTypes(theEmpiRulesJson);
 		validateSearchParams(theEmpiRulesJson);
 		validateMatchFields(theEmpiRulesJson);
 		validateSystemIsUri(theEmpiRulesJson);
+	}
+
+	public void validateMdmTypes(EmpiRulesJson theEmpiRulesJson) {
+		for (String resourceType: theEmpiRulesJson.getMdmTypes()) {
+			validateTypeHasIdentifier(resourceType);
+		}
+	}
+
+	public void validateTypeHasIdentifier(String theResourceType) {
+		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier") == null) {
+			throw new ConfigurationException("Resource Type " + theResourceType + " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
+		}
 	}
 
 	private void validateSearchParams(EmpiRulesJson theEmpiRulesJson) {
@@ -105,7 +120,7 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 			} else if (fieldMatch.getMatcher() == null) {
 				throw new ConfigurationException("MatchField " + fieldMatch.getName() + " has neither a similarity nor a matcher.  At least one must be present.");
 			}
-			validatePath(fieldMatch);
+			validatePath(theEmpiRulesJson.getMdmTypes(), fieldMatch);
 		}
 	}
 
@@ -116,23 +131,29 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 		}
 	}
 
-	private void validatePath(EmpiFieldMatchJson theFieldMatch) {
+	private void validatePath(List<String> theMdmTypes, EmpiFieldMatchJson theFieldMatch) {
 		String resourceType = theFieldMatch.getResourceType();
+
+
 		if (EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(resourceType)) {
-			validatePatientPath(theFieldMatch);
-			validatePractitionerPath(theFieldMatch);
-		} else if ("Patient".equals(resourceType)) {
-			validatePatientPath(theFieldMatch);
-		} else if ("Practitioner".equals(resourceType)) {
-			validatePractitionerPath(theFieldMatch);
+			validateFieldPathForAllTypes(theMdmTypes, theFieldMatch);
 		} else {
-			throw new ConfigurationException("MatchField " + theFieldMatch.getName() + " has unknown resourceType " + resourceType);
+			validateFieldPath(theFieldMatch);
 		}
 	}
 
-	private void validatePatientPath(EmpiFieldMatchJson theFieldMatch) {
+	private void validateFieldPathForAllTypes(List<String> theMdmResourceTypes, EmpiFieldMatchJson theFieldMatch) {
+
+		for (String resourceType: theMdmResourceTypes) {
+			validateFieldPathForType(resourceType, theFieldMatch);
+		}
+	}
+
+	private void validateFieldPathForType(String theResourceType, EmpiFieldMatchJson theFieldMatch) {
 		try {
-			myTerser.getDefinition(myPatientClass, "Patient." + theFieldMatch.getResourcePath());
+			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
+			Class<? extends IBaseResource> implementingClass = resourceDefinition.getImplementingClass();
+			myTerser.getDefinition(implementingClass, theResourceType + "." + theFieldMatch.getResourcePath());
 		} catch (DataFormatException | ConfigurationException e) {
 			throw new ConfigurationException("MatchField " +
 				theFieldMatch.getName() +
@@ -140,20 +161,12 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 				theFieldMatch.getResourceType() +
 				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
 				e.getMessage());
+
 		}
 	}
 
-	private void validatePractitionerPath(EmpiFieldMatchJson theFieldMatch) {
-		try {
-			myTerser.getDefinition(myPractitionerClass, "Practitioner." + theFieldMatch.getResourcePath());
-		} catch (DataFormatException e) {
-			throw new ConfigurationException("MatchField " +
-				theFieldMatch.getName() +
-				" resourceType " +
-				theFieldMatch.getResourceType() +
-				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
-				e.getMessage());
-		}
+	private void validateFieldPath(EmpiFieldMatchJson theFieldMatch) {
+		validateFieldPathForType(theFieldMatch.getResourceType(), theFieldMatch);
 	}
 
 	private void validateSystemIsUri(EmpiRulesJson theEmpiRulesJson) {

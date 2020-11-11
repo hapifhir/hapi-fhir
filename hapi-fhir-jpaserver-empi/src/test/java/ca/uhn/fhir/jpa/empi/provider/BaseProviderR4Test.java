@@ -37,6 +37,7 @@ public abstract class BaseProviderR4Test extends BaseEmpiR4Test {
 		Resource resource = resourceLoader.getResource(theString);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		myEmpiSettings.setScriptText(json);
+
 	}
 
 	@BeforeEach

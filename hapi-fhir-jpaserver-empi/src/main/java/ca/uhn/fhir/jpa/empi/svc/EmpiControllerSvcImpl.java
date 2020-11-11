@@ -54,7 +54,7 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	IEmpiLinkUpdaterSvc myIEmpiLinkUpdaterSvc;
 
 	@Override
-	public IAnyResource mergePersons(String theFromPersonId, String theToPersonId, EmpiTransactionContext theEmpiTransactionContext) {
+	public IAnyResource mergeGoldenResources(String theFromPersonId, String theToPersonId, EmpiTransactionContext theEmpiTransactionContext) {
 		IAnyResource fromPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
 		IAnyResource toPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
 		myEmpiControllerHelper.validateMergeResources(fromPerson, toPerson);
@@ -75,7 +75,7 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	}
 
 	@Override
-	public Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> getDuplicateGoldenResources(EmpiTransactionContext theEmpiContext) {
 		return myEmpiLinkQuerySvc.getDuplicatePersons(theEmpiContext);
 	}
 
@@ -91,7 +91,7 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	}
 
 	@Override
-	public void notDuplicatePerson(String thePersonId, String theTargetPersonId, EmpiTransactionContext theEmpiContext) {
+	public void notDuplicateGoldenResource(String thePersonId, String theTargetPersonId, EmpiTransactionContext theEmpiContext) {
 		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
 		IAnyResource target = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetPersonId);
 

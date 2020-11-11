@@ -156,6 +156,7 @@ public class EmpiLink {
 	}
 
 	public EmpiLink setSourceResourcePid(Long theSourceResourcePid) {
+		myPersonPid = theSourceResourcePid;
 		mySourceResourcePid = theSourceResourcePid;
 		return this;
 	}

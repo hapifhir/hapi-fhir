@@ -41,8 +41,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,6 +85,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected FhirContext myFhirContext;
 	@Autowired
 	protected IFhirResourceDao<Patient> myPatientDao;
+	@Autowired
+	protected IFhirResourceDao<Organization> myOrganizationDao;
+	@Autowired
+	protected IFhirResourceDao<Medication> myMedicationDao;
 	@Autowired
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
@@ -170,6 +175,16 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
+		
+	}
+
+	@Nonnull
+	protected Medication createMedication(Medication theMedication) {
+		//Note that since our empi-rules block on active=true, all patients must be active.
+		DaoMethodOutcome outcome = myMedicationDao.create(theMedication);
+		Medication medication = (Medication) outcome.getResource();
+		medication.setId(outcome.getId());
+		return medication;
 	}
 
 	@Nonnull

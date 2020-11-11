@@ -43,10 +43,10 @@ public abstract class BaseEmpiProvider {
 		myFhirContext = theFhirContext;
 	}
 
-	protected void validateMergeParameters(IPrimitiveType<String> theFromPersonId, IPrimitiveType<String> theToPersonId) {
-		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
-		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
-		if (theFromPersonId.getValue().equals(theToPersonId.getValue())) {
+	protected void validateMergeParameters(IPrimitiveType<String> theFromGoldenResourceId, IPrimitiveType<String> theToGoldenResourceId) {
+		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
+		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
+		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
 			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
 		}
  	}
@@ -57,9 +57,9 @@ public abstract class BaseEmpiProvider {
 		}
 	}
 
-	protected void validateUpdateLinkParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId, IPrimitiveType<String> theMatchResult) {
-		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
-		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
+	protected void validateUpdateLinkParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId, IPrimitiveType<String> theMatchResult) {
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, theMatchResult);
 		EmpiMatchResultEnum matchResult = EmpiMatchResultEnum.valueOf(theMatchResult.getValue());
 		switch (matchResult) {
@@ -72,12 +72,12 @@ public abstract class BaseEmpiProvider {
 		}
 	}
 
-	protected void validateNotDuplicateParameters(IPrimitiveType<String> thePersonId, IPrimitiveType<String> theTargetId) {
-		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
-		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
+	protected void validateNotDuplicateParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId) {
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 	}
 
-	protected EmpiTransactionContext createEmpiContext(RequestDetails theRequestDetails, EmpiTransactionContext.OperationType theOperationType) {
+	protected EmpiTransactionContext createMdmContext(RequestDetails theRequestDetails, EmpiTransactionContext.OperationType theOperationType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
 		return new EmpiTransactionContext(transactionLogMessages, theOperationType);
 	}
@@ -94,17 +94,18 @@ public abstract class BaseEmpiProvider {
 
 		theEmpiLinkStream.forEach(empiLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
-			ParametersUtil.addPartString(myFhirContext, resultPart, "personId", empiLink.getPersonId());
-			ParametersUtil.addPartString(myFhirContext, resultPart, "targetId", empiLink.getTargetId());
+			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", empiLink.getGoldenResourceId());
+			ParametersUtil.addPartString(myFhirContext, resultPart, "targetResourceId", empiLink.getTargetId());
 
 			if (includeResultAndSource) {
 				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", empiLink.getMatchResult().name());
 				ParametersUtil.addPartString(myFhirContext, resultPart, "linkSource", empiLink.getLinkSource().name());
 				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "eidMatch", empiLink.getEidMatch());
-				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "newPerson", empiLink.getNewPerson());
+				ParametersUtil.addPartBoolean(myFhirContext, resultPart, "hadToCreateNewResource", empiLink.getLinkCreatedNewResource());
 				ParametersUtil.addPartDecimal(myFhirContext, resultPart, "score", empiLink.getScore());
 			}
 		});
 		return retval;
 	}
+
 }

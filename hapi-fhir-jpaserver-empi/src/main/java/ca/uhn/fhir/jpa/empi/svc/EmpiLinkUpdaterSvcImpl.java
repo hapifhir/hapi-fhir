@@ -135,19 +135,18 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		myEmpiLinkDaoSvc.save(empiLink);
 	}
 
-	private void validateNotDuplicatePersonRequest(IAnyResource thePerson, IAnyResource theTarget) {
-		String personType = myFhirContext.getResourceType(thePerson);
+	/**
+	 * Ensure that the two resources are of the same type and both are managed by HAPI-EMPI.
+	 */
+	private void validateNotDuplicatePersonRequest(IAnyResource theGoldenResource, IAnyResource theTarget) {
+		String goldenResourceType = myFhirContext.getResourceType(theGoldenResource);
 		String targetType = myFhirContext.getResourceType(theTarget);
-		if (!"Person".equals(personType)) {
-			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person.  Was " + personType);
-		}
-		if (!"Person".equals(targetType)) {
-			throw new InvalidRequestException("Second argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person .  Was " + targetType);
+		if (!goldenResourceType.equalsIgnoreCase(targetType)) {
+			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be the same resource type as the second argument.  Was " + goldenResourceType + "/" + targetType);
 		}
 
-		if (!EmpiUtil.isEmpiManaged(thePerson) || !EmpiUtil.isEmpiManaged(theTarget)) {
-			throw new InvalidRequestException("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
+		if (!EmpiUtil.isEmpiManaged(theGoldenResource) || !EmpiUtil.isEmpiManaged(theTarget)) {
+			throw new InvalidRequestException("Only EMPI Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by hapi-empi");
 		}
-
 	}
 }

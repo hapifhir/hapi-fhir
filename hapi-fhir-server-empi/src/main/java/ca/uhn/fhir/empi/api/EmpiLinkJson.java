@@ -26,8 +26,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class EmpiLinkJson implements IModelJson {
-	@JsonProperty("personId")
-	private String myPersonId;
+	@JsonProperty("goldenResourceId")
+	private String myGoldenResourceId;
 
 	@JsonProperty("targetId")
 	private String myTargetId;
@@ -52,8 +52,8 @@ public class EmpiLinkJson implements IModelJson {
 	private Boolean myEidMatch;
 
 	/** This link created a new person **/
-	@JsonProperty("newPerson")
-	private Boolean myNewPerson;
+	@JsonProperty("linkCreatedNewGoldenResource")
+	private Boolean myLinkCreatedNewResource;
 
 	@JsonProperty("vector")
 	private Long myVector;
@@ -61,12 +61,12 @@ public class EmpiLinkJson implements IModelJson {
 	@JsonProperty("score")
 	private Double myScore;
 
-	public String getPersonId() {
-		return myPersonId;
+	public String getGoldenResourceId() {
+		return myGoldenResourceId;
 	}
 
-	public EmpiLinkJson setPersonId(String thePersonId) {
-		myPersonId = thePersonId;
+	public EmpiLinkJson setGoldenResourceId(String theGoldenResourceId) {
+		myGoldenResourceId = theGoldenResourceId;
 		return this;
 	}
 
@@ -133,12 +133,12 @@ public class EmpiLinkJson implements IModelJson {
 		return this;
 	}
 
-	public Boolean getNewPerson() {
-		return myNewPerson;
+	public Boolean getLinkCreatedNewResource() {
+		return myLinkCreatedNewResource;
 	}
 
-	public EmpiLinkJson setNewPerson(Boolean theNewPerson) {
-		myNewPerson = theNewPerson;
+	public EmpiLinkJson setLinkCreatedNewResource(Boolean theLinkCreatedNewResource) {
+		myLinkCreatedNewResource = theLinkCreatedNewResource;
 		return this;
 	}
 
