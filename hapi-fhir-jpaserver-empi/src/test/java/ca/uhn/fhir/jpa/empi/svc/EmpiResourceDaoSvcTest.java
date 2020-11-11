@@ -32,7 +32,7 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 		badSourcePatient.setActive(false);
 		myPatientDao.update(badSourcePatient);
 
-		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Person");
+		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundPerson.isPresent());
 		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}

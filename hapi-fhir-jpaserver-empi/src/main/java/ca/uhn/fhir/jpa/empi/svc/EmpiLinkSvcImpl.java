@@ -102,26 +102,26 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 			myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(targetId, personId, EmpiMatchResultEnum.NO_MATCH).isPresent();
 	}
 
-	@Override
-	@Transactional
-	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext) {
-		// int origLinkCount = myPersonHelper.getLinkCount(thePersonResource);
-		int origLinkCount = myEmpiLinkDaoSvc.findEmpiMatchLinksBySource(thePersonResource).size();
-
-		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(thePersonResource);
-
-		List<IBaseBackboneElement> newLinks = empiLinks.stream()
-			.filter(link -> link.isMatch() || link.isPossibleMatch() || link.isRedirect())
-			.map(this::personLinkFromEmpiLink)
-			.collect(Collectors.toList());
-		myPersonHelper.setLinks(thePersonResource, newLinks);
-		if (newLinks.size() > origLinkCount) {
-			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links increased from " + origLinkCount + " to " + newLinks.size());
-		} else if (newLinks.size() < origLinkCount) {
-			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links decreased from " + origLinkCount + " to " + newLinks.size());
-		}
-
-	}
+//	@Override
+//	@Transactional
+//	public void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext) {
+//		// int origLinkCount = myPersonHelper.getLinkCount(thePersonResource);
+//		int origLinkCount = myEmpiLinkDaoSvc.findEmpiMatchLinksBySource(thePersonResource).size();
+//
+//		List<EmpiLink> empiLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(thePersonResource);
+//
+//		List<IBaseBackboneElement> newLinks = empiLinks.stream()
+//			.filter(link -> link.isMatch() || link.isPossibleMatch() || link.isRedirect())
+//			.map(this::personLinkFromEmpiLink)
+//			.collect(Collectors.toList());
+//		myPersonHelper.setLinks(thePersonResource, newLinks);
+//		if (newLinks.size() > origLinkCount) {
+//			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links increased from " + origLinkCount + " to " + newLinks.size());
+//		} else if (newLinks.size() < origLinkCount) {
+//			log(theEmpiTransactionContext, thePersonResource.getIdElement().toVersionless() + " links decreased from " + origLinkCount + " to " + newLinks.size());
+//		}
+//
+//	}
 
 	@Override
 	public void deleteLink(IAnyResource theSourceResource, IAnyResource theTargetResource, EmpiTransactionContext theEmpiTransactionContext) {

@@ -57,21 +57,21 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	@Override
 	@Transactional
-	public IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
-		Long toPersonPid = myIdHelperService.getPidOrThrowException(theToPerson);
+	public IAnyResource mergePersons(IAnyResource theFrom, IAnyResource theTo, EmpiTransactionContext theEmpiTransactionContext) {
+		Long toPid = myIdHelperService.getPidOrThrowException(theTo);
+//		TODO NG - Revisit when merge rules are defined
+//		myPersonHelper.mergeFields(theFrom, theTo);
+		mergeLinks(theFrom, theTo, toPid, theEmpiTransactionContext);
+		refreshLinksAndUpdatePerson(theTo, theEmpiTransactionContext);
 
-		myPersonHelper.mergePersonFields(theFromPerson, theToPerson);
-		mergeLinks(theFromPerson, theToPerson, toPersonPid, theEmpiTransactionContext);
-		refreshLinksAndUpdatePerson(theToPerson, theEmpiTransactionContext);
+		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFrom);
+		addMergeLink(fromPersonPid, toPid);
+		myPersonHelper.deactivateResource(theFrom);
 
-		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFromPerson);
-		addMergeLink(fromPersonPid, toPersonPid);
-		myPersonHelper.deactivatePerson(theFromPerson);
+		refreshLinksAndUpdatePerson(theFrom, theEmpiTransactionContext);
 
-		refreshLinksAndUpdatePerson(theFromPerson, theEmpiTransactionContext);
-
-		log(theEmpiTransactionContext, "Merged " + theFromPerson.getIdElement().toVersionless() + " into " + theToPerson.getIdElement().toVersionless());
-		return theToPerson;
+		log(theEmpiTransactionContext, "Merged " + theFrom.getIdElement().toVersionless() + " into " + theTo.getIdElement().toVersionless());
+		return theTo;
 	}
 
 	private void addMergeLink(Long theDeactivatedPersonPid, Long theActivePersonPid) {
@@ -84,7 +84,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	}
 
 	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
+//		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
 		myEmpiResourceDaoSvc.upsertSourceResource(theToPerson, theEmpiTransactionContext.getResourceType());
 	}
 

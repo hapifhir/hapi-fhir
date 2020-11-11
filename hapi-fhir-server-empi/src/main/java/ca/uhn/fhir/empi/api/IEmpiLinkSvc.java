@@ -36,11 +36,11 @@ public interface IEmpiLinkSvc {
 	 */
 	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
 
-	/**
-	 * Replace Person.link values from what they should be based on EmpiLink values
-	 * @param thePersonResource the person to correct the links on.
-	 */
-	void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext);
+//	/**
+//	 * Replace Person.link values from what they should be based on EmpiLink values
+//	 * @param thePersonResource the person to correct the links on.
+//	 */
+//	void syncEmpiLinksToPersonLinks(IAnyResource thePersonResource, EmpiTransactionContext theEmpiTransactionContext);
 
 	/**
 	 * Delete a link between given Person and target patient/practitioner
