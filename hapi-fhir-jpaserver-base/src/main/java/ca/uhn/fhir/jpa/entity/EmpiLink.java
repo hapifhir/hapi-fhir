@@ -325,4 +325,5 @@ public class EmpiLink {
 	public void setRuleCount(Long theRuleCount) {
 		myRuleCount = theRuleCount;
 	}
+
 }

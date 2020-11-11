@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
@@ -448,6 +449,30 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		for (int i = 0; i < links.size(); ++i) {
 			assertEquals(theExpectedValues[i], theAccessor.apply(links.get(i)), "Value at index " + i + " was not equal");
 		}
+	}
+
+
+	protected void print(IBaseResource ... theResource) {
+		for (IBaseResource r : theResource) {
+			System.out.println(myFhirContext.newJsonParser().encodeResourceToString(r));
+		}
+	}
+
+
+
+	protected void printResources(String theResourceType) {
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceType);
+		IBundleProvider search = dao.search(new SearchParameterMap());
+		search.getResources(0, search.size()).forEach(r -> {
+			print(r);
+		});
+	}
+
+
+	protected void printLinks() {
+		myEmpiLinkDao.findAll().forEach(empiLink -> {
+			System.out.println(empiLink);
+		});
 	}
 
 }

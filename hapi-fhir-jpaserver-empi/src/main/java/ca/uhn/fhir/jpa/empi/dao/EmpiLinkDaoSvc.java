@@ -302,6 +302,28 @@ public class EmpiLinkDaoSvc {
 		return myEmpiLinkDao.findAll(example);
 	}
 
+	/**
+	 * Finds all links pointing from the target resource to the source resource.
+	 *
+	 * @param theTargetResource Resource referencing the source resource
+	 * @param theSourceResource Resource being referenced by the source resource
+	 *
+	 * @return
+	 * 		Returns all EMPI links pointing to the source from target resource
+	 */
+	public List<EmpiLink> findEmpiLinksByTargetAndSource(IBaseResource theTargetResource, IBaseResource theSourceResource) {
+		Long targetPid = myIdHelperService.getPidOrNull(theTargetResource);
+		if (targetPid == null) {
+			return Collections.emptyList();
+		}
+		Long sourcePid = myIdHelperService.getPidOrNull(theSourceResource);
+		if (sourcePid == null) {
+			return Collections.emptyList();
+		}
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(targetPid).setSourceResourcePid(sourcePid);
+		Example<EmpiLink> example = Example.of(exampleLink);
+		return myEmpiLinkDao.findAll(example);
+	}
 
 	/**
 	 * Finds all {@link EmpiLink} entities in which theSourceResource's PID is the source
