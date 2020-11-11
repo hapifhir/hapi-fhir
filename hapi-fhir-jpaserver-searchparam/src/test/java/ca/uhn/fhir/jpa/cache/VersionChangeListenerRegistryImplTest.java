@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,7 @@ class VersionChangeListenerRegistryImplTest {
 	private VersionChangeListenerCache myVersionChangeListenerCache;
 
 	private IVersionChangeListener myTestListener = mock(IVersionChangeListener.class);
-	private SearchParameterMap myFemaleMap;
+	private SearchParameterMap myMap = SearchParameterMap.newSynchronous();
 
 	@Configuration
 	static class SpringContext {
@@ -56,12 +55,13 @@ class VersionChangeListenerRegistryImplTest {
 
 	@BeforeEach
 	public void before() {
-		myFemaleMap = new SearchParameterMap();
-		myFemaleMap.setLoadSynchronous(true);
-		myFemaleMap.add("gender", new TokenParam("female"));
-		when(myResourceVersionSvc.getVersionMap("Patient", myFemaleMap)).thenReturn(ResourceVersionMap.fromResourceIds(new ArrayList<>()));
+		// FIXME KHS move to IT
+//		myFemaleMap = new SearchParameterMap();
+//		myFemaleMap.setLoadSynchronous(true);
+//		myFemaleMap.add("gender", new TokenParam("female"));
+		when(myResourceVersionSvc.getVersionMap("Patient", myMap)).thenReturn(ResourceVersionMap.fromResourceIds(new ArrayList<>()));
 		Set<VersionChangeListenerEntry> entries = new HashSet<>();
-		VersionChangeListenerEntry entry = new VersionChangeListenerEntry(myTestListener, myFemaleMap);
+		VersionChangeListenerEntry entry = new VersionChangeListenerEntry(myTestListener, myMap);
 		entries.add(entry);
 		when(myVersionChangeListenerCache.getListenerEntries("Patient")).thenReturn(entries);
 	}
@@ -69,7 +69,7 @@ class VersionChangeListenerRegistryImplTest {
 	@Test
 	public void addingListenerForNonResourceFails() {
 		try {
-			myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Foo", myFemaleMap, myTestListener);
+			myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Foo", myMap, myTestListener);
 			fail();
 		} catch (DataFormatException e) {
 			assertEquals("Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
@@ -78,19 +78,19 @@ class VersionChangeListenerRegistryImplTest {
 
 	@Test
 	public void addingListenerResetsTimer() {
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", myFemaleMap, myTestListener);
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", myMap, myTestListener);
 		myVersionChangeListenerRegistry.forceRefresh("Patient");
 		assertNotEquals(Instant.MIN, myVersionChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
 
 		// Add a second listener to reset the timer
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", myFemaleMap, mock(IVersionChangeListener.class));
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", myMap, mock(IVersionChangeListener.class));
 		assertEquals(Instant.MIN, myVersionChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
 	}
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
-		// FIXME KHS create IT version of this test
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", myFemaleMap, mock(IVersionChangeListener.class));
+		// FIXME KHS create IT version of this test that tests with actual searchparams
+		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("Patient", myMap, mock(IVersionChangeListener.class));
 		myVersionChangeListenerRegistry.forceRefresh("Patient");
 		assertNotEquals(Instant.MIN, myVersionChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
 
