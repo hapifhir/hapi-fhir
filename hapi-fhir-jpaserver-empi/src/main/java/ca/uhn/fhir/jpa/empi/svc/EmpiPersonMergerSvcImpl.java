@@ -64,7 +64,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 //		myPersonHelper.mergeFields(theFrom, theTo);
 
 		mergeSourceResourceLinks(theFrom, theTo, toPid, theEmpiTransactionContext);
-		//removeTargetLinks(theFrom);
+		removeTargetLinks(theFrom, theTo, theEmpiTransactionContext);
 
 		refreshLinksAndUpdatePerson(theTo, theEmpiTransactionContext);
 
@@ -86,10 +86,10 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	 * @param theEmpiTransactionContext Context to keep track of the deletions
 	 */
 	private void removeTargetLinks(IAnyResource theFrom, IAnyResource theTo, EmpiTransactionContext theEmpiTransactionContext) {
-		List<EmpiLink> empiLinksByTargetAndSource = myEmpiLinkDaoSvc.findEmpiLinksByTarget(theFrom);
-		empiLinksByTargetAndSource
+		List<EmpiLink> allLinksWithTheFromAsTarget = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theFrom);
+		allLinksWithTheFromAsTarget
 			.stream()
-			.filter(EmpiLink::isAuto)
+			.filter(EmpiLink::isAuto) // only keep manual links
 			.forEach(l -> {
 				theEmpiTransactionContext.addTransactionLogMessage(String.format("Deleting link %s", l));
 				myEmpiLinkDaoSvc.deleteLink(l);
@@ -120,7 +120,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		for (EmpiLink fromLink : fromLinks) {
 			Optional<EmpiLink> optionalToLink = findFirstLinkWithMatchingTarget(toLinks, fromLink);
 			if (optionalToLink.isPresent()) {
-				toLinks.remove(optionalToLink);
+				// toLinks.remove(optionalToLink);
 
 				// The original links already contain this target, so move it over to the toPerson
 				EmpiLink toLink = optionalToLink.get();

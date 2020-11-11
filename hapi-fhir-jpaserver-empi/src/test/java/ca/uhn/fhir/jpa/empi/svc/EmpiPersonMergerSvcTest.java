@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.empi.interceptor.IEmpiStorageInterceptor;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -28,6 +29,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -296,7 +298,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		saveLink(toLink);
 
 		mergeSourcePatients();
-		assertEquals(1, myToSourcePatient.getLink().size());
+		assertResourceHasLinkCount(myToSourcePatient, 1, (e) -> false);
+//		assertEquals(1, myToSourcePatient.getLink().size());
 		assertEquals(3, myEmpiLinkDao.count());
 	}
 
@@ -311,7 +314,17 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-		assertEquals(3, myToSourcePatient.getLink().size());
+//		assertEquals(3, myToSourcePatient.getLink().size());
+		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
+	}
+
+	private void assertResourceHasAutoLinkCount(IBaseResource theResource, int theCount) {
+		assertResourceHasLinkCount(theResource, theCount, EmpiLink::isAuto);
+	}
+
+	private void assertResourceHasLinkCount(IBaseResource theResource, int theCount, Predicate<EmpiLink> thePredicate) {
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theResource);
+		assertEquals(theCount, links.stream().filter(thePredicate).count());
 	}
 
 	@Test
@@ -325,7 +338,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-		assertEquals(3, myToSourcePatient.getLink().size());
+		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
 	}
 
 	@Test
@@ -341,9 +354,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 
-		List<EmpiLink> sourcePatientLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(myToSourcePatient);
 //		assertEquals(3, myToSourcePatient.getLink().size());
-		assertEquals(3, sourcePatientLinks.stream().filter(EmpiLink::isAuto).count());
+		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
 	}
 
 	@Test
@@ -357,7 +369,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		myEmpiLinkHelper.logEmpiLinks();
 
 		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-		assertEquals(3, myToSourcePatient.getLink().size());
+
+//		assertEquals(3, myToSourcePatient.getLink().size());
+		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
 	}
 
 	@Test
