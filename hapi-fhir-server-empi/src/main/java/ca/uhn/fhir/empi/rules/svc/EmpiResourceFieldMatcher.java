@@ -43,12 +43,14 @@ public class EmpiResourceFieldMatcher {
 	private final String myResourceType;
 	private final String myResourcePath;
 	private final EmpiRulesJson myEmpiRulesJson;
+	private final String myName;
 
 	public EmpiResourceFieldMatcher(FhirContext theFhirContext, EmpiFieldMatchJson theEmpiFieldMatchJson, EmpiRulesJson theEmpiRulesJson) {
 		myFhirContext = theFhirContext;
 		myEmpiFieldMatchJson = theEmpiFieldMatchJson;
 		myResourceType = theEmpiFieldMatchJson.getResourceType();
 		myResourcePath = theEmpiFieldMatchJson.getResourcePath();
+		myName = theEmpiFieldMatchJson.getName();
 		myEmpiRulesJson = theEmpiRulesJson;
 	}
 
@@ -107,5 +109,9 @@ public class EmpiResourceFieldMatcher {
 
 	public String getResourcePath() {
 		return myResourcePath;
+	}
+
+	public String getName() {
+		return myName;
 	}
 }

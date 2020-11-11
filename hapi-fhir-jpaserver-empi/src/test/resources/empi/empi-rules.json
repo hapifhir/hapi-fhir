@@ -41,7 +41,7 @@
 	],
 	"matchFields": [
 		{
-			"name": "cosine-code",
+			"name": "matched-medication-code",
 			"resourceType": "Medication",
 			"resourcePath": "code.coding.code",
 			"matcher": {
@@ -112,7 +112,7 @@
 		"cosine-given-name,jaro-last-name": "MATCH",
 		"cosine-given-name-pract": "POSSIBLE_MATCH",
 		"cosine-given-name-pract,jaro-last-name-pract": "MATCH",
-		"cosine-code": "MATCH"
+		"matched-medication-code": "MATCH"
 	},
 	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
 }

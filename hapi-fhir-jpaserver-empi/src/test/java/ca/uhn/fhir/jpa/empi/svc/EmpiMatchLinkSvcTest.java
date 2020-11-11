@@ -9,7 +9,6 @@ import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -17,7 +16,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -418,6 +416,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		IBundleProvider bundle = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 		assertEquals(1, bundle.size());
 		Patient sourcePatient = (Patient) bundle.getResources(0, 1).get(0);
+
 		//assertEquals(Person.IdentityAssuranceLevel.LEVEL2, sourcePatient.getLink().get(0).getAssurance());
 		//assertEquals(Person.IdentityAssuranceLevel.LEVEL1, sourcePatient.getLink().get(1).getAssurance());
 		//assertEquals(Person.IdentityAssuranceLevel.LEVEL1, sourcePatient.getLink().get(2).getAssurance());

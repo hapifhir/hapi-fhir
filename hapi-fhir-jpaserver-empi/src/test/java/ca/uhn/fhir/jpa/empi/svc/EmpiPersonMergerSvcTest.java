@@ -5,7 +5,6 @@ import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
-import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
@@ -29,7 +28,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -345,7 +343,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		List<EmpiLink> sourcePatientLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(myToSourcePatient);
 //		assertEquals(3, myToSourcePatient.getLink().size());
-		assertEquals(3, sourcePatientLinks.stream().filter(Predicate.not(EmpiLink::isManual)).count());
+		assertEquals(3, sourcePatientLinks.stream().filter(EmpiLink::isAuto).count());
 	}
 
 	@Test

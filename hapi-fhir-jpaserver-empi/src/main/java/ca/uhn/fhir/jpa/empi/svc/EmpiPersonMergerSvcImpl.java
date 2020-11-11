@@ -39,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 @Service
 public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
@@ -65,7 +64,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 //		myPersonHelper.mergeFields(theFrom, theTo);
 
 		mergeSourceResourceLinks(theFrom, theTo, toPid, theEmpiTransactionContext);
-		removeTargetLinks(theFrom);
+		//removeTargetLinks(theFrom);
 
 		refreshLinksAndUpdatePerson(theTo, theEmpiTransactionContext);
 
@@ -90,7 +89,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 		List<EmpiLink> empiLinksByTargetAndSource = myEmpiLinkDaoSvc.findEmpiLinksByTarget(theFrom);
 		empiLinksByTargetAndSource
 			.stream()
-			.filter(Predicate.not(EmpiLink::isManual))
+			.filter(EmpiLink::isAuto)
 			.forEach(l -> {
 				theEmpiTransactionContext.addTransactionLogMessage(String.format("Deleting link %s", l));
 				myEmpiLinkDaoSvc.deleteLink(l);

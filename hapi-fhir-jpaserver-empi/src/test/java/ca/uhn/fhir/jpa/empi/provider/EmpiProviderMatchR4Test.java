@@ -3,12 +3,10 @@ package ca.uhn.fhir.jpa.empi.provider;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,9 +63,9 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 		myOrganizationDao.update(org);
 
 
-		Medication medication = buildMedication();
+		Medication medication = buildMedication("Organization/mfr");
 		Medication createdMedication = createMedication(medication);
-		Medication newMedication = buildMedication();
+		Medication newMedication = buildMedication("Organization/mfr");
 
 		Bundle result = myEmpiProviderR4.serverMatch(newMedication, new StringType("Medication"));
 		assertEquals(1, result.getEntry().size());

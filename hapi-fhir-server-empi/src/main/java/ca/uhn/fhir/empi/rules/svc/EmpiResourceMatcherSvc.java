@@ -38,7 +38,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The EmpiResourceComparator is in charge of performing actual comparisons between left and right records.
@@ -118,24 +117,39 @@ public class EmpiResourceMatcherSvc {
 	private EmpiMatchOutcome getMatchOutcome(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long vector = 0;
 		double score = 0.0;
-		//TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
-		String resourceType = myFhirContext.getResourceType(theLeftResource);
-		List<EmpiResourceFieldMatcher> resourceRelevantFieldMatchers = myFieldMatchers.stream()
-			.filter(comp -> comp.getResourceType().equalsIgnoreCase(EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE) || comp.getResourceType().equalsIgnoreCase(resourceType))
-			.collect(Collectors.toList());
+		int appliedRuleCount = 0;
 
-		for (int i = 0; i < resourceRelevantFieldMatchers.size(); ++i) {
+		//TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
+
+		String resourceType = myFhirContext.getResourceType(theLeftResource);
+
+
+		for (int i = 0; i < myFieldMatchers.size(); ++i) {
 			//any that are not for the resourceType in question.
-			EmpiResourceFieldMatcher fieldComparator = resourceRelevantFieldMatchers.get(i);
-			EmpiMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
-			if (matchEvaluation.match) {
-				vector |= (1 << i);
+			EmpiResourceFieldMatcher fieldComparator = myFieldMatchers.get(i);
+			if (!isValidResourceType(resourceType, fieldComparator.getResourceType())) {
+				ourLog.debug("Matcher {} is not valid for resource type: {}. Skipping it.", fieldComparator.getName(), resourceType);
+				continue;
+			} else {
+				ourLog.debug("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
+				EmpiMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
+				if (matchEvaluation.match) {
+					vector |= (1 << i);
+				}
+				score += matchEvaluation.score;
+				appliedRuleCount += 1;
 			}
-			score += matchEvaluation.score;
 		}
 
 		EmpiMatchOutcome retVal = new EmpiMatchOutcome(vector, score);
-		retVal.setEmpiRuleCount(resourceRelevantFieldMatchers.size());
+		retVal.setEmpiRuleCount(appliedRuleCount);
 		return retVal;
+	}
+
+	private boolean isValidResourceType(String theResourceType, String theFieldComparatorType) {
+		return (
+			theFieldComparatorType.equalsIgnoreCase(EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE)
+			|| theFieldComparatorType.equalsIgnoreCase(theResourceType)
+		);
 	}
 }
