@@ -64,6 +64,7 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 		org.setId("Organization/mfr");
 		myOrganizationDao.update(org);
 
+
 		Medication medication = buildMedication();
 		Medication createdMedication = createMedication(medication);
 		Medication newMedication = buildMedication();
@@ -77,6 +78,7 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
+		//Since there is only
 		assertEquals(1.0 / 1.0, searchComponent.getScore().doubleValue(), 0.01);
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
@@ -84,14 +86,6 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 
 	}
 
-	private Medication buildMedication() {
-		Medication medication = new Medication();
-		medication.setManufacturer(new Reference("Organization/mfr"));
-		CodeableConcept codeableConcept = new CodeableConcept();
-		codeableConcept.addCoding().setSystem("zoop").setCode("boop");
-		medication.setCode(codeableConcept);
-		return medication;
-	}
 
 	@Test
 	public void testServerLevelMatch() throws Exception {

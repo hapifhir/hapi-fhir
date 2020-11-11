@@ -39,12 +39,14 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -319,6 +321,20 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		thePatient = createPatient(thePatient);
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(thePatient, createContextForCreate("Patient"));
 		return thePatient;
+	}
+
+	protected Medication buildMedication(String theManufacturerReference) {
+		Medication medication = new Medication();
+		medication.setManufacturer(new Reference(theManufacturerReference));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem("zoop").setCode("boop");
+		medication.setCode(codeableConcept);
+		return medication;
+	}
+	protected Medication createMedicationAndUpdateLinks(Medication theMedication) {
+		theMedication = createMedication(theMedication);
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMedication, createContextForCreate("Medication"));
+		return theMedication;
 	}
 
 	protected EmpiTransactionContext createContextForCreate(String theResourceType) {

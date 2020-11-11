@@ -22,6 +22,7 @@ package ca.uhn.fhir.empi.rules.svc;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiMatchEvaluation;
 import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
@@ -120,7 +121,7 @@ public class EmpiResourceMatcherSvc {
 		//TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
 		String resourceType = myFhirContext.getResourceType(theLeftResource);
 		List<EmpiResourceFieldMatcher> resourceRelevantFieldMatchers = myFieldMatchers.stream()
-			.filter(comp -> comp.getResourceType().equalsIgnoreCase("*") || comp.getResourceType().equalsIgnoreCase(resourceType))
+			.filter(comp -> comp.getResourceType().equalsIgnoreCase(EmpiConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE) || comp.getResourceType().equalsIgnoreCase(resourceType))
 			.collect(Collectors.toList());
 
 		for (int i = 0; i < resourceRelevantFieldMatchers.size(); ++i) {

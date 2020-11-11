@@ -9,7 +9,6 @@ import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
@@ -22,6 +21,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +46,9 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
@@ -72,6 +74,19 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testAddPatientLinksToNewPersonIfNoneFound() {
 		createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(1);
+		assertLinksMatchResult(MATCH);
+		assertLinksCreatedNewResource(true);
+		assertLinksMatchedByEid(false);
+	}
+
+	@Test
+	public void testAddMedicationLinksToNewGoldenRecordMedicationIfNoneFound() {
+		Organization org = new Organization();
+		org.setId("Organization/mfr");
+		myOrganizationDao.update(org);
+
+		createMedicationAndUpdateLinks(buildMedication("Organization/mfr"));
 		assertLinkCount(1);
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
