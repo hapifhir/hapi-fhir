@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
-import ca.uhn.fhir.jpa.cache.ListenerNotifier;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.VersionChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -78,11 +77,6 @@ public class SearchParamRegistryImplTest {
 		@Bean
 		IVersionChangeListenerRegistry versionChangeListenerRegistry() {
 			return new VersionChangeListenerRegistryImpl();
-		}
-
-		@Bean
-		ListenerNotifier listenerNotifier() {
-			return new ListenerNotifier();
 		}
 
 		@Bean

@@ -4,14 +4,13 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 public class VersionChangeListenerMap {
-	private final Map<String, List<VersionChangeListenerEntry>> myListenersByResourcetype = new HashMap<>();
+	private final Map<String, Set<VersionChangeListenerEntry>> myListenersByResourcetype = new HashMap<>();
 
 	public void add(String theResourceType, IVersionChangeListener theVersionChangeListener, SearchParameterMap theMap) {
 		getListenerEntries(theResourceType).add(new VersionChangeListenerEntry(theVersionChangeListener, theMap));
@@ -27,7 +26,7 @@ public class VersionChangeListenerMap {
 	}
 
 	@Nonnull
-	public List<VersionChangeListenerEntry> getListenerEntries(String theResourceType) {
-		return myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new ArrayList<>());
+	public Set<VersionChangeListenerEntry> getListenerEntries(String theResourceType) {
+		return myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new HashSet<>());
 	}
 }

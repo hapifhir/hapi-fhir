@@ -25,8 +25,8 @@ import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // FIXME KHS retool searchparam and subscription to use this
 @Repository
@@ -45,8 +45,6 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
-	private ListenerNotifier myListenerNotifier;
-	@Autowired
 	private FhirContext myFhirContext;
 
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
@@ -54,9 +52,19 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	private RefreshVersionCacheAndNotifyListenersOnUpdate myInterceptor;
 
+	/**
+	 *
+	 * @param theResourceName the name of the resource the listener should be notified about
+	 * @param theSearchParamMap the listener will only be notified of changes to resources that match this map
+	 * @param theVersionChangeListener the listener to be notified
+	 * @throws ca.uhn.fhir.parser.DataFormatException if theResourceName is not valid
+	 */
 	@Override
 	public void registerResourceVersionChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IVersionChangeListener theVersionChangeListener) {
+		// validate the resource name
+		myFhirContext.getResourceDefinition(theResourceName);
 		myListenerMap.add(theResourceName, theVersionChangeListener, theSearchParamMap);
+		myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
 	}
 
 	@PostConstruct
@@ -153,7 +161,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	private synchronized long doRefreshCachesAndNotifyListeners(String theResourceName) {
-		List<VersionChangeListenerEntry> listenerEntries = myListenerMap.getListenerEntries(theResourceName);
+		Set<VersionChangeListenerEntry> listenerEntries = myListenerMap.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {
 			return 0;
 		}
