@@ -22,6 +22,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +33,10 @@ import java.util.Map;
 public class VersionChangeListenerRegistryImpl implements IVersionChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerRegistryImpl.class);
 
-	static long LOCAL_REFRESH_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
-	static long REMOTE_REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
+	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
-	// FIXME KHS change Long to Instant
-	private static volatile Map<String, Long> myLastRefreshPerResourceType = new HashMap<>();
+	private static volatile Map<String, Instant> myNextRefreshByResourceName = new HashMap<>();
 
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
@@ -66,7 +67,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL, jobDetail);
+		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL_MS, jobDetail);
 	}
 
 	@PreDestroy
@@ -94,7 +95,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@VisibleForTesting
 	public void clearCacheForUnitTest() {
 		myResourceVersionCache.clearForUnitTest();
-		myLastRefreshPerResourceType.clear();
+		myNextRefreshByResourceName.clear();
 	}
 
 	@Override
@@ -110,8 +111,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Override
 	public long refreshCacheIfNecessary(String theResourceName) {
 		long retval = 0;
-		long lastRefresh = myLastRefreshPerResourceType.computeIfAbsent(theResourceName, key -> 0L);
-		if (lastRefresh == 0 || System.currentTimeMillis() - REMOTE_REFRESH_INTERVAL > lastRefresh) {
+		Instant nextRefresh = myNextRefreshByResourceName.computeIfAbsent(theResourceName, key -> Instant.MIN);
+		if (nextRefresh.isBefore(Instant.now())) {
 			retval = refreshCacheWithRetry(theResourceName);
 		}
 		return retval;
@@ -120,7 +121,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Override
 	public void requestRefresh(String theResourceName) {
 		synchronized (this) {
-			myLastRefreshPerResourceType.put(theResourceName, 0L);
+			myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
 		}
 	}
 
@@ -162,7 +163,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
 			count += listenerEntry.notifyListener(myResourceVersionCache, newResourceVersionMap);
 		}
-		myLastRefreshPerResourceType.put(theResourceName, System.currentTimeMillis());
+		myNextRefreshByResourceName.put(theResourceName, Instant.now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
 		return count;
 	}
 
@@ -193,5 +194,10 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 				requestRefresh(resourceName);
 			}
 		}
+	}
+
+	@VisibleForTesting
+	Instant getNextRefreshTimeForUnitTest(String theResourceName) {
+		return myNextRefreshByResourceName.get(theResourceName);
 	}
 }
