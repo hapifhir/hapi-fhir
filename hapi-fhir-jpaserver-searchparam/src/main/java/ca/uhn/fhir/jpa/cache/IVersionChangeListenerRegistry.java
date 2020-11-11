@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * Register a listener with this registry in order to be notified whenever a resource matching the provided SearchParameterMap
@@ -36,4 +37,11 @@ public interface IVersionChangeListenerRegistry {
 	void requestRefresh(String theResourceName);
 
 	long forceRefresh(String theResourceName);
+
+	/**
+	 * If any listeners have been registered with searchparams that match the incoming resource, then
+	 * call requestRefresh(theResourceName) for that resource type.
+	 * @param theResource the resource that changed that might trigger a refresh
+	 */
+	void requestRefreshIfWatching(IBaseResource theResource);
 }

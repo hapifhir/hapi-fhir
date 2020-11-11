@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -13,8 +12,6 @@ import javax.annotation.PreDestroy;
 
 @Service
 public class VersionChangeListenerRegistryInterceptor {
-	@Autowired
-	FhirContext myFhirContext;
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
@@ -49,10 +46,8 @@ public class VersionChangeListenerRegistryInterceptor {
 		if (theResource == null) {
 			return;
 		}
-		String resourceName = myFhirContext.getResourceType(theResource);
 		synchronized (this) {
-			// FIXME KHS only if it matches
-			myVersionChangeListenerRegistry.requestRefresh(resourceName);
+			myVersionChangeListenerRegistry.requestRefreshIfWatching(theResource);
 		}
 	}
 }
