@@ -66,8 +66,8 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 		}
 	}
 
-	protected List<EmpiLink> getEmpiLinksForTarget(IAnyResource thePatientOrPractitionerResource, EmpiMatchResultEnum theMatchResult) {
-		Long pidOrNull = myIdHelperService.getPidOrNull(thePatientOrPractitionerResource);
+	protected List<EmpiLink> getEmpiLinksForTarget(IAnyResource theTargetResource, EmpiMatchResultEnum theMatchResult) {
+		Long pidOrNull = myIdHelperService.getPidOrNull(theTargetResource);
 		List<EmpiLink> matchLinkForTarget = myEmpiLinkDaoSvc.getEmpiLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
 		if (!matchLinkForTarget.isEmpty()) {
 			return matchLinkForTarget;

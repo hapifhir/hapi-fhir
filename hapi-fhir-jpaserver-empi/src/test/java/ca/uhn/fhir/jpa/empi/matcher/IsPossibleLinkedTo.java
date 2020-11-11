@@ -24,8 +24,8 @@ public class IsPossibleLinkedTo extends BaseSourceResourceMatcher {
 	}
 
 	@Override
-	protected boolean matchesSafely(IAnyResource thePersonResource) {
-		incomingResourcePersonPid = myIdHelperService.getPidOrNull(thePersonResource);;
+	protected boolean matchesSafely(IAnyResource theSourceResource) {
+		incomingResourcePersonPid = myIdHelperService.getPidOrNull(theSourceResource);
 
 		//OK, lets grab all the person pids of the resources passed in via the constructor.
 		baseResourcePersonPids = myBaseResources.stream()

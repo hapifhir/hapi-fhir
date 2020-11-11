@@ -568,26 +568,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(jane, is(sameSourceResourceAs(paul)));
 	}
 
-	private void print(IBaseResource theResource) {
-		System.out.println(myFhirContext.newJsonParser().encodeResourceToString(theResource));
-	}
-
-	private void printResources(String theResourceType) {
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResourceType);
-		IBundleProvider search = dao.search(new SearchParameterMap());
-		search.getResources(0, search.size()).forEach(r -> {
-			print(r);
-		});
-	}
-
-	private void printLinks() {
-		myEmpiLinkDao.findAll().forEach(empiLink -> {
-			System.out.println(empiLink);
-//			System.out.println(String.format(" %s (s/r) <-- %s -- %s (targ.)",
-//				empiLink.getSourceResourcePid(), empiLink.getMatchResult(), empiLink.getTargetPid()));
-		});
-	}
-
 	@Test
 	public void testSinglyLinkedPersonThatGetsAnUpdatedEidSimplyUpdatesEID() {
 		//Use Case # 2
