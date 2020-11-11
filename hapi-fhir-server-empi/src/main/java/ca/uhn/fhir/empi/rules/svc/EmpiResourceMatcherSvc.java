@@ -134,7 +134,7 @@ public class EmpiResourceMatcherSvc {
 		}
 
 		EmpiMatchOutcome retVal = new EmpiMatchOutcome(vector, score);
-		retVal.setEmpiRuleCount(myFieldMatchers.size());
+		retVal.setEmpiRuleCount(resourceRelevantFieldMatchers.size());
 		return retVal;
 	}
 }

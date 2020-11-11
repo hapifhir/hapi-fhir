@@ -77,7 +77,7 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
 		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
-		assertEquals(2.0 / 3.0, searchComponent.getScore().doubleValue(), 0.01);
+		assertEquals(1.0 / 1.0, searchComponent.getScore().doubleValue(), 0.01);
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(EmpiConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());

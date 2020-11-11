@@ -43,11 +43,9 @@
 		{
 			"name": "cosine-code",
 			"resourceType": "Medication",
-			"resourcePath": "code",
-			"similarity": {
-				"algorithm": "COSINE",
-				"matchThreshold": 0.8,
-				"exact": true
+			"resourcePath": "code.coding.code",
+			"matcher": {
+				"algorithm": "STRING"
 			}
 		},
 		{
