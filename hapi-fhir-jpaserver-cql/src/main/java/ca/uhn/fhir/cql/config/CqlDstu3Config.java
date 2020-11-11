@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cql.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.cql.provider.CqlProviderFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CqlDstu3Config extends BaseCqlConfig {
+
 	@Bean
 	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider) {
 		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider);
