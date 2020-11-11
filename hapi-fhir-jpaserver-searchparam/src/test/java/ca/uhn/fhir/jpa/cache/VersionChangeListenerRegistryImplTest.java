@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -30,13 +29,9 @@ class VersionChangeListenerRegistryImplTest {
 	@Autowired
 	VersionChangeListenerRegistryImpl myVersionChangeListenerRegistry;
 	@MockBean
-	private IInterceptorService myInterceptorBroadcaster;
-	@MockBean
 	private ISchedulerService mySchedulerService;
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
-	@Autowired
-	private FhirContext myFhirContext;
 
 	private IVersionChangeListener myTestListener = mock(IVersionChangeListener.class);
 	private SearchParameterMap myMap = SearchParameterMap.newSynchronous();

@@ -1,10 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -13,15 +9,13 @@ import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -29,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 // FIXME KHS retool searchparam and subscription to use this
-@Repository
+@Component
 public class VersionChangeListenerRegistryImpl implements IVersionChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerRegistryImpl.class);
 
@@ -39,8 +33,6 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	private static volatile Map<String, Instant> myNextRefreshByResourceName = new HashMap<>();
 
 	@Autowired
-	private IInterceptorService myInterceptorBroadcaster;
-	@Autowired
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
@@ -49,8 +41,6 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
 	private final VersionChangeListenerMap myListenerMap = new VersionChangeListenerMap();
-
-	private RefreshVersionCacheAndNotifyListenersOnUpdate myInterceptor;
 
 	/**
 	 *
@@ -69,18 +59,10 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	@PostConstruct
 	public void start() {
-		myInterceptor = new RefreshVersionCacheAndNotifyListenersOnUpdate();
-		myInterceptorBroadcaster.registerInterceptor(myInterceptor);
-
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(getClass().getName());
 		jobDetail.setJobClass(Job.class);
 		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL_MS, jobDetail);
-	}
-
-	@PreDestroy
-	public void stop() {
-		myInterceptorBroadcaster.unregisterInterceptor(myInterceptor);
 	}
 
 	public static class Job implements HapiJob {
@@ -173,35 +155,6 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		}
 		myNextRefreshByResourceName.put(theResourceName, Instant.now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
 		return count;
-	}
-
-	@Interceptor
-	public class RefreshVersionCacheAndNotifyListenersOnUpdate {
-
-		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
-		public void created(IBaseResource theResource) {
-			handle(theResource);
-		}
-
-		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
-		public void deleted(IBaseResource theResource) {
-			handle(theResource);
-		}
-
-		@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
-		public void updated(IBaseResource theResource) {
-			handle(theResource);
-		}
-
-		private void handle(IBaseResource theResource) {
-			if (theResource == null) {
-				return;
-			}
-			String resourceName = myFhirContext.getResourceType(theResource);
-			synchronized (this) {
-				requestRefresh(resourceName);
-			}
-		}
 	}
 
 	@VisibleForTesting
