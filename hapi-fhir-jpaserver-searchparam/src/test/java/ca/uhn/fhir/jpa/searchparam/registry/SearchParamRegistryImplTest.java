@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
@@ -63,7 +64,7 @@ public class SearchParamRegistryImplTest {
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
 	@MockBean
-	private VersionChangeListenerCache myVersionChangeListenerCache;
+	private SearchParamMatcher mySearchParamMatcher;
 
 	@Configuration
 	static class SpringConfig {
@@ -85,6 +86,11 @@ public class SearchParamRegistryImplTest {
 		@Bean
 		IVersionChangeListenerRegistry versionChangeListenerRegistry() {
 			return new VersionChangeListenerRegistryImpl();
+		}
+
+		@Bean
+		VersionChangeListenerCache versionChangeListenerCache() {
+			return new VersionChangeListenerCache();
 		}
 
 		@Bean
@@ -115,13 +121,6 @@ public class SearchParamRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		myAnswerCount = 0;
-
-		Set<VersionChangeListenerWithSearchParamMap> entries = new HashSet<>();
-		VersionChangeListenerWithSearchParamMap entry = new VersionChangeListenerWithSearchParamMap(mock(IVersionChangeListener.class), SearchParameterMap.newSynchronous());
-		entries.add(entry);
-		when(myVersionChangeListenerCache.getListenerEntries("SearchParameter")).thenReturn(entries);
-		when(myVersionChangeListenerCache.notifyListener(any(), any(), any())).thenReturn(TEST_SEARCH_PARAMS);
-
 	}
 
 	@Test

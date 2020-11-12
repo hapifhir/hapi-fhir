@@ -156,6 +156,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		return count;
 	}
 
+	// FIXME KHS test
 	private synchronized long doRefreshCachesAndNotifyListeners(String theResourceName) {
 		Set<VersionChangeListenerWithSearchParamMap> listenerEntries = myVersionChangeListenerCache.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {

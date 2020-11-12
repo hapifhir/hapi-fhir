@@ -238,6 +238,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	@Override
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		requiresActiveSearchParams();
+		if (myActiveSearchParams == null) {
+			throw new IllegalStateException("SearchParamRegistry has not been initialized");
+		}
 		return Collections.unmodifiableMap(myActiveSearchParams);
 	}
 
