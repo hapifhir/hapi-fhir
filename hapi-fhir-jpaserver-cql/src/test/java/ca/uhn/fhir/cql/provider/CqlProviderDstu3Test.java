@@ -37,6 +37,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// FIXME KBD
+@Disabled
 public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
 
