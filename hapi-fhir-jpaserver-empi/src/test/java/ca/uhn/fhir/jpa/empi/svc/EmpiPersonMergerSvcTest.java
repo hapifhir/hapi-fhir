@@ -3,8 +3,8 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.api.IGoldenResourceMergerSvc;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.empi.helper.EmpiLinkHelper;
@@ -46,7 +46,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	private static final EmpiMatchOutcome POSSIBLE_MATCH = new EmpiMatchOutcome(null, null).setMatchResultEnum(EmpiMatchResultEnum.POSSIBLE_MATCH);
 
 	@Autowired
-	IEmpiPersonMergerSvc myEmpiPersonMergerSvc;
+	IGoldenResourceMergerSvc myEmpiPersonMergerSvc;
 	@Autowired
 	EmpiLinkHelper myEmpiLinkHelper;
 	@Autowired
@@ -102,7 +102,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	private Patient mergeSourcePatients() {
 		assertEquals(0, redirectLinkCount());
-		Patient retval = (Patient) myEmpiPersonMergerSvc.mergePersons(myFromSourcePatient, myToSourcePatient, createEmpiContext());
+		Patient retval = (Patient) myEmpiPersonMergerSvc.mergeGoldenResources(myFromSourcePatient, myToSourcePatient, createEmpiContext());
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
@@ -113,10 +113,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		return myEmpiLinkDao.findAll(example).size();
 	}
 
-	private EmpiTransactionContext createEmpiContext() {
-		EmpiTransactionContext empiTransactionContext = new EmpiTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), EmpiTransactionContext.OperationType.MERGE_PERSONS);
-		empiTransactionContext.setResourceType("Patient");
-		return empiTransactionContext;
+	private MdmTransactionContext createEmpiContext() {
+		MdmTransactionContext mdmTransactionContext = new MdmTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), MdmTransactionContext.OperationType.MERGE_PERSONS);
+		mdmTransactionContext.setResourceType("Patient");
+		return mdmTransactionContext;
 	}
 
 	@Test

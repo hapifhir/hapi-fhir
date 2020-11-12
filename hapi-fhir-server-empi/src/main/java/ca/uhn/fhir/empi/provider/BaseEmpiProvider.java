@@ -23,7 +23,7 @@ package ca.uhn.fhir.empi.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -77,9 +77,9 @@ public abstract class BaseEmpiProvider {
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 	}
 
-	protected EmpiTransactionContext createMdmContext(RequestDetails theRequestDetails, EmpiTransactionContext.OperationType theOperationType) {
+	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
-		return new EmpiTransactionContext(transactionLogMessages, theOperationType);
+		return new MdmTransactionContext(transactionLogMessages, theOperationType);
 	}
 
 	protected String extractStringOrNull(IPrimitiveType<String> theString) {

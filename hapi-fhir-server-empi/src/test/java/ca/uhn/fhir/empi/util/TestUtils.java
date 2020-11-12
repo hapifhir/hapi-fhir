@@ -1,10 +1,10 @@
 package ca.uhn.fhir.empi.util;
 
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 
 public class TestUtils {
-	public static EmpiTransactionContext createDummyContext() {
-			EmpiTransactionContext context = new EmpiTransactionContext();
+	public static MdmTransactionContext createDummyContext() {
+			MdmTransactionContext context = new MdmTransactionContext();
 			return context;
 	}
 }

@@ -20,16 +20,16 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
-public interface IEmpiPersonMergerSvc {
+public interface IGoldenResourceMergerSvc {
 	/**
-	 * Move all links from the theFromPerson to theToPerson and then set active=false on theFromPerson.  Merge all Person
+	 * Move all links from the theFromGoldenResource to theToGoldenResource and then set active=false on theFromGoldenResource.  Merge all Person
 	 * fields.
-	 * @param theFromPerson the person we are merging from
-	 * @param theToPerson the person we are merging to
-	 * @return updated theToPerson with the merged fields and links.
+	 * @param theFromGoldenResource the person we are merging from
+	 * @param theToGoldenResource the person we are merging to
+	 * @return updated theToGoldenResource with the merged fields and links.
 	 */
-	IAnyResource mergePersons(IAnyResource theFromPerson, IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext);
+	IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

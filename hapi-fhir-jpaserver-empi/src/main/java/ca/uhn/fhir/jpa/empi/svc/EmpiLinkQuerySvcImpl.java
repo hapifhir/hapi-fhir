@@ -24,7 +24,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -45,7 +45,7 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 
 	@Override
-	public Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, MdmTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(thePersonId, theTargetId, theMatchResult, theLinkSource);
 		return myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream()
 			.filter(empiLink -> empiLink.getMatchResult() != EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
@@ -53,7 +53,7 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	}
 
 	@Override
-	public Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext) {
+	public Stream<EmpiLinkJson> getDuplicatePersons(MdmTransactionContext theEmpiContext) {
 		Example<EmpiLink> exampleLink = exampleLinkFromParameters(null, null, EmpiMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		return myEmpiLinkDaoSvc.findEmpiLinkByExample(exampleLink).stream().map(this::toJson);
 	}

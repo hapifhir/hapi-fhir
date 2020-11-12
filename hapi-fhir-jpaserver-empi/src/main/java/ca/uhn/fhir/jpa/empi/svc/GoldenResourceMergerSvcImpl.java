@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.empi.svc;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
-import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.empi.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
+public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -57,25 +57,26 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 
 	@Override
 	@Transactional
-	public IAnyResource mergePersons(IAnyResource theFrom, IAnyResource theTo, EmpiTransactionContext theEmpiTransactionContext) {
-		Long toPid = myIdHelperService.getPidOrThrowException(theTo);
+	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 
 //		TODO NG - Revisit when merge rules are defined
 //		myPersonHelper.mergeFields(theFrom, theTo);
 
-		mergeSourceResourceLinks(theFrom, theTo, toPid, theEmpiTransactionContext);
-		removeTargetLinks(theFrom, theTo, theEmpiTransactionContext);
+		mergeSourceResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
 
-		refreshLinksAndUpdatePerson(theTo, theEmpiTransactionContext);
+		removeTargetLinks(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 
-		Long fromPersonPid = myIdHelperService.getPidOrThrowException(theFrom);
-		addMergeLink(toPid, fromPersonPid);
-		myPersonHelper.deactivateResource(theFrom);
+		refreshLinksAndUpdatePerson(theToGoldenResource, theMdmTransactionContext);
 
-		refreshLinksAndUpdatePerson(theFrom, theEmpiTransactionContext);
+		Long fromGoldenResourcePid = myIdHelperService.getPidOrThrowException(theFromGoldenResource);
+		addMergeLink(toGoldenResourcePid, fromGoldenResourcePid, theMdmTransactionContext.getResourceType());
+		myPersonHelper.deactivateResource(theFromGoldenResource);
 
-		log(theEmpiTransactionContext, "Merged " + theFrom.getIdElement().toVersionless() + " into " + theTo.getIdElement().toVersionless());
-		return theTo;
+		refreshLinksAndUpdatePerson(theFromGoldenResource, theMdmTransactionContext);
+
+		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless() + " into " + theToGoldenResource.getIdElement().toVersionless());
+		return theToGoldenResource;
 	}
 
 	/**
@@ -83,36 +84,36 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	 *
 	 * @param theFrom                   Target of the link
 	 * @param theTo                     Source resource of the link
-	 * @param theEmpiTransactionContext Context to keep track of the deletions
+	 * @param theMdmTransactionContext Context to keep track of the deletions
 	 */
-	private void removeTargetLinks(IAnyResource theFrom, IAnyResource theTo, EmpiTransactionContext theEmpiTransactionContext) {
+	private void removeTargetLinks(IAnyResource theFrom, IAnyResource theTo, MdmTransactionContext theMdmTransactionContext) {
 		List<EmpiLink> allLinksWithTheFromAsTarget = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theFrom);
 		allLinksWithTheFromAsTarget
 			.stream()
 			.filter(EmpiLink::isAuto) // only keep manual links
 			.forEach(l -> {
-				theEmpiTransactionContext.addTransactionLogMessage(String.format("Deleting link %s", l));
+				theMdmTransactionContext.addTransactionLogMessage(String.format("Deleting link %s", l));
 				myEmpiLinkDaoSvc.deleteLink(l);
 			});
 	}
 
-	private void addMergeLink(Long theSourceResourcePidAkaActive, Long theTargetResourcePidAkaDeactivated) {
+	private void addMergeLink(Long theSourceResourcePidAkaActive, Long theTargetResourcePidAkaDeactivated, String theResourceType) {
 		EmpiLink empiLink = myEmpiLinkDaoSvc
 			.getOrCreateEmpiLinkBySourceResourcePidAndTargetResourcePid(theSourceResourcePidAkaActive, theTargetResourcePidAkaDeactivated);
 
 		empiLink
-			.setEmpiTargetType("Person")
+			.setEmpiTargetType(theResourceType)
 			.setMatchResult(EmpiMatchResultEnum.REDIRECT)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
 	}
 
-	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, EmpiTransactionContext theEmpiTransactionContext) {
+	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, MdmTransactionContext theMdmTransactionContext) {
 //		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
-		myEmpiResourceDaoSvc.upsertSourceResource(theToPerson, theEmpiTransactionContext.getResourceType());
+		myEmpiResourceDaoSvc.upsertSourceResource(theToPerson, theMdmTransactionContext.getResourceType());
 	}
 
-	private void mergeSourceResourceLinks(IAnyResource theFromResource, IAnyResource theToResource, Long theToResourcePid, EmpiTransactionContext theEmpiTransactionContext) {
+	private void mergeSourceResourceLinks(IAnyResource theFromResource, IAnyResource theToResource, Long theToResourcePid, MdmTransactionContext theMdmTransactionContext) {
 		List<EmpiLink> fromLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theFromResource); // fromLinks - links going to theFromResource
 		List<EmpiLink> toLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theToResource); // toLinks - links going to theToResource
 
@@ -153,8 +154,8 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 			.findFirst();
 	}
 
-	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
-		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
+		theMdmTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
 }

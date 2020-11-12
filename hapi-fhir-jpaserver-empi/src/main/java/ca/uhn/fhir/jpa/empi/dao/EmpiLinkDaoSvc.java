@@ -25,7 +25,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.jpa.dao.data.IEmpiLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -60,7 +60,7 @@ public class EmpiLinkDaoSvc {
 	private FhirContext myFhirContext;
 
 	@Transactional
-	public EmpiLink createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, @Nullable EmpiTransactionContext theEmpiTransactionContext) {
+	public EmpiLink createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
 		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
 		Long targetResourcePid = myIdHelperService.getPidOrNull(theTargetResource);
 
@@ -78,7 +78,7 @@ public class EmpiLinkDaoSvc {
 		}
 
 		String message = String.format("Creating EmpiLink from %s to %s -> %s", theSourceResource.getIdElement().toUnqualifiedVersionless(), theTargetResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
-		theEmpiTransactionContext.addTransactionLogMessage(message);
+		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(empiLink);
 		return empiLink;

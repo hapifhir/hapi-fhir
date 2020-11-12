@@ -20,7 +20,7 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.stream.Stream;
@@ -29,6 +29,6 @@ import java.util.stream.Stream;
  * This service supports the EMPI Operation providers for those services that return multiple empi links.
  */
 public interface IEmpiLinkQuerySvc {
-	Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiContext);
-	Stream<EmpiLinkJson> getDuplicatePersons(EmpiTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource, MdmTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> getDuplicatePersons(MdmTransactionContext theEmpiContext);
 }

@@ -24,7 +24,7 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.svc.candidate.CandidateList;
@@ -63,49 +63,49 @@ public class EmpiMatchLinkSvc {
 	 * Does nothing if resource is determined to be not managed by EMPI.
 	 *
 	 * @param theResource the incoming EMPI target, which is either a Patient or Practitioner.
-	 * @param theEmpiTransactionContext
+	 * @param theMdmTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to EMPI processing of this resource.
 	 */
-	public EmpiTransactionContext updateEmpiLinksForEmpiTarget(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+	public MdmTransactionContext updateEmpiLinksForEmpiTarget(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		if (EmpiUtil.isEmpiAccessible(theResource)) {
-			return doEmpiUpdate(theResource, theEmpiTransactionContext);
+			return doEmpiUpdate(theResource, theMdmTransactionContext);
 		} else {
 			return null;
 		}
 	}
 
-	private EmpiTransactionContext doEmpiUpdate(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
+	private MdmTransactionContext doEmpiUpdate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		CandidateList candidateList = myEmpiSourceResourceFindingSvc.findSourceResourceCandidates(theResource);
 
 		if (candidateList.isEmpty()) {
-			handleEmpiWithNoCandidates(theResource, theEmpiTransactionContext);
+			handleEmpiWithNoCandidates(theResource, theMdmTransactionContext);
 		} else if (candidateList.exactlyOneMatch()) {
-			handleEmpiWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theEmpiTransactionContext);
+			handleEmpiWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theMdmTransactionContext);
 		} else {
-			handleEmpiWithMultipleCandidates(theResource, candidateList, theEmpiTransactionContext);
+			handleEmpiWithMultipleCandidates(theResource, candidateList, theMdmTransactionContext);
 		}
-		return theEmpiTransactionContext;
+		return theMdmTransactionContext;
 	}
 
-	private void handleEmpiWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, EmpiTransactionContext theEmpiTransactionContext) {
+	private void handleEmpiWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
 		MatchedSourceResourceCandidate firstMatch = theCandidateList.getFirstMatch();
 		Long samplePersonPid = firstMatch.getCandidatePersonPid().getIdAsLong();
 		boolean allSamePerson = theCandidateList.stream()
 			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
 
 		if (allSamePerson) {
-			log(theEmpiTransactionContext, "EMPI received multiple match candidates, but they are all linked to the same person.");
-			handleEmpiWithSingleCandidate(theResource, firstMatch, theEmpiTransactionContext);
+			log(theMdmTransactionContext, "EMPI received multiple match candidates, but they are all linked to the same person.");
+			handleEmpiWithSingleCandidate(theResource, firstMatch, theMdmTransactionContext);
 		} else {
-			log(theEmpiTransactionContext, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+			log(theMdmTransactionContext, "EMPI received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
 			List<IAnyResource> persons = new ArrayList<>();
 			for (MatchedSourceResourceCandidate matchedSourceResourceCandidate : theCandidateList.getCandidates()) {
 				IAnyResource person = myEmpiSourceResourceFindingSvc
-					.getSourceResourceFromMatchedSourceResourceCandidate(matchedSourceResourceCandidate, theEmpiTransactionContext.getResourceType());
+					.getSourceResourceFromMatchedSourceResourceCandidate(matchedSourceResourceCandidate, theMdmTransactionContext.getResourceType());
 				EmpiMatchOutcome outcome = EmpiMatchOutcome.POSSIBLE_MATCH;
 				outcome.setEidMatch(theCandidateList.isEidMatch());
-				myEmpiLinkSvc.updateLink(person, theResource, outcome, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+				myEmpiLinkSvc.updateLink(person, theResource, outcome, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 				persons.add(person);
 			}
 
@@ -115,51 +115,51 @@ public class EmpiMatchLinkSvc {
 				.forEach(possibleDuplicatePerson -> {
 					EmpiMatchOutcome outcome = EmpiMatchOutcome.POSSIBLE_DUPLICATE;
 					outcome.setEidMatch(theCandidateList.isEidMatch());
-					myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, outcome, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+					myEmpiLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, outcome, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 				});
 		}
 	}
 
-	private void handleEmpiWithNoCandidates(IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext) {
-		log(theEmpiTransactionContext, String.format("There were no matched candidates for EMPI, creating a new %s.", theResource.getIdElement().getResourceType()));
+	private void handleEmpiWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		log(theMdmTransactionContext, String.format("There were no matched candidates for EMPI, creating a new %s.", theResource.getIdElement().getResourceType()));
 		IAnyResource newPerson = myPersonHelper.createSourceResourceFromEmpiTarget(theResource);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resoruce for the EMPI target
 		// 3. UPDATE EMPI LINK TABLE
 
-		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+		myEmpiLinkSvc.updateLink(newPerson, theResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
-	private void handleEmpiCreate(IAnyResource theTargetResource, MatchedSourceResourceCandidate thePersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
-		log(theEmpiTransactionContext, "EMPI has narrowed down to one candidate for matching.");
-		IAnyResource sourceResource = myEmpiSourceResourceFindingSvc.getSourceResourceFromMatchedSourceResourceCandidate(thePersonCandidate, theEmpiTransactionContext.getResourceType());
+	private void handleEmpiCreate(IAnyResource theTargetResource, MatchedSourceResourceCandidate thePersonCandidate, MdmTransactionContext theMdmTransactionContext) {
+		log(theMdmTransactionContext, "EMPI has narrowed down to one candidate for matching.");
+		IAnyResource sourceResource = myEmpiSourceResourceFindingSvc.getSourceResourceFromMatchedSourceResourceCandidate(thePersonCandidate, theMdmTransactionContext.getResourceType());
 
 		if (myPersonHelper.isPotentialDuplicate(sourceResource, theTargetResource)) {
-			log(theEmpiTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
+			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newSourceResource = myPersonHelper.createSourceResourceFromEmpiTarget(theTargetResource);
-			myEmpiLinkSvc.updateLink(newSourceResource, theTargetResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
-			myEmpiLinkSvc.updateLink(newSourceResource, sourceResource, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(newSourceResource, theTargetResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
+			myEmpiLinkSvc.updateLink(newSourceResource, sourceResource, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
 			if (thePersonCandidate.isMatch()) {
-				myPersonHelper.handleExternalEidAddition(sourceResource, theTargetResource, theEmpiTransactionContext);
+				myPersonHelper.handleExternalEidAddition(sourceResource, theTargetResource, theMdmTransactionContext);
 				// myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			}
-			myEmpiLinkSvc.updateLink(sourceResource, theTargetResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theEmpiTransactionContext);
+			myEmpiLinkSvc.updateLink(sourceResource, theTargetResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}
 
-	private void handleEmpiWithSingleCandidate(IAnyResource theResource, MatchedSourceResourceCandidate thePersonCandidate, EmpiTransactionContext theEmpiTransactionContext) {
-		log(theEmpiTransactionContext, "EMPI has narrowed down to one candidate for matching.");
-		if (theEmpiTransactionContext.getRestOperation().equals(EmpiTransactionContext.OperationType.UPDATE_RESOURCE)) {
-			myEidUpdateService.handleEmpiUpdate(theResource, thePersonCandidate, theEmpiTransactionContext);
+	private void handleEmpiWithSingleCandidate(IAnyResource theResource, MatchedSourceResourceCandidate thePersonCandidate, MdmTransactionContext theMdmTransactionContext) {
+		log(theMdmTransactionContext, "EMPI has narrowed down to one candidate for matching.");
+		if (theMdmTransactionContext.getRestOperation().equals(MdmTransactionContext.OperationType.UPDATE_RESOURCE)) {
+			myEidUpdateService.handleEmpiUpdate(theResource, thePersonCandidate, theMdmTransactionContext);
 		} else {
-			handleEmpiCreate(theResource, thePersonCandidate, theEmpiTransactionContext);
+			handleEmpiCreate(theResource, thePersonCandidate, theMdmTransactionContext);
 		}
 	}
 
-	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
-		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
+		theMdmTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
 }

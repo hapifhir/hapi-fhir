@@ -20,7 +20,7 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IEmpiLinkSvc {
@@ -32,9 +32,9 @@ public interface IEmpiLinkSvc {
 	 * @param theTargetResource               the target resource, which is a Patient or Practitioner
 	 * @param theMatchResult            the current status of the match to set the link to.
 	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
-	 * @param theEmpiTransactionContext
+	 * @param theMdmTransactionContext
 	 */
-	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext);
+	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, EmpiMatchOutcome theMatchResult, EmpiLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext);
 
 //	/**
 //	 * Replace Person.link values from what they should be based on EmpiLink values
@@ -47,5 +47,5 @@ public interface IEmpiLinkSvc {
 	 * @param theExistingPerson
 	 * @param theResource
 	 */
-	void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, EmpiTransactionContext theEmpiTransactionContext);
+	void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, MdmTransactionContext theMdmTransactionContext);
 }

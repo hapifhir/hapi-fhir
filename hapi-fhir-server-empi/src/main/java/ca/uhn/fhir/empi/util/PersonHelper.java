@@ -25,19 +25,17 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalEID;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -202,17 +200,17 @@ public class PersonHelper {
 	 * @return the modified {@link IBaseResource} representing the person.
 	 */
 	public IAnyResource updateSourceResourceExternalEidFromTargetResource(IAnyResource theSourceResource, IAnyResource
-		theTargetResource, EmpiTransactionContext theEmpiTransactionContext) {
+		theTargetResource, MdmTransactionContext theMdmTransactionContext) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theTargetResource);
 		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(theSourceResource);
 
 		if (!incomingTargetEid.isEmpty()) {
 			if (personOfficialEid.isEmpty() || !myEmpiConfig.isPreventMultipleEids()) {
-				log(theEmpiTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
+				log(theMdmTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
 				addCanonicalEidsToSourceResourceIfAbsent(theSourceResource, incomingTargetEid);
 			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
-				log(theEmpiTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite person, as this EID is already present");
+				log(theMdmTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite person, as this EID is already present");
 			} else {
 				throw new IllegalArgumentException("This would create a duplicate person!");
 			}
@@ -461,16 +459,16 @@ public class PersonHelper {
 		person.setLink(links);
 	}
 
-	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
-		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
+		theMdmTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
 
-	public void handleExternalEidAddition(IAnyResource theSourceResource, IAnyResource theTargetResource, EmpiTransactionContext
-		theEmpiTransactionContext) {
+	public void handleExternalEidAddition(IAnyResource theSourceResource, IAnyResource theTargetResource, MdmTransactionContext
+			  theMdmTransactionContext) {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theTargetResource);
 		if (!eidFromResource.isEmpty()) {
-			updateSourceResourceExternalEidFromTargetResource(theSourceResource, theTargetResource, theEmpiTransactionContext);
+			updateSourceResourceExternalEidFromTargetResource(theSourceResource, theTargetResource, theMdmTransactionContext);
 		}
 	}
 

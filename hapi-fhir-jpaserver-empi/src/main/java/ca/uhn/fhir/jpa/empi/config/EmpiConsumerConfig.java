@@ -27,7 +27,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.api.IEmpiMatchFinderSvc;
-import ca.uhn.fhir.empi.api.IEmpiPersonMergerSvc;
+import ca.uhn.fhir.empi.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.provider.EmpiControllerHelper;
@@ -52,7 +52,7 @@ import ca.uhn.fhir.jpa.empi.svc.EmpiLinkUpdaterSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiMatchLinkSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiPersonDeletingSvc;
-import ca.uhn.fhir.jpa.empi.svc.EmpiPersonMergerSvcImpl;
+import ca.uhn.fhir.jpa.empi.svc.GoldenResourceMergerSvcImpl;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceDaoSvc;
 import ca.uhn.fhir.jpa.empi.svc.EmpiResourceFilteringSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiCandidateSearchCriteriaBuilderSvc;
@@ -157,8 +157,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	IEmpiPersonMergerSvc empiPersonMergerSvc() {
-		return new EmpiPersonMergerSvcImpl();
+	IGoldenResourceMergerSvc empiPersonMergerSvc() {
+		return new GoldenResourceMergerSvcImpl();
 	}
 
 

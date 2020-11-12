@@ -5,7 +5,7 @@ import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -338,17 +337,17 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return theMedication;
 	}
 
-	protected EmpiTransactionContext createContextForCreate(String theResourceType) {
-		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setRestOperation(EmpiTransactionContext.OperationType.CREATE_RESOURCE);
+	protected MdmTransactionContext createContextForCreate(String theResourceType) {
+		MdmTransactionContext ctx = new MdmTransactionContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.CREATE_RESOURCE);
 		ctx.setResourceType(theResourceType);
 		ctx.setTransactionLogMessages(null);
 		return ctx;
 	}
 
-	protected EmpiTransactionContext createContextForUpdate(String theResourceType) {
-		EmpiTransactionContext ctx = new EmpiTransactionContext();
-		ctx.setRestOperation(EmpiTransactionContext.OperationType.UPDATE_RESOURCE);
+	protected MdmTransactionContext createContextForUpdate(String theResourceType) {
+		MdmTransactionContext ctx = new MdmTransactionContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.UPDATE_RESOURCE);
 		ctx.setTransactionLogMessages(null);
 		ctx.setResourceType(theResourceType);
 		return ctx;

@@ -27,7 +27,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
@@ -59,7 +59,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, EmpiTransactionContext theEmpiContext) {
+	public IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, MdmTransactionContext theEmpiContext) {
 		String targetType = myFhirContext.getResourceType(theTarget);
 
 		validateUpdateLinkRequest(thePerson, theTarget, theMatchResult, targetType);
@@ -115,7 +115,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public void notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, EmpiTransactionContext theEmpiContext) {
+	public void notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, MdmTransactionContext theEmpiContext) {
 		validateNotDuplicatePersonRequest(thePerson, theTarget);
 
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);

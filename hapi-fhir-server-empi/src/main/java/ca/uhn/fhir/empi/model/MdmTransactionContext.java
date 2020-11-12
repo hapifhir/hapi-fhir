@@ -22,7 +22,7 @@ package ca.uhn.fhir.empi.model;
 
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
-public class EmpiTransactionContext {
+public class MdmTransactionContext {
 
 	public enum OperationType {
 		CREATE_RESOURCE,
@@ -48,15 +48,15 @@ public class EmpiTransactionContext {
 		return myTransactionLogMessages;
 	}
 
-	public EmpiTransactionContext() {
+	public MdmTransactionContext() {
 	}
 
-	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
+	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
 		myTransactionLogMessages = theTransactionLogMessages;
 		myRestOperation = theRestOperation;
 	}
 
-	public EmpiTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
+	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
 		this(theTransactionLogMessages, theRestOperation);
 		setResourceType(theResourceType);
 	}

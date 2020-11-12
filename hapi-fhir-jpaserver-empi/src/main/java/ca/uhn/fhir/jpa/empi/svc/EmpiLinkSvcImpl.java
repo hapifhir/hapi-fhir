@@ -26,7 +26,7 @@ import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.CanonicalIdentityAssuranceLevel;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.util.AssuranceLevelUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -42,9 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * This class is in charge of managing EmpiLinks between Persons and target resources
@@ -64,11 +62,11 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
+	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
 		IIdType resourceId = theTarget.getIdElement().toUnqualifiedVersionless();
 
 		if (theMatchOutcome.isPossibleDuplicate() && personsLinkedAsNoMatch(thePerson, theTarget)) {
-			log(theEmpiTransactionContext, thePerson.getIdElement().toUnqualifiedVersionless() +
+			log(theMdmTransactionContext, thePerson.getIdElement().toUnqualifiedVersionless() +
 				" is linked as NO_MATCH with " +
 				theTarget.getIdElement().toUnqualifiedVersionless() +
 				" not linking as POSSIBLE_DUPLICATE.");
@@ -90,8 +88,8 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 //			case POSSIBLE_DUPLICATE:
 //				break;
 //		}
-		myEmpiResourceDaoSvc.upsertSourceResource(thePerson, theEmpiTransactionContext.getResourceType());
-		createOrUpdateLinkEntity(thePerson, theTarget, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
+		myEmpiResourceDaoSvc.upsertSourceResource(thePerson, theMdmTransactionContext.getResourceType());
+		createOrUpdateLinkEntity(thePerson, theTarget, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
 	private boolean personsLinkedAsNoMatch(IAnyResource thePerson, IAnyResource theTarget) {
@@ -124,14 +122,14 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 //	}
 
 	@Override
-	public void deleteLink(IAnyResource theSourceResource, IAnyResource theTargetResource, EmpiTransactionContext theEmpiTransactionContext) {
+	public void deleteLink(IAnyResource theSourceResource, IAnyResource theTargetResource, MdmTransactionContext theMdmTransactionContext) {
 		// myPersonHelper.removeLink(theExistingPerson, theResource.getIdElement(), theEmpiTransactionContext);
 //		 myEmpiLinkDaoSvc.deleteEmpiLinks(theSourceResource, theTargetResource);
 
 		Optional<EmpiLink> oEmpiLink = getEmpiLinkForPersonTargetPair(theSourceResource, theTargetResource);
 		if (oEmpiLink.isPresent()) {
 			EmpiLink empiLink = oEmpiLink.get();
-			log(theEmpiTransactionContext, "Deleting EmpiLink [" + theSourceResource.getIdElement().toVersionless() + " -> " + theTargetResource.getIdElement().toVersionless() + "] with result: " + empiLink.getMatchResult());
+			log(theMdmTransactionContext, "Deleting EmpiLink [" + theSourceResource.getIdElement().toVersionless() + " -> " + theTargetResource.getIdElement().toVersionless() + "] with result: " + empiLink.getMatchResult());
 			myEmpiLinkDaoSvc.deleteLink(empiLink);
 		}
 	}
@@ -181,12 +179,12 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theSourceResource, theTargetResource, theMatchOutcome, theLinkSource, theEmpiTransactionContext);
+	private void createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, EmpiMatchOutcome theMatchOutcome, EmpiLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theSourceResource, theTargetResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
-	private void log(EmpiTransactionContext theEmpiTransactionContext, String theMessage) {
-		theEmpiTransactionContext.addTransactionLogMessage(theMessage);
+	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
+		theMdmTransactionContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
 }

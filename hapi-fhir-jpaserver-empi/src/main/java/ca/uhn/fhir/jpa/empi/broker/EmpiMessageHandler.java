@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.empi.broker;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -77,7 +77,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	public void matchEmpiAndUpdateLinks(ResourceModifiedMessage theMsg) {
 		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
-		EmpiTransactionContext empiContext =  createEmpiContext(theMsg, resourceType);
+		MdmTransactionContext empiContext =  createEmpiContext(theMsg, resourceType);
 		try {
 			switch (theMsg.getOperationType()) {
 				case CREATE:
@@ -106,25 +106,25 @@ public class EmpiMessageHandler implements MessageHandler {
 		}
 	}
 
-	private EmpiTransactionContext createEmpiContext(ResourceModifiedMessage theMsg, String theResourceType) {
+	private MdmTransactionContext createEmpiContext(ResourceModifiedMessage theMsg, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theMsg.getTransactionId());
-		EmpiTransactionContext.OperationType empiOperation;
+		MdmTransactionContext.OperationType empiOperation;
 		switch (theMsg.getOperationType()) {
 			case CREATE:
-				empiOperation = EmpiTransactionContext.OperationType.CREATE_RESOURCE;
+				empiOperation = MdmTransactionContext.OperationType.CREATE_RESOURCE;
 				break;
 			case UPDATE:
-				empiOperation = EmpiTransactionContext.OperationType.UPDATE_RESOURCE;
+				empiOperation = MdmTransactionContext.OperationType.UPDATE_RESOURCE;
 				break;
 			case MANUALLY_TRIGGERED:
-				empiOperation = EmpiTransactionContext.OperationType.SUBMIT_RESOURCE_TO_EMPI;
+				empiOperation = MdmTransactionContext.OperationType.SUBMIT_RESOURCE_TO_EMPI;
 				break;
 			case DELETE:
 			default:
 				ourLog.trace("Not creating an EmpiTransactionContext for {}", theMsg.getOperationType());
 				throw new InvalidRequestException("We can't handle non-update/create operations in EMPI");
 		}
-		return new EmpiTransactionContext(transactionLogMessages, empiOperation, theResourceType);
+		return new MdmTransactionContext(transactionLogMessages, empiOperation, theResourceType);
 	}
 
 	private void validateResourceType(String theResourceType) {
@@ -133,24 +133,24 @@ public class EmpiMessageHandler implements MessageHandler {
 		}
 	}
 
-	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theEmpiTransactionContext);
+	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theMdmTransactionContext);
 	}
 
 	private IAnyResource getResourceFromPayload(ResourceModifiedMessage theMsg) {
 		return (IAnyResource) theMsg.getNewPayload(myFhirContext);
 	}
 
-	private void handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, EmpiTransactionContext theEmpiTransactionContext) {
-		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theEmpiTransactionContext);
+	private void handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
+		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(getResourceFromPayload(theMsg), theMdmTransactionContext);
 	}
 
-	private void log(EmpiTransactionContext theEmpiContext, String theMessage) {
+	private void log(MdmTransactionContext theEmpiContext, String theMessage) {
 		theEmpiContext.addTransactionLogMessage(theMessage);
 		ourLog.debug(theMessage);
 	}
 
-	private void log(EmpiTransactionContext theEmpiContext, String theMessage, Exception theException) {
+	private void log(MdmTransactionContext theEmpiContext, String theMessage, Exception theException) {
 		theEmpiContext.addTransactionLogMessage(theMessage);
 		ourLog.error(theMessage, theException);
 	}

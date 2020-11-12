@@ -20,16 +20,16 @@ package ca.uhn.fhir.empi.api;
  * #L%
  */
 
-import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.annotation.Nullable;
 import java.util.stream.Stream;
 
 public interface IEmpiControllerSvc {
-	Stream<EmpiLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, EmpiTransactionContext theEmpiContext);
-	Stream<EmpiLinkJson> getDuplicateGoldenResources(EmpiTransactionContext theEmpiContext);
-	void notDuplicateGoldenResource(String thePersonId, String theTargetPersonId, EmpiTransactionContext theEmpiContext);
-	IAnyResource mergeGoldenResources(String theFromPersonId, String theToPersonId, EmpiTransactionContext theEmpiTransactionContext);
-	IAnyResource updateLink(String thePersonId, String theTargetId, String theMatchResult, EmpiTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theEmpiContext);
+	Stream<EmpiLinkJson> getDuplicateGoldenResources(MdmTransactionContext theEmpiContext);
+	void notDuplicateGoldenResource(String thePersonId, String theTargetPersonId, MdmTransactionContext theEmpiContext);
+	IAnyResource mergeGoldenResources(String theFromPersonId, String theToPersonId, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource updateLink(String thePersonId, String theTargetId, String theMatchResult, MdmTransactionContext theEmpiContext);
 }
