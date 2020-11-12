@@ -4,12 +4,16 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.IVersionChangeListener;
 import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.cache.VersionChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.VersionChangeListenerEntry;
 import ca.uhn.fhir.jpa.cache.VersionChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hamcrest.Matchers;
@@ -28,8 +32,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {
-	public static int TEST_SEARCH_PARAMS = 13;
+	public static long TEST_SEARCH_PARAMS = 13L;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
@@ -56,6 +62,8 @@ public class SearchParamRegistryImplTest {
 	private ModelConfig myModelConfig;
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
+	@MockBean
+	private VersionChangeListenerCache myVersionChangeListenerCache;
 
 	@Configuration
 	static class SpringConfig {
@@ -108,11 +116,17 @@ public class SearchParamRegistryImplTest {
 	public void before() {
 		myAnswerCount = 0;
 
+		Set<VersionChangeListenerEntry> entries = new HashSet<>();
+		VersionChangeListenerEntry entry = new VersionChangeListenerEntry(mock(IVersionChangeListener.class), SearchParameterMap.newSynchronous());
+		entries.add(entry);
+		when(myVersionChangeListenerCache.getListenerEntries("SearchParameter")).thenReturn(entries);
+		when(myVersionChangeListenerCache.notifyListener(any(), any(), any())).thenReturn(TEST_SEARCH_PARAMS);
+
 	}
 
 	@Test
 	public void testRefreshAfterExpiry() {
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+//		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
 		mySearchParamRegistry.requestRefresh();
 		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
