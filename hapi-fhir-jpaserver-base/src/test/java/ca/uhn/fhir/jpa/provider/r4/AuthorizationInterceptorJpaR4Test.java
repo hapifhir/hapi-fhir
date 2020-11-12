@@ -1186,6 +1186,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}
 	}
 
+	// FIXME KHS
 	@Test
 	public void testDeleteExpungeAllowed() {
 

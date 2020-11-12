@@ -50,12 +50,13 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;

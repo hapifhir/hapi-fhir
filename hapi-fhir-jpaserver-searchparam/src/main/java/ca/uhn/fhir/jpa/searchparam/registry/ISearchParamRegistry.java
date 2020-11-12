@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,8 @@ public interface ISearchParamRegistry {
 	 * @return Returns {@literal null} if no match
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
+
+	boolean refreshCacheIfNecessary();
 
 	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
 
@@ -81,6 +84,4 @@ public interface ISearchParamRegistry {
 		retVal.add(Constants.PARAM_LASTUPDATED);
 		return retVal;
 	}
-
-    boolean refreshCacheIfNecessary();
 }
