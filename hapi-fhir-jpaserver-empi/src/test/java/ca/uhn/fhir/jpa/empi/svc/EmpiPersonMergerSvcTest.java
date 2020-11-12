@@ -299,11 +299,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		mergeGoldenPatients();
 
-		assertResourceHasLinkCount(myToGoldenPatient, 3, (e) -> true);
-		assertResourceHasLinkCount(myFromGoldenPatient, 0, (e) -> true);
+		assertResourceHasLinkCount(myToGoldenPatient, 3);
+		assertResourceHasLinkCount(myFromGoldenPatient, 0);
 		// TODO ENSURE PROPER LINK TYPES
-		// TODO MAKE IT MORE READABLE
-
 		assertEquals(3, myEmpiLinkDao.count());
 	}
 
@@ -321,13 +319,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
-	private void assertResourceHasAutoLinkCount(IBaseResource theResource, int theCount) {
-		assertResourceHasLinkCount(theResource, theCount, EmpiLink::isAuto);
-	}
 
-	private void assertResourceHasLinkCount(IBaseResource theResource, int theCount, Predicate<EmpiLink> thePredicate) {
+	private void assertResourceHasLinkCount(IBaseResource theResource, int theCount) {
 		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theResource);
-		assertEquals(theCount, links.stream().filter(thePredicate).count());
+		assertEquals(theCount, links.size());
 	}
 
 	@Test
@@ -342,6 +337,11 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
+	}
+
+	private void assertResourceHasAutoLinkCount(Patient myToGoldenPatient, int theCount) {
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(myToGoldenPatient);
+		assertEquals(theCount, links.stream().filter(EmpiLink::isAuto).count());
 	}
 
 	@Test
