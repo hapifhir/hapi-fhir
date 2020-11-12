@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -26,7 +28,7 @@ public class VersionChangeListenerCache {
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 
-	private final SetValuedMap<String, VersionChangeListenerWithSearchParamMap> myListenersByResourcetype = new HashSetValuedHashMap<>();
+	private final SetValuedMap<String, VersionChangeListenerWithSearchParamMap> myListenersByResourceType = new HashSetValuedHashMap<>();
 
 	public void add(String theResourceType, IVersionChangeListener theVersionChangeListener, SearchParameterMap theMap) {
 		getListenerEntries(theResourceType).add(new VersionChangeListenerWithSearchParamMap(theVersionChangeListener, theMap));
@@ -34,21 +36,21 @@ public class VersionChangeListenerCache {
 
 	@VisibleForTesting
 	public void clearListenersForUnitTest() {
-		myListenersByResourcetype.clear();
+		myListenersByResourceType.clear();
 	}
 
 	public Set<String> resourceNames() {
-		return myListenersByResourcetype.keySet();
+		return myListenersByResourceType.keySet();
 	}
 
 	@Nonnull
 	public Set<VersionChangeListenerWithSearchParamMap> getListenerEntries(String theResourceType) {
-		return myListenersByResourcetype.get(theResourceType);
+		return myListenersByResourceType.get(theResourceType);
 	}
 
 	public boolean hasListenerFor(IBaseResource theResource) {
 		String resourceName = myFhirContext.getResourceType(theResource);
-		return myListenersByResourcetype.get(resourceName).stream().anyMatch(entry -> matches(entry.getSearchParameterMap(), theResource));
+		return myListenersByResourceType.get(resourceName).stream().anyMatch(entry -> matches(entry.getSearchParameterMap(), theResource));
 	}
 
 	private boolean matches(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
@@ -76,8 +78,10 @@ public class VersionChangeListenerCache {
 	}
 
 	public long compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IVersionChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+		Set<IdDt> newKeys = new HashSet<>();
 		long count = 0;
 		for (IdDt id : theNewResourceVersionMap.keySet()) {
+			newKeys.add(id);
 			String previousValue = theOldResourceVersionCache.addOrUpdate(id, theNewResourceVersionMap.get(id));
 			IdDt newId = id.withVersion(theNewResourceVersionMap.get(id));
 			if (previousValue == null) {
@@ -89,21 +93,29 @@ public class VersionChangeListenerCache {
 			}
 		}
 
-		// Now check for deletes
-		for (IdDt id : theOldResourceVersionCache.keySet()) {
-			if (!theNewResourceVersionMap.containsKey(id)) {
-				theListener.handleDelete(id);
-				++count;
-			}
+		// If the NEW ResourceVersionMap does NOT have OLD key - delete it
+		Set<IdDt> deletedIDs = new HashSet<>();
+		for (String key : theOldResourceVersionCache.keySet()) {
+			Map<IdDt, String> oldVersionCache = theOldResourceVersionCache.getMap(key);
+			oldVersionCache.keySet()
+				.forEach(k -> {
+					if (!newKeys.contains(k)) {
+						if (!deletedIDs.contains(k)) {
+							theListener.handleDelete(k);
+							deletedIDs.add(k);
+						}
+					}
+				});
+			count += deletedIDs.size();
 		}
 		return count;
 	}
 
 	public void remove(IVersionChangeListener theVersionChangeListener) {
-		myListenersByResourcetype.entries().removeIf(entry -> entry.getValue().getVersionChangeListener().equals(theVersionChangeListener));
+		myListenersByResourceType.entries().removeIf(entry -> entry.getValue().getVersionChangeListener().equals(theVersionChangeListener));
 	}
 
 	public int size() {
-		return myListenersByResourcetype.size();
+		return myListenersByResourceType.size();
 	}
 }

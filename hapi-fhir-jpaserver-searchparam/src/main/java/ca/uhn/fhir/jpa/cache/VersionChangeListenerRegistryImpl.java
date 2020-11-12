@@ -91,7 +91,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Override
 	@VisibleForTesting
 	public void clearCacheForUnitTest() {
-		myResourceVersionCache.clearForUnitTest();
+		myResourceVersionCache.clear();
 		myNextRefreshByResourceName.clear();
 	}
 
