@@ -210,6 +210,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
+	// FIXME KHS move these into a generic abstract superclass
 	@Override
 	public void requestRefresh() {
 		myVersionChangeListenerRegistry.requestRefresh("SearchParameter");
@@ -218,6 +219,11 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	@Override
 	public void forceRefresh() {
 		myVersionChangeListenerRegistry.forceRefresh("SearchParameter");
+	}
+
+	@Override
+	public boolean refreshCacheIfNecessary() {
+		return myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter") > 0;
 	}
 
 	@PostConstruct

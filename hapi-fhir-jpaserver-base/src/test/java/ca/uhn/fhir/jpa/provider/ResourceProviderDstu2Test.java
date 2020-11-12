@@ -187,7 +187,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourClient.update().resource(numberParameter).execute();
 
 		// This fires every 10 seconds
-		myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
+		mySearchParamRegistry.refreshCacheIfNecessary();
 
 		Patient patient = new Patient();
 		patient.setId("future-appointment-count-pt");

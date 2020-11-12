@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -134,8 +133,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	protected SubscriptionLoader mySubscriptionLoader;
-	@Autowired
-	protected IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
 	@Autowired
 	private IdHelperService myIdHelperService;
 	@Autowired

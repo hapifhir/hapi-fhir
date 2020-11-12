@@ -30,10 +30,10 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
-import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -100,7 +100,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
-	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
+	private ISearchParamRegistry mySearchParamRegistry;
 
 	/**
 	 * Constructor
@@ -170,7 +170,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 					install(npmPackage, theInstallationSpec, retVal);
 
 					// If any SearchParameters were installed, let's load them right away
-					myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
+					mySearchParamRegistry.refreshCacheIfNecessary();
 				}
 
 			} catch (IOException e) {

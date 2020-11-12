@@ -50,7 +50,6 @@ import java.util.Date;
 
 public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 
-
 	private IFhirResourceDao<T> myDao;
 
 	public BaseJpaResourceProvider() {

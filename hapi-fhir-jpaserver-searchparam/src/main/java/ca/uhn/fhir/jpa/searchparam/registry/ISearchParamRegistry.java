@@ -81,4 +81,6 @@ public interface ISearchParamRegistry {
 		retVal.add(Constants.PARAM_LASTUPDATED);
 		return retVal;
 	}
+
+    boolean refreshCacheIfNecessary();
 }
