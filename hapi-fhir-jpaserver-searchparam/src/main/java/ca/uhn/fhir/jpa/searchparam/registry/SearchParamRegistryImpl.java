@@ -266,16 +266,19 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	@Override
 	public void handleCreate(IdDt theResourceId) {
 		// FIXME KHS
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void handleUpdate(IdDt theResourceId) {
 		// FIXME KHS
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void handleDelete(IdDt theResourceId) {
 		// FIXME KHS
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

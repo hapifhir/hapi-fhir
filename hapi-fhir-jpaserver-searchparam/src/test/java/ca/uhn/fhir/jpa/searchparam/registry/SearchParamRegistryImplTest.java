@@ -54,6 +54,8 @@ public class SearchParamRegistryImplTest {
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
+	@Autowired
+	private IResourceVersionSvc myResourceVersionSvc;
 
 	@MockBean
 	private ISchedulerService mySchedulerService;
@@ -65,6 +67,7 @@ public class SearchParamRegistryImplTest {
 	private IInterceptorService myInterceptorBroadcaster;
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
+	private static List<ResourceTable> ourEntities;
 
 	@Configuration
 	static class SpringConfig {
@@ -97,11 +100,11 @@ public class SearchParamRegistryImplTest {
 		IResourceVersionSvc resourceVersionSvc() {
 			IResourceVersionSvc retval = mock(IResourceVersionSvc.class);
 
-			List<ResourceTable> entities = new ArrayList<>();
+			ourEntities = new ArrayList<>();
 			for (long id = 0; id < TEST_SEARCH_PARAMS; ++id) {
-				entities.add(createEntity(id, 1));
+				ourEntities.add(createEntity(id, 1));
 			}
-			ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(entities);
+			ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(ourEntities);
 			when(retval.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
 			return retval;
 		}
@@ -172,9 +175,18 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testExtractExtensions() {
-		SearchParameter searchParameter = buildSearchParameter();
+		// Initialize the registry
+		mySearchParamRegistry.forceRefresh();
 
-		when(mySearchParamProvider.read(any())).thenReturn(searchParameter);
+		// Add a new search parameter entity
+		List<ResourceTable> newEntities = new ArrayList(ourEntities);
+		newEntities.add(createEntity(TEST_SEARCH_PARAMS, 1));
+		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(newEntities);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
+
+		// When we ask for the new entity, return our foo search parameter
+		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter());
+
 		mySearchParamRegistry.forceRefresh();
 		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
 
