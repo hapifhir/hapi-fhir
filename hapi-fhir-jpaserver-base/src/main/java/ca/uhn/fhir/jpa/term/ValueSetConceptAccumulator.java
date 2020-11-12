@@ -81,9 +81,9 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void excludeConcept(String theSystem, String theCode) {
+	public boolean excludeConcept(String theSystem, String theCode) {
 		if (isAnyBlank(theSystem, theCode)) {
-			return;
+			return false;
 		}
 
 		// Get existing entity so it can be deleted.
@@ -114,6 +114,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
 			}
 		}
+		return false;
 	}
 
 	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay) {
