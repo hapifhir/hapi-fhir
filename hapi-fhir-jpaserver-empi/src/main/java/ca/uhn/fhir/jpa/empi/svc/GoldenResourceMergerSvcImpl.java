@@ -60,8 +60,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 
-//		TODO NG - Revisit when merge rules are defined
-//		myPersonHelper.mergeFields(theFrom, theTo);
+		myPersonHelper.mergeFields(theFrom, theTo);
 
 		mergeSourceResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
 
