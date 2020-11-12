@@ -54,10 +54,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Autowired
 	IInterceptorService myInterceptorService;
 
-	private Patient myFromSourcePatient;
-	private Patient myToSourcePatient;
-	private Long myFromSourcePatientPid;
-	private Long myToSourcePatientPid;
+	private Patient myFromGoldenPatient;
+	private Patient myToGoldenPatient;
+	private Long myFromGoldenPatientPid;
+	private Long myToGoldenPatientPid;
 	private Patient myTargetPatient1;
 	private Patient myTargetPatient2;
 	private Patient myTargetPatient3;
@@ -66,12 +66,12 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	public void before() {
 		super.loadEmpiSearchParameters();
 
-		myFromSourcePatient = createSourceResourcePatient();
-		IdType fromSourcePatientId = myFromSourcePatient.getIdElement().toUnqualifiedVersionless();
-		myFromSourcePatientPid = myIdHelperService.getPidOrThrowException(fromSourcePatientId);
-		myToSourcePatient = createSourceResourcePatient();
-		IdType toSourcePatientId = myToSourcePatient.getIdElement().toUnqualifiedVersionless();
-		myToSourcePatientPid = myIdHelperService.getPidOrThrowException(toSourcePatientId);
+		myFromGoldenPatient = createGoldenPatient();
+		IdType fromSourcePatientId = myFromGoldenPatient.getIdElement().toUnqualifiedVersionless();
+		myFromGoldenPatientPid = myIdHelperService.getPidOrThrowException(fromSourcePatientId);
+		myToGoldenPatient = createGoldenPatient();
+		IdType toGoldenPatientId = myToGoldenPatient.getIdElement().toUnqualifiedVersionless();
+		myToGoldenPatientPid = myIdHelperService.getPidOrThrowException(toGoldenPatientId);
 
 		myTargetPatient1 = createPatient();
 		myTargetPatient2 = createPatient();
@@ -90,19 +90,19 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	
 	@Test
 	public void emptyMerge() {
-		assertEquals(2, getAllSourcePatients().size());
-		assertEquals(2, getAllActiveSourcePatients().size());
+		assertEquals(2, getAllGoldenPatients().size());
+		assertEquals(2, getAllActiveGoldenPatients().size());
 
-		Patient mergedSourcePatients = mergeSourcePatients();
-		assertEquals(myToSourcePatient.getIdElement(), mergedSourcePatients.getIdElement());
-		assertThat(mergedSourcePatients, is(sameSourceResourceAs(mergedSourcePatients)));
-		assertEquals(2, getAllSourcePatients().size());
-		assertEquals(1, getAllActiveSourcePatients().size());
+		Patient mergedGoldenPatient = mergeGoldenPatients();
+		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
+		assertThat(mergedGoldenPatient, is(sameSourceResourceAs(mergedGoldenPatient)));
+		assertEquals(2, getAllGoldenPatients().size());
+		assertEquals(1, getAllActiveGoldenPatients().size());
 	}
 
-	private Patient mergeSourcePatients() {
+	private Patient mergeGoldenPatients() {
 		assertEquals(0, redirectLinkCount());
-		Patient retval = (Patient) myEmpiPersonMergerSvc.mergePersons(myFromSourcePatient, myToSourcePatient, createEmpiContext());
+		Patient retval = (Patient) myEmpiPersonMergerSvc.mergePersons(myFromGoldenPatient, myToGoldenPatient, createEmpiContext());
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
@@ -122,8 +122,8 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setSourceResourcePid(myToSourcePatientPid)
-			.setTargetPid(myFromSourcePatientPid)
+			.setSourceResourcePid(myToGoldenPatientPid)
+			.setTargetPid(myFromGoldenPatientPid)
 			.setEmpiTargetType("Patient")
 			.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
 			.setLinkSource(EmpiLinkSourceEnum.AUTO);
@@ -138,7 +138,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 		myEmpiLinkHelper.logEmpiLinks();
 
-		mergeSourcePatients();
+		mergeGoldenPatients();
 
 		{
 			List<EmpiLink> foundLinks = myEmpiLinkDao.findAll();
@@ -149,9 +149,9 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void fullFromEmptyTo() {
-		populatePerson(myFromSourcePatient);
+		populatePerson(myFromGoldenPatient);
 
-		Patient mergedSourcePatient = mergeSourcePatients();
+		Patient mergedSourcePatient = mergeGoldenPatients();
 		// TODO NG - Revisit when rules are ready
 //		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 //		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
@@ -161,10 +161,10 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void emptyFromFullTo() {
-		myFromSourcePatient.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
-		populatePerson(myToSourcePatient);
+		myFromGoldenPatient.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
+		populatePerson(myToGoldenPatient);
 
-		Patient mergedSourcePatient = mergeSourcePatients();
+		Patient mergedSourcePatient = mergeGoldenPatients();
 		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
@@ -173,92 +173,92 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void fromLinkToNoLink() {
-		createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 
-		Patient mergedSourcePatient = mergeSourcePatients();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedSourcePatient);
+		Patient mergedGoldenPatient = mergeGoldenPatients();
+		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedGoldenPatient);
 		assertEquals(1, links.size());
-		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
-//		fail("FIXME"); TODO NG - Confirm it's ok
+		assertThat(mergedGoldenPatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
 
 	@Test
 	public void fromNoLinkToLink() {
-		createEmpiLink(myToSourcePatient, myTargetPatient1);
+		createEmpiLink(myToGoldenPatient, myTargetPatient1);
 
-		Patient mergedSourcePatient = mergeSourcePatients();
+		Patient mergedSourcePatient = mergeGoldenPatients();
 		List<EmpiLink> links = getNonRedirectLinksByPerson(mergedSourcePatient);
 		assertEquals(1, links.size());
 		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
-//		fail("FIXME"); TODO NG - Confirm it's ok
 	}
 
 	@Test
 	public void fromManualLinkOverridesAutoToLink() {
-		EmpiLink fromLink = createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		EmpiLink fromLink = createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		saveLink(fromLink);
 
-		createEmpiLink(myToSourcePatient, myTargetPatient1);
+		createEmpiLink(myToGoldenPatient, myTargetPatient1);
 
-		mergeSourcePatients();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(myToSourcePatient);
+		mergeGoldenPatients();
+		List<EmpiLink> links = getNonRedirectLinksByPerson(myToGoldenPatient);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}
 
-	private List<EmpiLink> getNonRedirectLinksByPerson(Patient theSourcePatient) {
-		return myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theSourcePatient).stream()
+	private List<EmpiLink> getNonRedirectLinksByPerson(Patient theGoldenPatient) {
+		return myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theGoldenPatient).stream()
 			.filter(link -> !link.isRedirect())
 			.collect(Collectors.toList());
 	}
 
 	@Test
 	public void fromManualNoMatchLinkOverridesAutoToLink() {
-		EmpiLink fromLink = createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		EmpiLink fromLink = createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 
 		saveLink(fromLink);
 
-		createEmpiLink(myToSourcePatient, myTargetPatient1);
+		createEmpiLink(myToGoldenPatient, myTargetPatient1);
 
-		mergeSourcePatients();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(myToSourcePatient);
+		mergeGoldenPatients();
+		List<EmpiLink> links = getNonRedirectLinksByPerson(myToGoldenPatient);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test
 	public void fromManualAutoMatchLinkNoOverridesManualToLink() {
-		createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 
-		EmpiLink toLink = createEmpiLink(myToSourcePatient, myTargetPatient1);
+		EmpiLink toLink = createEmpiLink(myToGoldenPatient, myTargetPatient1);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		saveLink(toLink);
 
-		mergeSourcePatients();
-		List<EmpiLink> links = getNonRedirectLinksByPerson(myToSourcePatient);
+		mergeGoldenPatients();
+		List<EmpiLink> links = getNonRedirectLinksByPerson(myToGoldenPatient);
 		assertEquals(1, links.size());
 		assertEquals(EmpiLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(EmpiMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test
 	public void fromNoMatchMergeToManualMatchIsError() {
-		EmpiLink fromLink = createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		EmpiLink fromLink = createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		saveLink(fromLink);
 
-		EmpiLink toLink = createEmpiLink(myToSourcePatient, myTargetPatient1);
+		EmpiLink toLink = createEmpiLink(myToGoldenPatient, myTargetPatient1);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		saveLink(toLink);
 
 		try {
-			mergeSourcePatients();
+			mergeGoldenPatients();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("A MANUAL NO_MATCH link may not be merged into a MANUAL MATCH link for the same target", e.getMessage());
@@ -267,18 +267,18 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void fromMatchMergeToManualNoMatchIsError() {
-		EmpiLink fromLink = createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		EmpiLink fromLink = createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		saveLink(fromLink);
 
-		EmpiLink toLink = createEmpiLink(myToSourcePatient, myTargetPatient1);
+		EmpiLink toLink = createEmpiLink(myToGoldenPatient, myTargetPatient1);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		saveLink(toLink);
 
 		try {
-			mergeSourcePatients();
+			mergeGoldenPatients();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("A MANUAL MATCH link may not be merged into a MANUAL NO_MATCH link for the same target", e.getMessage());
@@ -287,35 +287,38 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void fromNoMatchMergeToManualMatchDifferentPatientIsOk() {
-		EmpiLink fromLink = createEmpiLink(myFromSourcePatient, myTargetPatient1);
+		EmpiLink fromLink = createEmpiLink(myFromGoldenPatient, myTargetPatient1);
 		fromLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		fromLink.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
 		saveLink(fromLink);
 
-		EmpiLink toLink = createEmpiLink(myToSourcePatient, myTargetPatient2);
+		EmpiLink toLink = createEmpiLink(myToGoldenPatient, myTargetPatient2);
 		toLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		toLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		saveLink(toLink);
 
-		mergeSourcePatients();
-		assertResourceHasLinkCount(myToSourcePatient, 1, (e) -> false);
-//		assertEquals(1, myToSourcePatient.getLink().size());
+		mergeGoldenPatients();
+
+		assertResourceHasLinkCount(myToGoldenPatient, 3, (e) -> true);
+		assertResourceHasLinkCount(myFromGoldenPatient, 0, (e) -> true);
+		// TODO ENSURE PROPER LINK TYPES
+		// TODO MAKE IT MORE READABLE
+
 		assertEquals(3, myEmpiLinkDao.count());
 	}
 
 	@Test
 	public void from123To1() {
-		createEmpiLink(myFromSourcePatient, myTargetPatient1);
-		createEmpiLink(myFromSourcePatient, myTargetPatient2);
-		createEmpiLink(myFromSourcePatient, myTargetPatient3);
-		createEmpiLink(myToSourcePatient, myTargetPatient1);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient1);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient2);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient3);
+		createEmpiLink(myToGoldenPatient, myTargetPatient1);
 
-		mergeSourcePatients();
+		mergeGoldenPatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
-		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-//		assertEquals(3, myToSourcePatient.getLink().size());
-		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
+		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 	private void assertResourceHasAutoLinkCount(IBaseResource theResource, int theCount) {
@@ -329,49 +332,47 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void from1To123() {
-		createEmpiLink(myFromSourcePatient, myTargetPatient1);
-		createEmpiLink(myToSourcePatient, myTargetPatient1);
-		createEmpiLink(myToSourcePatient, myTargetPatient2);
-		createEmpiLink(myToSourcePatient, myTargetPatient3);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient1);
+		createEmpiLink(myToGoldenPatient, myTargetPatient1);
+		createEmpiLink(myToGoldenPatient, myTargetPatient2);
+		createEmpiLink(myToGoldenPatient, myTargetPatient3);
 
-		mergeSourcePatients();
+		mergeGoldenPatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
-		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
-		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
+		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 	@Test
 	public void from123To123() {
-		createEmpiLink(myFromSourcePatient, myTargetPatient1);
-		createEmpiLink(myFromSourcePatient, myTargetPatient2);
-		createEmpiLink(myFromSourcePatient, myTargetPatient3);
-		createEmpiLink(myToSourcePatient, myTargetPatient1);
-		createEmpiLink(myToSourcePatient, myTargetPatient2);
-		createEmpiLink(myToSourcePatient, myTargetPatient3);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient1);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient2);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient3);
+		createEmpiLink(myToGoldenPatient, myTargetPatient1);
+		createEmpiLink(myToGoldenPatient, myTargetPatient2);
+		createEmpiLink(myToGoldenPatient, myTargetPatient3);
 
-		mergeSourcePatients();
+		mergeGoldenPatients();
 
-		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 
-//		assertEquals(3, myToSourcePatient.getLink().size());
-		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
+		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 	@Test
 	public void from12To23() {
-		createEmpiLink(myFromSourcePatient, myTargetPatient1);
-		createEmpiLink(myFromSourcePatient, myTargetPatient2);
-		createEmpiLink(myToSourcePatient, myTargetPatient2);
-		createEmpiLink(myToSourcePatient, myTargetPatient3);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient1);
+		createEmpiLink(myFromGoldenPatient, myTargetPatient2);
+		createEmpiLink(myToGoldenPatient, myTargetPatient2);
+		createEmpiLink(myToGoldenPatient, myTargetPatient3);
 
-		mergeSourcePatients();
+		mergeGoldenPatients();
 		myEmpiLinkHelper.logEmpiLinks();
 
-		assertThat(myToSourcePatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
+		assertThat(myToGoldenPatient, is(possibleLinkedTo(myTargetPatient1, myTargetPatient2, myTargetPatient3)));
 
-//		assertEquals(3, myToSourcePatient.getLink().size());
-		assertResourceHasAutoLinkCount(myToSourcePatient, 3);
+		assertResourceHasAutoLinkCount(myToGoldenPatient, 3);
 	}
 
 	@Test
@@ -412,17 +413,19 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testMergeIdentities() {
-		myFromSourcePatient.addIdentifier().setValue("aaa");
-		myFromSourcePatient.addIdentifier().setValue("bbb");
-		assertThat(myFromSourcePatient.getIdentifier(), hasSize(2));
+	public void testMergeIdentifiers() {
+		myFromGoldenPatient.addIdentifier().setValue("aaa").setSystem("SYSTEM1");
+		myFromGoldenPatient.addIdentifier().setValue("bbb").setSystem("SYSTEM1");
+		myFromGoldenPatient.addIdentifier().setValue("ccc").setSystem("SYSTEM2");
+		assertThat(myFromGoldenPatient.getIdentifier(), hasSize(3));
 
-		myToSourcePatient.addIdentifier().setValue("aaa");
-		myToSourcePatient.addIdentifier().setValue("ccc");
-		assertThat(myToSourcePatient.getIdentifier(), hasSize(2));
+		myToGoldenPatient.addIdentifier().setValue("aaa").setSystem("SYSTEM1");
+		myToGoldenPatient.addIdentifier().setValue("ccc").setSystem("SYSTEM1");
+		assertThat(myToGoldenPatient.getIdentifier(), hasSize(2));
 
-		mergeSourcePatients();
-		assertThat(myToSourcePatient.getIdentifier(), hasSize(3));
+		mergeGoldenPatients();
+
+		assertThat(myToGoldenPatient.getIdentifier(), hasSize(4));
 	}
 
 	private EmpiLink createEmpiLink(Patient theSourcePatient, Patient theTargetPatient) {

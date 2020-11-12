@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -66,6 +64,8 @@ import static ca.uhn.fhir.context.FhirVersionEnum.R4;
 @Service
 public class PersonHelper {
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
+
+	private static final String FIELD_NAME_IDENTIFIER = "identifier";
 
 	@Autowired
 	private IEmpiSettings myEmpiConfig;
@@ -96,7 +96,7 @@ public class PersonHelper {
 		IBaseResource newSourceResource = resourceDefinition.newInstance();
 
 		// hapi has 2 metamodels: for children and types
-		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
+		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 
 		cloneAllExternalEidsIntoNewSourceResource(sourceResourceIdentifier, theIncomingResource, newSourceResource);
 
@@ -145,7 +145,7 @@ public class PersonHelper {
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceToCloneInto);
 		// hapi has 2 metamodels: for children and types
-		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName("identifier");
+		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 		cloneEidIntoResource(resourceIdentifier, toId(theEid), theResourceToCloneInto);
 	}
 
@@ -154,12 +154,50 @@ public class PersonHelper {
 	 */
 	private void cloneEidIntoResource(BaseRuntimeChildDefinition theIdentifierDefinition, IBase theEid, IBase theResourceToCloneEidInto) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) theIdentifierDefinition.getChildByName("identifier");
+		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 		IBase resourceNewIdentifier = childIdentifier.newInstance();
 
 		FhirTerser terser = myFhirContext.newTerser();
 		terser.cloneInto(theEid, resourceNewIdentifier, true);
 		theIdentifierDefinition.getMutator().addValue(theResourceToCloneEidInto, resourceNewIdentifier);
+	}
+
+	/**
+	 * Clones specified composite field (collection). Composite field values must confirm to the collections
+	 * contract.
+	 *
+	 * @param theFrom Resource to clone the specified filed from
+	 * @param theTo Resource to clone the specified filed to
+	 * @param field Field name to be copied
+	 */
+	private void cloneCompositeField(IBaseResource theFrom, IBaseResource theTo, String field) {
+		FhirTerser terser = myFhirContext.newTerser();
+
+		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(theFrom);
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(field);
+
+		IFhirPath fhirPath = myFhirContext.newFhirPath();
+		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
+		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
+
+		for (IBase theFromFieldValue: theFromFieldValues) {
+			if (contains(theFromFieldValue, theToFieldValues)) {
+				continue;
+			}
+
+			BaseRuntimeElementCompositeDefinition<?> compositeDefinition = (BaseRuntimeElementCompositeDefinition<?>) childDefinition.getChildByName(field);
+			IBase newFieldValue = compositeDefinition.newInstance();
+			terser.cloneInto(theFromFieldValue, newFieldValue, true);
+
+			theToFieldValues.add(newFieldValue);
+		}
+	}
+
+	private boolean contains(IBase theItem, List<IBase> theItems) {
+		PrimitiveTypeComparingPredicate predicate = new PrimitiveTypeComparingPredicate();
+		return theItems.stream().filter(i -> {
+			return predicate.test(i, theItem);
+		}).findFirst().isPresent();
 	}
 
 	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition theSourceResourceIdentifier, IBase theSourceResource, IBase theNewSourceResource) {
@@ -246,7 +284,7 @@ public class PersonHelper {
 			}
 
 			BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>)
-					theSourceResourceIdentifier.getChildByName("identifier");
+					theSourceResourceIdentifier.getChildByName(FIELD_NAME_IDENTIFIER);
 			IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
 			terser.cloneInto(base, sourceResourceNewIdentifier, true);
 
@@ -263,7 +301,7 @@ public class PersonHelper {
 
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
-		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName("identifier");
+		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 		clearExternalEidsFromTheSourceResource(sourceResourceIdentifier, theSourceResource);
 	}
 
@@ -282,7 +320,7 @@ public class PersonHelper {
 		}
 	}
 
-	private <T> T toId(CanonicalEID eid) {
+	private <T extends IBase> T toId(CanonicalEID eid) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
 				return (T) eid.toR4();
@@ -330,16 +368,19 @@ public class PersonHelper {
 	}
 
 	public void mergeFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				mergeR4PersonFields(theFromPerson, theToPerson);
-				break;
-			case DSTU3:
-				mergeDstu3PersonFields(theFromPerson, theToPerson);
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
+		//	TODO NG - Revisit when merge rules are defined
+		cloneCompositeField(theFromPerson, theToPerson, FIELD_NAME_IDENTIFIER);
+
+//		switch (myFhirContext.getVersion().getVersion()) {
+//			case R4:
+//				mergeR4PersonFields(theFromPerson, theToPerson);
+//				break;
+//			case DSTU3:
+//				mergeDstu3PersonFields(theFromPerson, theToPerson);
+//				break;
+//			default:
+//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
+//		}
 	}
 
 	private void mergeR4PersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {

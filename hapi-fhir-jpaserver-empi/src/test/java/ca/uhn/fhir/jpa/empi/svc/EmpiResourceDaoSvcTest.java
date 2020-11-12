@@ -25,10 +25,10 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testSearchPersonByEidExcludesInactive() {
-		Patient goodSourcePatient = addExternalEID(createSourceResourcePatient(), TEST_EID);
+		Patient goodSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
 		myPatientDao.update(goodSourcePatient);
 
-		Patient badSourcePatient = addExternalEID(createSourceResourcePatient(), TEST_EID);
+		Patient badSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
 		badSourcePatient.setActive(false);
 		myPatientDao.update(badSourcePatient);
 
@@ -39,10 +39,10 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testSearchPersonByEidExcludesNonEmpiManaged() {
-		Patient goodSourcePatient = addExternalEID(createSourceResourcePatient(), TEST_EID);
+		Patient goodSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
 		myPatientDao.update(goodSourcePatient);
 
-		Patient badSourcePatient = addExternalEID(createSourceResourcePatient(new Patient(), false), TEST_EID);
+		Patient badSourcePatient = addExternalEID(createGoldenPatient(new Patient(), false), TEST_EID);
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Patient");

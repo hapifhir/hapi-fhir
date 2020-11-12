@@ -36,9 +36,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matcher;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.ContactPoint;
@@ -139,12 +139,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createUnmanagedSourceResource() {
-		return createSourceResourcePatient(new Patient(), false);
+		return createGoldenPatient(new Patient(), false);
 	}
 
 	@Nonnull
-	protected Patient createSourceResourcePatient() {
-		return createSourceResourcePatient(new Patient(), true);
+	protected Patient createGoldenPatient() {
+		return createGoldenPatient(new Patient(), true);
 	}
 
 	@Nonnull
@@ -153,17 +153,17 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	@Nonnull
-	protected Patient createSourceResourcePatient(Patient theSourceResourcePatient) {
-		return createSourceResourcePatient(theSourceResourcePatient, true);
+	protected Patient createGoldenPatient(Patient thePatient) {
+		return createGoldenPatient(thePatient, true);
 	}
 
 	@Nonnull
-	protected Patient createSourceResourcePatient(Patient theSourceResourcePatient, boolean theEmpiManaged) {
+	protected Patient createGoldenPatient(Patient thePatient, boolean theEmpiManaged) {
 		if (theEmpiManaged) {
-			theSourceResourcePatient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
-			theSourceResourcePatient.setActive(true);
+			thePatient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+			thePatient.setActive(true);
 		}
-		DaoMethodOutcome outcome = myPatientDao.create(theSourceResourcePatient);
+		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
 		return patient;
@@ -393,23 +393,23 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected Patient getOnlyActiveSourcePatient() {
-		List<IBaseResource> resources = getAllActiveSourcePatients();
+		List<IBaseResource> resources = getAllActiveGoldenPatients();
 		assertEquals(1, resources.size());
 		return (Patient) resources.get(0);
 	}
 
 	@Nonnull
-	protected List<IBaseResource> getAllActiveSourcePatients() {
-		return getAllSourcePatients(true);
+	protected List<IBaseResource> getAllActiveGoldenPatients() {
+		return getAllGoldenPatients(true);
 	}
 
 	@Nonnull
-	protected List<IBaseResource> getAllSourcePatients() {
-		return getAllSourcePatients(false);
+	protected List<IBaseResource> getAllGoldenPatients() {
+		return getAllGoldenPatients(false);
 	}
 
 	@Nonnull
-	private List<IBaseResource> getAllSourcePatients(boolean theOnlyActive) {
+	private List<IBaseResource> getAllGoldenPatients(boolean theOnlyActive) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		//TODO GGG ensure that this tag search works effectively.
@@ -423,7 +423,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected EmpiLink createResourcesAndBuildTestEmpiLink() {
-		Patient sourcePatient = createSourceResourcePatient();
+		Patient sourcePatient = createGoldenPatient();
 		Patient patient = createPatient();
 
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
@@ -468,10 +468,18 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 
-	protected void print(IBaseResource ... theResource) {
-		for (IBaseResource r : theResource) {
-			System.out.println(myFhirContext.newJsonParser().encodeResourceToString(r));
+	protected void print(String message, IBaseResource ... theResource) {
+		if (StringUtils.isNotEmpty(message)) {
+			ourLog.info(message);
 		}
+
+		for (IBaseResource r : theResource) {
+			ourLog.info(myFhirContext.newJsonParser().encodeResourceToString(r));
+		}
+	}
+
+	protected void print(IBaseResource ... theResource) {
+		print(null, theResource);
 	}
 
 
@@ -487,7 +495,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	protected void printLinks() {
 		myEmpiLinkDao.findAll().forEach(empiLink -> {
-			System.out.println(empiLink);
+			ourLog.info(String.valueOf(empiLink));
 		});
 	}
 

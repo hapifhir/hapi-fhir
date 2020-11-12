@@ -60,8 +60,7 @@ public class EmpiPersonMergerSvcImpl implements IEmpiPersonMergerSvc {
 	public IAnyResource mergePersons(IAnyResource theFrom, IAnyResource theTo, EmpiTransactionContext theEmpiTransactionContext) {
 		Long toPid = myIdHelperService.getPidOrThrowException(theTo);
 
-//		TODO NG - Revisit when merge rules are defined
-//		myPersonHelper.mergeFields(theFrom, theTo);
+		myPersonHelper.mergeFields(theFrom, theTo);
 
 		mergeSourceResourceLinks(theFrom, theTo, toPid, theEmpiTransactionContext);
 		removeTargetLinks(theFrom, theTo, theEmpiTransactionContext);

@@ -46,7 +46,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testCreateRemoveLink() {
 		assertLinkCount(0);
-		Patient sourcePatient = createSourceResourcePatient();
+		Patient sourcePatient = createGoldenPatient();
 		IdType sourcePatientId = sourcePatient.getIdElement().toUnqualifiedVersionless();
 		assertEquals(0, sourcePatient.getLink().size());
 		Patient patient = createPatient();
@@ -70,8 +70,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPossibleDuplicate() {
 		assertLinkCount(0);
-		Patient sourcePatient1 = createSourceResourcePatient();
-		Patient sourcePatient2 = createSourceResourcePatient();
+		Patient sourcePatient1 = createGoldenPatient();
+		Patient sourcePatient2 = createGoldenPatient();
 		// TODO GGG MDM NOT VALID
 		myEmpiLinkSvc.updateLink(sourcePatient1, sourcePatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertLinkCount(1);
@@ -80,8 +80,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testNoMatchBlocksPossibleDuplicate() {
 		assertLinkCount(0);
-		Patient sourcePatient1 = createSourceResourcePatient();
-		Patient sourcePatient2 = createSourceResourcePatient();
+		Patient sourcePatient1 = createGoldenPatient();
+		Patient sourcePatient2 = createGoldenPatient();
 
 		Long sourcePatient1Pid = myIdHelperService.getPidOrNull(sourcePatient1);
 		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
@@ -98,8 +98,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testNoMatchBlocksPossibleDuplicateReversed() {
 		assertLinkCount(0);
-		Patient sourcePatient1 = createSourceResourcePatient();
-		Patient sourcePatient2 = createSourceResourcePatient();
+		Patient sourcePatient1 = createGoldenPatient();
+		Patient sourcePatient2 = createGoldenPatient();
 
 		Long sourcePatient1Pid = myIdHelperService.getPidOrNull(sourcePatient1);
 		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
@@ -124,7 +124,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testManualEmpiLinksCannotBeModifiedBySystem() {
-		Patient sourcePatient = createSourceResourcePatient(buildJaneSourcePatient());
+		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
 		Patient patient = createPatient(buildJanePatient());
 
 		myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
@@ -138,7 +138,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
-		Patient sourcePatient = createSourceResourcePatient(buildJaneSourcePatient());
+		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
 		Patient patient = createPatient(buildJanePatient());
 
 		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
@@ -152,7 +152,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testSyncDoesNotSyncNoMatchLinks() {
-		Patient sourcePatient = createSourceResourcePatient(buildJaneSourcePatient());
+		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
 		Patient patient1 = createPatient(buildJanePatient());
 		Patient patient2 = createPatient(buildJanePatient());
 		assertEquals(0, myEmpiLinkDao.count());
