@@ -102,4 +102,5 @@ public class SearchParamConfig {
 	public SearchParamMatcher SearchParamMatcher() {
 		return new SearchParamMatcher();
 	}
+
 }
