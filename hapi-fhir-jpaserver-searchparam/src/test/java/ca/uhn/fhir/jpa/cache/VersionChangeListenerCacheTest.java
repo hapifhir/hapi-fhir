@@ -56,4 +56,9 @@ class VersionChangeListenerCacheTest {
 		myVersionChangeListenerCache.remove(listener2);
 		assertEquals(0, myVersionChangeListenerCache.size());
 	}
+
+	@Test
+	public void testCompareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges() {
+		// FIXME KBD Add Test Code Here ...
+	}
 }
