@@ -59,6 +59,11 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 		myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
 	}
 
+	@Override
+	public void unregisterResourceVersionChangeListener(IVersionChangeListener theVersionChangeListener) {
+		myVersionChangeListenerCache.remove(theVersionChangeListener);
+	}
+
 	@PostConstruct
 	public void start() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
@@ -152,12 +157,12 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	private synchronized long doRefreshCachesAndNotifyListeners(String theResourceName) {
-		Set<VersionChangeListenerEntry> listenerEntries = myVersionChangeListenerCache.getListenerEntries(theResourceName);
+		Set<VersionChangeListenerWithSearchParamMap> listenerEntries = myVersionChangeListenerCache.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {
 			return 0;
 		}
 		long count = 0;
-		for (VersionChangeListenerEntry listenerEntry : listenerEntries) {
+		for (VersionChangeListenerWithSearchParamMap listenerEntry : listenerEntries) {
 			SearchParameterMap searchParamMap = listenerEntry.getSearchParameterMap();
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
 			count += myVersionChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap);

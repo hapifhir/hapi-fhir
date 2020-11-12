@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -44,4 +45,6 @@ public interface IVersionChangeListenerRegistry {
 	 * @param theResource the resource that changed that might trigger a refresh
 	 */
 	void requestRefreshIfWatching(IBaseResource theResource);
+
+	void unregisterResourceVersionChangeListener(IVersionChangeListener theVersionChangeListener);
 }

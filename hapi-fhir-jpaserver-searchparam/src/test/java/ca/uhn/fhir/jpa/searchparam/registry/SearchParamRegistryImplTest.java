@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.cache.IVersionChangeListener;
 import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.VersionChangeListenerCache;
-import ca.uhn.fhir.jpa.cache.VersionChangeListenerEntry;
+import ca.uhn.fhir.jpa.cache.VersionChangeListenerWithSearchParamMap;
 import ca.uhn.fhir.jpa.cache.VersionChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -116,8 +116,8 @@ public class SearchParamRegistryImplTest {
 	public void before() {
 		myAnswerCount = 0;
 
-		Set<VersionChangeListenerEntry> entries = new HashSet<>();
-		VersionChangeListenerEntry entry = new VersionChangeListenerEntry(mock(IVersionChangeListener.class), SearchParameterMap.newSynchronous());
+		Set<VersionChangeListenerWithSearchParamMap> entries = new HashSet<>();
+		VersionChangeListenerWithSearchParamMap entry = new VersionChangeListenerWithSearchParamMap(mock(IVersionChangeListener.class), SearchParameterMap.newSynchronous());
 		entries.add(entry);
 		when(myVersionChangeListenerCache.getListenerEntries("SearchParameter")).thenReturn(entries);
 		when(myVersionChangeListenerCache.notifyListener(any(), any(), any())).thenReturn(TEST_SEARCH_PARAMS);

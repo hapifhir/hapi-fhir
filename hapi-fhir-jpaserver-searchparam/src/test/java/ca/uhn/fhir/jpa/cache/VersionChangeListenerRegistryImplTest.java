@@ -60,8 +60,8 @@ class VersionChangeListenerRegistryImplTest {
 //		myFemaleMap.setLoadSynchronous(true);
 //		myFemaleMap.add("gender", new TokenParam("female"));
 		when(myResourceVersionSvc.getVersionMap("Patient", myMap)).thenReturn(ResourceVersionMap.fromResourceIds(new ArrayList<>()));
-		Set<VersionChangeListenerEntry> entries = new HashSet<>();
-		VersionChangeListenerEntry entry = new VersionChangeListenerEntry(myTestListener, myMap);
+		Set<VersionChangeListenerWithSearchParamMap> entries = new HashSet<>();
+		VersionChangeListenerWithSearchParamMap entry = new VersionChangeListenerWithSearchParamMap(myTestListener, myMap);
 		entries.add(entry);
 		when(myVersionChangeListenerCache.getListenerEntries("Patient")).thenReturn(entries);
 	}

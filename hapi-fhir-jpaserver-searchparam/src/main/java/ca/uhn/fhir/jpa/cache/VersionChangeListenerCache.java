@@ -6,6 +6,8 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.collections4.SetValuedMap;
+import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-// FIXME KHS change to bean
 @Component
 public class VersionChangeListenerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerCache.class);
@@ -28,10 +26,10 @@ public class VersionChangeListenerCache {
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 
-	private final Map<String, Set<VersionChangeListenerEntry>> myListenersByResourcetype = new HashMap<>();
+	private final SetValuedMap<String, VersionChangeListenerWithSearchParamMap> myListenersByResourcetype = new HashSetValuedHashMap<>();
 
 	public void add(String theResourceType, IVersionChangeListener theVersionChangeListener, SearchParameterMap theMap) {
-		getListenerEntries(theResourceType).add(new VersionChangeListenerEntry(theVersionChangeListener, theMap));
+		getListenerEntries(theResourceType).add(new VersionChangeListenerWithSearchParamMap(theVersionChangeListener, theMap));
 	}
 
 	@VisibleForTesting
@@ -44,8 +42,8 @@ public class VersionChangeListenerCache {
 	}
 
 	@Nonnull
-	public Set<VersionChangeListenerEntry> getListenerEntries(String theResourceType) {
-		return myListenersByResourcetype.computeIfAbsent(theResourceType, listener -> new HashSet<>());
+	public Set<VersionChangeListenerWithSearchParamMap> getListenerEntries(String theResourceType) {
+		return myListenersByResourcetype.get(theResourceType);
 	}
 
 	public boolean hasListenerFor(IBaseResource theResource) {
@@ -63,7 +61,7 @@ public class VersionChangeListenerCache {
 	}
 
 	// FIXME KHS ensure we reset cache
-	public long notifyListener(VersionChangeListenerEntry theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+	public long notifyListener(VersionChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		long retval = 0;
 		IVersionChangeListener versionChangeListener = theListenerEntry.getVersionChangeListener();
 		if (theListenerEntry.isInitialized()) {
@@ -99,5 +97,13 @@ public class VersionChangeListenerCache {
 			}
 		}
 		return count;
+	}
+
+	public void remove(IVersionChangeListener theVersionChangeListener) {
+		myListenersByResourcetype.entries().removeIf(entry -> entry.getValue().getVersionChangeListener().equals(theVersionChangeListener));
+	}
+
+	public int size() {
+		return myListenersByResourcetype.size();
 	}
 }

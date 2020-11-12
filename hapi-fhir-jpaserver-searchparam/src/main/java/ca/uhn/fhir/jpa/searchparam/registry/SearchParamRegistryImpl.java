@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -110,11 +111,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 	private Map<String, RuntimeSearchParam> getSearchParamMap(Map<String, Map<String, RuntimeSearchParam>> searchParams, String theResourceName) {
 		return searchParams.computeIfAbsent(theResourceName, k -> new HashMap<>());
-	}
-
-	@PostConstruct
-	public void start() {
-		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
 	}
 
 	private void initializeActiveSearchParams(Collection<IdDt> theSearchParamIds) {
@@ -228,8 +224,15 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 	@PostConstruct
 	public void registerListener() {
+		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
+
 		// FIXME KHS compare this searchparam with below
 		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
+	}
+
+	@PreDestroy
+	public void unregisterListener() {
+		myVersionChangeListenerRegistry.unregisterResourceVersionChangeListener(this);
 	}
 
 	@Override
