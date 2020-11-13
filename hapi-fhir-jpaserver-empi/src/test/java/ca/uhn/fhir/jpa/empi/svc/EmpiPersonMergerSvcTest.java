@@ -121,7 +121,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void mergeRemovesPossibleDuplicatesLink() {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setSourceResourcePid(myToGoldenPatientPid)
+			.setGoldenResourcePid(myToGoldenPatientPid)
 			.setTargetPid(myFromGoldenPatientPid)
 			.setEmpiTargetType("Patient")
 			.setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE)
@@ -206,7 +206,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	}
 
 	private List<EmpiLink> getNonRedirectLinksByPerson(Patient theGoldenPatient) {
-		return myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theGoldenPatient).stream()
+		return myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(theGoldenPatient).stream()
 			.filter(link -> !link.isRedirect())
 			.collect(Collectors.toList());
 	}
@@ -320,7 +320,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 
 
 	private void assertResourceHasLinkCount(IBaseResource theResource, int theCount) {
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theResource);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(theResource);
 		assertEquals(theCount, links.size());
 	}
 
@@ -339,7 +339,7 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	}
 
 	private void assertResourceHasAutoLinkCount(Patient myToGoldenPatient, int theCount) {
-		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(myToGoldenPatient);
+		List<EmpiLink> links = myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(myToGoldenPatient);
 		assertEquals(theCount, links.stream().filter(EmpiLink::isAuto).count());
 	}
 

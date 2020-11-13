@@ -429,7 +429,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		empiLink.setMatchResult(EmpiMatchResultEnum.MATCH);
-		empiLink.setSourceResourcePid(myIdHelperService.getPidOrNull(sourcePatient));
+		empiLink.setGoldenResourcePid(myIdHelperService.getPidOrNull(sourcePatient));
 		empiLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
 		return empiLink;
 	}

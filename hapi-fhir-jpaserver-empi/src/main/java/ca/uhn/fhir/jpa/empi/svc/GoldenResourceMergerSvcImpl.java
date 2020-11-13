@@ -60,19 +60,23 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 
-		myPersonHelper.mergeFields(theFrom, theTo);
+		myPersonHelper.mergeFields(theFromGoldenResource, theToGoldenResource);
 
-		mergeSourceResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
+		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
 
+		//TODO GGG MDM: Is this just cleanup? In theory, the merge step from before shoulda done this..
 		removeTargetLinks(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 
-		refreshLinksAndUpdatePerson(theToGoldenResource, theMdmTransactionContext);
+
+		myEmpiResourceDaoSvc.upsertSourceResource(theFromGoldenResource, theMdmTransactionContext.getResourceType());
 
 		Long fromGoldenResourcePid = myIdHelperService.getPidOrThrowException(theFromGoldenResource);
 		addMergeLink(toGoldenResourcePid, fromGoldenResourcePid, theMdmTransactionContext.getResourceType());
-		myPersonHelper.deactivateResource(theFromGoldenResource);
+		//myPersonHelper.deactivateResource(theFromGoldenResource);
 
-		refreshLinksAndUpdatePerson(theFromGoldenResource, theMdmTransactionContext);
+		//Remove HAPI-EMPI Managed TAG, add a different Ttag? e.g. HAPI-EMPI-DEPRECATED or something? This would serve the purpose.
+
+		myEmpiResourceDaoSvc.upsertSourceResource(theFromGoldenResource, theMdmTransactionContext.getResourceType());
 
 		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless() + " into " + theToGoldenResource.getIdElement().toVersionless());
 		return theToGoldenResource;
@@ -86,9 +90,10 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	 * @param theMdmTransactionContext Context to keep track of the deletions
 	 */
 	private void removeTargetLinks(IAnyResource theFrom, IAnyResource theTo, MdmTransactionContext theMdmTransactionContext) {
-		List<EmpiLink> allLinksWithTheFromAsTarget = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theFrom);
+		List<EmpiLink> allLinksWithTheFromAsTarget = myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(theFrom);
 		allLinksWithTheFromAsTarget
 			.stream()
+			//TODO GGG NG MDM: Why are we keeping manual links? Haven't we already copied those over in the previous merge step?
 			.filter(EmpiLink::isAuto) // only keep manual links
 			.forEach(l -> {
 				theMdmTransactionContext.addTransactionLogMessage(String.format("Deleting link %s", l));
@@ -107,14 +112,10 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		myEmpiLinkDaoSvc.save(empiLink);
 	}
 
-	private void refreshLinksAndUpdatePerson(IAnyResource theToPerson, MdmTransactionContext theMdmTransactionContext) {
-//		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theToPerson, theEmpiTransactionContext);
-		myEmpiResourceDaoSvc.upsertSourceResource(theToPerson, theMdmTransactionContext.getResourceType());
-	}
 
-	private void mergeSourceResourceLinks(IAnyResource theFromResource, IAnyResource theToResource, Long theToResourcePid, MdmTransactionContext theMdmTransactionContext) {
-		List<EmpiLink> fromLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theFromResource); // fromLinks - links going to theFromResource
-		List<EmpiLink> toLinks = myEmpiLinkDaoSvc.findEmpiLinksBySourceResource(theToResource); // toLinks - links going to theToResource
+	private void mergeGoldenResourceLinks(IAnyResource theFromResource, IAnyResource theToResource, Long theToResourcePid, MdmTransactionContext theMdmTransactionContext) {
+		List<EmpiLink> fromLinks = myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(theFromResource); // fromLinks - links going to theFromResource
+		List<EmpiLink> toLinks = myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(theToResource); // toLinks - links going to theToResource
 
 		// For each incomingLink, either ignore it, move it, or replace the original one
 		for (EmpiLink fromLink : fromLinks) {
@@ -122,7 +123,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			if (optionalToLink.isPresent()) {
 				// toLinks.remove(optionalToLink);
 
-				// The original links already contain this target, so move it over to the toPerson
+				// The original links already contain this target, so move it over to the toResource
 				EmpiLink toLink = optionalToLink.get();
 				if (fromLink.isManual()) {
 					switch (toLink.getLinkSource()) {
@@ -141,7 +142,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 				}
 			}
 			// The original links didn't contain this target, so move it over to the toPerson
-			fromLink.setSourceResourcePid(theToResourcePid);
+			fromLink.setGoldenResourcePid(theToResourcePid);
 			ourLog.trace("Saving link {}", fromLink);
 			myEmpiLinkDaoSvc.save(fromLink);
 		}

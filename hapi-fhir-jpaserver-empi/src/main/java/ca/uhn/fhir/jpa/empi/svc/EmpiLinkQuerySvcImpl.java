@@ -79,7 +79,7 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 	private Example<EmpiLink> exampleLinkFromParameters(IIdType thePersonId, IIdType theTargetId, EmpiMatchResultEnum theMatchResult, EmpiLinkSourceEnum theLinkSource) {
 		EmpiLink empiLink = myEmpiLinkDaoSvc.newEmpiLink();
 		if (thePersonId != null) {
-			empiLink.setSourceResourcePid(myIdHelperService.getPidOrThrowException(thePersonId));
+			empiLink.setGoldenResourcePid(myIdHelperService.getPidOrThrowException(thePersonId));
 		}
 		if (theTargetId != null) {
 			empiLink.setTargetPid(myIdHelperService.getPidOrThrowException(theTargetId));

@@ -91,7 +91,7 @@ public class EmpiLinkDaoSvc {
 			return oExisting.get();
 		} else {
 			EmpiLink newLink = myEmpiLinkFactory.newEmpiLink();
-			newLink.setSourceResourcePid(theSourceResourcePid);
+			newLink.setGoldenResourcePid(theSourceResourcePid);
 			newLink.setPersonPid(theSourceResourcePid);
 			newLink.setTargetPid(theTargetResourcePid);
 			return newLink;
@@ -104,7 +104,7 @@ public class EmpiLinkDaoSvc {
 		}
 		EmpiLink link = myEmpiLinkFactory.newEmpiLink();
 		link.setTargetPid(theTargetResourcePid);
-		link.setSourceResourcePid(theSourceResourcePid);
+		link.setGoldenResourcePid(theSourceResourcePid);
 		Example<EmpiLink> example = Example.of(link);
 		return myEmpiLinkDao.findOne(example);
 	}
@@ -169,7 +169,7 @@ public class EmpiLinkDaoSvc {
 	 */
 	public Optional<EmpiLink> getEmpiLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, EmpiMatchResultEnum theMatchResult) {
 		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink();
-		exampleLink.setSourceResourcePid(thePersonPid);
+		exampleLink.setGoldenResourcePid(thePersonPid);
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<EmpiLink> example = Example.of(exampleLink);
@@ -210,17 +210,17 @@ public class EmpiLinkDaoSvc {
 	}
 
 	/**
-	 * Given a Person, return all links in which they are the source Person of the {@link EmpiLink}
+	 * Given a Golden Resource , return all links in which they are the source Person of the {@link EmpiLink}
 	 *
-	 * @param thePersonResource The {@link IBaseResource} Person who's links you would like to retrieve.
-	 * @return A list of all {@link EmpiLink} entities in which thePersonResource is the source Person.
+	 * @param theGoldenResource The {@link IBaseResource} Person who's links you would like to retrieve.
+	 * @return A list of all {@link EmpiLink} entities in which theGoldenResource is the source Person.
 	 */
-	public List<EmpiLink> findEmpiLinksBySourceResource(IBaseResource thePersonResource) {
-		Long pid = myIdHelperService.getPidOrNull(thePersonResource);
+	public List<EmpiLink> findEmpiLinksByGoldenResource(IBaseResource theGoldenResource) {
+		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setSourceResourcePid(pid);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setGoldenResourcePid(pid);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
@@ -320,7 +320,7 @@ public class EmpiLinkDaoSvc {
 		if (sourcePid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(targetPid).setSourceResourcePid(sourcePid);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setTargetPid(targetPid).setGoldenResourcePid(sourcePid);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);
 	}
@@ -337,7 +337,7 @@ public class EmpiLinkDaoSvc {
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setSourceResourcePid(pid);
+		EmpiLink exampleLink = myEmpiLinkFactory.newEmpiLink().setGoldenResourcePid(pid);
 		exampleLink.setMatchResult(EmpiMatchResultEnum.MATCH);
 		Example<EmpiLink> example = Example.of(exampleLink);
 		return myEmpiLinkDao.findAll(example);

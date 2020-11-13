@@ -49,7 +49,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myPerson2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
 		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
 
-		EmpiLink possibleDuplicateEmpiLink = myEmpiLinkDaoSvc.newEmpiLink().setSourceResourcePid(sourcePatient1Pid).setTargetPid(sourcePatient2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
+		EmpiLink possibleDuplicateEmpiLink = myEmpiLinkDaoSvc.newEmpiLink().setGoldenResourcePid(sourcePatient1Pid).setTargetPid(sourcePatient2Pid).setMatchResult(EmpiMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(EmpiLinkSourceEnum.AUTO);
 		saveLink(possibleDuplicateEmpiLink);
 	}
 
