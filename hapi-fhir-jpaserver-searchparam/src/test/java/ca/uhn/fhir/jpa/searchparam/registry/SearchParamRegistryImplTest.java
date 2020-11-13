@@ -170,8 +170,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	// FIXME KHS This one Fails when run as part of the whole Class but Passes when run by itslef
-	//@Test
-	@Disabled
+	@Test
 	public void testExtractExtensions() {
 		// Initialize the registry
 		mySearchParamRegistry.forceRefresh();

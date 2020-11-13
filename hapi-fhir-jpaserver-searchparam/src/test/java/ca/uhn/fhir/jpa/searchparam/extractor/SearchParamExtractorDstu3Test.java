@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.StringUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -251,7 +252,7 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+		public ReadOnlySearchParamCache getActiveSearchParams() {
 			throw new UnsupportedOperationException();
 		}
 

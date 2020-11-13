@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,31 +63,24 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	@Autowired
 	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
 
-	private Map<String, Map<String, RuntimeSearchParam>> myBuiltInSearchParams;
-	private IPhoneticEncoder myPhoneticEncoder;
-
-	private volatile ActiveSearchParamCache myActiveSearchParamCache = new ActiveSearchParamCache();
-	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
+	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
+	private volatile IPhoneticEncoder myPhoneticEncoder;
+	private volatile JpaSearchParamCache myJpaSearchParamCache = new JpaSearchParamCache();
+	private volatile RuntimeSearchParamCache myActiveSearchParams;
 
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-
 		requiresActiveSearchParams();
-		RuntimeSearchParam retVal = null;
-		Map<String, RuntimeSearchParam> params = myActiveSearchParams.get(theResourceName);
-		if (params != null) {
-			retVal = params.get(theParamName);
-		}
-		return retVal;
+		return myActiveSearchParams.get(theResourceName, theParamName);
 	}
 
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
-		return getActiveSearchParams().get(theResourceName);
+		return getActiveSearchParams().getSearchParamMap(theResourceName);
 	}
 
 	private void requiresActiveSearchParams() {
@@ -97,102 +91,78 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 	@Override
 	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-		return myActiveSearchParamCache.getActiveUniqueSearchParams(theResourceName);
+		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName);
 	}
 
 	@Override
 	public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-		return myActiveSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
-	}
-
-	private Map<String, Map<String, RuntimeSearchParam>> getBuiltInSearchParams() {
-		return myBuiltInSearchParams;
-	}
-
-	private Map<String, RuntimeSearchParam> getSearchParamMap(Map<String, Map<String, RuntimeSearchParam>> searchParams, String theResourceName) {
-		return searchParams.computeIfAbsent(theResourceName, k -> new HashMap<>());
+		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
 	}
 
 	private void initializeActiveSearchParams(Collection<IdDt> theSearchParamIds) {
-		Map<String, Map<String, RuntimeSearchParam>> searchParams = new HashMap<>();
-		addBuiltinParams(searchParams);
+		StopWatch sw = new StopWatch();
+
+		RuntimeSearchParamCache searchParams = new RuntimeSearchParamCache();
+		searchParams.putAll(myBuiltInSearchParams);
 
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveSearchParams(theSearchParamIds, searchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
-		StopWatch sw = new StopWatch();
-
-		Map<String, Map<String, RuntimeSearchParam>> activeSearchParams = new HashMap<>();
-		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextEntry : searchParams.entrySet()) {
-			for (RuntimeSearchParam nextSp : nextEntry.getValue().values()) {
-				String nextName = nextSp.getName();
-				if (nextSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
-					nextSp = null;
-				}
-
-				if (!activeSearchParams.containsKey(nextEntry.getKey())) {
-					activeSearchParams.put(nextEntry.getKey(), new HashMap<>());
-				}
-				if (activeSearchParams.containsKey(nextEntry.getKey())) {
-					ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
-				}
-
-				if (nextSp != null) {
-					activeSearchParams.get(nextEntry.getKey()).put(nextName, nextSp);
-				} else {
-					activeSearchParams.get(nextEntry.getKey()).remove(nextName);
-				}
-			}
-		}
+		RuntimeSearchParamCache activeSearchParams = RuntimeSearchParamCache.copyActiveSearchParamsFrom(searchParams);
 
 		myActiveSearchParams = activeSearchParams;
-		myActiveSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, activeSearchParams);
+		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, activeSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
 
-	private long overrideBuiltinSearchParamsWithActiveSearchParams(Collection<IdDt> theTheSearchParamIds, Map<String, Map<String, RuntimeSearchParam>> theSearchParams) {
+
+	private void addJpaSearchParam(IdDt theResourceId) {
+		StopWatch sw = new StopWatch();
+		IBaseResource searchParameter = mySearchParamProvider.read(theResourceId);
+		overrideSearchParam(myActiveSearchParams, searchParameter);
+		RuntimeSearchParamCache activeSearchParams = RuntimeSearchParamCache.copyActiveSearchParamsFrom(myActiveSearchParams);
+		myActiveSearchParams = activeSearchParams;
+		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, activeSearchParams);
+		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private long overrideBuiltinSearchParamsWithActiveSearchParams(Collection<IdDt> theSearchParamIds, RuntimeSearchParamCache theSearchParams) {
 		long retval = 0;
 
-		for (IdDt searchParamId : theTheSearchParamIds) {
-			IBaseResource nextSp = mySearchParamProvider.read(searchParamId);
-			if (nextSp == null) {
-				continue;
-			}
-
-			RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(nextSp);
-			if (runtimeSp == null) {
-				continue;
-			}
-			if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
-				continue;
-			}
-
-			for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, nextSp)) {
-				if (isBlank(nextBaseName)) {
-					continue;
-				}
-
-				Map<String, RuntimeSearchParam> searchParamMap = getSearchParamMap(theSearchParams, nextBaseName);
-				String name = runtimeSp.getName();
-				if (!searchParamMap.containsKey(name) || myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
-					searchParamMap.put(name, runtimeSp);
-					retval++;
-				}
-			}
+		for (IdDt searchParamId : theSearchParamIds) {
+			IBaseResource searchParameter = mySearchParamProvider.read(searchParamId);
+			retval += overrideSearchParam(theSearchParams, searchParameter);
 		}
 		return retval;
 	}
 
-	private void addBuiltinParams(Map<String, Map<String, RuntimeSearchParam>> theSearchParams) {
-		Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = getBuiltInSearchParams().entrySet();
-		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
-			for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {
-				String nextResourceName = nextBuiltInEntry.getKey();
-				getSearchParamMap(theSearchParams, nextResourceName).put(nextParam.getName(), nextParam);
+	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
+		long retval = 0;
+		if (theSearchParameter == null) {
+			return retval;
+		}
+
+		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
+		if (runtimeSp == null) {
+			return retval;
+		}
+		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
+			return retval;
+		}
+
+		for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter)) {
+			if (isBlank(nextBaseName)) {
+				continue;
 			}
 
-			ourLog.trace("Have {} built-in SPs for: {}", nextBuiltInEntry.getValue().size(), nextBuiltInEntry.getKey());
+			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
+			String name = runtimeSp.getName();
+			if (!searchParamMap.containsKey(name) || myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
+				searchParamMap.put(name, runtimeSp);
+				retval++;
+			}
 		}
+		return retval;
 	}
 
 	@Override
@@ -224,7 +194,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 	@PostConstruct
 	public void registerListener() {
-		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
+		myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
 
 		// FIXME KHS compare this searchparam with below
 		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
@@ -236,12 +206,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	}
 
 	@Override
-	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+	public ReadOnlySearchParamCache getActiveSearchParams() {
 		requiresActiveSearchParams();
 		if (myActiveSearchParams == null) {
 			throw new IllegalStateException("SearchParamRegistry has not been initialized");
 		}
-		return Collections.unmodifiableMap(myActiveSearchParams);
+		return ReadOnlySearchParamCache.fromRuntimeSearchParamCache(myActiveSearchParams);
 	}
 
 	/**
@@ -256,28 +226,23 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 		if (myActiveSearchParams == null) {
 			return;
 		}
-		for (Map<String, RuntimeSearchParam> activeUniqueSearchParams : myActiveSearchParams.values()) {
-			for (RuntimeSearchParam searchParam : activeUniqueSearchParams.values()) {
-				myActiveSearchParamCache.setPhoneticEncoder(myPhoneticEncoder, searchParam);
-			}
-		}
+		myActiveSearchParams.getSearchParamStream().forEach(searchParam -> myJpaSearchParamCache.setPhoneticEncoder(myPhoneticEncoder, searchParam));
 	}
 
 	@Override
 	public void handleCreate(IdDt theResourceId) {
-		// FIXME KHS
-		throw new UnsupportedOperationException();
+		addJpaSearchParam(theResourceId);
 	}
 
 	@Override
 	public void handleUpdate(IdDt theResourceId) {
-		// FIXME KHS
+		// FIXME KHS add tests e.g. deactivate and activate
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void handleDelete(IdDt theResourceId) {
-		// FIXME KHS
+		// FIXME KHS add test
 		throw new UnsupportedOperationException();
 	}
 
@@ -286,21 +251,5 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 		initializeActiveSearchParams(theResourceIds);
 	}
 
-	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
-		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
 
-		Set<String> resourceNames = theFhirContext.getResourceTypes();
-
-		for (String resourceName : resourceNames) {
-			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
-			String nextResourceName = nextResDef.getName();
-			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			resourceNameToSearchParams.put(nextResourceName, nameToParam);
-
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				nameToParam.put(nextSp.getName(), nextSp);
-			}
-		}
-		return Collections.unmodifiableMap(resourceNameToSearchParams);
-	}
 }
