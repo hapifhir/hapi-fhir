@@ -32,12 +32,10 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,7 +227,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 		// FIXME KHS compare this searchparam with below
 		SearchParameterMap activeSearchParameterMap = SearchParameterMap.newSynchronous();
-		activeSearchParameterMap.add("status", new TokenParam(Enumerations.PublicationStatus.ACTIVE.toCode()));
+		// FIXME KHS this causes a stack overflow since searching by param requires params to be loaded
+//		activeSearchParameterMap.add("status", new TokenParam(Enumerations.PublicationStatus.ACTIVE.toCode()));
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", activeSearchParameterMap, this);
 	}
 
