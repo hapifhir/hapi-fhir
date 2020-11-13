@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.length;
  * bork up migration tasks.
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL"}),
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CODE", columnNames = {"VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL"}),
 	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 })
 @Entity()
