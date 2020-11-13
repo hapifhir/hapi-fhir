@@ -30,7 +30,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -156,7 +155,7 @@ public class SearchParamRegistryImplTest {
 	public void after() {
 		myResourceChangeListenerRegistry.clearCacheForUnitTest();
 		// Empty out the searchparam registry
-		mySearchParamRegistry.handleInit(Collections.emptyList());
+		mySearchParamRegistry.resetForUnitTest();
 	}
 
 	@Test

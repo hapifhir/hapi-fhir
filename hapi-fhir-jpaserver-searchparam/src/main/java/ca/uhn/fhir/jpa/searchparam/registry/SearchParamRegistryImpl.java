@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -280,5 +282,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		initializeActiveSearchParams(theResourceIds);
 	}
 
-
+	@VisibleForTesting
+	public void resetForUnitTest() {
+		handleInit(Collections.emptyList());
+	}
 }
