@@ -55,10 +55,11 @@ public class SearchParamRegistryImplTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
 	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
 
-	public static int TEST_SEARCH_PARAMS = 3;
+	public static final int TEST_SEARCH_PARAMS = 3;
 	private static List<ResourceTable> ourEntities;
 	private static ResourceVersionMap ourResourceVersionMap;
 	private static int ourLastId;
+	private static int ourBuiltinPatientSearchParamCount;
 
 	static {
 		ourEntities = new ArrayList<>();
@@ -66,6 +67,7 @@ public class SearchParamRegistryImplTest {
 			ourEntities.add(createEntity(ourLastId, 1));
 		}
 		ourResourceVersionMap = ResourceVersionMap.fromResourceIds(ourEntities);
+		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext).getSearchParamMap("Patient").size();
 	}
 
 	@Autowired
@@ -160,21 +162,25 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
+
 		// Our first refresh adds our test searchparams to the registry
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
 		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
 		// Second refresh does not call the database
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
 		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbNotCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
 		// Requesting a refresh calls the database and adds nothing
 		mySearchParamRegistry.requestRefresh();
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
 		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
 		// Requesting a refresh after adding a new search parameter calls the database and adds one
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -182,6 +188,7 @@ public class SearchParamRegistryImplTest {
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
 		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
 		// Requesting a refresh after adding a new search parameter calls the database and
 		// removes the one added above and adds this new one
@@ -190,14 +197,20 @@ public class SearchParamRegistryImplTest {
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
 		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
 		// Requesting a refresh after adding a new search parameter calls the database,
 		// removes the ACTIVE one and does not add the new one because it is DRAFT
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.DRAFT);
 		mySearchParamRegistry.requestRefresh();
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
-		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 0, 1);
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
 		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
+	}
+
+	private void assertPatientSearchParamSize(int theExpectedSize) {
+		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient").size());
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
