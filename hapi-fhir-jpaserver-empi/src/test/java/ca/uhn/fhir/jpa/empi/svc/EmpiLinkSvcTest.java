@@ -53,13 +53,13 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testCreateRemoveLink() {
 		assertLinkCount(0);
-		Patient sourcePatient = createGoldenPatient();
-		IdType sourcePatientId = sourcePatient.getIdElement().toUnqualifiedVersionless();
-		// TODO NG should be ok to remove - assertEquals(0, sourcePatient.getLink().size());
+		Patient goldenPatient = createGoldenPatient();
+		IdType sourcePatientId = goldenPatient.getIdElement().toUnqualifiedVersionless();
+		// TODO NG should be ok to remove - assertEquals(0, goldenPatient.getLink().size());
 		Patient patient = createPatient();
 
 		{
-			myEmpiLinkSvc.updateLink(sourcePatient, patient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+			myEmpiLinkSvc.updateLink(goldenPatient, patient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertLinkCount(1);
 			// TODO NG should be ok to remove
 			// Patient newSourcePatient = myPatientDao.read(sourcePatientId);
@@ -67,7 +67,7 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		}
 
 		{
-			myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+			myEmpiLinkSvc.updateLink(goldenPatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 			assertLinkCount(1);
 			// TODO NG should be ok to remove
 			// Patient newSourcePatient = myPatientDao.read(sourcePatientId);
@@ -79,52 +79,52 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPossibleDuplicate() {
 		assertLinkCount(0);
-		Patient sourcePatient1 = createGoldenPatient();
-		Patient sourcePatient2 = createGoldenPatient();
+		Patient goldenPatient1 = createGoldenPatient();
+		Patient goldenPatient2 = createGoldenPatient();
 		// TODO GGG MDM NOT VALID
-		myEmpiLinkSvc.updateLink(sourcePatient1, sourcePatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+		myEmpiLinkSvc.updateLink(goldenPatient1, goldenPatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertLinkCount(1);
 	}
 
 	@Test
 	public void testNoMatchBlocksPossibleDuplicate() {
 		assertLinkCount(0);
-		Patient sourcePatient1 = createGoldenPatient();
-		Patient sourcePatient2 = createGoldenPatient();
+		Patient goldenPatient1 = createGoldenPatient();
+		Patient goldenPatient2 = createGoldenPatient();
 
-		Long sourcePatient1Pid = myIdHelperService.getPidOrNull(sourcePatient1);
-		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
-		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(sourcePatient1Pid, sourcePatient2Pid).isPresent());
-		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(sourcePatient2Pid, sourcePatient1Pid).isPresent());
+		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
+		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
-		saveNoMatchLink(sourcePatient1Pid, sourcePatient2Pid);
+		saveNoMatchLink(goldenPatient1Pid, goldenPatient2Pid);
 
-		myEmpiLinkSvc.updateLink(sourcePatient1, sourcePatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
-		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(sourcePatient1Pid, sourcePatient2Pid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		myEmpiLinkSvc.updateLink(goldenPatient1, goldenPatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
+		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
 	@Test
 	public void testNoMatchBlocksPossibleDuplicateReversed() {
 		assertLinkCount(0);
-		Patient sourcePatient1 = createGoldenPatient();
-		Patient sourcePatient2 = createGoldenPatient();
+		Patient goldenPatient1 = createGoldenPatient();
+		Patient goldenPatient2 = createGoldenPatient();
 
-		Long sourcePatient1Pid = myIdHelperService.getPidOrNull(sourcePatient1);
-		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
-		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(sourcePatient1Pid, sourcePatient2Pid).isPresent());
-		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(sourcePatient2Pid, sourcePatient1Pid).isPresent());
+		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
+		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
+		assertFalse(myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
-		saveNoMatchLink(sourcePatient2Pid, sourcePatient1Pid);
+		saveNoMatchLink(goldenPatient2Pid, goldenPatient1Pid);
 
-		myEmpiLinkSvc.updateLink(sourcePatient1, sourcePatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
-		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(sourcePatient1Pid, sourcePatient2Pid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		myEmpiLinkSvc.updateLink(goldenPatient1, goldenPatient2, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, createContextForCreate("Person"));
+		assertFalse(myEmpiLinkDaoSvc.getEmpiLinksByPersonPidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, EmpiMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
-	private void saveNoMatchLink(Long thePersonPid, Long theTargetPid) {
+	private void saveNoMatchLink(Long theGoldenResourcePid, Long theTargetPid) {
 		EmpiLink noMatchLink = myEmpiLinkDaoSvc.newEmpiLink()
-			.setGoldenResourcePid(thePersonPid)
+			.setGoldenResourcePid(theGoldenResourcePid)
 			.setTargetPid(theTargetPid)
 			.setLinkSource(EmpiLinkSourceEnum.MANUAL)
 			.setMatchResult(EmpiMatchResultEnum.NO_MATCH);
@@ -133,12 +133,13 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testManualEmpiLinksCannotBeModifiedBySystem() {
-		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
+//		Patient goldenPatient = createGoldenPatient(buildJaneSourcePatient());
+		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient = createPatient(buildJanePatient());
 
-		myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myEmpiLinkSvc.updateLink(goldenPatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		try {
-			myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, null);
+			myEmpiLinkSvc.updateLink(goldenPatient, patient, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), is(equalTo("EMPI system is not allowed to modify links on manually created links")));
@@ -147,13 +148,13 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
-//		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
-		Patient sourcePatient = createGoldenPatient(buildJanePatient());
+//		Patient goldenPatient = createGoldenPatient(buildJaneSourcePatient());
+		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient = createPatient(buildJanePatient());
 
 		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
 		try {
-			myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
+			myEmpiLinkSvc.updateLink(goldenPatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), is(equalTo("EMPI system is not allowed to automatically NO_MATCH a resource")));
