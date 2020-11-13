@@ -132,7 +132,6 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testUpdateStrangePerson() {
-		// TODO NG - OK? Patient person = createUnmanagedSourceResource();
 		Patient person = createPatient();
 		try {
 			myEmpiProviderR4.updateLink(new StringType(person.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);

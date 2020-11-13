@@ -5,6 +5,7 @@ import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,5 +41,25 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedMatchResult() {
 		return "Match Result may only be set to " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH;
+	}
+
+	public String getMessageForUnsupportedFirstArgumentTypeInUpdate(String goldenRecordType) {
+		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
+			+ myEmpiSettings.getSupportedMdmTypeNames() + ".  Was " + goldenRecordType;
+	}
+
+	public String getMessageForUnsupportedSecondArgumentTypeInUpdate(String theGoldenRecordType) {
+		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
+			+ myEmpiSettings.getSupportedMdmTypeNames() + ".  Was " + theGoldenRecordType;
+	}
+
+	public String getMessageForArgumentTypeMismatchInUpdate(String theGoldenRecordType, String theTargetType) {
+		return "Arguments to " + ProviderConstants.MDM_UPDATE_LINK + " must be of the same type. Were " +
+			theGoldenRecordType + " and " + theTargetType;
+	}
+
+	public String getMessageForUnsupportedTarget() {
+		return "The target is marked with the " + EmpiConstants.CODE_NO_EMPI_MANAGED
+			+ " tag which means it may not be EMPI linked.";
 	}
 }

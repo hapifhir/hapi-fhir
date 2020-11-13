@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
@@ -107,19 +108,23 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		}
 
 		if (!myEmpiSettings.isSupportedMdmType(goldenRecordType)) {
-			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person.  Was " + goldenRecordType);
+			throw new InvalidRequestException(myMessageHelper.getMessageForUnsupportedFirstArgumentTypeInUpdate(goldenRecordType));
 		}
 
 		if (!myEmpiSettings.isSupportedMdmType(theTargetType)) {
-			throw new InvalidRequestException("Second argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Patient or Practitioner.  Was " + theTargetType);
+			throw new InvalidRequestException(myMessageHelper.getMessageForUnsupportedSecondArgumentTypeInUpdate(theTargetType));
+		}
+
+		if (!Objects.equals(goldenRecordType, theTargetType)) {
+			throw new InvalidRequestException(myMessageHelper.getMessageForArgumentTypeMismatchInUpdate(goldenRecordType, theTargetType));
 		}
 
 		if (!EmpiUtil.isEmpiManaged(theGoldenRecord)) {
-			throw new InvalidRequestException("Only MDM managed rerson resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
+			throw new InvalidRequestException(myMessageHelper.getMessageForUnmanagedResource());
 		}
 
 		if (!EmpiUtil.isEmpiAccessible(theTarget)) {
-			throw new InvalidRequestException("The target is marked with the " + EmpiConstants.CODE_NO_EMPI_MANAGED + " tag which means it may not be EMPI linked.");
+			throw new InvalidRequestException(myMessageHelper.getMessageForUnsupportedTarget());
 		}
 	}
 

@@ -113,6 +113,11 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
+	MessageHelper messageHelper(IEmpiSettings theEmpiSettings, FhirContext theFhirContext) {
+		return new MessageHelper(theEmpiSettings, theFhirContext);
+	}
+
+	@Bean
 	EmpiSubscriptionLoader empiSubscriptionLoader() {
 		return new EmpiSubscriptionLoader();
 	}
@@ -123,7 +128,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-    EmpiSourceResourceFindingSvc empiPersonFindingSvc() {
+	EmpiSourceResourceFindingSvc empiPersonFindingSvc() {
 		return new EmpiSourceResourceFindingSvc();
 	}
 
@@ -169,7 +174,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	IEmpiExpungeSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl ) {
+	IEmpiExpungeSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl) {
 		return new EmpiClearSvcImpl(theEmpiLinkDaoSvc, theEmpiPersonDeletingSvcImpl);
 	}
 
@@ -184,7 +189,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-    EmpiResourceMatcherSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
+	EmpiResourceMatcherSvc empiResourceComparatorSvc(FhirContext theFhirContext, IEmpiSettings theEmpiConfig) {
 		return new EmpiResourceMatcherSvc(theFhirContext, theEmpiConfig);
 	}
 
@@ -229,5 +234,7 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	IEmpiControllerSvc empiControllerSvc() {return new EmpiControllerSvcImpl(); }
+	IEmpiControllerSvc empiControllerSvc() {
+		return new EmpiControllerSvcImpl();
+	}
 }
