@@ -92,4 +92,5 @@ public class ProviderConstants {
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria" ;
 	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;
    public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
+	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
 }

@@ -217,16 +217,26 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	})
 	public Parameters empiBatchOnAllTargets(
 		//TODO GGG MDM: also have to take it an optional resourceType here, to clarify which resources should have MDM run on them.
+		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0 , max = 1) StringType theResourceType,
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
 		ServletRequestDetails theRequestDetails) {
-		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount  = myMdmSubmitSvc.submitAllTargetTypesToEmpi(criteria);
+		String criteria = convertStringTypeToString(theCriteria);
+		String resourceType = convertStringTypeToString(theResourceType);
+
+		long submittedCount;
+		if (resourceType != null) {
+			submittedCount  = myMdmSubmitSvc.submitTargetTypeToEmpi(resourceType, criteria);
+		} else {
+			submittedCount  = myMdmSubmitSvc.submitAllTargetTypesToEmpi(criteria);
+
+		}
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
-	private String convertCriteriaToString(StringType theCriteria) {
+	private String convertStringTypeToString(StringType theCriteria) {
 		return theCriteria == null ? null : theCriteria.getValueAsString();
 	}
+
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
@@ -244,7 +254,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	public Parameters empiBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
-		String criteria = convertCriteriaToString(theCriteria);
+		String criteria = convertStringTypeToString(theCriteria);
 		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
@@ -265,7 +275,7 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 	public Parameters empiBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
-		String criteria = convertCriteriaToString(theCriteria);
+		String criteria = convertStringTypeToString(theCriteria);
 		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
