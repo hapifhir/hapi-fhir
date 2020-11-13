@@ -163,7 +163,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
 		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, 200);
 		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
-		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL");
+		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL");
 	}
 
 	protected void init510_20200725() {
