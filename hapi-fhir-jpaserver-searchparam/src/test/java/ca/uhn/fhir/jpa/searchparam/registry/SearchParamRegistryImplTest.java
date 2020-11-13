@@ -30,6 +30,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -139,36 +140,34 @@ public class SearchParamRegistryImplTest {
 	public void before() {
 		myAnswerCount = 0;
 		reset(myResourceVersionSvc);
+		reset(mySearchParamProvider);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+
+		// Our first refresh adds our test searchparams to the registry
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertDbCalled();
+		assertEquals(ourBuiltInSearchParams.size(), mySearchParamRegistry.getActiveSearchParams().size());
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 	}
 
 	@AfterEach
 	public void after() {
 		myResourceChangeListenerRegistry.clearCacheForUnitTest();
-	}
-
-	@Test
-	public void testBuildinSearchparams() {
-		assertEquals(ourBuiltInSearchParams.size(), mySearchParamRegistry.getActiveSearchParams().size());
+		// Empty out the searchparam registry
+		mySearchParamRegistry.handleInit(Collections.emptyList());
 	}
 
 	@Test
 	public void testRefreshAfterExpiry() {
 		mySearchParamRegistry.requestRefresh();
-		assertResult(myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"), TEST_SEARCH_PARAMS, 0, 0);
 		// Second time we don't need to run because we ran recently
 		assertEmptyResult(myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
 	}
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
-
-		// Our first refresh adds our test searchparams to the registry
-		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
-		assertDbCalled();
-		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
-
 		// Second refresh does not call the database
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
 		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
@@ -197,17 +196,40 @@ public class SearchParamRegistryImplTest {
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
 		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
-		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
 		// Requesting a refresh after adding a new search parameter calls the database,
-		// removes the ACTIVE one and does not add the new one because it is DRAFT
+		// removes the ACTIVE one and adds the new one because this is a mock test
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.DRAFT);
 		mySearchParamRegistry.requestRefresh();
 		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
 		assertDbCalled();
+		// the new one does not appear in our patient search params because it's DRAFT
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 	}
+
+	@Test
+	public void testSearchParamUpdate() {
+		// Requesting a refresh after adding a new search parameter calls the database and adds one
+		List<ResourceTable> newEntities = resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
+
+		// Update the resource without changing anything that would affect our cache
+		ResourceTable lastEntity = newEntities.get(newEntities.size() - 1);
+		lastEntity.setVersion(2);
+		resetMock(Enumerations.PublicationStatus.ACTIVE, newEntities);
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertDbCalled();
+		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
+	}
+	// FIXME KHS add an IT that changes a searchparam from ACTIVE to RETIRED and validate the searchparams go down
 
 	private void assertPatientSearchParamSize(int theExpectedSize) {
 		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient").size());
@@ -278,15 +300,20 @@ public class SearchParamRegistryImplTest {
 		assertEquals("FOO", value.getValueAsString());
 	}
 
-	private void resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theActive) {
+	private List<ResourceTable> resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theStatus) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList(ourEntities);
 		newEntities.add(createEntity(++ourLastId, 1));
-		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(newEntities);
+		resetMock(theStatus, newEntities);
+		return newEntities;
+	}
+
+	private void resetMock(Enumerations.PublicationStatus theStatus, List<ResourceTable> theNewEntities) {
+		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(theNewEntities);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
 
 		// When we ask for the new entity, return our foo search parameter
-		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter(theActive));
+		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter(theStatus));
 	}
 
 	// FIXME KHS add tests

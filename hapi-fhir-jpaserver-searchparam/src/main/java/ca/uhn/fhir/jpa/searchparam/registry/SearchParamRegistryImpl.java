@@ -267,8 +267,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void handleUpdate(IdDt theResourceId) {
-		// FIXME KHS add tests e.g. deactivate and activate
-		throw new UnsupportedOperationException();
+		addJpaSearchParam(theResourceId);
 	}
 
 	@Override
