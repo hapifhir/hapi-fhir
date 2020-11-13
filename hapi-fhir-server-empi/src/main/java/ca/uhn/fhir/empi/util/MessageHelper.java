@@ -7,6 +7,7 @@ import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,5 +62,14 @@ public class MessageHelper {
 	public String getMessageForUnsupportedTarget() {
 		return "The target is marked with the " + EmpiConstants.CODE_NO_EMPI_MANAGED
 			+ " tag which means it may not be EMPI linked.";
+	}
+
+	public String getMessageForNoLink(IAnyResource theGoldenRecord, IAnyResource theTarget) {
+		return getMessageForNoLink(theGoldenRecord.getIdElement().toVersionless().toString(),
+			theTarget.getIdElement().toVersionless().toString());
+	}
+
+	public String getMessageForNoLink(String theGoldenRecord, String theTarget) {
+		return "No link exists between " + theGoldenRecord + " and " + theTarget;
 	}
 }

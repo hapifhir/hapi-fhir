@@ -78,7 +78,7 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 
 		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personId, targetId);
 		if (!oEmpiLink.isPresent()) {
-			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
+			throw new InvalidRequestException(myMessageHelper.getMessageForNoLink(thePerson, theTarget));
 		}
 		EmpiLink empiLink = oEmpiLink.get();
 		if (empiLink.getMatchResult() == theMatchResult) {

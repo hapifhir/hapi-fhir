@@ -27,14 +27,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
-//	@Autowired
-//	private IEmpiSettings myEmpiSettings;
-
 	@Autowired
 	private MessageHelper myMessageHelper;
-
-	@Autowired
-	private EmpiControllerHelper myEmpiControllerHelper;
 
 	@Test
 	public void testUpdateLinkNoMatch() {

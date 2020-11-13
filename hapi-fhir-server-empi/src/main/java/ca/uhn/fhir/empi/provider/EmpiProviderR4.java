@@ -160,7 +160,6 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 								  ServletRequestDetails theRequestDetails) {
 
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-
 		return myEmpiControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(), theMatchResult.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK));
 	}
 

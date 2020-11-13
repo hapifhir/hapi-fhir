@@ -79,6 +79,8 @@ public abstract class BaseEmpiProvider {
 
 	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
+		if (true)
+			throw new RuntimeException("FIXME - NG - We need a way to set resource type here");
 		return new MdmTransactionContext(transactionLogMessages, theOperationType);
 	}
 
