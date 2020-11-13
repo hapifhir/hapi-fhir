@@ -3,6 +3,9 @@ package ca.uhn.fhir.jpa.empi.provider;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
+import ca.uhn.fhir.empi.provider.EmpiControllerHelper;
+import ca.uhn.fhir.empi.util.MessageHelper;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -10,6 +13,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -22,6 +26,16 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
+
+//	@Autowired
+//	private IEmpiSettings myEmpiSettings;
+
+	@Autowired
+	private MessageHelper myMessageHelper;
+
+	@Autowired
+	private EmpiControllerHelper myEmpiControllerHelper;
+
 	@Test
 	public void testUpdateLinkNoMatch() {
 		assertLinkCount(1);
@@ -118,12 +132,14 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testUpdateStrangePerson() {
-		Patient person = createUnmanagedSourceResource();
+		// TODO NG - OK? Patient person = createUnmanagedSourceResource();
+		Patient person = createPatient();
 		try {
 			myEmpiProviderR4.updateLink(new StringType(person.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Only EMPI Managed Person resources may be updated via this operation.  The Source Resource provided is not tagged as managed by hapi-empi", e.getMessage());
+			String expectedMessage = myMessageHelper.getMessageForUnmanagedResource();
+			assertEquals(expectedMessage, e.getMessage());
 		}
 	}
 

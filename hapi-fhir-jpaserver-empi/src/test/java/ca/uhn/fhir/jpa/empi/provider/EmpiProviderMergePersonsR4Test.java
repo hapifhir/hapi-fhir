@@ -58,8 +58,8 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testUnmanagedMerge() {
-		StringType fromPersonId = new StringType(createUnmanagedSourceResource().getIdElement().getValue());
-		StringType toPersonId = new StringType(createUnmanagedSourceResource().getIdElement().getValue());
+		StringType fromPersonId = new StringType(createPatient().getIdElement().getValue());
+		StringType toPersonId = new StringType(createPatient().getIdElement().getValue());
 		try {
 			myEmpiProviderR4.mergeGoldenResources(fromPersonId, toPersonId, myRequestDetails);
 			fail();

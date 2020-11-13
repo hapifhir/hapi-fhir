@@ -35,6 +35,7 @@ import ca.uhn.fhir.empi.provider.EmpiProviderLoader;
 import ca.uhn.fhir.empi.rules.config.EmpiRuleValidator;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
+import ca.uhn.fhir.empi.util.MessageHelper;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.dao.empi.EmpiLinkDeleteSvc;
 import ca.uhn.fhir.jpa.empi.broker.EmpiMessageHandler;
@@ -223,7 +224,9 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	EmpiControllerHelper empiProviderHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader) { return new EmpiControllerHelper(theFhirContext, theResourceLoader); }
+	EmpiControllerHelper empiProviderHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IEmpiSettings theEmpiSettings, MessageHelper messageHelper) {
+		return new EmpiControllerHelper(theFhirContext, theResourceLoader, theEmpiSettings, messageHelper);
+	}
 
 	@Bean
 	IEmpiControllerSvc empiControllerSvc() {return new EmpiControllerSvcImpl(); }

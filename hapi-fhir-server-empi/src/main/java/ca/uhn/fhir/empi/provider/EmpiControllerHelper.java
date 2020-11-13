@@ -22,7 +22,9 @@ package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.util.EmpiUtil;
+import ca.uhn.fhir.empi.util.MessageHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -34,15 +36,24 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Collectors;
+
 @Service
 public class EmpiControllerHelper {
 	private final FhirContext myFhirContext;
 	private final IResourceLoader myResourceLoader;
+	private final IEmpiSettings myEmpiSettings;
+	private final MessageHelper myMessageHelper;
 
 	@Autowired
-	public EmpiControllerHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader) {
+	public EmpiControllerHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IEmpiSettings theEmpiSettings, MessageHelper theMessageHelper) {
 		myFhirContext = theFhirContext;
 		myResourceLoader = theResourceLoader;
+		myEmpiSettings = theEmpiSettings;
+		myMessageHelper = theMessageHelper;
 	}
 
 	public void validateSameVersion(IAnyResource theResource, String theResourceId) {
@@ -81,12 +92,16 @@ public class EmpiControllerHelper {
 		return myFhirContext.newJsonParser().encodeResourceToString(theAnyResource);
 	}
 
-	private void validateIsEmpiManaged(String theName, IAnyResource thePerson) {
-		if (!"Person".equals(myFhirContext.getResourceType(thePerson))) {
-			throw new InvalidRequestException("Only Person resources can be merged.  The " + theName + " points to a " + myFhirContext.getResourceType(thePerson));
+	public void validateIsEmpiManaged(String theName, IAnyResource theResource) {
+		String resourceType = myFhirContext.getResourceType(theResource);
+		if (!myEmpiSettings.isSupportedMdmType(resourceType)) {
+			throw new InvalidRequestException(
+				myMessageHelper.getMessageForUnsupportedResource(theName, resourceType)
+			);
 		}
-		if (!EmpiUtil.isEmpiManaged(thePerson)) {
-			throw new InvalidRequestException("Only EMPI managed resources can be merged.  Empi managed resource have the " + EmpiConstants.CODE_HAPI_MDM_MANAGED + " tag.");
+
+		if (!EmpiUtil.isEmpiManaged(theResource)) {
+			throw new InvalidRequestException(myMessageHelper.getMessageForUnmanagedResource());
 		}
 	}
 }

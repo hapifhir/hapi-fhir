@@ -21,6 +21,9 @@ package ca.uhn.fhir.empi.api;
  */
 
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+
+import java.util.stream.Collectors;
 
 public interface IEmpiSettings {
 	String EMPI_CHANNEL_NAME = "empi";
@@ -38,4 +41,12 @@ public interface IEmpiSettings {
 	boolean isPreventMultipleEids();
 
 	String getRuleVersion();
+
+	default boolean isSupportedMdmType(String theResourceName) {
+		return getEmpiRules().getMdmTypes().contains(theResourceName);
+	}
+
+	default String getSupportedMdmTypeNames() {
+		return getEmpiRules().getMdmTypes().stream().collect(Collectors.joining(", "));
+	}
 }

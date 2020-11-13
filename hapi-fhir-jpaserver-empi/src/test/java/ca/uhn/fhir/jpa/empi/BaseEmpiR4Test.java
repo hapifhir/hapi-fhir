@@ -138,11 +138,12 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected void saveLink(EmpiLink theEmpiLink) {
 		myEmpiLinkDaoSvc.save(theEmpiLink);
 	}
-
-	@Nonnull
-	protected Patient createUnmanagedSourceResource() {
-		return createGoldenPatient(new Patient(), false);
-	}
+//
+//	@Nonnull
+//	protected Patient createUnmanagedSourceResource() {
+//		// return createGoldenPatient(new Patient(), false);
+//		return createGoldenPatient(new Patient(), false);
+//	}
 
 	@Nonnull
 	protected Patient createGoldenPatient() {
@@ -163,6 +164,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	protected Patient createGoldenPatient(Patient thePatient, boolean theEmpiManaged) {
 		EmpiUtil.setEmpiManaged(thePatient);
 		EmpiUtil.setGoldenResource(thePatient);
+
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());

@@ -26,9 +26,12 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.api.IEmpiLinkUpdaterSvc;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.MdmTransactionContext;
+import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.empi.util.EmpiUtil;
+import ca.uhn.fhir.empi.util.MessageHelper;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
@@ -42,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
+
 	private static final Logger ourLog = Logs.getEmpiTroubleshootingLog();
 
 	@Autowired
@@ -56,6 +60,10 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 	EmpiResourceDaoSvc myEmpiResourceDaoSvc;
 	@Autowired
 	EmpiMatchLinkSvc myEmpiMatchLinkSvc;
+	@Autowired
+	IEmpiSettings myEmpiSettings;
+	@Autowired
+	MessageHelper myMessageHelper;
 
 	@Transactional
 	@Override
@@ -90,22 +98,24 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 		return thePerson;
 	}
 
-	private void validateUpdateLinkRequest(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, String theTargetType) {
-		String personType = myFhirContext.getResourceType(thePerson);
+	private void validateUpdateLinkRequest(IAnyResource theGoldenRecord, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, String theTargetType) {
+		String goldenRecordType = myFhirContext.getResourceType(theGoldenRecord);
+
 		if (theMatchResult != EmpiMatchResultEnum.NO_MATCH &&
 			theMatchResult != EmpiMatchResultEnum.MATCH) {
-			throw new InvalidRequestException("Match Result may only be set to " + EmpiMatchResultEnum.NO_MATCH + " or " + EmpiMatchResultEnum.MATCH);
+			throw new InvalidRequestException(myMessageHelper.getMessageForUnsupportedMatchResult());
 		}
 
-		if (!"Person".equals(personType)) {
-			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person.  Was " + personType);
+		if (!myEmpiSettings.isSupportedMdmType(goldenRecordType)) {
+			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Person.  Was " + goldenRecordType);
 		}
-		if (!EmpiUtil.supportedTargetType(theTargetType)) {
+
+		if (!myEmpiSettings.isSupportedMdmType(theTargetType)) {
 			throw new InvalidRequestException("Second argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a Patient or Practitioner.  Was " + theTargetType);
 		}
 
-		if (!EmpiUtil.isEmpiManaged(thePerson)) {
-			throw new InvalidRequestException("Only EMPI Managed Person resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
+		if (!EmpiUtil.isEmpiManaged(theGoldenRecord)) {
+			throw new InvalidRequestException("Only MDM managed rerson resources may be updated via this operation.  The Person resource provided is not tagged as managed by hapi-empi");
 		}
 
 		if (!EmpiUtil.isEmpiAccessible(theTarget)) {
