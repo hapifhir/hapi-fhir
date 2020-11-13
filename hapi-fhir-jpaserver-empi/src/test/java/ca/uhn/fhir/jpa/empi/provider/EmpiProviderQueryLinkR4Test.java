@@ -69,7 +69,7 @@ public class EmpiProviderQueryLinkR4Test extends BaseLinkR4Test {
 		// Add a third patient
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		IdType patientId = patient.getIdElement().toVersionless();
-		IAnyResource person = getSourceResourceFromTargetResource(patient);
+		IAnyResource person = getGoldenResourceFromTargetResource(patient);
 		IIdType personId = person.getIdElement().toVersionless();
 
 		Parameters result = myEmpiProviderR4.queryLinks(null, null, null, myLinkSource, myRequestDetails);

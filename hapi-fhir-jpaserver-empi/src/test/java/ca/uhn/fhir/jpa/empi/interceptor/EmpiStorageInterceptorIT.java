@@ -203,7 +203,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		jane = addExternalEID(jane, "some_new_eid");
 
 		EmpiHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myEmpiHelper.updateWithLatch(jane);
-		IAnyResource person = getSourceResourceFromTargetResource(jane);
+		IAnyResource person = getGoldenResourceFromTargetResource(jane);
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(person);
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));

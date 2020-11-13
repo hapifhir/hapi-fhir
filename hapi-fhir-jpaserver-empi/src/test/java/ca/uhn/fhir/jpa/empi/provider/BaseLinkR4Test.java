@@ -41,7 +41,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		myPatient = createPatientAndUpdateLinks(buildPaulPatient());
 		myPatientId = new StringType(myPatient.getIdElement().getValue());
 
-		mySourcePatient = getSourceResourceFromTargetResource(myPatient);
+		mySourcePatient = getGoldenResourceFromTargetResource(myPatient);
 		mySourcePatientId = new StringType(mySourcePatient.getIdElement().getValue());
 		myVersionlessPersonId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
 

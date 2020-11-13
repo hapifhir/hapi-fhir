@@ -50,7 +50,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
-		IAnyResource janePerson = getSourceResourceFromTargetResource(patient);
+		IAnyResource janePerson = getGoldenResourceFromTargetResource(patient);
 		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
 		String foundHapiEid = hapiEid.get(0).getValue();
 
@@ -65,7 +65,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(sameSourceResourceAs(janePatient)));
 
-		Patient sourcePatient = (Patient)getSourceResourceFromTargetResource(patient);
+		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
 
 		List<Identifier> identifier = sourcePatient.getIdentifier();
 
@@ -112,7 +112,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		addExternalEID(patient2, "id_6");
 
 		//At this point, there should be 5 EIDs on the person
-		Patient personFromTarget = (Patient)getSourceResourceFromTargetResource(patient2);
+		Patient personFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(5));
 
 		updatePatientAndUpdateLinks(patient2);
@@ -122,7 +122,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 
 		assertThat(patient1, is(sameSourceResourceAs(patient2)));
 
-		personFromTarget = (Patient) getSourceResourceFromTargetResource(patient2);
+		personFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(6));
 	}
 
@@ -149,7 +149,7 @@ public class EmpiMatchLinkSvcMultipleEidModeTest extends BaseEmpiR4Test {
 		assertThat(possibleDuplicates, hasSize(1));
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
-			.map(this::getSourceResourceFromTargetResource)
+			.map(this::getGoldenResourceFromTargetResource)
 			.map(myIdHelperService::getPidOrNull)
 			.collect(Collectors.toList());
 

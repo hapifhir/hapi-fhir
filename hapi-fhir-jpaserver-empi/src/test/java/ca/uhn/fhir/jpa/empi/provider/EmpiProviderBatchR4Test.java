@@ -38,7 +38,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myGoldenPractitier = getSourceResourceFromTargetResource(myPractitioner);
+		myGoldenPractitier = getGoldenResourceFromTargetResource(myPractitioner);
 		myGoldenPractitionerId = new StringType(myGoldenPractitier.getIdElement().getValue());
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, afterEmpiLatch);
 	}

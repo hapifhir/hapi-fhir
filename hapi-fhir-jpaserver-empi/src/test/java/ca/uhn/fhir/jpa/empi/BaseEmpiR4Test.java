@@ -302,7 +302,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		assertEquals(theExpectedCount, myEmpiLinkDao.count());
 	}
 
-	protected IAnyResource getSourceResourceFromTargetResource(IAnyResource theBaseResource) {
+	protected IAnyResource getGoldenResourceFromTargetResource(IAnyResource theBaseResource) {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 

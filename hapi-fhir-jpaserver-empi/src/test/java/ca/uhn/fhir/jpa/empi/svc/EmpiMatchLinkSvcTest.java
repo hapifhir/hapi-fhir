@@ -122,7 +122,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testWhenMatchOccursOnPersonThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
 		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
-		IAnyResource janePerson = getSourceResourceFromTargetResource(originalJane);
+		IAnyResource janePerson = getGoldenResourceFromTargetResource(originalJane);
 
 		//Create a manual NO_MATCH between janePerson and unmatchedJane.
 		Patient unmatchedJane = createPatient(buildJanePatient());
@@ -219,7 +219,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 
-		IAnyResource janePerson = getSourceResourceFromTargetResource(patient);
+		IAnyResource janePerson = getGoldenResourceFromTargetResource(patient);
 		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
 		String foundHapiEid = hapiEid.get(0).getValue();
 
@@ -229,7 +229,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		//We want to make sure the patients were linked to the same person.
 		assertThat(patient, is(sameSourceResourceAs(janePatient)));
 
-		Patient sourcePatient = (Patient) getSourceResourceFromTargetResource(patient);
+		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
 
 		List<Identifier> identifier = sourcePatient.getIdentifier();
 
@@ -289,7 +289,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
-			.map(this::getSourceResourceFromTargetResource)
+			.map(this::getGoldenResourceFromTargetResource)
 			.map(myIdHelperService::getPidOrNull)
 			.collect(Collectors.toList());
 
@@ -362,7 +362,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		 * All other Person resources are marked as POSSIBLE_DUPLICATE of this first Person.
 		 */
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
-
 		Patient janePatient2 = createPatient(buildJanePatient());
 
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
@@ -473,8 +472,6 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 //		Identifier janeSourceResourceId = janeSourceResourcePatient.getIdentifier().get(0);
 		CanonicalEID janeId = myEidHelper.getHapiEid(janePatient).get(0);
 		CanonicalEID janeSourceResourceId = myEidHelper.getHapiEid(janeSourceResourcePatient).get(0);
-		print(janePatient);
-		print(janeSourceResourcePatient);
 
 		// source and target EIDs must match, as target EID should be reset to the newly created EID
 		assertEquals(janeId.getValue(), janeSourceResourceId.getValue());
@@ -485,7 +482,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void testPatientUpdateOverwritesPersonDataOnChanges() {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
-		Patient janeSourcePatient = (Patient) getSourceResourceFromTargetResource(janePatient);
+		Patient janeSourcePatient = (Patient) getGoldenResourceFromTargetResource(janePatient);
 
 		//Change Jane's name to paul.
 		Patient patient1 = buildPaulPatient();
@@ -495,7 +492,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(janeSourcePatient, is(sameSourceResourceAs(janePaulPatient)));
 
 		//Ensure the related person was updated with new info.
-		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(janePaulPatient);
+		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(janePaulPatient);
 		HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
 
 		// TODO NG  attribute propagation has been removed - revisit once source survivorship rules are defined
@@ -508,7 +505,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		paul.setGender(Enumerations.AdministrativeGender.MALE);
 		paul = createPatientAndUpdateLinks(paul);
 
-		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(paul);
+		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
 
 		// TODO NG - rules haven't been determined yet revisit once implemented...
 //		assertThat(sourcePatientFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
@@ -520,7 +517,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		assertThat(paul2, is(sameSourceResourceAs(paul)));
 
 		//Newly matched patients aren't allowed to overwrite Person Attributes unless they are empty, so gender should still be set to male.
-		Patient paul2Person = (Patient) getSourceResourceFromTargetResource(paul2);
+		Patient paul2Person = (Patient) getGoldenResourceFromTargetResource(paul2);
 //		assertThat(paul2Person.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
 	}
 
@@ -532,7 +529,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		paul.getBirthDateElement().setValueAsString(incorrectBirthdate);
 		paul = createPatientAndUpdateLinks(paul);
 
-		Patient sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(paul);
+		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
 		// TODO NG - rules haven't been determined yet revisit once implemented...
 //		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
 
@@ -541,7 +538,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		paul = updatePatientAndUpdateLinks(paul);
 
-		sourcePatientFromTarget = (Patient) getSourceResourceFromTargetResource(paul);
+		sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
 		// TODO NG - rules haven't been determined yet revisit once implemented...
 //		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
@@ -554,10 +551,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		String EID_2 = "456";
 
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
-		Patient originalPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
+		Patient originalPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
 
 		Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), EID_2));
-		Patient originalJanePatient = (Patient) getSourceResourceFromTargetResource(jane);
+		Patient originalJanePatient = (Patient) getGoldenResourceFromTargetResource(jane);
 
 		clearExternalEIDs(paul);
 		addExternalEID(paul, EID_2);
@@ -574,9 +571,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		String EID_2 = "456";
 
 		Patient paul = createPatientAndUpdateLinks(addExternalEID(buildPaulPatient(), EID_1));
-		print(paul);
-		Patient originalPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
-		print(originalPaulPatient);
+		Patient originalPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
 
 		String oldEid = myEidHelper.getExternalEid(originalPaulPatient).get(0).getValue();
 		assertThat(oldEid, is(equalTo(EID_1)));
@@ -584,15 +579,10 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 		clearExternalEIDs(paul);
 		addExternalEID(paul, EID_2);
 
-		System.out.println("Paul Before");
-		print(paul);
 		paul = updatePatientAndUpdateLinks(paul);
-		System.out.println("Paul After");
-		print(paul); // TODO NG - Paul after still has the EID - is it ok?
-
 		assertNoDuplicates();
 
-		Patient newlyFoundPaulPatient = (Patient) getSourceResourceFromTargetResource(paul);
+		Patient newlyFoundPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
 		assertThat(originalPaulPatient, is(sameSourceResourceAs(newlyFoundPaulPatient)));
 		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPatient).get(0).getValue();
 		assertThat(newEid, is(equalTo(EID_2)));

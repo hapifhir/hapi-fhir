@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.provider;
 
 import ca.uhn.fhir.empi.api.EmpiConstants;
+import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static ca.uhn.fhir.empi.api.EmpiMatchOutcome.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -38,7 +40,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myPractitionerSourceResource = getSourceResourceFromTargetResource(myPractitioner);
+		myPractitionerSourceResource = getGoldenResourceFromTargetResource(myPractitioner);
 		myPractitionerSourceResourceId = new StringType(myPractitionerSourceResource.getIdElement().getValue());
 	}
 
@@ -82,11 +84,11 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
-		IAnyResource person = getSourceResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource person = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(person, is(notNullValue()));
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
-		person = getSourceResourceFromTargetResource(patientAndUpdateLinks);
+		person = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(person, is(nullValue()));
 	}
 
@@ -96,8 +98,8 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
 
-		IAnyResource personFromTarget = getSourceResourceFromTargetResource(patientAndUpdateLinks);
-		IAnyResource personFromTarget2 = getSourceResourceFromTargetResource(patientAndUpdateLinks1);
+		IAnyResource personFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource personFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
 		linkPersons(personFromTarget, personFromTarget2);
 
 		//SUT
@@ -122,9 +124,9 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks2 = createPatientAndUpdateLinks(buildFrankPatient());
 
-		IAnyResource personFromTarget = getSourceResourceFromTargetResource(patientAndUpdateLinks);
-		IAnyResource personFromTarget1 = getSourceResourceFromTargetResource(patientAndUpdateLinks1);
-		IAnyResource personFromTarget2 = getSourceResourceFromTargetResource(patientAndUpdateLinks2);
+		IAnyResource personFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource personFromTarget1 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
+		IAnyResource personFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks2);
 
 		// A -> B -> C -> A linkages.
 		linkPersons(personFromTarget, personFromTarget1);
@@ -133,6 +135,9 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		//SUT
 		Parameters parameters = myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
+
+		printLinks();
+
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildSourceResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
@@ -140,8 +145,10 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	}
 
 	//TODO GGG unclear if we actually need to reimplement this.
-	private void linkPersons(IAnyResource theSourcePerson, IAnyResource theTargetPerson) {
-		throw new UnsupportedOperationException("We need to fix this!");
+	private void linkPersons(IAnyResource theGoldenResource, IAnyResource theTargetResource) {
+		// TODO NG - Should be ok to leave this - not really
+		// throw new UnsupportedOperationException("We need to fix this!");
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theTargetResource, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 	}
 
 	@Test
@@ -163,7 +170,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 			myEmpiProviderR4.clearEmpiLinks(new StringType("Observation"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), is(equalTo("$empi-clear does not support resource type: Observation")));
+			assertThat(e.getMessage(), is(equalTo("$mdm-clear does not support resource type: Observation")));
 		}
 	}
 
