@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
@@ -23,10 +25,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
+	public static final String ORGANIZATION_DUMMY = "Organization/dummy";
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
-	protected IAnyResource myGoldenPractitier;
+	protected IAnyResource myGoldenPractitioner;
 	protected StringType myGoldenPractitionerId;
+	protected Medication myMedication;
+	protected StringType myMedicationId;
+	protected IAnyResource myGoldenMedication;
+	protected StringType myGoldenMedicationId;
+
 
 	@Autowired
 	IInterceptorService myInterceptorService;
@@ -38,8 +46,19 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(buildPractitionerWithNameAndId("some_pract", "some_pract_id"));
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myGoldenPractitier = getGoldenResourceFromTargetResource(myPractitioner);
-		myGoldenPractitionerId = new StringType(myGoldenPractitier.getIdElement().getValue());
+		myGoldenPractitioner = getGoldenResourceFromTargetResource(myPractitioner);
+		myGoldenPractitionerId = new StringType(myGoldenPractitioner.getIdElement().getValue());
+
+		Organization dummyOrganization = new Organization();
+		dummyOrganization.setId(ORGANIZATION_DUMMY);
+		myOrganizationDao.update(dummyOrganization);
+
+		myMedication = createMedicationAndUpdateLinks(buildMedication(ORGANIZATION_DUMMY));
+		myMedicationId = new StringType(myMedication.getIdElement().getValue());
+		myGoldenMedication = getGoldenResourceFromTargetResource(myMedication);
+		myGoldenMedicationId = new StringType(myGoldenMedication.getIdElement().getValue());
+
+
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.EMPI_AFTER_PERSISTED_RESOURCE_CHECKED, afterEmpiLatch);
 	}
 
@@ -47,6 +66,15 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 	public void after() throws IOException {
 		myInterceptorService.unregisterInterceptor(afterEmpiLatch);
 		super.after();
+	}
+
+	@Test
+	public void testBatchRunOnAllMedications() throws InterruptedException {
+		StringType criteria = null;
+		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
+
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchOnAllTargets(new StringType("Medication"), criteria, null));
+		assertLinkCount(1);
 	}
 
 	@Test
@@ -106,7 +134,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = new StringType("");
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(2, () -> {
-			myEmpiProviderR4.empiBatchOnAllTargets(criteria, null);
+			myEmpiProviderR4.empiBatchOnAllTargets(null, criteria, null);
 		});
 		assertLinkCount(2);
 	}
