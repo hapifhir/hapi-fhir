@@ -50,16 +50,6 @@ public class DaoSearchParamProvider implements ISearchParamProvider {
 	}
 
 	@Override
-	public int refreshCache(SearchParamRegistryImpl theSearchParamRegistry, long theRefreshInterval) {
-		int retVal = 0;
-		if (myDaoRegistry.getResourceDaoOrNull("SearchParameter") != null) {
-			// FIXME KHS
-//			retVal = theSearchParamRegistry.doRefresh();
-		}
-		return retVal;
-	}
-
-	@Override
 	public IBaseResource read(IdDt theSearchParamId) {
 		return getSearchParamDao().read(theSearchParamId);
 	}

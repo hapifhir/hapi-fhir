@@ -28,7 +28,5 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface ISearchParamProvider {
 	IBundleProvider search(SearchParameterMap theParams);
 
-	int refreshCache(SearchParamRegistryImpl theSearchParamRegistry, long theRefreshInterval);
-
 	IBaseResource read(IdDt theSearchParamId);
 }

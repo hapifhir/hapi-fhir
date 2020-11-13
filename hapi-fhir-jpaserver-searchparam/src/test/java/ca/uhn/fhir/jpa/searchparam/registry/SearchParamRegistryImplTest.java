@@ -14,13 +14,13 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hamcrest.Matchers;
+import static org.hamcrest.Matchers.empty;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,21 +33,36 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 public class SearchParamRegistryImplTest {
+	private static final FhirContext ourFhirContext = FhirContext.forR4();
+	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
+
 	public static long TEST_SEARCH_PARAMS = 13L;
+	private static List<ResourceTable> ourEntities;
+	private static ResourceVersionMap ourResourceVersionMap;
+
+	static {
+		ourEntities = new ArrayList<>();
+		for (long id = 0; id < TEST_SEARCH_PARAMS; ++id) {
+			ourEntities.add(createEntity(id, 1));
+		}
+		ourResourceVersionMap = ResourceVersionMap.fromResourceIds(ourEntities);
+	}
+
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
@@ -65,13 +80,12 @@ public class SearchParamRegistryImplTest {
 	private IInterceptorService myInterceptorBroadcaster;
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
-	private static List<ResourceTable> ourEntities;
 
 	@Configuration
 	static class SpringConfig {
 		@Bean
 		FhirContext fhirContext() {
-			return FhirContext.forR4();
+			return ourFhirContext;
 		}
 
 		@Bean
@@ -97,13 +111,8 @@ public class SearchParamRegistryImplTest {
 		@Bean
 		IResourceVersionSvc resourceVersionSvc() {
 			IResourceVersionSvc retval = mock(IResourceVersionSvc.class);
-
-			ourEntities = new ArrayList<>();
-			for (long id = 0; id < TEST_SEARCH_PARAMS; ++id) {
-				ourEntities.add(createEntity(id, 1));
-			}
-			ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(ourEntities);
-			when(retval.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
+			// FIXME KHS do we still need this here?
+			when(retval.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
 			return retval;
 		}
 	}
@@ -122,18 +131,25 @@ public class SearchParamRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		myAnswerCount = 0;
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+	}
+
+	@AfterEach
+	public void after() {
+		myVersionChangeListenerRegistry.clearCacheForUnitTest();
+	}
+
+	@Test
+	public void testBuildinSearchparams() {
+		assertEquals(ourBuiltInSearchParams.size(), mySearchParamRegistry.getActiveSearchParams().size());
 	}
 
 	@Test
 	public void testRefreshAfterExpiry() {
-//		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
-
 		mySearchParamRegistry.requestRefresh();
 		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
 		// Second time we don't need to run because we ran recently
 		assertEquals(0, myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
-
-		assertEquals(146, mySearchParamRegistry.getActiveSearchParams().size());
 	}
 
 	@Test
@@ -142,45 +158,48 @@ public class SearchParamRegistryImplTest {
 
 		mySearchParamRegistry.requestRefresh();
 
-		// FIXME KHS find suitable replacement asserts
 		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
 		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
 
 		mySearchParamRegistry.requestRefresh();
 		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
 
-		addNewSearchParameterToDatabase();
+		addNewSearchParameterToDatabase(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
 	}
 
 	@Test
 	public void testGetActiveUniqueSearchParams_Empty() {
-		assertThat(mySearchParamRegistry.getActiveUniqueSearchParams("Patient"), Matchers.empty());
+		assertThat(mySearchParamRegistry.getActiveUniqueSearchParams("Patient"), is(empty()));
 	}
 
 	@Test
-	public void testGetActiveSearchParams() {
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
-		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
+	public void testGetActiveSearchParamsRetries() {
+		AtomicBoolean retried = new AtomicBoolean(false);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenAnswer(t -> {
 			if (myAnswerCount == 0) {
 				myAnswerCount++;
+				retried.set(true);
 				throw new InternalErrorException("this is an error!");
 			}
 
-			return 0;
+			return ourResourceVersionMap;
 		});
 
-		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
+		assertFalse(retried.get());
+		mySearchParamRegistry.forceRefresh();
+		Map<String, RuntimeSearchParam> activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
+		assertTrue(retried.get());
+		assertEquals(ourBuiltInSearchParams.getSearchParamMap("Patient").size(), activeSearchParams.size());
 	}
 
-	// FIXME KHS This one Fails when run as part of the whole Class but Passes when run by itslef
 	@Test
-	public void testExtractExtensions() {
+	public void testAddActiveSearchparam() {
 		// Initialize the registry
 		mySearchParamRegistry.forceRefresh();
 
-		addNewSearchParameterToDatabase();
+		addNewSearchParameterToDatabase(Enumerations.PublicationStatus.ACTIVE);
 
 		mySearchParamRegistry.forceRefresh();
 		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
@@ -193,7 +212,7 @@ public class SearchParamRegistryImplTest {
 		assertEquals("FOO", value.getValueAsString());
 	}
 
-	private void addNewSearchParameterToDatabase() {
+	private void addNewSearchParameterToDatabase(Enumerations.PublicationStatus theActive) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList(ourEntities);
 		newEntities.add(createEntity(TEST_SEARCH_PARAMS, 1));
@@ -201,16 +220,16 @@ public class SearchParamRegistryImplTest {
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
 
 		// When we ask for the new entity, return our foo search parameter
-		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter());
+		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter(theActive));
 	}
 
 	// FIXME KHS add tests
 
 	@Nonnull
-	private SearchParameter buildSearchParameter() {
+	private SearchParameter buildSearchParameter(Enumerations.PublicationStatus theStatus) {
 		SearchParameter searchParameter = new SearchParameter();
 		searchParameter.setCode("foo");
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setStatus(theStatus);
 		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
 		searchParameter.setExpression("Patient.name");
 		searchParameter.addBase("Patient");
