@@ -389,7 +389,7 @@ Tags have very specific semantics, which may not be obvious simply by using the 
 
 ## Accessing Tags in a Read / VRead / Search Method
 
-Tags are stored within a resource object, in the Resource.meta element. It is important to note that changing a resources tags will not cause a version update to that resource.
+Tags are stored within a resource object, in the Resource.meta element. It is important to note that changing a resource's tags will not cause a version update to that resource.
 
 In a server implementation, you may populate your tags into the returned resource(s) and HAPI will automatically place these tags into the response headers (for read/vread) or the bundle category tags (for search). The following example illustrates how to return tags from a server method. This example shows how to supply tags in a read method, but the same approach applies to vread and search operations as well.
 
