@@ -66,4 +66,9 @@ public class ResourceVersionCache {
 			entryByTypeMap.put(key, theResourceVersionMap.get(key));
 		}
 	}
+
+	public void listenerRemoved(IVersionChangeListener theVersionChangeListener) {
+		// FIXME KBD How do we clear the Cache for a specific ResourceType if we
+		//           don't know what ResourceType this particular Listener was for ?
+	}
 }
