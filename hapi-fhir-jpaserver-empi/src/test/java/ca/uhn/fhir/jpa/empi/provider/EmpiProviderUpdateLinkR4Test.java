@@ -130,7 +130,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testExcludedPerson() {
 		Patient patient = new Patient();
-		patient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_NO_EMPI_MANAGED);
+		patient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_MDM_MANAGED).setCode(EmpiConstants.CODE_NO_EMPI_MANAGED);
 		createPatient(patient);
 		try {
 			myEmpiProviderR4.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);

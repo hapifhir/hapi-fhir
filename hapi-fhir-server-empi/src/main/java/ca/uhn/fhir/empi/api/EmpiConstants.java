@@ -25,8 +25,8 @@ public class EmpiConstants {
 	 * TAG system for Person resources which are managed by HAPI EMPI.
 	 */
 
-	public static final String SYSTEM_EMPI_MANAGED = "https://hapifhir.org/NamingSystem/managing-empi-system";
-	public static final String CODE_HAPI_EMPI_MANAGED = "HAPI-EMPI";
+	public static final String SYSTEM_MDM_MANAGED = "https://hapifhir.org/NamingSystem/managing-mdm-system";
+	public static final String CODE_HAPI_MDM_MANAGED = "HAPI-MDM";
 	public static final String DISPLAY_HAPI_EMPI_MANAGED = "This Person can only be modified by Smile CDR's EMPI system.";
 	public static final String CODE_NO_EMPI_MANAGED = "NO-EMPI";
 	public static final String HAPI_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/empi-person-enterprise-id";
@@ -34,4 +34,9 @@ public class EmpiConstants {
 
 	public static final String FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE = "http://hl7.org/fhir/StructureDefinition/match-grade";
 
+	public static final String SYSTEM_GOLDEN_RECORD_STATUS = "http://hapifhir.io/fhir/NamingSystem/mdm-record-status";
+	public static final String CODE_GOLDEN_RECORD = "GOLDEN_RECORD";
+	public static final String CODE_GOLDEN_RECORD_REDIRECTED = "REDIRECTED";
+	public static final String DISPLAY_GOLDEN_RECORD = "Golden Record";
+	public static final String DISPLAY_GOLDEN_REDIRECT = "This resource was found to be a duplicate and has been redirected.";
 }

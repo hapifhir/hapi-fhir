@@ -88,7 +88,7 @@ public class PersonHelper {
 	 * @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
 	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
 	 */
-	public <T extends IAnyResource> T createSourceResourceFromEmpiTarget(T theIncomingResource) {
+	public <T extends IAnyResource> T createGoldenResourceFromMdmTarget(T theIncomingResource) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
@@ -102,24 +102,12 @@ public class PersonHelper {
 
 		addHapiEidIfNoExternalEidIsPresent(newSourceResource, sourceResourceIdentifier, theIncomingResource);
 
-		setActive(newSourceResource, resourceDefinition, true);
+		//setGoldenResource(newSourceResource, resourceDefinition, true);
 
 		EmpiUtil.setEmpiManaged(newSourceResource);
+		EmpiUtil.setGoldenResource(newSourceResource);
 
 		return (T) newSourceResource;
-	}
-
-	private void setActive(IBaseResource theResource, boolean theActiveFlag) {
-		setActive(theResource, myFhirContext.getResourceDefinition(theResource), theActiveFlag);
-	}
-
-	private void setActive(IBaseResource theNewSourceResource, RuntimeResourceDefinition theResourceDefinition, boolean theActiveFlag) {
-		BaseRuntimeChildDefinition activeChildDefinition = theResourceDefinition.getChildByName("active");
-		if (activeChildDefinition == null) {
-			ourLog.warn(String.format("Unable to set active flag on the provided source resource %s.", theNewSourceResource));
-			return;
-		}
-		activeChildDefinition.getMutator().setValue(theNewSourceResource, toBooleanType(theActiveFlag));
 	}
 
 	/**
@@ -516,32 +504,10 @@ public class PersonHelper {
 	}
 
 	public void deactivateResource(IAnyResource theResource) {
-		// get a ref to the actual ID Field
-		setActive(theResource, myFhirContext.getResourceDefinition(theResource), false);
+		EmpiUtil.setGoldenResourceRedirected(theResource);
 	}
 
-	public boolean isDeactivated(IBaseResource thePerson) {
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(thePerson);
-		BaseRuntimeChildDefinition activeChildDefinition = resourceDefinition.getChildByName("active");
-
-		Optional<IBase> value = activeChildDefinition.getAccessor().getFirstValueOrNull(thePerson);
-		return value.map(v -> {
-			return !fromBooleanType(v);
-		}).orElseThrow(
-			() -> new UnsupportedOperationException(String.format("Resource %s does not support deactivation", resourceDefinition.getName()))
-		);
-
-//
-//		}
-//		switch (myFhirContext.getVersion().getVersion()) {
-//			case R4:
-//				Person personR4 = (Person) thePerson;
-//				return !personR4.getActive();
-//			case DSTU3:
-//				org.hl7.fhir.dstu3.model.Person personStu3 = (org.hl7.fhir.dstu3.model.Person) thePerson;
-//				return !personStu3.getActive();
-//			default:
-//				throw
-//		}
+	public boolean isDeactivated(IBaseResource theGoldenResource) {
+		return EmpiUtil.isGoldenRecordRedirected(theGoldenResource);
 	}
 }

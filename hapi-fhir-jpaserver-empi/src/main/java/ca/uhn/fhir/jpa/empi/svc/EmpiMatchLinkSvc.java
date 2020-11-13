@@ -53,7 +53,7 @@ public class EmpiMatchLinkSvc {
 	@Autowired
 	private EmpiSourceResourceFindingSvc myEmpiSourceResourceFindingSvc;
 	@Autowired
-	private PersonHelper myPersonHelper;
+	private PersonHelper myGoldenResourceHelper;
 	@Autowired
 	private EmpiEidUpdateService myEidUpdateService;
 
@@ -122,7 +122,7 @@ public class EmpiMatchLinkSvc {
 
 	private void handleEmpiWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, String.format("There were no matched candidates for EMPI, creating a new %s.", theResource.getIdElement().getResourceType()));
-		IAnyResource newPerson = myPersonHelper.createSourceResourceFromEmpiTarget(theResource);
+		IAnyResource newPerson = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(theResource);
 		// TODO GGG :)
 		// 1. Get the right helper
 		// 2. Create source resoruce for the EMPI target
@@ -135,14 +135,14 @@ public class EmpiMatchLinkSvc {
 		log(theMdmTransactionContext, "EMPI has narrowed down to one candidate for matching.");
 		IAnyResource sourceResource = myEmpiSourceResourceFindingSvc.getSourceResourceFromMatchedSourceResourceCandidate(thePersonCandidate, theMdmTransactionContext.getResourceType());
 
-		if (myPersonHelper.isPotentialDuplicate(sourceResource, theTargetResource)) {
+		if (myGoldenResourceHelper.isPotentialDuplicate(sourceResource, theTargetResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-			IAnyResource newSourceResource = myPersonHelper.createSourceResourceFromEmpiTarget(theTargetResource);
+			IAnyResource newSourceResource = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(theTargetResource);
 			myEmpiLinkSvc.updateLink(newSourceResource, theTargetResource, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myEmpiLinkSvc.updateLink(newSourceResource, sourceResource, EmpiMatchOutcome.POSSIBLE_DUPLICATE, EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
 			if (thePersonCandidate.isMatch()) {
-				myPersonHelper.handleExternalEidAddition(sourceResource, theTargetResource, theMdmTransactionContext);
+				myGoldenResourceHelper.handleExternalEidAddition(sourceResource, theTargetResource, theMdmTransactionContext);
 				// myPersonHelper.updatePersonFromNewlyCreatedEmpiTarget(person, theResource, theEmpiTransactionContext);
 			}
 			myEmpiLinkSvc.updateLink(sourceResource, theTargetResource, thePersonCandidate.getMatchResult(), EmpiLinkSourceEnum.AUTO, theMdmTransactionContext);

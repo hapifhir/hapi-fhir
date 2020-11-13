@@ -113,7 +113,7 @@ public class EmpiProviderClearLinkR4Test extends BaseLinkR4Test {
 	 * @return
 	 */
 	private SearchParameterMap buildSourceResourceParameterMap() {
-		return new SearchParameterMap().setLoadSynchronous(true).add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
+		return new SearchParameterMap().setLoadSynchronous(true).add("_tag", new TokenParam(EmpiConstants.SYSTEM_MDM_MANAGED, EmpiConstants.CODE_HAPI_MDM_MANAGED));
 	}
 
 	@Test

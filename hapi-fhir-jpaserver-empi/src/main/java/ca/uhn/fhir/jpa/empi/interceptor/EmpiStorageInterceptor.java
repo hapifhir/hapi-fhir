@@ -161,7 +161,7 @@ public class EmpiStorageInterceptor implements IEmpiStorageInterceptor {
 	}
 
 	private void throwBlockEmpiManagedTagChange() {
-		throw new ForbiddenOperationException("The " + EmpiConstants.CODE_HAPI_EMPI_MANAGED + " tag on a resource may not be changed once created.");
+		throw new ForbiddenOperationException("The " + EmpiConstants.CODE_HAPI_MDM_MANAGED + " tag on a resource may not be changed once created.");
 	}
 
 	private void throwModificationBlockedByEmpi() {

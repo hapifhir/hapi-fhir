@@ -39,13 +39,11 @@ public class EmpiProviderMergePersonsR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMerge() {
-		//TODO GGG RP fix
 		IBaseResource mergedSourcePatient = myEmpiProviderR4.mergeGoldenResources(myFromSourcePatientId, myToSourcePatientId, myRequestDetails);
 		assertEquals(myToSourcePatient.getIdElement(), mergedSourcePatient.getIdElement());
-//		TODO GGG RP FIX
 		//assertThat(mergedSourcePatient, is(sameSourceResourceAs(myToSourcePatient)));
-		assertEquals(2, getAllGoldenPatients().size());
-		assertEquals(1, getAllActiveGoldenPatients().size());
+		assertEquals(1, getAllRedirectedGoldenPatients().size());
+		assertEquals(1, getAllGoldenPatients().size());
 
 		Patient fromSourcePatient = myPatientDao.read(myFromSourcePatient.getIdElement().toUnqualifiedVersionless());
 		assertThat(fromSourcePatient.getActive(), is(false));

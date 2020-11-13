@@ -86,7 +86,7 @@ public class EmpiControllerHelper {
 			throw new InvalidRequestException("Only Person resources can be merged.  The " + theName + " points to a " + myFhirContext.getResourceType(thePerson));
 		}
 		if (!EmpiUtil.isEmpiManaged(thePerson)) {
-			throw new InvalidRequestException("Only EMPI managed resources can be merged.  Empi managed resource have the " + EmpiConstants.CODE_HAPI_EMPI_MANAGED + " tag.");
+			throw new InvalidRequestException("Only EMPI managed resources can be merged.  Empi managed resource have the " + EmpiConstants.CODE_HAPI_MDM_MANAGED + " tag.");
 		}
 	}
 }

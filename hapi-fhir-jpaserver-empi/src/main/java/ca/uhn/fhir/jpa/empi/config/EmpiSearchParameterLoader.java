@@ -65,7 +65,7 @@ public class EmpiSearchParameterLoader {
 		org.hl7.fhir.dstu3.model.SearchParameter retval = new org.hl7.fhir.dstu3.model.SearchParameter();
 		retval.setId(EMPI_PERSON_ASSURANCE_SEARCH_PARAMETER_ID);
 		retval.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_MDM_MANAGED).setCode(EmpiConstants.CODE_HAPI_MDM_MANAGED);
 		retval.setCode("assurance");
 		retval.addBase("Person");
 		retval.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
@@ -78,7 +78,7 @@ public class EmpiSearchParameterLoader {
 		SearchParameter retval = new SearchParameter();
 		retval.setId(EMPI_PERSON_ASSURANCE_SEARCH_PARAMETER_ID);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_MDM_MANAGED).setCode(EmpiConstants.CODE_HAPI_MDM_MANAGED);
 		retval.setCode("assurance");
 		retval.addBase("Person");
 		retval.setType(Enumerations.SearchParamType.TOKEN);
@@ -91,7 +91,7 @@ public class EmpiSearchParameterLoader {
 		org.hl7.fhir.dstu3.model.SearchParameter retval = new org.hl7.fhir.dstu3.model.SearchParameter();
 		retval.setId(EMPI_PERSON_ACTIVE_SEARCH_PARAMETER_ID);
 		retval.setStatus(org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus.ACTIVE);
-		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_MDM_MANAGED).setCode(EmpiConstants.CODE_HAPI_MDM_MANAGED);
 		retval.setCode("active");
 		retval.addBase("Person");
 		retval.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
@@ -104,7 +104,7 @@ public class EmpiSearchParameterLoader {
 		SearchParameter retval = new SearchParameter();
 		retval.setId(EMPI_PERSON_ACTIVE_SEARCH_PARAMETER_ID);
 		retval.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
+		retval.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_MDM_MANAGED).setCode(EmpiConstants.CODE_HAPI_MDM_MANAGED);
 		retval.setCode("active");
 		retval.addBase("Person");
 		retval.setType(Enumerations.SearchParamType.TOKEN);

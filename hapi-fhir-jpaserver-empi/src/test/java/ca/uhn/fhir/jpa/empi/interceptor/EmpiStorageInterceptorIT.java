@@ -32,8 +32,8 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.Date;
 import java.util.List;
 
-import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_EMPI_MANAGED;
-import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_EMPI_MANAGED;
+import static ca.uhn.fhir.empi.api.EmpiConstants.CODE_HAPI_MDM_MANAGED;
+import static ca.uhn.fhir.empi.api.EmpiConstants.SYSTEM_MDM_MANAGED;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -72,7 +72,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testDeletePersonDeletesLinks() throws InterruptedException {
 		myEmpiHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
-		Patient sourcePatient = getOnlyActiveSourcePatient();
+		Patient sourcePatient = getOnlyGoldenPatient();
 		myPatientDao.delete(sourcePatient.getIdElement());
 		assertLinkCount(0);
 	}
@@ -81,7 +81,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testCreatePersonWithEmpiTagForbidden() throws InterruptedException {
 		//Creating a person with the EMPI-MANAGED tag should fail
 		Person person = new Person();
-		person.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		person.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by EMPI");
 		try {
 			myEmpiHelper.doCreateResource(person, true);
 			fail();
@@ -106,7 +106,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 	public void testCreateOrganizationWithEmpiTagForbidden() throws InterruptedException {
 		//Creating a organization with the EMPI-MANAGED tag should fail
 		Organization organization = new Organization();
-		organization.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		organization.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by EMPI");
 		try {
 			myEmpiHelper.doCreateResource(organization, true);
 			fail();
@@ -120,7 +120,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		//Creating a organization with the EMPI-MANAGED tag should fail
 		Organization organization = new Organization();
 		myEmpiHelper.doCreateResource(organization, true);
-		organization.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		organization.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by EMPI");
 		try {
 			myEmpiHelper.doUpdateResource(organization, true);
 			fail();
@@ -139,7 +139,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 		for (IBaseResource person : resources) {
-			assertThat(person.getMeta().getTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED), is(notNullValue()));
+			assertThat(person.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED), is(notNullValue()));
 		}
 	}
 
@@ -151,7 +151,7 @@ public class EmpiStorageInterceptorIT extends BaseEmpiR4Test {
 		assertNotNull(daoMethodOutcome.getId());
 
 		//Updating that person to set them as EMPI managed is not allowed.
-		person.getMeta().addTag(SYSTEM_EMPI_MANAGED, CODE_HAPI_EMPI_MANAGED, "User is managed by EMPI");
+		person.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by EMPI");
 		try {
 			myEmpiHelper.doUpdateResource(person, true);
 			fail();

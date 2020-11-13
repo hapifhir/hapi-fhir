@@ -303,7 +303,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testPatientWithNoEmpiTagIsNotMatched() {
 		// Patient with "no-empi" tag is not matched
 		Patient janePatient = buildJanePatient();
-		janePatient.getMeta().addTag(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
+		janePatient.getMeta().addTag(EmpiConstants.SYSTEM_MDM_MANAGED, EmpiConstants.CODE_NO_EMPI_MANAGED, "Don't EMPI on me!");
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}
@@ -367,7 +367,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
-		IAnyResource person = myPersonHelper.createSourceResourceFromEmpiTarget(janePatient2);
+		IAnyResource person = myPersonHelper.createGoldenResourceFromMdmTarget(janePatient2);
 		myEmpiLinkSvc.updateLink(person, janePatient2, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertThat(janePatient, is(not(sameSourceResourceAs(janePatient2))));
 
@@ -430,7 +430,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	private SearchParameterMap buildGoldenRecordSearchParameterMap() {
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 		searchParameterMap.setLoadSynchronous(true);
-		searchParameterMap.add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
+		searchParameterMap.add("_tag", new TokenParam(EmpiConstants.SYSTEM_MDM_MANAGED, EmpiConstants.CODE_HAPI_MDM_MANAGED));
 		return searchParameterMap;
 	}
 
@@ -458,7 +458,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 	public void testCreateSourceResourceFromEmpiTarget() {
 		// Create Use Case #2 - adding patient with no EID
 		Patient janePatient = buildJanePatient();
-		Patient janeSourceResourcePatient = myPersonHelper.createSourceResourceFromEmpiTarget(janePatient);
+		Patient janeSourceResourcePatient = myPersonHelper.createGoldenResourceFromMdmTarget(janePatient);
 
 		// golden record now contains HAPI-generated EID and HAPI tag
 		assertTrue(EmpiUtil.isEmpiManaged(janeSourceResourcePatient));

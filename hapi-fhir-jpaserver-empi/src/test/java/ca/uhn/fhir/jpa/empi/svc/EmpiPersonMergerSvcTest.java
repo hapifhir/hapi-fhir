@@ -90,13 +90,14 @@ public class EmpiPersonMergerSvcTest extends BaseEmpiR4Test {
 	@Test
 	public void emptyMerge() {
 		assertEquals(2, getAllGoldenPatients().size());
-		assertEquals(2, getAllActiveGoldenPatients().size());
+		assertEquals(0, getAllRedirectedGoldenPatients().size());
 
 		Patient mergedGoldenPatient = mergeGoldenPatients();
+
 		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
 		assertThat(mergedGoldenPatient, is(sameSourceResourceAs(mergedGoldenPatient)));
-		assertEquals(2, getAllGoldenPatients().size());
-		assertEquals(1, getAllActiveGoldenPatients().size());
+		assertEquals(1, getAllGoldenPatients().size());
+		assertEquals(1, getAllRedirectedGoldenPatients().size());
 	}
 
 	private Patient mergeGoldenPatients() {

@@ -8,6 +8,7 @@ import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.model.MdmTransactionContext;
 import ca.uhn.fhir.empi.rules.svc.EmpiResourceMatcherSvc;
 import ca.uhn.fhir.empi.util.EIDHelper;
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -159,10 +161,8 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createGoldenPatient(Patient thePatient, boolean theEmpiManaged) {
-		if (theEmpiManaged) {
-			thePatient.getMeta().addTag().setSystem(EmpiConstants.SYSTEM_EMPI_MANAGED).setCode(EmpiConstants.CODE_HAPI_EMPI_MANAGED);
-			thePatient.setActive(true);
-		}
+		EmpiUtil.setEmpiManaged(thePatient);
+		EmpiUtil.setGoldenResource(thePatient);
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
 		Patient patient = (Patient) outcome.getResource();
 		patient.setId(outcome.getId());
@@ -392,34 +392,33 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return IsMatchedToAPerson.matchedToAPerson(myIdHelperService, myEmpiLinkDaoSvc);
 	}
 
-	protected Patient getOnlyActiveSourcePatient() {
-		List<IBaseResource> resources = getAllActiveGoldenPatients();
+	protected Patient getOnlyGoldenPatient() {
+		List<IBaseResource> resources = getAllGoldenPatients();
 		assertEquals(1, resources.size());
 		return (Patient) resources.get(0);
 	}
 
-	@Nonnull
-	protected List<IBaseResource> getAllActiveGoldenPatients() {
-		return getAllGoldenPatients(true);
-	}
 
 	@Nonnull
 	protected List<IBaseResource> getAllGoldenPatients() {
-		return getAllGoldenPatients(false);
+		return getPatientsByTag(EmpiConstants.CODE_GOLDEN_RECORD);
 	}
 
 	@Nonnull
-	private List<IBaseResource> getAllGoldenPatients(boolean theOnlyActive) {
+	protected List<IBaseResource> getAllRedirectedGoldenPatients() {
+		return getPatientsByTag(EmpiConstants.CODE_GOLDEN_RECORD_REDIRECTED);
+	}
+
+	@NotNull
+	private List<IBaseResource> getPatientsByTag(String theCode) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		//TODO GGG ensure that this tag search works effectively.
-		map.add("_tag", new TokenParam(EmpiConstants.SYSTEM_EMPI_MANAGED, EmpiConstants.CODE_HAPI_EMPI_MANAGED));
-		if (theOnlyActive) {
-			map.add("active", new TokenParam().setValue("true"));
-		}
+		map.add("_tag", new TokenParam(EmpiConstants.SYSTEM_GOLDEN_RECORD_STATUS, theCode));
 		IBundleProvider bundle = myPatientDao.search(map);
 		return bundle.getResources(0, 999);
 	}
+
 
 	@Nonnull
 	protected EmpiLink createResourcesAndBuildTestEmpiLink() {
