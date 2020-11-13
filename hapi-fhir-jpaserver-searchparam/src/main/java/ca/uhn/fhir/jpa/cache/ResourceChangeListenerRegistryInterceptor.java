@@ -11,11 +11,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 @Service
-public class VersionChangeListenerRegistryInterceptor {
+public class ResourceChangeListenerRegistryInterceptor {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
-	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@PostConstruct
 	public void start() {
@@ -47,7 +47,7 @@ public class VersionChangeListenerRegistryInterceptor {
 			return;
 		}
 		synchronized (this) {
-			myVersionChangeListenerRegistry.requestRefreshIfWatching(theResource);
+			myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 		}
 	}
 }

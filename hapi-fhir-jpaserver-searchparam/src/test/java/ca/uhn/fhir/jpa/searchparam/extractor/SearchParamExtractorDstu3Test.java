@@ -6,7 +6,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.cache.VersionChangeResult;
+import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -247,9 +247,9 @@ public class SearchParamExtractorDstu3Test {
 		}
 
 		@Override
-		public VersionChangeResult refreshCacheIfNecessary() {
+		public ResourceChangeResult refreshCacheIfNecessary() {
 			// nothing
-			return new VersionChangeResult();
+			return new ResourceChangeResult();
 		}
 
 		@Override

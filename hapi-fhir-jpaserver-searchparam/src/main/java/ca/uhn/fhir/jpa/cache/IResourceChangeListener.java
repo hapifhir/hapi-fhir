@@ -5,9 +5,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import java.util.Collection;
 
 /**
- * Called by the {@link IVersionChangeListenerRegistry} when a resource change has been detected
+ * Called by the {@link IResourceChangeListenerRegistry} when a resource change has been detected
  */
-public interface IVersionChangeListener {
+public interface IResourceChangeListener {
 	void handleCreate(IdDt theResourceId);
 	void handleUpdate(IdDt theResourceId);
 	void handleDelete(IdDt theResourceId);

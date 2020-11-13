@@ -1,43 +1,42 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
  * Register a listener with this registry in order to be notified whenever a resource matching the provided SearchParameterMap
  * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
- * within {@link VersionChangeListenerRegistryImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
- * on a different jvm process, then the listener will be called within {@link VersionChangeListenerRegistryImpl#REMOTE_REFRESH_INTERVAL}
+ * within {@link ResourceChangeListenerRegistryImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
+ * on a different jvm process, then the listener will be called within {@link ResourceChangeListenerRegistryImpl#REMOTE_REFRESH_INTERVAL}
  * of the change happening.
  */
-public interface IVersionChangeListenerRegistry {
+public interface IResourceChangeListenerRegistry {
 	@VisibleForTesting
 	void clearCacheForUnitTest();
 
 	@VisibleForTesting
 	void clearListenersForUnitTest();
 
-	VersionChangeResult refreshAllCachesIfNecessary();
+	ResourceChangeResult refreshAllCachesIfNecessary();
 
 	/**
 	 * Request that all caches be refreshed now, in the current thread
 	 */
-	VersionChangeResult refreshAllCachesImmediately();
+	ResourceChangeResult refreshAllCachesImmediately();
 
-	VersionChangeResult refreshCacheWithRetry(String theResourceName);
+	ResourceChangeResult refreshCacheWithRetry(String theResourceName);
 
-	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
+	void registerResourceResourceChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener);
 
-	VersionChangeResult refreshCacheIfNecessary(String theResourceName);
+	ResourceChangeResult refreshCacheIfNecessary(String theResourceName);
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
 	void requestRefresh(String theResourceName);
 
-	VersionChangeResult forceRefresh(String theResourceName);
+	ResourceChangeResult forceRefresh(String theResourceName);
 
 	/**
 	 * If any listeners have been registered with searchparams that match the incoming resource, then
@@ -46,5 +45,5 @@ public interface IVersionChangeListenerRegistry {
 	 */
 	void requestRefreshIfWatching(IBaseResource theResource);
 
-	void unregisterResourceVersionChangeListener(IVersionChangeListener theVersionChangeListener);
+	void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener);
 }

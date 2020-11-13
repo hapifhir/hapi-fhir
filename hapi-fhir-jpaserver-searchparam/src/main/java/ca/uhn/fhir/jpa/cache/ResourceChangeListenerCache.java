@@ -20,18 +20,18 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class VersionChangeListenerCache {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerCache.class);
+public class ResourceChangeListenerCache {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
 
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 
-	private final SetValuedMap<String, VersionChangeListenerWithSearchParamMap> myListenersByResourceType = new HashSetValuedHashMap<>();
+	private final SetValuedMap<String, ResourceChangeListenerWithSearchParamMap> myListenersByResourceType = new HashSetValuedHashMap<>();
 
-	public void add(String theResourceType, IVersionChangeListener theVersionChangeListener, SearchParameterMap theMap) {
-		getListenerEntries(theResourceType).add(new VersionChangeListenerWithSearchParamMap(theVersionChangeListener, theMap));
+	public void add(String theResourceType, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap) {
+		getListenerEntries(theResourceType).add(new ResourceChangeListenerWithSearchParamMap(theResourceChangeListener, theMap));
 	}
 
 	@VisibleForTesting
@@ -44,7 +44,7 @@ public class VersionChangeListenerCache {
 	}
 
 	@Nonnull
-	public Set<VersionChangeListenerWithSearchParamMap> getListenerEntries(String theResourceType) {
+	public Set<ResourceChangeListenerWithSearchParamMap> getListenerEntries(String theResourceType) {
 		return myListenersByResourceType.get(theResourceType);
 	}
 
@@ -63,21 +63,21 @@ public class VersionChangeListenerCache {
 	}
 
 	// FIXME KHS ensure we reset cache
-	public VersionChangeResult notifyListener(VersionChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
-		VersionChangeResult retval;
-		IVersionChangeListener versionChangeListener = theListenerEntry.getVersionChangeListener();
+	public ResourceChangeResult notifyListener(ResourceChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+		ResourceChangeResult retval;
+		IResourceChangeListener resourceChangeListener = theListenerEntry.getResourceChangeListener();
 		if (theListenerEntry.isInitialized()) {
-			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(versionChangeListener, theOldResourceVersionCache, theNewResourceVersionMap);
+			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, theOldResourceVersionCache, theNewResourceVersionMap);
 		} else {
 			theOldResourceVersionCache.initialize(theNewResourceVersionMap);
-			versionChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
-			retval = VersionChangeResult.fromAdded(theNewResourceVersionMap.size());
+			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
+			retval = ResourceChangeResult.fromAdded(theNewResourceVersionMap.size());
 			theListenerEntry.setInitialized(true);
 		}
 		return retval;
 	}
 
-	public VersionChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IVersionChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+	public ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		Set<IdDt> newKeys = new HashSet<>();
 		long added = 0;
 		long updated = 0;
@@ -110,11 +110,11 @@ public class VersionChangeListenerCache {
 				});
 			removed += deletedIDs.size();
 		}
-		return VersionChangeResult.fromAddedUpdatedRemoved(added, updated, removed);
+		return ResourceChangeResult.fromAddedUpdatedRemoved(added, updated, removed);
 	}
 
-	public void remove(IVersionChangeListener theVersionChangeListener) {
-		myListenersByResourceType.entries().removeIf(entry -> entry.getValue().getVersionChangeListener().equals(theVersionChangeListener));
+	public void remove(IResourceChangeListener theResourceChangeListener) {
+		myListenersByResourceType.entries().removeIf(entry -> entry.getValue().getResourceChangeListener().equals(theResourceChangeListener));
 	}
 
 	public int size() {

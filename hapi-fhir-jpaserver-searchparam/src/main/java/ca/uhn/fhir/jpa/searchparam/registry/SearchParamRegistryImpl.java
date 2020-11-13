@@ -25,9 +25,9 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.cache.IVersionChangeListener;
-import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
-import ca.uhn.fhir.jpa.cache.VersionChangeResult;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -48,7 +48,7 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionChangeListener {
+public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	@Autowired
 	private ModelConfig myModelConfig;
@@ -59,7 +59,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	@Autowired
 	private SearchParameterCanonicalizer mySearchParameterCanonicalizer;
 	@Autowired
-	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	private volatile ReadOnlySearchParamCache myBuiltInSearchParams;
 	private volatile IPhoneticEncoder myPhoneticEncoder;
@@ -83,7 +83,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
-			myVersionChangeListenerRegistry.refreshCacheWithRetry("SearchParameter");
+			myResourceChangeListenerRegistry.refreshCacheWithRetry("SearchParameter");
 		}
 	}
 
@@ -205,17 +205,17 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	// FIXME KHS move these into a generic abstract superclass
 	@Override
 	public void requestRefresh() {
-		myVersionChangeListenerRegistry.requestRefresh("SearchParameter");
+		myResourceChangeListenerRegistry.requestRefresh("SearchParameter");
 	}
 
 	@Override
 	public void forceRefresh() {
-		myVersionChangeListenerRegistry.forceRefresh("SearchParameter");
+		myResourceChangeListenerRegistry.forceRefresh("SearchParameter");
 	}
 
 	@Override
-	public VersionChangeResult refreshCacheIfNecessary() {
-		return myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
+	public ResourceChangeResult refreshCacheIfNecessary() {
+		return myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
 	}
 
 	@PostConstruct
@@ -223,12 +223,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 		myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
 
 		// FIXME KHS compare this searchparam with below
-		myVersionChangeListenerRegistry.registerResourceVersionChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
 	}
 
 	@PreDestroy
 	public void unregisterListener() {
-		myVersionChangeListenerRegistry.unregisterResourceVersionChangeListener(this);
+		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
 	@Override

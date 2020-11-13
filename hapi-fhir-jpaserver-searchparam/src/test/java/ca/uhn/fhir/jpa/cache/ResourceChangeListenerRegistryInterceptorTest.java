@@ -13,27 +13,27 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
-class VersionChangeListenerRegistryInterceptorTest {
+class ResourceChangeListenerRegistryInterceptorTest {
 	@Autowired
-	VersionChangeListenerRegistryInterceptor myVersionChangeListenerRegistryInterceptor;
+	ResourceChangeListenerRegistryInterceptor myResourceChangeListenerRegistryInterceptor;
 
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
 	@MockBean
-	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Configuration
 	static class SpringContext {
 		@Bean
-		public VersionChangeListenerRegistryInterceptor versionChangeListenerRegistryInterceptor() {
-			return new VersionChangeListenerRegistryInterceptor();
+		public ResourceChangeListenerRegistryInterceptor resourceChangeListenerRegistryInterceptor() {
+			return new ResourceChangeListenerRegistryInterceptor();
 		}
 	}
 
 	@Test
 	public void testRefreshCalled() {
 		Patient patient = new Patient();
-		myVersionChangeListenerRegistryInterceptor.created(patient);
-		verify(myVersionChangeListenerRegistry).requestRefreshIfWatching(patient);
+		myResourceChangeListenerRegistryInterceptor.created(patient);
+		verify(myResourceChangeListenerRegistry).requestRefreshIfWatching(patient);
 	}
 }

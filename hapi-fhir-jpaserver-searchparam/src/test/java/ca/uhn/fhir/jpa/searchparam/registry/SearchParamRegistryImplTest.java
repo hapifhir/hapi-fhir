@@ -4,11 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
-import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
-import ca.uhn.fhir.jpa.cache.VersionChangeListenerCache;
-import ca.uhn.fhir.jpa.cache.VersionChangeListenerRegistryImpl;
-import ca.uhn.fhir.jpa.cache.VersionChangeResult;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -71,7 +71,7 @@ public class SearchParamRegistryImplTest {
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
-	private VersionChangeListenerRegistryImpl myVersionChangeListenerRegistry;
+	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 
@@ -104,13 +104,13 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		IVersionChangeListenerRegistry versionChangeListenerRegistry() {
-			return new VersionChangeListenerRegistryImpl();
+		IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
+			return new ResourceChangeListenerRegistryImpl();
 		}
 
 		@Bean
-		VersionChangeListenerCache versionChangeListenerCache() {
-			return new VersionChangeListenerCache();
+		ResourceChangeListenerCache resourceChangeListenerCache() {
+			return new ResourceChangeListenerCache();
 		}
 
 		@Bean
@@ -142,7 +142,7 @@ public class SearchParamRegistryImplTest {
 
 	@AfterEach
 	public void after() {
-		myVersionChangeListenerRegistry.clearCacheForUnitTest();
+		myResourceChangeListenerRegistry.clearCacheForUnitTest();
 	}
 
 	@Test
@@ -153,34 +153,34 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testRefreshAfterExpiry() {
 		mySearchParamRegistry.requestRefresh();
-		assertResult(myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"), TEST_SEARCH_PARAMS, 0, 0);
+		assertResult(myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"), TEST_SEARCH_PARAMS, 0, 0);
 		// Second time we don't need to run because we ran recently
-		assertEmptyResult(myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
+		assertEmptyResult(myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
 	}
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
 		// Our first refresh adds our test searchparams to the registry
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
 
 		// Second refresh does not call the database
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbNotCalled();
 
 		// Requesting a refresh calls the database and adds nothing
 		mySearchParamRegistry.requestRefresh();
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
 
 		// Requesting a refresh after adding a new search parameter calls the database and adds one
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
 
 		// Requesting a refresh after adding a new search parameter calls the database and
@@ -188,25 +188,25 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
 
 		// Requesting a refresh after adding a new search parameter calls the database,
 		// removes the ACTIVE one and does not add the new one because it is DRAFT
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.DRAFT);
 		mySearchParamRegistry.requestRefresh();
-		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 0, 1);
 		assertDbCalled();
 	}
 
-	private void assertResult(VersionChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
+	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
 		assertEquals(theExpectedAdded, theResult.added, "added results");
 		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
 		assertEquals(theExpectedRemoved, theResult.removed, "removed results");
 	}
 
-	private void assertEmptyResult(VersionChangeResult theResult) {
+	private void assertEmptyResult(ResourceChangeResult theResult) {
 		assertResult(theResult, 0, 0, 0);
 	}
 

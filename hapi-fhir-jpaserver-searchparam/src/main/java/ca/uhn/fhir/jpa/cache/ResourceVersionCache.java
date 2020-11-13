@@ -67,7 +67,7 @@ public class ResourceVersionCache {
 		}
 	}
 
-	public void listenerRemoved(IVersionChangeListener theVersionChangeListener) {
+	public void listenerRemoved(IResourceChangeListener theResourceChangeListener) {
 		// FIXME KBD How do we clear the Cache for a specific ResourceType if we
 		//           don't know what ResourceType this particular Listener was for ?
 	}

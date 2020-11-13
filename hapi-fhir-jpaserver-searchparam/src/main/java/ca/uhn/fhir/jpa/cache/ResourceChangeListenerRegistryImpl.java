@@ -25,8 +25,8 @@ import java.util.Set;
 
 // FIXME KHS retool searchparam and subscription to use this
 @Component
-public class VersionChangeListenerRegistryImpl implements IVersionChangeListenerRegistry {
-	private static final Logger ourLog = LoggerFactory.getLogger(VersionChangeListenerRegistryImpl.class);
+public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerRegistryImpl.class);
 
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_HOUR;
@@ -40,7 +40,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
-	private VersionChangeListenerCache myVersionChangeListenerCache;
+	private ResourceChangeListenerCache myResourceChangeListenerCache;
 
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
 
@@ -48,22 +48,21 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	 *
 	 * @param theResourceName the name of the resource the listener should be notified about
 	 * @param theSearchParamMap the listener will only be notified of changes to resources that match this map
-	 * @param theVersionChangeListener the listener to be notified
+	 * @param theResourceChangeListener the listener to be notified
 	 * @throws ca.uhn.fhir.parser.DataFormatException if theResourceName is not valid
 	 */
 	@Override
-	public void registerResourceVersionChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IVersionChangeListener theVersionChangeListener) {
+	public void registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IResourceChangeListener theResourceChangeListener) {
 		// validate the resource name
 		myFhirContext.getResourceDefinition(theResourceName);
-		myVersionChangeListenerCache.add(theResourceName, theVersionChangeListener, theSearchParamMap);
+		myResourceChangeListenerCache.add(theResourceName, theResourceChangeListener, theSearchParamMap);
 		myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
 	}
 
 	@Override
-	public void unregisterResourceVersionChangeListener(IVersionChangeListener theVersionChangeListener) {
-
-		myVersionChangeListenerCache.remove(theVersionChangeListener);
-		myResourceVersionCache.listenerRemoved(theVersionChangeListener);
+	public void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener) {
+		myResourceChangeListenerCache.remove(theResourceChangeListener);
+		myResourceVersionCache.listenerRemoved(theResourceChangeListener);
 	}
 
 	@PostConstruct
@@ -76,7 +75,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	public static class Job implements HapiJob {
 		@Autowired
-		private IVersionChangeListenerRegistry myTarget;
+		private IResourceChangeListenerRegistry myTarget;
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
@@ -87,7 +86,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	@Override
 	@VisibleForTesting
 	public void clearListenersForUnitTest() {
-		myVersionChangeListenerCache.clearListenersForUnitTest();
+		myResourceChangeListenerCache.clearListenersForUnitTest();
 	}
 
 	@Override
@@ -98,9 +97,9 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public VersionChangeResult refreshAllCachesIfNecessary() {
-		VersionChangeResult retval =  new VersionChangeResult();
-		for (String resourceName : myVersionChangeListenerCache.resourceNames()) {
+	public ResourceChangeResult refreshAllCachesIfNecessary() {
+		ResourceChangeResult retval =  new ResourceChangeResult();
+		for (String resourceName : myResourceChangeListenerCache.resourceNames()) {
 			retval = retval.plus(refreshCacheIfNecessary(resourceName));
 		}
 		// This will return true if at least 1 of the Resource Caches was refreshed
@@ -108,8 +107,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public VersionChangeResult refreshCacheIfNecessary(String theResourceName) {
-		VersionChangeResult retval =  new VersionChangeResult();
+	public ResourceChangeResult refreshCacheIfNecessary(String theResourceName) {
+		ResourceChangeResult retval =  new ResourceChangeResult();
 		Instant nextRefresh = myNextRefreshByResourceName.computeIfAbsent(theResourceName, key -> Instant.MIN);
 		if (nextRefresh.isBefore(Instant.now())) {
 			retval = refreshCacheWithRetry(theResourceName);
@@ -125,21 +124,21 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public VersionChangeResult forceRefresh(String theResourceName) {
+	public ResourceChangeResult forceRefresh(String theResourceName) {
 		requestRefresh(theResourceName);
 		return refreshCacheWithRetry(theResourceName);
 	}
 
 	@Override
 	public void requestRefreshIfWatching(IBaseResource theResource) {
-		if (myVersionChangeListenerCache.hasListenerFor(theResource)) {
+		if (myResourceChangeListenerCache.hasListenerFor(theResource)) {
 			requestRefresh(myFhirContext.getResourceType(theResource));
 		}
 	}
 
 	@Override
-	public VersionChangeResult refreshCacheWithRetry(String theResourceName) {
-		Retrier<VersionChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
+	public ResourceChangeResult refreshCacheWithRetry(String theResourceName) {
+		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (this) {
 				return doRefreshCachesAndNotifyListeners(theResourceName);
 			}
@@ -148,10 +147,10 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public VersionChangeResult refreshAllCachesImmediately() {
+	public ResourceChangeResult refreshAllCachesImmediately() {
 		StopWatch sw = new StopWatch();
-		VersionChangeResult retval = new VersionChangeResult();
-		for (String resourceType : myVersionChangeListenerCache.resourceNames()) {
+		ResourceChangeResult retval = new ResourceChangeResult();
+		for (String resourceType : myResourceChangeListenerCache.resourceNames()) {
 			retval = retval.plus(doRefreshCachesAndNotifyListeners(resourceType));
 		}
 		ourLog.debug("Refreshed all caches in {}ms: {}", sw.getMillis(), retval);
@@ -159,17 +158,17 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	// FIXME KHS test
-	private synchronized VersionChangeResult doRefreshCachesAndNotifyListeners(String theResourceName) {
-		VersionChangeResult retval = new VersionChangeResult();
-		Set<VersionChangeListenerWithSearchParamMap> listenerEntries = myVersionChangeListenerCache.getListenerEntries(theResourceName);
+	private synchronized ResourceChangeResult doRefreshCachesAndNotifyListeners(String theResourceName) {
+		ResourceChangeResult retval = new ResourceChangeResult();
+		Set<ResourceChangeListenerWithSearchParamMap> listenerEntries = myResourceChangeListenerCache.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {
 			myResourceVersionCache.getMap(theResourceName).clear();
 			return retval;
 		}
-		for (VersionChangeListenerWithSearchParamMap listenerEntry : listenerEntries) {
+		for (ResourceChangeListenerWithSearchParamMap listenerEntry : listenerEntries) {
 			SearchParameterMap searchParamMap = listenerEntry.getSearchParameterMap();
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
-			retval = retval.plus(myVersionChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap));
+			retval = retval.plus(myResourceChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap));
 		}
 		// FIXME KHS Should we assume that if COUNT == 0 then we do NOT have any Listeners for this ResourceType ?
 		//           If so, then we can clear() the Cache for that ResourceType...
