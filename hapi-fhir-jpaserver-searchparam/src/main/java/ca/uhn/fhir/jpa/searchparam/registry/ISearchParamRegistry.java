@@ -45,6 +45,9 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
+	/**
+	 * @return true if any search parameters were changed in the registry
+	 */
 	boolean refreshCacheIfNecessary();
 
 	ReadOnlySearchParamCache getActiveSearchParams();

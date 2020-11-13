@@ -36,7 +36,9 @@ import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -136,17 +138,20 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
-
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
 		mySearchParamRegistry.requestRefresh();
 
 		// FIXME KHS find suitable replacement asserts
-//		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
-//		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
 
 		mySearchParamRegistry.requestRefresh();
-//		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+
+		addNewSearchParameterToDatabase();
+		mySearchParamRegistry.requestRefresh();
+		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
 	}
 
 	@Test
@@ -175,14 +180,7 @@ public class SearchParamRegistryImplTest {
 		// Initialize the registry
 		mySearchParamRegistry.forceRefresh();
 
-		// Add a new search parameter entity
-		List<ResourceTable> newEntities = new ArrayList(ourEntities);
-		newEntities.add(createEntity(TEST_SEARCH_PARAMS, 1));
-		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(newEntities);
-		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
-
-		// When we ask for the new entity, return our foo search parameter
-		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter());
+		addNewSearchParameterToDatabase();
 
 		mySearchParamRegistry.forceRefresh();
 		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
@@ -193,6 +191,17 @@ public class SearchParamRegistryImplTest {
 		assertEquals(1, converted.getExtensions("http://foo").size());
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
 		assertEquals("FOO", value.getValueAsString());
+	}
+
+	private void addNewSearchParameterToDatabase() {
+		// Add a new search parameter entity
+		List<ResourceTable> newEntities = new ArrayList(ourEntities);
+		newEntities.add(createEntity(TEST_SEARCH_PARAMS, 1));
+		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(newEntities);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
+
+		// When we ask for the new entity, return our foo search parameter
+		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter());
 	}
 
 	// FIXME KHS add tests

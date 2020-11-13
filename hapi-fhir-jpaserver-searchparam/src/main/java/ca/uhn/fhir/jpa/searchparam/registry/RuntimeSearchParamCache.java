@@ -67,4 +67,5 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	public Stream<RuntimeSearchParam> getSearchParamStream() {
 		return myMap.values().stream().flatMap(entry -> entry.values().stream());
 	}
+
 }
