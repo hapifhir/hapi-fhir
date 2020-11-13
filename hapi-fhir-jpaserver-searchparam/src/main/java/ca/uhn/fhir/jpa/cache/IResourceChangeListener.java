@@ -11,5 +11,11 @@ public interface IResourceChangeListener {
 	void handleCreate(IdDt theResourceId);
 	void handleUpdate(IdDt theResourceId);
 	void handleDelete(IdDt theResourceId);
+
+	/**
+	 * Called within {@link ResourceChangeListenerRegistryImpl#LOCAL_REFRESH_INTERVAL_MS} of a listener registration
+	 *
+	 * @param theResourceIds the list of resource ids of resources that match the search parameters the listener was registered with
+	 */
 	void handleInit(Collection<IdDt> theResourceIds);
 }

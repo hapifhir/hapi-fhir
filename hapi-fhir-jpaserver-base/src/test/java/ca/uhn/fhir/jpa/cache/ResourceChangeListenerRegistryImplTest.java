@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
-	IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
 	private final static String RESOURCE_TYPE = "Patient";
 	private TestCallback myTestCallback = new TestCallback();
@@ -50,9 +50,13 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterInterceptor() throws InterruptedException {
+		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
+
 		setupResourceChangeRegistry(RESOURCE_TYPE, SearchParameterMap.newSynchronous());
 
 		Patient patient = setupPatientAndEnsureCallbacksOccur(null);
+		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
+
 		IdDt patientId = new IdDt(patient.getIdElement().toUnqualifiedVersionless());
 
 		patient.setActive(false);
@@ -61,18 +65,20 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		myPatientDao.update(patient);
 
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertResult(result, 1, 0, 0);
+		assertResult(result, 0, 1, 0);
 		myTestCallback.awaitExpected();
 		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(BaseResourceMessage.OperationTypeEnum.UPDATE, myTestCallback.getOperationTypeEnum());
+		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
 
 		myTestCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
 		result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertResult(result, 1, 0, 0);
+		assertResult(result, 0, 0, 1);
 		myTestCallback.awaitExpected();
 		assertEquals(patientId, myTestCallback.getResourceId());
 		assertEquals(BaseResourceMessage.OperationTypeEnum.DELETE, myTestCallback.getOperationTypeEnum());
+		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {

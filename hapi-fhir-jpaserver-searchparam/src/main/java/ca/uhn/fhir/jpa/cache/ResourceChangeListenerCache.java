@@ -15,9 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class ResourceChangeListenerCache {
@@ -81,7 +84,7 @@ public class ResourceChangeListenerCache {
 		Set<IdDt> newKeys = new HashSet<>();
 		long added = 0;
 		long updated = 0;
-		long removed = 0;
+		AtomicLong removed = new AtomicLong();
 		for (IdDt id : theNewResourceVersionMap.keySet()) {
 			newKeys.add(id);
 			String previousValue = theOldResourceVersionCache.addOrUpdate(id, theNewResourceVersionMap.get(id));
@@ -96,21 +99,22 @@ public class ResourceChangeListenerCache {
 		}
 
 		// If the NEW ResourceVersionMap does NOT have OLD key - delete it
-		Set<IdDt> deletedIDs = new HashSet<>();
+		List<IdDt> toDelete = new ArrayList<>();
 		for (String key : theOldResourceVersionCache.keySet()) {
 			Map<IdDt, String> oldVersionCache = theOldResourceVersionCache.getMap(key);
 			oldVersionCache.keySet()
-				.forEach(k -> {
-					if (!newKeys.contains(k)) {
-						if (!deletedIDs.contains(k)) {
-							theListener.handleDelete(k);
-							deletedIDs.add(k);
-						}
+				.forEach(id -> {
+					if (!newKeys.contains(id)) {
+						toDelete.add(id);
 					}
 				});
-			removed += deletedIDs.size();
 		}
-		return ResourceChangeResult.fromAddedUpdatedRemoved(added, updated, removed);
+		toDelete.forEach(id -> {
+			theOldResourceVersionCache.remove(id);
+			theListener.handleDelete(id);
+			removed.incrementAndGet();
+		});
+		return ResourceChangeResult.fromAddedUpdatedRemoved(added, updated, removed.get());
 	}
 
 	public void remove(IResourceChangeListener theResourceChangeListener) {
