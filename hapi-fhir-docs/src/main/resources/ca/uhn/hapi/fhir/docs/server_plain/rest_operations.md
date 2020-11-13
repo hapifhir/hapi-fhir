@@ -409,7 +409,7 @@ Within a [Type Create](#type_create) or [Instance Update](#instance_update) meth
 
 Note that FHIR specifies that in an update method, any tags supplied by the client are copied to the newly saved version, as well as any tags the existing version had.
 
-To work with tags in a create/update method, the pattern used in the read examples above is simply revered. In a server, the resource which is passed in will be populated with any tags that the client supplied:
+To work with tags in a create/update method, the pattern used in the read examples above is simply reversed. In a server, the resource which is passed in will be populated with any tags that the client supplied:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|createTags}}
