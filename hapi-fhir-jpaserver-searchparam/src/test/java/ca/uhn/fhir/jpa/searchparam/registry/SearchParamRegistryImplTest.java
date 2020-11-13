@@ -12,7 +12,6 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import static org.hamcrest.Matchers.empty;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -44,6 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -131,6 +134,7 @@ public class SearchParamRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		myAnswerCount = 0;
+		reset(myResourceVersionSvc);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
 	}
 
@@ -154,19 +158,36 @@ public class SearchParamRegistryImplTest {
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
-		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
-
-		mySearchParamRegistry.requestRefresh();
-
+		// Our first refresh adds the builtin searchparams to the registry
 		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertDbCalled();
 
+		// Second refresh does not call the database
+		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertDbNotCalled();
+
+		// Requesting a refresh calls the database and adds nothing
 		mySearchParamRegistry.requestRefresh();
 		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertDbCalled();
 
+		// Requesting a refresh after adding a new search parameter calls the database and adds one
 		addNewSearchParameterToDatabase(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertDbCalled();
+	}
+
+	private void assertDbCalled() {
+		verify(myResourceVersionSvc, times(1)).getVersionMap(anyString(), any());
+		reset(myResourceVersionSvc);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+	}
+
+	private void assertDbNotCalled() {
+		verify(myResourceVersionSvc, never()).getVersionMap(anyString(), any());
+		reset(myResourceVersionSvc);
+		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
 	}
 
 	@Test
