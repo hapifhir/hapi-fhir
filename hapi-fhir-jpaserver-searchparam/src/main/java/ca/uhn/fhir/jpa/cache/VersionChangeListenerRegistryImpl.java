@@ -96,18 +96,18 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public long refreshAllCachesIfNecessary() {
-		long retval = 0;
+	public VersionChangeResult refreshAllCachesIfNecessary() {
+		VersionChangeResult retval =  new VersionChangeResult();
 		for (String resourceName : myVersionChangeListenerCache.resourceNames()) {
-			retval += refreshCacheIfNecessary(resourceName);
+			retval = retval.plus(refreshCacheIfNecessary(resourceName));
 		}
 		// This will return true if at least 1 of the Resource Caches was refreshed
 		return retval;
 	}
 
 	@Override
-	public long refreshCacheIfNecessary(String theResourceName) {
-		long retval = 0;
+	public VersionChangeResult refreshCacheIfNecessary(String theResourceName) {
+		VersionChangeResult retval =  new VersionChangeResult();
 		Instant nextRefresh = myNextRefreshByResourceName.computeIfAbsent(theResourceName, key -> Instant.MIN);
 		if (nextRefresh.isBefore(Instant.now())) {
 			retval = refreshCacheWithRetry(theResourceName);
@@ -123,7 +123,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public long forceRefresh(String theResourceName) {
+	public VersionChangeResult forceRefresh(String theResourceName) {
 		requestRefresh(theResourceName);
 		return refreshCacheWithRetry(theResourceName);
 	}
@@ -136,8 +136,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public long refreshCacheWithRetry(String theResourceName) {
-		Retrier<Long> refreshCacheRetrier = new Retrier<>(() -> {
+	public VersionChangeResult refreshCacheWithRetry(String theResourceName) {
+		Retrier<VersionChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (this) {
 				return doRefreshCachesAndNotifyListeners(theResourceName);
 			}
@@ -146,34 +146,39 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	}
 
 	@Override
-	public long refreshAllCachesImmediately() {
+	public VersionChangeResult refreshAllCachesImmediately() {
 		StopWatch sw = new StopWatch();
-		long count = 0;
+		VersionChangeResult retval = new VersionChangeResult();
 		for (String resourceType : myVersionChangeListenerCache.resourceNames()) {
-			count += doRefreshCachesAndNotifyListeners(resourceType);
+			retval = retval.plus(doRefreshCachesAndNotifyListeners(resourceType));
 		}
-		ourLog.debug("Refreshed all caches.  Updated {} entries in {}ms", count, sw.getMillis());
-		return count;
+		ourLog.debug("Refreshed all caches in {}ms: {}", sw.getMillis(), retval);
+		return retval;
 	}
 
 	// FIXME KHS test
-	private synchronized long doRefreshCachesAndNotifyListeners(String theResourceName) {
+	private synchronized VersionChangeResult doRefreshCachesAndNotifyListeners(String theResourceName) {
+		VersionChangeResult retval = new VersionChangeResult();
 		Set<VersionChangeListenerWithSearchParamMap> listenerEntries = myVersionChangeListenerCache.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {
-			return 0;
+			return retval;
 		}
-		long count = 0;
 		for (VersionChangeListenerWithSearchParamMap listenerEntry : listenerEntries) {
 			SearchParameterMap searchParamMap = listenerEntry.getSearchParameterMap();
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
-			count += myVersionChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap);
+			retval = retval.plus(myVersionChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap));
 		}
 		myNextRefreshByResourceName.put(theResourceName, Instant.now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
-		return count;
+		return retval;
 	}
 
 	@VisibleForTesting
 	Instant getNextRefreshTimeForUnitTest(String theResourceName) {
 		return myNextRefreshByResourceName.get(theResourceName);
+	}
+
+	@VisibleForTesting
+	public int getResourceVersionCacheSizeForUnitTest(String theResourceName) {
+		return myResourceVersionCache.getMap(theResourceName).size();
 	}
 }

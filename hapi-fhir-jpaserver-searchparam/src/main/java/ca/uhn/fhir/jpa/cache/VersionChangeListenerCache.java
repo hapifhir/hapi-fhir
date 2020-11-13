@@ -63,33 +63,35 @@ public class VersionChangeListenerCache {
 	}
 
 	// FIXME KHS ensure we reset cache
-	public long notifyListener(VersionChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
-		long retval = 0;
+	public VersionChangeResult notifyListener(VersionChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+		VersionChangeResult retval;
 		IVersionChangeListener versionChangeListener = theListenerEntry.getVersionChangeListener();
 		if (theListenerEntry.isInitialized()) {
 			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(versionChangeListener, theOldResourceVersionCache, theNewResourceVersionMap);
 		} else {
 			theOldResourceVersionCache.initialize(theNewResourceVersionMap);
 			versionChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
-			retval = theNewResourceVersionMap.size();
+			retval = VersionChangeResult.fromAdded(theNewResourceVersionMap.size());
 			theListenerEntry.setInitialized(true);
 		}
 		return retval;
 	}
 
-	public long compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IVersionChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+	public VersionChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IVersionChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		Set<IdDt> newKeys = new HashSet<>();
-		long count = 0;
+		long added = 0;
+		long updated = 0;
+		long removed = 0;
 		for (IdDt id : theNewResourceVersionMap.keySet()) {
 			newKeys.add(id);
 			String previousValue = theOldResourceVersionCache.addOrUpdate(id, theNewResourceVersionMap.get(id));
 			IdDt newId = id.withVersion(theNewResourceVersionMap.get(id));
 			if (previousValue == null) {
 				theListener.handleCreate(newId);
-				++count;
+				++added;
 			} else if (!theNewResourceVersionMap.get(id).equals(previousValue)) {
 				theListener.handleUpdate(newId);
-				++count;
+				++updated;
 			}
 		}
 
@@ -106,9 +108,9 @@ public class VersionChangeListenerCache {
 						}
 					}
 				});
-			count += deletedIDs.size();
+			removed += deletedIDs.size();
 		}
-		return count;
+		return VersionChangeResult.fromAddedUpdatedRemoved(added, updated, removed);
 	}
 
 	public void remove(IVersionChangeListener theVersionChangeListener) {

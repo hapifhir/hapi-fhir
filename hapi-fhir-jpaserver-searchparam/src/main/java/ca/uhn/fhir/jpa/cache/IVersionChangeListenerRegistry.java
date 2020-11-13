@@ -19,25 +19,25 @@ public interface IVersionChangeListenerRegistry {
 	@VisibleForTesting
 	void clearListenersForUnitTest();
 
-	long refreshAllCachesIfNecessary();
+	VersionChangeResult refreshAllCachesIfNecessary();
 
 	/**
 	 * Request that all caches be refreshed now, in the current thread
 	 */
-	long refreshAllCachesImmediately();
+	VersionChangeResult refreshAllCachesImmediately();
 
-	long refreshCacheWithRetry(String theResourceName);
+	VersionChangeResult refreshCacheWithRetry(String theResourceName);
 
 	void registerResourceVersionChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IVersionChangeListener theVersionChangeListener);
 
-	long refreshCacheIfNecessary(String theResourceName);
+	VersionChangeResult refreshCacheIfNecessary(String theResourceName);
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
 	void requestRefresh(String theResourceName);
 
-	long forceRefresh(String theResourceName);
+	VersionChangeResult forceRefresh(String theResourceName);
 
 	/**
 	 * If any listeners have been registered with searchparams that match the incoming resource, then

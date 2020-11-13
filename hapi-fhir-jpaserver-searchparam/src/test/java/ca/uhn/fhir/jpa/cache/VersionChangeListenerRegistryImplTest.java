@@ -22,6 +22,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -64,6 +65,7 @@ class VersionChangeListenerRegistryImplTest {
 		VersionChangeListenerWithSearchParamMap entry = new VersionChangeListenerWithSearchParamMap(myTestListener, myMap);
 		entries.add(entry);
 		when(myVersionChangeListenerCache.getListenerEntries("Patient")).thenReturn(entries);
+		when(myVersionChangeListenerCache.notifyListener(any(), any(), any())).thenReturn(new VersionChangeResult());
 	}
 
 	@Test

@@ -16,7 +16,7 @@ import java.util.TreeSet;
 
 public class ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReadOnlySearchParamCache.class);
-
+	// resourceName -> searchParamName -> searchparam
 	protected final Map<String, Map<String, RuntimeSearchParam>> myMap;
 
 	ReadOnlySearchParamCache() {

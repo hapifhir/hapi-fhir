@@ -28,13 +28,6 @@ public class MockFhirClientSearchParamProvider implements ISearchParamProvider {
 	public IBundleProvider search(SearchParameterMap theParams) { return myMockProvider.search(theParams); }
 
 	@Override
-	public int refreshCache(SearchParamRegistryImpl theSearchParamRegistry, long theRefreshInterval) {
-		// FIXME KHS
-//		mySearchParamRegistry.doRefresh();
-		return 0;
-	}
-
-	@Override
 	public IBaseResource read(IdDt theId) {
 		return myMockProvider.read(theId);
 	}

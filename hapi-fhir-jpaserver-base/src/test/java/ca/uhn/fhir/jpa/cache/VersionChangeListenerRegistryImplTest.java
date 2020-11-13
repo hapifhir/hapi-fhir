@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	@Autowired
@@ -59,19 +60,29 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		myTestCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
 
-		long count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(1, count);
+		VersionChangeResult result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertResult(result, 1, 0, 0);
 		myTestCallback.awaitExpected();
 		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
 		assertEquals(BaseResourceMessage.OperationTypeEnum.UPDATE, myTestCallback.getOperationTypeEnum());
 
 		myTestCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
-		count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(1, count);
+		result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertResult(result, 1, 0, 0);
 		myTestCallback.awaitExpected();
 		assertEquals(patientId, myTestCallback.getResourceId());
 		assertEquals(BaseResourceMessage.OperationTypeEnum.DELETE, myTestCallback.getOperationTypeEnum());
+	}
+
+	private void assertResult(VersionChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
+		assertEquals(theExpectedAdded, theResult.added, "added results");
+		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
+		assertEquals(theExpectedRemoved, theResult.removed, "removed results");
+	}
+
+	private void assertEmptyResult(VersionChangeResult theResult) {
+		assertResult(theResult, 0, 0, 0);
 	}
 
 	private void setupVersionChangeRegistry(String theResourceType, SearchParameterMap theSearchParameterMap) {
@@ -99,8 +110,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 	private IdDt createPatientAndRefreshCache(Patient thePatient, TestCallback theTestCallback, long theExpectedCount) throws InterruptedException {
 		IIdType retval = myPatientDao.create(thePatient).getId();
-		long count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(theExpectedCount, count);
+		VersionChangeResult result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertResult(result, theExpectedCount, 0, 0);
 		return new IdDt(retval);
 	}
 
@@ -114,8 +125,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		myTestCallback.setExpectedCount(1);
-		long count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(1, count);
+		VersionChangeResult result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientId, calledWithId);
@@ -135,8 +146,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the myTestCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
-		long count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(0, count);
+		VersionChangeResult result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertEmptyResult(result);
 		assertNotNull(patientIdFemale.toString());
 		assertNull(myTestCallback.getResourceId());
 		assertNull(myTestCallback.getOperationTypeEnum());
@@ -155,8 +166,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
 		// NOTE: This scenario does not invoke the myTestCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
-		long count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(0, count);
+		VersionChangeResult result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertEmptyResult(result);
 		assertNotNull(patientIdFemale.toString());
 		assertNull(myTestCallback.getResourceId());
 		assertNull(myTestCallback.getOperationTypeEnum());
@@ -164,8 +175,8 @@ public class VersionChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myVersionChangeListenerRegistry.clearCacheForUnitTest();
 		myTestCallback.setExpectedCount(1);
-		count = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
-		assertEquals(1, count);
+		result = myVersionChangeListenerRegistry.forceRefresh(RESOURCE_TYPE);
+		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
 		IdDt calledWithId  = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientIdMale, calledWithId);

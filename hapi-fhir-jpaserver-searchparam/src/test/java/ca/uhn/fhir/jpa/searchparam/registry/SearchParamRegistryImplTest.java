@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.cache.VersionChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.VersionChangeListenerRegistryImpl;
+import ca.uhn.fhir.jpa.cache.VersionChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -54,14 +55,15 @@ public class SearchParamRegistryImplTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
 	private static final ReadOnlySearchParamCache ourBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext);
 
-	public static long TEST_SEARCH_PARAMS = 13L;
+	public static int TEST_SEARCH_PARAMS = 3;
 	private static List<ResourceTable> ourEntities;
 	private static ResourceVersionMap ourResourceVersionMap;
+	private static int ourLastId;
 
 	static {
 		ourEntities = new ArrayList<>();
-		for (long id = 0; id < TEST_SEARCH_PARAMS; ++id) {
-			ourEntities.add(createEntity(id, 1));
+		for (ourLastId = 0; ourLastId < TEST_SEARCH_PARAMS; ++ourLastId) {
+			ourEntities.add(createEntity(ourLastId, 1));
 		}
 		ourResourceVersionMap = ResourceVersionMap.fromResourceIds(ourEntities);
 	}
@@ -69,7 +71,7 @@ public class SearchParamRegistryImplTest {
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
-	private IVersionChangeListenerRegistry myVersionChangeListenerRegistry;
+	private VersionChangeListenerRegistryImpl myVersionChangeListenerRegistry;
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 
@@ -151,31 +153,61 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testRefreshAfterExpiry() {
 		mySearchParamRegistry.requestRefresh();
-		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
+		assertResult(myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"), TEST_SEARCH_PARAMS, 0, 0);
 		// Second time we don't need to run because we ran recently
-		assertEquals(0, myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
+		assertEmptyResult(myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
 	}
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
-		// Our first refresh adds the builtin searchparams to the registry
-		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
+		// Our first refresh adds our test searchparams to the registry
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
+		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
 
 		// Second refresh does not call the database
-		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbNotCalled();
 
 		// Requesting a refresh calls the database and adds nothing
 		mySearchParamRegistry.requestRefresh();
-		assertFalse(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
 
 		// Requesting a refresh after adding a new search parameter calls the database and adds one
-		addNewSearchParameterToDatabase(Enumerations.PublicationStatus.ACTIVE);
+		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
-		assertTrue(mySearchParamRegistry.refreshCacheIfNecessary());
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
+		assertEquals(TEST_SEARCH_PARAMS + 1, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
+
+		// Requesting a refresh after adding a new search parameter calls the database and
+		// removes the one added above and adds this new one
+		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParamRegistry.requestRefresh();
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
+		assertEquals(TEST_SEARCH_PARAMS + 1, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertDbCalled();
+
+		// Requesting a refresh after adding a new search parameter calls the database,
+		// removes the ACTIVE one and does not add the new one because it is DRAFT
+		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.DRAFT);
+		mySearchParamRegistry.requestRefresh();
+		assertEquals(TEST_SEARCH_PARAMS, myVersionChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 0, 1);
+		assertDbCalled();
+	}
+
+	private void assertResult(VersionChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
+		assertEquals(theExpectedAdded, theResult.added, "added results");
+		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
+		assertEquals(theExpectedRemoved, theResult.removed, "removed results");
+	}
+
+	private void assertEmptyResult(VersionChangeResult theResult) {
+		assertResult(theResult, 0, 0, 0);
 	}
 
 	private void assertDbCalled() {
@@ -220,7 +252,7 @@ public class SearchParamRegistryImplTest {
 		// Initialize the registry
 		mySearchParamRegistry.forceRefresh();
 
-		addNewSearchParameterToDatabase(Enumerations.PublicationStatus.ACTIVE);
+		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 
 		mySearchParamRegistry.forceRefresh();
 		Map<String, RuntimeSearchParam> outcome = mySearchParamRegistry.getActiveSearchParams("Patient");
@@ -233,10 +265,10 @@ public class SearchParamRegistryImplTest {
 		assertEquals("FOO", value.getValueAsString());
 	}
 
-	private void addNewSearchParameterToDatabase(Enumerations.PublicationStatus theActive) {
+	private void resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus theActive) {
 		// Add a new search parameter entity
 		List<ResourceTable> newEntities = new ArrayList(ourEntities);
-		newEntities.add(createEntity(TEST_SEARCH_PARAMS, 1));
+		newEntities.add(createEntity(++ourLastId, 1));
 		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(newEntities);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
 

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.jpa.cache.VersionChangeResult;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -46,9 +47,9 @@ public interface ISearchParamRegistry {
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
 	/**
-	 * @return true if any search parameters were changed in the registry
+	 * @return the number of search parameter entries changed
 	 */
-	boolean refreshCacheIfNecessary();
+	VersionChangeResult refreshCacheIfNecessary();
 
 	ReadOnlySearchParamCache getActiveSearchParams();
 

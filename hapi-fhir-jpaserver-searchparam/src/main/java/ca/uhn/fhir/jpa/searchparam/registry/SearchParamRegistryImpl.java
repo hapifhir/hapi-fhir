@@ -27,13 +27,13 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IVersionChangeListener;
 import ca.uhn.fhir.jpa.cache.IVersionChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.VersionChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,25 +102,29 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 		RuntimeSearchParamCache searchParams = new RuntimeSearchParamCache();
 		searchParams.putAll(myBuiltInSearchParams);
-
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveSearchParams(theSearchParamIds, searchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
+		myActiveSearchParams = searchParams;
 
-		RuntimeSearchParamCache activeSearchParams = RuntimeSearchParamCache.copyActiveSearchParamsFrom(searchParams);
-
-		myActiveSearchParams = activeSearchParams;
-		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, activeSearchParams);
+		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
 
-
 	private void addJpaSearchParam(IdDt theResourceId) {
 		StopWatch sw = new StopWatch();
+		ourLog.info("Adding search parameter {}", theResourceId);
 		IBaseResource searchParameter = mySearchParamProvider.read(theResourceId);
-		overrideSearchParam(myActiveSearchParams, searchParameter);
-		RuntimeSearchParamCache activeSearchParams = RuntimeSearchParamCache.copyActiveSearchParamsFrom(myActiveSearchParams);
-		myActiveSearchParams = activeSearchParams;
-		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, activeSearchParams);
+		addSearchParam(myActiveSearchParams, searchParameter);
+		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
+		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private void removeJpaSearchParam(IdDt theResourceId) {
+		StopWatch sw = new StopWatch();
+		ourLog.info("Removing search parameter {}", theResourceId);
+		IBaseResource searchParameter = mySearchParamProvider.read(theResourceId);
+		removeSearchParam(myActiveSearchParams, searchParameter);
+		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
 
@@ -131,25 +133,25 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 		for (IdDt searchParamId : theSearchParamIds) {
 			IBaseResource searchParameter = mySearchParamProvider.read(searchParamId);
-			retval += overrideSearchParam(theSearchParams, searchParameter);
+			retval += addSearchParam(theSearchParams, searchParameter);
 		}
 		return retval;
 	}
 
-	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
-		long retval = 0;
+	private long addSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
 		if (theSearchParameter == null) {
-			return retval;
+			return 0;
 		}
 
 		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
 		if (runtimeSp == null) {
-			return retval;
+			return 0;
 		}
-		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
-			return retval;
+		if (runtimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+			return 0;
 		}
 
+		long retval = 0;
 		for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter)) {
 			if (isBlank(nextBaseName)) {
 				continue;
@@ -161,6 +163,30 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 				searchParamMap.put(name, runtimeSp);
 				retval++;
 			}
+		}
+		return retval;
+	}
+
+	private long removeSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
+		if (theSearchParameter == null) {
+			return 0;
+		}
+
+		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
+		if (runtimeSp == null) {
+			return 0;
+		}
+
+		long retval = 0;
+		for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter)) {
+			if (isBlank(nextBaseName)) {
+				continue;
+			}
+
+			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
+			String name = runtimeSp.getName();
+			searchParamMap.remove(name, runtimeSp);
+			retval++;
 		}
 		return retval;
 	}
@@ -188,8 +214,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 	}
 
 	@Override
-	public boolean refreshCacheIfNecessary() {
-		return myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter") > 0;
+	public VersionChangeResult refreshCacheIfNecessary() {
+		return myVersionChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
 	}
 
 	@PostConstruct
@@ -242,8 +268,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IVersionCh
 
 	@Override
 	public void handleDelete(IdDt theResourceId) {
-		// FIXME KHS add test
-		throw new UnsupportedOperationException();
+		removeJpaSearchParam(theResourceId);
 	}
 
 	@Override

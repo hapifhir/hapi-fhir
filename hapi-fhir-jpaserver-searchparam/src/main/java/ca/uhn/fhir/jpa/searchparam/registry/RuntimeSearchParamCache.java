@@ -12,35 +12,15 @@ import java.util.stream.Stream;
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);
 
-	public static RuntimeSearchParamCache copyActiveSearchParamsFrom(RuntimeSearchParamCache theSearchParams) {
-		RuntimeSearchParamCache retval = new RuntimeSearchParamCache();
-		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextEntry : theSearchParams.myMap.entrySet()) {
-			for (RuntimeSearchParam nextSp : nextEntry.getValue().values()) {
-				String nextName = nextSp.getName();
-
-				if (nextSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
-					retval.add(nextEntry.getKey(), nextName, nextSp);
-				} else {
-					// FIXME KHS how could this ever happen?
-					retval.remove(nextEntry.getKey(), nextName);
-					throw new IllegalStateException("HOW DID WE GET HERE?");
-				}
-				// FIXME KHS this log message never made sense...
-				ourLog.debug("Replacing existing/built in search param {}:{} with new one", nextEntry.getKey(), nextName);
-			}
-		}
-		return retval;
-	}
-
 	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
 		getSearchParamMap(theResourceName).put(theName, theSearchParam);
 	}
 
-	public void remove(String theKey, String theName) {
-		if (!myMap.containsKey(theKey)) {
+	public void remove(String theResourceName, String theName) {
+		if (!myMap.containsKey(theResourceName)) {
 			return;
 		}
-		myMap.get(theKey).remove(theName);
+		myMap.get(theResourceName).remove(theName);
 	}
 
 	public void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
