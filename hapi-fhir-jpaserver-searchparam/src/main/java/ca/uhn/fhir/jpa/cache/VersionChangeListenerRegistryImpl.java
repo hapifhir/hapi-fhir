@@ -61,7 +61,9 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 
 	@Override
 	public void unregisterResourceVersionChangeListener(IVersionChangeListener theVersionChangeListener) {
+
 		myVersionChangeListenerCache.remove(theVersionChangeListener);
+		myResourceVersionCache.listenerRemoved(theVersionChangeListener);
 	}
 
 	@PostConstruct
@@ -160,6 +162,7 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 	private synchronized long doRefreshCachesAndNotifyListeners(String theResourceName) {
 		Set<VersionChangeListenerWithSearchParamMap> listenerEntries = myVersionChangeListenerCache.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {
+			myResourceVersionCache.getMap(theResourceName).clear();
 			return 0;
 		}
 		long count = 0;
@@ -168,6 +171,8 @@ public class VersionChangeListenerRegistryImpl implements IVersionChangeListener
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
 			count += myVersionChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap);
 		}
+		// FIXME KHS Should we assume that if COUNT == 0 then we do NOT have any Listeners for this ResourceType ?
+		//           If so, then we can clear() the Cache for that ResourceType...
 		myNextRefreshByResourceName.put(theResourceName, Instant.now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
 		return count;
 	}
