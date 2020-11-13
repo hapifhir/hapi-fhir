@@ -72,8 +72,9 @@ public class EmpiLinkSvcImpl implements IEmpiLinkSvc {
 				" not linking as POSSIBLE_DUPLICATE.");
 			return;
 		}
-//		EmpiMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
-//		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
+		EmpiMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
+		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
+
 //		switch (matchResultEnum) {
 //			case MATCH:
 //				myPersonHelper.addOrUpdateLink(thePerson, resourceId, AssuranceLevelUtil.getAssuranceLevel(matchResultEnum, theLinkSource), theEmpiTransactionContext);

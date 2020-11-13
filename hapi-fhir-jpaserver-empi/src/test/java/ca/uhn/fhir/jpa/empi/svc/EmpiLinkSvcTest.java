@@ -4,9 +4,13 @@ import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
+import ca.uhn.fhir.empi.util.EIDHelper;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.assertj.core.util.Lists;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -48,21 +55,23 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 		Patient sourcePatient = createGoldenPatient();
 		IdType sourcePatientId = sourcePatient.getIdElement().toUnqualifiedVersionless();
-		assertEquals(0, sourcePatient.getLink().size());
+		// TODO NG should be ok to remove - assertEquals(0, sourcePatient.getLink().size());
 		Patient patient = createPatient();
 
 		{
 			myEmpiLinkSvc.updateLink(sourcePatient, patient, POSSIBLE_MATCH, EmpiLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 			assertLinkCount(1);
-			Patient newSourcePatient = myPatientDao.read(sourcePatientId);
-			assertEquals(1, newSourcePatient.getLink().size());
+			// TODO NG should be ok to remove
+			// Patient newSourcePatient = myPatientDao.read(sourcePatientId);
+			// assertEquals(1, newSourcePatient.getLink().size());
 		}
 
 		{
 			myEmpiLinkSvc.updateLink(sourcePatient, patient, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 			assertLinkCount(1);
-			Patient newSourcePatient = myPatientDao.read(sourcePatientId);
-			assertEquals(0, newSourcePatient.getLink().size());
+			// TODO NG should be ok to remove
+			// Patient newSourcePatient = myPatientDao.read(sourcePatientId);
+			// assertEquals(0, newSourcePatient.getLink().size());
 		}
 	}
 
@@ -138,7 +147,8 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAutomaticallyAddedNO_MATCHEmpiLinksAreNotAllowed() {
-		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
+//		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
+		Patient sourcePatient = createGoldenPatient(buildJanePatient());
 		Patient patient = createPatient(buildJanePatient());
 
 		// Test: it should be impossible to have a AUTO NO_MATCH record.  The only NO_MATCH records in the system must be MANUAL.
@@ -152,16 +162,35 @@ public class EmpiLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testSyncDoesNotSyncNoMatchLinks() {
-		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
+//		Patient sourcePatient = createGoldenPatient(buildJaneSourcePatient());
+		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient1 = createPatient(buildJanePatient());
 		Patient patient2 = createPatient(buildJanePatient());
 		assertEquals(0, myEmpiLinkDao.count());
 
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(sourcePatient, patient1, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
-		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(sourcePatient, patient2, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, EmpiMatchOutcome.NEW_PERSON_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myEmpiLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient2, EmpiMatchOutcome.NO_MATCH, EmpiLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 //		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(sourcePatient, createContextForCreate("Patient"));
-		assertTrue(sourcePatient.hasLink());
+
+		List<EmpiLink> targets = myEmpiLinkDaoSvc.findEmpiLinksByGoldenResource(goldenPatient);
+		assertFalse(targets.isEmpty());
+		assertEquals(2, targets.size());
+		// TODO NG - OK? original assertTrue(goldenPatient.hasLink());
+
 		//TODO GGG update this test once we decide what has to happen here. There is no more "syncing links"
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());
+		List<String> actual = targets
+			.stream()
+			.map(link -> link.getTargetPid().toString())
+			.collect(Collectors.toList());
+
+		List<String> expected = Arrays.asList(patient1, patient2)
+			.stream().map(p -> p.getIdElement().toVersionless().getIdPart())
+			.collect(Collectors.toList());
+
+		System.out.println(actual);
+		System.out.println(expected);
+
+		assertThat(actual, Matchers.containsInAnyOrder(expected.toArray()));
 	}
 }

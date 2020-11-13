@@ -62,9 +62,7 @@ public class EmpiEidUpdateService {
 	private IEmpiSettings myEmpiSettings;
 
 	void handleEmpiUpdate(IAnyResource theResource, MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-
 		EmpiUpdateContext updateContext = new EmpiUpdateContext(theMatchedSourceResourceCandidate, theResource);
-
 		if (updateContext.isRemainsMatchedToSamePerson()) {
 			// Copy over any new external EIDs which don't already exist.
 			// TODO NG - Eventually this call will use terser to clone data in, once the surviorship rules for copying data will be confirmed

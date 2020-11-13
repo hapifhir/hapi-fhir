@@ -209,6 +209,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return buildPractitionerWithNameIdAndBirthday(theGivenName, theId, null);
 	}
 
+	/**
+	 * Use {@link #buildPatientWithNameAndId(String, String)} instead
+	 */
+	@Deprecated
 	@Nonnull
 	protected Patient buildSourcePaitentWithNameAndId(String theGivenName, String theId) {
 		return buildSourcePatientWithNameIdAndBirthday(theGivenName, theId, null);
@@ -243,6 +247,10 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return practitioner;
 	}
 
+	/**
+	 * Use {@link #buildPatientWithNameAndId(String, String)} instead.
+	 */
+	@Deprecated
 	@Nonnull
 	protected Patient buildSourcePatientWithNameIdAndBirthday(String theGivenName, String theId, Date theBirthday) {
 		Patient patient = new Patient();
@@ -266,7 +274,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		return buildPractitionerWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 	}
 
+	/**
+	 * Use {@link #buildJanePatient()} instead
+	 */
 	@Nonnull
+	@Deprecated
 	protected Patient buildJaneSourcePatient() {
 		return buildSourcePaitentWithNameAndId(NAME_GIVEN_JANE, JANE_ID);
 	}
