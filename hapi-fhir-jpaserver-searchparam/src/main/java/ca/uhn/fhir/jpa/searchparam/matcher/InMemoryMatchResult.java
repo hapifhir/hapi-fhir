@@ -36,17 +36,20 @@ public class InMemoryMatchResult {
 	private boolean myInMemory = false;
 
 	private InMemoryMatchResult(boolean theMatch) {
-		this.myMatch = theMatch;
-		this.mySupported = true;
-		this.myUnsupportedParameter = null;
-		this.myUnsupportedReason = null;
+		myMatch = theMatch;
+		mySupported = true;
+		myUnsupportedParameter = null;
+		myUnsupportedReason = null;
+		if (myMatch) {
+			myInMemory = true;
+		}
 	}
 
 	private InMemoryMatchResult(String theUnsupportedParameter, String theUnsupportedReason) {
-		this.myMatch = false;
-		this.mySupported = false;
-		this.myUnsupportedParameter = theUnsupportedParameter;
-		this.myUnsupportedReason = theUnsupportedReason;
+		myMatch = false;
+		mySupported = false;
+		myUnsupportedParameter = theUnsupportedParameter;
+		myUnsupportedReason = theUnsupportedReason;
 	}
 
 	public static InMemoryMatchResult successfulMatch() {

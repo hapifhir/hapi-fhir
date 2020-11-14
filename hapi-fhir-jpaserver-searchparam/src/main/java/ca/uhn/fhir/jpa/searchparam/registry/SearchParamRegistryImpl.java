@@ -129,6 +129,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private void removeJpaSearchParam(IdDt theResourceId) {
 		StopWatch sw = new StopWatch();
 		ourLog.info("Removing search parameter {}", theResourceId);
+		// FIXME KHS this fails on a ResourceGoneException
 		IBaseResource searchParameter = mySearchParamProvider.read(theResourceId);
 		removeSearchParam(myActiveSearchParams, searchParameter);
 		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);

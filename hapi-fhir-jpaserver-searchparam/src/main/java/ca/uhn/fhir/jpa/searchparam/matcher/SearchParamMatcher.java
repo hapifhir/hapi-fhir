@@ -44,6 +44,9 @@ public class SearchParamMatcher {
 	}
 
 	public InMemoryMatchResult match(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
+		if (theSearchParameterMap.isEmpty()) {
+			return InMemoryMatchResult.successfulMatch();
+		}
 		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource, null);
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResource);
 		return myInMemoryResourceMatcher.match(theSearchParameterMap, theResource, resourceDefinition, resourceIndexedSearchParams);
