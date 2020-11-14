@@ -128,10 +128,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private void removeJpaSearchParam(IdDt theResourceId) {
 		StopWatch sw = new StopWatch();
-		ourLog.info("Removing search parameter {}", theResourceId);
+		ourLog.info("Removing search parameter {} from SearchParamRegistry", theResourceId);
 		// FIXME KHS this fails on a ResourceGoneException
-		IBaseResource searchParameter = mySearchParamProvider.read(theResourceId);
-		removeSearchParam(myActiveSearchParams, searchParameter);
+		if (removeSearchParam(theResourceId)) {
+			ourLog.info("Search parameter {} successfully removed", theResourceId);
+		} else {
+			ourLog.info("No Search parameters matching {} were found", theResourceId);
+		}
 		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
 	}
@@ -176,29 +179,8 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		return retval;
 	}
 
-	private long removeSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
-		if (theSearchParameter == null) {
-			return 0;
-		}
-
-		RuntimeSearchParam runtimeSp = mySearchParameterCanonicalizer.canonicalizeSearchParameter(theSearchParameter);
-		if (runtimeSp == null) {
-			return 0;
-		}
-
-		long retval = 0;
-		for (String nextBaseName : SearchParameterUtil.getBaseAsStrings(myFhirContext, theSearchParameter)) {
-			if (isBlank(nextBaseName)) {
-				continue;
-			}
-
-			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
-			String name = runtimeSp.getName();
-			ourLog.info("Removing search parameter {}.{}", nextBaseName, name);
-			searchParamMap.remove(name, runtimeSp);
-			retval++;
-		}
-		return retval;
+	private boolean removeSearchParam(IdDt theSearchParameterId) {
+		return myActiveSearchParams.removeSearchParam(theSearchParameterId);
 	}
 
 	@Override
