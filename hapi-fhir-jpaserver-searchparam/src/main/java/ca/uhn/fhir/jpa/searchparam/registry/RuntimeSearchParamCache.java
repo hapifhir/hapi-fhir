@@ -11,6 +11,14 @@ import java.util.stream.Stream;
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);
 
+	private RuntimeSearchParamCache() {}
+
+	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
+		RuntimeSearchParamCache retval = new RuntimeSearchParamCache();
+		retval.putAll(theBuiltInSearchParams);
+		return retval;
+	}
+
 	public void add(String theResourceName, String theName, RuntimeSearchParam theSearchParam) {
 		getSearchParamMap(theResourceName).put(theName, theSearchParam);
 	}
@@ -22,7 +30,7 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		myMap.get(theResourceName).remove(theName);
 	}
 
-	public void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
+	private void putAll(ReadOnlySearchParamCache theReadOnlySearchParamCache) {
 		Set<Map.Entry<String, Map<String, RuntimeSearchParam>>> builtInSps = theReadOnlySearchParamCache.myMap.entrySet();
 		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextBuiltInEntry : builtInSps) {
 			for (RuntimeSearchParam nextParam : nextBuiltInEntry.getValue().values()) {

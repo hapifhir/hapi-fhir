@@ -102,14 +102,20 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private void initializeActiveSearchParams(Collection<IdDt> theSearchParamIds) {
 		StopWatch sw = new StopWatch();
 
-		RuntimeSearchParamCache searchParams = new RuntimeSearchParamCache();
-		searchParams.putAll(myBuiltInSearchParams);
+		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltinSearchparams());
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveSearchParams(theSearchParamIds, searchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		myActiveSearchParams = searchParams;
 
 		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private ReadOnlySearchParamCache getBuiltinSearchparams() {
+		if (myBuiltInSearchParams == null) {
+			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
+		}
+		return myBuiltInSearchParams;
 	}
 
 	private void addJpaSearchParam(IdDt theResourceId) {
@@ -223,8 +229,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@PostConstruct
 	public void registerListener() {
-		myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
-
 		// FIXME KHS compare this searchparam with below
 		SearchParameterMap activeSearchParameterMap = SearchParameterMap.newSynchronous();
 		// FIXME KHS this causes a stack overflow since searching by param requires params to be loaded
