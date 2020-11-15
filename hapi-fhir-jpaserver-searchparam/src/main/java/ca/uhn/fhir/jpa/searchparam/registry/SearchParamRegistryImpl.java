@@ -122,16 +122,24 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		initializeActiveSearchParams(allSearchParams);
 	}
 
-	private void initializeActiveSearchParams(Collection<IBaseResource> theSearchParams) {
+	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
 		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltinSearchparams());
-		long overriddenCount = overrideBuiltinSearchParamsWithActiveSearchParams(theSearchParams, searchParams);
+		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
+		removeInactiveSearchParams(searchParams);
 		myActiveSearchParams = searchParams;
 
 		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private void removeInactiveSearchParams(RuntimeSearchParamCache theSearchParams) {
+		for (String resourceName : theSearchParams.getResourceNameKeys()) {
+			Map<String, RuntimeSearchParam> map = theSearchParams.getSearchParamMap(resourceName);
+			map.entrySet().removeIf(entry -> entry.getValue().getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		}
 	}
 
 	private ReadOnlySearchParamCache getBuiltinSearchparams() {
@@ -142,17 +150,19 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 
+	private long overrideBuiltinSearchParamsWithActiveJpaSearchParams(RuntimeSearchParamCache theSearchParamCache, Collection<IBaseResource> theSearchParams) {
+		if (!myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
+			return 0;
+		}
 
-	private long overrideBuiltinSearchParamsWithActiveSearchParams(Collection<IBaseResource> theSearchParams, RuntimeSearchParamCache theSearchParamCache) {
 		long retval = 0;
-
 		for (IBaseResource searchParam : theSearchParams) {
-			retval += addSearchParam(theSearchParamCache, searchParam);
+			retval += overrideSearchParam(theSearchParamCache, searchParam);
 		}
 		return retval;
 	}
 
-	private long addSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
+	private long overrideSearchParam(RuntimeSearchParamCache theSearchParams, IBaseResource theSearchParameter) {
 		if (theSearchParameter == null) {
 			return 0;
 		}
@@ -161,7 +171,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		if (runtimeSp == null) {
 			return 0;
 		}
-		if (runtimeSp.getStatus() != RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE) {
+		if (runtimeSp.getStatus() == RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT) {
 			return 0;
 		}
 
@@ -173,11 +183,9 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
 			String name = runtimeSp.getName();
-			if (!searchParamMap.containsKey(name) || myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
-				ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
-				searchParamMap.put(name, runtimeSp);
-				retval++;
-			}
+			ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
+			searchParamMap.put(name, runtimeSp);
+			retval++;
 		}
 		return retval;
 	}
@@ -249,19 +257,22 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void handleCreate(IdDt theResourceId) {
+		// FIXME KHS don't call this twice, rather call once with a list
 		ourLog.info("Adding search parameter {} to SearchParamRegistry", theResourceId);
 		rebuildActiveSearchParams();
 	}
 
 	@Override
 	public void handleUpdate(IdDt theResourceId) {
+		// FIXME KHS don't call this twice, rather call once with a list
 		ourLog.info("Updating search parameter {} in SearchParamRegistry", theResourceId);
 		rebuildActiveSearchParams();
 	}
 
 	@Override
 	public void handleDelete(IdDt theResourceId) {
-			ourLog.info("Removing search parameter {} from SearchParamRegistry", theResourceId);
+		// FIXME KHS don't call this twice, rather call once with a list
+		ourLog.info("Removing search parameter {} from SearchParamRegistry", theResourceId);
 		rebuildActiveSearchParams();
 	}
 

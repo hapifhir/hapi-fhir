@@ -5,6 +5,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -63,5 +64,10 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 
 	private boolean idMatches(IdDt theTheIdToDelete, RuntimeSearchParam theSearchParam) {
 		return theSearchParam.getId() != null && theTheIdToDelete.equals(new IdDt(theSearchParam.getId().toVersionless()));
+	}
+
+	@Override
+	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
+		return myMap.computeIfAbsent(theResourceName, k -> new HashMap<>());
 	}
 }
