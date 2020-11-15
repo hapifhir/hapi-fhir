@@ -3,8 +3,9 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,8 @@ class ResourceChangeListenerRegistryImplTest {
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
 	private ResourceChangeListenerCache myResourceChangeListenerCache;
+	@MockBean
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	private IResourceChangeListener myTestListener = mock(IResourceChangeListener.class);
 	private SearchParameterMap myMap = SearchParameterMap.newSynchronous();
@@ -82,17 +85,19 @@ class ResourceChangeListenerRegistryImplTest {
 	@Test
 	public void addingNonInMemorySearchParamFails() {
 		try {
-			SearchParameterMap map = new SearchParameterMap();
-			map.setLastUpdated(new DateRangeParam("1965", "1970"));
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", map, myTestListener);
+			InMemoryMatchResult badResult = InMemoryMatchResult.unsupportedFromReason("TEST REASON");
+			when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition("Patient"))).thenReturn(badResult);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, myTestListener);
 			fail();
-		} catch (Exception e) {
-			assertEquals("", e.getMessage());
+		} catch (IllegalArgumentException e) {
+			assertEquals("SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
 		}
 	}
 
 	@Test
 	public void addingListenerResetsTimer() {
+		when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition("Patient"))).thenReturn(InMemoryMatchResult.successfulMatch());
+
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, myTestListener);
 		myResourceChangeListenerRegistry.forceRefresh("Patient");
 		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
@@ -104,6 +109,8 @@ class ResourceChangeListenerRegistryImplTest {
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
+		when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition("Patient"))).thenReturn(InMemoryMatchResult.successfulMatch());
+
 		// FIXME KHS create IT version of this test that tests with actual searchparams
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, mock(IResourceChangeListener.class));
 		myResourceChangeListenerRegistry.forceRefresh("Patient");

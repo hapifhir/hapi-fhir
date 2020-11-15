@@ -37,7 +37,7 @@ public class SubscriptionStrategyEvaluator {
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match(theCriteria, null, null);
+		InMemoryMatchResult result = myInMemoryResourceMatcher.checkIfInMemorySupported(theCriteria);
 		if (result.supported()) {
 			return SubscriptionMatchingStrategy.IN_MEMORY;
 		}

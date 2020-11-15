@@ -87,6 +87,27 @@ public class InMemoryResourceMatcher {
 		return match(searchParameterMap, theResource, resourceDefinition, theSearchParams);
 	}
 
+
+	/**
+	 *
+	 * @param theCriteria
+	 * @return result.supported() will be true if theCriteria can be evaluated in-memory
+	 */
+	public InMemoryMatchResult checkIfInMemorySupported(String theCriteria) {
+		return match(theCriteria, null, null);
+	}
+
+	/**
+	 *
+	 * @param theSearchParameterMap
+	 * @param theResourceDefinition
+	 * @return result.supported() will be true if theSearchParameterMap can be evaluated in-memory
+	 */
+	public InMemoryMatchResult checkIfInMemorySupported(SearchParameterMap theSearchParameterMap, RuntimeResourceDefinition theResourceDefinition) {
+		return match(theSearchParameterMap, null, theResourceDefinition, null);
+	}
+
+
 	@Nonnull
 	public InMemoryMatchResult match(SearchParameterMap theSearchParameterMap, IBaseResource theResource, RuntimeResourceDefinition theResourceDefinition, ResourceIndexedSearchParams theSearchParams) {
 		if (theSearchParameterMap.getLastUpdated() != null) {

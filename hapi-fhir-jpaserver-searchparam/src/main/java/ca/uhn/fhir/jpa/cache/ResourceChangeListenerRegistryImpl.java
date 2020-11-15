@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -41,6 +44,8 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	private IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
 	private ResourceChangeListenerCache myResourceChangeListenerCache;
+	@Autowired
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
 
@@ -55,7 +60,11 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	public void registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IResourceChangeListener theResourceChangeListener) {
 		// FIXME KHS reject non in-memory searchparams
 		// validate the resource name
-		myFhirContext.getResourceDefinition(theResourceName);
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
+		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParamMap, resourceDef);
+		if (!inMemoryMatchResult.supported()) {
+			throw new IllegalArgumentException("SearchParameterMap " + theSearchParamMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
+		}
 		myResourceChangeListenerCache.add(theResourceName, theResourceChangeListener, theSearchParamMap);
 		myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
 	}
