@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -50,7 +51,6 @@ public class JpaSearchParamCache {
 	}
 
 	void populateActiveSearchParams(IInterceptorService theInterceptorBroadcaster, IPhoneticEncoder theDefaultPhoneticEncoder, RuntimeSearchParamCache theActiveSearchParams) {
-
 		Map<String, List<JpaRuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
 		Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> activeParamNamesToUniqueSearchParams = new HashMap<>();
 
@@ -60,18 +60,33 @@ public class JpaSearchParamCache {
 		/*
 		 * Loop through parameters and find JPA params
 		 */
-		theActiveSearchParams.getSearchParamStream().forEach(nextCandidate -> {
-			if (nextCandidate.getId() != null) {
-				idToRuntimeSearchParam.put(nextCandidate.getId().toUnqualifiedVersionless().getValue(), nextCandidate);
+		for (String theResourceName : theActiveSearchParams.getResourceNameKeys()) {
+			Map<String, RuntimeSearchParam> searchParamMap = theActiveSearchParams.getSearchParamMap(theResourceName);
+			List<JpaRuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.computeIfAbsent(theResourceName, k -> new ArrayList<>());
+			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = searchParamMap.values();
+
+			ourLog.trace("Resource {} has {} params", theResourceName, searchParamMap.size());
+
+			for (RuntimeSearchParam nextCandidate : nextSearchParamsForResourceName) {
+
+				ourLog.trace("Resource {} has parameter {} with ID {}", theResourceName, nextCandidate.getName(), nextCandidate.getId());
+
+				if (nextCandidate.getId() != null) {
+					idToRuntimeSearchParam.put(nextCandidate.getId().toUnqualifiedVersionless().getValue(), nextCandidate);
+				}
+
+				if (nextCandidate instanceof JpaRuntimeSearchParam) {
+					JpaRuntimeSearchParam nextCandidateCasted = (JpaRuntimeSearchParam) nextCandidate;
+					jpaSearchParams.add(nextCandidateCasted);
+					if (nextCandidateCasted.isUnique()) {
+						uniqueSearchParams.add(nextCandidateCasted);
+					}
+				}
+
+				setPhoneticEncoder(theDefaultPhoneticEncoder, nextCandidate);
 			}
 
-			if (nextCandidate instanceof JpaRuntimeSearchParam) {
-				JpaRuntimeSearchParam nextCandidateCasted = (JpaRuntimeSearchParam) nextCandidate;
-				jpaSearchParams.add(nextCandidateCasted);
-			}
-
-			setPhoneticEncoder(theDefaultPhoneticEncoder, nextCandidate);
-		});
+		}
 
 		ourLog.trace("Have {} search params loaded", idToRuntimeSearchParam.size());
 
@@ -116,7 +131,7 @@ public class JpaSearchParamCache {
 			}
 		}
 
-		ourLog.trace("Have {} unique search params", activeParamNamesToUniqueSearchParams.size());
+		ourLog.info("Have {} unique search params", activeParamNamesToUniqueSearchParams.size());
 
 		myActiveUniqueSearchParams = activeUniqueSearchParams;
 		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;

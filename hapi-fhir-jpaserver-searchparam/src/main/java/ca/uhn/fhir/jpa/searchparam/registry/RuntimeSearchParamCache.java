@@ -53,17 +53,12 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 		return retVal;
 	}
 
-	public Stream<RuntimeSearchParam> getSearchParamStream() {
-		return myMap.values().stream().flatMap(entry -> entry.values().stream());
+	public Set<String> getResourceNameKeys() {
+		return myMap.keySet();
 	}
 
-	public boolean removeSearchParam(IdDt theIdToDelete) {
-		boolean removed = false;
-		for (String resourceName : myMap.keySet()) {
-			Map<String, RuntimeSearchParam> map = myMap.get(resourceName);
-			removed |= map.entrySet().removeIf(entry -> idMatches(theIdToDelete, entry.getValue()));
-		}
-		return removed;
+	public Stream<RuntimeSearchParam> getSearchParamStream() {
+		return myMap.values().stream().flatMap(entry -> entry.values().stream());
 	}
 
 	private boolean idMatches(IdDt theTheIdToDelete, RuntimeSearchParam theSearchParam) {

@@ -32,9 +32,11 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +49,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
+	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -99,11 +103,30 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		return myJpaSearchParamCache.getActiveUniqueSearchParams(theResourceName, theParamNames);
 	}
 
-	private void initializeActiveSearchParams(Collection<IdDt> theSearchParamIds) {
+	private void rebuildActiveSearchParams() {
+		ourLog.info("Rebuilding SearchParamRegistry");
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(MAX_MANAGED_PARAM_COUNT);
+
+		IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
+		int size = allSearchParamsBp.size();
+
+		ourLog.trace("Loaded {} search params from the DB", size);
+
+		// Just in case..
+		if (size >= MAX_MANAGED_PARAM_COUNT) {
+			ourLog.warn("Unable to support >" + MAX_MANAGED_PARAM_COUNT + " search params!");
+			size = MAX_MANAGED_PARAM_COUNT;
+		}
+		List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
+		initializeActiveSearchParams(allSearchParams);
+	}
+
+	private void initializeActiveSearchParams(Collection<IBaseResource> theSearchParams) {
 		StopWatch sw = new StopWatch();
 
 		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltinSearchparams());
-		long overriddenCount = overrideBuiltinSearchParamsWithActiveSearchParams(theSearchParamIds, searchParams);
+		long overriddenCount = overrideBuiltinSearchParamsWithActiveSearchParams(theSearchParams, searchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		myActiveSearchParams = searchParams;
 
@@ -118,33 +141,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		return myBuiltInSearchParams;
 	}
 
-	private void addJpaSearchParam(IdDt theResourceId) {
-		StopWatch sw = new StopWatch();
-		IBaseResource searchParameter = mySearchParamProvider.read(theResourceId);
-		addSearchParam(myActiveSearchParams, searchParameter);
-		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
-		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
-	}
 
-	private void removeJpaSearchParam(IdDt theResourceId) {
-		StopWatch sw = new StopWatch();
-		ourLog.info("Removing search parameter {} from SearchParamRegistry", theResourceId);
-		// FIXME KHS this fails on a ResourceGoneException
-		if (removeSearchParam(theResourceId)) {
-			ourLog.info("Search parameter {} successfully removed", theResourceId);
-		} else {
-			ourLog.info("No Search parameters matching {} were found", theResourceId);
-		}
-		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
-		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
-	}
 
-	private long overrideBuiltinSearchParamsWithActiveSearchParams(Collection<IdDt> theSearchParamIds, RuntimeSearchParamCache theSearchParams) {
+	private long overrideBuiltinSearchParamsWithActiveSearchParams(Collection<IBaseResource> theSearchParams, RuntimeSearchParamCache theSearchParamCache) {
 		long retval = 0;
 
-		for (IdDt searchParamId : theSearchParamIds) {
-			IBaseResource searchParameter = mySearchParamProvider.read(searchParamId);
-			retval += addSearchParam(theSearchParams, searchParameter);
+		for (IBaseResource searchParam : theSearchParams) {
+			retval += addSearchParam(theSearchParamCache, searchParam);
 		}
 		return retval;
 	}
@@ -171,16 +174,12 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 			Map<String, RuntimeSearchParam> searchParamMap = theSearchParams.getSearchParamMap(nextBaseName);
 			String name = runtimeSp.getName();
 			if (!searchParamMap.containsKey(name) || myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
-				ourLog.info("Adding search parameter {}.{}", nextBaseName, name);
+				ourLog.debug("Adding search parameter {}.{} to SearchParamRegistry", nextBaseName, StringUtils.defaultString(name, "[composite]"));
 				searchParamMap.put(name, runtimeSp);
 				retval++;
 			}
 		}
 		return retval;
-	}
-
-	private boolean removeSearchParam(IdDt theSearchParameterId) {
-		return myActiveSearchParams.removeSearchParam(theSearchParameterId);
 	}
 
 	@Override
@@ -250,22 +249,26 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void handleCreate(IdDt theResourceId) {
-		addJpaSearchParam(theResourceId);
+		ourLog.info("Adding search parameter {} to SearchParamRegistry", theResourceId);
+		rebuildActiveSearchParams();
 	}
 
 	@Override
 	public void handleUpdate(IdDt theResourceId) {
-		addJpaSearchParam(theResourceId);
+		ourLog.info("Updating search parameter {} in SearchParamRegistry", theResourceId);
+		rebuildActiveSearchParams();
 	}
 
 	@Override
 	public void handleDelete(IdDt theResourceId) {
-		removeJpaSearchParam(theResourceId);
+			ourLog.info("Removing search parameter {} from SearchParamRegistry", theResourceId);
+		rebuildActiveSearchParams();
 	}
 
 	@Override
 	public void handleInit(Collection<IdDt> theResourceIds) {
-		initializeActiveSearchParams(theResourceIds);
+		List<IBaseResource> searchParams = theResourceIds.stream().map(id -> mySearchParamProvider.read(id)).collect(Collectors.toList());
+		initializeActiveSearchParams(searchParams);
 	}
 
 	@VisibleForTesting
