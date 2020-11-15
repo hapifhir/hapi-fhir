@@ -53,6 +53,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	 */
 	@Override
 	public void registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IResourceChangeListener theResourceChangeListener) {
+		// FIXME KHS reject non in-memory searchparams
 		// validate the resource name
 		myFhirContext.getResourceDefinition(theResourceName);
 		myResourceChangeListenerCache.add(theResourceName, theResourceChangeListener, theSearchParamMap);

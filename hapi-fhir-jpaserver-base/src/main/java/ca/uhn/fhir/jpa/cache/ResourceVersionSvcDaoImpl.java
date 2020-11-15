@@ -27,15 +27,13 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
-// FIXME KHS
-		myLogger.info("About to search for '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
+		myLogger.debug("About to search for '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
 
 		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, null).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
-// FIXME KHS
-		myLogger.info("Found " + matchingIds.size() + " '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
+		myLogger.debug("Found " + matchingIds.size() + " '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
 
 		return ResourceVersionMap.fromResourceIds(myResourceTableDao.findAllById(matchingIds));
 	}

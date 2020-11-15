@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,18 @@ class ResourceChangeListenerRegistryImplTest {
 			fail();
 		} catch (DataFormatException e) {
 			assertEquals("Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+		}
+	}
+
+	@Test
+	public void addingNonInMemorySearchParamFails() {
+		try {
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLastUpdated(new DateRangeParam("1965", "1970"));
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", map, myTestListener);
+			fail();
+		} catch (Exception e) {
+			assertEquals("", e.getMessage());
 		}
 	}
 
