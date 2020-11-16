@@ -205,11 +205,11 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		private final PointcutLatch mySingleLatch = new PointcutLatch("ResourceChangeListener single resource called");
 		private final PointcutLatch myInitLatch = new PointcutLatch("ResourceChangeListener init called");
 
-		private ResourceChangeEvent myResourceChangeEvent;
+		private IResourceChangeEvent myResourceChangeEvent;
 		private Collection<IIdType> myInitResourceIds;
 
 		@Override
-		public void handleChange(ResourceChangeEvent theResourceChangeEvent) {
+		public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
 			ourLog.debug("TestCallback.handleChange() called with {}", theResourceChangeEvent);
 			myResourceChangeEvent = theResourceChangeEvent;
 			mySingleLatch.call(theResourceChangeEvent);
@@ -243,7 +243,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 			return new ArrayList<>(myInitResourceIds);
 		}
 
-		public ResourceChangeEvent getResourceChangeEvent() {
+		public IResourceChangeEvent getResourceChangeEvent() {
 			return myResourceChangeEvent;
 		}
 

@@ -12,7 +12,7 @@ public interface IResourceChangeListener {
 	 * Called by the {@link IResourceChangeListenerRegistry} when resource changes have been detected
 	 */
 
-	void handleChange(ResourceChangeEvent theResourceChangeEvent);
+	void handleChange(IResourceChangeEvent theResourceChangeEvent);
 	/**
 	 * Called within {@link ResourceChangeListenerRegistryImpl#LOCAL_REFRESH_INTERVAL_MS} of a listener registration
 	 *

@@ -104,7 +104,7 @@ public class ResourceChangeListenerCache {
 			}
 		}
 
-		ResourceChangeEvent resourceChangeEvent = ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
+		IResourceChangeEvent resourceChangeEvent = ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
 		if (!resourceChangeEvent.isEmpty()) {
 			theListener.handleChange(resourceChangeEvent);
 		}

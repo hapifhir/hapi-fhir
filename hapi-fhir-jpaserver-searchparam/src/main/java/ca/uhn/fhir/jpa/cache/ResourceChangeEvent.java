@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * An immutable list of resource ids that have been changed, updated, or deleted.
  */
-public class ResourceChangeEvent {
+public class ResourceChangeEvent implements IResourceChangeEvent {
 	private final List<IdDt> myCreatedResourceIds;
 	private final List<IdDt> myUpdatedResourceIds;
 	private final List<IdDt> myDeletedResourceIds;
@@ -37,14 +37,17 @@ public class ResourceChangeEvent {
 		return Collections.unmodifiableList(retval);
 	}
 
+	@Override
 	public List<IdDt> getCreatedResourceIds() {
 		return myCreatedResourceIds;
 	}
 
+	@Override
 	public List<IdDt> getUpdatedResourceIds() {
 		return myUpdatedResourceIds;
 	}
 
+	@Override
 	public List<IdDt> getDeletedResourceIds() {
 		return myDeletedResourceIds;
 	}

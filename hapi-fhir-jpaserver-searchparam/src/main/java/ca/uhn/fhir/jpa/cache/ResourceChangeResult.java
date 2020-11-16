@@ -23,7 +23,7 @@ public class ResourceChangeResult {
 		return new ResourceChangeResult(theCreated, 0, 0);
 	}
 
-	public static ResourceChangeResult fromResourceChangeEvent(ResourceChangeEvent theResourceChangeEvent) {
+	public static ResourceChangeResult fromResourceChangeEvent(IResourceChangeEvent theResourceChangeEvent) {
 		return new ResourceChangeResult(theResourceChangeEvent.getCreatedResourceIds().size(), theResourceChangeEvent.getUpdatedResourceIds().size(), theResourceChangeEvent.getDeletedResourceIds().size());
 	}
 

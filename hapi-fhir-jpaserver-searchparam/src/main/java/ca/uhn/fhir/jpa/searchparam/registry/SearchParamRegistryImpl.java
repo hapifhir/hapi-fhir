@@ -25,9 +25,9 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -252,7 +252,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public void handleChange(ResourceChangeEvent theResourceChangeEvent) {
+	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
 		if (theResourceChangeEvent.isEmpty()) {
 			return;
 		}
