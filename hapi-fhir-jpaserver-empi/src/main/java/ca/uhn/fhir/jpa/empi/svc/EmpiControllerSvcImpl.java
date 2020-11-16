@@ -55,8 +55,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public IAnyResource mergeGoldenResources(String theFromPersonId, String theToPersonId, MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource fromPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
-		IAnyResource toPerson = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
+		IAnyResource fromPerson = myEmpiControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
+		IAnyResource toPerson = myEmpiControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
 		myEmpiControllerHelper.validateMergeResources(fromPerson, toPerson);
 		myEmpiControllerHelper.validateSameVersion(fromPerson, theFromPersonId);
 		myEmpiControllerHelper.validateSameVersion(toPerson, theToPersonId);
@@ -80,11 +80,11 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 	}
 
 	@Override
-	public IAnyResource updateLink(String thePersonId, String theTargetId, String theMatchResult, MdmTransactionContext theEmpiContext) {
+	public IAnyResource updateLink(String theGoldenResourceId, String theTargetId, String theMatchResult, MdmTransactionContext theEmpiContext) {
 		EmpiMatchResultEnum matchResult = EmpiControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
+		IAnyResource person = myEmpiControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		IAnyResource target = myEmpiControllerHelper.getLatestTargetFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
-		myEmpiControllerHelper.validateSameVersion(person, thePersonId);
+		myEmpiControllerHelper.validateSameVersion(person, theGoldenResourceId);
 		myEmpiControllerHelper.validateSameVersion(target, theTargetId);
 
 		return myIEmpiLinkUpdaterSvc.updateLink(person, target, matchResult, theEmpiContext);
@@ -92,8 +92,8 @@ public class EmpiControllerSvcImpl implements IEmpiControllerSvc {
 
 	@Override
 	public void notDuplicateGoldenResource(String thePersonId, String theTargetPersonId, MdmTransactionContext theEmpiContext) {
-		IAnyResource person = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
-		IAnyResource target = myEmpiControllerHelper.getLatestPersonFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetPersonId);
+		IAnyResource person = myEmpiControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
+		IAnyResource target = myEmpiControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetPersonId);
 
 		myIEmpiLinkUpdaterSvc.notDuplicatePerson(person, target, theEmpiContext);
 	}

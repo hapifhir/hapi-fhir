@@ -68,35 +68,36 @@ public class EmpiLinkUpdaterSvcImpl implements IEmpiLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, MdmTransactionContext theEmpiContext) {
+	public IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, MdmTransactionContext theEmpiContext) {
 		String targetType = myFhirContext.getResourceType(theTarget);
 
-		validateUpdateLinkRequest(thePerson, theTarget, theMatchResult, targetType);
+		validateUpdateLinkRequest(theGoldenResource, theTarget, theMatchResult, targetType);
 
-		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
+		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personId, targetId);
+		Optional<EmpiLink> oEmpiLink = myEmpiLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenResourceId, targetId);
 		if (!oEmpiLink.isPresent()) {
-			throw new InvalidRequestException(myMessageHelper.getMessageForNoLink(thePerson, theTarget));
-		}
-		EmpiLink empiLink = oEmpiLink.get();
-		if (empiLink.getMatchResult() == theMatchResult) {
-			ourLog.warn("EMPI Link for " + thePerson.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " already has value " + theMatchResult + ".  Nothing to do.");
-			return thePerson;
+			throw new InvalidRequestException(myMessageHelper.getMessageForNoLink(theGoldenResource, theTarget));
 		}
 
-		ourLog.info("Manually updating EMPI Link for " + thePerson.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " from " + empiLink.getMatchResult() + " to " + theMatchResult + ".");
+		EmpiLink empiLink = oEmpiLink.get();
+		if (empiLink.getMatchResult() == theMatchResult) {
+			ourLog.warn("MDM Link for " + theGoldenResource.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " already has value " + theMatchResult + ".  Nothing to do.");
+			return theGoldenResource;
+		}
+
+		ourLog.info("Manually updating MDM Link for " + theGoldenResource.getIdElement().toVersionless() + ", " + theTarget.getIdElement().toVersionless() + " from " + empiLink.getMatchResult() + " to " + theMatchResult + ".");
 		empiLink.setMatchResult(theMatchResult);
 		empiLink.setLinkSource(EmpiLinkSourceEnum.MANUAL);
 		myEmpiLinkDaoSvc.save(empiLink);
-//		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(thePerson, theEmpiContext);
-		myEmpiResourceDaoSvc.upsertSourceResource(thePerson, theEmpiContext.getResourceType());
+//		myEmpiLinkSvc.syncEmpiLinksToPersonLinks(theGoldenResource, theEmpiContext);
+		myEmpiResourceDaoSvc.upsertSourceResource(theGoldenResource, theEmpiContext.getResourceType());
 		if (theMatchResult == EmpiMatchResultEnum.NO_MATCH) {
 			// Need to find a new Person to link this target to
 			myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theTarget, theEmpiContext);
 		}
-		return thePerson;
+		return theGoldenResource;
 	}
 
 	private void validateUpdateLinkRequest(IAnyResource theGoldenRecord, IAnyResource theTarget, EmpiMatchResultEnum theMatchResult, String theTargetType) {

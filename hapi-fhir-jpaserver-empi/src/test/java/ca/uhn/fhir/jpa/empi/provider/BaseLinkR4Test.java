@@ -31,7 +31,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected EmpiLink myLink;
 	protected StringType myPatientId;
 	protected StringType mySourcePatientId;
-	protected StringType myVersionlessPersonId;
+	protected StringType myVersionlessGodlenResourceId;
 
 	@Override
 	@BeforeEach
@@ -43,7 +43,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 
 		mySourcePatient = getGoldenResourceFromTargetResource(myPatient);
 		mySourcePatientId = new StringType(mySourcePatient.getIdElement().getValue());
-		myVersionlessPersonId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
+		myVersionlessGodlenResourceId = new StringType(mySourcePatient.getIdElement().toVersionless().getValue());
 
 		myLink = getOnlyPatientLink();
 		// Tests require our initial link to be a POSSIBLE_MATCH
