@@ -144,8 +144,8 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
 		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
-		IdDt calledWithId = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
-		assertEquals(patientId, calledWithId);
+		ResourceChangeEvent resourceChangeEvent = (ResourceChangeEvent) PointcutLatch.getLatchInvocationParameter(calledWith);
+		assertEquals(patientId, resourceChangeEvent.getCreatedResourceIds().get(0));
 	}
 
 	@Test
@@ -192,8 +192,8 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
 		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
-		IdDt calledWithId = (IdDt) PointcutLatch.getLatchInvocationParameter(calledWith);
-		assertEquals(patientIdMale, calledWithId);
+		ResourceChangeEvent resourceChangeEvent = (ResourceChangeEvent) PointcutLatch.getLatchInvocationParameter(calledWith);
+		assertEquals(patientIdMale, resourceChangeEvent.getCreatedResourceIds().get(0));
 	}
 
 	private SearchParameterMap createSearchParameterMap(Enumerations.AdministrativeGender theGender) {
