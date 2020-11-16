@@ -27,17 +27,18 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -251,28 +252,25 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	@Override
-	public void handleCreate(IdDt theResourceId) {
-		// FIXME KHS don't call this twice, rather call once with a list
-		ourLog.info("Adding search parameter {} to SearchParamRegistry", theResourceId);
+	public void handleChange(ResourceChangeEvent theResourceChangeEvent) {
+		if (theResourceChangeEvent.isEmpty()) {
+			return;
+		}
+		ResourceChangeResult result = ResourceChangeResult.fromResourceChangeEvent(theResourceChangeEvent);
+		if (result.created > 0) {
+			ourLog.info("Adding {} search parameters to SearchParamRegistry", result.created);
+		}
+		if (result.updated > 0) {
+			ourLog.info("Updating {} search parameters in SearchParamRegistry", result.updated);
+		}
+		if (result.created > 0) {
+			ourLog.info("Deleting {} search parameters from SearchParamRegistry", result.deleted);
+		}
 		rebuildActiveSearchParams();
 	}
 
 	@Override
-	public void handleUpdate(IdDt theResourceId) {
-		// FIXME KHS don't call this twice, rather call once with a list
-		ourLog.info("Updating search parameter {} in SearchParamRegistry", theResourceId);
-		rebuildActiveSearchParams();
-	}
-
-	@Override
-	public void handleDelete(IdDt theResourceId) {
-		// FIXME KHS don't call this twice, rather call once with a list
-		ourLog.info("Removing search parameter {} from SearchParamRegistry", theResourceId);
-		rebuildActiveSearchParams();
-	}
-
-	@Override
-	public void handleInit(Collection<IdDt> theResourceIds) {
+	public void handleInit(Collection<IIdType> theResourceIds) {
 		List<IBaseResource> searchParams = theResourceIds.stream().map(id -> mySearchParamProvider.read(id)).collect(Collectors.toList());
 		initializeActiveSearchParams(searchParams);
 	}

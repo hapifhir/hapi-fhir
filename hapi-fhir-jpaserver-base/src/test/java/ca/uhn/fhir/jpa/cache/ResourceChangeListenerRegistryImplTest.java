@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.messaging.BaseResourceMessage;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -68,8 +67,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
 		assertResult(result, 0, 1, 0);
 		myTestCallback.awaitExpected();
-		assertEquals(2L, myTestCallback.getResourceId().getVersionIdPartAsLong());
-		assertEquals(BaseResourceMessage.OperationTypeEnum.UPDATE, myTestCallback.getOperationTypeEnum());
+		assertEquals(2L, myTestCallback.getUpdateResourceId().getVersionIdPartAsLong());
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
 
 		myTestCallback.setExpectedCount(1);
@@ -77,8 +75,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
 		assertResult(result, 0, 0, 1);
 		myTestCallback.awaitExpected();
-		assertEquals(patientId, myTestCallback.getResourceId());
-		assertEquals(BaseResourceMessage.OperationTypeEnum.DELETE, myTestCallback.getOperationTypeEnum());
+		assertEquals(patientId, myTestCallback.getDeletedResourceId());
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
 	}
 
@@ -95,9 +92,9 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
-		assertEquals(theExpectedAdded, theResult.added, "added results");
+		assertEquals(theExpectedAdded, theResult.created, "added results");
 		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedRemoved, theResult.removed, "removed results");
+		assertEquals(theExpectedRemoved, theResult.deleted, "removed results");
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {
@@ -118,9 +115,9 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		IdDt patientId = createPatientAndRefreshCache(patient, myTestCallback, 1);
 		myTestCallback.awaitInitExpected();
 
-		List<IdDt> resourceIds = myTestCallback.getInitResourceIds();
+		List<IIdType> resourceIds = myTestCallback.getInitResourceIds();
 		assertThat(resourceIds, hasSize(1));
-		IdDt resourceId = resourceIds.get(0);
+		IIdType resourceId = resourceIds.get(0);
 		assertEquals(patientId.toString(), resourceId.toString());
 		assertEquals(1L, resourceId.getVersionIdPartAsLong());
 
@@ -168,8 +165,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
 		assertEmptyResult(result);
 		assertNotNull(patientIdFemale.toString());
-		assertNull(myTestCallback.getResourceId());
-		assertNull(myTestCallback.getOperationTypeEnum());
+		assertNull(myTestCallback.getResourceChangeEvent());
 	}
 
 	// FIXME KHS review
@@ -188,8 +184,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
 		assertEmptyResult(result);
 		assertNotNull(patientIdFemale.toString());
-		assertNull(myTestCallback.getResourceId());
-		assertNull(myTestCallback.getOperationTypeEnum());
+		assertNull(myTestCallback.getResourceChangeEvent());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
 		myResourceChangeListenerRegistry.clearCacheForUnitTest();
@@ -210,42 +205,25 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		private final PointcutLatch mySingleLatch = new PointcutLatch("ResourceChangeListener single resource called");
 		private final PointcutLatch myInitLatch = new PointcutLatch("ResourceChangeListener init called");
 
-		private IIdType myResourceId;
-		private BaseResourceMessage.OperationTypeEnum myOperationTypeEnum;
-		private Collection<IdDt> myInitResourceIds;
+		private ResourceChangeEvent myResourceChangeEvent;
+		private Collection<IIdType> myInitResourceIds;
 
 		@Override
-		public void handleCreate(IdDt theResourceId) {
-			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.CREATE);
+		public void handleChange(ResourceChangeEvent theResourceChangeEvent) {
+			ourLog.debug("TestCallback.handleChange() called with {}", theResourceChangeEvent);
+			myResourceChangeEvent = theResourceChangeEvent;
+			mySingleLatch.call(theResourceChangeEvent);
 		}
 
 		@Override
-		public void handleUpdate(IdDt theResourceId) {
-			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.UPDATE);
-		}
-
-		@Override
-		public void handleDelete(IdDt theResourceId) {
-			handle(theResourceId, BaseResourceMessage.OperationTypeEnum.DELETE);
-		}
-
-		@Override
-		public void handleInit(Collection<IdDt> theResourceIds) {
+		public void handleInit(Collection<IIdType> theResourceIds) {
 			myInitResourceIds = theResourceIds;
 			myInitLatch.call(theResourceIds);
 		}
 
-		private void handle(IIdType theResourceId, BaseResourceMessage.OperationTypeEnum theOperationTypeEnum) {
-			ourLog.debug("TestCallback.handle('{}', '{}') called...", theResourceId, theOperationTypeEnum);
-			myResourceId = theResourceId;
-			myOperationTypeEnum = theOperationTypeEnum;
-			mySingleLatch.call(theResourceId);
-		}
-
 		@Override
 		public void clear() {
-			myResourceId = null;
-			myOperationTypeEnum = null;
+			myResourceChangeEvent = null;
 			myInitResourceIds = null;
 			mySingleLatch.clear();
 			myInitLatch.clear();
@@ -261,16 +239,12 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 			return mySingleLatch.awaitExpected();
 		}
 
-		public IIdType getResourceId() {
-			return myResourceId;
-		}
-
-		public BaseResourceMessage.OperationTypeEnum getOperationTypeEnum() {
-			return myOperationTypeEnum;
-		}
-
-		public List<IdDt> getInitResourceIds() {
+		public List<IIdType> getInitResourceIds() {
 			return new ArrayList<>(myInitResourceIds);
+		}
+
+		public ResourceChangeEvent getResourceChangeEvent() {
+			return myResourceChangeEvent;
 		}
 
 		public void setInitExpectedCount(int theCount) {
@@ -279,6 +253,16 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 		public void awaitInitExpected() throws InterruptedException {
 			myInitLatch.awaitExpected();
+		}
+
+		public IIdType getUpdateResourceId() {
+			assertThat(myResourceChangeEvent.getUpdatedResourceIds(), hasSize(1));
+			return myResourceChangeEvent.getUpdatedResourceIds().get(0);
+		}
+
+		public IIdType getDeletedResourceId() {
+			assertThat(myResourceChangeEvent.getDeletedResourceIds(), hasSize(1));
+			return myResourceChangeEvent.getDeletedResourceIds().get(0);
 		}
 	}
 }

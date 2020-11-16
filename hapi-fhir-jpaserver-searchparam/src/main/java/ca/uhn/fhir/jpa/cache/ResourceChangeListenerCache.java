@@ -4,11 +4,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections4.SetValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class ResourceChangeListenerCache {
@@ -72,46 +71,44 @@ public class ResourceChangeListenerCache {
 		} else {
 			theOldResourceVersionCache.initialize(theNewResourceVersionMap);
 			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
-			retval = ResourceChangeResult.fromAdded(theNewResourceVersionMap.size());
+			retval = ResourceChangeResult.fromCreated(theNewResourceVersionMap.size());
 			theListenerEntry.setInitialized(true);
 		}
 		return retval;
 	}
 
 	public ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
-		AtomicLong removed = new AtomicLong();
-		// If the NEW ResourceVersionMap does NOT have OLD key - delete it
-		List<IdDt> toDelete = new ArrayList<>();
+		// If the new ResourceVersionMap does not have the old key - delete it
+		List<IIdType> deletedIds = new ArrayList<>();
 		for (String key : theOldResourceVersionCache.keySet()) {
-			Map<IdDt, String> oldVersionCache = theOldResourceVersionCache.getMap(key);
+			Map<IIdType, String> oldVersionCache = theOldResourceVersionCache.getMap(key);
 			oldVersionCache.keySet()
 				.forEach(id -> {
 					if (!theNewResourceVersionMap.containsKey(id)) {
-						toDelete.add(id);
+						deletedIds.add(id);
 					}
 				});
 		}
-		toDelete.forEach(id -> {
-			theOldResourceVersionCache.remove(id);
-			theListener.handleDelete(id);
-			removed.incrementAndGet();
-		});
+		deletedIds.forEach(theOldResourceVersionCache::remove);
 
-		long added = 0;
-		long updated = 0;
-		for (IdDt id : theNewResourceVersionMap.keySet()) {
+		List<IIdType> createdIds = new ArrayList<>();
+		List<IIdType> updatedIds = new ArrayList<>();
+
+		for (IIdType id : theNewResourceVersionMap.keySet()) {
 			String previousValue = theOldResourceVersionCache.addOrUpdate(id, theNewResourceVersionMap.get(id));
-			IdDt newId = id.withVersion(theNewResourceVersionMap.get(id));
+			IIdType newId = id.withVersion(theNewResourceVersionMap.get(id));
 			if (previousValue == null) {
-				theListener.handleCreate(newId);
-				++added;
+				createdIds.add(newId);
 			} else if (!theNewResourceVersionMap.get(id).equals(previousValue)) {
-				theListener.handleUpdate(newId);
-				++updated;
+				updatedIds.add(newId);
 			}
 		}
 
-		return ResourceChangeResult.fromAddedUpdatedRemoved(added, updated, removed.get());
+		ResourceChangeEvent resourceChangeEvent = ResourceChangeEvent.fromCreatedUpdatedDeletedResourceIds(createdIds, updatedIds, deletedIds);
+		if (!resourceChangeEvent.isEmpty()) {
+			theListener.handleChange(resourceChangeEvent);
+		}
+		return ResourceChangeResult.fromResourceChangeEvent(resourceChangeEvent);
 	}
 
 	public void remove(IResourceChangeListener theResourceChangeListener) {

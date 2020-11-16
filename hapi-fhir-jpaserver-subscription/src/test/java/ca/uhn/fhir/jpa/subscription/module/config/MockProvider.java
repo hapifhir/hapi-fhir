@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public class MockProvider {
 	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
@@ -34,7 +34,7 @@ public class MockProvider {
 		return myFailCount;
 	}
 
-	public IBaseResource read(IdDt theId) {
+	public IBaseResource read(IIdType theId) {
 		return myReadResource;
 	}
 }

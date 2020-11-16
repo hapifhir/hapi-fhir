@@ -246,9 +246,9 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
-		assertEquals(theExpectedAdded, theResult.added, "added results");
+		assertEquals(theExpectedAdded, theResult.created, "added results");
 		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedRemoved, theResult.removed, "removed results");
+		assertEquals(theExpectedRemoved, theResult.deleted, "removed results");
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {

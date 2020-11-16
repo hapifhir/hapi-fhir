@@ -15,7 +15,7 @@ import java.util.Set;
  * by providing an IdDt, since the String key in the top-level Map is defined by IdDt.getResourceType().
  */
 public class ResourceVersionCache {
-	private final Map<String, Map<IdDt, String>> myVersionMap = new HashMap<>();
+	private final Map<String, Map<IIdType, String>> myVersionMap = new HashMap<>();
 
 	public void clear() {
 		myVersionMap.forEach((k, v) -> v.clear());
@@ -23,37 +23,34 @@ public class ResourceVersionCache {
 	}
 
 	/**
-	 *
 	 * @param theResourceId
 	 * @param theVersion
 	 * @return previous value
 	 */
 	public String addOrUpdate(IIdType theResourceId, String theVersion) {
-		Map<IdDt, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<IdDt, String>());
+		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<>());
 		String previousMapEntry = entryByTypeMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
 		return previousMapEntry;
 	}
 
-	public String get(IdDt theResourceId) {
-		Map<IdDt, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<IdDt, String>());
+	public String get(IIdType theResourceId) {
+		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<>());
 		return entryByTypeMap.get(theResourceId);
 	}
 
-	public String get(IIdType theResourceId) {
-		Map<IdDt, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<IdDt, String>());
-		return entryByTypeMap.get(new IdDt(theResourceId));
-	}
-
 	@Nonnull
-	public Map<IdDt, String> getMap(String theResourceType) {
-		Map<IdDt, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceType, key -> new HashMap<IdDt, String>());
+	public Map<IIdType, String> getMap(String theResourceType) {
+		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceType, key -> new HashMap<>());
 		return entryByTypeMap;
 	}
 
 	public String remove(IIdType theResourceId) {
-		Map<IdDt, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<IdDt, String>());
-		String previousValue = entryByTypeMap.remove(new IdDt(theResourceId));
-		return previousValue;
+		Map<IIdType, String> entryByTypeMap = myVersionMap.get(theResourceId.getResourceType());
+		if (entryByTypeMap == null) {
+			return null;
+		} else {
+			return entryByTypeMap.remove(new IdDt(theResourceId));
+		}
 	}
 
 	public Set<String> keySet() {
@@ -61,8 +58,8 @@ public class ResourceVersionCache {
 	}
 
 	public void initialize(ResourceVersionMap theResourceVersionMap) {
-		for (IdDt key : theResourceVersionMap.keySet()) {
-			Map<IdDt, String> entryByTypeMap = myVersionMap.computeIfAbsent(key.getResourceType(), k -> new HashMap<IdDt, String>());
+		for (IIdType key : theResourceVersionMap.keySet()) {
+			Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(key.getResourceType(), k -> new HashMap<>());
 			entryByTypeMap.put(key, theResourceVersionMap.get(key));
 		}
 	}

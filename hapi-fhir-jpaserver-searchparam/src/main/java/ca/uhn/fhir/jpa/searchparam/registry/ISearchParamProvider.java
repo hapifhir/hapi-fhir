@@ -21,12 +21,12 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  */
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface ISearchParamProvider {
 	IBundleProvider search(SearchParameterMap theParams);
 
-	IBaseResource read(IdDt theSearchParamId);
+	IBaseResource read(IIdType theSearchParamId);
 }

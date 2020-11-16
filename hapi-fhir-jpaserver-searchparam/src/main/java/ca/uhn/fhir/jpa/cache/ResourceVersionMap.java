@@ -15,8 +15,8 @@ import java.util.Set;
  * Immutable copy of current resource versions read from the repository
  */
 public class ResourceVersionMap {
-	private final Set<IdDt> mySourceIds = new HashSet<>();
-	private final Map<IdDt, String> myMap = new HashMap<>();
+	private final Set<IIdType> mySourceIds = new HashSet<>();
+	private final Map<IIdType, String> myMap = new HashMap<>();
 	private ResourceVersionMap() {}
 
 	public static ResourceVersionMap fromResourceIds(List<ResourceTable> theEntities) {
@@ -39,19 +39,19 @@ public class ResourceVersionMap {
 		return myMap.size();
 	}
 
-	public Set<IdDt> keySet() {
+	public Set<IIdType> keySet() {
 		return Collections.unmodifiableSet(myMap.keySet());
 	}
 
-	public Set<IdDt> getSourceIds() {
+	public Set<IIdType> getSourceIds() {
 		return Collections.unmodifiableSet(mySourceIds);
 	}
 
-	public String get(IdDt theId) {
+	public String get(IIdType theId) {
 		return myMap.get(theId);
 	}
 
-	public boolean containsKey(IdDt theId) {
+	public boolean containsKey(IIdType theId) {
 		return myMap.containsKey(theId);
 	}
 }

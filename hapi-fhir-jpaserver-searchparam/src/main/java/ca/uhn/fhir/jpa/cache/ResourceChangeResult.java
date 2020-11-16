@@ -3,40 +3,40 @@ package ca.uhn.fhir.jpa.cache;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class ResourceChangeResult {
-	public final long added;
+	public final long created;
 	public final long updated;
-	public final long removed;
+	public final long deleted;
 
 	public ResourceChangeResult() {
-		added = 0;
+		created = 0;
 		updated = 0;
-		removed = 0;
+		deleted = 0;
 	}
 
-	private ResourceChangeResult(long theAdded, long theUpdated, long theRemoved) {
-		added = theAdded;
+	private ResourceChangeResult(long theCreated, long theUpdated, long theDeleted) {
+		created = theCreated;
 		updated = theUpdated;
-		removed = theRemoved;
+		deleted = theDeleted;
 	}
 
-	public static ResourceChangeResult fromAddedUpdatedRemoved(long theAdded, long theUpdated, long theRemoved) {
-		return new ResourceChangeResult(theAdded, theUpdated, theRemoved);
+	public static ResourceChangeResult fromCreated(int theCreated) {
+		return new ResourceChangeResult(theCreated, 0, 0);
 	}
 
-	public static ResourceChangeResult fromAdded(int theAdded) {
-		return new ResourceChangeResult(theAdded, 0, 0);
+	public static ResourceChangeResult fromResourceChangeEvent(ResourceChangeEvent theResourceChangeEvent) {
+		return new ResourceChangeResult(theResourceChangeEvent.getCreatedResourceIds().size(), theResourceChangeEvent.getUpdatedResourceIds().size(), theResourceChangeEvent.getDeletedResourceIds().size());
 	}
 
 	public ResourceChangeResult plus(ResourceChangeResult theResult) {
-		return new ResourceChangeResult(added + theResult.added, updated + theResult.updated, removed + theResult.removed);
+		return new ResourceChangeResult(created + theResult.created, updated + theResult.updated, deleted + theResult.deleted);
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("added", added)
+			.append("created", created)
 			.append("updated", updated)
-			.append("removed", removed)
+			.append("deleted", deleted)
 			.toString();
 	}
 }

@@ -1,21 +1,22 @@
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
 
 /**
- * Called by the {@link IResourceChangeListenerRegistry} when a resource change has been detected
+ * Called by the {@link IResourceChangeListenerRegistry} when resource changes have been detected
  */
 public interface IResourceChangeListener {
-	void handleCreate(IdDt theResourceId);
-	void handleUpdate(IdDt theResourceId);
-	void handleDelete(IdDt theResourceId);
+	/**
+	 * Called by the {@link IResourceChangeListenerRegistry} when resource changes have been detected
+	 */
 
+	void handleChange(ResourceChangeEvent theResourceChangeEvent);
 	/**
 	 * Called within {@link ResourceChangeListenerRegistryImpl#LOCAL_REFRESH_INTERVAL_MS} of a listener registration
 	 *
 	 * @param theResourceIds the list of resource ids of resources that match the search parameters the listener was registered with
 	 */
-	void handleInit(Collection<IdDt> theResourceIds);
+	void handleInit(Collection<IIdType> theResourceIds);
 }
