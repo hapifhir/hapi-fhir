@@ -85,6 +85,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		.setValue("555-555-5555");
 	private static final String NAME_GIVEN_FRANK = "Frank";
 	protected static final String FRANK_ID = "ID.FRANK.789";
+	protected static final String DUMMY_ORG_ID = "Organization/mfr";
 
 	@Autowired
 	protected FhirContext myFhirContext;
@@ -346,6 +347,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		medication.setCode(codeableConcept);
 		return medication;
 	}
+
+	protected Medication buildMedicationWithDummyOrganization() {
+		return buildMedication(DUMMY_ORG_ID);
+	}
+
 	protected Medication createMedicationAndUpdateLinks(Medication theMedication) {
 		theMedication = createMedication(theMedication);
 		myEmpiMatchLinkSvc.updateEmpiLinksForEmpiTarget(theMedication, createContextForCreate("Medication"));
@@ -512,4 +518,9 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 		});
 	}
 
+	protected DaoMethodOutcome createDummyOrganization() {
+		Organization org = new Organization();
+		org.setId(DUMMY_ORG_ID);
+		return myOrganizationDao.update(org);
+	}
 }

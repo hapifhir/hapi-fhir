@@ -58,9 +58,7 @@ public class EmpiProviderMatchR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMedicationMatch() throws Exception {
-		Organization org = new Organization();
-		org.setId("Organization/mfr");
-		myOrganizationDao.update(org);
+		createDummyOrganization();
 
 
 		Medication medication = buildMedication("Organization/mfr");

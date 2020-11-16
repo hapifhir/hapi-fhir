@@ -19,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,9 +79,7 @@ public class EmpiMatchLinkSvcTest extends BaseEmpiR4Test {
 
 	@Test
 	public void testAddMedicationLinksToNewGoldenRecordMedicationIfNoneFound() {
-		Organization org = new Organization();
-		org.setId("Organization/mfr");
-		myOrganizationDao.update(org);
+		createDummyOrganization();
 
 		createMedicationAndUpdateLinks(buildMedication("Organization/mfr"));
 		assertLinkCount(1);

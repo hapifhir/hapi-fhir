@@ -46,12 +46,17 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 			createPractitioner(buildPractitionerWithNameAndId("test", "id"));
 		}
 
+		createDummyOrganization();
+		for(int i = 0; i< 10; i++) {
+			createMedication(buildMedicationWithDummyOrganization());
+		}
+
 		assertLinkCount(0);
 
 		//SUT
-		afterEmpiLatch.runWithExpectedCount(20, () -> myEmpiSubmitSvc.submitAllTargetTypesToEmpi(null));
+		afterEmpiLatch.runWithExpectedCount(30, () -> myEmpiSubmitSvc.submitAllTargetTypesToEmpi(null));
 
-		assertLinkCount(20);
+		assertLinkCount(30);
 	}
 
 	@Test
@@ -65,6 +70,23 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 
 		//SUT
 		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiSubmitSvc.submitTargetTypeToEmpi("Patient", null));
+
+		assertLinkCount(10);
+	}
+
+	@Test
+	public void testEmpiBatchOnMedicationType() throws Exception {
+
+		createDummyOrganization();
+
+
+		for(int i = 0; i< 10; i++) {
+			createMedication(buildMedicationWithDummyOrganization());
+		}
+		assertLinkCount(0);
+
+		//SUT
+		afterEmpiLatch.runWithExpectedCount(10, () -> myEmpiSubmitSvc.submitTargetTypeToEmpi("Medication", null));
 
 		assertLinkCount(10);
 	}
@@ -92,7 +114,7 @@ class EmpiBatchSvcImplTest extends BaseEmpiR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiSubmitSvc.submitAllTargetTypesToEmpi("Patient?name=gary"));
+		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiSubmitSvc.submitTargetTypeToEmpi("Patient", "Patient?name=gary"));
 
 		assertLinkCount(1);
 	}
