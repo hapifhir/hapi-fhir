@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-// FIXME KHS retool searchparam and subscription to use this
+// FIXME KHS retool subscription to use this
 @Component
 public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerRegistryImpl.class);
@@ -55,11 +55,10 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	 * @param theSearchParamMap the listener will only be notified of changes to resources that match this map
 	 * @param theResourceChangeListener the listener to be notified
 	 * @throws ca.uhn.fhir.parser.DataFormatException if theResourceName is not valid
+	 * @throws ca.uhn.fhir.parser.IllegalArgumentException if theSearchParamMap cannot be evaluated in-memory
 	 */
 	@Override
 	public void registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IResourceChangeListener theResourceChangeListener) {
-		// FIXME KHS reject non in-memory searchparams
-		// validate the resource name
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
 		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParamMap, resourceDef);
 		if (!inMemoryMatchResult.supported()) {
@@ -167,7 +166,6 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		return retval;
 	}
 
-	// FIXME KHS test
 	private synchronized ResourceChangeResult doRefreshCachesAndNotifyListeners(String theResourceName) {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		Set<ResourceChangeListenerWithSearchParamMap> listenerEntries = myResourceChangeListenerCache.getListenerEntries(theResourceName);
@@ -180,8 +178,6 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
 			retval = retval.plus(myResourceChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap));
 		}
-		// FIXME KHS Should we assume that if COUNT == 0 then we do NOT have any Listeners for this ResourceType ?
-		//           If so, then we can clear() the Cache for that ResourceType...
 		myNextRefreshByResourceName.put(theResourceName, Instant.now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
 		return retval;
 	}

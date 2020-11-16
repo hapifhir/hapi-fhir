@@ -60,10 +60,6 @@ class ResourceChangeListenerRegistryImplTest {
 
 	@BeforeEach
 	public void before() {
-		// FIXME KHS move to IT
-//		myFemaleMap = new SearchParameterMap();
-//		myFemaleMap.setLoadSynchronous(true);
-//		myFemaleMap.add("gender", new TokenParam("female"));
 		when(myResourceVersionSvc.getVersionMap("Patient", myMap)).thenReturn(ResourceVersionMap.fromResourceIds(new ArrayList<>()));
 		Set<ResourceChangeListenerWithSearchParamMap> entries = new HashSet<>();
 		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(myTestListener, myMap);

@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.cache;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-// FIXME KHS rename all Version classes to ResourceChange
 public class ResourceChangeResult {
 	public final long added;
 	public final long updated;

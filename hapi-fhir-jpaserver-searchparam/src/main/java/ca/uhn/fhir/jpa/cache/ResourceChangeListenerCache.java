@@ -58,13 +58,12 @@ public class ResourceChangeListenerCache {
 	private boolean matches(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(theSearchParameterMap, theResource);
 		if (!result.isInMemory()) {
-			// FIXME KHS detect this at registration time
+			// This should never happen since we detect this at
 			ourLog.warn("Search Parameter Map {} cannot be processed in-memory", theSearchParameterMap);
 		}
 		return result.matched();
 	}
 
-	// FIXME KHS ensure we reset cache
 	public ResourceChangeResult notifyListener(ResourceChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
 		IResourceChangeListener resourceChangeListener = theListenerEntry.getResourceChangeListener();

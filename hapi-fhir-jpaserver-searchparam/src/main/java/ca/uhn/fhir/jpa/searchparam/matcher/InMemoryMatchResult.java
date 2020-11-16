@@ -26,13 +26,24 @@ public class InMemoryMatchResult {
 	public static final String CHAIN = "Chained parameters are not supported";
 	public static final String PARAM = "Parameter not supported";
 	public static final String QUALIFIER = "Qualified parameter not supported";
-    public static final String LOCATION_NEAR = "Location.position near not supported";
+	public static final String LOCATION_NEAR = "Location.position near not supported";
 
-    private final boolean myMatch;
+	private final boolean myMatch;
+	/**
+	 * True if it is expected that a search will be performed in-memory
+	 */
 	private final boolean mySupported;
+	/**
+	 * if mySupported is false, then the parameter responsible for in-memory search not being supported
+	 */
 	private final String myUnsupportedParameter;
+	/**
+	 * if mySupported is false, then the reason in-memory search is not supported
+	 */
 	private final String myUnsupportedReason;
-
+	/**
+	 * True a match was actually performed in memory
+	 */
 	private boolean myInMemory = false;
 
 	private InMemoryMatchResult(boolean theMatch) {

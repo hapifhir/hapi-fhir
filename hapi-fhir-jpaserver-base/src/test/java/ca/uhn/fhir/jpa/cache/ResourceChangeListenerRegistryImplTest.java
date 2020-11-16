@@ -202,11 +202,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	}
 
 	private SearchParameterMap createSearchParameterMap(Enumerations.AdministrativeGender theGender) {
-		SearchParameterMap theSearchParamMap = new SearchParameterMap();
-		theSearchParamMap.setLoadSynchronous(true);
-		theSearchParamMap.add(Patient.SP_GENDER,
-			new TokenParam(null, org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender.MALE.toCode()));
-		return theSearchParamMap;
+		return SearchParameterMap.newSynchronous().add(Patient.SP_GENDER, new TokenParam(null, theGender.toCode()));
 	}
 
 	private static class TestCallback implements IResourceChangeListener, IPointcutLatch {
