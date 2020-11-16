@@ -1,4 +1,5 @@
 {
+	"mdmTypes": ["Patient", "Practitioner"],
 	"version": "1",
 	"candidateSearchParams": [],
 	"candidateFilterSearchParams": [

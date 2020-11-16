@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.empi.broker;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.MdmTransactionContext;
-import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -54,6 +54,8 @@ public class EmpiMessageHandler implements MessageHandler {
 	private FhirContext myFhirContext;
 	@Autowired
 	private EmpiResourceFilteringSvc myEmpiResourceFilteringSvc;
+	@Autowired
+	private IEmpiSettings myEmpiSettings;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -128,7 +130,7 @@ public class EmpiMessageHandler implements MessageHandler {
 	}
 
 	private void validateResourceType(String theResourceType) {
-		if (!EmpiUtil.supportedTargetType(theResourceType)) {
+		if (!myEmpiSettings.isSupportedMdmType(theResourceType)) {
 			throw new IllegalStateException("Unsupported resource type submitted to EMPI matching queue: " + theResourceType);
 		}
 	}

@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.IEmpiChannelSubmitterSvc;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.api.IEmpiSubmitSvc;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -61,14 +61,18 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 	@Autowired
 	private IEmpiChannelSubmitterSvc myEmpiChannelSubmitterSvc;
 
+	@Autowired
+	private IEmpiSettings myEmpiSettings;
+
 	private static final int BUFFER_SIZE = 100;
 
 	@Override
 	@Transactional
 	public long submitAllTargetTypesToEmpi(@Nullable String theCriteria) {
-		long submittedCount = 0;
-		submittedCount += submitPatientTypeToMdm(theCriteria);
-		submittedCount += submitPractitionerTypeToMdm(theCriteria);
+		long submittedCount = myEmpiSettings.getEmpiRules().getMdmTypes().stream()
+			.mapToLong(targetType -> submitTargetTypeToEmpi(targetType, theCriteria))
+			.sum();
+
 		return submittedCount;
 	}
 
@@ -80,7 +84,8 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 		} else {
 			ourLog.info("Submitting resources of type {} with criteria {} to EMPI", theTargetType, theCriteria);
 		}
-		resolveTargetTypeOrThrowException(theTargetType);
+
+		validateTargetType(theTargetType);
 		SearchParameterMap spMap = myEmpiSearchParamSvc.getSearchParameterMapFromCriteria(theTargetType, theCriteria);
 		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
 		ISearchBuilder searchBuilder = myEmpiSearchParamSvc.generateSearchBuilderForType(theTargetType);
@@ -136,15 +141,15 @@ public class EmpiSubmitSvcImpl implements IEmpiSubmitSvc {
 	@Override
 	@Transactional
 	public long submitTargetToMdm(IIdType theId) {
-		resolveTargetTypeOrThrowException(theId.getResourceType());
+		validateTargetType(theId.getResourceType());
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource read = resourceDao.read(theId);
 		myEmpiChannelSubmitterSvc.submitResourceToEmpiChannel(read);
 		return 1;
 	}
 
-	private void resolveTargetTypeOrThrowException(String theResourceType) {
-		if (!EmpiUtil.supportedTargetType(theResourceType)) {
+	private void validateTargetType(String theResourceType) {
+		if(!myEmpiSettings.getEmpiRules().getMdmTypes().contains(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}
 	}

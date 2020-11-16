@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.empi.svc;
  */
 
 import ca.uhn.fhir.empi.api.IEmpiExpungeSvc;
+import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.empi.log.Logs;
-import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.empi.dao.EmpiLinkDaoSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -42,11 +42,13 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 
 	final EmpiLinkDaoSvc myEmpiLinkDaoSvc;
 	final EmpiPersonDeletingSvc myEmpiPersonDeletingSvcImpl;
+	final IEmpiSettings myEmpiSettings;
 
 	@Autowired
-	public EmpiClearSvcImpl(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl) {
+	public EmpiClearSvcImpl(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl, IEmpiSettings theIEmpiSettings) {
 		myEmpiLinkDaoSvc = theEmpiLinkDaoSvc;
 		myEmpiPersonDeletingSvcImpl = theEmpiPersonDeletingSvcImpl;
+		myEmpiSettings = theIEmpiSettings;
 	}
 
 	@Override
@@ -60,7 +62,7 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	}
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
-		if (!EmpiUtil.supportedTargetType(theResourceType)) {
+		if (!myEmpiSettings.isSupportedMdmType(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.MDM_CLEAR + " does not support resource type: " + theResourceType);
 		}
 	}
@@ -68,7 +70,7 @@ public class EmpiClearSvcImpl implements IEmpiExpungeSvc {
 	@Override
 	public long expungeAllEmpiLinks(ServletRequestDetails theRequestDetails) {
 		ourLog.info("Clearing all EMPI Links...");
-		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnPersonPids();
+		List<Long> personPids = myEmpiLinkDaoSvc.deleteAllEmpiLinksAndReturnGoldenResourcePids();
 		DeleteMethodOutcome deleteOutcome = myEmpiPersonDeletingSvcImpl.expungePersonPids(personPids, theRequestDetails);
 		ourLog.info("EMPI clear operation complete.  Removed {} EMPI links and expunged {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
 		return personPids.size();

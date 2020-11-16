@@ -21,7 +21,6 @@ package ca.uhn.fhir.empi.api;
  */
 
 import ca.uhn.fhir.empi.rules.json.EmpiRulesJson;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.stream.Collectors;
 
@@ -46,7 +45,7 @@ public interface IEmpiSettings {
 		return getEmpiRules().getMdmTypes().contains(theResourceName);
 	}
 
-	default String getSupportedMdmTypeNames() {
+	default String getSupportedMdmTypes() {
 		return getEmpiRules().getMdmTypes().stream().collect(Collectors.joining(", "));
 	}
 }

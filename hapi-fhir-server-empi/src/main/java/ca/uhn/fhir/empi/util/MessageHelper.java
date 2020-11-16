@@ -3,11 +3,9 @@ package ca.uhn.fhir.empi.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.empi.api.EmpiConstants;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.api.IEmpiLinkQuerySvc;
 import ca.uhn.fhir.empi.api.IEmpiSettings;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +35,7 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedResource(String theName, String theResourceType) {
 		return String.format("Only %s resources can be merged. The %s points to a %s",
-			myEmpiSettings.getSupportedMdmTypeNames(), theName, theResourceType);
+			myEmpiSettings.getSupportedMdmTypes(), theName, theResourceType);
 	}
 
 	public String getMessageForUnsupportedMatchResult() {
@@ -46,12 +44,12 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedFirstArgumentTypeInUpdate(String goldenRecordType) {
 		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
-			+ myEmpiSettings.getSupportedMdmTypeNames() + ".  Was " + goldenRecordType;
+			+ myEmpiSettings.getSupportedMdmTypes() + ".  Was " + goldenRecordType;
 	}
 
 	public String getMessageForUnsupportedSecondArgumentTypeInUpdate(String theGoldenRecordType) {
 		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
-			+ myEmpiSettings.getSupportedMdmTypeNames() + ".  Was " + theGoldenRecordType;
+			+ myEmpiSettings.getSupportedMdmTypes() + ".  Was " + theGoldenRecordType;
 	}
 
 	public String getMessageForArgumentTypeMismatchInUpdate(String theGoldenRecordType, String theTargetType) {

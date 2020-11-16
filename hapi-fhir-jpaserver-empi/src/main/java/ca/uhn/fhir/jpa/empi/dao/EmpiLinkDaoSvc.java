@@ -231,14 +231,20 @@ public class EmpiLinkDaoSvc {
 	 * @return A list of Long representing the related Person Pids.
 	 */
 	@Transactional
-	public List<Long> deleteAllEmpiLinksAndReturnPersonPids() {
+	public List<Long> deleteAllEmpiLinksAndReturnGoldenResourcePids() {
 		List<EmpiLink> all = myEmpiLinkDao.findAll();
-		return deleteEmpiLinksAndReturnPersonPids(all);
+		return deleteEmpiLinksAndReturnGoldenResourcePids(all);
 	}
 
-	private List<Long> deleteEmpiLinksAndReturnPersonPids(List<EmpiLink> theLinks) {
+	private List<Long> deleteEmpiLinksAndReturnGoldenResourcePids(List<EmpiLink> theLinks) {
 		Set<Long> persons = theLinks.stream().map(EmpiLink::getSourceResourcePid).collect(Collectors.toSet());
-		persons.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
+		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
+		//and REDIRECT
+		//persons.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
+		persons.addAll(theLinks.stream()
+			.filter(link -> link.getMatchResult().equals(EmpiMatchResultEnum.REDIRECT)
+				|| link.getMatchResult().equals(EmpiMatchResultEnum.POSSIBLE_DUPLICATE))
+			.map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
 		ourLog.info("Deleting {} EMPI link records...", theLinks.size());
 		myEmpiLinkDao.deleteAll(theLinks);
 		ourLog.info("{} EMPI link records deleted", theLinks.size());
@@ -257,7 +263,7 @@ public class EmpiLinkDaoSvc {
 		link.setEmpiTargetType(theTargetType);
 		Example<EmpiLink> exampleLink = Example.of(link);
 		List<EmpiLink> allOfType = myEmpiLinkDao.findAll(exampleLink);
-		return deleteEmpiLinksAndReturnPersonPids(allOfType);
+		return deleteEmpiLinksAndReturnGoldenResourcePids(allOfType);
 	}
 
 	/**

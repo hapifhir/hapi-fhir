@@ -31,9 +31,6 @@ import java.util.Optional;
 public final class EmpiUtil {
 	private EmpiUtil() {}
 
-	public static boolean supportedTargetType(String theResourceType) {
-		return ("Patient".equals(theResourceType) || "Practitioner".equals(theResourceType));
-	}
 
 	public static boolean isEmpiResourceType(FhirContext theFhirContext, IBaseResource theResource) {
 		String resourceType = theFhirContext.getResourceType(theResource);

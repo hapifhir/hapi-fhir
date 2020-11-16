@@ -174,8 +174,8 @@ public class EmpiConsumerConfig {
 	}
 
 	@Bean
-	IEmpiExpungeSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl) {
-		return new EmpiClearSvcImpl(theEmpiLinkDaoSvc, theEmpiPersonDeletingSvcImpl);
+	IEmpiExpungeSvc empiResetSvc(EmpiLinkDaoSvc theEmpiLinkDaoSvc, EmpiPersonDeletingSvc theEmpiPersonDeletingSvcImpl, IEmpiSettings theIEmpiSettings) {
+		return new EmpiClearSvcImpl(theEmpiLinkDaoSvc, theEmpiPersonDeletingSvcImpl, theIEmpiSettings);
 	}
 
 	@Bean

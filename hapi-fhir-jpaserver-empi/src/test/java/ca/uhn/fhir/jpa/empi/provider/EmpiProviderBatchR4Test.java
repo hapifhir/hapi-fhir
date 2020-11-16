@@ -103,7 +103,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testBatchRunOnAllPatients() throws InterruptedException {
-		assertLinkCount(2);
+		assertLinkCount(3);
 		StringType criteria = null;
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientType(criteria, null));
@@ -112,7 +112,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testBatchRunOnSpecificPatient() throws InterruptedException {
-		assertLinkCount(2);
+		assertLinkCount(3);
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		afterEmpiLatch.runWithExpectedCount(1, () -> myEmpiProviderR4.empiBatchPatientInstance(myPatient.getIdElement(), null));
 		assertLinkCount(1);
@@ -120,7 +120,7 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testBatchRunOnNonExistentSpecificPatient() {
-		assertLinkCount(2);
+		assertLinkCount(3);
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 		try {
 			myEmpiProviderR4.empiBatchPatientInstance(new IdType("Patient/999"), null);
@@ -130,18 +130,18 @@ public class EmpiProviderBatchR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testBatchRunOnAllTypes() throws InterruptedException {
-		assertLinkCount(2);
+		assertLinkCount(3);
 		StringType criteria = new StringType("");
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
-		afterEmpiLatch.runWithExpectedCount(2, () -> {
+		afterEmpiLatch.runWithExpectedCount(3, () -> {
 			myEmpiProviderR4.empiBatchOnAllTargets(null, criteria, null);
 		});
-		assertLinkCount(2);
+		assertLinkCount(3);
 	}
 
 	@Test
 	public void testBatchRunOnAllTypesWithInvalidCriteria() {
-		assertLinkCount(2);
+		assertLinkCount(3);
 		StringType criteria = new StringType("death-date=2020-06-01");
 		myEmpiProviderR4.clearEmpiLinks(null, myRequestDetails);
 

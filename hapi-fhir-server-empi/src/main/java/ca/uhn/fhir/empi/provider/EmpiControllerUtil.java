@@ -22,7 +22,6 @@ package ca.uhn.fhir.empi.provider;
 
 import ca.uhn.fhir.empi.api.EmpiLinkSourceEnum;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
-import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -67,10 +66,8 @@ public class EmpiControllerUtil {
 
 	public static IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
 		IdDt targetId = new IdDt(theId);
-		String resourceType = targetId.getResourceType();
-		if (!EmpiUtil.supportedTargetType(resourceType) ||
-			targetId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form Patient/<id> or Practitioner/<id> where <id> is the id of the resource");
+		if (targetId.getIdPart() == null) {
+			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
 		return targetId;
 	}
