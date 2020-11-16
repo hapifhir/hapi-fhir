@@ -125,7 +125,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	private void initializeActiveSearchParams(Collection<IBaseResource> theJpaSearchParams) {
 		StopWatch sw = new StopWatch();
 
-		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(myBuiltInSearchParams);
+		RuntimeSearchParamCache searchParams = RuntimeSearchParamCache.fromReadOnlySearchParmCache(getBuiltInSearchParams());
 		long overriddenCount = overrideBuiltinSearchParamsWithActiveJpaSearchParams(searchParams, theJpaSearchParams);
 		ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 		removeInactiveSearchParams(searchParams);
@@ -133,6 +133,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 		myJpaSearchParamCache.populateActiveSearchParams(myInterceptorBroadcaster, myPhoneticEncoder, myActiveSearchParams);
 		ourLog.debug("Refreshed search parameter cache in {}ms", sw.getMillis());
+	}
+
+	private ReadOnlySearchParamCache getBuiltInSearchParams() {
+		if (myBuiltInSearchParams == null) {
+			myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
+		}
+		return myBuiltInSearchParams;
 	}
 
 	private void removeInactiveSearchParams(RuntimeSearchParamCache theSearchParams) {
@@ -211,7 +218,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@PostConstruct
 	public void registerListener() {
-		myBuiltInSearchParams = ReadOnlySearchParamCache.fromFhirContext(myFhirContext);
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
 	}
 

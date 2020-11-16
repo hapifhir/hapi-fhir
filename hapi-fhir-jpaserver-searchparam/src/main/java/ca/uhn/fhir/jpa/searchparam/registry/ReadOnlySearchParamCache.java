@@ -59,11 +59,16 @@ public class ReadOnlySearchParamCache {
 	}
 
 	public Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
-		TreeSet<String> retVal = new TreeSet<>(myMap.get(theResourceName).keySet());
-		retVal.add(IAnyResource.SP_RES_ID);
-		retVal.add(Constants.PARAM_LASTUPDATED);
-		return retVal;
-
+		TreeSet<String> retval;
+		Map<String, RuntimeSearchParam> searchParamMap = myMap.get(theResourceName);
+		if (searchParamMap == null) {
+			retval = new TreeSet<>();
+		} else {
+			retval = new TreeSet<>(searchParamMap.keySet());
+		}
+		retval.add(IAnyResource.SP_RES_ID);
+		retval.add(Constants.PARAM_LASTUPDATED);
+		return retval;
 	}
 
 	public int size() {
