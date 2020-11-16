@@ -556,19 +556,7 @@ public class FhirContext {
 		Set<String> resourceNames = new HashSet<>();
 
 		if (myNameToResourceDefinition.isEmpty()) {
-			Properties props = new Properties();
-			try {
-				props.load(myVersion.getFhirVersionPropertiesFile());
-			} catch (IOException theE) {
-				throw new ConfigurationException("Failed to load version properties file");
-			}
-			Enumeration<?> propNames = props.propertyNames();
-			while (propNames.hasMoreElements()) {
-				String next = (String) propNames.nextElement();
-				if (next.startsWith("resource.")) {
-					resourceNames.add(next.substring("resource.".length()).trim());
-				}
-			}
+			resourceNames.addAll(addResourceNamesFromPropertiesFile());
 		}
 
 		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
@@ -576,6 +564,24 @@ public class FhirContext {
 		}
 
 		return Collections.unmodifiableSet(resourceNames);
+	}
+
+	private List<String> addResourceNamesFromPropertiesFile() {
+		List<String> retval = new ArrayList<>();
+		Properties props = new Properties();
+		try {
+			props.load(myVersion.getFhirVersionPropertiesFile());
+		} catch (IOException theE) {
+			throw new ConfigurationException("Failed to load version properties file");
+		}
+		Enumeration<?> propNames = props.propertyNames();
+		while (propNames.hasMoreElements()) {
+			String next = (String) propNames.nextElement();
+			if (next.startsWith("resource.")) {
+				retval.add(next.substring("resource.".length()).trim());
+			}
+		}
+		return retval;
 	}
 
 	/**
@@ -1064,4 +1070,7 @@ public class FhirContext {
 		return retVal;
 	}
 
+	public void loadResourceDefinitions() {
+		addResourceNamesFromPropertiesFile().forEach(this::getResourceDefinition);
+	}
 }

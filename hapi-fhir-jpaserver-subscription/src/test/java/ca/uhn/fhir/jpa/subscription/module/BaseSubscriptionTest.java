@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
@@ -46,10 +46,11 @@ public abstract class BaseSubscriptionTest {
 	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 
 	@Autowired
-	IResourceChangeListenerRegistry myMockResourceChangeListenerRegistry;
+	FhirContext myFhirContext;
 
 	@BeforeEach
 	public void before() {
+		myFhirContext.loadResourceDefinitions();
 		mySearchParamRegistry.handleInit(Collections.emptyList());
 	}
 
