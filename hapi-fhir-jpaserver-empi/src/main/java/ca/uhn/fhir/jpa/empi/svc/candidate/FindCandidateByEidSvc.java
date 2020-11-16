@@ -51,7 +51,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundPerson = myEmpiResourceDaoSvc.searchSourceResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType());
+				Optional<IAnyResource> oFoundPerson = myEmpiResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType());
 				if (oFoundPerson.isPresent()) {
 					IAnyResource foundPerson = oFoundPerson.get();
 					Long pidOrNull = myIdHelperService.getPidOrNull(foundPerson);

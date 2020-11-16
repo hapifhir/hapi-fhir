@@ -148,7 +148,7 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createGoldenPatient() {
-		return createGoldenPatient(new Patient(), true);
+		return createPatient(new Patient(), true, false);
 	}
 
 	@Nonnull
@@ -158,13 +158,24 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createGoldenPatient(Patient thePatient) {
-		return createGoldenPatient(thePatient, true);
+		return createPatient(thePatient, true, false);
+	}
+	
+	@Nonnull
+	protected Patient createRedirectedGoldenPatient(Patient thePatient) {
+		return createPatient(thePatient, true, true);
 	}
 
 	@Nonnull
-	protected Patient createGoldenPatient(Patient thePatient, boolean theEmpiManaged) {
-		EmpiUtil.setEmpiManaged(thePatient);
-		EmpiUtil.setGoldenResource(thePatient);
+	protected Patient createPatient(Patient thePatient, boolean theEmpiManaged, boolean isRedirect) {
+		if (theEmpiManaged) {
+			EmpiUtil.setEmpiManaged(thePatient);
+			if (isRedirect) {
+				EmpiUtil.setGoldenResourceRedirected(thePatient);
+			} else {
+				EmpiUtil.setGoldenResource(thePatient);
+			}
+		}
 
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
 		Patient patient = (Patient) outcome.getResource();

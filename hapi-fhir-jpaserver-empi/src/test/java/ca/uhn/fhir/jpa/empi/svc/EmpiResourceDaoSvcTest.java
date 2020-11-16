@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.empi.svc;
 
+import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.jpa.empi.BaseEmpiR4Test;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -24,15 +25,17 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 	}
 
 	@Test
-	public void testSearchPersonByEidExcludesInactive() {
+	public void testSearchPatientByEidExcludesNonGoldenPatients() {
 		Patient goodSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
+
 		myPatientDao.update(goodSourcePatient);
 
-		Patient badSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
-		badSourcePatient.setActive(false);
+
+		Patient badSourcePatient = addExternalEID(createRedirectedGoldenPatient(new Patient()), TEST_EID);
+		EmpiUtil.setGoldenResourceRedirected(badSourcePatient);
 		myPatientDao.update(badSourcePatient);
 
-		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Patient");
+		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundPerson.isPresent());
 		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
@@ -42,10 +45,10 @@ public class EmpiResourceDaoSvcTest extends BaseEmpiR4Test {
 		Patient goodSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
 		myPatientDao.update(goodSourcePatient);
 
-		Patient badSourcePatient = addExternalEID(createGoldenPatient(new Patient(), false), TEST_EID);
+		Patient badSourcePatient = addExternalEID(createPatient(new Patient()), TEST_EID);
 		myPatientDao.update(badSourcePatient);
 
-		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchSourceResourceByEID(TEST_EID, "Patient");
+		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertTrue(foundSourcePatient.isPresent());
 		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
