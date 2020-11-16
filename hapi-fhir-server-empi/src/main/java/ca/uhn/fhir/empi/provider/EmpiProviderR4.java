@@ -151,7 +151,9 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
 		return myEmpiControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS, theFromGoldenResourceId.getValue()));
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS,
+				getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId.getValue()))
+		);
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
@@ -163,7 +165,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 		return myEmpiControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(),
 			theMatchResult.getValue(),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
-				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId.getValue())));
+				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId.getValue()))
+		);
 	}
 
 	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
@@ -193,7 +196,9 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS, theGoldenResourceId.getValue()));
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId.getValue()))
+		);
 		return (Parameters) parametersFromEmpiLinks(empiLinkJson, true);
 	}
 
@@ -212,7 +217,9 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 
 		validateNotDuplicateParameters(theGoldenResourceId, theResourceId);
 		myEmpiControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE, theGoldenResourceId.getValue()));
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE,
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId.getValue()))
+		);
 
 		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
