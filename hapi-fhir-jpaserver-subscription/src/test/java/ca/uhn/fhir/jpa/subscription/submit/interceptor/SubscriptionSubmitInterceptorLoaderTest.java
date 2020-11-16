@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -46,6 +47,8 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@MockBean
 	private DaoRegistry myDaoRegistry;
+	@MockBean
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired

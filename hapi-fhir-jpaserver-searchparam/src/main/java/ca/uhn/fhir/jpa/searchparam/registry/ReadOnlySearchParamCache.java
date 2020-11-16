@@ -51,6 +51,10 @@ public class ReadOnlySearchParamCache {
 	}
 
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {
+		Map<String, RuntimeSearchParam> retval = myMap.get(theResourceName);
+		if (retval == null) {
+			return Collections.emptyMap();
+		}
 		return Collections.unmodifiableMap(myMap.get(theResourceName));
 	}
 

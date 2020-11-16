@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -53,6 +54,8 @@ public class DaoSubscriptionMatcherTest {
 	private IValidationSupport myValidationSupport;
 	@MockBean
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	@MockBean
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	/**
 	 * Make sure that if we're only running the {@link SubscriptionSubmitterConfig}, we don't need

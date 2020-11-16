@@ -20,6 +20,8 @@ public class MockFhirClientSearchParamProvider implements ISearchParamProvider {
 
 	public void setBundleProvider(IBundleProvider theBundleProvider) { myMockProvider.setBundleProvider(theBundleProvider); }
 
+	public void setReadResource(IBaseResource theReadResource) { myMockProvider.setReadResource(theReadResource);}
+
 	public void setFailCount(int theFailCount) { myMockProvider.setFailCount(theFailCount); }
 
 	public int getFailCount() { return myMockProvider.getFailCount(); }

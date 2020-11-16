@@ -9,9 +9,13 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public class MockProvider {
 	private IBundleProvider myBundleProvider = new SimpleBundleProvider();
 	private int myFailCount = 0;
+	private IBaseResource myReadResource;
 
 	public void setBundleProvider(IBundleProvider theBundleProvider) {
 		myBundleProvider = theBundleProvider;
+	}
+	public void setReadResource(IBaseResource theReadResource) {
+		myReadResource = theReadResource;
 	}
 
 	public IBundleProvider search(SearchParameterMap theParams) {
@@ -31,6 +35,6 @@ public class MockProvider {
 	}
 
 	public IBaseResource read(IdDt theId) {
-		throw new UnsupportedOperationException();
+		return myReadResource;
 	}
 }
