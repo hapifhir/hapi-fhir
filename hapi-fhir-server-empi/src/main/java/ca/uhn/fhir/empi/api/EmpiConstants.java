@@ -39,4 +39,6 @@ public class EmpiConstants {
 	public static final String CODE_GOLDEN_RECORD_REDIRECTED = "REDIRECTED";
 	public static final String DISPLAY_GOLDEN_RECORD = "Golden Record";
 	public static final String DISPLAY_GOLDEN_REDIRECT = "This resource was found to be a duplicate and has been redirected.";
+
+	public static final String UNKNOWN_MDM_TYPES = "Unknown Resource Types";
 }

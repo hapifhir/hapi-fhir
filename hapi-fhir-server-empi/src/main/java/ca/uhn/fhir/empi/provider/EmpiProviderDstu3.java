@@ -44,12 +44,12 @@ import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Person;
 import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.dstu3.model.codesystems.MatchGrade;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -109,59 +109,59 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 		return searchComponent;
 	}
 
-	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES, type = Person.class)
-	public Person mergePerson(@OperationParam(name=ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theFromPersonId,
-									  @OperationParam(name=ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theToPersonId,
-									  RequestDetails theRequestDetails) {
-		validateMergeParameters(theFromPersonId, theToPersonId);
+	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
+	public IBaseResource mergeGoldenResource(@OperationParam(name=ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theFromGoldenResourceId,
+														  @OperationParam(name=ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theToGoldenResourceId,
+														  RequestDetails theRequestDetails) {
+		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
-		String resourceType = getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId.getValue());
+		String resourceType = getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 
-		return (Person) myEmpiControllerSvc.mergeGoldenResources(theFromPersonId.getValue(), theToPersonId.getValue(),
+		return myEmpiControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS, resourceType));
 	}
 
-	@Operation(name = ProviderConstants.MDM_UPDATE_LINK, type = Person.class)
-	public Person updateLink(@OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType thePersonId,
+	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
+	public IBaseResource updateLink(@OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theGoldenResourceId,
 																  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) StringType theTargetId,
 																  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
 																  ServletRequestDetails theRequestDetails) {
 
-		validateUpdateLinkParameters(thePersonId, theTargetId, theMatchResult);
+		validateUpdateLinkParameters(theGoldenResourceId, theTargetId, theMatchResult);
 
-		return (Person) myEmpiControllerSvc.updateLink(thePersonId.getValue(), theTargetId.getValue(), theMatchResult.getValue(),
+		return myEmpiControllerSvc.updateLink(theGoldenResourceId.getValue(), theTargetId.getValue(), theMatchResult.getValue(),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
-				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId.getValue())));
+				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
 	}
 
 	@Operation(name = ProviderConstants.MDM_QUERY_LINKS)
-	public Parameters queryLinks(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1) StringType thePersonId,
-										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1) StringType theTargetId,
+	public Parameters queryLinks(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1) StringType theGoldenResourceId,
+										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1) StringType theTargetResourceId,
 										  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theMatchResult,
 										  @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theLinkSource,
 										  ServletRequestDetails theRequestDetails) {
 
-		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(thePersonId), extractStringOrNull(theTargetId),
+		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId), extractStringOrNull(theTargetResourceId),
 			extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createMdmContext(theRequestDetails,
-				MdmTransactionContext.OperationType.QUERY_LINKS, getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, thePersonId.getValue())));
+				MdmTransactionContext.OperationType.QUERY_LINKS, getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
 		return (Parameters) parametersFromEmpiLinks(empiLinkJson, true);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES)
-	public Parameters getDuplicatePersons(ServletRequestDetails theRequestDetails) {
+	public Parameters getDuplicateGoldenResources(ServletRequestDetails theRequestDetails) {
 		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS, (String) null));
 		return (Parameters) parametersFromEmpiLinks(possibleDuplicates, false);
 	}
 
 	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)
 	// TODO KHS can this return void?
-	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType thePersonId,
-																		  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1) StringType theTargetId,
+	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theGoldenResourceId,
+																		  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1) StringType theTargetResourceId,
 																		  ServletRequestDetails theRequestDetails) {
 
-		validateNotDuplicateParameters(thePersonId, theTargetId);
-		myEmpiControllerSvc.notDuplicateGoldenResource(thePersonId.getValue(), theTargetId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE, thePersonId.fhirType()));
+		validateNotDuplicateParameters(theGoldenResourceId, theTargetResourceId);
+		myEmpiControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theTargetResourceId.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE, theGoldenResourceId.fhirType()));
 
 		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
@@ -286,5 +286,14 @@ public class EmpiProviderDstu3 extends BaseEmpiProvider {
 			matchGrade = MatchGrade.POSSIBLE;
 		}
 		return matchGrade;
+	}
+
+	protected String getResourceType(String theParamName, StringType theResourceId) {
+		if (theResourceId != null) {
+			IIdType idType = EmpiControllerUtil.getGoldenIdDtOrThrowException(theParamName, theResourceId.getValueNotNull());
+			return idType.getResourceType();
+		} else {
+			return EmpiConstants.UNKNOWN_MDM_TYPES;
+		}
 	}
 }
