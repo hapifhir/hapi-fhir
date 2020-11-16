@@ -37,9 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// FIXME KBD
-@Disabled
-public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
+public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProviderTestBase {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
 
 	@Autowired
@@ -74,22 +72,22 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		loadBundle("hedis-valuesets-bundle.json");
 
 		// Load libraries
-		loadResource("library/library-fhir-model-definition.json");
-		loadResource("library/library-fhir-helpers.json");
-		loadResource("library/library-asf-logic.json");
+		loadResource("library/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
+		loadResource("library/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
+		loadResource("library/library-asf-logic.json", myFhirContext, myDaoRegistry);
 
 		// load test data and conversion library for $apply operation tests
-		loadResource("general-practitioner.json");
-		loadResource("general-patient.json");
+		loadResource("general-practitioner.json", myFhirContext, myDaoRegistry);
+		loadResource("general-patient.json", myFhirContext, myDaoRegistry);
 	}
 
 	// FIXME KBD
+	//@Test
 	@Disabled
-	@Test
 	public void evaluateMeasure() throws IOException {
 		Patient patient = new Patient();
 		// FIXME KBD add something to patient we want to measure
-		loadResource("measure-asf.json");
+		loadResource("measure-asf.json", myFhirContext, myDaoRegistry);
 
 		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
 
@@ -137,7 +135,7 @@ Direct Reference Codes:
 	@Test
 	public void evaluatePatientMeasure() throws IOException {
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("measure-asf.json");
+		loadResource("measure-asf.json", myFhirContext, myDaoRegistry);
 		Bundle result = loadBundle("test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -175,11 +173,10 @@ Direct Reference Codes:
 
 	}
 
-
 	@Test
 	public void evaluatePopulationMeasure() throws IOException {
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("measure-asf.json");
+		loadResource("measure-asf.json", myFhirContext, myDaoRegistry);
 		loadBundle("test-patient-6529-data.json");
 		// Add a second patient with the same data
 		loadBundle("test-patient-9999-x-data.json");
@@ -219,19 +216,4 @@ Direct Reference Codes:
 		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
 		return result;
 	}
-
-	private String stringFromResource(String theLocation) throws IOException {
-		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource(theLocation);
-		return IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
-	}
-
-	private IBaseResource loadResource(String theLocation) throws IOException {
-		String json = stringFromResource(theLocation);
-		IBaseResource resource = myFhirContext.newJsonParser().parseResource(json);
-		IFhirResourceDao<IBaseResource> dao = myDaoRegistry.getResourceDao(resource.getIdElement().getResourceType());
-		dao.update(resource);
-		return resource;
-	}
-
 }
