@@ -556,7 +556,7 @@ public class FhirContext {
 		Set<String> resourceNames = new HashSet<>();
 
 		if (myNameToResourceDefinition.isEmpty()) {
-			resourceNames.addAll(addResourceNamesFromPropertiesFile());
+			resourceNames.addAll(getResourceNamesFromPropertiesFile());
 		}
 
 		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
@@ -566,7 +566,7 @@ public class FhirContext {
 		return Collections.unmodifiableSet(resourceNames);
 	}
 
-	private List<String> addResourceNamesFromPropertiesFile() {
+	private List<String> getResourceNamesFromPropertiesFile() {
 		List<String> retval = new ArrayList<>();
 		Properties props = new Properties();
 		try {
@@ -1071,6 +1071,6 @@ public class FhirContext {
 	}
 
 	public void loadResourceDefinitions() {
-		addResourceNamesFromPropertiesFile().forEach(this::getResourceDefinition);
+		getResourceNamesFromPropertiesFile().forEach(this::getResourceDefinition);
 	}
 }
