@@ -1,15 +1,12 @@
 package ca.uhn.fhir.jpa.cache;
 
-import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.List;
 
 public interface IResourceChangeEvent {
-	List<IdDt> getCreatedResourceIds();
-
-	List<IdDt> getUpdatedResourceIds();
-
-	List<IdDt> getDeletedResourceIds();
-
+	List<IIdType> getCreatedResourceIds();
+	List<IIdType> getUpdatedResourceIds();
+	List<IIdType> getDeletedResourceIds();
 	boolean isEmpty();
 }

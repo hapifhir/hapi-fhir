@@ -13,9 +13,9 @@ import java.util.List;
  * An immutable list of resource ids that have been changed, updated, or deleted.
  */
 public class ResourceChangeEvent implements IResourceChangeEvent {
-	private final List<IdDt> myCreatedResourceIds;
-	private final List<IdDt> myUpdatedResourceIds;
-	private final List<IdDt> myDeletedResourceIds;
+	private final List<IIdType> myCreatedResourceIds;
+	private final List<IIdType> myUpdatedResourceIds;
+	private final List<IIdType> myDeletedResourceIds;
 
 	private ResourceChangeEvent(Collection<IIdType> theCreatedResourceIds, Collection<IIdType> theUpdatedResourceIds, Collection<IIdType> theDeletedResourceIds) {
 		myCreatedResourceIds = copyFrom(theCreatedResourceIds);
@@ -31,24 +31,24 @@ public class ResourceChangeEvent implements IResourceChangeEvent {
 		return new ResourceChangeEvent(theCreatedResourceIds, theUpdatedResourceIds, theDeletedResourceIds);
 	}
 
-	private List<IdDt> copyFrom(Collection<IIdType> theResourceIds) {
+	private List<IIdType> copyFrom(Collection<IIdType> theResourceIds) {
 		ArrayList<IdDt> retval = new ArrayList<>();
 		theResourceIds.forEach(id -> retval.add(new IdDt(id)));
 		return Collections.unmodifiableList(retval);
 	}
 
 	@Override
-	public List<IdDt> getCreatedResourceIds() {
+	public List<IIdType> getCreatedResourceIds() {
 		return myCreatedResourceIds;
 	}
 
 	@Override
-	public List<IdDt> getUpdatedResourceIds() {
+	public List<IIdType> getUpdatedResourceIds() {
 		return myUpdatedResourceIds;
 	}
 
 	@Override
-	public List<IdDt> getDeletedResourceIds() {
+	public List<IIdType> getDeletedResourceIds() {
 		return myDeletedResourceIds;
 	}
 
