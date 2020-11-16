@@ -150,7 +150,6 @@ public class SearchParamRegistryImplTest {
 
 	@BeforeEach
 	public void before() {
-		// FIXME KHS remove unneccessary setup from here
 		myAnswerCount = 0;
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
