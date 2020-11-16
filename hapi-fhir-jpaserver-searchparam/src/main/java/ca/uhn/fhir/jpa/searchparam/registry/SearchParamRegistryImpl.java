@@ -219,11 +219,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@PostConstruct
 	public void registerListener() {
-		// FIXME KHS compare this searchparam with below
-		SearchParameterMap activeSearchParameterMap = SearchParameterMap.newSynchronous();
-		// FIXME KHS this causes a stack overflow since searching by param requires params to be loaded
-//		activeSearchParameterMap.add("status", new TokenParam(Enumerations.PublicationStatus.ACTIVE.toCode()));
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", activeSearchParameterMap, this);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
 	}
 
 	@PreDestroy

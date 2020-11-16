@@ -12,7 +12,11 @@ import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -74,25 +78,34 @@ public class SearchParamRegistryImplTest {
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
-	@Autowired
-	private IResourceVersionSvc myResourceVersionSvc;
 
+	@MockBean
+	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
 	private ISchedulerService mySchedulerService;
 	@MockBean
 	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
+	@Autowired
 	private ModelConfig myModelConfig;
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
 	@MockBean
 	private SearchParamMatcher mySearchParamMatcher;
+	@MockBean
+	private MatchUrlService myMatchUrlService;
 
 	@Configuration
 	static class SpringConfig {
 		@Bean
 		FhirContext fhirContext() {
 			return ourFhirContext;
+		}
+
+		@Bean
+		ModelConfig modelConfig() {
+			ModelConfig modelConfig = new ModelConfig();
+			modelConfig.setDefaultSearchParamsCanBeOverridden(true);
+			return modelConfig;
 		}
 
 		@Bean
@@ -116,12 +129,12 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		IResourceVersionSvc resourceVersionSvc() {
-			IResourceVersionSvc retval = mock(IResourceVersionSvc.class);
-			// FIXME KHS do we still need this here?
-			when(retval.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		InMemoryResourceMatcher inMemoryResourceMatcher() {
+			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
+			when(retval.checkIfInMemorySupported(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 			return retval;
 		}
+
 	}
 
 	@Nonnull
@@ -137,13 +150,12 @@ public class SearchParamRegistryImplTest {
 
 	@BeforeEach
 	public void before() {
+		// FIXME KHS remove unneccessary setup from here
 		myAnswerCount = 0;
-		reset(myResourceVersionSvc);
-		reset(mySearchParamProvider);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(ourResourceVersionMap);
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
 
 		// Our first refresh adds our test searchparams to the registry
-		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
 		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
 		assertDbCalled();
@@ -312,10 +324,8 @@ public class SearchParamRegistryImplTest {
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
 
 		// When we ask for the new entity, return our foo search parameter
-		when(mySearchParamProvider.read(any())).thenReturn(buildSearchParameter(theStatus));
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider(buildSearchParameter(theStatus)));
 	}
-
-	// FIXME KHS add tests
 
 	@Nonnull
 	private SearchParameter buildSearchParameter(Enumerations.PublicationStatus theStatus) {

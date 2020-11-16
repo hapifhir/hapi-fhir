@@ -107,7 +107,6 @@ class ResourceChangeListenerRegistryImplTest {
 	public void doNotRefreshIfNotMatches() {
 		when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition("Patient"))).thenReturn(InMemoryMatchResult.successfulMatch());
 
-		// FIXME KHS create IT version of this test that tests with actual searchparams
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, mock(IResourceChangeListener.class));
 		myResourceChangeListenerRegistry.forceRefresh("Patient");
 		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
