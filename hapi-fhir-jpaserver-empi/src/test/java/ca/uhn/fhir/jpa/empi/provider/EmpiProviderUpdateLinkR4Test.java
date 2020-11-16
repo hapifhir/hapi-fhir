@@ -33,6 +33,7 @@ public class EmpiProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testUpdateLinkNoMatch() {
 		assertLinkCount(1);
+		System.out.println(mySourcePatientId);
 		myEmpiProviderR4.updateLink(mySourcePatientId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 

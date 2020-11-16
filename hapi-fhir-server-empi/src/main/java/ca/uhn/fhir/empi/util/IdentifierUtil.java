@@ -20,10 +20,12 @@ package ca.uhn.fhir.empi.util;
  * #L%
  */
 
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
 public class IdentifierUtil {
+
 	public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
 		CanonicalIdentifier retval = new CanonicalIdentifier();
 

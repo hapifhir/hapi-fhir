@@ -21,6 +21,7 @@ package ca.uhn.fhir.empi.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.empi.api.EmpiLinkJson;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.model.MdmTransactionContext;
@@ -29,8 +30,10 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.stream.Stream;
@@ -44,12 +47,13 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected void validateMergeParameters(IPrimitiveType<String> theFromGoldenResourceId, IPrimitiveType<String> theToGoldenResourceId) {
+		// TODO NG - Add validation to check that types are the same?
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
 			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
 		}
- 	}
+	}
 
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
 		if (theString == null || theString.getValue() == null) {
@@ -58,6 +62,7 @@ public abstract class BaseEmpiProvider {
 	}
 
 	protected void validateUpdateLinkParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId, IPrimitiveType<String> theMatchResult) {
+		// TODO NG - Add validation to check that types are the same?
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, theMatchResult);
@@ -77,11 +82,16 @@ public abstract class BaseEmpiProvider {
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 	}
 
-	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType) {
+	protected String getResourceType(String theParamName, String theResourceId) {
+		IIdType idType = EmpiControllerUtil.getGoldenIdDtOrThrowException(theParamName, theResourceId);
+		return idType.getResourceType();
+	}
+
+	protected MdmTransactionContext createMdmContext(RequestDetails theRequestDetails, MdmTransactionContext.OperationType theOperationType, String theResourceType) {
 		TransactionLogMessages transactionLogMessages = TransactionLogMessages.createFromTransactionGuid(theRequestDetails.getTransactionGuid());
-		if (true)
-			throw new RuntimeException("FIXME - NG - We need a way to set resource type here");
-		return new MdmTransactionContext(transactionLogMessages, theOperationType);
+		MdmTransactionContext mdmTransactionContext = new MdmTransactionContext(transactionLogMessages, theOperationType);
+		mdmTransactionContext.setResourceType(theResourceType);
+		return mdmTransactionContext;
 	}
 
 	protected String extractStringOrNull(IPrimitiveType<String> theString) {

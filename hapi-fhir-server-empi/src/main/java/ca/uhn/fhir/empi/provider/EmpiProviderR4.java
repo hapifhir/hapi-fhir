@@ -150,7 +150,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 															RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
-		return myEmpiControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS));
+		return myEmpiControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS, theFromGoldenResourceId.getValue()));
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
@@ -158,9 +159,11 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) StringType theResourceId,
 								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
 								  ServletRequestDetails theRequestDetails) {
-
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-		return myEmpiControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(), theMatchResult.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK));
+		return myEmpiControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(),
+			theMatchResult.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
+				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId.getValue())));
 	}
 
 	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
@@ -188,13 +191,17 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 									 @OperationParam(name=ProviderConstants.EMPI_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1) StringType theLinkSource,
 									 ServletRequestDetails theRequestDetails) {
 
-		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId), extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS));
+		Stream<EmpiLinkJson> empiLinkJson = myEmpiControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
+			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS, theGoldenResourceId.getValue()));
 		return (Parameters) parametersFromEmpiLinks(empiLinkJson, true);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
 	public Parameters getDuplicateGoldenResources(ServletRequestDetails theRequestDetails) {
-		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES));
+		Stream<EmpiLinkJson> possibleDuplicates = myEmpiControllerSvc.getDuplicateGoldenResources(
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null)
+		);
 		return (Parameters) parametersFromEmpiLinks(possibleDuplicates, false);
 	}
 
@@ -204,7 +211,8 @@ public class EmpiProviderR4 extends BaseEmpiProvider {
 											 ServletRequestDetails theRequestDetails) {
 
 		validateNotDuplicateParameters(theGoldenResourceId, theResourceId);
-		myEmpiControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theResourceId.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE));
+		myEmpiControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theResourceId.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE, theGoldenResourceId.getValue()));
 
 		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
 		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
