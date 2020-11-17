@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN = "patient-given";
@@ -65,6 +66,7 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 		retval.addFilterSearchParam(activePatientsBlockingFilter);
 		retval.addMatchField(myGivenNameMatchField);
 		retval.addMatchField(lastNameMatchField);
+		retval.setMdmTypes(Arrays.asList("Patient", "Practitioner", "Medication"));
 		retval.putMatchResult(myBothNameFields, EmpiMatchResultEnum.MATCH);
 		retval.putMatchResult(PATIENT_GIVEN, EmpiMatchResultEnum.POSSIBLE_MATCH);
 		return retval;
