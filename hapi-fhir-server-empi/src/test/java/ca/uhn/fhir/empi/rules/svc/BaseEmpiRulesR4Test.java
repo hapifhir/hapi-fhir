@@ -11,6 +11,8 @@ import ca.uhn.fhir.empi.rules.similarity.EmpiSimilarityEnum;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.util.ArrayList;
+
 public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 	public static final String PATIENT_GIVEN = "patient-given";
 	public static final String PATIENT_FAMILY = "patient-last";
@@ -18,9 +20,16 @@ public abstract class BaseEmpiRulesR4Test extends BaseR4Test {
 	public static final double NAME_THRESHOLD = 0.8;
 	protected EmpiFieldMatchJson myGivenNameMatchField;
 	protected String myBothNameFields;
+	protected EmpiRulesJson myEmpiRulesJson;
 
 	@BeforeEach
 	public void before() {
+		myEmpiRulesJson = new EmpiRulesJson();
+
+		ArrayList<String> myLegalMdmTypes = new ArrayList<>();
+		myLegalMdmTypes.add("Patient");
+		myEmpiRulesJson.setMdmTypes(myLegalMdmTypes);
+
 		myGivenNameMatchField = new EmpiFieldMatchJson()
 			.setName(PATIENT_GIVEN)
 			.setResourceType("Patient")

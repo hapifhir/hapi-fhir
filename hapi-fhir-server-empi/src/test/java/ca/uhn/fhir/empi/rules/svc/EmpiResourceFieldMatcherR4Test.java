@@ -23,16 +23,12 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 	protected EmpiResourceFieldMatcher myComparator;
 	private Patient myJohn;
 	private Patient myJohny;
-	private EmpiRulesJson myEmpiRulesJson;
 
 	@Override
 	@BeforeEach
 	public void before() {
 		super.before();
 
-		ArrayList<String>  myLegalMdmTypes = new ArrayList<>();
-		myLegalMdmTypes.add("Patient");
-		myEmpiRulesJson.setMdmTypes(myLegalMdmTypes);
 		myComparator = new EmpiResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myEmpiRulesJson);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
