@@ -8,7 +8,7 @@
 		"resourcePath" : "name.given",
 		"similarity" : {
 			"algorithm": "COSINE",
-			"threshold": 0.8
+			"matchThreshold": 0.8
 		}
 	}],
 	"matchResultMap" : {

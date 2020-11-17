@@ -31,7 +31,7 @@ public class EmpiResourceFieldMatcherR4Test extends BaseEmpiRulesR4Test {
 		super.before();
 
 		ArrayList<String>  myLegalMdmTypes = new ArrayList<>();
-		myLegalMdmTypes.add("Patient");
+		//myLegalMdmTypes.add("Patient");
 		myEmpiRulesJson.setMdmTypes(myLegalMdmTypes);
 		myComparator = new EmpiResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myEmpiRulesJson);
 		myJohn = buildJohn();
