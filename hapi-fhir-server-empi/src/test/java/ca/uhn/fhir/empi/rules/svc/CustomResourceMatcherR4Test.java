@@ -1,5 +1,6 @@
 package ca.uhn.fhir.empi.rules.svc;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.empi.BaseR4Test;
 import ca.uhn.fhir.empi.api.EmpiMatchResultEnum;
 import ca.uhn.fhir.empi.rules.json.EmpiFieldMatchJson;
@@ -9,7 +10,13 @@ import ca.uhn.fhir.empi.rules.matcher.EmpiMatcherEnum;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class CustomResourceMatcherR4Test extends BaseR4Test {
 
@@ -22,6 +29,14 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 	private static Patient ourBillyJohnHenry;
 	private static Patient ourHenryJohn;
 	private static Patient ourHenryJOHN;
+
+	@BeforeEach
+	public void before() {
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
+	}
 
 	@Test
 	public void testExactNameAnyOrder() {
@@ -86,6 +101,7 @@ public class CustomResourceMatcherR4Test extends BaseR4Test {
 
 		EmpiRulesJson retval = new EmpiRulesJson();
 		retval.addMatchField(nameAnyOrderFieldMatch);
+		retval.setMdmTypes(Arrays.asList("Patient", "Practitioner", "Medication"));
 		retval.putMatchResult(FIELD_EXACT_MATCH_NAME, EmpiMatchResultEnum.MATCH);
 
 		return retval;

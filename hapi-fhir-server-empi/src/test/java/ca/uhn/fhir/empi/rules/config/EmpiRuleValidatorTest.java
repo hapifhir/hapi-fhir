@@ -28,6 +28,7 @@ public class EmpiRuleValidatorTest extends BaseR4Test {
 		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
 		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
 	}
+
    @Test
    public void testValidate() throws IOException {
 		try {
