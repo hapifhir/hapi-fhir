@@ -239,7 +239,6 @@ public class SearchParamRegistryImplTest {
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 	}
-	// FIXME KHS add an IT that changes a searchparam from ACTIVE to RETIRED and validate the searchparams go down
 
 	private void assertPatientSearchParamSize(int theExpectedSize) {
 		assertEquals(theExpectedSize, mySearchParamRegistry.getActiveSearchParams("Patient").size());
