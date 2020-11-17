@@ -389,7 +389,7 @@ Tags have very specific semantics, which may not be obvious simply by using the 
 
 ## Accessing Tags in a Read / VRead / Search Method
 
-Tags are stored within a resource object, in the Resource.meta element.
+Tags are stored within a resource object, in the Resource.meta element. It is important to note that changing a resource's tags will not cause a version update to that resource.
 
 In a server implementation, you may populate your tags into the returned resource(s) and HAPI will automatically place these tags into the response headers (for read/vread) or the bundle category tags (for search). The following example illustrates how to return tags from a server method. This example shows how to supply tags in a read method, but the same approach applies to vread and search operations as well.
 
@@ -409,11 +409,16 @@ Within a [Type Create](#type_create) or [Instance Update](#instance_update) meth
 
 Note that FHIR specifies that in an update method, any tags supplied by the client are copied to the newly saved version, as well as any tags the existing version had.
 
-To work with tags in a create/update method, the pattern used in the read examples above is simply revered. In a server, the resource which is passed in will be populated with any tags that the client supplied:
+To work with tags in a create/update method, the pattern used in the read examples above is simply reversed. In a server, the resource which is passed in will be populated with any tags that the client supplied:
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RestfulPatientResourceProviderMore.java|createTags}}
 ``` 
+
+## Removing Tags
+
+In order to remove a tag, it does not suffice to remove it from the resource. Tags can be removed using the [Resource Operation Meta Delete](https://www.hl7.org/fhir/resource-operation-meta-delete.html), which takes a Parameter 
+definining which tags to delete. 
 
 # Handling _summary and _elements
 
