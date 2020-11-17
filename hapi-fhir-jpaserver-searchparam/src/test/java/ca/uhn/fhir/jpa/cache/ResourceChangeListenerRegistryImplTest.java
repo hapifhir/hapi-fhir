@@ -144,6 +144,10 @@ class ResourceChangeListenerRegistryImplTest {
 		when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition("Patient"))).thenReturn(theTheInMemoryMatchResult);
 	}
 
+	/**
+	 * This test assumes that  {@link ResourceChangeListenerRegistryImpl#REMOTE_REFRESH_INTERVAL_MS} is set to one hour.
+	 * Adjust the times below if that changes.
+ 	 */
 	@Test
 	public void testSchedule() {
 		mockInMemorySupported(InMemoryMatchResult.successfulMatch());
