@@ -12,6 +12,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,8 @@ public class ResourceMatcherR4Test extends BaseEmpiRulesR4Test {
 
 		when(mySearchParamRetriever.getActiveSearchParam("Patient", "birthdate")).thenReturn(mock(RuntimeSearchParam.class));
 		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
 		when(mySearchParamRetriever.getActiveSearchParam("Patient", "active")).thenReturn(mock(RuntimeSearchParam.class));
 
 		{
@@ -86,6 +90,7 @@ public class ResourceMatcherR4Test extends BaseEmpiRulesR4Test {
 		retval.setVersion("test version");
 		retval.addMatchField(firstNameMatchField);
 		retval.addMatchField(lastNameMatchField);
+		retval.setMdmTypes(Arrays.asList("Patient", "Practitioner", "Medication"));
 		retval.addMatchField(phoneField);
 		retval.putMatchResult(MATCH_FIELDS, EmpiMatchResultEnum.MATCH);
 		return retval;
