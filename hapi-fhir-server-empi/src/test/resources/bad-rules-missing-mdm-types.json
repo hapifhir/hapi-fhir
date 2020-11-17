@@ -1,15 +1,14 @@
 {
 	"version": "1",
-	"mdmTypes": ["Patient", "Practitioner", "Medication"],
 	"candidateSearchParams" : [],
 	"candidateFilterSearchParams" : [],
 	"matchFields" : [ {
 		"name" : "given-name",
-		"resourceType" : "Patient",
-		"resourcePath" : "name.first",
-		"matcher" : {
-			"algorithm": "STRING",
-			"exact" : true
+		"resourceType" : "*",
+		"resourcePath" : "name.given",
+		"similarity" : {
+			"algorithm": "COSINE",
+			"threshold": 0.8
 		}
 	}],
 	"matchResultMap" : {
