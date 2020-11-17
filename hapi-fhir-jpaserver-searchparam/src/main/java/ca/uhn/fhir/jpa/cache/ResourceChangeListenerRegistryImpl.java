@@ -20,8 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -34,7 +36,9 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
+	// FIXME KHS make this a service we can mock
 	private static volatile Map<String, Instant> myNextRefreshByResourceName = new HashMap<>();
+	private static Instant ourNowForUnitTests;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -119,7 +123,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	public ResourceChangeResult refreshCacheIfNecessary(String theResourceName) {
 		ResourceChangeResult retval =  new ResourceChangeResult();
 		Instant nextRefresh = myNextRefreshByResourceName.computeIfAbsent(theResourceName, key -> Instant.MIN);
-		if (nextRefresh.isBefore(Instant.now())) {
+		if (nextRefresh.isBefore(now())) {
 			retval = refreshCacheWithRetry(theResourceName);
 		}
 		return retval;
@@ -178,8 +182,15 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 			ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theResourceName, searchParamMap);
 			retval = retval.plus(myResourceChangeListenerCache.notifyListener(listenerEntry, myResourceVersionCache, newResourceVersionMap));
 		}
-		myNextRefreshByResourceName.put(theResourceName, Instant.now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
+		myNextRefreshByResourceName.put(theResourceName, now().plus(Duration.ofMillis(REMOTE_REFRESH_INTERVAL_MS)));
 		return retval;
+	}
+
+	private static Instant now() {
+		if (ourNowForUnitTests != null) {
+			return ourNowForUnitTests;
+		}
+		return Instant.now();
 	}
 
 	@VisibleForTesting
@@ -190,5 +201,19 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	@VisibleForTesting
 	public int getResourceVersionCacheSizeForUnitTest(String theResourceName) {
 		return myResourceVersionCache.getMap(theResourceName).size();
+	}
+
+	/**
+	 * @param theTime has format like "12:34:56" i.e. HH:MM:SS
+	 */
+	@VisibleForTesting
+	public static void setNowForUnitTests(String theTime) {
+		if (theTime == null) {
+			ourNowForUnitTests = null;
+			return;
+		}
+		String datetime = "2020-11-16T" + theTime + "Z";
+		Clock clock = Clock.fixed(Instant.parse(datetime), ZoneId.systemDefault());
+		ourNowForUnitTests = Instant.now(clock);
 	}
 }
