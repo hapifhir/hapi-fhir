@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
@@ -45,12 +44,8 @@ public abstract class BaseSubscriptionTest {
 	@Autowired
 	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 
-	@Autowired
-	FhirContext myFhirContext;
-
 	@BeforeEach
 	public void before() {
-		myFhirContext.loadResourceDefinitions();
 		mySearchParamRegistry.handleInit(Collections.emptyList());
 	}
 

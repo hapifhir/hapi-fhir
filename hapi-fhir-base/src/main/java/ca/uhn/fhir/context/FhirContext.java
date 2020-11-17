@@ -553,21 +553,7 @@ public class FhirContext {
 	 * @since 5.1.0
 	 */
 	public Set<String> getResourceTypes() {
-		Set<String> resourceNames = new HashSet<>();
-
-		if (myNameToResourceDefinition.isEmpty()) {
-			resourceNames.addAll(getResourceNamesFromPropertiesFile());
-		}
-
-		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
-			resourceNames.add(next.getName());
-		}
-
-		return Collections.unmodifiableSet(resourceNames);
-	}
-
-	private List<String> getResourceNamesFromPropertiesFile() {
-		List<String> retval = new ArrayList<>();
+		Set<String> retval = new HashSet<>();
 		Properties props = new Properties();
 		try {
 			props.load(myVersion.getFhirVersionPropertiesFile());
@@ -1068,9 +1054,5 @@ public class FhirContext {
 			retVal.add((Class<? extends IResource>) clazz);
 		}
 		return retVal;
-	}
-
-	public void loadResourceDefinitions() {
-		getResourceNamesFromPropertiesFile().forEach(this::getResourceDefinition);
 	}
 }

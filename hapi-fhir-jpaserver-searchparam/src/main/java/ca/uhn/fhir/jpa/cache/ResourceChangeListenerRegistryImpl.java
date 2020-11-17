@@ -36,7 +36,6 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_HOUR;
 	private static final int MAX_RETRIES = 60; // 5 minutes
-	// FIXME KHS make this a service we can mock
 	private static volatile Map<String, Instant> myNextRefreshByResourceName = new HashMap<>();
 	private static Instant ourNowForUnitTests;
 
