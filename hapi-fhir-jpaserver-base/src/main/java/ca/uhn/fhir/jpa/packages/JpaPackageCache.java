@@ -217,10 +217,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 
 			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
+			String packageDesc;
+			if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
+				packageDesc = npmPackage.description().substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4) + "...";
+			} else {
+				packageDesc = npmPackage.description();
+			}
 			if (currentVersion) {
 				getProcessingMessages(npmPackage).add("Marking package " + thePackageId + "#" + thePackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
-				pkg.setDescription(npmPackage.description());
+				pkg.setDescription(packageDesc);
 				myPackageDao.save(pkg);
 			} else {
 				getProcessingMessages(npmPackage).add("Package " + thePackageId + "#" + thePackageVersionId + " is not the newest version");
@@ -232,7 +238,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
 			packageVersion.setSavedTime(new Date());
-			packageVersion.setDescription(npmPackage.description());
+			packageVersion.setDescription(packageDesc);
 			packageVersion.setFhirVersionId(npmPackage.fhirVersion());
 			packageVersion.setFhirVersion(fhirVersion);
 			packageVersion.setCurrentVersion(currentVersion);
