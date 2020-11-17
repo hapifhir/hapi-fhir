@@ -118,6 +118,7 @@ public class FhirContext {
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
+	private Set<String> myResourceNames;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -553,21 +554,23 @@ public class FhirContext {
 	 * @since 5.1.0
 	 */
 	public Set<String> getResourceTypes() {
-		Set<String> retval = new HashSet<>();
-		Properties props = new Properties();
-		try {
-			props.load(myVersion.getFhirVersionPropertiesFile());
-		} catch (IOException theE) {
-			throw new ConfigurationException("Failed to load version properties file");
-		}
-		Enumeration<?> propNames = props.propertyNames();
-		while (propNames.hasMoreElements()) {
-			String next = (String) propNames.nextElement();
-			if (next.startsWith("resource.")) {
-				retval.add(next.substring("resource.".length()).trim());
+		if (myResourceNames == null) {
+			myResourceNames = new HashSet<>();
+			Properties props = new Properties();
+			try {
+				props.load(myVersion.getFhirVersionPropertiesFile());
+			} catch (IOException theE) {
+				throw new ConfigurationException("Failed to load version properties file");
+			}
+			Enumeration<?> propNames = props.propertyNames();
+			while (propNames.hasMoreElements()) {
+				String next = (String) propNames.nextElement();
+				if (next.startsWith("resource.")) {
+					myResourceNames.add(next.substring("resource.".length()).trim());
+				}
 			}
 		}
-		return retval;
+		return myResourceNames;
 	}
 
 	/**
