@@ -1,9 +1,11 @@
 package ca.uhn.fhir.empi.rules.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.empi.BaseR4Test;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
@@ -14,8 +16,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class EmpiRuleValidatorTest extends BaseR4Test {
+
+	@BeforeEach
+	public void before() {
+		when(mySearchParamRetriever.getActiveSearchParam("Patient", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Practitioner", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("Medication", "identifier")).thenReturn(mock(RuntimeSearchParam.class));
+		when(mySearchParamRetriever.getActiveSearchParam("AllergyIntolerance", "identifier")).thenReturn(null);
+	}
    @Test
    public void testValidate() throws IOException {
 		try {
@@ -73,6 +85,16 @@ public class EmpiRuleValidatorTest extends BaseR4Test {
 			fail();
 		} catch (ConfigurationException e) {
 			assertThat(e.getMessage(), startsWith("Error in candidateFilterSearchParams: Patient does not have a search parameter called 'foo'"));
+		}
+	}
+
+	@Test
+	public void testInvalidMdmType() throws IOException {
+		try {
+			setEmpiRuleJson("bad-rules-missing-mdm-types.json");
+			fail();
+		} catch (ConfigurationException e) {
+			assertThat(e.getMessage(), startsWith("mdmTypes must be set to a list of resource types."));
 		}
 	}
 

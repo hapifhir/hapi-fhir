@@ -72,6 +72,9 @@ public class EmpiRuleValidator implements IEmpiRuleValidator {
 	}
 
 	public void validateMdmTypes(EmpiRulesJson theEmpiRulesJson) {
+		if (theEmpiRulesJson.getMdmTypes() == null) {
+			throw new ConfigurationException("mdmTypes must be set to a list of resource types.");
+		}
 		for (String resourceType: theEmpiRulesJson.getMdmTypes()) {
 			validateTypeHasIdentifier(resourceType);
 		}
