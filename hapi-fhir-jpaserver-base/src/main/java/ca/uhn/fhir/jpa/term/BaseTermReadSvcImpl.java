@@ -141,7 +141,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
 import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -173,7 +172,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -428,10 +426,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		accumulator.setTimestamp(new Date());
 		accumulator.setOffset(offset);
 
-		if (theExpansionOptions != null) {
+		if (theExpansionOptions != null && isHibernateSearchEnabled()) {
 			accumulator.addParameter().setName("offset").setValue(new IntegerType(offset));
-		}
-		if (theExpansionOptions != null) {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
@@ -854,6 +850,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	}
 
+	private boolean isHibernateSearchEnabled() {
+		return myFulltextSearchSvc != null;
+	}
+
 	@Nonnull
 	private Boolean expandValueSetHandleIncludeOrExcludeUsingDatabase(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, int theQueryIndex, @Nonnull ExpansionFilter theExpansionFilter, String theSystem, TermCodeSystem theCs) {
 		String includeOrExcludeVersion = theIncludeOrExclude.getVersion();
@@ -869,7 +869,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * If FullText searching is not enabled, we can handle only basic expansions
 		 * since we're going to do it without the database.
 		 */
-		if (myFulltextSearchSvc == null) {
+		if (!isHibernateSearchEnabled()) {
 			expandWithoutHibernateSearch(theValueSetCodeAccumulator, csv, theAddedCodes, theIncludeOrExclude, theSystem, theAdd);
 			return false;
 		}
