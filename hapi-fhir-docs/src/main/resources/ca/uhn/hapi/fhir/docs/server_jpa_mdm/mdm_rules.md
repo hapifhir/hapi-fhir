@@ -412,4 +412,4 @@ These entries convert combinations of successful matchFields into an MDM Match R
 
 ### eidSystem
 
-The external EID system that the HAPI MDM system should expect to see on incoming Patient resources. Must be a valid URI.  See [MDM EID](/hapi-fhir/docs/server_jpa_empi/empi_eid.html) for details on how EIDs are managed by HAPI MDM.
+The external EID system that the HAPI MDM system should expect to see on incoming Patient resources. Must be a valid URI.  See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.

@@ -36,15 +36,15 @@ diagrams outline how EIDs are replicated from Patient resources to their linked 
 
 ## MDM EID Update Scenarios
 
-<a href="/hapi-fhir/docs/images/empi-update-1.svg"><img src="/hapi-fhir/docs/images/empi-update-1.svg" alt="MDM Create 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-update-1.svg"><img src="/hapi-fhir/docs/images/empi-update-1.svg" alt="MDM Update 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
 
-<a href="/hapi-fhir/docs/images/empi-update-2.svg"><img src="/hapi-fhir/docs/images/empi-update-2.svg" alt="MDM Create 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-update-2.svg"><img src="/hapi-fhir/docs/images/empi-update-2.svg" alt="MDM Update 2" style="margin-left: 15px; margin-bottom: 15px;" /></a>
 
-<a href="/hapi-fhir/docs/images/empi-update-3.svg"><img src="/hapi-fhir/docs/images/empi-update-3.svg" alt="MDM Create 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-update-3.svg"><img src="/hapi-fhir/docs/images/empi-update-3.svg" alt="MDM Update 3" style="margin-left: 15px; margin-bottom: 15px;" /></a>
 
-<a href="/hapi-fhir/docs/images/empi-update-4.svg"><img src="/hapi-fhir/docs/images/empi-update-4.svg" alt="MDM Create 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-update-4.svg"><img src="/hapi-fhir/docs/images/empi-update-4.svg" alt="MDM Update 4" style="margin-left: 15px; margin-bottom: 15px;" /></a>
 
-<a href="/hapi-fhir/docs/images/empi-update-5.svg"><img src="/hapi-fhir/docs/images/empi-update-5.svg" alt="MDM Create 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-update-5.svg"><img src="/hapi-fhir/docs/images/empi-update-5.svg" alt="MDM Update 5" style="margin-left: 15px; margin-bottom: 15px;" /></a>
 
-<a href="/hapi-fhir/docs/images/empi-update-6.svg"><img src="/hapi-fhir/docs/images/empi-update-6.svg" alt="MDM Create 1" style="margin-left: 15px; margin-bottom: 15px;" /></a>
+<a href="/hapi-fhir/docs/images/empi-update-6.svg"><img src="/hapi-fhir/docs/images/empi-update-6.svg" alt="MDM Update 6" style="margin-left: 15px; margin-bottom: 15px;" /></a>
 

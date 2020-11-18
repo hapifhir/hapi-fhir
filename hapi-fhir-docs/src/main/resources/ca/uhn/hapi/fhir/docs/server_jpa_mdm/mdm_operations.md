@@ -356,8 +356,8 @@ This operation returns the merged Patient resource.
 When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
 
 This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient 
-resources that match it according to the matching rules. The response will include search score that is calculated by averaging the
-number of matched rules against total rules checked for the Patient resource, and assigning appropriate match grade extension. 
+resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the
+number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
 For example, the following request may be submitted:
 

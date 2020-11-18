@@ -18,7 +18,7 @@ There are several resources that are used:
 
 With MDM enabled, the default behavior of the MDM is to create a new Golden Patient record for every Patient that is 
 created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually via the 
-[MDM Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html).
+[MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).
 
 In a typical configuration it is often desirable to have links be created automatically using matching rules. For example, 
 you might decide that if a Patient shares the same name, gender, and date of birth as another Patient, you have at 
@@ -37,15 +37,15 @@ It is important to note that before a resource is processed by MDM, it is first 
 
 Below are some simplifying principles HAPI MDM follows to reduce complexity and ensure data integrity.
 
-1. When MDM is enabled on a HAPI FHIR server, any Patient resource in the repository that has the "hapi-empi" tag is
+1. When MDM is enabled on a HAPI FHIR server, any Patient resource in the repository that has the "hapi-mdm" tag is
  considered read-only by the FHIR endpoint. These Golden Patient resources are managed exclusively by HAPI MDM. Users 
- can only change them via [MDM Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html).  In most cases, users 
+ can only change them via [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).  In most cases, users 
  will indirectly change them by creating and updating target Patient resources. For the rest of this document, assume
-  "Golden Patient" refers to a "hapi-empi" tagged Patient resource.
+  "Golden Patient" refers to a "HAPI-MDM" tagged Patient resource.
 
 1. Every Patient in the system has a MATCH link to at most one Golden Patient resource.
 
-1. The only Patient resources in the system that do not have a MATCH link are those that have the 'no-empi' tag or 
+1. The only Patient resources in the system that do not have a MATCH link are those that have the 'NO-EMPI' tag or 
 those that have POSSIBLE_MATCH links pending review.
 
 1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a Patient has 
@@ -111,5 +111,5 @@ When MDM is enabled, the HAPI FHIR JPA Server does the following things on start
 
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
 1. It creates two MESSAGE subscriptions, called 'empi-patient' and 'empi-practitioner' that match all incoming Patient and Practitioner resources and send them to an internal queue called "empi".  The JPA Server listens to this queue and links incoming resources to Persons.
-1. The [MDM Operations](/hapi-fhir/docs/server_jpa_empi/empi_operations.html) are registered with the server.
+1. The [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html) are registered with the server.
 1. It registers a new dao interceptor that restricts access to MDM managed Golden Patient records.
