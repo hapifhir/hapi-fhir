@@ -9,13 +9,10 @@ import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -25,8 +22,6 @@ import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.List;
@@ -69,16 +64,16 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 		myProvider = myCqlProviderLoader.buildDstu3Provider();
 
 		// Load terminology for measure tests (HEDIS measures)
-		loadBundle("hedis-valuesets-bundle.json");
+		loadBundle("dstu3/hedis-valuesets-bundle.json");
 
 		// Load libraries
-		loadResource("library/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
-		loadResource("library/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
-		loadResource("library/library-asf-logic.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/library/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/library/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
 
 		// load test data and conversion library for $apply operation tests
-		loadResource("general-practitioner.json", myFhirContext, myDaoRegistry);
-		loadResource("general-patient.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/general-practitioner.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/general-patient.json", myFhirContext, myDaoRegistry);
 	}
 
 	// FIXME KBD
@@ -87,7 +82,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 	public void evaluateMeasure() throws IOException {
 		Patient patient = new Patient();
 		// FIXME KBD add something to patient we want to measure
-		loadResource("measure-asf.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
 
 		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
 
@@ -105,8 +100,8 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 	}
 
 	/*
-	See library-asf-cql.txt to see the cql encoded within library-asf-logic.json
-	See library-asf-elm.xml to see the elm encoded within library-asf-logic.json
+	See dstu3/library-asf-cql.txt to see the cql encoded within library-asf-logic.json
+	See dstu3/library-asf-elm.xml to see the elm encoded within library-asf-logic.json
 	 */
 
 	/*
@@ -135,8 +130,8 @@ Direct Reference Codes:
 	@Test
 	public void evaluatePatientMeasure() throws IOException {
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("measure-asf.json", myFhirContext, myDaoRegistry);
-		Bundle result = loadBundle("test-patient-6529-data.json");
+		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
+		Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		assertThat(entries, hasSize(22));
@@ -176,10 +171,10 @@ Direct Reference Codes:
 	@Test
 	public void evaluatePopulationMeasure() throws IOException {
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("measure-asf.json", myFhirContext, myDaoRegistry);
-		loadBundle("test-patient-6529-data.json");
+		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
+		loadBundle("dstu3/test-patient-6529-data.json");
 		// Add a second patient with the same data
-		loadBundle("test-patient-9999-x-data.json");
+		loadBundle("dstu3/test-patient-9999-x-data.json");
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String periodStart = "2003-01-01";
