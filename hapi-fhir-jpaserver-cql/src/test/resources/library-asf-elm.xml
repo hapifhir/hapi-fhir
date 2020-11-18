@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="urn:hl7-org:elm:r1" xmlns:t="urn:hl7-org:elm-types:r1"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			xmlns:fhir="http://hl7.org/fhir" xmlns:a="urn:hl7-org:cql-annotations:r1">
+	<annotation startLine="124" startChar="3" endLine="124" endChar="50" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<annotation startLine="130" startChar="3" endLine="130" endChar="48" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<annotation startLine="139" startChar="3" endLine="139" endChar="63" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<annotation startLine="151" startChar="3" endLine="151" endChar="63" message="Could not resolve membership operator for terminology target of the retrieve." errorType="semantic" errorSeverity="warning" xsi:type="a:CqlToElmError"/>
+	<identifier id="ASF_FHIR" version="1.0.0"/>
+	<schemaIdentifier id="urn:hl7-org:elm" version="r1"/>
+	<usings>
+		<def localIdentifier="System" uri="urn:hl7-org:elm-types:r1"/>
+		<def localIdentifier="FHIR" uri="http://hl7.org/fhir" version="3.0.0"/>
+	</usings>
+	<includes>
+		<def localIdentifier="FHIRHelpers" path="FHIRHelpers" version="3.0.0"/>
+	</includes>
+	<parameters>
+		<def name="Product Line" accessLevel="Public">
+			<parameterTypeSpecifier name="t:String" xsi:type="NamedTypeSpecifier"/>
+		</def>
+		<def name="Measurement Period" accessLevel="Public">
+			<parameterTypeSpecifier xsi:type="IntervalTypeSpecifier">
+				<pointType name="t:DateTime" xsi:type="NamedTypeSpecifier"/>
+			</parameterTypeSpecifier>
+		</def>
+	</parameters>
+	<codeSystems>
+		<def name="LOINC" id="http://loinc.org" accessLevel="Public"/>
+		<def name="CQFramework" id="http://cqframework.info/codesystem/placeholder" accessLevel="Public"/>
+	</codeSystems>
+	<valueSets>
+		<def name="Alcohol Counseling and Treatment" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437" accessLevel="Public"/>
+		<def name="Alcohol Screening" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337" accessLevel="Public"/>
+		<def name="Alcohol use disorder" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339" accessLevel="Public"/>
+		<def name="Dementia" id="http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074" accessLevel="Public"/>
+	</valueSets>
+	<codes>
+		<def name="Alcoholic drinks per drinking day - Reported" id="11287-0" accessLevel="Public">
+			<codeSystem name="LOINC"/>
+		</def>
+		<def name="AUDIT Total Score (in points)" id="75624-7" accessLevel="Public">
+			<codeSystem name="LOINC"/>
+		</def>
+		<def name="AUDIT-C Total Score (in points)" id="75626-2" accessLevel="Public">
+			<codeSystem name="LOINC"/>
+		</def>
+	</codes>
+	<statements>
+		<def name="Patient" context="Patient">
+			<expression xsi:type="SingletonFrom">
+				<operand dataType="fhir:Patient" xsi:type="Retrieve"/>
+			</expression>
+		</def>
+		<def name="Initial Population" context="Patient" accessLevel="Public">
+			<expression xsi:type="GreaterOrEqual">
+				<operand precision="Year" xsi:type="CalculateAgeAt">
+					<operand xsi:type="ToDateTime">
+						<operand path="birthDate.value" xsi:type="Property">
+							<source name="Patient" xsi:type="ExpressionRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Start">
+						<operand name="Measurement Period" xsi:type="ParameterRef"/>
+					</operand>
+				</operand>
+				<operand valueType="t:Integer" value="18" xsi:type="Literal"/>
+			</expression>
+		</def>
+		<def name="Denominator Exclusion" context="Patient" accessLevel="Public">
+			<expression xsi:type="Or">
+				<operand xsi:type="Exists">
+					<operand xsi:type="Query">
+						<source alias="AlcoholUse">
+							<expression dataType="fhir:Condition" codeProperty="code" xsi:type="Retrieve">
+								<codes name="Alcohol use disorder" xsi:type="ValueSetRef"/>
+							</expression>
+						</source>
+						<where xsi:type="And">
+							<operand xsi:type="In">
+								<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand path="clinicalStatus" scope="AlcoholUse" xsi:type="Property"/>
+								</operand>
+								<operand xsi:type="List">
+									<element valueType="t:String" value="active" xsi:type="Literal"/>
+									<element valueType="t:String" value="recurrence" xsi:type="Literal"/>
+								</operand>
+							</operand>
+							<operand precision="Day" xsi:type="In">
+								<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand path="assertedDate" scope="AlcoholUse" xsi:type="Property"/>
+								</operand>
+								<operand lowClosed="true" highClosed="true" xsi:type="Interval">
+									<low xsi:type="Subtract">
+										<operand xsi:type="Start">
+											<operand name="Measurement Period" xsi:type="ParameterRef"/>
+										</operand>
+										<operand value="1" unit="year" xsi:type="Quantity"/>
+									</low>
+									<high xsi:type="End">
+										<operand name="Measurement Period" xsi:type="ParameterRef"/>
+									</high>
+								</operand>
+							</operand>
+						</where>
+					</operand>
+				</operand>
+				<operand xsi:type="Exists">
+					<operand xsi:type="Query">
+						<source alias="D">
+							<expression dataType="fhir:Condition" codeProperty="code" xsi:type="Retrieve">
+								<codes name="Dementia" xsi:type="ValueSetRef"/>
+							</expression>
+						</source>
+						<where xsi:type="And">
+							<operand xsi:type="In">
+								<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand path="clinicalStatus" scope="D" xsi:type="Property"/>
+								</operand>
+								<operand xsi:type="List">
+									<element valueType="t:String" value="active" xsi:type="Literal"/>
+									<element valueType="t:String" value="recurrence" xsi:type="Literal"/>
+								</operand>
+							</operand>
+							<operand precision="Day" xsi:type="In">
+								<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand path="assertedDate" scope="D" xsi:type="Property"/>
+								</operand>
+								<operand lowClosed="true" highClosed="true" xsi:type="Interval">
+									<low xsi:type="Start">
+										<operand name="Measurement Period" xsi:type="ParameterRef"/>
+									</low>
+									<high xsi:type="Subtract">
+										<operand xsi:type="End">
+											<operand name="Measurement Period" xsi:type="ParameterRef"/>
+										</operand>
+										<operand value="60" unit="days" xsi:type="Quantity"/>
+									</high>
+								</operand>
+							</operand>
+						</where>
+					</operand>
+				</operand>
+			</expression>
+		</def>
+		<def name="Denominator 1" context="Patient" accessLevel="Public">
+			<expression valueType="t:Boolean" value="true" xsi:type="Literal"/>
+		</def>
+		<def name="AUDIT-C Assessment" context="Patient" accessLevel="Public">
+			<expression xsi:type="Query">
+				<source alias="A">
+					<expression dataType="fhir:Observation" codeProperty="code" xsi:type="Retrieve">
+						<codes xsi:type="ToList">
+							<operand name="AUDIT-C Total Score (in points)" xsi:type="CodeRef"/>
+						</codes>
+					</expression>
+				</source>
+				<where xsi:type="And">
+					<operand xsi:type="And">
+						<operand xsi:type="In">
+							<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand path="status" scope="A" xsi:type="Property"/>
+							</operand>
+							<operand xsi:type="List">
+								<element valueType="t:String" value="final" xsi:type="Literal"/>
+								<element valueType="t:String" value="amended" xsi:type="Literal"/>
+								<element valueType="t:String" value="corrected" xsi:type="Literal"/>
+							</operand>
+						</operand>
+						<operand precision="Day" xsi:type="In">
+							<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand asType="fhir:dateTime" xsi:type="As">
+									<operand path="effective" scope="A" xsi:type="Property"/>
+								</operand>
+							</operand>
+							<operand name="Measurement Period" xsi:type="ParameterRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Not">
+						<operand xsi:type="IsNull">
+							<operand path="value" scope="A" xsi:type="Property"/>
+						</operand>
+					</operand>
+				</where>
+			</expression>
+		</def>
+		<def name="AUDIT Assessment" context="Patient" accessLevel="Public">
+			<expression xsi:type="Query">
+				<source alias="A">
+					<expression dataType="fhir:Observation" codeProperty="code" xsi:type="Retrieve">
+						<codes xsi:type="ToList">
+							<operand name="AUDIT Total Score (in points)" xsi:type="CodeRef"/>
+						</codes>
+					</expression>
+				</source>
+				<where xsi:type="And">
+					<operand xsi:type="And">
+						<operand xsi:type="In">
+							<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand path="status" scope="A" xsi:type="Property"/>
+							</operand>
+							<operand xsi:type="List">
+								<element valueType="t:String" value="final" xsi:type="Literal"/>
+								<element valueType="t:String" value="amended" xsi:type="Literal"/>
+								<element valueType="t:String" value="corrected" xsi:type="Literal"/>
+							</operand>
+						</operand>
+						<operand precision="Day" xsi:type="In">
+							<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand asType="fhir:dateTime" xsi:type="As">
+									<operand path="effective" scope="A" xsi:type="Property"/>
+								</operand>
+							</operand>
+							<operand name="Measurement Period" xsi:type="ParameterRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Not">
+						<operand xsi:type="IsNull">
+							<operand path="value" scope="A" xsi:type="Property"/>
+						</operand>
+					</operand>
+				</where>
+			</expression>
+		</def>
+		<def name="Patient is Male" context="Patient" accessLevel="Public">
+			<expression xsi:type="Equal">
+				<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+					<operand path="gender" xsi:type="Property">
+						<source name="Patient" xsi:type="ExpressionRef"/>
+					</operand>
+				</operand>
+				<operand valueType="t:String" value="male" xsi:type="Literal"/>
+			</expression>
+		</def>
+		<def name="Five or more drinks per day Assessment" context="Patient" accessLevel="Public">
+			<expression xsi:type="Query">
+				<source alias="A">
+					<expression dataType="fhir:Observation" codeProperty="code" xsi:type="Retrieve">
+						<codes xsi:type="ToList">
+							<operand name="Alcoholic drinks per drinking day - Reported" xsi:type="CodeRef"/>
+						</codes>
+					</expression>
+				</source>
+				<where xsi:type="And">
+					<operand xsi:type="And">
+						<operand xsi:type="In">
+							<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand path="status" scope="A" xsi:type="Property"/>
+							</operand>
+							<operand xsi:type="List">
+								<element valueType="t:String" value="final" xsi:type="Literal"/>
+								<element valueType="t:String" value="amended" xsi:type="Literal"/>
+								<element valueType="t:String" value="corrected" xsi:type="Literal"/>
+							</operand>
+						</operand>
+						<operand precision="Day" xsi:type="In">
+							<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand asType="fhir:dateTime" xsi:type="As">
+									<operand path="effective" scope="A" xsi:type="Property"/>
+								</operand>
+							</operand>
+							<operand name="Measurement Period" xsi:type="ParameterRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="GreaterOrEqual">
+						<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+							<operand asType="fhir:Quantity" xsi:type="As">
+								<operand path="value" scope="A" xsi:type="Property"/>
+							</operand>
+						</operand>
+						<operand value="5" unit="{drinks}/d" xsi:type="Quantity"/>
+					</operand>
+				</where>
+			</expression>
+		</def>
+		<def name="Patient is Female" context="Patient" accessLevel="Public">
+			<expression xsi:type="Equal">
+				<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+					<operand path="gender" xsi:type="Property">
+						<source name="Patient" xsi:type="ExpressionRef"/>
+					</operand>
+				</operand>
+				<operand valueType="t:String" value="female" xsi:type="Literal"/>
+			</expression>
+		</def>
+		<def name="Four or more drinks per day Assessment" context="Patient" accessLevel="Public">
+			<expression xsi:type="Query">
+				<source alias="A">
+					<expression dataType="fhir:Observation" codeProperty="code" xsi:type="Retrieve">
+						<codes xsi:type="ToList">
+							<operand name="Alcoholic drinks per drinking day - Reported" xsi:type="CodeRef"/>
+						</codes>
+					</expression>
+				</source>
+				<where xsi:type="And">
+					<operand xsi:type="And">
+						<operand xsi:type="In">
+							<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand path="status" scope="A" xsi:type="Property"/>
+							</operand>
+							<operand xsi:type="List">
+								<element valueType="t:String" value="final" xsi:type="Literal"/>
+								<element valueType="t:String" value="amended" xsi:type="Literal"/>
+								<element valueType="t:String" value="corrected" xsi:type="Literal"/>
+							</operand>
+						</operand>
+						<operand precision="Day" xsi:type="In">
+							<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand asType="fhir:dateTime" xsi:type="As">
+									<operand path="effective" scope="A" xsi:type="Property"/>
+								</operand>
+							</operand>
+							<operand name="Measurement Period" xsi:type="ParameterRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="GreaterOrEqual">
+						<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+							<operand asType="fhir:Quantity" xsi:type="As">
+								<operand path="value" scope="A" xsi:type="Property"/>
+							</operand>
+						</operand>
+						<operand value="4" unit="{drinks}/d" xsi:type="Quantity"/>
+					</operand>
+				</where>
+			</expression>
+		</def>
+		<def name="Patient is 65 or Over" context="Patient" accessLevel="Public">
+			<expression xsi:type="GreaterOrEqual">
+				<operand precision="Year" xsi:type="CalculateAgeAt">
+					<operand xsi:type="ToDateTime">
+						<operand path="birthDate.value" xsi:type="Property">
+							<source name="Patient" xsi:type="ExpressionRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Start">
+						<operand name="Measurement Period" xsi:type="ParameterRef"/>
+					</operand>
+				</operand>
+				<operand valueType="t:Integer" value="65" xsi:type="Literal"/>
+			</expression>
+		</def>
+		<def name="Numerator 1" context="Patient" accessLevel="Public">
+			<expression xsi:type="Or">
+				<operand xsi:type="Or">
+					<operand xsi:type="Or">
+						<operand xsi:type="Or">
+							<operand xsi:type="Exists">
+								<operand name="AUDIT-C Assessment" xsi:type="ExpressionRef"/>
+							</operand>
+							<operand xsi:type="Exists">
+								<operand name="AUDIT Assessment" xsi:type="ExpressionRef"/>
+							</operand>
+						</operand>
+						<operand xsi:type="And">
+							<operand name="Patient is Male" xsi:type="ExpressionRef"/>
+							<operand xsi:type="Exists">
+								<operand name="Five or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+							</operand>
+						</operand>
+					</operand>
+					<operand xsi:type="And">
+						<operand name="Patient is Female" xsi:type="ExpressionRef"/>
+						<operand xsi:type="Or">
+							<operand xsi:type="Exists">
+								<operand name="Four or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+							</operand>
+							<operand xsi:type="Exists">
+								<operand name="Five or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+							</operand>
+						</operand>
+					</operand>
+				</operand>
+				<operand xsi:type="And">
+					<operand name="Patient is 65 or Over" xsi:type="ExpressionRef"/>
+					<operand xsi:type="Or">
+						<operand xsi:type="Exists">
+							<operand name="Four or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+						</operand>
+						<operand xsi:type="Exists">
+							<operand name="Five or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+						</operand>
+					</operand>
+				</operand>
+			</expression>
+		</def>
+		<def name="Positive Assessment for Unhealthy Alcohol Use" context="Patient" accessLevel="Public">
+			<expression xsi:type="Union">
+				<operand xsi:type="Union">
+					<operand xsi:type="Query">
+						<source alias="A">
+							<expression name="AUDIT Assessment" xsi:type="ExpressionRef"/>
+						</source>
+						<where xsi:type="GreaterOrEqual">
+							<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand asType="fhir:Quantity" xsi:type="As">
+									<operand path="value" scope="A" xsi:type="Property"/>
+								</operand>
+							</operand>
+							<operand xsi:type="ToQuantity">
+								<operand valueType="t:Integer" value="8" xsi:type="Literal"/>
+							</operand>
+						</where>
+					</operand>
+					<operand xsi:type="Query">
+						<source alias="A">
+							<expression name="AUDIT-C Assessment" xsi:type="ExpressionRef"/>
+						</source>
+						<where xsi:type="Or">
+							<operand xsi:type="And">
+								<operand name="Patient is Male" xsi:type="ExpressionRef"/>
+								<operand xsi:type="GreaterOrEqual">
+									<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+										<operand asType="fhir:Quantity" xsi:type="As">
+											<operand path="value" scope="A" xsi:type="Property"/>
+										</operand>
+									</operand>
+									<operand xsi:type="ToQuantity">
+										<operand valueType="t:Integer" value="4" xsi:type="Literal"/>
+									</operand>
+								</operand>
+							</operand>
+							<operand xsi:type="And">
+								<operand name="Patient is Female" xsi:type="ExpressionRef"/>
+								<operand xsi:type="GreaterOrEqual">
+									<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+										<operand asType="fhir:Quantity" xsi:type="As">
+											<operand path="value" scope="A" xsi:type="Property"/>
+										</operand>
+									</operand>
+									<operand xsi:type="ToQuantity">
+										<operand valueType="t:Integer" value="3" xsi:type="Literal"/>
+									</operand>
+								</operand>
+							</operand>
+						</where>
+					</operand>
+				</operand>
+				<operand xsi:type="Union">
+					<operand xsi:type="Query">
+						<source alias="A">
+							<expression name="Five or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+						</source>
+						<where xsi:type="And">
+							<operand name="Patient is Male" xsi:type="ExpressionRef"/>
+							<operand xsi:type="GreaterOrEqual">
+								<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand asType="fhir:Quantity" xsi:type="As">
+										<operand path="value" scope="A" xsi:type="Property"/>
+									</operand>
+								</operand>
+								<operand xsi:type="ToQuantity">
+									<operand valueType="t:Integer" value="1" xsi:type="Literal"/>
+								</operand>
+							</operand>
+						</where>
+					</operand>
+					<operand xsi:type="Query">
+						<source alias="A">
+							<expression name="Four or more drinks per day Assessment" xsi:type="ExpressionRef"/>
+						</source>
+						<where xsi:type="And">
+							<operand xsi:type="Or">
+								<operand name="Patient is Female" xsi:type="ExpressionRef"/>
+								<operand name="Patient is 65 or Over" xsi:type="ExpressionRef"/>
+							</operand>
+							<operand xsi:type="GreaterOrEqual">
+								<operand name="ToQuantity" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand asType="fhir:Quantity" xsi:type="As">
+										<operand path="value" scope="A" xsi:type="Property"/>
+									</operand>
+								</operand>
+								<operand xsi:type="ToQuantity">
+									<operand valueType="t:Integer" value="1" xsi:type="Literal"/>
+								</operand>
+							</operand>
+						</where>
+					</operand>
+				</operand>
+			</expression>
+		</def>
+		<def name="Denominator 2" context="Patient" accessLevel="Public">
+			<expression xsi:type="Exists">
+				<operand name="Positive Assessment for Unhealthy Alcohol Use" xsi:type="ExpressionRef"/>
+			</expression>
+		</def>
+		<def name="Initial Positive Assessment for Unhealthy Alcohol Use" context="Patient" accessLevel="Public">
+			<expression xsi:type="List">
+				<element xsi:type="First">
+					<source xsi:type="Query">
+						<source alias="A">
+							<expression name="Positive Assessment for Unhealthy Alcohol Use" xsi:type="ExpressionRef"/>
+						</source>
+						<sort>
+							<by direction="asc" xsi:type="ByExpression">
+								<expression path="value" xsi:type="Property">
+									<source name="effective" xsi:type="IdentifierRef"/>
+								</expression>
+							</by>
+						</sort>
+					</source>
+				</element>
+			</expression>
+		</def>
+		<def name="Followup After Positive Screen" context="Patient" accessLevel="Public">
+			<expression xsi:type="Union">
+				<operand xsi:type="As">
+					<operand xsi:type="Union">
+						<operand xsi:type="As">
+							<operand xsi:type="Union">
+								<operand xsi:type="As">
+									<operand xsi:type="Query">
+										<source alias="Proc">
+											<expression dataType="fhir:Procedure" codeProperty="code" xsi:type="Retrieve">
+												<codes name="Alcohol Counseling and Treatment" xsi:type="ValueSetRef"/>
+											</expression>
+										</source>
+										<where xsi:type="Equal">
+											<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+												<operand path="status" scope="Proc" xsi:type="Property"/>
+											</operand>
+											<operand valueType="t:String" value="completed" xsi:type="Literal"/>
+										</where>
+									</operand>
+									<asTypeSpecifier xsi:type="ListTypeSpecifier">
+										<elementType xsi:type="ChoiceTypeSpecifier">
+											<choice name="fhir:Procedure" xsi:type="NamedTypeSpecifier"/>
+											<choice name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+										</elementType>
+									</asTypeSpecifier>
+								</operand>
+								<operand xsi:type="As">
+									<operand xsi:type="Query">
+										<source alias="Obs">
+											<expression dataType="fhir:Observation" codeProperty="code" xsi:type="Retrieve">
+												<codes name="Alcohol Counseling and Treatment" xsi:type="ValueSetRef"/>
+											</expression>
+										</source>
+										<where xsi:type="In">
+											<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+												<operand path="status" scope="Obs" xsi:type="Property"/>
+											</operand>
+											<operand xsi:type="List">
+												<element valueType="t:String" value="final" xsi:type="Literal"/>
+												<element valueType="t:String" value="amended" xsi:type="Literal"/>
+												<element valueType="t:String" value="corrected" xsi:type="Literal"/>
+											</operand>
+										</where>
+									</operand>
+									<asTypeSpecifier xsi:type="ListTypeSpecifier">
+										<elementType xsi:type="ChoiceTypeSpecifier">
+											<choice name="fhir:Procedure" xsi:type="NamedTypeSpecifier"/>
+											<choice name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+										</elementType>
+									</asTypeSpecifier>
+								</operand>
+							</operand>
+							<asTypeSpecifier xsi:type="ListTypeSpecifier">
+								<elementType xsi:type="ChoiceTypeSpecifier">
+									<choice name="fhir:Procedure" xsi:type="NamedTypeSpecifier"/>
+									<choice name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+								</elementType>
+							</asTypeSpecifier>
+						</operand>
+						<operand xsi:type="As">
+							<operand xsi:type="Query">
+								<source alias="Proc">
+									<expression dataType="fhir:Procedure" codeProperty="code" xsi:type="Retrieve">
+										<codes name="Alcohol Screening" xsi:type="ValueSetRef"/>
+									</expression>
+								</source>
+								<where xsi:type="Equal">
+									<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+										<operand path="status" scope="Proc" xsi:type="Property"/>
+									</operand>
+									<operand valueType="t:String" value="completed" xsi:type="Literal"/>
+								</where>
+							</operand>
+							<asTypeSpecifier xsi:type="ListTypeSpecifier">
+								<elementType xsi:type="ChoiceTypeSpecifier">
+									<choice name="fhir:Procedure" xsi:type="NamedTypeSpecifier"/>
+									<choice name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+								</elementType>
+							</asTypeSpecifier>
+						</operand>
+					</operand>
+					<asTypeSpecifier xsi:type="ListTypeSpecifier">
+						<elementType xsi:type="ChoiceTypeSpecifier">
+							<choice name="fhir:Procedure" xsi:type="NamedTypeSpecifier"/>
+							<choice name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+						</elementType>
+					</asTypeSpecifier>
+				</operand>
+				<operand xsi:type="As">
+					<operand xsi:type="Query">
+						<source alias="Obs">
+							<expression dataType="fhir:Observation" codeProperty="code" xsi:type="Retrieve">
+								<codes name="Alcohol Screening" xsi:type="ValueSetRef"/>
+							</expression>
+						</source>
+						<where xsi:type="In">
+							<operand name="ToString" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+								<operand path="status" scope="Obs" xsi:type="Property"/>
+							</operand>
+							<operand xsi:type="List">
+								<element valueType="t:String" value="final" xsi:type="Literal"/>
+								<element valueType="t:String" value="amended" xsi:type="Literal"/>
+								<element valueType="t:String" value="corrected" xsi:type="Literal"/>
+							</operand>
+						</where>
+					</operand>
+					<asTypeSpecifier xsi:type="ListTypeSpecifier">
+						<elementType xsi:type="ChoiceTypeSpecifier">
+							<choice name="fhir:Procedure" xsi:type="NamedTypeSpecifier"/>
+							<choice name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+						</elementType>
+					</asTypeSpecifier>
+				</operand>
+			</expression>
+		</def>
+		<def name="Numerator 2" context="Patient" accessLevel="Public">
+			<expression xsi:type="Exists">
+				<operand xsi:type="Query">
+					<source alias="A">
+						<expression name="Initial Positive Assessment for Unhealthy Alcohol Use" xsi:type="ExpressionRef"/>
+					</source>
+					<relationship alias="F" xsi:type="With">
+						<expression name="Followup After Positive Screen" xsi:type="ExpressionRef"/>
+						<suchThat xsi:type="If">
+							<condition asType="t:Boolean" xsi:type="As">
+								<operand xsi:type="Is">
+									<operand name="F" xsi:type="AliasRef"/>
+									<isTypeSpecifier name="fhir:Observation" xsi:type="NamedTypeSpecifier"/>
+								</operand>
+							</condition>
+							<then precision="Day" xsi:type="In">
+								<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand asType="fhir:dateTime" xsi:type="As">
+										<operand path="effective" scope="F" xsi:type="Property"/>
+									</operand>
+								</operand>
+								<operand lowClosed="true" highClosed="true" xsi:type="Interval">
+									<low name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+										<operand asType="fhir:dateTime" xsi:type="As">
+											<operand path="effective" scope="A" xsi:type="Property"/>
+										</operand>
+									</low>
+									<high xsi:type="Add">
+										<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+											<operand asType="fhir:dateTime" xsi:type="As">
+												<operand path="effective" scope="A" xsi:type="Property"/>
+											</operand>
+										</operand>
+										<operand value="2" unit="months" xsi:type="Quantity"/>
+									</high>
+								</operand>
+							</then>
+							<else precision="Day" xsi:type="In">
+								<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+									<operand path="end" xsi:type="Property">
+										<source path="performed" scope="F" xsi:type="Property"/>
+									</operand>
+								</operand>
+								<operand lowClosed="true" highClosed="true" xsi:type="Interval">
+									<low name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+										<operand asType="fhir:dateTime" xsi:type="As">
+											<operand path="effective" scope="A" xsi:type="Property"/>
+										</operand>
+									</low>
+									<high xsi:type="Add">
+										<operand name="ToDateTime" libraryName="FHIRHelpers" xsi:type="FunctionRef">
+											<operand asType="fhir:dateTime" xsi:type="As">
+												<operand path="effective" scope="A" xsi:type="Property"/>
+											</operand>
+										</operand>
+										<operand value="2" unit="months" xsi:type="Quantity"/>
+									</high>
+								</operand>
+							</else>
+						</suchThat>
+					</relationship>
+				</operand>
+			</expression>
+		</def>
+		<def name="Stratifier 1" context="Patient" accessLevel="Public">
+			<expression xsi:type="In">
+				<operand precision="Year" xsi:type="CalculateAgeAt">
+					<operand xsi:type="ToDateTime">
+						<operand path="birthDate.value" xsi:type="Property">
+							<source name="Patient" xsi:type="ExpressionRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Start">
+						<operand name="Measurement Period" xsi:type="ParameterRef"/>
+					</operand>
+				</operand>
+				<operand lowClosed="true" highClosed="true" xsi:type="Interval">
+					<low valueType="t:Integer" value="18" xsi:type="Literal"/>
+					<high valueType="t:Integer" value="44" xsi:type="Literal"/>
+				</operand>
+			</expression>
+		</def>
+		<def name="Stratifier 2" context="Patient" accessLevel="Public">
+			<expression xsi:type="In">
+				<operand precision="Year" xsi:type="CalculateAgeAt">
+					<operand xsi:type="ToDateTime">
+						<operand path="birthDate.value" xsi:type="Property">
+							<source name="Patient" xsi:type="ExpressionRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Start">
+						<operand name="Measurement Period" xsi:type="ParameterRef"/>
+					</operand>
+				</operand>
+				<operand lowClosed="true" highClosed="true" xsi:type="Interval">
+					<low valueType="t:Integer" value="45" xsi:type="Literal"/>
+					<high valueType="t:Integer" value="64" xsi:type="Literal"/>
+				</operand>
+			</expression>
+		</def>
+		<def name="Stratifier 3" context="Patient" accessLevel="Public">
+			<expression xsi:type="GreaterOrEqual">
+				<operand precision="Year" xsi:type="CalculateAgeAt">
+					<operand xsi:type="ToDateTime">
+						<operand path="birthDate.value" xsi:type="Property">
+							<source name="Patient" xsi:type="ExpressionRef"/>
+						</operand>
+					</operand>
+					<operand xsi:type="Start">
+						<operand name="Measurement Period" xsi:type="ParameterRef"/>
+					</operand>
+				</operand>
+				<operand valueType="t:Integer" value="65" xsi:type="Literal"/>
+			</expression>
+		</def>
+	</statements>
+</library>

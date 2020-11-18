@@ -1,0 +1,40 @@
+{
+  "resourceType": "Patient",
+  "id": "Patient-12214",
+  "active": false,
+  "name": [
+    {
+      "family": "N Geriatric",
+      "given": [
+        "2"
+      ],
+      "suffix": [
+        "Jr"
+      ]
+    }
+  ],
+  "telecom": [
+    {
+      "system": "phone",
+      "value": "586-555-7576",
+      "use": "home"
+    },
+    {
+      "system": "phone",
+      "value": "586-555-0297",
+      "use": "work"
+    }
+  ],
+  "gender": "male",
+  "birthDate": "1946-05-07",
+  "address": [
+    {
+      "line": [
+        "202 Burlington Rd."
+      ],
+      "city": "Bedford",
+      "state": "MA",
+      "postalCode": "01730"
+    }
+  ]
+}

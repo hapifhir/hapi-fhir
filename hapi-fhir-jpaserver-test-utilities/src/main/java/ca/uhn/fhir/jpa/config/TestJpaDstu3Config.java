@@ -1,25 +1,5 @@
 package ca.uhn.fhir.jpa.config;
 
-/*-
- * #%L
- * HAPI FHIR JPA Server Test Utilities
- * %%
- * Copyright (C) 2014 - 2020 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
@@ -45,10 +25,10 @@ import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-// TODO KBD Can we remove this Class entirely and just use a Generic one (same for TestJpaDstu3Config)?
+// TODO KBD Can we remove this Class entirely and just use a Generic one (same for TestJpaR4Config)?
 @Import(TestJpaConfig.class)
-public class TestJpaR4Config extends BaseJavaConfigR4 {
-	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaR4Config.class);
+public class TestJpaDstu3Config extends BaseJavaConfigDstu3 {
+	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaDstu3Config.class);
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -62,7 +42,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 		BasicDataSource retVal = new BasicDataSource();
 
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+		retVal.setUrl("jdbc:h2:mem:testdb_dstu3");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -91,7 +71,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
-		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
@@ -133,7 +113,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Bean
-	public DefaultProfileValidationSupport validationSupportChainR4() {
+	public DefaultProfileValidationSupport validationSupportChainDstu3() {
 		return new DefaultProfileValidationSupport(myFhirContext);
 	}
 }
