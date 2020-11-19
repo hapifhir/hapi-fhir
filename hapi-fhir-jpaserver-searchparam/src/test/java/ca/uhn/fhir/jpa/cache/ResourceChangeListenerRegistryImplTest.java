@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -66,7 +65,6 @@ class ResourceChangeListenerRegistryImplTest {
 
 	@BeforeEach
 	public void before() {
-		when(myResourceVersionSvc.getVersionMap("Patient", myMap)).thenReturn(ResourceVersionMap.fromResourceIds(new ArrayList<>()));
 		myEntries = new HashSet<>();
 		myEntries.add(new ResourceChangeListenerWithSearchParamMap(myTestListener, myMap));
 		resetMockCache();

@@ -79,7 +79,13 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
 		requiresActiveSearchParams();
-		return myActiveSearchParams.get(theResourceName, theParamName);
+
+		// Can still be null in unit test scenarios
+		if (myActiveSearchParams != null) {
+			return myActiveSearchParams.get(theResourceName, theParamName);
+		} else {
+			return null;
+		}
 	}
 
 	@Override

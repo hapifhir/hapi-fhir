@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.model.sched.HapiJob;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
@@ -32,22 +34,24 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
-import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+import java.util.stream.Collectors;
 
 
-public class SubscriptionLoader {
+public class SubscriptionLoader implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 	private final Object mySyncSubscriptionsLock = new Object();
@@ -62,6 +66,11 @@ public class SubscriptionLoader {
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingInterceptor;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+
+	private IFhirResourceDao<?> mySubscriptionDao;
+	private SearchParameterMap mySearchParameterMap;
 
 	/**
 	 * Constructor
@@ -70,11 +79,24 @@ public class SubscriptionLoader {
 		super();
 	}
 
+	@PostConstruct
+	public void registerListener() {
+		if (subscriptionsDaoExists()) {
+			mySubscriptionDao = myDaoRegistry.getSubscriptionDao();
+		}
+		mySearchParameterMap = getSearchParameterMap();
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this);
+	}
+
+	private boolean subscriptionsDaoExists() {
+		return myDaoRegistry == null || myDaoRegistry.isResourceTypeSupported("Subscription");
+	}
+
 	/**
 	 * Read the existing subscriptions from the database
 	 */
 	public void syncSubscriptions() {
-		if (myDaoRegistry != null && !myDaoRegistry.isResourceTypeSupported("Subscription")) {
+		if (!subscriptionsDaoExists()) {
 			return;
 		}
 		if (!mySyncSubscriptionsSemaphore.tryAcquire()) {
@@ -85,16 +107,6 @@ public class SubscriptionLoader {
 		} finally {
 			mySyncSubscriptionsSemaphore.release();
 		}
-	}
-
-	@PostConstruct
-	public void scheduleJob() {
-		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(getClass().getName());
-		jobDetail.setJobClass(Job.class);
-		mySchedulerService.scheduleLocalJob(DateUtils.MILLIS_PER_MINUTE, jobDetail);
-
-		syncSubscriptions();
 	}
 
 	@VisibleForTesting
@@ -122,16 +134,8 @@ public class SubscriptionLoader {
 
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
-			SearchParameterMap map = new SearchParameterMap();
 
-			if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
-				map.add(Subscription.SP_STATUS, new TokenOrListParam()
-					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
-					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
-			}
-			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
-
-			IBundleProvider subscriptionBundleList =  myDaoRegistry.getSubscriptionDao().search(map);
+			IBundleProvider subscriptionBundleList =  mySubscriptionDao.search(mySearchParameterMap);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
@@ -141,41 +145,59 @@ public class SubscriptionLoader {
 
 			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionCount);
 
-			Set<String> allIds = new HashSet<>();
-			int activatedCount = 0;
-			int registeredCount = 0;
+			return updateSubscriptionRegistry(resourceList);
+		}
+	}
 
-			for (IBaseResource resource : resourceList) {
-				String nextId = resource.getIdElement().getIdPart();
-				allIds.add(nextId);
+	@Nonnull
+	private SearchParameterMap getSearchParameterMap() {
+		SearchParameterMap map = new SearchParameterMap();
 
-				boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
-				if (activated) {
-					activatedCount++;
-				}
+		if (mySearchParamRegistry.getActiveSearchParam("Subscription", "status") != null) {
+			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
+				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
+		}
+		map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
+		return map;
+	}
 
-				boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
-				if (registered) {
-					registeredCount++;
-				}
+	private int updateSubscriptionRegistry(List<IBaseResource> theResourceList) {
+		Set<String> allIds = new HashSet<>();
+		int activatedCount = 0;
+		int registeredCount = 0;
+
+		for (IBaseResource resource : theResourceList) {
+			String nextId = resource.getIdElement().getIdPart();
+			allIds.add(nextId);
+
+			boolean activated = mySubscriptionActivatingInterceptor.activateSubscriptionIfRequired(resource);
+			if (activated) {
+				activatedCount++;
 			}
 
-			mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
-			ourLog.debug("Finished sync subscriptions - activated {} and registered {}", resourceList.size(), registeredCount);
-
-			return activatedCount;
+			boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(resource);
+			if (registered) {
+				registeredCount++;
+			}
 		}
+
+		mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
+		ourLog.debug("Finished sync subscriptions - activated {} and registered {}", theResourceList.size(), registeredCount);
+		return activatedCount;
 	}
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private SubscriptionLoader myTarget;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTarget.syncSubscriptions();
-		}
+	@Override
+	public void handleInit(Collection<IIdType> theResourceIds) {
+		List<IBaseResource> resourceList = theResourceIds.stream().map(mySubscriptionDao::read).collect(Collectors.toList());
+		updateSubscriptionRegistry(resourceList);
 	}
 
+	@Override
+	public void handleChange(IResourceChangeEvent theResourceChangeEvent) {
+		// For now ignore the contents of theResourceChangeEvent.  In the future, consider updating the registry based on
+		// known subscriptions that have been created, updated & deleted
+		syncSubscriptions();
+	}
 }
 
