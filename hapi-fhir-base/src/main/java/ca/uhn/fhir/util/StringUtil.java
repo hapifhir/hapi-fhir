@@ -24,6 +24,7 @@ import java.io.CharArrayWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Arrays;
+import java.util.StringTokenizer;
 
 public class StringUtil {
 
@@ -78,4 +79,24 @@ public class StringUtil {
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
+	/**
+	 * Check the input string has prefix token 
+	 * 
+	 * @param theInput       the input string
+	 * @param thePrefix      the prefix string of a token
+	 * @return Return true if a input string token separated by space start with the prefix 
+	 */
+	public static boolean isStartsWithIgnoreCase(final String theInput, final String thePrefix) {
+		
+		if (theInput == null || thePrefix == null)
+			return false;
+		
+		StringTokenizer tok = new StringTokenizer(theInput);
+		while (tok.hasMoreTokens()) {
+			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), thePrefix))
+				return true;
+		}
+		
+		return false;
+	}
 }

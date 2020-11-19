@@ -33,6 +33,8 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.StringUtil;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -208,7 +210,11 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 
 		for (int idx = 0; idx < theContains.size(); idx++) {
 			ValueSetExpansionContainsComponent next = theContains.get(idx);
-			if (isBlank(next.getDisplay()) || !org.apache.commons.lang3.StringUtils.containsIgnoreCase(next.getDisplay(), theFilter)) {
+			
+			// e.g. For a display text of “Body height”:
+			// searching on "Bo" or "he" should find it
+			// searching on "ei" or "dy" should not find it
+			if (isBlank(next.getDisplay()) || !StringUtil.isStartsWithIgnoreCase(next.getDisplay(), theFilter)) {
 				theContains.remove(idx);
 				idx--;
 				if (theTotalElement.getValue() != null) {
@@ -218,7 +224,7 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 			applyFilter(theTotalElement, next.getContains(), theFilter);
 		}
 	}
-
+	
 	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
 		if (ElementUtil.isEmpty(include.getConcept())) {
 			if (isNotBlank(theFilter)) {

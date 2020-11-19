@@ -1195,7 +1195,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
-	public void testExpandByValueSetWithFilterContainsPartialValue() throws IOException {
+	public void testExpandByValueSetWithFilterContainsPrefixValue() throws IOException {
 		loadAndPersistCodeSystem();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
@@ -1205,13 +1205,34 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "valueSet", toExpand)
-			.andParameter("filter", new StringType("loo"))
+			.andParameter("filter", new StringType("blo"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, stringContainsInOrder("<code value=\"11378-7\"/>", "<display value=\"Systolic blood pressure at First encounter\"/>"));
+	}
+	
+	@Test
+	public void testExpandByValueSetWithFilterContainsNoPrefixValue() throws IOException {
+		loadAndPersistCodeSystem();
+
+		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "valueSet", toExpand)
+			.andParameter("filter", new StringType("lood"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		
+		assertThat(resp, not(stringContainsInOrder("<code value=\"11378-7\"/>","<display value=\"Systolic blood pressure at First encounter\"/>")));
 	}
 	
 	@Test
