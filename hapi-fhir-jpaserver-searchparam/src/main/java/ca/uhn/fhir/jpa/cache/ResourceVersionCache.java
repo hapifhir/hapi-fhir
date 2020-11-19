@@ -33,18 +33,18 @@ public class ResourceVersionCache {
 		return previousMapEntry;
 	}
 
-	public String get(IIdType theResourceId) {
+	public String getVersionForResourceId(IIdType theResourceId) {
 		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<>());
 		return entryByTypeMap.get(theResourceId);
 	}
 
 	@Nonnull
-	public Map<IIdType, String> getMap(String theResourceName) {
+	public Map<IIdType, String> getMapForResourceName(String theResourceName) {
 		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceName, key -> new HashMap<>());
 		return entryByTypeMap;
 	}
 
-	public String remove(IIdType theResourceId) {
+	public String removeResourceId(IIdType theResourceId) {
 		Map<IIdType, String> entryByTypeMap = myVersionMap.get(theResourceId.getResourceType());
 		if (entryByTypeMap == null) {
 			return null;
@@ -71,5 +71,9 @@ public class ResourceVersionCache {
 
 	public boolean hasEntriesForResourceName(String theResourceName) {
 		return myVersionMap.containsKey(theResourceName);
+	}
+
+	public void removeCacheForResourceName(String theResourceName) {
+		myVersionMap.remove(theResourceName);
 	}
 }

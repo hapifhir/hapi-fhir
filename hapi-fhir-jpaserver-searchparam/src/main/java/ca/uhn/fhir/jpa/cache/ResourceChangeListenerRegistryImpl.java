@@ -72,8 +72,13 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@Override
 	public void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener) {
-		myResourceChangeListenerCache.remove(theResourceChangeListener);
-		myResourceVersionCache.listenerRemoved(theResourceChangeListener);
+		ResourceChangeListenerWithSearchParamMap entry = myResourceChangeListenerCache.remove(theResourceChangeListener);
+		if (entry != null) {
+			String resourceName = entry.getResourceName();
+			if (!myResourceChangeListenerCache.hasEntriesForResourceName(resourceName)) {
+				myResourceVersionCache.removeCacheForResourceName(resourceName);
+			}
+		}
 	}
 
 	@PostConstruct
@@ -165,8 +170,8 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	public ResourceChangeResult refreshAllCachesImmediately() {
 		StopWatch sw = new StopWatch();
 		ResourceChangeResult retval = new ResourceChangeResult();
-		for (String resourceType : myResourceChangeListenerCache.resourceNames()) {
-			retval = retval.plus(doRefreshCachesAndNotifyListeners(resourceType));
+		for (String resourceName : myResourceChangeListenerCache.resourceNames()) {
+			retval = retval.plus(doRefreshCachesAndNotifyListeners(resourceName));
 		}
 		ourLog.debug("Refreshed all caches in {}ms: {}", sw.getMillis(), retval);
 		return retval;
@@ -176,7 +181,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		ResourceChangeResult retval = new ResourceChangeResult();
 		Set<ResourceChangeListenerWithSearchParamMap> listenerEntries = myResourceChangeListenerCache.getListenerEntries(theResourceName);
 		if (listenerEntries.isEmpty()) {
-			myResourceVersionCache.getMap(theResourceName).clear();
+			myResourceVersionCache.getMapForResourceName(theResourceName).clear();
 			return retval;
 		}
 		for (ResourceChangeListenerWithSearchParamMap listenerEntry : listenerEntries) {
@@ -202,7 +207,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@VisibleForTesting
 	public int getResourceVersionCacheSizeForUnitTest(String theResourceName) {
-		return myResourceVersionCache.getMap(theResourceName).size();
+		return myResourceVersionCache.getMapForResourceName(theResourceName).size();
 	}
 
 	/**

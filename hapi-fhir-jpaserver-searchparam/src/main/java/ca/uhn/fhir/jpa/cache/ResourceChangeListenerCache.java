@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,8 +33,8 @@ public class ResourceChangeListenerCache {
 
 	private final SetValuedMap<String, ResourceChangeListenerWithSearchParamMap> myListenersByResourceName = new HashSetValuedHashMap<>();
 
-	public void add(String theResourceType, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap) {
-		getListenerEntries(theResourceType).add(new ResourceChangeListenerWithSearchParamMap(theResourceChangeListener, theMap));
+	public void add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap) {
+		getListenerEntries(theResourceName).add(new ResourceChangeListenerWithSearchParamMap(theResourceName, theResourceChangeListener, theMap));
 	}
 
 	@VisibleForTesting
@@ -45,8 +47,8 @@ public class ResourceChangeListenerCache {
 	}
 
 	@Nonnull
-	public Set<ResourceChangeListenerWithSearchParamMap> getListenerEntries(String theResourceType) {
-		return myListenersByResourceName.get(theResourceType);
+	public Set<ResourceChangeListenerWithSearchParamMap> getListenerEntries(String theResourceName) {
+		return myListenersByResourceName.get(theResourceName);
 	}
 
 	public boolean hasListenerFor(IBaseResource theResource) {
@@ -81,7 +83,7 @@ public class ResourceChangeListenerCache {
 		// If the new ResourceVersionMap does not have the old key - delete it
 		List<IIdType> deletedIds = new ArrayList<>();
 		for (String key : theOldResourceVersionCache.keySet()) {
-			Map<IIdType, String> oldVersionCache = theOldResourceVersionCache.getMap(key);
+			Map<IIdType, String> oldVersionCache = theOldResourceVersionCache.getMapForResourceName(key);
 			oldVersionCache.keySet()
 				.forEach(id -> {
 					if (!theNewResourceVersionMap.containsKey(id)) {
@@ -89,7 +91,7 @@ public class ResourceChangeListenerCache {
 					}
 				});
 		}
-		deletedIds.forEach(theOldResourceVersionCache::remove);
+		deletedIds.forEach(theOldResourceVersionCache::removeResourceId);
 
 		List<IIdType> createdIds = new ArrayList<>();
 		List<IIdType> updatedIds = new ArrayList<>();
@@ -111,8 +113,18 @@ public class ResourceChangeListenerCache {
 		return ResourceChangeResult.fromResourceChangeEvent(resourceChangeEvent);
 	}
 
-	public void remove(IResourceChangeListener theResourceChangeListener) {
-		myListenersByResourceName.entries().removeIf(entry -> entry.getValue().getResourceChangeListener().equals(theResourceChangeListener));
+	@Nullable
+	public ResourceChangeListenerWithSearchParamMap remove(IResourceChangeListener theResourceChangeListener) {
+		ResourceChangeListenerWithSearchParamMap retval = null;
+		Iterator<Map.Entry<String, ResourceChangeListenerWithSearchParamMap>> iterator = myListenersByResourceName.entries().iterator();
+		while (iterator.hasNext()) {
+			Map.Entry<String, ResourceChangeListenerWithSearchParamMap> next = iterator.next();
+			if (next.getValue().getResourceChangeListener().equals(theResourceChangeListener)) {
+				retval = next.getValue();
+				myListenersByResourceName.removeMapping(next.getKey(), next.getValue());
+			}
+		}
+		return retval;
 	}
 
 	public int size() {

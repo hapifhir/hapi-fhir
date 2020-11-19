@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class ResourceChangeListenerRegistryImplTest {
+	public static final String RESOURCE_NAME = "Patient";
 	private static FhirContext ourFhirContext = FhirContext.forR4();
 
 	@Autowired
@@ -66,13 +67,13 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		myEntries = new HashSet<>();
-		myEntries.add(new ResourceChangeListenerWithSearchParamMap(myTestListener, myMap));
+		myEntries.add(new ResourceChangeListenerWithSearchParamMap(RESOURCE_NAME, myTestListener, myMap));
 		resetMockCache();
 	}
 
 	private void resetMockCache() {
 		reset(myResourceChangeListenerCache);
-		when(myResourceChangeListenerCache.getListenerEntries("Patient")).thenReturn(myEntries);
+		when(myResourceChangeListenerCache.getListenerEntries(RESOURCE_NAME)).thenReturn(myEntries);
 		when(myResourceChangeListenerCache.notifyListener(any(), any(), any())).thenReturn(new ResourceChangeResult());
 	}
 
@@ -95,7 +96,7 @@ class ResourceChangeListenerRegistryImplTest {
 	public void addingNonInMemorySearchParamFails() {
 		try {
 			mockInMemorySupported(InMemoryMatchResult.unsupportedFromReason("TEST REASON"));
-			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, myTestListener);
+			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, myMap, myTestListener);
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
@@ -106,22 +107,22 @@ class ResourceChangeListenerRegistryImplTest {
 	public void addingListenerResetsTimer() {
 		mockInMemorySupported(InMemoryMatchResult.successfulMatch());
 
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, myTestListener);
-		myResourceChangeListenerRegistry.forceRefresh("Patient");
-		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, myMap, myTestListener);
+		myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
+		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest(RESOURCE_NAME));
 
 		// Add a second listener to reset the timer
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, mock(IResourceChangeListener.class));
-		assertEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, myMap, mock(IResourceChangeListener.class));
+		assertEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest(RESOURCE_NAME));
 	}
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
 		mockInMemorySupported(InMemoryMatchResult.successfulMatch());
 
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Patient", myMap, mock(IResourceChangeListener.class));
-		myResourceChangeListenerRegistry.forceRefresh("Patient");
-		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, myMap, mock(IResourceChangeListener.class));
+		myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
+		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest(RESOURCE_NAME));
 
 		Patient patient = new Patient();
 
@@ -129,17 +130,17 @@ class ResourceChangeListenerRegistryImplTest {
 		when(myResourceChangeListenerCache.hasListenerFor(patient)).thenReturn(false);
 		myResourceChangeListenerRegistry.requestRefreshIfWatching(patient);
 
-		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
+		assertNotEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest(RESOURCE_NAME));
 
 		// Reset timer if it does match searchparams
 		when(myResourceChangeListenerCache.hasListenerFor(patient)).thenReturn(true);
 		myResourceChangeListenerRegistry.requestRefreshIfWatching(patient);
 
-		assertEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest("Patient"));
+		assertEquals(Instant.MIN, myResourceChangeListenerRegistry.getNextRefreshTimeForUnitTest(RESOURCE_NAME));
 	}
 
 	private void mockInMemorySupported(InMemoryMatchResult theTheInMemoryMatchResult) {
-		when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition("Patient"))).thenReturn(theTheInMemoryMatchResult);
+		when(myInMemoryResourceMatcher.checkIfInMemorySupported(myMap, ourFhirContext.getResourceDefinition(RESOURCE_NAME))).thenReturn(theTheInMemoryMatchResult);
 	}
 
 	/**
@@ -152,22 +153,22 @@ class ResourceChangeListenerRegistryImplTest {
 
 		resetMockCache();
 		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:00:00");
-		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
+		myResourceChangeListenerRegistry.refreshCacheIfNecessary(RESOURCE_NAME);
 		verify(myResourceChangeListenerCache, times(1)).notifyListener(any(), any(), any());
 
 		resetMockCache();
 		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:00:01");
-		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
+		myResourceChangeListenerRegistry.refreshCacheIfNecessary(RESOURCE_NAME);
 		verify(myResourceChangeListenerCache, never()).notifyListener(any(), any(), any());
 
 		resetMockCache();
 		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:00:59");
-		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
+		myResourceChangeListenerRegistry.refreshCacheIfNecessary(RESOURCE_NAME);
 		verify(myResourceChangeListenerCache, never()).notifyListener(any(), any(), any());
 
 		resetMockCache();
 		ResourceChangeListenerRegistryImpl.setNowForUnitTests("09:01:00");
-		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
+		myResourceChangeListenerRegistry.refreshCacheIfNecessary(RESOURCE_NAME);
 		verify(myResourceChangeListenerCache, times(1)).notifyListener(any(), any(), any());
 	}
 }

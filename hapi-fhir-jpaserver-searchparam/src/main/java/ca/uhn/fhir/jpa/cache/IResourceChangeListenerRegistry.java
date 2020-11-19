@@ -24,7 +24,7 @@ public interface IResourceChangeListenerRegistry {
 	 * @param theSearchParameterMap     a search parameter map defining a filter for which resources are of interest
 	 * @param theResourceChangeListener the listener that will be called when a change is detected
 	 */
-	void registerResourceResourceChangeListener(String theResourceType, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener);
+	void registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener);
 
 	/**
 	 * Unregister a listener from this service

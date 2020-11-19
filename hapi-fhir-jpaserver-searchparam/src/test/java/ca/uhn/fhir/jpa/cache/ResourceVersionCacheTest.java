@@ -43,7 +43,7 @@ public class ResourceVersionCacheTest {
 		resourceVersionCache.addOrUpdate(patientMale.getIdElement(), patientMale.getIdElement().getVersionIdPart());
 		assertFalse(resourceVersionCache.keySet().isEmpty());
 		assertEquals(1, resourceVersionCache.keySet().size());
-		Map<IIdType, String> patientMap = resourceVersionCache.getMap(RESOURCE_TYPE_PATIENT);
+		Map<IIdType, String> patientMap = resourceVersionCache.getMapForResourceName(RESOURCE_TYPE_PATIENT);
 		assertEquals(1, patientMap.size());
 		IIdType patientId = patientMap.keySet().iterator().next();
 		assertEquals("1", patientId.getIdPart());
