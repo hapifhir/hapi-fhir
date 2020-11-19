@@ -58,7 +58,7 @@ public class ResourceChangeListenerCache {
 	private boolean matches(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(theSearchParameterMap, theResource);
 		if (!result.isInMemory()) {
-			// This should never happen since we detect this at
+			// This should never happen since we detect this at registration time
 			ourLog.warn("Search Parameter Map {} cannot be processed in-memory", theSearchParameterMap);
 		}
 		return result.matched();
@@ -81,8 +81,8 @@ public class ResourceChangeListenerCache {
 	public ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		// If the new ResourceVersionMap does not have the old key - delete it
 		List<IIdType> deletedIds = new ArrayList<>();
-		for (String key : theOldResourceVersionCache.keySet()) {
-			Map<IIdType, String> oldVersionCache = theOldResourceVersionCache.getMapForResourceName(key);
+		for (String resourceName : theOldResourceVersionCache.getResourceNames()) {
+			Map<IIdType, String> oldVersionCache = theOldResourceVersionCache.getMapForResourceName(resourceName);
 			oldVersionCache.keySet()
 				.forEach(id -> {
 					if (!theNewResourceVersionMap.containsKey(id)) {
@@ -96,7 +96,7 @@ public class ResourceChangeListenerCache {
 		List<IIdType> updatedIds = new ArrayList<>();
 
 		for (IIdType id : theNewResourceVersionMap.keySet()) {
-			String previousValue = theOldResourceVersionCache.addOrUpdate(id, theNewResourceVersionMap.get(id));
+			String previousValue = theOldResourceVersionCache.put(id, theNewResourceVersionMap.get(id));
 			IIdType newId = id.withVersion(theNewResourceVersionMap.get(id));
 			if (previousValue == null) {
 				createdIds.add(newId);

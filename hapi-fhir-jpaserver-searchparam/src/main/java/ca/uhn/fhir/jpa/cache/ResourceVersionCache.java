@@ -27,7 +27,7 @@ public class ResourceVersionCache {
 	 * @param theVersion
 	 * @return previous value
 	 */
-	public String addOrUpdate(IIdType theResourceId, String theVersion) {
+	public String put(IIdType theResourceId, String theVersion) {
 		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<>());
 		String previousMapEntry = entryByTypeMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
 		return previousMapEntry;
@@ -45,15 +45,15 @@ public class ResourceVersionCache {
 	}
 
 	public String removeResourceId(IIdType theResourceId) {
+		String retval = null;
 		Map<IIdType, String> entryByTypeMap = myVersionMap.get(theResourceId.getResourceType());
-		if (entryByTypeMap == null) {
-			return null;
-		} else {
-			return entryByTypeMap.remove(new IdDt(theResourceId));
+		if (entryByTypeMap != null) {
+			retval = entryByTypeMap.remove(new IdDt(theResourceId));
 		}
+		return retval;
 	}
 
-	public Set<String> keySet() {
+	public Set<String> getResourceNames() {
 		return myVersionMap.keySet();
 	}
 
@@ -65,7 +65,7 @@ public class ResourceVersionCache {
 	}
 
 	public boolean hasEntriesForResourceName(String theResourceName) {
-		return myVersionMap.containsKey(theResourceName);
+		return myVersionMap.containsKey(theResourceName) && !myVersionMap.get(theResourceName).isEmpty();
 	}
 
 	public void removeCacheForResourceName(String theResourceName) {
