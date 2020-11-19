@@ -64,9 +64,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class NpmTestR4 extends BaseJpaR4Test {
+public class NpmR4Test extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NpmTestR4.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
 	@Autowired
 	public IPackageInstallerSvc igInstaller;
 	@Autowired

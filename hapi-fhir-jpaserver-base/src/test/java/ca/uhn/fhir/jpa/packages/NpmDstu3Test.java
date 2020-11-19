@@ -31,7 +31,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class NpmTestDstu3 extends BaseJpaDstu3Test {
+public class NpmDstu3Test extends BaseJpaDstu3Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FakeNpmServlet.class);
 	@Autowired
@@ -99,7 +99,7 @@ public class NpmTestDstu3 extends BaseJpaDstu3Test {
 			ourLog.info("Fail Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals("Profile http://fhir.de/StructureDefinition/condition-de-basis/0.2, Element 'Condition.subject': minimum required = 1, but only found 0", oo.getIssueFirstRep().getDiagnostics());
+			assertEquals("Condition.subject: minimum required = 1, but only found 0 (from http://fhir.de/StructureDefinition/condition-de-basis/0.2)", oo.getIssueFirstRep().getDiagnostics());
 		}
 		
 	}
