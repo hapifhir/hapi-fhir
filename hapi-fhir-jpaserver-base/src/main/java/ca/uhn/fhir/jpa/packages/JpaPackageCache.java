@@ -217,11 +217,13 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 
 			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
-			String packageDesc;
-			if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
-				packageDesc = npmPackage.description().substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4) + "...";
-			} else {
-				packageDesc = npmPackage.description();
+			String packageDesc = null;
+			if (npmPackage.description() != null) {
+				if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
+					packageDesc = npmPackage.description().substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4) + "...";
+				} else {
+					packageDesc = npmPackage.description();
+				}
 			}
 			if (currentVersion) {
 				getProcessingMessages(npmPackage).add("Marking package " + thePackageId + "#" + thePackageVersionId + " as current version");
