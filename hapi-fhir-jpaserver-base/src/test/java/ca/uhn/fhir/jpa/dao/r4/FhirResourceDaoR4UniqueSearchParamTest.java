@@ -1510,7 +1510,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (PreconditionFailedException e) {
-			// good
+			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 
 		Patient pt2 = new Patient();
@@ -1525,7 +1525,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			myPatientDao.update(pt2);
 			fail();
 		} catch (PreconditionFailedException e) {
-			// good
+			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 
 	}
