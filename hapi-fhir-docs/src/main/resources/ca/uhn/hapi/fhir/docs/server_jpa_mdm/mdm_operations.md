@@ -1,12 +1,12 @@
-# EMPI Operations
+# MDM Operations
 
-EMPI links are managed by EMPI Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
+MDM links are managed by MDM Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
 
-In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Person/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
+In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Patient/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
 
 ## Query links
 
-Ue the `$empi-query-links` operation to view empi links.  The results returned are based on the parameters provided.  All parameters are optional.  This operation takes the following parameters:
+Use the `$mdm-query-links` operation to view MDM links. The results returned are based on the parameters provided. All parameters are optional.  This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -19,19 +19,19 @@ Ue the `$empi-query-links` operation to view empi links.  The results returned a
     </thead>
     <tbody>
         <tr>
-            <td>personId</td>
+            <td>goldenResourceId</td>
             <td>String</td>
             <td>0..1</td>
             <td>
-                The id of the Person resource.
+                The id of the Golden Resource (e.g. Golden Patient Resource).
             </td>
         </tr>
         <tr>
-            <td>targetId</td>
+            <td>resourceId</td>
             <td>String</td>
             <td>0..1</td>
             <td>
-                The id of the Patient or Practitioner resource.
+                The id of the target resource (e.g. Patient resource).
             </td>
         </tr>
         <tr>
@@ -55,10 +55,10 @@ Ue the `$empi-query-links` operation to view empi links.  The results returned a
 
 ### Example
 
-Use an HTTP GET like `http://example.com/$empi-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
+Use an HTTP GET like `http://example.com/$mdm-query-links?matchResult=POSSIBLE_MATCH` or an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-query-links
+http://example.com/$mdm-query-links
 ```
 
 The following request body could be used to find all POSSIBLE_MATCH links in the system:
@@ -81,10 +81,10 @@ This operation returns a `Parameters` resource that looks like the following:
   "parameter": [ {
     "name": "link",
     "part": [ {
-      "name": "personId",
+      "name": "goldenResourceId",
       "valueString": "Person/123"
     }, {
-      "name": "targetId",
+      "name": "resourceId",
       "valueString": "Patient/456"
     }, {
       "name": "matchResult",
@@ -106,61 +106,20 @@ This operation returns a `Parameters` resource that looks like the following:
 }
 ```
 
-## Querying links via the Person resource
+## Query Duplicate Golden Resources
 
-Alternatively, you can query Empi links by querying Person resources directly.  Empi represents links in Person resources using the following mapping:
-
-<table class="table table-striped table-condensed">
-    <thead>
-        <tr>
-            <th>EMPI matchResult</th>
-            <th>EMPI linkSource</th>
-            <th>Person link.assurance</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>NO_MATCH</td>
-            <td>MANUAL</td>
-            <td>No link present</td>
-        </tr>
-        <tr>
-            <td>POSSIBLE_MATCH</td>
-            <td>AUTO</td>
-            <td>level2</td>
-        </tr>
-        <tr>
-            <td>MATCH</td>
-            <td>AUTO</td>
-            <td>level3</td>
-        </tr>
-        <tr>
-            <td>MATCH</td>
-            <td>MANUAL</td>
-            <td>level4</td>
-        </tr>
-    </tbody>
-</table>
-
-For example, you can use the following HTTP GET to find all Person resources that have POSSIBLE_MATCH links:
-
-```
-http://example.com/Person?assurance=level2
-```
-
-## Query Duplicate Persons
-
-Use the `$empi-duplicate-persons` operation to request a list of duplicate persons.  This operation takes no parameters
+Use the `$empi-duplicate-golden-resources` operation to request a list of duplicate golden resources. 
+This operation takes no parameters.
 
 ### Example
 
 Use an HTTP GET to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-duplicate-persons
+http://example.com/$empi-duplicate-golden-resources
 ```
 
-This operation returns `Parameters` similar to `$empi-query-links`:
+This operation returns `Parameters` similar to `$mdm-query-links`:
 
 
 ```json
@@ -169,10 +128,10 @@ This operation returns `Parameters` similar to `$empi-query-links`:
   "parameter": [ {
     "name": "link",
     "part": [ {
-      "name": "personId",
+      "name": "goldenResourceId",
       "valueString": "Person/123"
     }, {
-      "name": "targetId",
+      "name": "resourceId",
       "valueString": "Person/456"
     }, {
       "name": "matchResult",
@@ -185,9 +144,10 @@ This operation returns `Parameters` similar to `$empi-query-links`:
 }
 ```
 
-## Unduplicate Persons
+## Unduplicate Golden Resources
 
-Use the `$empi-not-duplicate` operation to mark duplicate persons as not duplicates.    This operation takes the following parameters:
+Use the `$empi-not-duplicate` operation to mark duplicate golden resources as not duplicates. 
+This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -200,15 +160,15 @@ Use the `$empi-not-duplicate` operation to mark duplicate persons as not duplica
     </thead>
     <tbody>
         <tr>
-            <td>personId</td>
+            <td>goldenResourceId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person resource.
+                The id of the Golden resource.
             </td>
         </tr>
         <tr>
-            <td>targetId</td>
+            <td>resourceId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
@@ -232,11 +192,11 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "personId",
-    "valueString": "Person/123"
+    "name": "goldenResourceId",
+    "valueString": "Patient/123"
   }, {
-    "name": "targetId",
-    "valueString": "Person/456"
+    "name": "resourceId",
+    "valueString": "Patient/456"
   } ]
 }
 ```
@@ -255,7 +215,7 @@ When the operation is successful, it returns the following `Parameters`:
 
 ## Update Link
 
-Use the `$empi-update-link` operation to change the `matchResult` update of an empi link. This operation takes the following parameters:
+Use the `$mdm-update-link` operation to change the `matchResult` update of an empi link. This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -268,19 +228,19 @@ Use the `$empi-update-link` operation to change the `matchResult` update of an e
     </thead>
     <tbody>
         <tr>
-            <td>personId</td>
+            <td>goldenResourceId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person resource.
+                The id of the Golden resource.
             </td>
         </tr>
         <tr>
-            <td>targetId</td>
+            <td>resourceId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Patient or Practitioner resource.
+                The id of the target resource.
             </td>
         </tr>
         <tr>
@@ -310,10 +270,10 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "personId",
-    "valueString": "Person/123"
+    "name": "goldenResourceId",
+    "valueString": "Patient/123"
   }, {
-    "name": "targetId",
+    "name": "resourceId",
     "valueString": "Patient/456"
   }, {
     "name": "matchResult",
@@ -322,13 +282,18 @@ The following request body could be used:
 }
 ```
 
-The operation returns the updated `Person` resource.  Note that this is the only way to modify EMPI-managed `Person` resources.
+The operation returns the updated `Patient` resource.  Note that this is the only way to modify MDM-managed `Patient` resources.
 
 ## Merge Persons
 
-The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
+<!--- 
+    In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).
+    However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
+-->
+The `$mdm-merge-golden-resources` operation can be used to merge one Golden resource with another. When
+doing this, you will need to decide which resource to merge from and which one to merge to. 
 
-After the merge is complete, `fromPerson.active` is set to `false`.  Also, a new link with assurance level 4 (MANUAL MATCH) will be added pointing from the fromPerson to the toPerson.
+After the merge is complete, `fromGoldenResourceId` will be deactivated by assigning a metadata tag `REDIRECTED`. 
 
 This operation takes the following parameters:
 
@@ -343,19 +308,19 @@ This operation takes the following parameters:
     </thead>
     <tbody>
         <tr>
-            <td>fromPersonId</td>
+            <td>fromGoldenResourceId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person resource to merge data from.
+                The id of the Golden Resource to merge data from.
             </td>
         </tr>
         <tr>
-            <td>toPersonId</td>
+            <td>toGoldenResourceId</td>
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person to merge data into.
+                The id of the Golden Resource to merge data into.
             </td>
         </tr>
     </tbody>
@@ -366,7 +331,7 @@ This operation takes the following parameters:
 Use an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-merge-persons
+http://example.com/$mdm-merge-golden-resources
 ```
 
 The following request body could be used:
@@ -375,22 +340,24 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "fromPersonId",
-    "valueString": "Person/123"
+    "name": "fromGoldenResourceId",
+    "valueString": "Patient/123"
   }, {
-    "name": "toPersonId",
+    "name": "toGoldenResourceId",
     "valueString": "Patient/128"
   } ]
 }
 ```
 
-This operation returns the merged Person resource.
+This operation returns the merged Patient resource.
 
-# Querying The EMPI
+# Querying The MDM
 
-When EMPI is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
+When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
 
-This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules.  
+This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient 
+resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the
+number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
 For example, the following request may be submitted:
 
@@ -442,20 +409,28 @@ This might result in a response such as the following:
           }
         ],
         "birthDate": "2000-01-01"
+      },
+      "search": {
+        "extension": [{
+          "url": "http://hl7.org/fhir/StructureDefinition/match-grade",
+          "valueCode": "certain"
+        }],
+        "mode": "match",
+        "score": 0.9
       }
     }
   ]
 }
 ```
 
-## Clearing EMPI Links
+## Clearing MDM Links
 
-The `$empi-clear` operation is used to batch-delete EMPI links and related persons from the database. This operation is meant to
-be used during the rules-tuning phase of the EMPI implementation so that you can quickly test your ruleset.
-It permits the user to reset the state of their EMPI system without manual deletion of all related links and Persons.
+The `$mdm-clear` operation is used to batch-delete MDM links and related persons from the database. This operation is meant to
+be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset.
+It permits the user to reset the state of their MDM system without manual deletion of all related links and golden resources.
 
-After the operation is complete, all targeted EMPI links are removed from the system, and their related Person resources are deleted and expunged
-from the server.
+After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are
+deleted and expunged from the server.
 
 This operation takes a single optional Parameter.
 
@@ -470,11 +445,11 @@ This operation takes a single optional Parameter.
     </thead>
     <tbody>
         <tr>
-            <td>resourceType</td>
+            <td>targetType</td>
             <td>String</td>
             <td>0..1</td>
             <td>
-                The target Resource type you would like to clear. Currently limited to Patient/Practitioner. If omitted, will operate over all links.
+                The target Resource type you would like to clear. If omitted, will operate over all links.
             </td>
         </tr>
     </tbody>
@@ -485,7 +460,7 @@ This operation takes a single optional Parameter.
 Use an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-clear
+http://example.com/$mdm-clear
 ```
 
 The following request body could be used:
@@ -494,13 +469,13 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "resourceType",
+    "name": "targetType",
     "valueString": "Patient"
   } ]
 }
 ```
 
-This operation returns the number of EMPI links that were cleared. The following is a sample response:
+This operation returns the number of MDM links that were cleared. The following is a sample response:
 
 ```json
 {
@@ -512,13 +487,14 @@ This operation returns the number of EMPI links that were cleared. The following
 }
 ```
 
-## Batch-creating EMPI Links
+## Batch-creating MDM Links
 
-Call the `$empi-submit` operation to submit patients and practitioners for EMPI processing. In the rules-tuning phase of your setup, you can use `$empi-submit` to apply EMPI rules across multiple Resources.
-An important thing to note is that this operation only submits the resources for processing. Actual EMPI processing is run asynchronously, and depending on the size
+Call the `$mdm-submit` operation to submit patients and practitioners for MDM processing. In the rules-tuning phase of your setup, you can 
+use `$mdm-submit` to apply MDM rules across multiple Resources. An important thing to note is that this operation only submits the 
+resources for processing. Actual MDM processing is run asynchronously, and depending on the size
 of the affected bundle of resources, may take some time to complete.
 
-After the operation is complete, all resources that matched the criteria will now have at least one empi link attached to them.
+After the operation is complete, all resources that matched the criteria will now have at least one MDM link attached to them.
 
 This operation takes a single optional criteria parameter unless it is called on a specific instance.
 
@@ -549,9 +525,9 @@ This operation can be executed at the Server level, Resource level, or Instance 
 Use an HTTP POST to the following URL to invoke this operation with matching criteria:
 
 ```url
-http://example.com/$empi-submit
-http://example.com/Patient/$empi-submit
-http://example.com/Practitioner/$empi-submit
+http://example.com/$mdm-submit
+http://example.com/Patient/$mdm-submit
+http://example.com/Practitioner/$mdm-submit
 ```
 
 The following request body could be used:
@@ -565,7 +541,7 @@ The following request body could be used:
   } ]
 }
 ```
-This operation returns the number of resources that were submitted for EMPI processing. The following is a sample response:
+This operation returns the number of resources that were submitted for MDM processing. The following is a sample response:
 
 ```json
 {

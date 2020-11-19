@@ -1,10 +1,12 @@
 # Rules
 
-HAPI EMPI rules are defined in a single json document.
+HAPI MDM rules are defined in a single json document.
 
-Note that in all the following configuration, valid options for `resourceType` are `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types and you would like to apply it to both practitioners and patients.
+Note that in all the following configuration, valid options for `resourceType` include any supported resource, such as
+ `Patient`, `Practitioner`, and `*`. Use `*` if the 
+criteria is identical across both resource types and you would like to apply it to all resources.
 
-Here is an example of a full HAPI EMPI rules json document:
+Here is an example of a full HAPI MDM rules json document:
 
 ```json
 {
@@ -96,11 +98,20 @@ Here is an example of a full HAPI EMPI rules json document:
 Here is a description of how each section of this document is configured.
 
 ### candidateSearchParams
-These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number.  The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some EMPI systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
 
-If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters.  In the following candidateSearchParams definition, hapi-fhir
-will extract given name, family name and identifiers from the incoming Patient and perform two separate
-searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
+These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of
+ "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all 
+ resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common 
+ or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches separately and then takes the 
+ union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some MDM systems, 
+ these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
+
+If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters.
+In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient
+and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming 
+Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient
+ was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no 
+ family name, then only a search for matching identifiers would be performed.
 
 ```json
 "candidateSearchParams": [ {
@@ -113,7 +124,9 @@ searches, first for all Patient resources that have the same given `AND` the sam
 ```
 
 ### candidateFilterSearchParams
-When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.
+When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients
+for which active=true.
+
 ```json
 [ {
     "resourceType" : "Patient",
@@ -386,7 +399,7 @@ The following algorithms are currently supported:
 
 ### matchResultMap
 
-These entries convert combinations of successful matchFields into an EMPI Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.  If the incoming resource matches ALL of the named matchFields listed, then a new match link is created with the assigned matchResult (`MATCH` or `POSSIBLE_MATCH`).
+These entries convert combinations of successful matchFields into an MDM Match Result for overall matching of a given pair of resources.  MATCH results are evaluated take precedence over POSSIBLE_MATCH results.  If the incoming resource matches ALL of the named matchFields listed, then a new match link is created with the assigned matchResult (`MATCH` or `POSSIBLE_MATCH`).
 
 ```json
 {
@@ -399,4 +412,4 @@ These entries convert combinations of successful matchFields into an EMPI Match 
 
 ### eidSystem
 
-The external EID system that the HAPI EMPI system should expect to see on incoming Patient resources. Must be a valid URI.  See [EMPI EID](/hapi-fhir/docs/server_jpa_empi/empi_eid.html) for details on how EIDs are managed by HAPI EMPI.
+The external EID system that the HAPI MDM system should expect to see on incoming Patient resources. Must be a valid URI.  See [MDM EID](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html) for details on how EIDs are managed by HAPI MDM.
