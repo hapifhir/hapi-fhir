@@ -64,11 +64,6 @@ public class ResourceVersionCache {
 		}
 	}
 
-	public void listenerRemoved(IResourceChangeListener theResourceChangeListener) {
-		// FIXME KHS How do we clear the Cache for a specific ResourceType if we
-		//           don't know what ResourceType this particular Listener was for ?
-	}
-
 	public boolean hasEntriesForResourceName(String theResourceName) {
 		return myVersionMap.containsKey(theResourceName);
 	}

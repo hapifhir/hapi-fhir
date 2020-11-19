@@ -25,8 +25,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
@@ -72,9 +74,9 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@Override
 	public void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener) {
-		ResourceChangeListenerWithSearchParamMap entry = myResourceChangeListenerCache.remove(theResourceChangeListener);
-		if (entry != null) {
-			String resourceName = entry.getResourceName();
+		List<ResourceChangeListenerWithSearchParamMap> entries = myResourceChangeListenerCache.remove(theResourceChangeListener);
+		Set<String> resourceNames = entries.stream().map(ResourceChangeListenerWithSearchParamMap::getResourceName).collect(Collectors.toSet());
+		for (String resourceName : resourceNames) {
 			if (!myResourceChangeListenerCache.hasEntriesForResourceName(resourceName)) {
 				myResourceVersionCache.removeCacheForResourceName(resourceName);
 			}

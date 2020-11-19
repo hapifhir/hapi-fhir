@@ -15,12 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class ResourceChangeListenerCache {
@@ -113,18 +112,17 @@ public class ResourceChangeListenerCache {
 		return ResourceChangeResult.fromResourceChangeEvent(resourceChangeEvent);
 	}
 
-	@Nullable
-	public ResourceChangeListenerWithSearchParamMap remove(IResourceChangeListener theResourceChangeListener) {
-		ResourceChangeListenerWithSearchParamMap retval = null;
-		Iterator<Map.Entry<String, ResourceChangeListenerWithSearchParamMap>> iterator = myListenersByResourceName.entries().iterator();
-		while (iterator.hasNext()) {
-			Map.Entry<String, ResourceChangeListenerWithSearchParamMap> next = iterator.next();
+	public List<ResourceChangeListenerWithSearchParamMap> remove(IResourceChangeListener theResourceChangeListener) {
+		List<Map.Entry<String, ResourceChangeListenerWithSearchParamMap>> entriesToDelete = new ArrayList<>();
+		for (Map.Entry<String, ResourceChangeListenerWithSearchParamMap> next : myListenersByResourceName.entries()) {
 			if (next.getValue().getResourceChangeListener().equals(theResourceChangeListener)) {
-				retval = next.getValue();
-				myListenersByResourceName.removeMapping(next.getKey(), next.getValue());
+				entriesToDelete.add(next);
 			}
 		}
-		return retval;
+		for (Map.Entry<String, ResourceChangeListenerWithSearchParamMap> entryToDelete : entriesToDelete) {
+			myListenersByResourceName.removeMapping(entryToDelete.getKey(), entryToDelete.getValue());
+		}
+		return entriesToDelete.stream().map(Map.Entry::getValue).collect(Collectors.toList());
 	}
 
 	public int size() {
