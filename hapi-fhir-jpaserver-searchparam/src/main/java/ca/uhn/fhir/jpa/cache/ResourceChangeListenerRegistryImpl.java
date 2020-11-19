@@ -28,13 +28,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-// FIXME KHS retool subscription to use this
 @Component
 public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerRegistryImpl.class);
 
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
-	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_HOUR;
+	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
 	private static volatile Map<String, Instant> myNextRefreshByResourceName = new HashMap<>();
 	private static Instant ourNowForUnitTests;

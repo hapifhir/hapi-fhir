@@ -201,7 +201,6 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		return getActiveSearchParams(theResourceDef.getName()).values();
 	}
 
-	// FIXME KHS move these into a generic abstract superclass
 	@Override
 	public void requestRefresh() {
 		myResourceChangeListenerRegistry.requestRefresh("SearchParameter");

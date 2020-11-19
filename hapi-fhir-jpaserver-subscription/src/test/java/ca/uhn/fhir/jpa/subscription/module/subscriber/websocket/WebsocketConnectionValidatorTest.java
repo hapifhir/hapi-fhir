@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -66,6 +67,8 @@ public class WebsocketConnectionValidatorTest {
 	SubscriptionRegistry mySubscriptionRegistry;
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
+	@MockBean
+	IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@Autowired
 	WebsocketConnectionValidator myWebsocketConnectionValidator;

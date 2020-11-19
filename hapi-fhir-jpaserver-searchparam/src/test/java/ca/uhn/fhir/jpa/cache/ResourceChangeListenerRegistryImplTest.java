@@ -158,17 +158,17 @@ class ResourceChangeListenerRegistryImplTest {
 		verify(myResourceChangeListenerCache, times(1)).notifyListener(any(), any(), any());
 
 		resetMockCache();
-		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:15:00");
+		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:00:01");
 		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
 		verify(myResourceChangeListenerCache, never()).notifyListener(any(), any(), any());
 
 		resetMockCache();
-		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:59:59");
+		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:00:59");
 		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
 		verify(myResourceChangeListenerCache, never()).notifyListener(any(), any(), any());
 
 		resetMockCache();
-		ResourceChangeListenerRegistryImpl.setNowForUnitTests("09:00:01");
+		ResourceChangeListenerRegistryImpl.setNowForUnitTests("09:01:00");
 		myResourceChangeListenerRegistry.refreshCacheIfNecessary("Patient");
 		verify(myResourceChangeListenerCache, times(1)).notifyListener(any(), any(), any());
 	}
