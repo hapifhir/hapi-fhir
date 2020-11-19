@@ -107,7 +107,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
 	public void deleteMdmLinks(RequestDetails theRequest, IBaseResource theResource) {
-		if (!MdmUtil.isMdmResourceType(myFhirContext, theResource)) {
+		if (!myMdmSettings.isSupportedMdmType(myFhirContext.getResourceType(theResource))) {
 			return;
 		}
 		myMdmLinkDeleteSvc.deleteWithAnyReferenceTo(theResource);
