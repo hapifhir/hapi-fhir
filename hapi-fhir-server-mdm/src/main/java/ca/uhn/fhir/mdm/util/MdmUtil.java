@@ -31,14 +31,6 @@ import java.util.Optional;
 public final class MdmUtil {
 	private MdmUtil() {}
 
-
-	public static boolean isMdmResourceType(FhirContext theFhirContext, IBaseResource theResource) {
-		String resourceType = theFhirContext.getResourceType(theResource);
-		return ("Patient".equals(resourceType) ||
-			"Practitioner".equals(resourceType)) ||
-			"Person".equals(resourceType);
-	}
-
 	/**
 	 * If the resource is tagged as not managed by empi, return false. Otherwise true.
 	 * @param theBaseResource The Patient/Practitioner that is potentially managed by EMPI.
