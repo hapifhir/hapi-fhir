@@ -80,11 +80,11 @@ public class ProviderConstants {
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
 	public static final String MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_QUERY_LINKS_RESOURCE_ID = "resourceId";
-	public static final String EMPI_QUERY_LINKS_MATCH_RESULT = "matchResult";
-	public static final String EMPI_QUERY_LINKS_LINK_SOURCE = "linkSource";
+	public static final String MDM_QUERY_LINKS_MATCH_RESULT = "matchResult";
+	public static final String MDM_QUERY_LINKS_LINK_SOURCE = "linkSource";
 
-	public static final String MDM_DUPLICATE_GOLDEN_RESOURCES = "$empi-duplicate-golden-resources";
-	public static final String MDM_NOT_DUPLICATE = "$empi-not-duplicate";
+	public static final String MDM_DUPLICATE_GOLDEN_RESOURCES = "$mdm-duplicate-golden-resources";
+	public static final String MDM_NOT_DUPLICATE = "$mdm-not-duplicate";
 
 	public static final String MDM_CLEAR = "$mdm-clear";
 	public static final String MDM_CLEAR_TARGET_TYPE = "targetType";
