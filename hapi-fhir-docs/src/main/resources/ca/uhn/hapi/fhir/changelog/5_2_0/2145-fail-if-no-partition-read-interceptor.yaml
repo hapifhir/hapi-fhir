@@ -2,5 +2,5 @@
 type: change
 issue: 2145
 title: "In HAPI FHIR 5.1.0 JPA Server, if partitioning was enabled, but no interceptor was registered to the 
-  `STORAGE_PARTITION_IDENTIFY_READ` pointcut, the system would simply default to 'App Partitions'. This was not the
+  `STORAGE_PARTITION_IDENTIFY_READ` pointcut, the system would simply default to 'All Partitions'. This was not the
   intended behaviour, so this will now result in an error."
