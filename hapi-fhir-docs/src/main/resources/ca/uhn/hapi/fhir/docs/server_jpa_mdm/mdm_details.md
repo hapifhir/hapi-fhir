@@ -45,7 +45,7 @@ Below are some simplifying principles HAPI MDM follows to reduce complexity and 
 
 1. Every Patient in the system has a MATCH link to at most one Golden Patient resource.
 
-1. The only Patient resources in the system that do not have a MATCH link are those that have the 'NO-EMPI' tag or 
+1. The only Patient resources in the system that do not have a MATCH link are those that have the 'NO-MDM' tag or 
 those that have POSSIBLE_MATCH links pending review.
 
 1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a Patient has 
@@ -76,7 +76,7 @@ The outcome of each of these comparisons is either NO_MATCH, POSSIBLE_MATCH or M
 <!---
 1. Whenever a MATCH link is established between a Patient resource and a Golden Patient resource, that Patient is always
  added to that Golden Patient resource links.  All MATCH links have corresponding Golden Patient resource links and all 
- Golden Patient resource links have corresponding MATCH empi-link records. You can think of the fields of the empi-link 
+ Golden Patient resource links have corresponding MATCH mdm-link records. You can think of the fields of the mdm-link 
  records as extra meta-data associated with each Person.link.target.
 
 1. Each record in the `MPI_LINK` table corresponds to a `link.target` entry on a Person resource unless it is a NO_MATCH record.  HAPI MDM uses the following convention for the Person.link.assurance level:

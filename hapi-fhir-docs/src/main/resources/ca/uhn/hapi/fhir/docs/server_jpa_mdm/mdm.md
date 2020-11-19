@@ -44,9 +44,9 @@ precedence over automatic links. Once a link for a patient has been manually ver
 
 Follow these steps to enable MDM on the server:
 
-The [EmpiSettings](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html) bean 
+The [MdmSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html) bean 
 contains configuration settings related to MDM within the server. To enable MDM, the 
-[setEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setEnabled(boolean)) 
+[setEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setEnabled(boolean)) 
 property should be enabled.
 
-See [MDM EID Settings](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html#empi-eid-settings) for a description of the EID-related settings.
+See [MDM EID Settings](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html#mdm-eid-settings) for a description of the EID-related settings.

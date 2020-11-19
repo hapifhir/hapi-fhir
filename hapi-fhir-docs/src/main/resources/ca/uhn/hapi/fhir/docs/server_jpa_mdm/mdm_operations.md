@@ -1,8 +1,8 @@
 # MDM Operations
 
-MDM links are managed by MDM Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
+MDM links are managed by MDM Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [MdmProvider](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/provider/MdmProviderR4.html).
 
-In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Patient/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
+In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Patient/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of mdm links.
 
 ## Query links
 
@@ -108,7 +108,7 @@ This operation returns a `Parameters` resource that looks like the following:
 
 ## Query Duplicate Golden Resources
 
-Use the `$empi-duplicate-golden-resources` operation to request a list of duplicate golden resources. 
+Use the `$mdm-duplicate-golden-resources` operation to request a list of duplicate golden resources. 
 This operation takes no parameters.
 
 ### Example
@@ -116,7 +116,7 @@ This operation takes no parameters.
 Use an HTTP GET to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-duplicate-golden-resources
+http://example.com/$mdm-duplicate-golden-resources
 ```
 
 This operation returns `Parameters` similar to `$mdm-query-links`:
@@ -146,7 +146,7 @@ This operation returns `Parameters` similar to `$mdm-query-links`:
 
 ## Unduplicate Golden Resources
 
-Use the `$empi-not-duplicate` operation to mark duplicate golden resources as not duplicates. 
+Use the `$mdm-not-duplicate` operation to mark duplicate golden resources as not duplicates. 
 This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
@@ -183,7 +183,7 @@ This operation takes the following parameters:
 Use an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-not-duplicate
+http://example.com/$mdm-not-duplicate
 ```
 
 The following request body could be used:
@@ -215,7 +215,7 @@ When the operation is successful, it returns the following `Parameters`:
 
 ## Update Link
 
-Use the `$mdm-update-link` operation to change the `matchResult` update of an empi link. This operation takes the following parameters:
+Use the `$mdm-update-link` operation to change the `matchResult` update of an mdm link. This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -254,14 +254,14 @@ Use the `$mdm-update-link` operation to change the `matchResult` update of an em
     </tbody>
 </table>
 
-Empi links updated in this way will automatically have their `linkSource` set to `MANUAL`.
+Mdm links updated in this way will automatically have their `linkSource` set to `MANUAL`.
 
 ### Example
 
 Use an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-update-link
+http://example.com/$mdm-update-link
 ```
 
 The following request body could be used:
@@ -557,6 +557,6 @@ This operation can also be done at the Instance level. When this is the case, th
 The following are examples of Instance level POSTs, which require no parameters.
 
 ```url
-http://example.com/Patient/123/$empi-submit
-http://example.com/Practitioner/456/$empi-submit
+http://example.com/Patient/123/$mdm-submit
+http://example.com/Practitioner/456/$mdm-submit
 ```

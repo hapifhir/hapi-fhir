@@ -2082,7 +2082,7 @@
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-jpaserver-empi">
+								<copy todir="target/site/apidocs-jpaserver-mdm">
 									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
@@ -2094,7 +2094,7 @@
 								<copy todir="target/site/apidocs-server">
 									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-server-empi">
+								<copy todir="target/site/apidocs-server-mdm">
 									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
