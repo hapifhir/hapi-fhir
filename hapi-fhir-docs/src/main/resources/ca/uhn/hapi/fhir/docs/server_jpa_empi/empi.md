@@ -30,6 +30,6 @@ HAPI EMPI keeps track of which links were automatically established vs manually 
 
 Follow these steps to enable EMPI on the server:
 
-The [EmpiSettings](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html) bean contains configuration settings related to EMPI within the server. To enable EMPI, the [setEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setEnabled(boolean)) property should be enabled.
+The [EmpiSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/rules/config/EmpiSettings.html) bean contains configuration settings related to EMPI within the server. To enable EMPI, the [setEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setEnabled(boolean)) property should be enabled.
 
 See [EMPI EID Settings](/hapi-fhir/docs/server_jpa_empi/empi_eid.html#empi-eid-settings) for a description of the EID-related settings.

@@ -10,7 +10,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-jpaserver-empi</artifactId>
+	<artifactId>hapi-fhir-jpaserver-mdm</artifactId>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR JPA Server - Enterprise Master Patient Index</name>
@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-server-empi</artifactId>
+			<artifactId>hapi-fhir-server-mdm</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

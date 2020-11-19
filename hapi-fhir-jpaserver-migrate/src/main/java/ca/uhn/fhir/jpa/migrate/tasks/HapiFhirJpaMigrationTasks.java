@@ -20,10 +20,6 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -139,6 +135,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		empiLink.addColumn("20200715.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
 		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
+
 
 		init510_20200725();
 

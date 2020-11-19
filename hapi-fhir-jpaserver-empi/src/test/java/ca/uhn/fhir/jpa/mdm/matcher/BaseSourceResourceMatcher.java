@@ -1,0 +1,77 @@
+package ca.uhn.fhir.jpa.mdm.matcher;
+
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import org.hamcrest.TypeSafeMatcher;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyResource> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseSourceResourceMatcher.class);
+
+	protected IdHelperService myIdHelperService;
+	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
+	protected Collection<IAnyResource> myBaseResources;
+	protected String myTargetType;
+
+	protected BaseSourceResourceMatcher(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+		myIdHelperService = theIdHelperService;
+		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
+		myBaseResources = Arrays.stream(theBaseResource).collect(Collectors.toList());
+	}
+
+	@Nullable
+	protected Long getMatchedResourcePidFromResource(IAnyResource theResource) {
+		Long retval;
+
+		boolean isGoldenRecord = MdmUtil.isMdmManaged(theResource);
+		if (isGoldenRecord) {
+			return myIdHelperService.getPidOrNull(theResource);
+		}
+		MdmLink matchLink = getMatchedEmpiLink(theResource);
+
+		if (matchLink == null) {
+			return null;
+		} else {
+			retval = matchLink.getGoldenResourcePid();
+			myTargetType = matchLink.getMdmTargetType();
+		}
+		return retval;
+	}
+
+	protected List<Long> getPossibleMatchedSourceResourcePidsFromTarget(IAnyResource theBaseResource) {
+		return getEmpiLinksForTarget(theBaseResource, MdmMatchResultEnum.POSSIBLE_MATCH).stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toList());
+	}
+
+	protected MdmLink getMatchedEmpiLink(IAnyResource thePatientOrPractitionerResource) {
+		List<MdmLink> mdmLinks = getEmpiLinksForTarget(thePatientOrPractitionerResource, MdmMatchResultEnum.MATCH);
+		if (mdmLinks.size() == 0) {
+			return null;
+		} else if (mdmLinks.size() == 1) {
+			return mdmLinks.get(0);
+		} else {
+			throw new IllegalStateException("Its illegal to have more than 1 match for a given target! we found " + mdmLinks.size() + " for resource with id: " + thePatientOrPractitionerResource.getIdElement().toUnqualifiedVersionless());
+		}
+	}
+
+	protected List<MdmLink> getEmpiLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
+		Long pidOrNull = myIdHelperService.getPidOrNull(theTargetResource);
+		List<MdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
+		if (!matchLinkForTarget.isEmpty()) {
+			return matchLinkForTarget;
+		} else {
+			return new ArrayList<>();
+		}
+	}
+}

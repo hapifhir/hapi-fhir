@@ -11,7 +11,7 @@
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
-	<artifactId>hapi-fhir-server-empi</artifactId>
+	<artifactId>hapi-fhir-server-mdm</artifactId>
 	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Enterprise Master Patient Index</name>

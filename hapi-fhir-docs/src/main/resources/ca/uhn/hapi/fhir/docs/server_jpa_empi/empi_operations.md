@@ -1,6 +1,6 @@
 # EMPI Operations
 
-EMPI links are managed by EMPI Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
+EMPI links are managed by EMPI Operations. These operations are supplied by a [plain provider](/docs/server_plain/resource_providers.html#plain-providers) called [EmpiProvider](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/provider/EmpiProviderR4.html).
 
 In cases where the operation changes data, if a resource id parameter contains a version (e.g. `Person/123/_history/1`), then the operation will fail with a 409 CONFLICT if that is not the latest version of that resource.  This feature can be used to prevent update conflicts in an environment where multiple users are working on the same set of empi links.
 

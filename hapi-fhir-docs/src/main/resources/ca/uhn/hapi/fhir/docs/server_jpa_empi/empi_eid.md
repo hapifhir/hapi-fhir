@@ -4,11 +4,11 @@ An Enterprise Identifier(EID) is a unique identifier that can be attached to Pat
 
 ## EMPI EID Settings
 
-The [EmpiSettings](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html) bean contains two EID related settings.  Both are enabled by default.
+The [EmpiSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/rules/config/EmpiSettings.html) bean contains two EID related settings.  Both are enabled by default.
 
-* **Prevent EID Updates** ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setPreventEidUpdates(boolean))): If this is enabled, then once an EID is set on a resource, it cannot be changed. If disabled, patients may have their EID updated.
+* **Prevent EID Updates** ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setPreventEidUpdates(boolean))): If this is enabled, then once an EID is set on a resource, it cannot be changed. If disabled, patients may have their EID updated.
 
-* **Prevent multiple EIDs**: ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-empi/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setPreventMultipleEids(boolean))): If this is enabled, then a resource cannot have more than one EID, and incoming resources that break this rule will be rejected.
+* **Prevent multiple EIDs**: ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/empi/rules/config/EmpiSettings.html#setPreventMultipleEids(boolean))): If this is enabled, then a resource cannot have more than one EID, and incoming resources that break this rule will be rejected.
 
 ## EMPI EID Scenarios
 

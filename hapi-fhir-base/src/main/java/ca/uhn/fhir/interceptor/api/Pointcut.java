@@ -1703,9 +1703,9 @@ public enum Pointcut {
 	),
 
 	/**
-	 * <b>EMPI Hook:</b>
-	 * Invoked whenever a persisted Patient/Practitioner resource (a resource that has just been stored in the
-	 * database via a create/update/patch/etc.) has been matched against related resources and EMPI links have been updated.
+	 * <b>MDM(EMPI) Hook:</b>
+	 * Invoked whenever a persisted resource (a resource that has just been stored in the
+	 * database via a create/update/patch/etc.) has been matched against related resources and MDM links have been updated.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
@@ -1717,7 +1717,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
+	MDM_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
