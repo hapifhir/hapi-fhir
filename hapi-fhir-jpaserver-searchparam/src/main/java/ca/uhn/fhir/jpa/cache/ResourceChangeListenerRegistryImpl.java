@@ -84,6 +84,10 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		mySchedulerService.scheduleLocalJob(LOCAL_REFRESH_INTERVAL_MS, jobDetail);
 	}
 
+	public boolean hasCacheEntriesForResourceName(String theResourceName) {
+		return myResourceVersionCache.hasEntriesForResourceName(theResourceName);
+	}
+
 	public static class Job implements HapiJob {
 		@Autowired
 		private IResourceChangeListenerRegistry myTarget;

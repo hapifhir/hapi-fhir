@@ -29,7 +29,7 @@ public class ResourceChangeListenerCache {
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 
-	private final SetValuedMap<String, ResourceChangeListenerWithSearchParamMap> myListenersByResourceType = new HashSetValuedHashMap<>();
+	private final SetValuedMap<String, ResourceChangeListenerWithSearchParamMap> myListenersByResourceName = new HashSetValuedHashMap<>();
 
 	public void add(String theResourceType, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap) {
 		getListenerEntries(theResourceType).add(new ResourceChangeListenerWithSearchParamMap(theResourceChangeListener, theMap));
@@ -37,21 +37,21 @@ public class ResourceChangeListenerCache {
 
 	@VisibleForTesting
 	public void clearListenersForUnitTest() {
-		myListenersByResourceType.clear();
+		myListenersByResourceName.clear();
 	}
 
 	public Set<String> resourceNames() {
-		return myListenersByResourceType.keySet();
+		return myListenersByResourceName.keySet();
 	}
 
 	@Nonnull
 	public Set<ResourceChangeListenerWithSearchParamMap> getListenerEntries(String theResourceType) {
-		return myListenersByResourceType.get(theResourceType);
+		return myListenersByResourceName.get(theResourceType);
 	}
 
 	public boolean hasListenerFor(IBaseResource theResource) {
 		String resourceName = myFhirContext.getResourceType(theResource);
-		return myListenersByResourceType.get(resourceName).stream().anyMatch(entry -> matches(entry.getSearchParameterMap(), theResource));
+		return myListenersByResourceName.get(resourceName).stream().anyMatch(entry -> matches(entry.getSearchParameterMap(), theResource));
 	}
 
 	private boolean matches(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
@@ -112,10 +112,14 @@ public class ResourceChangeListenerCache {
 	}
 
 	public void remove(IResourceChangeListener theResourceChangeListener) {
-		myListenersByResourceType.entries().removeIf(entry -> entry.getValue().getResourceChangeListener().equals(theResourceChangeListener));
+		myListenersByResourceName.entries().removeIf(entry -> entry.getValue().getResourceChangeListener().equals(theResourceChangeListener));
 	}
 
 	public int size() {
-		return myListenersByResourceType.size();
+		return myListenersByResourceName.size();
+	}
+
+	public boolean hasEntriesForResourceName(String theResourceName) {
+		return myListenersByResourceName.containsKey((theResourceName));
 	}
 }

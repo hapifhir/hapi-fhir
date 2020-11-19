@@ -39,8 +39,8 @@ public class ResourceVersionCache {
 	}
 
 	@Nonnull
-	public Map<IIdType, String> getMap(String theResourceType) {
-		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceType, key -> new HashMap<>());
+	public Map<IIdType, String> getMap(String theResourceName) {
+		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceName, key -> new HashMap<>());
 		return entryByTypeMap;
 	}
 
@@ -65,7 +65,11 @@ public class ResourceVersionCache {
 	}
 
 	public void listenerRemoved(IResourceChangeListener theResourceChangeListener) {
-		// FIXME KBD How do we clear the Cache for a specific ResourceType if we
+		// FIXME KHS How do we clear the Cache for a specific ResourceType if we
 		//           don't know what ResourceType this particular Listener was for ?
+	}
+
+	public boolean hasEntriesForResourceName(String theResourceName) {
+		return myVersionMap.containsKey(theResourceName);
 	}
 }

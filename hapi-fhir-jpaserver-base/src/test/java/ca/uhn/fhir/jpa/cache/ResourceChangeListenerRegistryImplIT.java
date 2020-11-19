@@ -25,13 +25,17 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
+public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	@Autowired
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
+	@Autowired
+	ResourceChangeListenerCache myResourceChangeListenerCache;
 
 	private final static String RESOURCE_NAME = "Patient";
 	private TestCallback myTestCallback = new TestCallback();
@@ -52,9 +56,9 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 	public void testRegisterInterceptor() throws InterruptedException {
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
 
-		setupResourceChangeRegistry(RESOURCE_NAME, SearchParameterMap.newSynchronous());
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myTestCallback);
 
-		Patient patient = setupPatientAndEnsureCallbacksOccur(null);
+		Patient patient = createPatientAndEnsureTestListenerIsCalled(null);
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("Patient"));
 
 		IdDt patientId = new IdDt(patient.getIdElement().toUnqualifiedVersionless());
@@ -101,11 +105,7 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertResult(theResult, 0, 0, 0);
 	}
 
-	private void setupResourceChangeRegistry(String theResourceName, SearchParameterMap theSearchParameterMap) {
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(theResourceName, theSearchParameterMap, myTestCallback);
-	}
-
-	private Patient setupPatientAndEnsureCallbacksOccur(Enumerations.AdministrativeGender theGender) throws InterruptedException {
+	private Patient createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender theGender) throws InterruptedException {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		if (theGender != null) {
@@ -133,9 +133,9 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterPolling() throws InterruptedException {
-		setupResourceChangeRegistry(RESOURCE_NAME, SearchParameterMap.newSynchronous());
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myTestCallback);
 
-		Patient patient = setupPatientAndEnsureCallbacksOccur(null);
+		Patient patient = createPatientAndEnsureTestListenerIsCalled(null);
 		IdDt patientId = new IdDt(patient.getIdElement());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the entry yet
@@ -150,9 +150,9 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
-		setupResourceChangeRegistry(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE));
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myTestCallback);
 
-		Patient patientMale = setupPatientAndEnsureCallbacksOccur(Enumerations.AdministrativeGender.MALE);
+		Patient patientMale = createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender.MALE);
 		IdDt patientIdMale = new IdDt(patientMale.getIdElement());
 
 		myTestCallback.clear();
@@ -168,12 +168,11 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		assertNull(myTestCallback.getResourceChangeEvent());
 	}
 
-	// FIXME KHS review
 	@Test
 	public void testRegisterPollingFor2Patients() throws InterruptedException {
-		setupResourceChangeRegistry(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE));
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myTestCallback);
 
-		Patient patientMale = setupPatientAndEnsureCallbacksOccur(Enumerations.AdministrativeGender.MALE);
+		Patient patientMale = createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender.MALE);
 		IdDt patientIdMale = new IdDt(patientMale.getIdElement());
 
 		Patient patientFemale = new Patient();
@@ -190,10 +189,32 @@ public class ResourceChangeListenerRegistryImplTest extends BaseJpaR4Test {
 		myResourceChangeListenerRegistry.clearCacheForUnitTest();
 		myTestCallback.setExpectedCount(1);
 		result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
+		// We should still only get one matching result
 		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myTestCallback.awaitExpected();
 		ResourceChangeEvent resourceChangeEvent = (ResourceChangeEvent) PointcutLatch.getLatchInvocationParameter(calledWith);
 		assertEquals(patientIdMale, resourceChangeEvent.getCreatedResourceIds().get(0));
+	}
+
+	@Test
+	public void removingLastListenerEmptiesCache() throws InterruptedException {
+		assertFalse(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
+		assertFalse(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myTestCallback);
+		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
+
+		createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender.MALE);
+		assertTrue(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+		TestCallback otherTestCallback = new TestCallback();
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), otherTestCallback);
+		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
+		assertTrue(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(myTestCallback);
+		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
+		assertTrue(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(otherTestCallback);
+		assertFalse(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
+		assertFalse(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
 	}
 
 	private SearchParameterMap createSearchParameterMap(Enumerations.AdministrativeGender theGender) {
