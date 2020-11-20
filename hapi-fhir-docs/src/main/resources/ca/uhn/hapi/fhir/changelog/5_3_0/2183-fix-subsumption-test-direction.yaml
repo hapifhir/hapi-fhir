@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2183
+title: "The `CodeSystem/$subsumes` operation inadvertantly reversed the meanings of the CodeA and CodeB parameters, resulting
+   in `subsumes` and `subsumed-by` responses being reversed. This has been corrected. Thanks to Rob Hausam for reporting!"

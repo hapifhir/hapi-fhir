@@ -2,4 +2,4 @@
 type: fix
 issue: 2113
 title: "When performing a `_lastUpdated` search in the JPA server where the parameter value(s) are supplied with date
-  (not time) precision, a timezone bug could cause some resoutces to not be included. This has been corrected."
+  (not time) precision, a timezone bug could cause some resources to not be included. This has been corrected."
