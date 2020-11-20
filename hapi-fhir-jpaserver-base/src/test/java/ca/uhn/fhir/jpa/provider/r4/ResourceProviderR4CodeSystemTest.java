@@ -274,8 +274,8 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ChildAA"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ChildAA"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
@@ -294,8 +294,8 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
-			.andParameter("codeB", new CodeType("ChildAA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ChildAA"))
+			.andParameter("codeB", new CodeType("ParentA"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
@@ -381,8 +381,8 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -400,8 +400,8 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
