@@ -82,6 +82,10 @@ public class StringUtil {
 	/**
 	 * Check the input string has prefix token 
 	 * 
+	 * e.g. For a display text of “Body height”:
+	 *	searching on "Bo" or "he" should find it
+	 *	searching on "ei" or "dy" should not find it
+	 * 
 	 * @param theInput       the input string
 	 * @param thePrefix      the prefix string of a token
 	 * @return Return true if a input string token separated by space start with the prefix 

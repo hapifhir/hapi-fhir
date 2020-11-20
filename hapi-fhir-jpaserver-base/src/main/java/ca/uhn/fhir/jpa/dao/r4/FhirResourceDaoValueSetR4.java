@@ -211,9 +211,6 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		for (int idx = 0; idx < theContains.size(); idx++) {
 			ValueSetExpansionContainsComponent next = theContains.get(idx);
 			
-			// e.g. For a display text of “Body height”:
-			// searching on "Bo" or "he" should find it
-			// searching on "ei" or "dy" should not find it
 			if (isBlank(next.getDisplay()) || !StringUtil.isStartsWithIgnoreCase(next.getDisplay(), theFilter)) {
 				theContains.remove(idx);
 				idx--;
