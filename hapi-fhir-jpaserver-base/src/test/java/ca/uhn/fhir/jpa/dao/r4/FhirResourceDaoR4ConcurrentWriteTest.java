@@ -139,7 +139,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 					myPatientDao.create(p);
 				} catch (PreconditionFailedException e) {
 					// expected - This is as a result of the unique SP
-					assertThat(e.getMessage(), containsString("duplicate index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
+					assertThat(e.getMessage(), containsString("duplicate unique index matching query: Patient?gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale"));
 				} catch (ResourceVersionConflictException e) {
 					// expected - This is as a result of the unique SP
 					assertThat(e.getMessage(), containsString("would have resulted in a duplicate value for a unique index"));
