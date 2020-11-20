@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Collections;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,6 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -96,7 +100,28 @@ class ResourceChangeListenerCacheTest {
 	}
 
 	@Test
-	public void testCompareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges() {
-		// FIXME KHS test...
+	public void testNotifyListenersEmptyEmptyNotInitialized() {
+		IResourceChangeListener listener = mock(IResourceChangeListener.class);
+		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(PATIENT_RESOURCE_NAME, listener, myMap);
+		ResourceVersionCache oldResourceVersionCache = new ResourceVersionCache();
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceIds(Collections.emptyList());
+		assertFalse(entry.isInitialized());
+		myResourceChangeListenerCache.notifyListener(entry, oldResourceVersionCache, newResourceVersionMap);
+		assertTrue(entry.isInitialized());
+		verify(listener, times(1)).handleInit(any());
 	}
+
+	@Test
+	public void testNotifyListenersEmptyEmptyInitialized() {
+		IResourceChangeListener listener = mock(IResourceChangeListener.class);
+		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(PATIENT_RESOURCE_NAME, listener, myMap);
+		ResourceVersionCache oldResourceVersionCache = new ResourceVersionCache();
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceIds(Collections.emptyList());
+		entry.setInitialized(true);
+		assertTrue(entry.isInitialized());
+		myResourceChangeListenerCache.notifyListener(entry, oldResourceVersionCache, newResourceVersionMap);
+		assertTrue(entry.isInitialized());
+		verifyNoInteractions(listener);
+	}
+
 }
