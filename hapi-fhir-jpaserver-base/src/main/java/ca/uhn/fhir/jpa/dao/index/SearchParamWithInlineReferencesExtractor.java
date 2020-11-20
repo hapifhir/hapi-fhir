@@ -207,7 +207,7 @@ public class SearchParamWithInlineReferencesExtractor {
 			for (String nextQueryString : queryStringsToPopulate) {
 				if (isNotBlank(nextQueryString)) {
 					ourLog.trace("Adding composite unique SP: {}", nextQueryString);
-					theParams.myCompositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
+					theParams.myCompositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString, next.getId()));
 				}
 			}
 		}
@@ -290,7 +290,13 @@ public class SearchParamWithInlineReferencesExtractor {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {
-						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+
+						String searchParameterId = "(unknown)";
+						if (next.getSearchParameterId() != null) {
+							searchParameterId = next.getSearchParameterId().toUnqualifiedVersionless().getValue();
+						}
+
+						String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "uniqueIndexConflictFailure", theEntity.getResourceType(), next.getIndexString(), existing.getResource().getIdDt().toUnqualifiedVersionless().getValue(), searchParameterId);
 						throw new PreconditionFailedException(msg);
 					}
 				}

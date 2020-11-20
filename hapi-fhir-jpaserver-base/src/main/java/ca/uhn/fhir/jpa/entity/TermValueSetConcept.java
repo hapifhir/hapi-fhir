@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.length;
  * bork up migration tasks.
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CODE", columnNames = {"VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL"}),
 	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 })
 @Entity()
@@ -71,6 +71,9 @@ public class TermValueSetConcept implements Serializable {
 
 	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
+
+	@Column(name = "SYSTEM_VER", nullable = true, length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
+	private String mySystemVer;
 
 	@Column(name = "CODEVAL", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
@@ -131,6 +134,17 @@ public class TermValueSetConcept implements Serializable {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystem, TermCodeSystem.MAX_URL_LENGTH,
 			"System exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSystem));
 		mySystem = theSystem;
+		return this;
+	}
+
+	public String getSystemVersion() {
+		return mySystemVer;
+	}
+
+	public TermValueSetConcept setSystemVersion(String theSystemVersion) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystemVersion, TermCodeSystemVersion.MAX_VERSION_LENGTH,
+			"System version exceeds maximum length (" + TermCodeSystemVersion.MAX_VERSION_LENGTH + "): " + length(theSystemVersion));
+		mySystemVer = theSystemVersion;
 		return this;
 	}
 

@@ -89,8 +89,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 
 	@Test
 	public void testLookupOnExternalCodeMultiVersion() {
-		ResourceProviderR4ValueSetVersionedTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
-		ResourceProviderR4ValueSetVersionedTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
+		ResourceProviderR4ValueSetVerCSVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "1");
+		ResourceProviderR4ValueSetVerCSVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, "2");
 
 		// First test with no version specified (should return from last version created)
 		Parameters respParam = myClient
@@ -445,8 +445,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentB"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentB"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
@@ -462,8 +462,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentC"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentC"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.andParameter("version", new StringType("1"))
 			.execute();
@@ -480,8 +480,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentB"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentB"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.andParameter("version", new StringType("2"))
 			.execute();
@@ -502,8 +502,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
-			.andParameter("codeB", new CodeType("ParentB"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentB"))
+			.andParameter("codeB", new CodeType("ParentA"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
@@ -519,8 +519,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
-			.andParameter("codeB", new CodeType("ParentC"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentC"))
+			.andParameter("codeB", new CodeType("ParentA"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.andParameter("version", new StringType("1"))
 			.execute();
@@ -537,8 +537,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
-			.andParameter("codeB", new CodeType("ParentB"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentB"))
+			.andParameter("codeB", new CodeType("ParentA"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.andParameter("version", new StringType("2"))
 			.execute();
@@ -632,8 +632,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -648,8 +648,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC").setVersion("1"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("1"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("1"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC").setVersion("1"))
 			.execute();
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -664,8 +664,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB").setVersion("2"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB").setVersion("2"))
 			.execute();
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -685,8 +685,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -701,8 +701,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("1"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC").setVersion("1"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentC").setVersion("1"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("1"))
 			.execute();
 
 		 resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -717,8 +717,8 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB").setVersion("2"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentB").setVersion("2"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
 			.execute();
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);

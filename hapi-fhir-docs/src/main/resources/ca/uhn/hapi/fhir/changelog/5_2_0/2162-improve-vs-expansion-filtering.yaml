@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2162
+title: "When expanding a pre-expanded ValueSet using a filter, the filter was ignored and the pre-expansion was not used
+   resulting in an inefficient and potentially incorrect expansion. This has been corrected."

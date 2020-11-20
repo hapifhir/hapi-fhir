@@ -81,13 +81,21 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
-	public void excludeConcept(String theSystem, String theCode) {
+	public boolean excludeConcept(String theSystem, String theCode) {
 		if (isAnyBlank(theSystem, theCode)) {
-			return;
+			return false;
 		}
 
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSetConcept> optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
+		Optional<TermValueSetConcept> optionalConcept;
+		int versionIdx = theSystem.indexOf("|");
+		if (versionIdx >= 0) {
+			String systemUrl = theSystem.substring(0,versionIdx);
+			String systemVersion = theSystem.substring(versionIdx+1);
+			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCodeWithVersion(myTermValueSet.getId(), systemUrl, systemVersion,theCode);
+		} else {
+			optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
+		}
 
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();
@@ -106,6 +114,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
 			}
 		}
+		return false;
 	}
 
 	private TermValueSetConcept saveConcept(String theSystem, String theCode, String theDisplay) {
@@ -115,7 +124,13 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		TermValueSetConcept concept = new TermValueSetConcept();
 		concept.setValueSet(myTermValueSet);
 		concept.setOrder(myConceptsSaved);
-		concept.setSystem(theSystem);
+		int versionIndex = theSystem.indexOf("|");
+		if (versionIndex >= 0) {
+			concept.setSystem(theSystem.substring(0, versionIndex));
+			concept.setSystemVersion(theSystem.substring(versionIndex+1));
+		} else {
+			concept.setSystem(theSystem);
+		}
 		concept.setCode(theCode);
 		if (isNotBlank(theDisplay)) {
 			concept.setDisplay(theDisplay);

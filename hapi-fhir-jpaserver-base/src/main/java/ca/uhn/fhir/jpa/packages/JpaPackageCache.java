@@ -55,8 +55,8 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.utilities.cache.BasePackageCacheManager;
-import org.hl7.fhir.utilities.cache.NpmPackage;
+import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,10 +217,18 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			}
 
 			boolean currentVersion = updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(thePackageId, packageVersionId);
+			String packageDesc = null;
+			if (npmPackage.description() != null) {
+				if (npmPackage.description().length() > NpmPackageVersionEntity.PACKAGE_DESC_LENGTH) {
+					packageDesc = npmPackage.description().substring(0, NpmPackageVersionEntity.PACKAGE_DESC_LENGTH - 4) + "...";
+				} else {
+					packageDesc = npmPackage.description();
+				}
+			}
 			if (currentVersion) {
 				getProcessingMessages(npmPackage).add("Marking package " + thePackageId + "#" + thePackageVersionId + " as current version");
 				pkg.setCurrentVersionId(packageVersionId);
-				pkg.setDescription(npmPackage.description());
+				pkg.setDescription(packageDesc);
 				myPackageDao.save(pkg);
 			} else {
 				getProcessingMessages(npmPackage).add("Package " + thePackageId + "#" + thePackageVersionId + " is not the newest version");
@@ -232,7 +240,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			packageVersion.setPackage(pkg);
 			packageVersion.setPackageBinary(persistedPackage);
 			packageVersion.setSavedTime(new Date());
-			packageVersion.setDescription(npmPackage.description());
+			packageVersion.setDescription(packageDesc);
 			packageVersion.setFhirVersionId(npmPackage.fhirVersion());
 			packageVersion.setFhirVersion(fhirVersion);
 			packageVersion.setCurrentVersion(currentVersion);

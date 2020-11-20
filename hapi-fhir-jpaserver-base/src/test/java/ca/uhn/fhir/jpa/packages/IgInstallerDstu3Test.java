@@ -10,7 +10,7 @@ import ca.uhn.fhir.test.utilities.ProxyUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.utilities.cache.IPackageCacheManager;
+import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	private IPackageCacheManager myPackageCacheManager;
 	private Server myServer;
-	private NpmTestR4.FakeNpmServlet myFakeNpmServlet;
+	private NpmR4Test.FakeNpmServlet myFakeNpmServlet;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 	private int myPort;
@@ -50,7 +50,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		myServer = new Server(0);
 		ServletHandler proxyHandler = new ServletHandler();
-		myFakeNpmServlet = new NpmTestR4.FakeNpmServlet();
+		myFakeNpmServlet = new NpmR4Test.FakeNpmServlet();
 		ServletHolder servletHolder = new ServletHolder(myFakeNpmServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		myServer.setHandler(proxyHandler);
@@ -91,8 +91,11 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		bytes = loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.questionnaires-1.0.2.tgz");
 		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.questionnaires/1.0.2", bytes);
 
+		bytes = loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.zib2017.json");
+		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017", bytes);
+
 		bytes = loadResourceAsByteArray("/packages/nictiz.fhir.nl.stu3.zib2017-1.3.10.tgz");
-		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.x", bytes);
+		myFakeNpmServlet.getResponses().put("/nictiz.fhir.nl.stu3.zib2017/1.3.10", bytes);
 
 		daoConfig.setAllowExternalReferences(true);
 		PackageInstallationSpec spec = new PackageInstallationSpec()

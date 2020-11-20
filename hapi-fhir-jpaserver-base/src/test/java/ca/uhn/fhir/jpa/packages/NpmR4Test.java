@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -32,7 +33,7 @@ import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.utilities.cache.NpmPackage;
+import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -63,9 +64,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class NpmTestR4 extends BaseJpaR4Test {
+public class NpmR4Test extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NpmTestR4.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(NpmR4Test.class);
 	@Autowired
 	public IPackageInstallerSvc igInstaller;
 	@Autowired
@@ -654,7 +655,12 @@ public class NpmTestR4 extends BaseJpaR4Test {
 				ourLog.info("Responding to request: {}", requestUrl);
 
 				resp.setStatus(200);
-				resp.setHeader(Constants.HEADER_CONTENT_TYPE, "application/gzip");
+
+				if (StringUtils.countMatches(requestUrl, "/") == 1) {
+					resp.setHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
+				}else {
+					resp.setHeader(Constants.HEADER_CONTENT_TYPE, "application/gzip");
+				}
 				resp.getOutputStream().write(myResponses.get(requestUrl));
 				resp.getOutputStream().close();
 			} else {

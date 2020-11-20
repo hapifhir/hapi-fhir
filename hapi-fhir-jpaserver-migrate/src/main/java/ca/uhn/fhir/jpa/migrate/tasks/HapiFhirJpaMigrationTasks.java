@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConceptMap;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -134,7 +135,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510_20200706_to_20200714();
 
 		Builder.BuilderWithTableName empiLink = version.onTable("MPI_LINK");
-		empiLink.addColumn("20200715.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, EmpiLink.VERSION_LENGTH);
+		empiLink.addColumn("20200715.1", "VERSION").nonNullable().type(ColumnTypeEnum.STRING, 16);
 		empiLink.addColumn("20200715.2", "EID_MATCH").nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("20200715.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
@@ -143,11 +144,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init510_20200725();
 
 		//EMPI Target Type
-		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, EmpiLink.TARGET_TYPE_LENGTH);
+		empiLink.addColumn("20200727.1","TARGET_TYPE").nullable().type(ColumnTypeEnum.STRING, 40);
 
 		//ConceptMap add version for search
 		Builder.BuilderWithTableName trmConceptMap = version.onTable("TRM_CONCEPT_MAP");
-		trmConceptMap.addColumn("20200910.1", "VER").nullable().type(ColumnTypeEnum.STRING, TermConceptMap.MAX_VER_LENGTH);
+		trmConceptMap.addColumn("20200910.1", "VER").nullable().type(ColumnTypeEnum.STRING, 200);
 		trmConceptMap.dropIndex("20200910.2", "IDX_CONCEPT_MAP_URL");
 		trmConceptMap.addIndex("20200910.3", "IDX_CONCEPT_MAP_URL").unique(true).withColumns("URL", "VER");
 
@@ -155,9 +156,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName trmCodeSystemVer = version.onTable("TRM_CODESYSTEM_VER");
 		trmCodeSystemVer.addIndex("20200923.1", "IDX_CODESYSTEM_AND_VER").unique(true).withColumns("CODESYSTEM_PID", "CS_VERSION_ID");
 		Builder.BuilderWithTableName trmValueSet = version.onTable("TRM_VALUESET");
-		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, TermValueSet.MAX_VER_LENGTH);
+		trmValueSet.addColumn("20200923.2", "VER").nullable().type(ColumnTypeEnum.STRING, 200);
 		trmValueSet.dropIndex("20200923.3", "IDX_VALUESET_URL");
 		trmValueSet.addIndex("20200923.4", "IDX_VALUESET_URL").unique(true).withColumns("URL", "VER");
+
+		//Term ValueSet Component add system version
+		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
+		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, 200);
+		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
+		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL");
 	}
 
 	protected void init510_20200725() {

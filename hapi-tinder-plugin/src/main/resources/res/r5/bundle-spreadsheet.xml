@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:dt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:html="http://www.w3.org/TR/REC-html40" xmlns:o="urn:schemas-microsoft-com:office:office">
  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
   <Author>Grahame</Author>
-  <LastAuthor>Eric Haas</LastAuthor>
+  <LastAuthor>Gino Canessa</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2017-03-18T21:15:30Z</LastSaved>
+  <LastSaved>2020-04-20T15:00:57Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <CustomDocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
@@ -18,7 +18,6 @@
   
   
   <ActiveSheet>2</ActiveSheet>
-  <FirstVisibleSheet>1</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -900,7 +899,7 @@
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s87"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s87"><Data ss:Type="String">document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s87"><Data ss:Type="String">document | message | transaction | transaction-response | batch | batch-response | history | searchset | collection | subscription-notification</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">Indicates the purpose of this bundle - how it is intended to be used</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s89"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s88"><Data ss:Type="String">It's possible to use a bundle for other purposes (e.g. a document can be accepted as a transaction). This is primarily defined so that there can be specific rules for some of the bundle types</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3692,7 +3691,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>19</TopRowBottomPane>
+   <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3711,9 +3710,9 @@
    <Column ss:AutoFitWidth="0" ss:Index="2" ss:StyleID="s101" ss:Width="116.0"/>
    <Column ss:StyleID="s101" ss:Width="56.0"/>
    <Column ss:StyleID="s101" ss:Width="165.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="205.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="297.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="266.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="336.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="370.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="375.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s101" ss:Width="260.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="11" ss:StyleID="s101" ss:Width="217.0"/>
    <Row ss:AutoFitHeight="0" ss:Height="16" ss:StyleID="s70">
@@ -3748,18 +3747,18 @@
     <Cell ss:StyleID="s90"><Data ss:Type="String">entry.request</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.request mandatory for batch/transaction/history, otherwise prohibited</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.all(request.exists() = (%resource.type = 'batch' or %resource.type = 'transaction' or %resource.type = 'history'))</Data></Cell>
-    <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:entry/f:request) or (f:type/@value = 'batch') or (f:type/@value = 'transaction') or (f:type/@value = 'history')</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.request mandatory for batch/transaction/history, allowed for subscription-notification, otherwise prohibited</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.all(request.exists() = (%resource.type = 'batch' or %resource.type = 'transaction' or %resource.type = 'history')) or (type='subscription-notification')</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:entry/f:request) or (f:type/@value = 'batch') or (f:type/@value = 'transaction') or (f:type/@value = 'history') or (f:type/@value = 'subscription-notification)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
     <Cell ss:StyleID="s105"><Data ss:Type="Number">4</Data><NamedCell ss:Name="Invariantids"/></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">entry.response</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
     <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.response mandatory for batch-response/transaction-response/history, otherwise prohibited</Data></Cell>
-    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.all(response.exists() = (%resource.type = 'batch-response' or %resource.type = 'transaction-response' or %resource.type = 'history'))</Data></Cell>
-    <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:entry/f:response) or (f:type/@value = 'batch-response') or (f:type/@value = 'transaction-response') or (f:type/@value = 'history')</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.response mandatory for batch-response/transaction-response/history, allowed for subscription-notification, otherwise prohibited</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">entry.all(response.exists() = (%resource.type = 'batch-response' or %resource.type = 'transaction-response' or %resource.type = 'history')) or (type='subscription-notification')</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:entry/f:response) or (f:type/@value = 'batch-response') or (f:type/@value = 'transaction-response') or (f:type/@value = 'history') or (f:type/@value = 'subscription-notification)</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30">
     <Cell ss:StyleID="s105"><Data ss:Type="Number">5</Data><NamedCell ss:Name="Invariantids"/></Cell>
@@ -3825,13 +3824,13 @@
     <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:type/@value='message') or f:entry[1]/f:resource/f:MessageHeader</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s105"><NamedCell ss:Name="Invariantids"/></Cell>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s90"/>
-    <Cell ss:StyleID="s106"/>
+    <Cell ss:StyleID="s105"><Data ss:Type="Number">13</Data><NamedCell ss:Name="Invariantids"/></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Subscription.entry.first</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">error</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">Bundle</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">A subscription-notification must have a SubscriptionStatus as the first resource</Data></Cell>
+    <Cell ss:StyleID="s90"><Data ss:Type="String">type = 'subscription-notification' implies entry.first().resource.is(SubscriptionStatus)</Data></Cell>
+    <Cell ss:StyleID="s106"><Data ss:Type="String">not(f:type/@value='subscription-notification') or f:entry[1]/f:resource/f:SubscriptionStatus</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s105"><NamedCell ss:Name="Invariantids"/></Cell>
@@ -6548,12 +6547,12 @@
     <Cell ss:StyleID="s144"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s143"/>
-    <Cell ss:StyleID="s132"/>
+    <Cell ss:StyleID="s143"><Data ss:Type="String">subscription-notification</Data></Cell>
+    <Cell ss:StyleID="s132"><Data ss:Type="Number">8</Data></Cell>
     <Cell ss:StyleID="s118"/>
     <Cell ss:StyleID="s153"/>
-    <Cell ss:StyleID="s153"/>
-    <Cell ss:StyleID="s153"/>
+    <Cell ss:StyleID="s153"><Data ss:Type="String">Subscription Notification</Data></Cell>
+    <Cell ss:StyleID="s153"><Data ss:Type="String">The bundle has been generated by a Subscription to communicate information to a client.</Data></Cell>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s132"/>
     <Cell ss:StyleID="s144"/>
