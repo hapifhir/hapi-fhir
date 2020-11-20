@@ -157,6 +157,7 @@ Direct Reference Codes:
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
+		// FIXME KBD Why does this call accept a reportType of "population" ? http://hl7.org/fhir/STU3/valueset-measure-report-type.html
 		// First run to absorb startup costs
 		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
 			null, null, null, null, null, null, null);
@@ -185,17 +186,20 @@ Direct Reference Codes:
 	// FIXME KBD
 	//@Disabled
 	@Test
-	public void evaluateMeasure() throws IOException {
-		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
+	public void evaluateColMeasure() throws IOException {
+		loadResource("dstu3/col/common-logic.cql", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/col/participation-logic.cql", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/col/FHIRHelpers-3.0.0.cql", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/col/col-logic.cql", myFhirContext, myDaoRegistry);
+
 		loadBundle("dstu3/test-patient-6529-data.json");
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 		String patient = "Patient/Patient-6529";
-		MeasureReport measureReport = myProvider.evaluateMeasure(measureId, periodStart,
-			periodEnd, null, "patient", patient, null, null,
+		MeasureReport measureReport = myProvider.evaluateMeasure(measureId, null,
+			null, null, "patient", patient, null, null,
 			null, null, null, null);
 		assertThat(measureReport.getGroup(), hasSize(1));
 		assertThat(measureReport.getGroup().get(0).getPopulation(), hasSize(3));
