@@ -16,8 +16,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Set;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -68,13 +71,22 @@ class ResourceChangeListenerCacheTest {
 		assertTrue(myResourceChangeListenerCache.hasListenerFor(new Observation()));
 		assertFalse(myResourceChangeListenerCache.hasListenerFor(new CarePlan()));
 
-				assertEquals(2, myResourceChangeListenerCache.size());
+		assertEquals(2, myResourceChangeListenerCache.size());
 		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(PATIENT_RESOURCE_NAME));
 		assertThat(myResourceChangeListenerCache.resourceNames(), containsInAnyOrder(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME));
 
 		IResourceChangeListener listener2 = mock(IResourceChangeListener.class);
 		myResourceChangeListenerCache.add(PATIENT_RESOURCE_NAME, listener2, myMap);
 		assertEquals(3, myResourceChangeListenerCache.size());
+
+		Set<ResourceChangeListenerWithSearchParamMap> entries = myResourceChangeListenerCache.getListenerEntries(PATIENT_RESOURCE_NAME);
+		assertThat(entries, hasSize(2));
+		entries = myResourceChangeListenerCache.getListenerEntries(OBSERVATION_RESOURCE_NAME);
+		assertThat(entries, hasSize(1));
+		ResourceChangeListenerWithSearchParamMap entry = entries.iterator().next();
+		assertEquals(listener1, entry.getResourceChangeListener());
+		assertEquals(OBSERVATION_RESOURCE_NAME, entry.getResourceName());
+		assertEquals(myMap, entry.getSearchParameterMap());
 
 		myResourceChangeListenerCache.remove(listener1);
 		assertEquals(1, myResourceChangeListenerCache.size());
