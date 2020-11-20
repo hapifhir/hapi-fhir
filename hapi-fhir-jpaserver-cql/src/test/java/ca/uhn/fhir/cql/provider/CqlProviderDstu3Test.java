@@ -69,42 +69,17 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 		// Load libraries
 		loadResource("dstu3/library/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
 		loadResource("dstu3/library/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
+
 
 		// load test data and conversion library for $apply operation tests
 		loadResource("dstu3/general-practitioner.json", myFhirContext, myDaoRegistry);
 		loadResource("dstu3/general-patient.json", myFhirContext, myDaoRegistry);
 	}
 
-	// FIXME KBD
-	//@Test
-	@Disabled
-	public void evaluateMeasure() throws IOException {
-		Patient patient = new Patient();
-		// FIXME KBD add something to patient we want to measure
-		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
-
-		IIdType patientId = myPatientDao.create(patient).getId().toVersionless();
-
-		Patient patientInstance = myDaoRegistry.getResourceDao(Patient.class).read(patientId);
-
-		// FIXME KBD
-		String periodStart = "0";
-		String periodEnd = StringUtils.defaultToString(System.currentTimeMillis());
-		String subject = "Patient";
-		MeasureReport measureReport = myProvider.evaluateMeasure((IdType) patientId.toVersionless(), periodStart,
-			periodEnd, null, "patient", subject, null, null,
-			null, null, null, null);
-		assertNotNull(measureReport);
-		// FIXME KBD assert on stuff in measureReport
-	}
-
 	/*
 	See dstu3/library-asf-cql.txt to see the cql encoded within library-asf-logic.json
 	See dstu3/library-asf-elm.xml to see the elm encoded within library-asf-logic.json
-	 */
 
-	/*
 	To help explain what's being measured here.  Specifically how to interpret the contents of library-asf-logic.json.
 	From https://www.ncqa.org/wp-content/uploads/2020/02/20200212_17_ASF.pdf
 
@@ -129,6 +104,7 @@ Direct Reference Codes:
 
 	@Test
 	public void evaluatePatientMeasure() throws IOException {
+		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
 		Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
@@ -170,6 +146,7 @@ Direct Reference Codes:
 
 	@Test
 	public void evaluatePopulationMeasure() throws IOException {
+		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
 		loadBundle("dstu3/test-patient-6529-data.json");
@@ -203,6 +180,31 @@ Direct Reference Codes:
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
 
+	}
+
+	// FIXME KBD
+	//@Disabled
+	@Test
+	public void evaluateMeasure() throws IOException {
+		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
+		loadBundle("dstu3/test-patient-6529-data.json");
+
+		IdType measureId = new IdType("Measure", "measure-asf");
+		String periodStart = "2003-01-01";
+		String periodEnd = "2003-12-31";
+		String patient = "Patient/Patient-6529";
+		MeasureReport measureReport = myProvider.evaluateMeasure(measureId, periodStart,
+			periodEnd, null, "patient", patient, null, null,
+			null, null, null, null);
+		assertThat(measureReport.getGroup(), hasSize(1));
+		assertThat(measureReport.getGroup().get(0).getPopulation(), hasSize(3));
+		for (MeasureReport.MeasureReportGroupComponent group : measureReport.getGroup()) {
+			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
+				assertTrue(population.getCount() > 0);
+			}
+		}
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(measureReport));
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {
