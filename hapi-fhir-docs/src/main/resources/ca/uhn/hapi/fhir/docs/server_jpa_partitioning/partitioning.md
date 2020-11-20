@@ -87,6 +87,20 @@ The following snippet shows a server with this configuration.
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|multitenantServer}}
 ```
 
+Once enabled, HTTP Requests to the FHIR server must include the name of the partition in the request, for identification purposes. With no multitenancy, a request to create a Patient could look like this:
+
+```HTTP
+POST www.example.com/fhir/Patient
+```
+
+With partitioning enabled, if we were to now create a patient in the `DEFAULT` paritition, the request would now look like this:
+
+
+```
+POST www.example.com/fhir/DEFAULT/Patient
+```
+
+Failure to add a partition name to the request path will result in an error when multitenancy is enabled.
 
 # Limitations
 
