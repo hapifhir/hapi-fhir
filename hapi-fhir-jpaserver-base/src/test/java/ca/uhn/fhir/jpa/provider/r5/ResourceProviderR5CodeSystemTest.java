@@ -102,8 +102,8 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ChildAA"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ChildAA"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
@@ -121,8 +121,8 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
-			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA"))
+			.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA"))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);

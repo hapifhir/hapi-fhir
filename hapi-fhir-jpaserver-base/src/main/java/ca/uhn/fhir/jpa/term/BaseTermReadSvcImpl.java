@@ -2079,12 +2079,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		});
 	}
 
-	private @Nullable
-	ConceptSubsumptionOutcome testForSubsumption(FullTextEntityManager theEntityManager, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
+	@Nullable
+	private ConceptSubsumptionOutcome testForSubsumption(FullTextEntityManager theEntityManager, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
 		QueryBuilder qb = theEntityManager.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
 		BooleanJunction<?> bool = qb.bool();
-		bool.must(qb.keyword().onField("myId").matching(Long.toString(theLeft.getId())).createQuery());
-		bool.must(qb.keyword().onField("myParentPids").matching(Long.toString(theRight.getId())).createQuery());
+		bool.must(qb.keyword().onField("myId").matching(Long.toString(theRight.getId())).createQuery());
+		bool.must(qb.keyword().onField("myParentPids").matching(Long.toString(theLeft.getId())).createQuery());
 		Query luceneQuery = bool.createQuery();
 		FullTextQuery jpaQuery = theEntityManager.createFullTextQuery(luceneQuery, TermConcept.class);
 		jpaQuery.setMaxResults(1);

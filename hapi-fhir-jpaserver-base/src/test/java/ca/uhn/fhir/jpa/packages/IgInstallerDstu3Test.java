@@ -39,7 +39,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 	@Autowired
 	private IPackageCacheManager myPackageCacheManager;
 	private Server myServer;
-	private NpmTestR4.FakeNpmServlet myFakeNpmServlet;
+	private NpmR4Test.FakeNpmServlet myFakeNpmServlet;
 	@Autowired
 	private INpmPackageVersionDao myPackageVersionDao;
 	private int myPort;
@@ -50,7 +50,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
 		myServer = new Server(0);
 		ServletHandler proxyHandler = new ServletHandler();
-		myFakeNpmServlet = new NpmTestR4.FakeNpmServlet();
+		myFakeNpmServlet = new NpmR4Test.FakeNpmServlet();
 		ServletHolder servletHolder = new ServletHolder(myFakeNpmServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		myServer.setHandler(proxyHandler);
