@@ -13,11 +13,9 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.platform.commons.util.StringUtils;
 import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,8 +182,8 @@ Direct Reference Codes:
 	}
 
 	// FIXME KBD
-	//@Disabled
-	@Test
+	@Disabled
+	//@Test
 	public void evaluateColMeasure() throws IOException {
 		loadResource("dstu3/col/common-logic.cql", myFhirContext, myDaoRegistry);
 		loadResource("dstu3/col/participation-logic.cql", myFhirContext, myDaoRegistry);
