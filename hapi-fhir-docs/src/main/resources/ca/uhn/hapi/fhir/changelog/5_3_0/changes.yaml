@@ -1,0 +1,8 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>Jetty (JPA Starter): 9.4.30.v20200611 -&gt; 9.4.34.v20201102</li>
+    </ul>"

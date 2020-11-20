@@ -220,8 +220,8 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentB"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentB"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.execute();
 
@@ -237,8 +237,8 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentC"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentC"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.andParameter("version", new StringType("1"))
 			.execute();
@@ -255,8 +255,8 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_SUBSUMES)
-			.withParameter(Parameters.class, "codeA", new CodeType("ParentB"))
-			.andParameter("codeB", new CodeType("ParentA"))
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentB"))
 			.andParameter("system", new UriType(SYSTEM_PARENTCHILD))
 			.andParameter("version", new StringType("2"))
 			.execute();
