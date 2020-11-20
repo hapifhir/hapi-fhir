@@ -9,6 +9,7 @@ import java.util.*;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -23,6 +24,7 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +54,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setEverythingIncludesFetchPageSize(new DaoConfig().getEverythingIncludesFetchPageSize());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 	}
 
 	@Override
@@ -104,6 +107,44 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testEverythingWithCanonicalReferences() throws Exception {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient p = new Patient();
+		p.setManagingOrganization(new Reference("http://example.com/Organization/123"));
+		String patientId = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
+
+		Observation obs = new Observation();
+		obs.getSubject().setReference(patientId);
+		obs.getEncounter().setReference("http://example.com/Encounter/999");
+		String observationId = myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
+
+		// Normal call
+		Bundle bundle = fetchBundle(ourServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
+		assertNull(bundle.getLink("next"));
+		Set<String> actual = new TreeSet<>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		assertThat(actual, containsInAnyOrder(patientId, observationId));
+
+		// Synchronous call
+		HttpGet get = new HttpGet(ourServerBase + "/" + patientId + "/$everything?_format=json&_count=100");
+		get.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
+			bundle = EncodingEnum.JSON.newParser(myFhirCtx).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
+		}
+		assertNull(bundle.getLink("next"));
+		actual = new TreeSet<>();
+		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
+			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		assertThat(actual, containsInAnyOrder(patientId, observationId));
+	}
+
+
 	/**
 	 * See #674
 	 */
@@ -114,7 +155,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		
 		assertNull(bundle.getLink("next"));
 		
-		Set<String> actual = new TreeSet<String>();
+		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}

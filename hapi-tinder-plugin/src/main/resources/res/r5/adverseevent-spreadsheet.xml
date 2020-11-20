@@ -840,11 +840,11 @@
     <Cell ss:Index="9"><Data ss:Type="String">AdverseEventStatus</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">status</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15"><Data ss:Type="String">in-progress | completed | entered-in-error | unknown</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">The current state of the data entry of the adverse event or potential adverse event.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="18"><Data ss:Type="String">This is not the reporting of the event to any regulatory or quality organization</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The current state of the adverse event or potential adverse event.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="18"><Data ss:Type="String">This is not the reporting of the event to any regulatory or quality organization.  This is not the outcome of the patient's condition.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22"><Data ss:Type="String">Event.status</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s79"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="25"><Data ss:Type="String">GF#22108</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#22108, J#25926</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="87">
     <Cell><Data ss:Type="String">AdverseEvent.actuality</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -863,8 +863,9 @@
     <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9"><Data ss:Type="String">AdverseEventCategory</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">class</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">product-problem | product-quality | product-use-error | wrong-dose | incorrect-prescribing-information | wrong-technique | wrong-route-of-administration | wrong-rate | wrong-duration | wrong-time | expired-drug | medical-device-use-error | problem-different-manufacturer | unsafe-physical-environment</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">wrong-patient | procedure-mishap | medication-mishap | device | unsafe-physical-environment | hospital-aquired-infection | wrong-body-site</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">The overall type of event, intended for search and filtering purposes.  </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">FHIR-25396</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="72">
     <Cell><Data ss:Type="String">AdverseEvent.code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -894,11 +895,11 @@
     <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">Reference (Encounter)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="10"><Data ss:Type="String">context</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="15"><Data ss:Type="String">The Encounter during which this AdverseEvent was created</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">The Encounter during which AdverseEvent was created or to which the creation of this record is tightly associated.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="18"><Data ss:Type="String">This will typically be the encounter the event occurred within, but some activities may be initiated prior to or after the official completion of an encounter but still be tied to the context of the encounter.  For example, if a medication administration was considered an adverse event because it resulted in a rash, then the encounter when the medication administration was given is the context.  If the patient reports the AdverseEvent during a second encounter, that second encounter is not the context.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="15"><Data ss:Type="String">The Encounter associated with the start of the AdverseEvent</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The Encounter associated with the start of the AdverseEvent</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="18"><Data ss:Type="String">This will typically be the encounter the event occurred within, but some activities may be initiated prior to or after the official completion of an encounter but still be tied to the context of the encounter. For example, if a medication administration was considered an adverse event because it resulted in a rash, then the encounter when the medication administration was given is the associated encounter. If the patient reports the AdverseEvent during a second encounter, that second encounter is not the associated encounter.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="22" ss:StyleID="s78"><Data ss:Type="String">Event.encounter</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="25"><Data ss:Type="String">GF#14458</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">GF#14458; FHIR-25397</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="43" ss:StyleID="s80">
     <Cell><Data ss:Type="String">AdverseEvent.occurrence[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -934,7 +935,8 @@
     <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5" ss:StyleID="s69"><Data ss:Type="String">Reference(Condition)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15"><Data ss:Type="String">Effect on the subject due to this event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell><Data ss:Type="String">Includes information about the reaction that occurred as a result of exposure to a substance (for example, a drug or a chemical)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">Information about the condition that occurred as a result of the adverse event, such as hives due to the exposure to a substance (for example, a drug or a chemical) or a broken leg as a result of the fall.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">J#26435</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14" ss:StyleID="s82">
     <Cell><Data ss:Type="String">AdverseEvent.location</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -956,11 +958,12 @@
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14" ss:StyleID="s80">
     <Cell ss:StyleID="s83"><Data ss:Type="String">AdverseEvent.outcome</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="3"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="5"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="9" ss:StyleID="s69"><Data ss:Type="String">AdverseEventOutcome</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:Index="15" ss:StyleID="s82"><Data ss:Type="String">Type of outcome from the adverse event</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">Describes the type of outcome from the adverse event, such as resolved, recovering, ongoing, resolved-with-sequelae, or fatal.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="25"><Data ss:Type="String">J#27784</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="14" ss:StyleID="s80">
     <Cell><Data ss:Type="String">AdverseEvent.recorder</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1189,7 +1192,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>19</TopRowBottomPane>
+   <TopRowBottomPane>2</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3446,7 +3449,7 @@
     <Cell ss:StyleID="s143"><Data ss:Type="String">AdverseEventCategory</Data></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Overall categorization of the event, e.g. product-related or situational</Data></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">code list</Data></Cell>
-    <Cell ss:StyleID="s105"><Data ss:Type="String">extensible</Data></Cell>
+    <Cell ss:StyleID="s105"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">#adverse-event-category</Data></Cell>
     <Cell ss:StyleID="s105"/>
     <Cell ss:StyleID="s105"/>
@@ -3476,7 +3479,7 @@
     <Cell ss:StyleID="s107"><Data ss:Type="String">AdverseEventOutcome</Data></Cell>
     <Cell ss:StyleID="s106"><Data ss:Type="String">Codes describing the type of outcome from the adverse event</Data></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">value set</Data></Cell>
-    <Cell ss:StyleID="s105"><Data ss:Type="String">preferred</Data></Cell>
+    <Cell ss:StyleID="s105"><Data ss:Type="String">example</Data></Cell>
     <Cell ss:StyleID="s105"><Data ss:Type="String">valueset-adverse-event-outcome</Data></Cell>
     <Cell ss:StyleID="s105"/>
     <Cell ss:StyleID="s105"/>
@@ -3485,7 +3488,7 @@
     <Cell ss:StyleID="s105"/>
     <Cell ss:StyleID="s105"/>
     <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s128"><Data ss:Type="String">GF#10642,11151, 11920, 23022</Data></Cell>
+    <Cell ss:StyleID="s128"><Data ss:Type="String">GF#10642,11151, 11920, 23022, 25556</Data></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="30" ss:StyleID="s115">
     <Cell ss:StyleID="s106"><Data ss:Type="String">AdverseEventSeriousness</Data></Cell>
@@ -4328,13 +4331,13 @@
   <Names>
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='adverse-event-category'!R1C1:R1C9"/>
   </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="57" ss:StyleID="s130" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="42" ss:StyleID="s130" x:FullColumns="1" x:FullRows="1">
    <Column ss:StyleID="s130" ss:Width="165.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s130" ss:Width="37.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s130" ss:Width="163.0"/>
    <Column ss:StyleID="s130" ss:Width="89.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s130" ss:Width="190.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s130" ss:Width="259.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s130" ss:Width="469.0"/>
    <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s130" ss:Width="88.0"/>
    <Column ss:AutoFitWidth="0" ss:Index="9" ss:StyleID="s130" ss:Width="256.0"/>
    <Row ss:AutoFitHeight="0">
@@ -4348,153 +4351,54 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v3 codes - See Confluence for syntax</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">product-problem</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">1</Data></Cell>
-    <Cell ss:StyleID="s105"/>
+   <Row ss:AutoFitHeight="0" ss:Height="30">
+    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-patient</Data></Cell>
+    <Cell ss:StyleID="s120"/>
+    <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Product Problem</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a product problem</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Wrong Patient</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to an event involving the wrong patient, who was not the intended subject</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">product-quality</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">2</Data></Cell>
-    <Cell ss:StyleID="s105"/>
+    <Cell ss:StyleID="s136"><Data ss:Type="String">procedure-mishap</Data></Cell>
+    <Cell ss:StyleID="s120"/>
+    <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Product Quality</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to product quality</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Procedure Mishap</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a procedure mishap</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">3</Data></Cell>
-    <Cell ss:StyleID="s105"/>
+    <Cell><Data ss:Type="String">medication-mishap</Data></Cell>
+    <Cell ss:StyleID="s120"/>
+    <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Product Use Error</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a product use error</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Medication Mishap</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a medication mishap, such as wrong dose, route, rate, or duration of administration.</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-dose</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">4</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Wrong Dose</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a wrong dose</Data></Cell>
+    <Cell><Data ss:Type="String">device</Data></Cell>
     <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">incorrect-prescribing-information</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">5</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Incorrect Prescribing Information</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to incorrect perscribing information</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-technique</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">6</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Wrong Technique</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a wrong technique</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-route-of-administration</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">7</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Wrong Route of Administration</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a wrong route of administration</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-rate</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">8</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Wrong Rate</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a wrong rate</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-duration</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">9</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Wrong Duration</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a wrong duration</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">wrong-time</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">10</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Wrong Time</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a wrong time</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">expired-drug</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">11</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">product-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Expired Drug</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to an expired drug</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">medical-device-use-error</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">12</Data></Cell>
-    <Cell ss:StyleID="s105"/>
+    <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">Medical Device Use Error</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a medical device use error</Data></Cell>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="32">
-    <Cell ss:StyleID="s136"><Data ss:Type="String">problem-different-manufacturer</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">13</Data></Cell>
-    <Cell ss:StyleID="s105"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">Problem with Different Manufacturer of Same Medicine</Data></Cell>
-    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a problem with a different manufacturer of the same medication</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Device</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a device</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s136"><Data ss:Type="String">unsafe-physical-environment</Data></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="Number">14</Data></Cell>
-    <Cell ss:StyleID="s105"/>
+    <Cell ss:StyleID="s120"/>
+    <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
     <Cell ss:StyleID="s120"><Data ss:Type="String">Unsafe Physical Environment</Data></Cell>
     <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to an unsafe physical environment</Data></Cell>
@@ -4503,84 +4407,23 @@
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"/>
+    <Cell><Data ss:Type="String">hospital-aquired-infection</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Hospital Acquired Infection</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to a hospital acquired infection</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s138"/>
    </Row>
    <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"/>
+    <Cell><Data ss:Type="String">wrong-body-site</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s149"/>
     <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s136"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:Index="2" ss:StyleID="s120"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:Index="2" ss:StyleID="s120"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:Index="2" ss:StyleID="s120"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:Index="2" ss:StyleID="s120"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s120"/>
-    <Cell ss:StyleID="s138"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:Index="2" ss:StyleID="s120"/>
-    <Cell ss:StyleID="s149"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
-    <Cell ss:StyleID="s147"/>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">Wrong Body Site</Data></Cell>
+    <Cell ss:StyleID="s147"><Data ss:Type="String">The adverse event pertains to the wrong body site</Data></Cell>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s120"/>
     <Cell ss:StyleID="s138"/>

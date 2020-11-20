@@ -77,6 +77,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	public Condition addPredicate(List<? extends IQueryParameterType> theUriOrParameterList, String theParamName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequestDetails) {
 
 		List<Condition> codePredicates = new ArrayList<>();
+		boolean predicateIsHash = false;
 		for (IQueryParameterType nextOr : theUriOrParameterList) {
 
 			if (nextOr instanceof UriParam) {
@@ -141,8 +142,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					Condition uriPredicate = null;
 					if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
 						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName, value);
-						Condition hashPredicate = BinaryCondition.equalTo(myColumnHashUri, generatePlaceholder(hashUri));
-						codePredicates.add(hashPredicate);
+						uriPredicate = BinaryCondition.equalTo(myColumnHashUri, generatePlaceholder(hashUri));
+						predicateIsHash = true;
 					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
 						uriPredicate = BinaryCondition.notEqualTo(myColumnUri, generatePlaceholder(value));
 					} else if (theOperation == SearchFilterParser.CompareOperation.co) {
@@ -164,11 +165,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 							theOperation.toString()));
 					}
 
-					if (uriPredicate != null) {
-						long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
-						BinaryCondition hashIdentityPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
-						codePredicates.add(ComboCondition.and(hashIdentityPredicate, uriPredicate));
-					}
+					codePredicates.add(uriPredicate);
 				}
 
 			} else {
@@ -186,8 +183,11 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		}
 
 		ComboCondition orPredicate = ComboCondition.or(codePredicates.toArray(new Condition[0]));
-		Condition outerPredicate = combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate);
-		return outerPredicate;
+		if (predicateIsHash) {
+			return orPredicate;
+		} else {
+			return combineWithHashIdentityPredicate(getResourceType(), theParamName, orPredicate);
+		}
 
 	}
 

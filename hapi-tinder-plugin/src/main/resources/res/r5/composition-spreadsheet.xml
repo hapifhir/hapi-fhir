@@ -5161,7 +5161,7 @@
   <Names>
    <NamedRange ss:Name="_FilterDatabase" ss:RefersTo="=Profiles!R1C1:R2C4"/>
   </Names>
-  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="41" ss:StyleID="s113" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="5" ss:ExpandedRowCount="40" ss:StyleID="s113" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s113" ss:Width="114.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s113" ss:Width="281.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s113" ss:Width="252.0"/>
@@ -5200,12 +5200,6 @@
     <Cell ss:StyleID="s116"><Data ss:Type="String">composition-extensions-spreadsheet.xml</Data></Cell>
     <Cell ss:StyleID="s117"><Data ss:Type="String">spreadsheet</Data></Cell>
     <Cell><Data ss:Type="String">core</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s118"/>
-    <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s120"/>
    </Row>
    <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s118"/>
@@ -5912,7 +5906,7 @@
     <Cell ss:StyleID="s119"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s119"><Data ss:Type="String">required</Data></Cell>
     <Cell ss:StyleID="s119"/>
-    <Cell ss:StyleID="s149"><Data ss:Type="String">http://terminology.hl7.org/ValueSet/v3-ConfidentialityClassification</Data></Cell>
+    <Cell ss:StyleID="s149"><Data ss:Type="String">http://terminology.hl7.org/ValueSet/v3-Confidentiality</Data></Cell>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>
     <Cell ss:StyleID="s119"/>

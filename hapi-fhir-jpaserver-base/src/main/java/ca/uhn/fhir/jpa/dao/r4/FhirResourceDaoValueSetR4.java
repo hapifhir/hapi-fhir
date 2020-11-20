@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -99,14 +100,13 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-		source.getCompose().addInclude().addValueSet(theUri);
-
 		if (isNotBlank(theFilter)) {
-			ConceptSetComponent include = source.getCompose().addInclude();
-			ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
+		} else {
+			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		return doExpand(source);
@@ -133,14 +133,13 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		ValueSet source = new ValueSet();
 		source.setUrl(theUri);
 
-		source.getCompose().addInclude().addValueSet(theUri);
-
 		if (isNotBlank(theFilter)) {
-			ConceptSetComponent include = source.getCompose().addInclude();
-			ConceptSetFilterComponent filter = include.addFilter();
+			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(FilterOperator.EQUAL);
 			filter.setValue(theFilter);
+		} else {
+			source.getCompose().addInclude().addValueSet(theUri);
 		}
 
 		return doExpand(source, theOffset, theCount);
@@ -223,7 +222,7 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
 		if (ElementUtil.isEmpty(include.getConcept())) {
 			if (isNotBlank(theFilter)) {
-				include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue(theFilter);
+				include.addFilter().setProperty(JpaConstants.VALUESET_FILTER_DISPLAY).setOp(FilterOperator.EQUAL).setValue(theFilter);
 			}
 		}
 	}

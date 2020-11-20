@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2182
+title: "When a unique index SearchParametr violation is blocked, the error message will now include the ID of the relevant
+   SearchParameter, in order to make troubleshooting easier."

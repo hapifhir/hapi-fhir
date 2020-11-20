@@ -75,7 +75,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 	@Test
 	public void testValidateInvalidExpression() {
 		SearchParameter nextSearchParameter = new SearchParameter();
-		nextSearchParameter.setExpression("Patient.ex////");
+		nextSearchParameter.setExpression("Patient.ex[[[");
 		nextSearchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		nextSearchParameter.setType(Enumerations.SearchParamType.STRING);
 		nextSearchParameter.addBase("Patient");
@@ -84,7 +84,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 			myDao.validateResourceForStorage(nextSearchParameter, null);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"Patient.ex////\": Error in ?? at 1, 1: Premature ExpressionNode termination at unexpected token \"////\"", e.getMessage());
+			assertEquals("Invalid SearchParameter.expression value \"Patient.ex[[[\": Error in ?? at 1, 1: Found [ expecting a token name", e.getMessage());
 		}
 	}
 

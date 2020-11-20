@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.*;
 
@@ -59,6 +60,8 @@ public class ResourceIndexedCompositeStringUnique extends BasePartitionable impl
 	@SuppressWarnings("unused")
 	@Column(name = PartitionablePartitionId.PARTITION_ID, insertable = false, updatable = false, nullable = true)
 	private Integer myPartitionIdValue;
+	@Transient
+	private IIdType mySearchParameterId;
 
 	/**
 	 * Constructor
@@ -70,10 +73,11 @@ public class ResourceIndexedCompositeStringUnique extends BasePartitionable impl
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedCompositeStringUnique(ResourceTable theResource, String theIndexString) {
+	public ResourceIndexedCompositeStringUnique(ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
 		setResource(theResource);
 		setIndexString(theIndexString);
 		setPartitionId(theResource.getPartitionId());
+		setSearchParameterId(theSearchParameterId);
 	}
 
 	@Override
@@ -130,5 +134,19 @@ public class ResourceIndexedCompositeStringUnique extends BasePartitionable impl
 			.append("indexString", myIndexString)
 			.append("partition", getPartitionId())
 			.toString();
+	}
+
+	/**
+	 * Note: This field is not persisted, so it will only be populated for new indexes
+	 */
+	public void setSearchParameterId(IIdType theSearchParameterId) {
+		mySearchParameterId = theSearchParameterId;
+	}
+
+	/**
+	 * Note: This field is not persisted, so it will only be populated for new indexes
+	 */
+	public IIdType getSearchParameterId() {
+		return mySearchParameterId;
 	}
 }
