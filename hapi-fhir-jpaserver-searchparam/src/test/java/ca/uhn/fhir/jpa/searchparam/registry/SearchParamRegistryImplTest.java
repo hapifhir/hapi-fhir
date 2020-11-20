@@ -70,7 +70,7 @@ public class SearchParamRegistryImplTest {
 		for (ourLastId = 0; ourLastId < TEST_SEARCH_PARAMS; ++ourLastId) {
 			ourEntities.add(createEntity(ourLastId, 1));
 		}
-		ourResourceVersionMap = ResourceVersionMap.fromResourceIds(ourEntities);
+		ourResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ourEntities);
 		ourBuiltinPatientSearchParamCount = ReadOnlySearchParamCache.fromFhirContext(ourFhirContext).getSearchParamMap("Patient").size();
 	}
 
@@ -318,7 +318,7 @@ public class SearchParamRegistryImplTest {
 	}
 
 	private void resetMock(Enumerations.PublicationStatus theStatus, List<ResourceTable> theNewEntities) {
-		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(theNewEntities);
+		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceTableEntities(theNewEntities);
 		when(myResourceVersionSvc.getVersionMap(anyString(), any())).thenReturn(resourceVersionMap);
 
 		// When we ask for the new entity, return our foo search parameter

@@ -22,6 +22,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
+/**
+ * This Spring Component holds all of the IResourceChangeListeners that have been registered with the
+ * IResourceChangeListenerRegistry along with the ResourceName and SearchParamMap they were registered with.
+ */
 public class ResourceChangeListenerCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
 
@@ -58,12 +62,20 @@ public class ResourceChangeListenerCache {
 	private boolean matches(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(theSearchParameterMap, theResource);
 		if (!result.isInMemory()) {
-			// This should never happen since we detect this at registration time
+			// This should never happen since we enforce only in-memory SearchParamMaps at registration time
 			ourLog.warn("Search Parameter Map {} cannot be processed in-memory", theSearchParameterMap);
 		}
 		return result.matched();
 	}
 
+	/**
+	 * Notify a listener with all matching resources if it hasn't been initialized yet, otherwise only notify it if
+	 * any resources have changed
+	 * @param theListenerEntry
+	 * @param theOldResourceVersionCache the resource versions we have in our cache for that listener entry
+	 * @param theNewResourceVersionMap the measured new resources
+	 * @return the list of created, updated and deleted ids
+	 */
 	public ResourceChangeResult notifyListener(ResourceChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
 		IResourceChangeListener resourceChangeListener = theListenerEntry.getResourceChangeListener();

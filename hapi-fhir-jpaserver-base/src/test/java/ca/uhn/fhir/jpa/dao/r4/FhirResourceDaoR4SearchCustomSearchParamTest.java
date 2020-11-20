@@ -1435,7 +1435,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParamRegistry.forceRefresh();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		// Try with custom gender SP
+		// Expect error since searchparam is now retired
 		map = new SearchParameterMap();
 		map.add("foo", new TokenParam(null, "male"));
 		try {

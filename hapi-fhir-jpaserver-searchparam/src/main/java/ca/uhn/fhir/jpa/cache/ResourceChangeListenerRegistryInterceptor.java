@@ -46,8 +46,6 @@ public class ResourceChangeListenerRegistryInterceptor {
 		if (theResource == null) {
 			return;
 		}
-		synchronized (this) {
-			myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
-		}
+		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 	}
 }

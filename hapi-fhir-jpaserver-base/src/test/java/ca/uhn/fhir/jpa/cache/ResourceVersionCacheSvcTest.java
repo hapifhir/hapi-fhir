@@ -7,8 +7,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
@@ -16,7 +14,7 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 	IResourceVersionSvc myResourceVersionCacheSvc;
 
 	@Test
-	public void testGetVersionLookup() throws IOException {
+	public void testGetVersionMap() {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		IIdType patientId = myPatientDao.create(patient).getId();

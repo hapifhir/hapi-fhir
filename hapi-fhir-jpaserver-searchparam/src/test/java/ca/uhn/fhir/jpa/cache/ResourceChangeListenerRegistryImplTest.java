@@ -144,7 +144,7 @@ class ResourceChangeListenerRegistryImplTest {
 	}
 
 	/**
-	 * This test assumes that  {@link ResourceChangeListenerRegistryImpl#REMOTE_REFRESH_INTERVAL_MS} is set to one hour.
+	 * This test assumes that  {@link ResourceChangeListenerRegistryImpl#REMOTE_REFRESH_INTERVAL_MS} is set to one minute.
 	 * Adjust the times below if that changes.
  	 */
 	@Test
@@ -167,7 +167,12 @@ class ResourceChangeListenerRegistryImplTest {
 		verify(myResourceChangeListenerCache, never()).notifyListener(any(), any(), any());
 
 		resetMockCache();
-		ResourceChangeListenerRegistryImpl.setNowForUnitTests("09:01:00");
+		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:01:00");
+		myResourceChangeListenerRegistry.refreshCacheIfNecessary(RESOURCE_NAME);
+		verify(myResourceChangeListenerCache, never()).notifyListener(any(), any(), any());
+
+		resetMockCache();
+		ResourceChangeListenerRegistryImpl.setNowForUnitTests("08:01:01");
 		myResourceChangeListenerRegistry.refreshCacheIfNecessary(RESOURCE_NAME);
 		verify(myResourceChangeListenerCache, times(1)).notifyListener(any(), any(), any());
 	}

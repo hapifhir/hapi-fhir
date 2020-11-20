@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-// FIXME KHS
+// TODO JA Please fix this test. Expanding FhirContext.getResourceTypes() to cover all resource types broke this test.
 @Disabled
 public class SearchParamExtractorMegaTest {
 

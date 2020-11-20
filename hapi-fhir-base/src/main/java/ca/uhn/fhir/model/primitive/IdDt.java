@@ -59,7 +59,6 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	private boolean myHaveComponentParts;
 	private String myResourceType;
 	private String myUnqualifiedId;
-
 	private String myUnqualifiedVersionId;
 
 	/**

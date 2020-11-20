@@ -84,7 +84,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchParamNotInMemoryFails() {
+	public void testNonInMemorySearchParamCannotBeRegistered() {
 		try {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLastUpdated(new DateRangeParam("1965", "1970"));
@@ -152,14 +152,14 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myTestCallback);
 
-		Patient patientMale = createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender.MALE);
-		IdDt patientIdMale = new IdDt(patientMale.getIdElement());
+		createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender.MALE);
 
 		myTestCallback.clear();
 
 		Patient patientFemale = new Patient();
 		patientFemale.setActive(true);
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
+
 		// NOTE: This scenario does not invoke the myTestCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
@@ -178,6 +178,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		Patient patientFemale = new Patient();
 		patientFemale.setActive(true);
 		patientFemale.setGender(Enumerations.AdministrativeGender.FEMALE);
+
 		// NOTE: This scenario does not invoke the myTestCallback listener so just call the DAO directly
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		ResourceChangeResult result = myResourceChangeListenerRegistry.forceRefresh(RESOURCE_NAME);
@@ -200,18 +201,24 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void removingLastListenerEmptiesCache() throws InterruptedException {
 		assertFalse(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
 		assertFalse(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myTestCallback);
 		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
+		assertFalse(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
 
 		createPatientAndEnsureTestListenerIsCalled(Enumerations.AdministrativeGender.MALE);
 		assertTrue(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+
 		TestCallback otherTestCallback = new TestCallback();
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), otherTestCallback);
+
 		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
 		assertTrue(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(myTestCallback);
 		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
 		assertTrue(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));
+
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(otherTestCallback);
 		assertFalse(myResourceChangeListenerCache.hasEntriesForResourceName(RESOURCE_NAME));
 		assertFalse(myResourceChangeListenerRegistry.hasCacheEntriesForResourceName(RESOURCE_NAME));

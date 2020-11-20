@@ -29,7 +29,7 @@ public class ResourceVersionCacheTest {
 	}
 
 	@Test
-	public void testPut() {
+	public void testPutRemove() {
 		IdDt id = buildIdDt(RESOURCE_ID);
 		assertFalse(myResourceVersionCache.hasEntriesForResourceName(RESOURCE_NAME));
 		String version1 = "1";
@@ -46,7 +46,7 @@ public class ResourceVersionCacheTest {
 	}
 
 	@Test
-	public void initializeAndClear() {
+	public void testInitializeAndClear() {
 				myResourceVersionCache.initialize(buildResourceVersionMap());
 		for (int i = 0; i < ENTITY_COUNT; ++i) {
 			assertEquals("" + i, myResourceVersionCache.getVersionForResourceId(buildIdDt(i)));
@@ -71,7 +71,7 @@ public class ResourceVersionCacheTest {
 		for (int i = 0; i < ENTITY_COUNT; ++i) {
 			ids.add(createEntity(i, i));
 		}
-		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceIds(ids);
+		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromResourceTableEntities(ids);
 		return resourceVersionMap;
 	}
 

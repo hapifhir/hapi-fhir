@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * In-memory cache of resource versions used to detect when resources have changed by remote processes
+ * Service returns a map of resource ids to versions.  Used by the in-memory resource-version cache to detect
+ * when resource versions have been changed by remote processes.
  */
 @Service
 public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
@@ -27,14 +28,11 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
-		myLogger.debug("About to search for '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
 
 		List<Long> matchingIds = dao.searchForIds(theSearchParamMap, null).stream()
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
-		myLogger.debug("Found " + matchingIds.size() + " '" + theResourceName + "' objects using params '" + theSearchParamMap + "'.");
-
-		return ResourceVersionMap.fromResourceIds(myResourceTableDao.findAllById(matchingIds));
+		return ResourceVersionMap.fromResourceTableEntities(myResourceTableDao.findAllById(matchingIds));
 	}
 }

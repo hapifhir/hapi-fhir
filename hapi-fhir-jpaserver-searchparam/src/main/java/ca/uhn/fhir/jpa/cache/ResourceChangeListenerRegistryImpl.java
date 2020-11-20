@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
-import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,10 +23,10 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,7 +36,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 	static long REMOTE_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
-	private static volatile Map<String, Instant> myNextRefreshByResourceName = new HashMap<>();
+	private static volatile Map<String, Instant> myNextRefreshByResourceName = new ConcurrentHashMap<>();
 	private static Instant ourNowForUnitTests;
 
 	@Autowired
@@ -51,14 +50,14 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
+	// FIXME KHS test this supports two different caches of the same resource type
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
 
 	/**
-	 *
-	 * @param theResourceName the name of the resource the listener should be notified about
-	 * @param theSearchParamMap the listener will only be notified of changes to resources that match this map
+	 * @param theResourceName           the name of the resource the listener should be notified about
+	 * @param theSearchParamMap         the listener will only be notified of changes to resources that match this map
 	 * @param theResourceChangeListener the listener to be notified
-	 * @throws ca.uhn.fhir.parser.DataFormatException if theResourceName is not valid
+	 * @throws ca.uhn.fhir.parser.DataFormatException      if theResourceName is not valid
 	 * @throws ca.uhn.fhir.parser.IllegalArgumentException if theSearchParamMap cannot be evaluated in-memory
 	 */
 	@Override
@@ -120,17 +119,16 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@Override
 	public ResourceChangeResult refreshAllCachesIfNecessary() {
-		ResourceChangeResult retval =  new ResourceChangeResult();
+		ResourceChangeResult retval = new ResourceChangeResult();
 		for (String resourceName : myResourceChangeListenerCache.resourceNames()) {
 			retval = retval.plus(refreshCacheIfNecessary(resourceName));
 		}
-		// This will return true if at least 1 of the Resource Caches was refreshed
 		return retval;
 	}
 
 	@Override
 	public ResourceChangeResult refreshCacheIfNecessary(String theResourceName) {
-		ResourceChangeResult retval =  new ResourceChangeResult();
+		ResourceChangeResult retval = new ResourceChangeResult();
 		Instant nextRefresh = myNextRefreshByResourceName.computeIfAbsent(theResourceName, key -> Instant.MIN);
 		if (nextRefresh.isBefore(now())) {
 			retval = refreshCacheWithRetry(theResourceName);
@@ -140,9 +138,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@Override
 	public void requestRefresh(String theResourceName) {
-		synchronized (this) {
-			myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
-		}
+		myNextRefreshByResourceName.put(theResourceName, Instant.MIN);
 	}
 
 	@Override
@@ -166,17 +162,6 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 			}
 		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
-	}
-
-	@Override
-	public ResourceChangeResult refreshAllCachesImmediately() {
-		StopWatch sw = new StopWatch();
-		ResourceChangeResult retval = new ResourceChangeResult();
-		for (String resourceName : myResourceChangeListenerCache.resourceNames()) {
-			retval = retval.plus(doRefreshCachesAndNotifyListeners(resourceName));
-		}
-		ourLog.debug("Refreshed all caches in {}ms: {}", sw.getMillis(), retval);
-		return retval;
 	}
 
 	private synchronized ResourceChangeResult doRefreshCachesAndNotifyListeners(String theResourceName) {

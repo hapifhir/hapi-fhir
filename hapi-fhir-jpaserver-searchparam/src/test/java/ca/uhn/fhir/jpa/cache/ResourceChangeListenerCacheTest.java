@@ -104,7 +104,7 @@ class ResourceChangeListenerCacheTest {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
 		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(PATIENT_RESOURCE_NAME, listener, myMap);
 		ResourceVersionCache oldResourceVersionCache = new ResourceVersionCache();
-		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceIds(Collections.emptyList());
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		assertFalse(entry.isInitialized());
 		myResourceChangeListenerCache.notifyListener(entry, oldResourceVersionCache, newResourceVersionMap);
 		assertTrue(entry.isInitialized());
@@ -116,7 +116,7 @@ class ResourceChangeListenerCacheTest {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
 		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(PATIENT_RESOURCE_NAME, listener, myMap);
 		ResourceVersionCache oldResourceVersionCache = new ResourceVersionCache();
-		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceIds(Collections.emptyList());
+		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		entry.setInitialized(true);
 		assertTrue(entry.isInitialized());
 		myResourceChangeListenerCache.notifyListener(entry, oldResourceVersionCache, newResourceVersionMap);

@@ -13,7 +13,7 @@ public interface IResourceChangeListener {
 	void handleInit(Collection<IIdType> theResourceIds);
 
 	/**
-	 * Called by the {@link IResourceChangeListenerRegistry} when resource changes have been detected
+	 * Called by the {@link IResourceChangeListenerRegistry} when resource changes are detected
 	 */
 
 	void handleChange(IResourceChangeEvent theResourceChangeEvent);

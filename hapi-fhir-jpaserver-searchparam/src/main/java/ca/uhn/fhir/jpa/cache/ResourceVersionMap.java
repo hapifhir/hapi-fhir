@@ -19,7 +19,7 @@ public class ResourceVersionMap {
 	private final Map<IIdType, String> myMap = new HashMap<>();
 	private ResourceVersionMap() {}
 
-	public static ResourceVersionMap fromResourceIds(List<ResourceTable> theEntities) {
+	public static ResourceVersionMap fromResourceTableEntities(List<ResourceTable> theEntities) {
 		ResourceVersionMap retval = new ResourceVersionMap();
 		theEntities.forEach(entity -> retval.add(entity.getIdDt()));
 		return retval;
