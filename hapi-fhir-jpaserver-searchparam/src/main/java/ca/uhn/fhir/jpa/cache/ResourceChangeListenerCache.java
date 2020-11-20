@@ -78,7 +78,7 @@ public class ResourceChangeListenerCache {
 		return retval;
 	}
 
-	public ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+	private ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		// If the new ResourceVersionMap does not have the old key - delete it
 		List<IIdType> deletedIds = new ArrayList<>();
 		for (String resourceName : theOldResourceVersionCache.getResourceNames()) {
