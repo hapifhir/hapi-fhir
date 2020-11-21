@@ -240,7 +240,7 @@ public class FhirResourceDaoValueSetDstu3 extends BaseHapiFhirResourceDao<ValueS
 	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
 		if (ElementUtil.isEmpty(include.getConcept())) {
 			if (isNotBlank(theFilter)) {
-				include.addFilter().setProperty("display").setOp(FilterOperator.EXISTS).setValue(theFilter);
+				include.addFilter().setProperty("display").setOp(FilterOperator.EQUAL).setValue(theFilter);
 			}
 		}
 	}

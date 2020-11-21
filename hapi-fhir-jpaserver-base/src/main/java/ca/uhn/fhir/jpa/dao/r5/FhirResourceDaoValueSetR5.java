@@ -224,7 +224,7 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
 		if (ElementUtil.isEmpty(include.getConcept())) {
 			if (isNotBlank(theFilter)) {
-				include.addFilter().setProperty("display").setOp(Enumerations.FilterOperator.EXISTS).setValue(theFilter);
+				include.addFilter().setProperty("display").setOp(Enumerations.FilterOperator.EQUAL).setValue(theFilter);
 			}
 		}
 	}
