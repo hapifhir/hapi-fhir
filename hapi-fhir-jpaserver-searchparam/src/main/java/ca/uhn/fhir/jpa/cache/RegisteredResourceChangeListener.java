@@ -90,9 +90,6 @@ public class RegisteredResourceChangeListener {
 		return myNextRefreshTime;
 	}
 
-	// FIXME KHS rewrite javadoc on all interfaces
-	// FIXME KHS revisit tests
-
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */

@@ -102,7 +102,6 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
-	// FIXME KHS move notification stuff out to its own service
 	ResourceChangeResult notifyListener(RegisteredResourceChangeListener theListenerEntry, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
 		IResourceChangeListener resourceChangeListener = theListenerEntry.getResourceChangeListener();
