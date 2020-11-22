@@ -128,7 +128,6 @@ public class ResourceChangeListenerCache {
 
 	public void requestRefreshIfWatching(IBaseResource theResource) {
 		String resourceName = myFhirContext.getResourceType(theResource);
-		// FIXME KHS write a test that verifies nothing gets called if we have no listeners for that resource type
 		for (RegisteredResourceChangeListener entry : myListenerEntries) {
 			if (resourceName.equals(entry.getResourceName())) {
 				entry.requestRefreshIfWatching(theResource);

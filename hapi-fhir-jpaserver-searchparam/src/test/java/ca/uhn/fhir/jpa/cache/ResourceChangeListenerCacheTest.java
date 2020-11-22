@@ -98,7 +98,9 @@ class ResourceChangeListenerCacheTest {
 
 		myResourceChangeListenerCache.remove(listener1);
 		assertEquals(1, myResourceChangeListenerCache.size());
-		// FIXME KHS test what remains
+		RegisteredResourceChangeListener entry = myResourceChangeListenerCache.iterator().next();
+		assertEquals(PATIENT_RESOURCE_NAME, entry.getResourceName());
+		assertEquals(listener2, entry.getResourceChangeListener());
 		myResourceChangeListenerCache.remove(listener2);
 		assertEquals(0, myResourceChangeListenerCache.size());
 	}

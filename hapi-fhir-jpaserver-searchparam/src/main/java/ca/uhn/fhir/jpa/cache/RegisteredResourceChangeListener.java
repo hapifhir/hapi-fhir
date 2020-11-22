@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,7 @@ public class RegisteredResourceChangeListener {
 	}
 
 	// FIXME KHS rewrite javadoc on all interfaces
+	// FIXME KHS revisit tests
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
@@ -155,5 +157,14 @@ public class RegisteredResourceChangeListener {
 			myNextRefreshTime = now().plus(Duration.ofMillis(myRemoteRefreshIntervalMs));
 		}
 		return retval;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myResourceName", myResourceName)
+			.append("mySearchParameterMap", mySearchParameterMap)
+			.append("myInitialized", myInitialized)
+			.toString();
 	}
 }

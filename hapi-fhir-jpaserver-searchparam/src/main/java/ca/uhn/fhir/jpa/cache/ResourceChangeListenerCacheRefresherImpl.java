@@ -89,7 +89,6 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	private synchronized ResourceChangeResult doRefreshCachesAndNotifyListeners(RegisteredResourceChangeListener theEntry) {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		if (!myResourceChangeListenerCache.contains(theEntry)) {
-			// FIXME KHS toString()
 			ourLog.warn("Requesting cache refresh for unregistered listener {}", theEntry);
 		}
 		SearchParameterMap searchParamMap = theEntry.getSearchParameterMap();
