@@ -20,7 +20,7 @@ class ResourceChangeListenerRegistryInterceptorTest {
 	@MockBean
 	private IInterceptorService myInterceptorBroadcaster;
 	@MockBean
-	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 	@Configuration
 	static class SpringContext {
@@ -34,6 +34,6 @@ class ResourceChangeListenerRegistryInterceptorTest {
 	public void testRefreshCalled() {
 		Patient patient = new Patient();
 		myResourceChangeListenerRegistryInterceptor.created(patient);
-		verify(myResourceChangeListenerRegistry).requestRefreshIfWatching(patient);
+		verify(myResourceChangeListenerCacheRefresher).requestRefreshIfWatching(patient);
 	}
 }

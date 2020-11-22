@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.RegisteredResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -37,6 +38,7 @@ import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -57,6 +59,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamRegistryImpl.class);
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
+	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
+
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -75,6 +79,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
+	private RegisteredResourceChangeListener myRegisteredResourceChangeListener;
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
@@ -96,7 +101,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
-			myResourceChangeListenerRegistry.refreshCacheWithRetry("SearchParameter");
+			myRegisteredResourceChangeListener.refreshCacheWithRetry();
 		}
 	}
 
@@ -209,22 +214,22 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void requestRefresh() {
-		myResourceChangeListenerRegistry.requestRefresh("SearchParameter");
+		myRegisteredResourceChangeListener.requestRefresh();
 	}
 
 	@Override
 	public void forceRefresh() {
-		myResourceChangeListenerRegistry.forceRefresh("SearchParameter");
+		myRegisteredResourceChangeListener.forceRefresh();
 	}
 
 	@Override
 	public ResourceChangeResult refreshCacheIfNecessary() {
-		return myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter");
+		return myRegisteredResourceChangeListener.refreshCacheIfNecessary();
 	}
 
 	@PostConstruct
 	public void registerListener() {
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this);
+		myRegisteredResourceChangeListener = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy

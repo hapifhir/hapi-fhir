@@ -2,11 +2,8 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.collections4.SetValuedMap;
-import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -16,10 +13,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 /**
@@ -33,56 +30,41 @@ public class ResourceChangeListenerCache {
 	FhirContext myFhirContext;
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
+	@Autowired
+	RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
 
-	private final SetValuedMap<String, ResourceChangeListenerWithSearchParamMap> myListenersByResourceName = new HashSetValuedHashMap<>();
+	private final Queue<RegisteredResourceChangeListener> myListenerEntries = new ConcurrentLinkedQueue<RegisteredResourceChangeListener>();
 
-	public void add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap) {
-		getListenerEntries(theResourceName).add(new ResourceChangeListenerWithSearchParamMap(theResourceName, theResourceChangeListener, theMap));
+	public RegisteredResourceChangeListener add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap, long theRemoteRefreshIntervalMs) {
+		RegisteredResourceChangeListener retval = myRegisteredResourceListenerFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+		myListenerEntries.add(retval);
+		return retval;
 	}
 
 	@VisibleForTesting
 	public void clearListenersForUnitTest() {
-		myListenersByResourceName.clear();
-	}
-
-	public Set<String> resourceNames() {
-		return myListenersByResourceName.keySet();
+		myListenerEntries.clear();
 	}
 
 	@Nonnull
-	public Set<ResourceChangeListenerWithSearchParamMap> getListenerEntries(String theResourceName) {
-		return myListenersByResourceName.get(theResourceName);
-	}
-
-	public boolean hasListenerFor(IBaseResource theResource) {
-		String resourceName = myFhirContext.getResourceType(theResource);
-		return myListenersByResourceName.get(resourceName).stream().anyMatch(entry -> matches(entry.getSearchParameterMap(), theResource));
-	}
-
-	private boolean matches(SearchParameterMap theSearchParameterMap, IBaseResource theResource) {
-		InMemoryMatchResult result = mySearchParamMatcher.match(theSearchParameterMap, theResource);
-		if (!result.isInMemory()) {
-			// This should never happen since we enforce only in-memory SearchParamMaps at registration time
-			ourLog.warn("Search Parameter Map {} cannot be processed in-memory", theSearchParameterMap);
-		}
-		return result.matched();
+	public Iterator<RegisteredResourceChangeListener> iterator() {
+		return myListenerEntries.iterator();
 	}
 
 	/**
 	 * Notify a listener with all matching resources if it hasn't been initialized yet, otherwise only notify it if
 	 * any resources have changed
 	 * @param theListenerEntry
-	 * @param theOldResourceVersionCache the resource versions we have in our cache for that listener entry
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
-	public ResourceChangeResult notifyListener(ResourceChangeListenerWithSearchParamMap theListenerEntry, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
+	public ResourceChangeResult notifyListener(RegisteredResourceChangeListener theListenerEntry, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
 		IResourceChangeListener resourceChangeListener = theListenerEntry.getResourceChangeListener();
 		if (theListenerEntry.isInitialized()) {
-			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, theOldResourceVersionCache, theNewResourceVersionMap);
+			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, theListenerEntry.getResourceVersionCache(), theNewResourceVersionMap);
 		} else {
-			theOldResourceVersionCache.initialize(theNewResourceVersionMap);
+			theListenerEntry.getResourceVersionCache().initialize(theNewResourceVersionMap);
 			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
 			retval = ResourceChangeResult.fromCreated(theNewResourceVersionMap.size());
 			theListenerEntry.setInitialized(true);
@@ -93,15 +75,12 @@ public class ResourceChangeListenerCache {
 	private ResourceChangeResult compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(IResourceChangeListener theListener, ResourceVersionCache theOldResourceVersionCache, ResourceVersionMap theNewResourceVersionMap) {
 		// If the new ResourceVersionMap does not have the old key - delete it
 		List<IIdType> deletedIds = new ArrayList<>();
-		for (String resourceName : theOldResourceVersionCache.getResourceNames()) {
-			Map<IIdType, String> oldVersionCache = theOldResourceVersionCache.getMapForResourceName(resourceName);
-			oldVersionCache.keySet()
+		theOldResourceVersionCache.keySet()
 				.forEach(id -> {
 					if (!theNewResourceVersionMap.containsKey(id)) {
 						deletedIds.add(id);
 					}
 				});
-		}
 		deletedIds.forEach(theOldResourceVersionCache::removeResourceId);
 
 		List<IIdType> createdIds = new ArrayList<>();
@@ -124,24 +103,39 @@ public class ResourceChangeListenerCache {
 		return ResourceChangeResult.fromResourceChangeEvent(resourceChangeEvent);
 	}
 
-	public List<ResourceChangeListenerWithSearchParamMap> remove(IResourceChangeListener theResourceChangeListener) {
-		List<Map.Entry<String, ResourceChangeListenerWithSearchParamMap>> entriesToDelete = new ArrayList<>();
-		for (Map.Entry<String, ResourceChangeListenerWithSearchParamMap> next : myListenersByResourceName.entries()) {
-			if (next.getValue().getResourceChangeListener().equals(theResourceChangeListener)) {
-				entriesToDelete.add(next);
-			}
-		}
-		for (Map.Entry<String, ResourceChangeListenerWithSearchParamMap> entryToDelete : entriesToDelete) {
-			myListenersByResourceName.removeMapping(entryToDelete.getKey(), entryToDelete.getValue());
-		}
-		return entriesToDelete.stream().map(Map.Entry::getValue).collect(Collectors.toList());
+	public void remove(IResourceChangeListener theResourceChangeListener) {
+		myListenerEntries.removeIf(l -> l.getResourceChangeListener().equals(theResourceChangeListener));
 	}
 
 	public int size() {
-		return myListenersByResourceName.size();
+		return myListenerEntries.size();
 	}
 
-	public boolean hasEntriesForResourceName(String theResourceName) {
-		return myListenersByResourceName.containsKey((theResourceName));
+	@VisibleForTesting
+	public void clearCachesForUnitTest() {
+		myListenerEntries.forEach(RegisteredResourceChangeListener::clear);
+	}
+
+	public boolean contains(RegisteredResourceChangeListener theEntry) {
+		return myListenerEntries.contains(theEntry);
+	}
+
+	@VisibleForTesting
+	public int getResourceVersionCacheSizeForUnitTest() {
+		int retval = 0;
+		for (RegisteredResourceChangeListener entry : myListenerEntries) {
+			retval += entry.getResourceVersionCache().size();
+		}
+		return retval;
+	}
+
+	public void requestRefreshIfWatching(IBaseResource theResource) {
+		String resourceName = myFhirContext.getResourceType(theResource);
+		// FIXME KHS write a test that verifies nothing gets called if we have no listeners for that resource type
+		for (RegisteredResourceChangeListener entry : myListenerEntries) {
+			if (resourceName.equals(entry.getResourceName())) {
+				entry.requestRefreshIfWatching(theResource);
+			}
+		}
 	}
 }

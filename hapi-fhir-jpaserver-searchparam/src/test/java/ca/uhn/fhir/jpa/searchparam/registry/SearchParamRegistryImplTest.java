@@ -3,9 +3,13 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.RegisteredResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.RegisteredResourceListenerFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
@@ -13,6 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -30,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
@@ -78,6 +84,10 @@ public class SearchParamRegistryImplTest {
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
+	@Autowired
+	private ResourceChangeListenerCacheRefresher myChangeListenerCacheRefresher;
+	@Autowired
+	private ResourceChangeListenerCache myResourceChangeListenerCache;
 
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
@@ -129,6 +139,23 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
+		ResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
+			return new ResourceChangeListenerCacheRefresher();
+		}
+
+		// FIXME KHS group these in a config.  they are used in a lot of tests
+		@Bean
+		RegisteredResourceListenerFactory myRegisteredResourceListenerFactory() {
+			return new RegisteredResourceListenerFactory();
+		}
+
+		@Bean
+		@Scope("prototype")
+		RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+			return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+		}
+
+		@Bean
 		InMemoryResourceMatcher inMemoryResourceMatcher() {
 			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
 			when(retval.checkIfInMemorySupported(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
@@ -156,7 +183,7 @@ public class SearchParamRegistryImplTest {
 
 		// Our first refresh adds our test searchparams to the registry
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), TEST_SEARCH_PARAMS, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
 		assertEquals(ourBuiltInSearchParams.size(), mySearchParamRegistry.getActiveSearchParams().size());
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
@@ -164,7 +191,7 @@ public class SearchParamRegistryImplTest {
 
 	@AfterEach
 	public void after() {
-		myResourceChangeListenerRegistry.clearCacheForUnitTest();
+		myResourceChangeListenerCache.clearCachesForUnitTest();
 		// Empty out the searchparam registry
 		mySearchParamRegistry.resetForUnitTest();
 	}
@@ -173,21 +200,21 @@ public class SearchParamRegistryImplTest {
 	public void testRefreshAfterExpiry() {
 		mySearchParamRegistry.requestRefresh();
 		// Second time we don't need to run because we ran recently
-		assertEmptyResult(myResourceChangeListenerRegistry.refreshCacheIfNecessary("SearchParameter"));
+		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
 	}
 
 	@Test
 	public void testRefreshCacheIfNecessary() {
 		// Second refresh does not call the database
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbNotCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
 		// Requesting a refresh calls the database and adds nothing
 		mySearchParamRegistry.requestRefresh();
 		assertEmptyResult(mySearchParamRegistry.refreshCacheIfNecessary());
-		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount);
 
@@ -195,7 +222,7 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
@@ -204,7 +231,7 @@ public class SearchParamRegistryImplTest {
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
@@ -212,7 +239,7 @@ public class SearchParamRegistryImplTest {
 		// removes the ACTIVE one and adds the new one because this is a mock test
 		resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.DRAFT);
 		mySearchParamRegistry.requestRefresh();
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 1);
 		assertDbCalled();
 		// the new one does not appear in our patient search params because it's DRAFT
@@ -225,7 +252,7 @@ public class SearchParamRegistryImplTest {
 		List<ResourceTable> newEntities = resetDatabaseToOrigSearchParamsPlusNewOneWithStatus(Enumerations.PublicationStatus.ACTIVE);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 1, 0, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 
@@ -235,7 +262,7 @@ public class SearchParamRegistryImplTest {
 		resetMock(Enumerations.PublicationStatus.ACTIVE, newEntities);
 		mySearchParamRegistry.requestRefresh();
 		assertResult(mySearchParamRegistry.refreshCacheIfNecessary(), 0, 1, 0);
-		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest("SearchParameter"));
+		assertEquals(TEST_SEARCH_PARAMS + 1, myResourceChangeListenerCache.getResourceVersionCacheSizeForUnitTest());
 		assertDbCalled();
 		assertPatientSearchParamSize(ourBuiltinPatientSearchParamCount + 1);
 	}

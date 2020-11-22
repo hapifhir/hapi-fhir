@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,10 +14,9 @@ import java.util.Set;
  * by providing an IdDt, since the String key in the top-level Map is defined by IdDt.getResourceType().
  */
 public class ResourceVersionCache {
-	private final Map<String, Map<IIdType, String>> myVersionMap = new HashMap<>();
+	private final Map<IIdType, String> myVersionMap = new HashMap<>();
 
 	public void clear() {
-		myVersionMap.forEach((k, v) -> v.clear());
 		myVersionMap.clear();
 	}
 
@@ -28,47 +26,28 @@ public class ResourceVersionCache {
 	 * @return previous value
 	 */
 	public String put(IIdType theResourceId, String theVersion) {
-		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<>());
-		String previousMapEntry = entryByTypeMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
-		return previousMapEntry;
+		return myVersionMap.put(new IdDt(theResourceId).toVersionless(), theVersion);
 	}
 
 	public String getVersionForResourceId(IIdType theResourceId) {
-		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceId.getResourceType(), key -> new HashMap<>());
-		return entryByTypeMap.get(theResourceId);
-	}
-
-	@Nonnull
-	public Map<IIdType, String> getMapForResourceName(String theResourceName) {
-		Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(theResourceName, key -> new HashMap<>());
-		return entryByTypeMap;
+		return myVersionMap.get(new IdDt(theResourceId));
 	}
 
 	public String removeResourceId(IIdType theResourceId) {
-		String retval = null;
-		Map<IIdType, String> entryByTypeMap = myVersionMap.get(theResourceId.getResourceType());
-		if (entryByTypeMap != null) {
-			retval = entryByTypeMap.remove(new IdDt(theResourceId));
-		}
-		return retval;
-	}
-
-	public Set<String> getResourceNames() {
-		return myVersionMap.keySet();
+		return myVersionMap.remove(new IdDt(theResourceId));
 	}
 
 	public void initialize(ResourceVersionMap theResourceVersionMap) {
-		for (IIdType key : theResourceVersionMap.keySet()) {
-			Map<IIdType, String> entryByTypeMap = myVersionMap.computeIfAbsent(key.getResourceType(), k -> new HashMap<>());
-			entryByTypeMap.put(key, theResourceVersionMap.get(key));
+		for (IIdType resourceId : theResourceVersionMap.keySet()) {
+			myVersionMap.put(resourceId, theResourceVersionMap.get(resourceId));
 		}
 	}
 
-	public boolean hasEntriesForResourceName(String theResourceName) {
-		return myVersionMap.containsKey(theResourceName) && !myVersionMap.get(theResourceName).isEmpty();
+	public int size() {
+		return myVersionMap.size();
 	}
 
-	public void removeCacheForResourceName(String theResourceName) {
-		myVersionMap.remove(theResourceName);
+	public Set<IIdType> keySet() {
+		return myVersionMap.keySet();
 	}
 }

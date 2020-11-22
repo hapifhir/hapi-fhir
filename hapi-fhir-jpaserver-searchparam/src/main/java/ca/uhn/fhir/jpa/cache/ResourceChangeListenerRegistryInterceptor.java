@@ -15,7 +15,7 @@ public class ResourceChangeListenerRegistryInterceptor {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
-	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 	@PostConstruct
 	public void start() {
@@ -46,6 +46,6 @@ public class ResourceChangeListenerRegistryInterceptor {
 		if (theResource == null) {
 			return;
 		}
-		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
+		myResourceChangeListenerCacheRefresher.requestRefreshIfWatching(theResource);
 	}
 }

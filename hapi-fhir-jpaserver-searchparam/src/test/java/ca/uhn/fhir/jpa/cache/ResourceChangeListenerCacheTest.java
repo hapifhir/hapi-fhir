@@ -4,9 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,13 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,9 +38,13 @@ class ResourceChangeListenerCacheTest {
 	private static final FhirContext ourFhirContext = FhirContext.forR4();
 	public static final String PATIENT_RESOURCE_NAME = "Patient";
 	public static final String OBSERVATION_RESOURCE_NAME = "Observation";
+	private static final long TEST_REFRESH_INTERVAL_MS = DateUtils.MILLIS_PER_DAY;
 
 	@Autowired
 	ResourceChangeListenerCache myResourceChangeListenerCache;
+
+	@MockBean
+	ResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 	@MockBean
 	SearchParamMatcher mySearchParamMatcher;
 
@@ -50,6 +55,19 @@ class ResourceChangeListenerCacheTest {
 		@Bean
 		ResourceChangeListenerCache resourceChangeListenerCache() {
 			return new ResourceChangeListenerCache();
+		}
+
+		@Bean
+		// FIXME KHS can mock?
+		RegisteredResourceListenerFactory registeredResourceListenerFactory() {
+			return new RegisteredResourceListenerFactory();
+		}
+
+		// FIXME KHS can mock?
+		@Bean
+		@Scope("prototype")
+		RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+			return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 		}
 
 		@Bean
@@ -66,47 +84,43 @@ class ResourceChangeListenerCacheTest {
 	@Test
 	public void registerUnregister() {
 		IResourceChangeListener listener1 = mock(IResourceChangeListener.class);
-		myResourceChangeListenerCache.add(PATIENT_RESOURCE_NAME, listener1, myMap);
-		myResourceChangeListenerCache.add(OBSERVATION_RESOURCE_NAME, listener1, myMap);
+		myResourceChangeListenerCache.add(PATIENT_RESOURCE_NAME, listener1, myMap, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerCache.add(OBSERVATION_RESOURCE_NAME, listener1, myMap, TEST_REFRESH_INTERVAL_MS);
 
 		when(mySearchParamMatcher.match(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 
-		assertTrue(myResourceChangeListenerCache.hasListenerFor(new Patient()));
-		assertTrue(myResourceChangeListenerCache.hasListenerFor(new Observation()));
-		assertFalse(myResourceChangeListenerCache.hasListenerFor(new CarePlan()));
-
 		assertEquals(2, myResourceChangeListenerCache.size());
-		assertTrue(myResourceChangeListenerCache.hasEntriesForResourceName(PATIENT_RESOURCE_NAME));
-		assertThat(myResourceChangeListenerCache.resourceNames(), containsInAnyOrder(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME));
 
 		IResourceChangeListener listener2 = mock(IResourceChangeListener.class);
-		myResourceChangeListenerCache.add(PATIENT_RESOURCE_NAME, listener2, myMap);
+		myResourceChangeListenerCache.add(PATIENT_RESOURCE_NAME, listener2, myMap, TEST_REFRESH_INTERVAL_MS);
 		assertEquals(3, myResourceChangeListenerCache.size());
 
-		Set<ResourceChangeListenerWithSearchParamMap> entries = myResourceChangeListenerCache.getListenerEntries(PATIENT_RESOURCE_NAME);
-		assertThat(entries, hasSize(2));
-		entries = myResourceChangeListenerCache.getListenerEntries(OBSERVATION_RESOURCE_NAME);
-		assertThat(entries, hasSize(1));
-		ResourceChangeListenerWithSearchParamMap entry = entries.iterator().next();
-		assertEquals(listener1, entry.getResourceChangeListener());
-		assertEquals(OBSERVATION_RESOURCE_NAME, entry.getResourceName());
-		assertEquals(myMap, entry.getSearchParameterMap());
+		List<RegisteredResourceChangeListener> entries = Lists.newArrayList(myResourceChangeListenerCache.iterator());
+		assertThat(entries, hasSize(3));
+
+		List<IResourceChangeListener> listeners = entries.stream().map(RegisteredResourceChangeListener::getResourceChangeListener).collect(Collectors.toList());
+		assertThat(listeners, contains(listener1, listener1, listener2));
+
+		List<String> resourceNames = entries.stream().map(RegisteredResourceChangeListener::getResourceName).collect(Collectors.toList());
+		assertThat(resourceNames, contains(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME));
+
+		RegisteredResourceChangeListener firstEntry = entries.iterator().next();
+		assertEquals(myMap, firstEntry.getSearchParameterMap());
 
 		myResourceChangeListenerCache.remove(listener1);
 		assertEquals(1, myResourceChangeListenerCache.size());
+		// FIXME KHS test what remains
 		myResourceChangeListenerCache.remove(listener2);
 		assertEquals(0, myResourceChangeListenerCache.size());
-		assertFalse(myResourceChangeListenerCache.hasEntriesForResourceName(PATIENT_RESOURCE_NAME));
 	}
 
 	@Test
 	public void testNotifyListenersEmptyEmptyNotInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(PATIENT_RESOURCE_NAME, listener, myMap);
-		ResourceVersionCache oldResourceVersionCache = new ResourceVersionCache();
+		RegisteredResourceChangeListener entry = new RegisteredResourceChangeListener(PATIENT_RESOURCE_NAME, listener, myMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		assertFalse(entry.isInitialized());
-		myResourceChangeListenerCache.notifyListener(entry, oldResourceVersionCache, newResourceVersionMap);
+		myResourceChangeListenerCache.notifyListener(entry, newResourceVersionMap);
 		assertTrue(entry.isInitialized());
 		verify(listener, times(1)).handleInit(any());
 	}
@@ -114,12 +128,11 @@ class ResourceChangeListenerCacheTest {
 	@Test
 	public void testNotifyListenersEmptyEmptyInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerWithSearchParamMap entry = new ResourceChangeListenerWithSearchParamMap(PATIENT_RESOURCE_NAME, listener, myMap);
-		ResourceVersionCache oldResourceVersionCache = new ResourceVersionCache();
+		RegisteredResourceChangeListener entry = new RegisteredResourceChangeListener(PATIENT_RESOURCE_NAME, listener, myMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		entry.setInitialized(true);
 		assertTrue(entry.isInitialized());
-		myResourceChangeListenerCache.notifyListener(entry, oldResourceVersionCache, newResourceVersionMap);
+		myResourceChangeListenerCache.notifyListener(entry, newResourceVersionMap);
 		assertTrue(entry.isInitialized());
 		verifyNoInteractions(listener);
 	}

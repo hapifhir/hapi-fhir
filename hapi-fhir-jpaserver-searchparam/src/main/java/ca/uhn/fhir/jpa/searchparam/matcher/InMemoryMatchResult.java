@@ -42,18 +42,16 @@ public class InMemoryMatchResult {
 	 */
 	private final String myUnsupportedReason;
 	/**
-	 * True a match was actually performed in memory
+	 * Only used by CompositeInMemoryDaoSubscriptionMatcher to track whether we had to go
+	 * out to the database to resolve the match.
 	 */
 	private boolean myInMemory = false;
 
 	private InMemoryMatchResult(boolean theMatch) {
-		myMatch = theMatch;
-		mySupported = true;
-		myUnsupportedParameter = null;
-		myUnsupportedReason = null;
-		if (myMatch) {
-			myInMemory = true;
-		}
+		this.myMatch = theMatch;
+		this.mySupported = true;
+		this.myUnsupportedParameter = null;
+		this.myUnsupportedReason = null;
 	}
 
 	private InMemoryMatchResult(String theUnsupportedParameter, String theUnsupportedReason) {

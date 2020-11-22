@@ -2,24 +2,24 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IResourceChangeListenerRegistry {
-	ResourceChangeResult refreshAllCachesIfNecessary();
-
-	ResourceChangeResult refreshCacheWithRetry(String theResourceName);
 
 	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
 	 * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
-	 * within {@link ResourceChangeListenerRegistryImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
-	 * on a different jvm process, then the listener will be called within {@link ResourceChangeListenerRegistryImpl#REMOTE_REFRESH_INTERVAL_MS}.
-	 *
-	 * @param theResourceName           the resource type
-	 * @param theSearchParameterMap     a search parameter map defining a filter for which resources are of interest
-	 * @param theResourceChangeListener the listener that will be called when a change is detected
+	 * within {@link ResourceChangeListenerCacheRefresher#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
+	 * on a different jvm process, then the listener will be called within theRemoteRefreshIntervalMs.
+	 * @param theResourceName           the name of the resource the listener should be notified about
+	 * @param theSearchParameterMap     the listener will only be notified of changes to resources that match this map
+	 * @param theResourceChangeListener the listener to be notified
+	 * @param theRemoteRefreshIntervalMs the number of milliseconds between checking the database for changed resources that match the search parameter map
+	 * @throws ca.uhn.fhir.parser.DataFormatException      if theResourceName is not valid
+	 * @throws IllegalArgumentException if theSearchParamMap cannot be evaluated in-memory
+	 * @return RegisteredResourceChangeListener that stores the resource id cache, and the next refresh time
+	 * @return
 	 */
-	void registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener);
+	RegisteredResourceChangeListener registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs);
 
 	/**
 	 * Unregister a listener from this service
@@ -27,29 +27,6 @@ public interface IResourceChangeListenerRegistry {
 	 * @param theResourceChangeListener
 	 */
 	void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener);
-
-	ResourceChangeResult refreshCacheIfNecessary(String theResourceName);
-
-	/**
-	 * Request that the cache be refreshed at the next convenient time (in a different thread)
-	 */
-	void requestRefresh(String theResourceName);
-
-	/**
-	 * Request that a cache be refreshed now, in the current thread
-	 */
-	ResourceChangeResult forceRefresh(String theResourceName);
-
-	/**
-	 * If any listeners have been registered with searchparams that match the incoming resource, then
-	 * call requestRefresh(theResourceName) for that resource type.
-	 *
-	 * @param theResource the resource that changed that might trigger a refresh
-	 */
-	void requestRefreshIfWatching(IBaseResource theResource);
-
-	@VisibleForTesting
-	void clearCacheForUnitTest();
 
 	@VisibleForTesting
 	void clearListenersForUnitTest();

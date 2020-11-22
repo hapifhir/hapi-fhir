@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -54,6 +55,8 @@ import java.util.stream.Collectors;
 public class SubscriptionLoader implements IResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionLoader.class);
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
+	private static long REFRESH_INTERVAL = DateUtils.MILLIS_PER_MINUTE;
+
 	private final Object mySyncSubscriptionsLock = new Object();
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
@@ -85,7 +88,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 			mySubscriptionDao = myDaoRegistry.getSubscriptionDao();
 		}
 		mySearchParameterMap = getSearchParameterMap();
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this);
+		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 	}
 
 	private boolean subscriptionsDaoExists() {
