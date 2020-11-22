@@ -17,6 +17,9 @@ import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
+import ca.uhn.fhir.jpa.cache.config.ResourceChangeListenerRegistryConfig;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -88,9 +91,8 @@ import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
-import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,11 +150,12 @@ import java.util.Date;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.searchparam.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.empi.*"),
+	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.cache.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.starter.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.batch.*")
 })
 @Import({
-	SearchParamConfig.class, BatchJobsConfig.class
+	SearchParamConfig.class, BatchJobsConfig.class, ResourceChangeListenerRegistryConfig.class
 })
 @EnableBatchProcessing
 public abstract class BaseConfig {
@@ -455,6 +458,11 @@ public abstract class BaseConfig {
 	@Bean
 	public HistoryBuilderFactory historyBuilderFactory() {
 		return new HistoryBuilderFactory();
+	}
+
+	@Bean
+	public IResourceVersionSvc resourceVersionSvc() {
+		return new ResourceVersionSvcDaoImpl();
 	}
 
 	/* **************************************************************** *
