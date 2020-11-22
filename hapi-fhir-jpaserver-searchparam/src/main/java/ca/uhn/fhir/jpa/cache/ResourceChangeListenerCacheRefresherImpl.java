@@ -29,7 +29,7 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
-	private ResourceChangeListenerCache myResourceChangeListenerCache;
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@PostConstruct
 	public void start() {
@@ -52,7 +52,7 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@Override
 	public ResourceChangeResult refreshAllCachesIfNecessary() {
 		ResourceChangeResult retval = new ResourceChangeResult();
-		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerCache.iterator();
+		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerRegistry.iterator();
 		while (iterator.hasNext()) {
 			RegisteredResourceChangeListener entry = iterator.next();
 			retval = retval.plus(entry.refreshCacheIfNecessary());
@@ -63,7 +63,7 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@VisibleForTesting
 	public ResourceChangeResult forceRefreshAllCachesForUnitTest() {
 		ResourceChangeResult retval = new ResourceChangeResult();
-		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerCache.iterator();
+		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerRegistry.iterator();
 		while (iterator.hasNext()) {
 			RegisteredResourceChangeListener entry = iterator.next();
 			retval = retval.plus(entry.forceRefresh());
@@ -73,7 +73,7 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 
 	@Override
 	public void requestRefreshIfWatching(IBaseResource theResource) {
-		myResourceChangeListenerCache.requestRefreshIfWatching(theResource);
+		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 	}
 
 	@Override
@@ -88,12 +88,12 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 
 	private synchronized ResourceChangeResult doRefreshCachesAndNotifyListeners(RegisteredResourceChangeListener theEntry) {
 		ResourceChangeResult retval = new ResourceChangeResult();
-		if (!myResourceChangeListenerCache.contains(theEntry)) {
+		if (!myResourceChangeListenerRegistry.contains(theEntry)) {
 			ourLog.warn("Requesting cache refresh for unregistered listener {}", theEntry);
 		}
 		SearchParameterMap searchParamMap = theEntry.getSearchParameterMap();
 		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theEntry.getResourceName(), searchParamMap);
-		retval = retval.plus(myResourceChangeListenerCache.notifyListener(theEntry, newResourceVersionMap));
+		retval = retval.plus(myResourceChangeListenerRegistry.notifyListener(theEntry, newResourceVersionMap));
 
 		return retval;
 	}

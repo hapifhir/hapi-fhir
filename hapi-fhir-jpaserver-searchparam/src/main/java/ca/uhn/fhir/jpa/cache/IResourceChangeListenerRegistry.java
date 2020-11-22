@@ -2,6 +2,10 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.annotation.Nonnull;
+import java.util.Iterator;
 
 public interface IResourceChangeListenerRegistry {
 
@@ -30,4 +34,14 @@ public interface IResourceChangeListenerRegistry {
 
 	@VisibleForTesting
 	void clearListenersForUnitTest();
+
+	@Nonnull
+	Iterator<RegisteredResourceChangeListener> iterator();
+
+	void requestRefreshIfWatching(IBaseResource theResource);
+
+	// FIXME KHS document these
+	boolean contains(RegisteredResourceChangeListener theEntry);
+
+	ResourceChangeResult notifyListener(RegisteredResourceChangeListener theEntry, ResourceVersionMap theNewResourceVersionMap);
 }
