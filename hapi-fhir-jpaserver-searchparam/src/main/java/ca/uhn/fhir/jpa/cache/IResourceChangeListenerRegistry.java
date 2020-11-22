@@ -10,7 +10,7 @@ import java.util.Iterator;
 /**
  * This service contains an in-memory list of all registered {@link IResourceChangeListener} instances along
  * with their caches and other details needed to maintain those caches.  Register an {@link IResourceChangeListener} instance
- * with this wervice to be notified when resources you care about are changed.  This service quickly notifies listeners
+ * with this service to be notified when resources you care about are changed.  This service quickly notifies listeners
  * of changes that happened on the local process and also eventually notifies listeners of changes that were made by
  * remote processes.
  */
