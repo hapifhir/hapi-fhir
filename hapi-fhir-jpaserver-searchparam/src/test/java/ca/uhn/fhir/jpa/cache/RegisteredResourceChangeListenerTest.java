@@ -68,29 +68,29 @@ class RegisteredResourceChangeListenerTest {
 		RegisteredResourceChangeListener entry = myRegisteredResourceListenerFactory.create(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
 		RegisteredResourceChangeListener.setNowForUnitTests("08:00:00");
 		entry.refreshCacheIfNecessary();
-		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheWithRetry(any());
+		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());
 
 		reset(myResourceChangeListenerCacheRefresher);
 		RegisteredResourceChangeListener.setNowForUnitTests("08:00:01");
 		entry.refreshCacheIfNecessary();
-		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheWithRetry(any());
+		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
 		reset(myResourceChangeListenerCacheRefresher);
 		RegisteredResourceChangeListener.setNowForUnitTests("08:59:59");
 		entry.refreshCacheIfNecessary();
-		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheWithRetry(any());
+		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
 
 		reset(myResourceChangeListenerCacheRefresher);
 		RegisteredResourceChangeListener.setNowForUnitTests("09:00:00");
 		entry.refreshCacheIfNecessary();
-		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheWithRetry(any());
+		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
 		reset(myResourceChangeListenerCacheRefresher);
 		// Now that we passed TEST_REFRESH_INTERVAL, the cache should refresh
 		RegisteredResourceChangeListener.setNowForUnitTests("09:00:01");
 		entry.refreshCacheIfNecessary();
-		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheWithRetry(any());
+		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());
 	}
 
 

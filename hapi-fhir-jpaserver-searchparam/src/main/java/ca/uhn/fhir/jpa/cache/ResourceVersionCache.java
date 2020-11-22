@@ -10,8 +10,6 @@ import java.util.Set;
 /**
  * This maintains a mapping of resource id to resource version.  We cache these in order to
  * detect resources that were modified on remote servers in our cluster.
- * Note that even though it stores an internal Map of Maps, you can access an internal Map directly
- * by providing an IdDt, since the String key in the top-level Map is defined by IdDt.getResourceType().
  */
 public class ResourceVersionCache {
 	private final Map<IIdType, String> myVersionMap = new HashMap<>();

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,6 +22,7 @@ import java.time.ZoneId;
 @Scope("prototype")
 public class RegisteredResourceChangeListener {
 	private static final Logger ourLog = LoggerFactory.getLogger(RegisteredResourceChangeListener.class);
+	private static final int MAX_RETRIES = 60;
 
 	private static Instant ourNowForUnitTests;
 
@@ -90,6 +92,7 @@ public class RegisteredResourceChangeListener {
 
 	// FIXME KHS rewrite javadoc on all interfaces
 	// FIXME KHS revisit tests
+
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
@@ -152,11 +155,20 @@ public class RegisteredResourceChangeListener {
 	public ResourceChangeResult refreshCacheWithRetry() {
 		ResourceChangeResult retval;
 		try {
-			retval = myResourceChangeListenerCacheRefresher.refreshCacheWithRetry(this);
+			retval = refreshCacheAndNotifyListenersWithRetry();
 		} finally {
 			myNextRefreshTime = now().plus(Duration.ofMillis(myRemoteRefreshIntervalMs));
 		}
 		return retval;
+	}
+
+	private ResourceChangeResult refreshCacheAndNotifyListenersWithRetry() {
+		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
+			synchronized (this) {
+				return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
+			}
+		}, MAX_RETRIES);
+		return refreshCacheRetrier.runWithRetry();
 	}
 
 	@Override

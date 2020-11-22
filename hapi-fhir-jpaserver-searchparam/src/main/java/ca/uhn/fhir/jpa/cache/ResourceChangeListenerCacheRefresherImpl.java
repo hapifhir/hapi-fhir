@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -20,12 +19,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * This service refreshes the {@link RegisteredResourceChangeListener} caches and notifies their listener when
+ * those caches change.
+ */
 @Service
 public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresherImpl.class);
 
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
-	private static final int MAX_RETRIES = 60; // 5 minutes
 
 	@Autowired
 	private ISchedulerService mySchedulerService;
@@ -48,12 +50,12 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			myTarget.refreshAllCachesIfNecessary();
+			myTarget.refreshExpiredCachesAndNotifyListeners();
 		}
 	}
 
 	@Override
-	public ResourceChangeResult refreshAllCachesIfNecessary() {
+	public ResourceChangeResult refreshExpiredCachesAndNotifyListeners() {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerRegistry.iterator();
 		while (iterator.hasNext()) {
@@ -80,19 +82,11 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	}
 
 	@Override
-	public ResourceChangeResult refreshCacheWithRetry(RegisteredResourceChangeListener theEntry) {
-		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
-			synchronized (this) {
-				return doRefreshCachesAndNotifyListeners(theEntry);
-			}
-		}, MAX_RETRIES);
-		return refreshCacheRetrier.runWithRetry();
-	}
-
-	private synchronized ResourceChangeResult doRefreshCachesAndNotifyListeners(RegisteredResourceChangeListener theEntry) {
+	public ResourceChangeResult refreshCacheAndNotifyListener(RegisteredResourceChangeListener theEntry) {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		if (!myResourceChangeListenerRegistry.contains(theEntry)) {
-			ourLog.warn("Requesting cache refresh for unregistered listener {}", theEntry);
+			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theEntry);
+			return new ResourceChangeResult();
 		}
 		SearchParameterMap searchParamMap = theEntry.getSearchParameterMap();
 		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theEntry.getResourceName(), searchParamMap);

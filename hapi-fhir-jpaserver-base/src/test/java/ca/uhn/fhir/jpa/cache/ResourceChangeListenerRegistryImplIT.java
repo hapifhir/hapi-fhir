@@ -50,7 +50,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void after() {
 		myResourceChangeListenerRegistry.clearListenersForUnitTest();
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
-		myResourceChangeListenerCacheRefresher.refreshAllCachesIfNecessary();
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 	}
 
 	@Test

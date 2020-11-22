@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Immutable copy of current resource versions read from the repository
+ * This immutable map holds a copy of current resource versions read from the repository.
  */
 public class ResourceVersionMap {
 	private final Set<IIdType> mySourceIds = new HashSet<>();

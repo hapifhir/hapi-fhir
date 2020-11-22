@@ -18,8 +18,11 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * This Spring Component holds all of the IResourceChangeListeners that have been registered with the
- * IResourceChangeListenerRegistry along with the ResourceName and SearchParamMap they were registered with.
+ * This service contains an in-memory list of all registered {@link IResourceChangeListener} instances along
+ * with their caches and other details needed to maintain those caches.  Register an {@link IResourceChangeListener} instance
+ * with this wervice to be notified when resources you care about are changed.  This service quickly notifies listeners
+ * of changes that happened on the local process and also eventually notifies listeners of changes that were made by
+ * remote processes.
  */
 @Component
 public class ResourceChangeListenerRegistryImpl implements IResourceChangeListenerRegistry {
@@ -35,25 +38,33 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	private final Queue<RegisteredResourceChangeListener> myListenerEntries = new ConcurrentLinkedQueue<RegisteredResourceChangeListener>();
 
 	/**
-	 * @param theResourceName           the name of the resource the listener should be notified about
-	 * @param theSearchParamMap         the listener will only be notified of changes to resources that match this map
-	 * @param theResourceChangeListener the listener to be notified
+	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
+	 * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
+	 * within {@link ResourceChangeListenerCacheRefresherImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
+	 * on a different jvm process, then the listener will be called within theRemoteRefreshIntervalMs.
+	 * @param theResourceName           the type of the resource the listener should be notified about (e.g. "Subscription" or "SearchParameter")
+	 * @param theSearchParameterMap     the listener will only be notified of changes to resources that match this map
+	 * @param theResourceChangeListener the listener that will be called whenever resource changes are detected
 	 * @param theRemoteRefreshIntervalMs the number of milliseconds between checking the database for changed resources that match the search parameter map
-	 * @throws ca.uhn.fhir.parser.DataFormatException      if theResourceName is not valid
+	 * @throws ca.uhn.fhir.parser.DataFormatException      if theResourceName is not a valid resource type in our FhirContext
 	 * @throws IllegalArgumentException if theSearchParamMap cannot be evaluated in-memory
 	 * @return RegisteredResourceChangeListener that stores the resource id cache, and the next refresh time
 	 */
 	@Override
-	// FIXME set remote poll interval
-	public RegisteredResourceChangeListener registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParamMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+	public RegisteredResourceChangeListener registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
-		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParamMap, resourceDef);
+		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParameterMap, resourceDef);
 		if (!inMemoryMatchResult.supported()) {
-			throw new IllegalArgumentException("SearchParameterMap " + theSearchParamMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
+			throw new IllegalArgumentException("SearchParameterMap " + theSearchParameterMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
-		return add(theResourceName, theResourceChangeListener, theSearchParamMap, theRemoteRefreshIntervalMs);
+		return add(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
 
+	/**
+	 * Unregister a listener from this service
+	 *
+	 * @param theResourceChangeListener
+	 */
 	@Override
 	public void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener) {
 		myListenerEntries.removeIf(l -> l.getResourceChangeListener().equals(theResourceChangeListener));
@@ -63,12 +74,6 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		RegisteredResourceChangeListener retval = myRegisteredResourceListenerFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 		myListenerEntries.add(retval);
 		return retval;
-	}
-
-	@Override
-	@VisibleForTesting
-	public void clearListenersForUnitTest() {
-		myListenerEntries.clear();
 	}
 
 	@Override
@@ -110,4 +115,9 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		}
 	}
 
+	@Override
+	@VisibleForTesting
+	public void clearListenersForUnitTest() {
+		myListenerEntries.clear();
+	}
 }
