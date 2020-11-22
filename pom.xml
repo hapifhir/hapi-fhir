@@ -737,11 +737,10 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.6.2</junit_version>
 		<flyway_version>6.5.4</flyway_version>
-		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.22.Final</hibernate_version>
+		<hibernate_version>5.4.23.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
-		<lucene_version>5.5.5</lucene_version>
+		<lucene_version>8.6.2</lucene_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
@@ -1415,19 +1414,24 @@
 				<version>${hibernate_validator_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-orm</artifactId>
-				<version>${hibernate_search_version}</version>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-mapper-orm</artifactId>
+				<version>6.0.0.CR1</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-elasticsearch</artifactId>
-				<version>${hibernate_search_version}</version>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-high-level-client</artifactId>
+				<version>7.9.2</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-engine</artifactId>
-				<version>${hibernate_search_version}</version>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-elasticsearch</artifactId>
+				<version>6.0.0.CR1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-lucene</artifactId>
+				<version>6.0.0.CR1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -2517,7 +2521,6 @@
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-igpacks</module>
-				<module>hapi-fhir-elasticsearch-6</module>
 				<module>hapi-fhir-jpaserver-api</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

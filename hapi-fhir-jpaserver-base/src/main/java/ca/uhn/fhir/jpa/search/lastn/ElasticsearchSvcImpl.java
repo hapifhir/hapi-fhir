@@ -35,40 +35,35 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import org.shadehapi.elasticsearch.action.DocWriteResponse;
-import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.shadehapi.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.shadehapi.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.shadehapi.elasticsearch.action.index.IndexRequest;
-import org.shadehapi.elasticsearch.action.index.IndexResponse;
-import org.shadehapi.elasticsearch.action.search.SearchRequest;
-import org.shadehapi.elasticsearch.action.search.SearchResponse;
-import org.shadehapi.elasticsearch.client.RequestOptions;
-import org.shadehapi.elasticsearch.client.RestHighLevelClient;
-import org.shadehapi.elasticsearch.common.xcontent.XContentType;
-import org.shadehapi.elasticsearch.index.query.BoolQueryBuilder;
-import org.shadehapi.elasticsearch.index.query.MatchQueryBuilder;
-import org.shadehapi.elasticsearch.index.query.QueryBuilders;
-import org.shadehapi.elasticsearch.index.query.RangeQueryBuilder;
-import org.shadehapi.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.shadehapi.elasticsearch.search.SearchHit;
-import org.shadehapi.elasticsearch.search.SearchHits;
-import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilders;
-import org.shadehapi.elasticsearch.search.aggregations.Aggregations;
-import org.shadehapi.elasticsearch.search.aggregations.BucketOrder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.metrics.tophits.ParsedTopHits;
-import org.shadehapi.elasticsearch.search.aggregations.support.ValueType;
-import org.shadehapi.elasticsearch.search.builder.SearchSourceBuilder;
-import org.shadehapi.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
+import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
+import org.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
+import org.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
+import org.elasticsearch.search.aggregations.support.ValueType;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -165,15 +160,17 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private boolean createIndex(String theIndexName, String theMapping) throws IOException {
 		CreateIndexRequest request = new CreateIndexRequest(theIndexName);
 		request.source(theMapping, XContentType.JSON);
-		CreateIndexResponse createIndexResponse = myRestHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
-		return createIndexResponse.isAcknowledged();
+		//TODO GGG HS CreateIndexResponse createIndexResponse = myRestHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
+		return true;
+		//return createIndexResponse.isAcknowledged();
 
 	}
 
 	private boolean indexExists(String theIndexName) throws IOException {
 		GetIndexRequest request = new GetIndexRequest();
 		request.indices(theIndexName);
-		return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
+		return true;
+		// TODO GGG HS return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
 	}
 
 	@Override
@@ -271,21 +268,22 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field(OBSERVATION_CODEVALUE_FIELD_NAME);
+		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE).field(OBSERVATION_CODEVALUE_FIELD_NAME);
 		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
 		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
 			.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
 		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
+		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
 		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
 		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
 		return observationCodeSystemAggregationBuilder;
 	}
 
 	private SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
-		return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+		// TODO GGG HS: return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+		return null;
 	}
 
 	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue,
@@ -707,10 +705,12 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
-		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
-			RequestOptions.DEFAULT);
+		return true;
+		//TODO GGG HS
+		//IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
+	//		RequestOptions.DEFAULT);
 
-		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
+		//return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
 	}
 
 	@Override
@@ -731,23 +731,24 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public void deleteObservationDocument(String theDocumentId) {
 		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(OBSERVATION_INDEX);
 		deleteByQueryRequest.setQuery(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theDocumentId));
-		try {
-			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
-		} catch (IOException theE) {
-			throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
-		}
+//		try {
+			//TODO GGG HS myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+			return;
+		//} catch (IOException theE) {
+	//		throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
+	//	}
 	}
 
 	@VisibleForTesting
 	public void deleteAllDocumentsForTest(String theIndexName) throws IOException {
 		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(theIndexName);
 		deleteByQueryRequest.setQuery(QueryBuilders.matchAllQuery());
-		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		//TODO GGG HS: myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
 	}
 
 	@VisibleForTesting
 	public void refreshIndex(String theIndexName) throws IOException {
-		myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
+		//TODO GGG HS myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
 	}
 
 }

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -45,13 +44,15 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.highlight.Formatter;
 import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.QueryScorer;
-import org.apache.lucene.search.highlight.Scorer;
 import org.apache.lucene.search.highlight.TokenGroup;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.FullTextQuery;
-import org.hibernate.search.query.dsl.BooleanJunction;
-import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.backend.lucene.index.LuceneIndexManager;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.query.SearchQuery;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.mapping.SearchMapping;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,22 +67,22 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.join;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
+
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
-
-	@Autowired
-	private DaoConfig myDaoConfig;
 
 	@Autowired
 	private IdHelperService myIdHelperService;
@@ -100,15 +101,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
-			Set<String> terms = new HashSet<>();
-			for (IQueryParameterType nextOr : nextAnd) {
-				StringParam nextOrString = (StringParam) nextOr;
-				String nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
-				if (isNotBlank(nextValueTrimmed)) {
-					terms.add(nextValueTrimmed);
-				}
-			}
-			if (terms.isEmpty() == false) {
+			Set<String> terms = extractOrStringParams(nextAnd);
+			if (!terms.isEmpty()) {
 				if (terms.size() == 1) {
 					//@formatter:off
 					Query textQuery = theQueryBuilder
@@ -129,102 +123,136 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 	}
 
-	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-
-		List<ResourcePersistentId> pids = null;
-		
-		/*
-		 * Handle textual params
-		 */
-		/*
-		for (String nextParamName : theParams.keySet()) {
-			for (List<? extends IQueryParameterType> nextAndList : theParams.get(nextParamName)) {
-				for (Iterator<? extends IQueryParameterType> orIterator = nextAndList.iterator(); orIterator.hasNext();) {
-					IQueryParameterType nextParam = orIterator.next();
-					if (nextParam instanceof TokenParam) {
-						TokenParam nextTokenParam = (TokenParam) nextParam;
-						if (nextTokenParam.isText()) {
-							orIterator.remove();
-							QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceIndexedSearchParamString.class).get();
-							BooleanJunction<?> bool = qb.bool();
-
-							bool.must(qb.keyword().onField("myParamName").matching(nextParamName).createQuery());
-							if (isNotBlank(theResourceName)) {
-								bool.must(qb.keyword().onField("myResourceType").matching(theResourceName).createQuery());
-							}
-//							
-							//@formatter:off
-							String value = nextTokenParam.getValue().toLowerCase();
-							bool.must(qb.keyword().onField("myValueTextEdgeNGram").matching(value).createQuery());
-							
-							//@formatter:on
-							
-							FullTextQuery ftq = em.createFullTextQuery(bool.createQuery(), ResourceIndexedSearchParamString.class);
-
-							List<?> resultList = ftq.getResultList();
-							pids = new ArrayList<Long>();
-							for (Object next : resultList) {
-								ResourceIndexedSearchParamString nextAsArray = (ResourceIndexedSearchParamString) next;
-								pids.add(nextAsArray.getResourcePid());
-							}
-						}
-					}
+	private void addTextSearch2(BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram){
+		if (theTerms == null) {
+			return;
+		}
+		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
+			Set<String> terms = extractOrStringParams(nextAnd);
+				if (terms.size() == 1) {
+					b.must(j -> j.phrase()
+						.field(theFieldName)
+						.boost(4.0f)
+						.matching(terms.iterator().next().toLowerCase())
+						.slop(2));
+				} else if (terms.size() > 1){
+					String joinedTerms = StringUtils.join(terms, ' ');
+					b.must(j -> j.match().field(theFieldName).matching(joinedTerms));
+				} else {
+					//donothing
 				}
 			}
 		}
-		
-		if (pids != null && pids.isEmpty()) {
-			return pids;
-		}
-		*/
 
-		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
-		BooleanJunction<?> bool = qb.bool();
-
-		/*
-		 * Handle _content parameter (resource body content)
-		 */
-		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
-		addTextSearch(qb, bool, contentAndTerms, "myContentText", "myContentTextEdgeNGram", "myContentTextNGram");
-
-		/*
-		 * Handle _text parameter (resource narrative content)
-		 */
-		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
-		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
-
-		if (theReferencingPid != null) {
-			bool.must(qb.keyword().onField("myResourceLinksField").matching(theReferencingPid.toString()).createQuery());
-		}
-
-		if (bool.isEmpty()) {
-			return pids;
-		}
-
-		if (isNotBlank(theResourceName)) {
-			bool.must(qb.keyword().onField("myResourceType").matching(theResourceName).createQuery());
-		}
-
-		Query luceneQuery = bool.createQuery();
-
-		// wrap Lucene query in a javax.persistence.SqlQuery
-		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, ResourceTable.class);
-		jpaQuery.setProjection("myId");
-
-		// execute search
-		List<?> result = jpaQuery.getResultList();
-
-		ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
-		for (Object object : result) {
-			Object[] nextArray = (Object[]) object;
-			Long next = (Long) nextArray[0];
-			if (next != null) {
-				retVal.add(new ResourcePersistentId(next));
+	@NotNull
+	private Set<String> extractOrStringParams(List<? extends IQueryParameterType> nextAnd) {
+		Set<String> terms = new HashSet<>();
+		for (IQueryParameterType nextOr : nextAnd) {
+			StringParam nextOrString = (StringParam) nextOr;
+			String nextValueTrimmed = StringUtils.defaultString(nextOrString.getValue()).trim();
+			if (isNotBlank(nextValueTrimmed)) {
+				terms.add(nextValueTrimmed);
 			}
 		}
+		return terms;
+	}
 
-		return retVal;
+	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+
+		List<ResourcePersistentId> pids = null;
+
+		SearchSession session = Search.session(myEntityManager);
+		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+
+		List<Long> longPids = session.search(ResourceTable.class)
+			//Selects are replacements for projection and convert more cleanly than the old implementation.
+			.select(
+				f -> f.field("myId", Long.class)
+			)
+			.where(
+				f -> f.bool(b -> {
+					/*
+					 * Handle _content parameter (resource body content)
+					 */
+					addTextSearch2(b, contentAndTerms, "myContentText", "mycontentTextEdgeNGram", "myContentTextNGram");
+					/*
+					 * Handle _text parameter (resource narrative content)
+					 */
+					addTextSearch2(b, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
+
+					if (theReferencingPid != null) {
+						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
+					}
+
+					//DROP EARLY HERE IF BOOL IS EMPTY?
+
+					if (isNotBlank(theResourceName)) {
+						b.must(f.match().field("myResourceType").matching(theResourceName));
+					}
+				})
+			).fetchAllHits();
+
+		return convertLongsToResourcePersistentIds(longPids);
+	}
+
+
+	private List<ResourcePersistentId> doSearchOld(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
+
+
+//		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+//		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+//		BooleanJunction<?> bool = qb.bool();
+//
+//		/*
+//		 * Handle _content parameter (resource body content)
+//		 */
+//		addTextSearch(qb, bool, contentAndTerms, "myContentText", "myContentTextEdgeNGram", "myContentTextNGram");
+//
+//		/*
+//		 * Handle _text parameter (resource narrative content)
+//		 */
+//		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
+//
+//		if (theReferencingPid != null) {
+//			bool.must(qb.keyword().onField("myResourceLinksField").matching(theReferencingPid.toString()).createQuery());
+//		}
+//
+//		TODO GGG HS exit early here?
+//		if (bool.isEmpty()) {
+//			return pids;
+//		}
+//
+//		if (isNotBlank(theResourceName)) {
+//			bool.must(qb.keyword().onField("myResourceType").matching(theResourceName).createQuery());
+//		}
+//
+//		Query luceneQuery = bool.createQuery();
+//
+//		 wrap Lucene query in a javax.persistence.SqlQuery
+//		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, ResourceTable.class);
+//		jpaQuery.setProjection("myId");
+//
+//		 execute search
+//		List<?> result = jpaQuery.getResultList();
+//
+//		ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
+//		for (Object object : result) {
+//			Object[] nextArray = (Object[]) object;
+//			Long next = (Long) nextArray[0];
+//			if (next != null) {
+//				retVal.add(new ResourcePersistentId(next));
+//			}
+//		}
+//
+//		return retVal;
+		return null;
+	}
+
+	private List<ResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
+		return theLongPids.stream()
+			.map(pid -> new ResourcePersistentId(pid))
+			.collect(Collectors.toList());
 	}
 
 	@Override
@@ -259,8 +287,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (retVal == null) {
 			retVal = new TransactionTemplate(myTxManager).execute(t -> {
 				try {
-					FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-					em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+					//TODO GGG HS leaving the old code in for code review purposes. This QB is clearly just checking if it worked or not, not sure
+					//what the HS6 equivalent is.
+					//FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+					//em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+					SearchSession searchSession = Search.session(myEntityManager);
+					searchSession.search(ResourceTable.class);
 					return Boolean.FALSE;
 				} catch (Exception e) {
 					ourLog.trace("FullText test failed", e);
@@ -307,10 +339,32 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		ResourcePersistentId pid = myIdHelperService.resolveResourcePersistentIds(requestPartitionId, contextParts[0], contextParts[1]);
 
-		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+//		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+//		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		SearchSession searchSession = Search.session(myEntityManager);
 
-		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
+		SearchQuery<Object> query = searchSession.search(ResourceTable.class)
+			.select(f -> f.field("myContentText"))
+			.where(f -> f
+				.bool()
+				.must(j -> j
+					.phrase()
+					.field("myContentText").boost(4.0f)
+					.field("myContentTextEdgeNGram").boost(2.0f)
+					.field("mycontentTextNGram").boost(1.0f)
+					.field("myContentTextPhonetic").boost(0.5f)
+					.matching(theText.toLowerCase())
+					.slop(2))
+				.must(i -> i
+					.match()
+					.field("myResourceLinksFIeld")
+					.matching(pid.toString())
+				)
+			).toQuery();
 
+		List<Object> resultList  = query.fetchHits(20);
+
+		/**
 		Query textQuery = qb
 			.phrase()
 			.withSlop(2)
@@ -330,16 +384,21 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		ftq.setMaxResults(20);
 
 		List<?> resultList = ftq.getResultList();
-		List<Suggestion> suggestions = Lists.newArrayList();
+		 */
+		List<Suggestion> suggestions= Lists.newArrayList();
 		for (Object next : resultList) {
 			Object[] nextAsArray = (Object[]) next;
 			String nextValue = (String) nextAsArray[0];
 
 			try {
 				MySuggestionFormatter formatter = new MySuggestionFormatter(theText, suggestions);
-				Scorer scorer = new QueryScorer(textQuery);
+				//TODO GGG HS: no clue how to make this QueryScorer go.
+				QueryScorer scorer = new QueryScorer(query);
 				Highlighter highlighter = new Highlighter(formatter, scorer);
-				Analyzer analyzer = em.getSearchFactory().getAnalyzer(ResourceTable.class);
+
+				//Analyzer analyzer = em.getSearchFactory().getAnalyzer(ResourceTable.class);
+				SearchMapping mapping = Search.mapping(myEntityManager.getEntityManagerFactory());
+				Analyzer analyzer = mapping.indexedEntity(ResourceTable.class).indexManager().unwrap(LuceneIndexManager.class).searchAnalyzer();
 
 				formatter.setAnalyzer("myContentTextPhonetic");
 				highlighter.getBestFragments(analyzer.tokenStream("myContentTextPhonetic", nextValue), nextValue, 10);

@@ -20,15 +20,14 @@ package ca.uhn.fhir.jpa.model.util;
  * #L%
  */
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.index.IndexableField;
-import org.hibernate.search.bridge.LuceneOptions;
-import org.hibernate.search.bridge.TwoWayFieldBridge;
 
-import java.math.BigDecimal;
+//TODO GGG HS currently all replaced with @ScaledNumberField
+// implements TwoWayFieldBridge {
+public class BigDecimalNumericFieldBridge {
 
-public class BigDecimalNumericFieldBridge implements TwoWayFieldBridge {
-	@Override
+}
+/**
+//	@Override
 	public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
 		if (value == null) {
 			if (luceneOptions.indexNullAs() != null) {
@@ -60,3 +59,4 @@ public class BigDecimalNumericFieldBridge implements TwoWayFieldBridge {
 		luceneOptions.addNumericFieldToDocument(name, value, document);
 	}
 }
+ */

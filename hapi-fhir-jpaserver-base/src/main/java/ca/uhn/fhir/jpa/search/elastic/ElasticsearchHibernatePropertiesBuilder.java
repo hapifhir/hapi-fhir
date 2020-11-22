@@ -21,10 +21,13 @@ package ca.uhn.fhir.jpa.search.elastic;
  */
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.search.cfg.Environment;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchEnvironment;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
-import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
+import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.automaticindexing.session.AutomaticIndexingSynchronizationStrategyNames;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
+import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
+import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
+import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 
 import java.util.Properties;
 
@@ -35,13 +38,14 @@ import java.util.Properties;
  */
 public class ElasticsearchHibernatePropertiesBuilder {
 
-	private ElasticsearchIndexStatus myRequiredIndexStatus = ElasticsearchIndexStatus.YELLOW;
+	private IndexStatus myRequiredIndexStatus = IndexStatus.YELLOW.YELLOW;
+	private SchemaManagementStrategyName myIndexSchemaManagementStrategy = SchemaManagementStrategyName.CREATE;
+
 	private String myRestUrl;
 	private String myUsername;
 	private String myPassword;
-	private IndexSchemaManagementStrategy myIndexSchemaManagementStrategy = IndexSchemaManagementStrategy.CREATE;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
-	private boolean myDebugRefreshAfterWrite = false;
+	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;//TODO GGG HS not sure if this is the right
 	private boolean myDebugPrettyPrintJsonLog = false;
 
 	public ElasticsearchHibernatePropertiesBuilder setUsername(String theUsername) {
@@ -60,32 +64,53 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.remove("hibernate.search.model_mapping");
 
 		// the below properties are used for ElasticSearch integration
-		theProperties.put("hibernate.search.default." + Environment.INDEX_MANAGER_IMPL_NAME, "elasticsearch");
-		theProperties.put("hibernate.search." + ElasticsearchEnvironment.ANALYSIS_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
+		//theProperties.put("hibernate.search.default." + INDEX_MANAGER_IMPL_NAME, "elasticsearch");
+		theProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
 
-		theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
+
+		//theProperties.put("hibernate.search." + ANALYSIS_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER), HapiElasticsearchAnalysisConfigurer.class.getName());
+
+		//theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
+		//TODO GGG note that we MUST exclude the protocol from this URL, and it should be set via the protocol hibernate prop.
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myRestUrl);
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), "https");
+
 		if (StringUtils.isNotBlank(myUsername)) {
-			theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
+			//theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
+			theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.USERNAME), myUsername);
 		}
 		if (StringUtils.isNotBlank(myPassword)) {
-			theProperties.put("hibernate.search.default.elasticsearch.password", myPassword);
+			//theProperties.put("hibernate.search.default.elasticsearch.password", myPassword);
+			theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PASSWORD), myPassword);
 		}
 
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.getExternalName());
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_MANAGEMENT_WAIT_TIMEOUT, Long.toString(myIndexManagementWaitTimeoutMillis));
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REQUIRED_INDEX_STATUS, myRequiredIndexStatus.getElasticsearchString());
+		//theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.getExternalName());
+		theProperties.put(HibernateOrmMapperSettings.SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.externalRepresentation());
+
+		//theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_MANAGEMENT_WAIT_TIMEOUT, Long.toString(myIndexManagementWaitTimeoutMillis));
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.SCHEMA_MANAGEMENT_MINIMAL_REQUIRED_STATUS_WAIT_TIMEOUT), Long.toString(myIndexManagementWaitTimeoutMillis));
+
+		//theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REQUIRED_INDEX_STATUS, myRequiredIndexStatus.getElasticsearchString());
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.SCHEMA_MANAGEMENT_MINIMAL_REQUIRED_STATUS), myRequiredIndexStatus.externalRepresentation());
+
 
 		// Need the mapping to be dynamic because of terminology indexes.
-		theProperties.put("hibernate.search.default.elasticsearch.dynamic_mapping", "true");
+		//theProperties.put("hibernate.search.default.elasticsearch.dynamic_mapping", "true");
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.DYNAMIC_MAPPING), "true");
 
 
 		// Only for unit tests
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REFRESH_AFTER_WRITE, Boolean.toString(myDebugRefreshAfterWrite));
-		theProperties.put("hibernate.search." + ElasticsearchEnvironment.LOG_JSON_PRETTY_PRINTING, Boolean.toString(myDebugPrettyPrintJsonLog));
+		//theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REFRESH_AFTER_WRITE, Boolean.toString(myDebugRefreshAfterWrite));
+		//Docs say that "read-sync" or "sync" is the same as the old RefreshAfterWrite
+		theProperties.put(HibernateOrmMapperSettings.AUTOMATIC_INDEXING_SYNCHRONIZATION_STRATEGY, myDebugSyncStrategy);
+
+		//theProperties.put("hibernate.search." + ElasticsearchEnvironment.LOG_JSON_PRETTY_PRINTING, Boolean.toString(myDebugPrettyPrintJsonLog));
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LOG_JSON_PRETTY_PRINTING), Boolean.toString(myDebugPrettyPrintJsonLog));
 
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(ElasticsearchIndexStatus theRequiredIndexStatus) {
+	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(IndexStatus theRequiredIndexStatus) {
 		myRequiredIndexStatus = theRequiredIndexStatus;
 		return this;
 	}
@@ -95,7 +120,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy theIndexSchemaManagementStrategy) {
+	public ElasticsearchHibernatePropertiesBuilder setIndexSchemaManagementStrategy(SchemaManagementStrategyName theIndexSchemaManagementStrategy) {
 		myIndexSchemaManagementStrategy = theIndexSchemaManagementStrategy;
 		return this;
 	}
@@ -105,8 +130,8 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setDebugRefreshAfterWrite(boolean theDebugRefreshAfterWrite) {
-		myDebugRefreshAfterWrite = theDebugRefreshAfterWrite;
+	public ElasticsearchHibernatePropertiesBuilder setDebugIndexSyncStrategy(String theSyncStrategy) {
+		myDebugSyncStrategy = theSyncStrategy;
 		return this;
 	}
 

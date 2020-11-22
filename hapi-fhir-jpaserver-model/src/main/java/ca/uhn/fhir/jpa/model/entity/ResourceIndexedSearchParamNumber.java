@@ -21,16 +21,13 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.NumericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -56,10 +53,14 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_VALUE", nullable = true)
-	@Field
-	@NumericField
-	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
+	//TODO GGG HS : as per changes in 6.0, @Field, @NumericField is replaced with @GenericField with a particular value bridge.
+	// Alternatively, can use @ScaledNumberField We will have to see if this works.
+	//@Field
+	//@NumericField
+	//@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
+	@ScaledNumberField
 	public BigDecimal myValue;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_NUMBER", sequenceName = "SEQ_SPIDX_NUMBER")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")

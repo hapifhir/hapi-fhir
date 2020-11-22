@@ -29,13 +29,10 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -89,16 +86,15 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	@ContainedIn
+	//TODO GGG HS it said we were cool to rip these out.
+	//@ContainedIn
 	private ResourceTable myResourceTable;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
-	@Fields({
-		@Field(name = "myValueText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
-		@Field(name = "myValueTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
-		@Field(name = "myValueTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
-		@Field(name = "myValueTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
-	})
+	@FullTextField(name = "myValueText", searchable=Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+	@FullTextField(name = "myValueTextEdgeNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myValueTextNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myValueTextPhonetic", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
 	private String myValueExact;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)

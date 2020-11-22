@@ -20,8 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -43,8 +42,9 @@ public class TermConceptParentChildLink implements Serializable {
 	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
+	//TODO GGG HS: Why is this field indexed? It seems to never get set.
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
-	@Fields({@Field(name = "myCodeSystemVersionPid")})
+	@FullTextField(name = "myCodeSystemVersionPid")
 	private long myCodeSystemVersionPid;
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = {})

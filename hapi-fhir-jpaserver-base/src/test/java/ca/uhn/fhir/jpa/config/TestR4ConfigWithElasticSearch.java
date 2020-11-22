@@ -37,7 +37,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 		ourLog.info("ElasticSearch started on port: {}", httpPort);
 
 		new ElasticsearchHibernatePropertiesBuilder()
-			.setDebugRefreshAfterWrite(true)
+			.setDebugIndexSyncStrategy(true)
 			.setDebugPrettyPrintJsonLog(true)
 			.setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)

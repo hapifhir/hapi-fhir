@@ -19,23 +19,13 @@ package ca.uhn.fhir.jpa.search;
  * limitations under the License.
  * #L%
  */
-
-import org.apache.lucene.analysis.core.*;
-import org.apache.lucene.analysis.miscellaneous.WordDelimiterFilterFactory;
-import org.apache.lucene.analysis.ngram.EdgeNGramFilterFactory;
-import org.apache.lucene.analysis.ngram.NGramFilterFactory;
-import org.apache.lucene.analysis.pattern.PatternTokenizerFactory;
-import org.apache.lucene.analysis.phonetic.PhoneticFilterFactory;
-import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
-import org.apache.lucene.analysis.standard.StandardFilterFactory;
-import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
-import org.hibernate.search.annotations.Factory;
-import org.hibernate.search.cfg.SearchMapping;
-
 /**
  * Factory for defining the analysers.
+ * TODO GGG HS, removed in favour of HapiLuceneAnalysisConfigurer
  */
-public class LuceneSearchMappingFactory {
+@Deprecated
+public class LuceneSearchMappingFactory {}
+/*
 	@Factory
 	public SearchMapping getSearchMapping() {
 		SearchMapping mapping = new SearchMapping();
@@ -70,3 +60,4 @@ public class LuceneSearchMappingFactory {
 		return mapping;
 	}
 }
+*/

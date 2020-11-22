@@ -20,12 +20,16 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import org.hibernate.search.indexes.interceptor.EntityIndexingInterceptor;
-import org.hibernate.search.indexes.interceptor.IndexingOverride;
+//import org.hibernate.search.indexes.interceptor.EntityIndexingInterceptor;
+//import org.hibernate.search.indexes.interceptor.IndexingOverride;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 
-public class DeferConceptIndexingInterceptor  implements EntityIndexingInterceptor<TermConcept> {
+
+//TODO GGG HS: replaced in favour of DeferConceptIndexingRoutingBinder
+@Deprecated
+public class DeferConceptIndexingInterceptor  {}/*implements EntityIndexingInterceptor<TermConcept> {
+
 
 	@Override
 	public IndexingOverride onAdd(TermConcept theEntity) {
@@ -53,3 +57,4 @@ public class DeferConceptIndexingInterceptor  implements EntityIndexingIntercept
 	}
 
 }
+*/
