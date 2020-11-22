@@ -37,11 +37,9 @@ public interface IResourceChangeListenerRegistry {
 
 	@Nonnull
 	Iterator<RegisteredResourceChangeListener> iterator();
+	// FIXME KHS can remove these?
 
 	void requestRefreshIfWatching(IBaseResource theResource);
 
-	// FIXME KHS document these
 	boolean contains(RegisteredResourceChangeListener theEntry);
-
-	ResourceChangeResult notifyListener(RegisteredResourceChangeListener theEntry, ResourceVersionMap theNewResourceVersionMap);
 }
