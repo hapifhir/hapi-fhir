@@ -162,7 +162,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 	}
 
 	private long overrideBuiltinSearchParamsWithActiveJpaSearchParams(RuntimeSearchParamCache theSearchParamCache, Collection<IBaseResource> theSearchParams) {
-		if (!myModelConfig.isDefaultSearchParamsCanBeOverridden()) {
+		if (!myModelConfig.isDefaultSearchParamsCanBeOverridden() || theSearchParams == null) {
 			return 0;
 		}
 

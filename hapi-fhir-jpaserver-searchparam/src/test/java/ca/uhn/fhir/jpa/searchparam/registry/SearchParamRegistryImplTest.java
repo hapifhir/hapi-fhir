@@ -3,21 +3,18 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
-import ca.uhn.fhir.jpa.cache.RegisteredResourceChangeListener;
-import ca.uhn.fhir.jpa.cache.RegisteredResourceListenerFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
-import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresher;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -35,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Nonnull;
@@ -85,7 +82,7 @@ public class SearchParamRegistryImplTest {
 	@Autowired
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
-	private ResourceChangeListenerCacheRefresher myChangeListenerCacheRefresher;
+	private ResourceChangeListenerCacheRefresherImpl myChangeListenerCacheRefresher;
 	@Autowired
 	private ResourceChangeListenerCache myResourceChangeListenerCache;
 
@@ -105,6 +102,7 @@ public class SearchParamRegistryImplTest {
 	private MatchUrlService myMatchUrlService;
 
 	@Configuration
+	@Import(RegisteredResourceListenerFactoryConfig.class)
 	static class SpringConfig {
 		@Bean
 		FhirContext fhirContext() {
@@ -139,20 +137,8 @@ public class SearchParamRegistryImplTest {
 		}
 
 		@Bean
-		ResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
-			return new ResourceChangeListenerCacheRefresher();
-		}
-
-		// FIXME KHS group these in a config.  they are used in a lot of tests
-		@Bean
-		RegisteredResourceListenerFactory myRegisteredResourceListenerFactory() {
-			return new RegisteredResourceListenerFactory();
-		}
-
-		@Bean
-		@Scope("prototype")
-		RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
-			return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+		ResourceChangeListenerCacheRefresherImpl resourceChangeListenerCacheRefresher() {
+			return new ResourceChangeListenerCacheRefresherImpl();
 		}
 
 		@Bean

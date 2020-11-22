@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -16,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.HashSet;
@@ -44,7 +45,7 @@ class ResourceChangeListenerRegistryImplTest {
 	@MockBean
 	private ResourceChangeListenerCache myResourceChangeListenerCache;
 	@MockBean
-	private ResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	private ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 	@MockBean
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
@@ -56,20 +57,13 @@ class ResourceChangeListenerRegistryImplTest {
 	private RegisteredResourceChangeListener myEntry;
 
 	@Configuration
+	@Import(RegisteredResourceListenerFactoryConfig.class)
 	static class SpringContext {
 		@Bean
 		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
 			return new ResourceChangeListenerRegistryImpl();
 		}
-		@Bean
-		public RegisteredResourceListenerFactory registeredResourceListenerFactory() {
-			return new RegisteredResourceListenerFactory();
-		}
-		@Bean
-		@Scope("prototype")
-		RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
-			return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
-		}
+
 		@Bean
 		public FhirContext fhirContext() {
 			return ourFhirContext;

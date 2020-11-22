@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -9,9 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.Instant;
@@ -27,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = RegisteredResourceListenerFactoryConfig.class)
 class RegisteredResourceChangeListenerTest {
 	private static final String TEST_RESOURCE_NAME = "Foo";
 	private static final long TEST_REFRESH_INTERVAL = DateUtils.MILLIS_PER_HOUR;
@@ -38,22 +38,9 @@ class RegisteredResourceChangeListenerTest {
 	private RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
 
 	@MockBean
-	ResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 	@MockBean
 	SearchParamMatcher mySearchParamMatcher;
-
-	@Configuration
-	static class SpringContext {
-		@Bean
-		RegisteredResourceListenerFactory registeredResourceListenerFactory() {
-			return new RegisteredResourceListenerFactory();
-		}
-		@Bean
-		@Scope("prototype")
-		RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
-			return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
-		}
-	}
 
 	@Test
 	public void doNotRefreshIfNotMatches() {

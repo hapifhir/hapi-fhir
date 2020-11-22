@@ -18,8 +18,8 @@ import javax.annotation.PostConstruct;
 import java.util.Iterator;
 
 @Service
-public class ResourceChangeListenerCacheRefresher implements IResourceChangeListenerCacheRefresher {
-	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresher.class);
+public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresherImpl.class);
 
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final int MAX_RETRIES = 60; // 5 minutes

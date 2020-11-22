@@ -38,7 +38,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	@Autowired
 	ResourceChangeListenerCache myResourceChangeListenerCache;
 	@Autowired
-	ResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 
 	private final static String RESOURCE_NAME = "Patient";
 	private TestCallback myMaleTestCallback = new TestCallback("MALE");

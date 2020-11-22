@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -28,8 +27,6 @@ public class ResourceChangeListenerCache {
 
 	@Autowired
 	FhirContext myFhirContext;
-	@Autowired
-	SearchParamMatcher mySearchParamMatcher;
 	@Autowired
 	RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
 

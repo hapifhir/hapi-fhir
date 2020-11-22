@@ -24,7 +24,7 @@ public class RegisteredResourceChangeListener {
 	private static Instant ourNowForUnitTests;
 
 	@Autowired
-	ResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 

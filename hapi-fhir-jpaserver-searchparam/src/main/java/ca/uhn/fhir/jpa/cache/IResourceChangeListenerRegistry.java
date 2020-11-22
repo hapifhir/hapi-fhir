@@ -8,7 +8,7 @@ public interface IResourceChangeListenerRegistry {
 	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
 	 * changes in any way.  If the change happened on the same jvm process where this registry resides, then the listener will be called
-	 * within {@link ResourceChangeListenerCacheRefresher#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
+	 * within {@link ResourceChangeListenerCacheRefresherImpl#LOCAL_REFRESH_INTERVAL_MS} of the change happening.  If the change happened
 	 * on a different jvm process, then the listener will be called within theRemoteRefreshIntervalMs.
 	 * @param theResourceName           the name of the resource the listener should be notified about
 	 * @param theSearchParameterMap     the listener will only be notified of changes to resources that match this map

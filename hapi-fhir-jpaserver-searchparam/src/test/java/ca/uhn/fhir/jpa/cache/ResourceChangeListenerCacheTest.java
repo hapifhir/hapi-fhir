@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -13,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collections;
@@ -44,30 +45,18 @@ class ResourceChangeListenerCacheTest {
 	ResourceChangeListenerCache myResourceChangeListenerCache;
 
 	@MockBean
-	ResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 	@MockBean
 	SearchParamMatcher mySearchParamMatcher;
 
 	private final SearchParameterMap myMap = SearchParameterMap.newSynchronous();
 
 	@Configuration
+	@Import(RegisteredResourceListenerFactoryConfig.class)
 	static class SpringContext {
 		@Bean
 		ResourceChangeListenerCache resourceChangeListenerCache() {
 			return new ResourceChangeListenerCache();
-		}
-
-		@Bean
-		// FIXME KHS can mock?
-		RegisteredResourceListenerFactory registeredResourceListenerFactory() {
-			return new RegisteredResourceListenerFactory();
-		}
-
-		// FIXME KHS can mock?
-		@Bean
-		@Scope("prototype")
-		RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
-			return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 		}
 
 		@Bean
