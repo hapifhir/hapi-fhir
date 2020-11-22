@@ -50,7 +50,6 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	}
 
 	@Override
-	// FIXME KHS only test?
 	public ResourceChangeResult refreshAllCachesIfNecessary() {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerCache.iterator();
