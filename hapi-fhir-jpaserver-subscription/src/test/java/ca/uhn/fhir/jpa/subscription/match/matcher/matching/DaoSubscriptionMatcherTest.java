@@ -5,7 +5,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.config.ResourceChangeListenerRegistryConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -25,11 +26,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	SubscriptionProcessorConfig.class,
 	SearchParamConfig.class,
+	ResourceChangeListenerRegistryConfig.class,
 	DaoSubscriptionMatcherTest.MyConfig.class
 })
 public class DaoSubscriptionMatcherTest {
@@ -54,8 +58,6 @@ public class DaoSubscriptionMatcherTest {
 	private IValidationSupport myValidationSupport;
 	@MockBean
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
-	@MockBean
-	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	/**
 	 * Make sure that if we're only running the {@link SubscriptionSubmitterConfig}, we don't need
@@ -77,6 +79,11 @@ public class DaoSubscriptionMatcherTest {
 		@Bean
 		public FhirContext fhirContext() {
 			return FhirContext.forR4();
+		}
+
+		@Bean
+		public IResourceVersionSvc resourceVersionSvc() {
+			return mock(IResourceVersionSvc.class, RETURNS_DEEP_STUBS);
 		}
 
 	}
