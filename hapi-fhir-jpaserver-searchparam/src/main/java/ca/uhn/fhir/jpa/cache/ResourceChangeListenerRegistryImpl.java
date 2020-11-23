@@ -52,6 +52,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	 */
 	@Override
 	public RegisteredResourceChangeListener registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+		// Clone searchparameter map
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
 		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParameterMap, resourceDef);
 		if (!inMemoryMatchResult.supported()) {
