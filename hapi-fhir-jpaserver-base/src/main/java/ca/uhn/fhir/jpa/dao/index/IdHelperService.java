@@ -199,10 +199,12 @@ public class IdHelperService {
 					if (theRequestPartitionId.isAllPartitions()) {
 						views = myForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds);
 					} else {
-						if (theRequestPartitionId.getPartitionIds() != null) {
-							views = myForcedIdDao.findByTypeAndForcedIdInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
-						} else {
+						if (theRequestPartitionId.isDefaultPartition()) {
 							views = myForcedIdDao.findByTypeAndForcedIdInPartitionNull(nextResourceType, nextIds);
+						} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+							views = myForcedIdDao.findByTypeAndForcedIdInPartitionIdsOrNullPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
+						} else {
+							views = myForcedIdDao.findByTypeAndForcedIdInPartitionIds(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
 						}
 					}
 					for (Object[] nextView : views) {
@@ -272,8 +274,10 @@ public class IdHelperService {
 				throw new PreconditionFailedException(msg);
 			}
 		} else {
-			if (theRequestPartitionId.getPartitionIds() == null) {
+			if (theRequestPartitionId.isDefaultPartition()) {
 				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
+			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+				pid = myForcedIdDao.findByPartitionIdOrNullAndTypeAndForcedId(theRequestPartitionId.getPartitionIdsWithoutDefault(), theResourceType, theId);
 			} else {
 				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionIds(), theResourceType, theId);
 			}
@@ -313,7 +317,7 @@ public class IdHelperService {
 			if (!myDaoConfig.isDeleteEnabled()) {
 				for (Iterator<String> forcedIdIterator = nextIds.iterator(); forcedIdIterator.hasNext(); ) {
 					String nextForcedId = forcedIdIterator.next();
-					String nextKey = nextResourceType + "/" + nextForcedId;
+					String nextKey = nextResourceType + "/" + nextForcedId; // FIXME: add partition ID to cache key
 					IResourceLookup cachedLookup = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
@@ -329,10 +333,12 @@ public class IdHelperService {
 				if (theRequestPartitionId.isAllPartitions()) {
 					views = myForcedIdDao.findAndResolveByForcedIdWithNoType(nextResourceType, nextIds);
 				} else {
-					if (theRequestPartitionId.getPartitionIds() != null) {
-						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
-					} else {
+					if (theRequestPartitionId.isDefaultPartition()) {
 						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionNull(nextResourceType, nextIds);
+					} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartitionIdOrNullPartitionId(nextResourceType, nextIds, theRequestPartitionId.getPartitionIdsWithoutDefault());
+					} else {
+						views = myForcedIdDao.findAndResolveByForcedIdWithNoTypeInPartition(nextResourceType, nextIds, theRequestPartitionId.getPartitionIds());
 					}
 				}
 
@@ -375,10 +381,12 @@ public class IdHelperService {
 			if (theRequestPartitionId.isAllPartitions()) {
 				lookup = myResourceTableDao.findLookupFieldsByResourcePid(thePidsToResolve);
 			} else {
-				if (theRequestPartitionId.getPartitionIds() != null) {
-					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartition(thePidsToResolve, theRequestPartitionId.getPartitionIds());
-				} else {
+				if (theRequestPartitionId.isDefaultPartition()) {
 					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionNull(thePidsToResolve);
+				} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(thePidsToResolve, theRequestPartitionId.getPartitionIdsWithoutDefault());
+				} else {
+					lookup = myResourceTableDao.findLookupFieldsByResourcePidInPartitionIds(thePidsToResolve, theRequestPartitionId.getPartitionIds());
 				}
 			}
 			lookup

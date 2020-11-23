@@ -64,12 +64,31 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")
 	void deleteByPid(@Param("pid") Long theId);
 
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
 	@Query("SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid)")
 	Collection<Object[]> findLookupFieldsByResourcePid(@Param("pid") List<Long> thePids);
 
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
 	@Query("SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IN :partition_id")
-	Collection<Object[]> findLookupFieldsByResourcePidInPartition(@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
+	Collection<Object[]> findLookupFieldsByResourcePidInPartitionIds(@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
 
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
+	@Query("SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid) AND (t.myPartitionIdValue IS NULL OR t.myPartitionIdValue IN :partition_id)")
+	Collection<Object[]> findLookupFieldsByResourcePidInPartitionIdsOrNullPartition(@Param("pid") List<Long> thePids, @Param("partition_id") Collection<Integer> thePartitionId);
+
+	/**
+	 * This method returns a Collection where each row is an element in the collection. Each element in the collection
+	 * is an object array, where the order matters (the array represents columns returned by the query). Be careful if you change this query in any way.
+	 */
 	@Query("SELECT t.myResourceType, t.myId, t.myDeleted FROM ResourceTable t WHERE t.myId IN (:pid) AND t.myPartitionIdValue IS NULL")
 	Collection<Object[]> findLookupFieldsByResourcePidInPartitionNull(@Param("pid") List<Long> thePids);
 }

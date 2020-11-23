@@ -1102,19 +1102,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Verify that the resource is for the correct partition
 		if (!requestPartitionId.isAllPartitions()) {
-			if (requestPartitionId.getFirstPartitionIdOrNull() == null) {
-				if (entity.getPartitionId() == null || entity.getPartitionId().getPartitionId() != null) {
-					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
-					entity = null;
-				}
-			} else if (entity.getPartitionId() != null && entity.getPartitionId().getPartitionId() != null) {
-				if (!requestPartitionId.getFirstPartitionIdOrNull().equals(entity.getPartitionId().getPartitionId())) {
+			if (entity.getPartitionId() != null && entity.getPartitionId().getPartitionId() != null) {
+				if (!requestPartitionId.hasPartitionId(entity.getPartitionId().getPartitionId())) {
 					ourLog.debug("Performing a read for PartitionId={} but entity has partition: {}", requestPartitionId, entity.getPartitionId());
 					entity = null;
 				}
 			} else {
-				ourLog.debug("Performing a read for PartitionId=null but entity has partition: {}", entity.getPartitionId());
-				entity = null;
+				// Entity Partition ID is null
+				if (!requestPartitionId.hasPartitionId(null)) {
+					ourLog.debug("Performing a read for PartitionId=null but entity has partition: {}", entity.getPartitionId());
+					entity = null;
+				}
 			}
 		}
 

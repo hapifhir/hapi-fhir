@@ -154,7 +154,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (retVal.getPartitionNames() != null) {
 			retVal = validateAndNormalizePartitionNames(retVal);
-		} else if (retVal.getPartitionIds() != null) {
+		} else if (retVal.hasPartitionIds()) {
 			retVal = validateAndNormalizePartitionIds(retVal);
 		}
 
@@ -225,7 +225,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				throw new ResourceNotFoundException(msg);
 			}
 
-			if (theRequestPartitionId.getPartitionIds() != null) {
+			if (theRequestPartitionId.hasPartitionIds()) {
 				if (partition == null) {
 					Validate.isTrue(theRequestPartitionId.getPartitionIds().get(i) == null, "Partition %s must not have an ID", JpaConstants.DEFAULT_PARTITION_NAME);
 				} else {
@@ -256,12 +256,14 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 			throw new InternalErrorException("No interceptor provided a value for pointcut: " + thePointcut);
 		}
 
-		validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionIds());
+		if (theRequestPartitionId.hasPartitionIds()) {
+			validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionIds());
+		}
 		validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionNames());
 
 		// Make sure we're not using one of the conformance resources in a non-default partition
-		if ((theRequestPartitionId.getPartitionIds() != null && theRequestPartitionId.getPartitionIds().get(0) != null) ||
-			theRequestPartitionId.getPartitionNames() != null && !JpaConstants.DEFAULT_PARTITION_NAME.equals(theRequestPartitionId.getPartitionNames().get(0))) {
+		if ((theRequestPartitionId.hasPartitionIds() && !theRequestPartitionId.getPartitionIds().contains(null)) ||
+			(theRequestPartitionId.hasPartitionNames() && !theRequestPartitionId.getPartitionNames().contains(JpaConstants.DEFAULT_PARTITION_NAME))) {
 
 			if (myPartitioningBlacklist.contains(theResourceName)) {
 				String msg = myFhirContext.getLocalizer().getMessageSanitized(RequestPartitionHelperSvc.class, "blacklistedResourceTypeForPartitioning", theResourceName);

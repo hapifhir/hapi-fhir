@@ -20,16 +20,23 @@ package ca.uhn.fhir.interceptor.model;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 /**
  * @since 5.0.0
@@ -88,14 +95,22 @@ public class RequestPartitionId {
 		return myPartitionNames;
 	}
 
-	@Nullable
+	@Nonnull
 	public List<Integer> getPartitionIds() {
+		Validate.notNull(myPartitionIds, "Partition IDs have not been set");
 		return myPartitionIds;
 	}
 
 	@Override
 	public String toString() {
-		return "RequestPartitionId[id=" + getPartitionIds() + ", name=" + getPartitionNames() + "]";
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		if (hasPartitionIds()) {
+			b.append("ids", getPartitionIds());
+		}
+		if (hasPartitionNames()) {
+			b.append("names", getPartitionNames());
+		}
+		return b.build();
 	}
 
 	@Override
@@ -128,6 +143,7 @@ public class RequestPartitionId {
 			.toHashCode();
 	}
 
+	@Nullable
 	public Integer getFirstPartitionIdOrNull() {
 		if (myPartitionIds != null) {
 			return myPartitionIds.get(0);
@@ -142,15 +158,39 @@ public class RequestPartitionId {
 		return null;
 	}
 
+	/**
+	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
+	 */
 	public boolean isDefaultPartition() {
-		return getFirstPartitionIdOrNull() == null;
+		return getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
+	}
+
+	public boolean hasPartitionId(Integer thePartitionId) {
+		Validate.notNull(myPartitionIds, "Partition IDs not set");
+		return myPartitionIds.contains(thePartitionId);
+	}
+
+	public boolean hasPartitionIds() {
+		return myPartitionIds != null;
+	}
+
+	public boolean hasPartitionNames() {
+		return myPartitionNames != null;
+	}
+
+	public boolean hasDefaultPartitionId() {
+		return getPartitionIds().contains(null);
+	}
+
+	public List<Integer> getPartitionIdsWithoutDefault() {
+		return getPartitionIds().stream().filter(t -> t != null).collect(Collectors.toList());
 	}
 
 	@Nullable
-	private static <T> List<T> toListOrNull(@Nullable List<T> theList) {
+	private static <T> List<T> toListOrNull(@Nullable Collection<T> theList) {
 		if (theList != null) {
 			if (theList.size() == 1) {
-				return Collections.singletonList(theList.get(0));
+				return Collections.singletonList(theList.iterator().next());
 			}
 			return Collections.unmodifiableList(new ArrayList<>(theList));
 		}
@@ -165,6 +205,15 @@ public class RequestPartitionId {
 		return null;
 	}
 
+	@SafeVarargs
+	@Nullable
+	private static <T> List<T> toListOrNull(@Nullable T... theObject) {
+		if (theObject != null) {
+			return Arrays.asList(theObject);
+		}
+		return null;
+	}
+
 	@Nonnull
 	public static RequestPartitionId allPartitions() {
 		return ALL_PARTITIONS;
@@ -172,17 +221,22 @@ public class RequestPartitionId {
 
 	@Nonnull
 	public static RequestPartitionId defaultPartition() {
-		return fromPartitionId(null);
+		return fromPartitionIds(Collections.singletonList(null));
 	}
 
 	@Nonnull
 	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId) {
-		return fromPartitionId(thePartitionId, null);
+		return fromPartitionIds(Collections.singletonList(thePartitionId));
 	}
 
 	@Nonnull
 	public static RequestPartitionId fromPartitionId(@Nullable Integer thePartitionId, @Nullable LocalDate thePartitionDate) {
-		return new RequestPartitionId(null, thePartitionId, thePartitionDate);
+		return new RequestPartitionId(null, Collections.singletonList(thePartitionId), thePartitionDate);
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromPartitionIds(@Nonnull Collection<Integer> thePartitionIds) {
+		return new RequestPartitionId(null, toListOrNull(thePartitionIds), null);
 	}
 
 	@Nonnull
@@ -193,6 +247,16 @@ public class RequestPartitionId {
 	@Nonnull
 	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName, @Nullable LocalDate thePartitionDate) {
 		return new RequestPartitionId(thePartitionName, null, thePartitionDate);
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromPartitionNames(@Nullable List<String> thePartitionNames) {
+		return new RequestPartitionId(toListOrNull(thePartitionNames), null, null);
+	}
+
+	@Nonnull
+	public static RequestPartitionId fromPartitionNames(String... thePartitionNames) {
+		return new RequestPartitionId(toListOrNull(thePartitionNames), null, null);
 	}
 
 	@Nonnull
@@ -218,13 +282,11 @@ public class RequestPartitionId {
 	public static String stringifyForKey(@Nullable RequestPartitionId theRequestPartitionId) {
 		String retVal = "(no partition)";
 		if (theRequestPartitionId != null) {
-			String result;
-			if (theRequestPartitionId.myPartitionIds != null) {
-				result = theRequestPartitionId.myPartitionIds.stream().map(t -> t.toString()).collect(Collectors.joining(" "));
-			} else {
-				result = "null";
-			}
-			retVal = result;
+			retVal = theRequestPartitionId
+				.getPartitionIds()
+				.stream()
+				.map(t -> defaultIfNull(t, "null").toString())
+				.collect(Collectors.joining(" "));
 		}
 		return retVal;
 	}
