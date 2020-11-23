@@ -55,6 +55,7 @@ import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.AuditEvent;
@@ -374,11 +375,11 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
-			Search.session(myEntityManager);
-			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
-			ftem.purgeAll(ResourceTable.class);
-			ftem.purgeAll(ResourceIndexedSearchParamString.class);
-			ftem.flushToIndexes();
+			SearchSession searchSession  = Search.session(myEntityManager);
+			searchSession.workspace(ResourceTable.class).purge();
+			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
+			//TODO GGG HS ok so docs (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#fulltextsession-flushtoindexes) say this is unnecessary but gonna call it anyhow
+			searchSession.indexingPlan().execute();
 		});
 
 		myDaoConfig.setSchedulingDisabled(true);
