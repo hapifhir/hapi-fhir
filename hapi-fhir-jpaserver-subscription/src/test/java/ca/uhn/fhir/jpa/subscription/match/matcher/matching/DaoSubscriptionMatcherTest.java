@@ -6,7 +6,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
-import ca.uhn.fhir.jpa.cache.config.ResourceChangeListenerRegistryConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -33,7 +32,6 @@ import static org.mockito.Mockito.mock;
 @ContextConfiguration(classes = {
 	SubscriptionProcessorConfig.class,
 	SearchParamConfig.class,
-	ResourceChangeListenerRegistryConfig.class,
 	DaoSubscriptionMatcherTest.MyConfig.class
 })
 public class DaoSubscriptionMatcherTest {

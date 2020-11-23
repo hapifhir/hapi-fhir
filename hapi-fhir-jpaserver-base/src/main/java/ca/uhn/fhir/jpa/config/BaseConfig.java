@@ -19,7 +19,6 @@ import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
-import ca.uhn.fhir.jpa.cache.config.ResourceChangeListenerRegistryConfig;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
@@ -155,7 +154,7 @@ import java.util.Date;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.batch.*")
 })
 @Import({
-	SearchParamConfig.class, BatchJobsConfig.class, ResourceChangeListenerRegistryConfig.class
+	SearchParamConfig.class, BatchJobsConfig.class
 })
 @EnableBatchProcessing
 public abstract class BaseConfig {
