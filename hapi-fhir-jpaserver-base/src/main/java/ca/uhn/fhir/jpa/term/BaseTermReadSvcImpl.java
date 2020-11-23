@@ -1044,25 +1044,27 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "descendant":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincDescendant2(theCodeSystemIdentifier, f, b, theFilter);
+				handleFilterLoincDescendant(theCodeSystemIdentifier, f, b, theFilter);
 				break;
 			case "copyright":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincCopyright2(f, b, theFilter);
+				//TODO start converting here.
+				handleFilterLoincCopyright(f, b, theFilter);
 				break;
 			default:
-				handleFilterRegex2(f, b, theFilter);
+				handleFilterRegex(f, b, theFilter);
 				break;
 		}
 	}
 
+
 	private void handleFilterLoincAncestor2(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
-				addLoincFilterAncestorEqual2(theSystem, f, b, theFilter);
+				addLoincFilterAncestorEqual(theSystem, f, b, theFilter);
 				break;
 			case IN:
-				addLoincFilterAncestorIn2(theSystem, f, b, theFilter);
+				addLoincFilterAncestorIn(theSystem, f, b, theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
@@ -1070,18 +1072,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	}
 
-	private void addLoincFilterAncestorEqual2(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
-		addLoincFilterAncestorEqual2(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
+	private void addLoincFilterAncestorEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterAncestorEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
 	}
 
-	private void addLoincFilterAncestorEqual2(String theSystem, SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, String theProperty, String theValue) {
+	private void addLoincFilterAncestorEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
 		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
-
-		theBool.must(new TermsQuery(terms));
-		theB.must(theF.match())
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
 	}
 
-	private void addLoincFilterAncestorIn2(String theSystem, SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void addLoincFilterAncestorIn(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
+		}
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+
 	}
 
 	private void handleFilterLoincParentChild(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1102,10 +1109,23 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
 			logFilteringValueOnProperty(value, theFilter.getProperty());
-			//terms.add(getPropertyTerm(theFilter.getProperty(), value));
-			//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
-			b.must(f.match().fields(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty()).matching(value));
+			terms.add(getPropertyTerm(theFilter.getProperty(), value));
 		}
+
+		//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
+		//Far as I'm aware, this is a single element of a MUST portion of a bool, which itself should contain a list of OR'ed options, e.g.
+		// shape == round && color == (green || blue)
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())));
+	}
+
+	private void addLoincFilterParentChildIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			logFilteringValueOnProperty(value, theFilter.getProperty());
+			terms.add(getPropertyTerm(theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
 	}
 
 	private void addLoincFilterParentChildEqual(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
@@ -1172,15 +1192,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
-	private void addLoincFilterParentChildIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		String[] values = theFilter.getValue().split(",");
-		List<Term> terms = new ArrayList<>();
-		for (String value : values) {
-			logFilteringValueOnProperty(value, theFilter.getProperty());
-			terms.add(getPropertyTerm(theFilter.getProperty(), value));
-		}
-		theBool.must(new TermsQuery(terms));
-	}
 
 	private Term getPropertyTerm(String theProperty, String theValue) {
 		return new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
@@ -1209,14 +1220,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		theBool.must(new TermsQuery(terms));
 	}
 
-	private void addLoincFilterAncestorIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		String[] values = theFilter.getValue().split(",");
-		List<Term> terms = new ArrayList<>();
-		for (String value : values) {
-			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
-		}
-		theBool.must(new TermsQuery(terms));
-	}
 
 	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
 		List<Term> retVal = new ArrayList<>();
@@ -1231,35 +1234,36 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincDescendant(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilterLoincDescendant(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
-				addLoincFilterDescendantEqual(theSystem, theBool, theFilter);
+				addLoincFilterDescendantEqual(theSystem, f, b, theFilter);
 				break;
 			case IN:
-				addLoincFilterDescendantIn(theSystem, theBool, theFilter);
+				addLoincFilterDescendantIn(theSystem, f,b , theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
-	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
+
+	private void addLoincFilterDescendantEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterDescendantEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
 	}
 
-	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
+	private void addLoincFilterDescendantEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
 		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
-		theBool.must(new TermsQuery(terms));
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text()))));
 	}
 
-	private void addLoincFilterDescendantIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void addLoincFilterDescendantIn(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
 			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
 		}
-		theBool.must(new TermsQuery(terms));
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text()))));
 	}
 
 	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
