@@ -72,9 +72,10 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	}
 
 	// FIXME KBD
-	@Disabled
+	//@Disabled
 	//@Test
-	public void evaluateColMeasure() throws IOException {
+	public void evaluateMeasureEXM130() throws IOException {
+		// Colorectal Cancer Screening - http://hl7.org/fhir/us/davinci-deqm/2020Sep/Measure-measure-exm130-example.html
 		loadResource("r4/EXM130/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
 		loadResource("r4/EXM130/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
 		loadResource("r4/EXM130/library-FHIRHelpers-4.0.0.json", myFhirContext, myDaoRegistry);
@@ -105,6 +106,47 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 			}
 		}
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(measureReport));
+	}
+
+	//@Test
+	// Fails with: ca.uhn.fhir.parser.DataFormatException: Invalid JSON content detected, missing required element: 'resourceType'
+	public void evaluateMeasureEXM130R4() throws IOException {
+		// https://github.com/projecttacoma/synthea/blob/abacus/src/main/resources/modules/EXM130-8.0.000-r4.json
+		loadResource("r4/EXM130/EXM130-8.0.000-r4.json", myFhirContext, myDaoRegistry);
+
+		loadBundle("dstu3/test-patient-6529-data.json");
+
+		IdType measureId = new IdType("Measure", "measure-EXM130-FHIR4-7.2.000");
+		String periodStart = "2003-01-01";
+		String periodEnd = "2003-12-31";
+		String patient = "Patient/Patient-6529";
+		MeasureReport measureReport = myProvider.evaluateMeasure(measureId, null,
+			null, null, "patient", patient, null, null,
+			null, null, null, null);
+		assertThat(measureReport.getGroup(), hasSize(1));
+		assertThat(measureReport.getGroup().get(0).getPopulation(), hasSize(3));
+		for (MeasureReport.MeasureReportGroupComponent group : measureReport.getGroup()) {
+			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
+				assertTrue(population.getCount() > 0);
+			}
+		}
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(measureReport));
+	}
+
+	//@Test
+	// Fails with: ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Unable to process request, this server does not know how to handle resources of type null - Can handle: [Account, etc. etc...
+	public void testSubmitDataCOL() throws IOException {
+		// http://hl7.org/fhir/us/davinci-deqm/Parameters-col-submit-collect-obs.json.html
+		loadResource("r4/COL/col-submit-collect-obs.json", myFhirContext, myDaoRegistry);
+		ourLog.info("Data imported successfully!");
+	}
+
+	//@Test
+	// Fails with: ca.uhn.fhir.rest.server.exceptions.InvalidRequestException: Unable to process request, this server does not know how to handle resources of type null - Can handle: [Account, etc. etc...
+	public void testDaVinciExample_BundleSingleIndvColObsReport() throws IOException {
+		// http://hl7.org/fhir/us/davinci-deqm/downloads.html#examples
+		loadResource("r4/DaVinciExamples/Bundle-single-indv-col-obs-report.json", myFhirContext, myDaoRegistry);
+		ourLog.info("Data imported successfully!");
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {

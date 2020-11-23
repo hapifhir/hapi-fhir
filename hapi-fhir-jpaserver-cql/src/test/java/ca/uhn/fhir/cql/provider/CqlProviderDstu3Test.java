@@ -180,6 +180,37 @@ Direct Reference Codes:
 
 	}
 
+
+	//@Test
+	// Result: java.lang.IllegalArgumentException: Could not load library source for libraries referenced in Measure/Measure/measure-EXM104-FHIR3-8.1.000/_history/1.
+	public void testEXM104() throws IOException {
+		Bundle result = loadBundle("dstu3/EXM104/valuesets-EXM104_FHIR3-8.1.000-bundle.json");
+		result = loadBundle("dstu3/EXM104/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
+		result = loadBundle("dstu3/EXM104/tests-denom-EXM104_FHIR3-bundle.json");
+		result = loadBundle("dstu3/EXM104/tests-numer-EXM104_FHIR3-bundle.json");
+		loadResource("dstu3/EXM104/library-EXM104_FHIR3-8.1.000.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/EXM104/measure-EXM104_FHIR3-8.1.000.json", myFhirContext, myDaoRegistry);
+		//Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
+		//assertNotNull(result);
+		//List<Bundle.BundleEntryComponent> entries = result.getEntry();
+		//assertThat(entries, hasSize(22));
+		//assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
+		//assertEquals(entries.get(21).getResponse().getStatus(), "201 Created");
+
+		IdType measureId = new IdType("Measure", "measure-EXM104-FHIR3-8.1.000");
+		//String patient = "Patient/Patient-6529";
+		//String periodStart = "2003-01-01";
+		//String periodEnd = "2003-12-31";
+
+		// First run to absorb startup costs
+		MeasureReport report = myProvider.evaluateMeasure(measureId, null, null, null, null,
+			null, null, null, null, null, null, null);
+		// Assert it worked
+		assertThat(report.getGroup(), hasSize(1));
+		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+
+	}
+
 	private Bundle loadBundle(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);

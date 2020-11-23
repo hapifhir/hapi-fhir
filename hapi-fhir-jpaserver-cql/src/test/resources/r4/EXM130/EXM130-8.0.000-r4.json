@@ -1,0 +1,101 @@
+{
+	"name": "EXM130-8.0.000-R4",
+	"remarks": [
+		"EXM130-8.0.000  Based on CMS130v7 - Colorectal Cancer Screening",
+		"As of version 7.2.000, logic for DENOM is simply 'true' therefore all patients meeting IPOP will meet DENOM"
+	],
+	"states": {
+		"Initial": {
+			"type": "Initial",
+			"direct_transition": "Set_Measurement_Period"
+		},
+		"IPP_Qualifying_Encounter": {
+			"remarks": [
+				"==============================================================================",
+				"and exists AdultOutpatientEncounters.Qualifying Encounters(Measurement Period)",
+				"=============================================================================="
+			],
+			"type": "Encounter",
+			"encounter_class": "ambulatory",
+			"valueset": {
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+				"display": "Office Visit"
+			},
+			"direct_transition": "Terminal"
+		},
+		"NUMER_Colonoscopy_Performed": {
+			"type": "Procedure",
+			"remarks": [
+				"===========================================================================================================================",
+				"define Colonoscopy Performed:",
+				"[Procedure: Colonoscopy] Colonoscopy",
+				"where Colonoscopy.status = 'completed'",
+				"  and Global.'Normalize Onset'(Colonoscopy.performed) ends 10 years or less on or before end of 'Measurement Period'",
+				"============================================================================================================================"
+			],
+			"valueset": {
+				"url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1020",
+				"display": "Colonoscopy"
+			},
+			"direct_transition": "wait_for_mp_for_encounter"
+		},
+		"Terminal": {
+			"type": "Terminal"
+		},
+		"wait_for_mp_for_encounter": {
+			"type": "Simple",
+			"complex_transition": [
+				{
+					"condition": {
+						"condition_type": "Date",
+						"operator": ">=",
+						"attribute": "Start of Measurement Period"
+					},
+					"distributions": [
+						{
+							"transition": "IPP_Qualifying_Encounter",
+							"distribution": 0.90
+						},
+						{
+							"transition": "Terminal",
+							"distribution": 0.10
+						}
+					]
+				},
+				{
+					"distributions": [
+						{
+							"transition": "NUMER_delay",
+							"distribution": 1
+						}
+					]
+				}
+			]
+		},
+		"NUMER_delay": {
+			"type": "Delay",
+			"range": {
+				"low": 3,
+				"high": 9,
+				"unit": "months"
+			},
+			"distributed_transition": [
+				{
+					"transition": "NUMER_Colonoscopy_Performed",
+					"distribution": 0.05
+				},
+				{
+					"transition": "wait_for_mp_for_encounter",
+					"distribution": 0.95
+				}
+			]
+		},
+		"Set_Measurement_Period": {
+			"type": "SetAttribute",
+			"attribute": "Start of Measurement Period",
+			"value": "2019-01-01T00:00:00Z",
+			"config_key": "ecqm.measurementPeriodStart",
+			"direct_transition": "NUMER_delay"
+		}
+	}
+}

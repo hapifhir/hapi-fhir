@@ -1,0 +1,322 @@
+{
+	"resourceType": "Parameters",
+	"id": "col-submit-collect-obs",
+	"meta": {
+		"source": "http://example.org/fhir/server"
+	},
+	"parameter": [
+		{
+			"name": "measure-report",
+			"resource": {
+				"resourceType": "MeasureReport",
+				"id": "datax-measurereport03",
+				"meta": {
+					"source": "http://example.org/fhir/server",
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/datax-measurereport-deqm"
+					]
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/extension-submitDataUpdateType",
+						"valueCode": "incremental"
+					}
+				],
+				"status": "complete",
+				"type": "data-collection",
+				"measure": "http://hl7.org/fhir/us/cqfmeasures/Measure/measure-exm130-FHIR",
+				"subject": {
+					"reference": "Patient/patient03"
+				},
+				"date": "2019-01-01T16:59:52.404Z",
+				"reporter": {
+					"reference": "Organization/organization03"
+				},
+				"period": {
+					"start": "2018-01-01",
+					"end": "2018-12-31"
+				},
+				"evaluatedResource": [
+					{
+						"reference": "Observation/DNA-occultblood"
+					}
+				]
+			}
+		},
+		{
+			"name": "resource",
+			"resource": {
+				"resourceType": "Patient",
+				"id": "patient03",
+				"meta": {
+					"versionId": "4",
+					"lastUpdated": "2019-02-07T18:47:34.000+00:00",
+					"source": "http://example.org/fhir/server",
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient"
+					]
+				},
+				"text": {
+					"status": "generated",
+					"div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\">Virginia <b>HARTMAN </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>34567</td></tr><tr><td>Address</td><td><span>213 Lilac Ave. </span><br/><span>Freehold </span><span>MI </span><span>USA </span></td></tr><tr><td>Date of birth</td><td><span>12 September 1983</span></td></tr></tbody></table></div>"
+				},
+				"extension": [
+					{
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-birthsex",
+						"valueCode": "F"
+					},
+					{
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2054-5",
+									"display": "Black or African American"
+								}
+							},
+							{
+								"url": "text",
+								"valueString": "Black or African American"
+							}
+						],
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"
+					},
+					{
+						"extension": [
+							{
+								"url": "ombCategory",
+								"valueCoding": {
+									"system": "urn:oid:2.16.840.1.113883.6.238",
+									"code": "2186-5",
+									"display": "Not Hispanic or Latino"
+								}
+							},
+							{
+								"url": "text",
+								"valueString": "Not Hispanic or Latino"
+							}
+						],
+						"url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity"
+					}
+				],
+				"identifier": [
+					{
+						"use": "usual",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "MR",
+									"display": "Medical record number"
+								}
+							]
+						},
+						"system": "http://hospital.davinci.org",
+						"value": "34567"
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"use": "official",
+						"family": "Hartman",
+						"given": [
+							"Virginia"
+						]
+					}
+				],
+				"gender": "female",
+				"birthDate": "1983-09-12",
+				"deceasedBoolean": false,
+				"address": [
+					{
+						"use": "home",
+						"line": [
+							"213 Lilac Ave."
+						],
+						"city": "Freehold",
+						"state": "MI",
+						"postalCode": "48099",
+						"country": "USA"
+					}
+				],
+				"maritalStatus": {
+					"coding": [
+						{
+							"system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+							"code": "U",
+							"display": "unmarried"
+						}
+					]
+				},
+				"communication": [
+					{
+						"language": {
+							"coding": [
+								{
+									"system": "urn:ietf:bcp:47",
+									"code": "en-US",
+									"display": "English (Region=United States)"
+								}
+							]
+						},
+						"preferred": true
+					}
+				],
+				"managingOrganization": {
+					"reference": "Organization/organization03"
+				}
+			}
+		},
+		{
+			"name": "resource",
+			"resource": {
+				"resourceType": "Observation",
+				"id": "DNA-occultblood",
+				"meta": {
+					"source": "http://example.org/fhir/server",
+					"profile": [
+						"http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation"
+					]
+				},
+				"status": "final",
+				"category": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/observation-category",
+								"code": "laboratory",
+								"display": "Laboratory"
+							}
+						]
+					}
+				],
+				"code": {
+					"coding": [
+						{
+							"system": "http://loinc.org",
+							"code": "77353-1",
+							"display": "Noninvasive colorectal cancer DNA and occult blood screening [Interpretation] in Stool Narrative"
+						}
+					]
+				},
+				"subject": {
+					"reference": "Patient/patient03"
+				},
+				"effectiveDateTime": "2018-06-22",
+				"performer": [
+					{
+						"reference": "Practitioner/practitioner01"
+					}
+				]
+			}
+		},
+		{
+			"name": "resource",
+			"resource": {
+				"resourceType": "Practitioner",
+				"id": "practitioner01",
+				"meta": {
+					"source": "http://example.org/fhir/server",
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/practitioner-deqm"
+					]
+				},
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "PRN",
+									"display": "Provider number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "456789123"
+					}
+				],
+				"active": true,
+				"name": [
+					{
+						"family": "Hale",
+						"given": [
+							"Cody"
+						],
+						"suffix": [
+							"MD"
+						]
+					}
+				],
+				"gender": "male"
+			}
+		},
+		{
+			"name": "resource",
+			"resource": {
+				"resourceType": "Organization",
+				"id": "organization03",
+				"meta": {
+					"versionId": "3",
+					"lastUpdated": "2019-02-21T01:47:53.000+00:00",
+					"source": "http://example.org/fhir/server",
+					"profile": [
+						"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/organization-deqm"
+					]
+				},
+				"identifier": [
+					{
+						"use": "official",
+						"type": {
+							"coding": [
+								{
+									"system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+									"code": "PRN",
+									"display": "Provider number"
+								}
+							]
+						},
+						"system": "http://hl7.org/fhir/sid/us-npi",
+						"value": "345678912",
+						"assigner": {
+							"display": "www.cms.gov"
+						}
+					}
+				],
+				"active": true,
+				"type": [
+					{
+						"coding": [
+							{
+								"system": "http://terminology.hl7.org/CodeSystem/organization-type",
+								"code": "prov",
+								"display": "Healthcare Provider"
+							}
+						]
+					}
+				],
+				"name": "DaVinciHospital03",
+				"telecom": [
+					{
+						"system": "phone",
+						"value": "(+1) 201-555-1212"
+					}
+				],
+				"address": [
+					{
+						"line": [
+							"94 Olive Ave."
+						],
+						"city": "Union City",
+						"state": "NJ",
+						"postalCode": "07087",
+						"country": "USA"
+					}
+				]
+			}
+		}
+	]
+}
