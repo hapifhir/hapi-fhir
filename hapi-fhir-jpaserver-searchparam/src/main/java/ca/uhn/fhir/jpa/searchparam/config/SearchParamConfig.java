@@ -21,8 +21,15 @@ package ca.uhn.fhir.jpa.searchparam.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.cache.config.ResourceChangeListenerRegistryConfig;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.RegisteredResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.RegisteredResourceListenerFactory;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
@@ -38,11 +45,10 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
-@Import(ResourceChangeListenerRegistryConfig.class)
 public class SearchParamConfig {
 
 	@Autowired
@@ -104,4 +110,23 @@ public class SearchParamConfig {
 		return new SearchParamMatcher();
 	}
 
+	@Bean
+	IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
+		return new ResourceChangeListenerRegistryImpl();
+	}
+
+	@Bean
+	IResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
+		return new ResourceChangeListenerCacheRefresherImpl();
+	}
+
+	@Bean
+	RegisteredResourceListenerFactory registeredResourceListenerFactory() {
+		return new RegisteredResourceListenerFactory();
+	}
+	@Bean
+	@Scope("prototype")
+	RegisteredResourceChangeListener registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+		return new RegisteredResourceChangeListener(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+	}
 }
