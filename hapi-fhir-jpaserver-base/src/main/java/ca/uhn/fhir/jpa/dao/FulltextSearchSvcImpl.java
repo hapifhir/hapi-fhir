@@ -40,13 +40,15 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.search.Query;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.search.highlight.Formatter;
 import org.apache.lucene.search.highlight.Highlighter;
-import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.Scorer;
+import org.apache.lucene.search.highlight.TextFragment;
 import org.apache.lucene.search.highlight.TokenGroup;
 import org.hibernate.search.backend.lucene.index.LuceneIndexManager;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
 import org.hibernate.search.engine.search.query.SearchQuery;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.mapping.SearchMapping;
@@ -61,6 +63,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -70,7 +73,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.join;
 
 public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FulltextSearchSvcImpl.class);
@@ -96,50 +98,24 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
-		if (theTerms == null) {
-			return;
-		}
-		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
-			Set<String> terms = extractOrStringParams(nextAnd);
-			if (!terms.isEmpty()) {
-				if (terms.size() == 1) {
-					//@formatter:off
-					Query textQuery = theQueryBuilder
-						.phrase()
-						.withSlop(2)
-						.onField(theFieldName).boostedTo(4.0f)
-//						.andField(theFieldNameEdgeNGram).boostedTo(2.0f)
-//						.andField(theFieldNameNGram).boostedTo(1.0f)
-						.sentence(terms.iterator().next().toLowerCase()).createQuery();
-					//@formatter:on
-
-					theBoolean.must(textQuery);
-				} else {
-					String joinedTerms = StringUtils.join(terms, ' ');
-					theBoolean.must(theQueryBuilder.keyword().onField(theFieldName).matching(joinedTerms).createQuery());
-				}
-			}
-		}
-	}
-
-	private void addTextSearch2(BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram){
+	private void addTextSearch(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameTextNGram){
 		if (theTerms == null) {
 			return;
 		}
 		for (List<? extends IQueryParameterType> nextAnd : theTerms) {
 			Set<String> terms = extractOrStringParams(nextAnd);
 				if (terms.size() == 1) {
-					b.must(j -> j.phrase()
+					b.must(f.phrase()
 						.field(theFieldName)
 						.boost(4.0f)
 						.matching(terms.iterator().next().toLowerCase())
 						.slop(2));
 				} else if (terms.size() > 1){
 					String joinedTerms = StringUtils.join(terms, ' ');
-					b.must(j -> j.match().field(theFieldName).matching(joinedTerms));
+					b.must(f.match().field(theFieldName).matching(joinedTerms));
 				} else {
 					//donothing
+					//TODO GGG HS add some logging.
 				}
 			}
 		}
@@ -159,8 +135,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	private List<ResourcePersistentId> doSearch(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
 
-		List<ResourcePersistentId> pids = null;
-
 		SearchSession session = Search.session(myEntityManager);
 		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
@@ -175,11 +149,11 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					/*
 					 * Handle _content parameter (resource body content)
 					 */
-					addTextSearch2(b, contentAndTerms, "myContentText", "mycontentTextEdgeNGram", "myContentTextNGram");
+					addTextSearch(f, b, contentAndTerms, "myContentText", "mycontentTextEdgeNGram", "myContentTextNGram");
 					/*
 					 * Handle _text parameter (resource narrative content)
 					 */
-					addTextSearch2(b, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
+					addTextSearch(f, b, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
 
 					if (theReferencingPid != null) {
 						b.must(f.match().field("myResourceLinksField").matching(theReferencingPid.toString()));
@@ -343,8 +317,8 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 //		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 		SearchSession searchSession = Search.session(myEntityManager);
 
-		SearchQuery<Object> query = searchSession.search(ResourceTable.class)
-			.select(f -> f.field("myContentText"))
+		SearchQuery<String> query = searchSession.search(ResourceTable.class)
+			.select(f -> f.field("myContentText", String.class))
 			.where(f -> f
 				.bool()
 				.must(j -> j
@@ -362,7 +336,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				)
 			).toQuery();
 
-		List<Object> resultList  = query.fetchHits(20);
+		List<String> resultList  = query.fetchHits(20);
 
 		/**
 		Query textQuery = qb
@@ -386,15 +360,35 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		List<?> resultList = ftq.getResultList();
 		 */
 		List<Suggestion> suggestions= Lists.newArrayList();
-		for (Object next : resultList) {
-			Object[] nextAsArray = (Object[]) next;
-			String nextValue = (String) nextAsArray[0];
+		for (String nextValue : resultList) {
 
 			try {
 				MySuggestionFormatter formatter = new MySuggestionFormatter(theText, suggestions);
-				//TODO GGG HS: no clue how to make this QueryScorer go.
-				QueryScorer scorer = new QueryScorer(query);
-				Highlighter highlighter = new Highlighter(formatter, scorer);
+				//TODO GGG HS: no clue how to make this QueryScorer go. For now, just added an anonymous inner class.
+				//TODO GGG HS: delete all this once I work out what needs to go here.
+				//QueryScorer scorer = new QueryScorer(new QueryScorer(new AllTermsQuery()));
+
+				Highlighter highlighter = new Highlighter(formatter, new Scorer() {
+					@Override
+					public TokenStream init(TokenStream theTokenStream) throws IOException {
+						return null;
+					}
+
+					@Override
+					public void startFragment(TextFragment theTextFragment) {
+
+					}
+
+					@Override
+					public float getTokenScore() {
+						return 0;
+					}
+
+					@Override
+					public float getFragmentScore() {
+						return 0;
+					}
+				});
 
 				//Analyzer analyzer = em.getSearchFactory().getAnalyzer(ResourceTable.class);
 				SearchMapping mapping = Search.mapping(myEntityManager.getEntityManagerFactory());

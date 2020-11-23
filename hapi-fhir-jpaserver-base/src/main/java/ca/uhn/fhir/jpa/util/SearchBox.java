@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-import org.hibernate.search.spatial.impl.Point;
 
-public class SearchBox {
+//TODO GGG HS : Deprecating this class in favour of using the builtin GeoboundingBox.
+public class SearchBox {}/*
 	private final Point mySouthWest;
 	private final Point myNorthEast;
 
@@ -43,3 +43,4 @@ public class SearchBox {
 		return myNorthEast.getLongitude() < mySouthWest.getLongitude();
 	}
 }
+*/

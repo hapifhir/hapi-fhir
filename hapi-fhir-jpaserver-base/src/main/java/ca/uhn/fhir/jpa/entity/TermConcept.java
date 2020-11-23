@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingRoutingBinder;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
@@ -30,8 +29,13 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hl7.fhir.r4.model.Coding;
 
 import javax.annotation.Nonnull;
@@ -57,48 +61,58 @@ public class TermConcept implements Serializable {
 	public static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 	private static final long serialVersionUID = 1L;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
 	private List<TermConceptParentChildLink> myChildren;
 
 	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
-	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
+	@FullTextField(name = "myCode", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "exactAnalyzer")
 	private String myCode;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CONCEPT_UPDATED", nullable = true)
 	private Date myUpdated;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPT_PID_CS_PID"))
 	private TermCodeSystemVersion myCodeSystem;
+
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
-	@Fields({@Field(name = "myCodeSystemVersionPid")})
+	@FullTextField(name = "myCodeSystemVersionPId")
 	private long myCodeSystemVersionPid;
+
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
-	@Fields({
-		@Field(name = "myDisplay", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
-		@Field(name = "myDisplayEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
-		@Field(name = "myDisplayNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
-		@Field(name = "myDisplayPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
-	})
+	@FullTextField(name = "myDisplayText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+	@FullTextField(name = "myDisplayTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myDisplayTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myDisplayTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	private String myDisplay;
+
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
-	@Field(name = "PROPmyProperties", analyzer = @Analyzer(definition = "termConceptPropertyAnalyzer"))
-	@FieldBridge(impl = TermConceptPropertyFieldBridge.class)
+	@FullTextField(name = "PROPmyProperties", analyzer = "termConceptPropertyAnalyzer")
+	@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
 	private Collection<TermConceptProperty> myProperties;
+
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
+
 	@Id()
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
 	@Column(name = "PID")
 	private Long myId;
+
 	@Column(name = "INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
-	@Field(name = "myParentPids", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "conceptParentPidsAnalyzer"))
+
 	@Lob
 	@Column(name = "PARENT_PIDS", nullable = true)
+	@FullTextField(name = "myParentPids", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "conceptParentPidsAnalyzer")
 	private String myParentPids;
+
 	@OneToMany(cascade = {}, fetch = FetchType.LAZY, mappedBy = "myChild")
 	private List<TermConceptParentChildLink> myParents;
+
 	@Column(name = "CODE_SEQUENCE", nullable = true)
 	private Integer mySequence;
 
