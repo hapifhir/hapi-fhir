@@ -266,6 +266,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 		if (theResourceChangeEvent.isEmpty()) {
 			return;
 		}
+
 		ResourceChangeResult result = ResourceChangeResult.fromResourceChangeEvent(theResourceChangeEvent);
 		if (result.created > 0) {
 			ourLog.info("Adding {} search parameters to SearchParamRegistry", result.created);
