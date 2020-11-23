@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
-import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
+import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
+	//TODO GGG HS update this to 7.9
 	private static final String ELASTIC_VERSION = "6.5.4";
 	protected final String elasticsearchHost = "localhost";
 	protected final String elasticsearchUserId = "";
@@ -37,11 +38,13 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 		ourLog.info("ElasticSearch started on port: {}", httpPort);
 
 		new ElasticsearchHibernatePropertiesBuilder()
-			.setDebugIndexSyncStrategy(true)
+			//TODO GGG HS According to these docs (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#_configuration_property_reference) the best approximation to `refreshAfterWrite=True`,
+			//Which was the previous behaviour
+			.setDebugIndexSyncStrategy("read-sync")
 			.setDebugPrettyPrintJsonLog(true)
-			.setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy.CREATE)
+			.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)
-			.setRequiredIndexStatus(ElasticsearchIndexStatus.YELLOW)
+			.setRequiredIndexStatus(IndexStatus.YELLOW)
 			.setRestUrl("http://"+ elasticsearchHost + ":" + httpPort)
 			.setUsername(elasticsearchUserId)
 			.setPassword(elasticsearchPassword)
