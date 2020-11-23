@@ -14,7 +14,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
@@ -179,34 +178,6 @@ Direct Reference Codes:
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
 
-	}
-
-	// FIXME KBD
-	@Disabled
-	//@Test
-	public void evaluateColMeasure() throws IOException {
-		loadResource("dstu3/col/common-logic.cql", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/col/participation-logic.cql", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/col/FHIRHelpers-3.0.0.cql", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/col/col-logic.cql", myFhirContext, myDaoRegistry);
-
-		loadBundle("dstu3/test-patient-6529-data.json");
-
-		IdType measureId = new IdType("Measure", "measure-asf");
-		String periodStart = "2003-01-01";
-		String periodEnd = "2003-12-31";
-		String patient = "Patient/Patient-6529";
-		MeasureReport measureReport = myProvider.evaluateMeasure(measureId, null,
-			null, null, "patient", patient, null, null,
-			null, null, null, null);
-		assertThat(measureReport.getGroup(), hasSize(1));
-		assertThat(measureReport.getGroup().get(0).getPopulation(), hasSize(3));
-		for (MeasureReport.MeasureReportGroupComponent group : measureReport.getGroup()) {
-			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
-				assertTrue(population.getCount() > 0);
-			}
-		}
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(measureReport));
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {

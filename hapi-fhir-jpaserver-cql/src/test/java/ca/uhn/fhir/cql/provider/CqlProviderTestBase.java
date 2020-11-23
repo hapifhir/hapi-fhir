@@ -17,8 +17,12 @@ public interface CqlProviderTestBase {
 		String json = stringFromResource(theLocation);
 		IBaseResource resource = theFhirContext.newJsonParser().parseResource(json);
 		IFhirResourceDao<IBaseResource> dao = theDaoRegistry.getResourceDao(resource.getIdElement().getResourceType());
-		dao.update(resource);
-		return resource;
+		if (dao == null) {
+			return null;
+		} else {
+			dao.update(resource);
+			return resource;
+		}
 	}
 
 	default String stringFromResource(String theLocation) throws IOException {

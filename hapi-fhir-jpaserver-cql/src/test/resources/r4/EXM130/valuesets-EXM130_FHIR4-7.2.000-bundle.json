@@ -1,0 +1,2431 @@
+{
+  "resourceType": "Bundle",
+  "id": "valuesets-EXM130-FHIR4-7.2.000-bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.108.12.1020",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1020",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.108.12.1020"
+          }
+        ],
+        "version": "20171219",
+        "name": "Colonoscopy",
+        "title": "Colonoscopy",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2014",
+              "concept": [
+                {
+                  "code": "44393",
+                  "display": "Colonoscopy through stoma; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+                },
+                {
+                  "code": "44397",
+                  "display": "Colonoscopy through stoma; with transendoscopic stent placement (includes predilation)"
+                },
+                {
+                  "code": "45355",
+                  "display": "Colonoscopy, rigid or flexible, transabdominal via colotomy, single or multiple"
+                },
+                {
+                  "code": "45383",
+                  "display": "Colonoscopy, flexible, proximal to splenic flexure; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+                },
+                {
+                  "code": "45387",
+                  "display": "Colonoscopy, flexible, proximal to splenic flexure; with transendoscopic stent placement (includes predilation)"
+                }
+              ]
+            },
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "44388",
+                  "display": "Colonoscopy through stoma; diagnostic, including collection of specimen(s) by brushing or washing, when performed (separate procedure)"
+                },
+                {
+                  "code": "44389",
+                  "display": "Colonoscopy through stoma; with biopsy, single or multiple"
+                },
+                {
+                  "code": "44390",
+                  "display": "Colonoscopy through stoma; with removal of foreign body(s)"
+                },
+                {
+                  "code": "44391",
+                  "display": "Colonoscopy through stoma; with control of bleeding, any method"
+                },
+                {
+                  "code": "44392",
+                  "display": "Colonoscopy through stoma; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+                },
+                {
+                  "code": "44394",
+                  "display": "Colonoscopy through stoma; with removal of tumor(s), polyp(s), or other lesion(s) by snare technique"
+                },
+                {
+                  "code": "44401",
+                  "display": "Colonoscopy through stoma; with ablation of tumor(s), polyp(s), or other lesion(s) (includes pre-and post-dilation and guide wire passage, when performed)"
+                },
+                {
+                  "code": "44402",
+                  "display": "Colonoscopy through stoma; with endoscopic stent placement (including pre- and post-dilation and guide wire passage, when performed)"
+                },
+                {
+                  "code": "44403",
+                  "display": "Colonoscopy through stoma; with endoscopic mucosal resection"
+                },
+                {
+                  "code": "44404",
+                  "display": "Colonoscopy through stoma; with directed submucosal injection(s), any substance"
+                },
+                {
+                  "code": "44405",
+                  "display": "Colonoscopy through stoma; with transendoscopic balloon dilation"
+                },
+                {
+                  "code": "44406",
+                  "display": "Colonoscopy through stoma; with endoscopic ultrasound examination, limited to the sigmoid, descending, transverse, or ascending colon and cecum and adjacent structures"
+                },
+                {
+                  "code": "44407",
+                  "display": "Colonoscopy through stoma; with transendoscopic ultrasound guided intramural or transmural fine needle aspiration/biopsy(s), includes endoscopic ultrasound examination limited to the sigmoid, descending, transverse, or ascending colon and cecum and adjacent structures"
+                },
+                {
+                  "code": "44408",
+                  "display": "Colonoscopy through stoma; with decompression (for pathologic distention) (eg, volvulus, megacolon), including placement of decompression tube, when performed"
+                },
+                {
+                  "code": "45378",
+                  "display": "Colonoscopy, flexible; diagnostic, including collection of specimen(s) by brushing or washing, when performed (separate procedure)"
+                },
+                {
+                  "code": "45379",
+                  "display": "Colonoscopy, flexible; with removal of foreign body(s)"
+                },
+                {
+                  "code": "45380",
+                  "display": "Colonoscopy, flexible; with biopsy, single or multiple"
+                },
+                {
+                  "code": "45381",
+                  "display": "Colonoscopy, flexible; with directed submucosal injection(s), any substance"
+                },
+                {
+                  "code": "45382",
+                  "display": "Colonoscopy, flexible; with control of bleeding, any method"
+                },
+                {
+                  "code": "45384",
+                  "display": "Colonoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+                },
+                {
+                  "code": "45385",
+                  "display": "Colonoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by snare technique"
+                },
+                {
+                  "code": "45386",
+                  "display": "Colonoscopy, flexible; with transendoscopic balloon dilation"
+                },
+                {
+                  "code": "45388",
+                  "display": "Colonoscopy, flexible; with ablation of tumor(s), polyp(s), or other lesion(s) (includes pre- and post-dilation and guide wire passage, when performed)"
+                },
+                {
+                  "code": "45389",
+                  "display": "Colonoscopy, flexible; with endoscopic stent placement (includes pre- and post-dilation and guide wire passage, when performed)"
+                },
+                {
+                  "code": "45390",
+                  "display": "Colonoscopy, flexible; with endoscopic mucosal resection"
+                },
+                {
+                  "code": "45391",
+                  "display": "Colonoscopy, flexible; with endoscopic ultrasound examination limited to the rectum, sigmoid, descending, transverse, or ascending colon and cecum, and adjacent structures"
+                },
+                {
+                  "code": "45392",
+                  "display": "Colonoscopy, flexible; with transendoscopic ultrasound guided intramural or transmural fine needle aspiration/biopsy(s), includes endoscopic ultrasound examination limited to the rectum, sigmoid, descending, transverse, or ascending colon and cecum, and adjacent structures"
+                },
+                {
+                  "code": "45393",
+                  "display": "Colonoscopy, flexible; with decompression (for pathologic distention) (eg, volvulus, megacolon), including placement of decompression tube, when performed"
+                },
+                {
+                  "code": "45398",
+                  "display": "Colonoscopy, flexible; with band ligation(s) (eg, hemorrhoids)"
+                }
+              ]
+            },
+            {
+              "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "G0105",
+                  "display": "Colorectal cancer screening; colonoscopy on individual at high risk"
+                },
+                {
+                  "code": "G0121",
+                  "display": "Colorectal cancer screening; colonoscopy on individual not meeting criteria for high risk"
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "12350003",
+                  "display": "Colonoscopy with rigid sigmoidoscope through colotomy (procedure)"
+                },
+                {
+                  "code": "174158000",
+                  "display": "Open colonoscopy (procedure)"
+                },
+                {
+                  "code": "235150006",
+                  "display": "Total colonoscopy (procedure)"
+                },
+                {
+                  "code": "235151005",
+                  "display": "Limited colonoscopy (procedure)"
+                },
+                {
+                  "code": "25732003",
+                  "display": "Fiberoptic colonoscopy with biopsy (procedure)"
+                },
+                {
+                  "code": "310634005",
+                  "display": "Check colonoscopy (procedure)"
+                },
+                {
+                  "code": "34264006",
+                  "display": "Intraoperative colonoscopy (procedure)"
+                },
+                {
+                  "code": "367535003",
+                  "display": "Fiberoptic colonoscopy (procedure)"
+                },
+                {
+                  "code": "425672002",
+                  "display": "Diagnostic endoscopic examination of ileoanal pouch and biopsy of ileoanal pouch using colonoscope (procedure)"
+                },
+                {
+                  "code": "425937002",
+                  "display": "Diagnostic endoscopic examination of enteric pouch using colonoscope (procedure)"
+                },
+                {
+                  "code": "427459009",
+                  "display": "Diagnostic endoscopic examination of colonic pouch and biopsy of colonic pouch using colonoscope (procedure)"
+                },
+                {
+                  "code": "443998000",
+                  "display": "Colonoscopy through colostomy with endoscopic biopsy of colon (procedure)"
+                },
+                {
+                  "code": "444783004",
+                  "display": "Screening colonoscopy (procedure)"
+                },
+                {
+                  "code": "446521004",
+                  "display": "Colonoscopy and excision of mucosa of colon (procedure)"
+                },
+                {
+                  "code": "446745002",
+                  "display": "Colonoscopy and biopsy of colon (procedure)"
+                },
+                {
+                  "code": "447021001",
+                  "display": "Colonoscopy and tattooing (procedure)"
+                },
+                {
+                  "code": "709421007",
+                  "display": "Colonoscopy and dilatation of stricture of colon (procedure)"
+                },
+                {
+                  "code": "710293001",
+                  "display": "Colonoscopy using fluoroscopic guidance (procedure)"
+                },
+                {
+                  "code": "711307001",
+                  "display": "Colonoscopy using X-ray guidance (procedure)"
+                },
+                {
+                  "code": "713154003",
+                  "display": "Endoscopic submucosal dissection of rectum using colonoscope (procedure)"
+                },
+                {
+                  "code": "73761001",
+                  "display": "Colonoscopy (procedure)"
+                },
+                {
+                  "code": "8180007",
+                  "display": "Fiberoptic colonoscopy through colostomy (procedure)"
+                },
+                {
+                  "code": "851000119109",
+                  "display": "History of colonoscopy (situation)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.108.12.1020"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.198.12.1010",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1010",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.198.12.1010"
+          }
+        ],
+        "version": "20171219",
+        "name": "FlexibleSigmoidoscopy",
+        "title": "Flexible Sigmoidoscopy",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2014",
+              "concept": [
+                {
+                  "code": "45339",
+                  "display": "Sigmoidoscopy, flexible; with ablation of tumor(s), polyp(s), or other lesion(s) not amenable to removal by hot biopsy forceps, bipolar cautery or snare technique"
+                },
+                {
+                  "code": "45345",
+                  "display": "Sigmoidoscopy, flexible; with transendoscopic stent placement (includes predilation)"
+                }
+              ]
+            },
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "45330",
+                  "display": "Sigmoidoscopy, flexible; diagnostic, including collection of specimen(s) by brushing or washing, when performed (separate procedure)"
+                },
+                {
+                  "code": "45331",
+                  "display": "Sigmoidoscopy, flexible; with biopsy, single or multiple"
+                },
+                {
+                  "code": "45332",
+                  "display": "Sigmoidoscopy, flexible; with removal of foreign body(s)"
+                },
+                {
+                  "code": "45333",
+                  "display": "Sigmoidoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by hot biopsy forceps"
+                },
+                {
+                  "code": "45334",
+                  "display": "Sigmoidoscopy, flexible; with control of bleeding, any method"
+                },
+                {
+                  "code": "45335",
+                  "display": "Sigmoidoscopy, flexible; with directed submucosal injection(s), any substance"
+                },
+                {
+                  "code": "45337",
+                  "display": "Sigmoidoscopy, flexible; with decompression (for pathologic distention) (eg, volvulus, megacolon), including placement of decompression tube, when performed"
+                },
+                {
+                  "code": "45338",
+                  "display": "Sigmoidoscopy, flexible; with removal of tumor(s), polyp(s), or other lesion(s) by snare technique"
+                },
+                {
+                  "code": "45340",
+                  "display": "Sigmoidoscopy, flexible; with transendoscopic balloon dilation"
+                },
+                {
+                  "code": "45341",
+                  "display": "Sigmoidoscopy, flexible; with endoscopic ultrasound examination"
+                },
+                {
+                  "code": "45342",
+                  "display": "Sigmoidoscopy, flexible; with transendoscopic ultrasound guided intramural or transmural fine needle aspiration/biopsy(s)"
+                },
+                {
+                  "code": "45346",
+                  "display": "Sigmoidoscopy, flexible; with ablation of tumor(s), polyp(s), or other lesion(s) (includes pre- and post-dilation and guide wire passage, when performed)"
+                },
+                {
+                  "code": "45347",
+                  "display": "Sigmoidoscopy, flexible; with placement of endoscopic stent (includes pre- and post-dilation and guide wire passage, when performed)"
+                },
+                {
+                  "code": "45349",
+                  "display": "Sigmoidoscopy, flexible; with endoscopic mucosal resection"
+                },
+                {
+                  "code": "45350",
+                  "display": "Sigmoidoscopy, flexible; with band ligation(s) (eg, hemorrhoids)"
+                }
+              ]
+            },
+            {
+              "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "G0104",
+                  "display": "Colorectal cancer screening; flexible sigmoidoscopy"
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "396226005",
+                  "display": "Flexible fiberoptic sigmoidoscopy with biopsy (procedure)"
+                },
+                {
+                  "code": "425634007",
+                  "display": "Diagnostic endoscopic examination of lower bowel and sampling for bacterial overgrowth using fiberoptic sigmoidoscope (procedure)"
+                },
+                {
+                  "code": "44441009",
+                  "display": "Flexible fiberoptic sigmoidoscopy (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.198.12.1010"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.198.12.1011",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1011",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.198.12.1011"
+          }
+        ],
+        "version": "20171219",
+        "name": "FecalOccultBloodTest(FOBT)",
+        "title": "Fecal Occult Blood Test (FOBT)",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "version": "2.64",
+              "concept": [
+                {
+                  "code": "12503-9",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --4th specimen"
+                },
+                {
+                  "code": "12504-7",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --5th specimen"
+                },
+                {
+                  "code": "14563-1",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --1st specimen"
+                },
+                {
+                  "code": "14564-9",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --2nd specimen"
+                },
+                {
+                  "code": "14565-6",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --3rd specimen"
+                },
+                {
+                  "code": "2335-8",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool"
+                },
+                {
+                  "code": "27396-1",
+                  "display": "Hemoglobin.gastrointestinal [Mass/mass] in Stool"
+                },
+                {
+                  "code": "27401-9",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --6th specimen"
+                },
+                {
+                  "code": "27925-7",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --7th specimen"
+                },
+                {
+                  "code": "27926-5",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool --8th specimen"
+                },
+                {
+                  "code": "29771-3",
+                  "display": "Hemoglobin.gastrointestinal.lower [Presence] in Stool by Immunoassay"
+                },
+                {
+                  "code": "56490-6",
+                  "display": "Hemoglobin.gastrointestinal.lower [Presence] in Stool by Immunoassay --2nd specimen"
+                },
+                {
+                  "code": "56491-4",
+                  "display": "Hemoglobin.gastrointestinal.lower [Presence] in Stool by Immunoassay --3rd specimen"
+                },
+                {
+                  "code": "57905-2",
+                  "display": "Hemoglobin.gastrointestinal.lower [Presence] in Stool by Immunoassay --1st specimen"
+                },
+                {
+                  "code": "58453-2",
+                  "display": "Hemoglobin.gastrointestinal.lower [Mass/volume] in Stool by Immunoassay"
+                },
+                {
+                  "code": "80372-6",
+                  "display": "Hemoglobin.gastrointestinal [Presence] in Stool by Rapid immunoassay"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.198.12.1011"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.114222.4.11.3591",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.114222.4.11.3591"
+          }
+        ],
+        "version": "20180718",
+        "name": "Payer",
+        "title": "Payer",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.phdsc.org/standards/pdfs/SourceofPaymentTypologyVersion6FINALSeptember2015.pdf",
+              "version": "8.0",
+              "concept": [
+                {
+                  "code": "1",
+                  "display": "MEDICARE"
+                },
+                {
+                  "code": "11",
+                  "display": "Medicare (Managed Care)"
+                },
+                {
+                  "code": "111",
+                  "display": "Medicare HMO"
+                },
+                {
+                  "code": "112",
+                  "display": "Medicare PPO"
+                },
+                {
+                  "code": "113",
+                  "display": "Medicare POS"
+                },
+                {
+                  "code": "119",
+                  "display": "Medicare Managed Care Other"
+                },
+                {
+                  "code": "12",
+                  "display": "Medicare (Non-managed Care)"
+                },
+                {
+                  "code": "121",
+                  "display": "Medicare FFS"
+                },
+                {
+                  "code": "122",
+                  "display": "Medicare Drug Benefit"
+                },
+                {
+                  "code": "123",
+                  "display": "Medicare Medical Savings Account (MSA)"
+                },
+                {
+                  "code": "129",
+                  "display": "Medicare Non-managed Care Other"
+                },
+                {
+                  "code": "13",
+                  "display": "Medicare Hospice"
+                },
+                {
+                  "code": "14",
+                  "display": "Dual Eligibility Medicare/Medicaid Organization"
+                },
+                {
+                  "code": "19",
+                  "display": "Medicare Other"
+                },
+                {
+                  "code": "191",
+                  "display": "Medicare Pharmacy Benefit Manager"
+                },
+                {
+                  "code": "2",
+                  "display": "MEDICAID"
+                },
+                {
+                  "code": "21",
+                  "display": "Medicaid (Managed Care)"
+                },
+                {
+                  "code": "211",
+                  "display": "Medicaid HMO"
+                },
+                {
+                  "code": "212",
+                  "display": "Medicaid PPO"
+                },
+                {
+                  "code": "213",
+                  "display": "Medicaid PCCM (Primary Care Case Management)"
+                },
+                {
+                  "code": "219",
+                  "display": "Medicaid Managed Care Other"
+                },
+                {
+                  "code": "22",
+                  "display": "Medicaid (Non-managed Care Plan)"
+                },
+                {
+                  "code": "23",
+                  "display": "Medicaid/SCHIP"
+                },
+                {
+                  "code": "25",
+                  "display": "Medicaid - Out of State"
+                },
+                {
+                  "code": "26",
+                  "display": "Medicaid -- Long Term Care"
+                },
+                {
+                  "code": "29",
+                  "display": "Medicaid Other"
+                },
+                {
+                  "code": "291",
+                  "display": "Medicaid Pharmacy Benefit Manager"
+                },
+                {
+                  "code": "299",
+                  "display": "Medicaid - Dental"
+                },
+                {
+                  "code": "3",
+                  "display": "OTHER GOVERNMENT (Federal/State/Local) (excluding Department of Corrections)"
+                },
+                {
+                  "code": "31",
+                  "display": "Department of Defense"
+                },
+                {
+                  "code": "311",
+                  "display": "TRICARE (CHAMPUS)"
+                },
+                {
+                  "code": "3111",
+                  "display": "TRICARE Prime--HMO"
+                },
+                {
+                  "code": "3112",
+                  "display": "TRICARE Extra--PPO"
+                },
+                {
+                  "code": "3113",
+                  "display": "TRICARE Standard - Fee For Service"
+                },
+                {
+                  "code": "3114",
+                  "display": "TRICARE For Life--Medicare Supplement"
+                },
+                {
+                  "code": "3115",
+                  "display": "TRICARE Reserve Select"
+                },
+                {
+                  "code": "3116",
+                  "display": "Uniformed Services Family Health Plan (USFHP) -- HMO"
+                },
+                {
+                  "code": "3119",
+                  "display": "Department of Defense - (other)"
+                },
+                {
+                  "code": "312",
+                  "display": "Military Treatment Facility"
+                },
+                {
+                  "code": "3121",
+                  "display": "Enrolled Prime--HMO"
+                },
+                {
+                  "code": "3122",
+                  "display": "Non-enrolled Space Available"
+                },
+                {
+                  "code": "3123",
+                  "display": "TRICARE For Life (TFL)"
+                },
+                {
+                  "code": "313",
+                  "display": "Dental --Stand Alone"
+                },
+                {
+                  "code": "32",
+                  "display": "Department of Veterans Affairs"
+                },
+                {
+                  "code": "321",
+                  "display": "Veteran care--Care provided to Veterans"
+                },
+                {
+                  "code": "3211",
+                  "display": "Direct Care--Care provided in VA facilities"
+                },
+                {
+                  "code": "3212",
+                  "display": "Indirect Care--Care provided outside VA facilities"
+                },
+                {
+                  "code": "32121",
+                  "display": "Fee Basis"
+                },
+                {
+                  "code": "32122",
+                  "display": "Foreign Fee/Foreign Medical Program (FMP)"
+                },
+                {
+                  "code": "32123",
+                  "display": "Contract Nursing Home/Community Nursing Home"
+                },
+                {
+                  "code": "32124",
+                  "display": "State Veterans Home"
+                },
+                {
+                  "code": "32125",
+                  "display": "Sharing Agreements"
+                },
+                {
+                  "code": "32126",
+                  "display": "Other Federal Agency"
+                },
+                {
+                  "code": "32127",
+                  "display": "Dental Care"
+                },
+                {
+                  "code": "32128",
+                  "display": "Vision Care"
+                },
+                {
+                  "code": "322",
+                  "display": "Non-veteran care"
+                },
+                {
+                  "code": "3221",
+                  "display": "Civilian Health and Medical Program for the VA (CHAMPVA)"
+                },
+                {
+                  "code": "3222",
+                  "display": "Spina Bifida Health Care Program (SB)"
+                },
+                {
+                  "code": "3223",
+                  "display": "Children of Women Vietnam Veterans (CWVV)"
+                },
+                {
+                  "code": "3229",
+                  "display": "Other non-veteran care"
+                },
+                {
+                  "code": "33",
+                  "display": "Indian Health Service or Tribe"
+                },
+                {
+                  "code": "331",
+                  "display": "Indian Health Service -- Regular"
+                },
+                {
+                  "code": "332",
+                  "display": "Indian Health Service -- Contract"
+                },
+                {
+                  "code": "333",
+                  "display": "Indian Health Service - Managed Care"
+                },
+                {
+                  "code": "334",
+                  "display": "Indian Tribe - Sponsored Coverage"
+                },
+                {
+                  "code": "34",
+                  "display": "HRSA Program"
+                },
+                {
+                  "code": "341",
+                  "display": "Title V (MCH Block Grant)"
+                },
+                {
+                  "code": "342",
+                  "display": "Migrant Health Program"
+                },
+                {
+                  "code": "343",
+                  "display": "Ryan White Act"
+                },
+                {
+                  "code": "349",
+                  "display": "Other"
+                },
+                {
+                  "code": "35",
+                  "display": "Black Lung"
+                },
+                {
+                  "code": "36",
+                  "display": "State Government"
+                },
+                {
+                  "code": "361",
+                  "display": "State SCHIP program (codes for individual states)"
+                },
+                {
+                  "code": "362",
+                  "display": "Specific state programs (list/ local code)"
+                },
+                {
+                  "code": "369",
+                  "display": "State, not otherwise specified (other state)"
+                },
+                {
+                  "code": "37",
+                  "display": "Local Government"
+                },
+                {
+                  "code": "371",
+                  "display": "Local - Managed care"
+                },
+                {
+                  "code": "3711",
+                  "display": "HMO"
+                },
+                {
+                  "code": "3712",
+                  "display": "PPO"
+                },
+                {
+                  "code": "3713",
+                  "display": "POS"
+                },
+                {
+                  "code": "372",
+                  "display": "FFS/Indemnity"
+                },
+                {
+                  "code": "379",
+                  "display": "Local, not otherwise specified (other local, county)"
+                },
+                {
+                  "code": "38",
+                  "display": "Other Government (Federal, State, Local not specified)"
+                },
+                {
+                  "code": "381",
+                  "display": "Federal, State, Local not specified managed care"
+                },
+                {
+                  "code": "3811",
+                  "display": "Federal, State, Local not specified - HMO"
+                },
+                {
+                  "code": "3812",
+                  "display": "Federal, State, Local not specified - PPO"
+                },
+                {
+                  "code": "3813",
+                  "display": "Federal, State, Local not specified - POS"
+                },
+                {
+                  "code": "3819",
+                  "display": "Federal, State, Local not specified - not specified managed care"
+                },
+                {
+                  "code": "382",
+                  "display": "Federal, State, Local not specified - FFS"
+                },
+                {
+                  "code": "389",
+                  "display": "Federal, State, Local not specified - Other"
+                },
+                {
+                  "code": "39",
+                  "display": "Other Federal"
+                },
+                {
+                  "code": "391",
+                  "display": "Federal Employee Health Plan - Use when known"
+                },
+                {
+                  "code": "4",
+                  "display": "DEPARTMENTS OF CORRECTIONS"
+                },
+                {
+                  "code": "41",
+                  "display": "Corrections Federal"
+                },
+                {
+                  "code": "42",
+                  "display": "Corrections State"
+                },
+                {
+                  "code": "43",
+                  "display": "Corrections Local"
+                },
+                {
+                  "code": "44",
+                  "display": "Corrections Unknown Level"
+                },
+                {
+                  "code": "5",
+                  "display": "PRIVATE HEALTH INSURANCE"
+                },
+                {
+                  "code": "51",
+                  "display": "Managed Care (Private)"
+                },
+                {
+                  "code": "511",
+                  "display": "Commercial Managed Care - HMO"
+                },
+                {
+                  "code": "512",
+                  "display": "Commercial Managed Care - PPO"
+                },
+                {
+                  "code": "513",
+                  "display": "Commercial Managed Care - POS"
+                },
+                {
+                  "code": "514",
+                  "display": "Exclusive Provider Organization"
+                },
+                {
+                  "code": "515",
+                  "display": "Gatekeeper PPO (GPPO)"
+                },
+                {
+                  "code": "516",
+                  "display": "Commercial Managed Care - Pharmacy Benefit Manager"
+                },
+                {
+                  "code": "517",
+                  "display": "Commercial Managed Care - Dental"
+                },
+                {
+                  "code": "519",
+                  "display": "Managed Care, Other (non HMO)"
+                },
+                {
+                  "code": "52",
+                  "display": "Private Health Insurance - Indemnity"
+                },
+                {
+                  "code": "521",
+                  "display": "Commercial Indemnity"
+                },
+                {
+                  "code": "522",
+                  "display": "Self-insured (ERISA) Administrative Services Only (ASO) plan"
+                },
+                {
+                  "code": "523",
+                  "display": "Medicare supplemental policy (as second payer)"
+                },
+                {
+                  "code": "524",
+                  "display": "Indemnity Insurance - Dental"
+                },
+                {
+                  "code": "529",
+                  "display": "Private health insurance--other commercial Indemnity"
+                },
+                {
+                  "code": "53",
+                  "display": "Managed Care (private) or private health insurance (indemnity), not otherwise specified"
+                },
+                {
+                  "code": "54",
+                  "display": "Organized Delivery System"
+                },
+                {
+                  "code": "55",
+                  "display": "Small Employer Purchasing Group"
+                },
+                {
+                  "code": "56",
+                  "display": "Specialized Stand Alone Plan"
+                },
+                {
+                  "code": "561",
+                  "display": "Dental"
+                },
+                {
+                  "code": "562",
+                  "display": "Vision"
+                },
+                {
+                  "code": "59",
+                  "display": "Other Private Insurance"
+                },
+                {
+                  "code": "6",
+                  "display": "BLUE CROSS/BLUE SHIELD"
+                },
+                {
+                  "code": "61",
+                  "display": "BC Managed Care"
+                },
+                {
+                  "code": "611",
+                  "display": "BC Managed Care -- HMO"
+                },
+                {
+                  "code": "612",
+                  "display": "BC Managed Care -- PPO"
+                },
+                {
+                  "code": "613",
+                  "display": "BC Managed Care -- POS"
+                },
+                {
+                  "code": "614",
+                  "display": "BC Managed Care - Dental"
+                },
+                {
+                  "code": "619",
+                  "display": "BC Managed Care -- Other"
+                },
+                {
+                  "code": "62",
+                  "display": "BC Insurance Indemnity"
+                },
+                {
+                  "code": "621",
+                  "display": "BC Indemnity"
+                },
+                {
+                  "code": "622",
+                  "display": "BC Self-insured (ERISA) Administrative Services Only (ASO)Plan"
+                },
+                {
+                  "code": "623",
+                  "display": "BC Medicare Supplemental Plan"
+                },
+                {
+                  "code": "629",
+                  "display": "BC Indemnity - Dental"
+                },
+                {
+                  "code": "7",
+                  "display": "MANAGED CARE, UNSPECIFIED (to be used only if one can't distinguish public from private)"
+                },
+                {
+                  "code": "71",
+                  "display": "HMO"
+                },
+                {
+                  "code": "72",
+                  "display": "PPO"
+                },
+                {
+                  "code": "73",
+                  "display": "POS"
+                },
+                {
+                  "code": "79",
+                  "display": "Other Managed Care"
+                },
+                {
+                  "code": "8",
+                  "display": "NO PAYMENT from an Organization/Agency/Program/Private Payer Listed"
+                },
+                {
+                  "code": "81",
+                  "display": "Self-pay (Includes applicants for insurance and Medicaid applicants)"
+                },
+                {
+                  "code": "82",
+                  "display": "No Charge"
+                },
+                {
+                  "code": "821",
+                  "display": "Charity"
+                },
+                {
+                  "code": "822",
+                  "display": "Professional Courtesy"
+                },
+                {
+                  "code": "823",
+                  "display": "Research/Clinical Trial"
+                },
+                {
+                  "code": "83",
+                  "display": "Refusal to Pay/Bad Debt"
+                },
+                {
+                  "code": "84",
+                  "display": "Hill Burton Free Care"
+                },
+                {
+                  "code": "85",
+                  "display": "Research/Donor"
+                },
+                {
+                  "code": "89",
+                  "display": "No Payment, Other"
+                },
+                {
+                  "code": "9",
+                  "display": "MISCELLANEOUS/OTHER"
+                },
+                {
+                  "code": "91",
+                  "display": "Foreign National"
+                },
+                {
+                  "code": "92",
+                  "display": "Other (Non-government)"
+                },
+                {
+                  "code": "93",
+                  "display": "Disability Insurance"
+                },
+                {
+                  "code": "94",
+                  "display": "Long-term Care Insurance"
+                },
+                {
+                  "code": "95",
+                  "display": "Worker's Compensation"
+                },
+                {
+                  "code": "951",
+                  "display": "Worker's Comp HMO"
+                },
+                {
+                  "code": "953",
+                  "display": "Worker's Comp Fee-for-Service"
+                },
+                {
+                  "code": "954",
+                  "display": "Worker's Comp Other Managed Care"
+                },
+                {
+                  "code": "959",
+                  "display": "Worker's Comp, Other unspecified"
+                },
+                {
+                  "code": "96",
+                  "display": "Auto Insurance (includes no fault)"
+                },
+                {
+                  "code": "97",
+                  "display": "Legal Liability / Liability Insurance"
+                },
+                {
+                  "code": "98",
+                  "display": "Other specified but not otherwise classifiable (includes Hospice - Unspecified plan)"
+                },
+                {
+                  "code": "99",
+                  "display": "No Typology Code available for payment source"
+                },
+                {
+                  "code": "9999",
+                  "display": "Unavailable / No Payer Specified / Blank"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.114222.4.11.3591"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.108.12.1001",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1001",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.108.12.1001"
+          }
+        ],
+        "version": "20171222",
+        "name": "MalignantNeoplasmofColon",
+        "title": "Malignant Neoplasm of Colon",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "version": "2019",
+              "concept": [
+                {
+                  "code": "C18.0",
+                  "display": "Malignant neoplasm of cecum"
+                },
+                {
+                  "code": "C18.1",
+                  "display": "Malignant neoplasm of appendix"
+                },
+                {
+                  "code": "C18.2",
+                  "display": "Malignant neoplasm of ascending colon"
+                },
+                {
+                  "code": "C18.3",
+                  "display": "Malignant neoplasm of hepatic flexure"
+                },
+                {
+                  "code": "C18.4",
+                  "display": "Malignant neoplasm of transverse colon"
+                },
+                {
+                  "code": "C18.5",
+                  "display": "Malignant neoplasm of splenic flexure"
+                },
+                {
+                  "code": "C18.6",
+                  "display": "Malignant neoplasm of descending colon"
+                },
+                {
+                  "code": "C18.7",
+                  "display": "Malignant neoplasm of sigmoid colon"
+                },
+                {
+                  "code": "C18.8",
+                  "display": "Malignant neoplasm of overlapping sites of colon"
+                },
+                {
+                  "code": "C18.9",
+                  "display": "Malignant neoplasm of colon, unspecified"
+                },
+                {
+                  "code": "C19",
+                  "display": "Malignant neoplasm of rectosigmoid junction"
+                },
+                {
+                  "code": "C20",
+                  "display": "Malignant neoplasm of rectum"
+                },
+                {
+                  "code": "C21.2",
+                  "display": "Malignant neoplasm of cloacogenic zone"
+                },
+                {
+                  "code": "C21.8",
+                  "display": "Malignant neoplasm of overlapping sites of rectum, anus and anal canal"
+                },
+                {
+                  "code": "C78.5",
+                  "display": "Secondary malignant neoplasm of large intestine and rectum"
+                }
+              ]
+            },
+            {
+              "system": "http://hl7.org/fhir/sid/icd-9-cm",
+              "version": "2013",
+              "concept": [
+                {
+                  "code": "153.0",
+                  "display": "Malignant neoplasm of hepatic flexure"
+                },
+                {
+                  "code": "153.1",
+                  "display": "Malignant neoplasm of transverse colon"
+                },
+                {
+                  "code": "153.2",
+                  "display": "Malignant neoplasm of descending colon"
+                },
+                {
+                  "code": "153.3",
+                  "display": "Malignant neoplasm of sigmoid colon"
+                },
+                {
+                  "code": "153.4",
+                  "display": "Malignant neoplasm of cecum"
+                },
+                {
+                  "code": "153.5",
+                  "display": "Malignant neoplasm of appendix vermiformis"
+                },
+                {
+                  "code": "153.6",
+                  "display": "Malignant neoplasm of ascending colon"
+                },
+                {
+                  "code": "153.7",
+                  "display": "Malignant neoplasm of splenic flexure"
+                },
+                {
+                  "code": "153.8",
+                  "display": "Malignant neoplasm of other specified sites of large intestine"
+                },
+                {
+                  "code": "153.9",
+                  "display": "Malignant neoplasm of colon, unspecified site"
+                },
+                {
+                  "code": "154.0",
+                  "display": "Malignant neoplasm of rectosigmoid junction"
+                },
+                {
+                  "code": "154.1",
+                  "display": "Malignant neoplasm of rectum"
+                },
+                {
+                  "code": "197.5",
+                  "display": "Secondary malignant neoplasm of large intestine and rectum"
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2012-07",
+              "concept": [
+                {
+                  "code": "187758006",
+                  "display": "Malignant neoplasm of other specified sites of colon (disorder)"
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "109838007",
+                  "display": "Overlapping malignant neoplasm of colon (disorder)"
+                },
+                {
+                  "code": "133751000119102",
+                  "display": "Lymphoma of colon (disorder)"
+                },
+                {
+                  "code": "1701000119104",
+                  "display": "Primary adenocarcinoma of colon (disorder)"
+                },
+                {
+                  "code": "184881000119106",
+                  "display": "Primary adenocarcinoma of rectosigmoid junction (disorder)"
+                },
+                {
+                  "code": "187757001",
+                  "display": "Malignant neoplasm, overlapping lesion of colon (disorder)"
+                },
+                {
+                  "code": "269533000",
+                  "display": "Carcinoma of colon (disorder)"
+                },
+                {
+                  "code": "269544008",
+                  "display": "Carcinoma of the rectosigmoid junction (disorder)"
+                },
+                {
+                  "code": "285312008",
+                  "display": "Carcinoma of sigmoid colon (disorder)"
+                },
+                {
+                  "code": "285611007",
+                  "display": "Metastasis to colon of unknown primary (disorder)"
+                },
+                {
+                  "code": "301756000",
+                  "display": "Adenocarcinoma of sigmoid colon (disorder)"
+                },
+                {
+                  "code": "312111009",
+                  "display": "Carcinoma of ascending colon (disorder)"
+                },
+                {
+                  "code": "312112002",
+                  "display": "Carcinoma of transverse colon (disorder)"
+                },
+                {
+                  "code": "312113007",
+                  "display": "Carcinoma of descending colon (disorder)"
+                },
+                {
+                  "code": "312114001",
+                  "display": "Carcinoma of hepatic flexure (disorder)"
+                },
+                {
+                  "code": "312115000",
+                  "display": "Carcinoma of splenic flexure (disorder)"
+                },
+                {
+                  "code": "314965007",
+                  "display": "Local recurrence of malignant tumor of colon (disorder)"
+                },
+                {
+                  "code": "315058005",
+                  "display": "Hereditary nonpolyposis colon cancer (disorder)"
+                },
+                {
+                  "code": "363406005",
+                  "display": "Malignant neoplasm of colon (disorder)"
+                },
+                {
+                  "code": "363407001",
+                  "display": "Malignant tumor of hepatic flexure (disorder)"
+                },
+                {
+                  "code": "363408006",
+                  "display": "Malignant tumor of transverse colon (disorder)"
+                },
+                {
+                  "code": "363409003",
+                  "display": "Malignant tumor of descending colon (disorder)"
+                },
+                {
+                  "code": "363410008",
+                  "display": "Malignant tumor of sigmoid colon (disorder)"
+                },
+                {
+                  "code": "363412000",
+                  "display": "Malignant tumor of ascending colon (disorder)"
+                },
+                {
+                  "code": "363413005",
+                  "display": "Malignant tumor of splenic flexure (disorder)"
+                },
+                {
+                  "code": "363414004",
+                  "display": "Malignant tumor of rectosigmoid junction (disorder)"
+                },
+                {
+                  "code": "363510005",
+                  "display": "Malignant tumor of large intestine (disorder)"
+                },
+                {
+                  "code": "425178004",
+                  "display": "Adenocarcinoma of rectosigmoid junction (disorder)"
+                },
+                {
+                  "code": "449218003",
+                  "display": "Lymphoma of sigmoid colon (disorder)"
+                },
+                {
+                  "code": "681601000119101",
+                  "display": "Primary adenocarcinoma of ascending colon (disorder)"
+                },
+                {
+                  "code": "716654007",
+                  "display": "Non-polyposis Turcot syndrome (disorder)"
+                },
+                {
+                  "code": "721695008",
+                  "display": "Primary adenocarcinoma of ascending colon and right flexure (disorder)"
+                },
+                {
+                  "code": "721696009",
+                  "display": "Primary adenocarcinoma of transverse colon (disorder)"
+                },
+                {
+                  "code": "721699002",
+                  "display": "Primary adenocarcinoma of descending colon and splenic flexure (disorder)"
+                },
+                {
+                  "code": "737058005",
+                  "display": "Microsatellite instability-high colorectal cancer (disorder)"
+                },
+                {
+                  "code": "93683002",
+                  "display": "Primary malignant neoplasm of ascending colon (disorder)"
+                },
+                {
+                  "code": "93761005",
+                  "display": "Primary malignant neoplasm of colon (disorder)"
+                },
+                {
+                  "code": "93771007",
+                  "display": "Primary malignant neoplasm of descending colon (disorder)"
+                },
+                {
+                  "code": "93826009",
+                  "display": "Primary malignant neoplasm of hepatic flexure of colon (disorder)"
+                },
+                {
+                  "code": "93980002",
+                  "display": "Primary malignant neoplasm of rectosigmoid junction (disorder)"
+                },
+                {
+                  "code": "94006002",
+                  "display": "Primary malignant neoplasm of sigmoid colon (disorder)"
+                },
+                {
+                  "code": "94072004",
+                  "display": "Primary malignant neoplasm of splenic flexure of colon (disorder)"
+                },
+                {
+                  "code": "94105000",
+                  "display": "Primary malignant neoplasm of transverse colon (disorder)"
+                },
+                {
+                  "code": "94179005",
+                  "display": "Secondary malignant neoplasm of ascending colon (disorder)"
+                },
+                {
+                  "code": "94260004",
+                  "display": "Secondary malignant neoplasm of colon (disorder)"
+                },
+                {
+                  "code": "94271003",
+                  "display": "Secondary malignant neoplasm of descending colon (disorder)"
+                },
+                {
+                  "code": "94328005",
+                  "display": "Secondary malignant neoplasm of hepatic flexure of colon (disorder)"
+                },
+                {
+                  "code": "94509004",
+                  "display": "Secondary malignant neoplasm of rectosigmoid junction (disorder)"
+                },
+                {
+                  "code": "94538001",
+                  "display": "Secondary malignant neoplasm of sigmoid colon (disorder)"
+                },
+                {
+                  "code": "94604000",
+                  "display": "Secondary malignant neoplasm of splenic flexure of colon (disorder)"
+                },
+                {
+                  "code": "94643001",
+                  "display": "Secondary malignant neoplasm of transverse colon (disorder)"
+                },
+                {
+                  "code": "96281000119107",
+                  "display": "Overlapping malignant neoplasm of colon and rectum (disorder)"
+                },
+                {
+                  "code": "96981000119102",
+                  "display": "Malignant neoplasm of rectosigmoid junction metastatic to brain (disorder)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.108.12.1001"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.101.12.1025",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.101.12.1025"
+          }
+        ],
+        "version": "20170504",
+        "name": "PreventiveCareServices-EstablishedOfficeVisit,18andUp",
+        "title": "Preventive Care Services - Established Office Visit, 18 and Up",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "99395",
+                  "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 18-39 years"
+                },
+                {
+                  "code": "99396",
+                  "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 40-64 years"
+                },
+                {
+                  "code": "99397",
+                  "display": "Periodic comprehensive preventive medicine reevaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, established patient; 65 years and older"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1025"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.101.12.1016",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.101.12.1016"
+          }
+        ],
+        "version": "20180310",
+        "name": "HomeHealthcareServices",
+        "title": "Home Healthcare Services",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "99341",
+                  "display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; and Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low severity. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99342",
+                  "display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; and Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99343",
+                  "display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99344",
+                  "display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of high severity. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99345",
+                  "display": "Home visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; and Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the patient is unstable or has developed a significant new problem requiring immediate physician attention. Typically, 75 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99347",
+                  "display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused interval history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 15 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99348",
+                  "display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused interval history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 25 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99349",
+                  "display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed interval history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are moderate to high severity. Typically, 40 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99350",
+                  "display": "Home visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive interval history; A comprehensive examination; Medical decision making of moderate to high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. The patient may be unstable or may have developed a significant new problem requiring immediate physician attention. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "185460008",
+                  "display": "Home visit request by patient (procedure)"
+                },
+                {
+                  "code": "185462000",
+                  "display": "Home visit request by relative (procedure)"
+                },
+                {
+                  "code": "185466002",
+                  "display": "Home visit for urgent condition (procedure)"
+                },
+                {
+                  "code": "185467006",
+                  "display": "Home visit for acute condition (procedure)"
+                },
+                {
+                  "code": "185468001",
+                  "display": "Home visit for chronic condition (procedure)"
+                },
+                {
+                  "code": "185470005",
+                  "display": "Home visit elderly assessment (procedure)"
+                },
+                {
+                  "code": "225929007",
+                  "display": "Joint home visit (procedure)"
+                },
+                {
+                  "code": "315205008",
+                  "display": "Bank holiday home visit (procedure)"
+                },
+                {
+                  "code": "439708006",
+                  "display": "Home visit (procedure)"
+                },
+                {
+                  "code": "698704008",
+                  "display": "Home visit for rheumatology service (procedure)"
+                },
+                {
+                  "code": "704126008",
+                  "display": "Home visit for anticoagulant drug monitoring (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1016"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.108.12.1039",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1039",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.108.12.1039"
+          }
+        ],
+        "version": "20171219",
+        "name": "FITDNA",
+        "title": "FIT DNA",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://loinc.org",
+              "version": "2.64",
+              "concept": [
+                {
+                  "code": "77353-1",
+                  "display": "Noninvasive colorectal cancer DNA and occult blood screening [Interpretation] in Stool Narrative"
+                },
+                {
+                  "code": "77354-9",
+                  "display": "Noninvasive colorectal cancer DNA and occult blood screening [Presence] in Stool"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.108.12.1039"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.108.12.1038",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.108.12.1038",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.108.12.1038"
+          }
+        ],
+        "version": "20171219",
+        "name": "CTColonography",
+        "title": "CT Colonography",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "74261",
+                  "display": "Computed tomographic (CT) colonography, diagnostic, including image postprocessing; without contrast material"
+                },
+                {
+                  "code": "74262",
+                  "display": "Computed tomographic (CT) colonography, diagnostic, including image postprocessing; with contrast material(s) including non-contrast images, if performed"
+                },
+                {
+                  "code": "74263",
+                  "display": "Computed tomographic (CT) colonography, screening, including image postprocessing"
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "418714002",
+                  "display": "Virtual computed tomography colonoscopy (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.108.12.1038"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.526.3.1240",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1240",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.526.3.1240"
+          }
+        ],
+        "version": "20170504",
+        "name": "AnnualWellnessVisit",
+        "title": "Annual Wellness Visit",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "https://www.cms.gov/Medicare/Coding/MedHCPCSGenInfo/index.html",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "G0438",
+                  "display": "Annual wellness visit; includes a personalized prevention plan of service (pps), initial visit"
+                },
+                {
+                  "code": "G0439",
+                  "display": "Annual wellness visit, includes a personalized prevention plan of service (pps), subsequent visit"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.526.3.1240"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.292",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+        "title": "Emergency Department Visit",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-03",
+              "concept": [
+                {
+                  "code": "4525004",
+                  "display": "Emergency department patient visit (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1111.143",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
+        "title": "Observation Services",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-09",
+              "concept": [
+                {
+                  "code": "448851000124103",
+                  "display": "Hospital admission from observation unit (procedure)"
+                },
+                {
+                  "code": "448951000124107",
+                  "display": "Admission to observation unit (procedure)"
+                },
+                {
+                  "code": "76464004",
+                  "display": "Hospital admission, for observation (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1111.143"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.666.5.307",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.666.5.307"
+          }
+        ],
+        "version": "20170504",
+        "name": "EncounterInpatient",
+        "title": "Encounter Inpatient",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "183452005",
+                  "display": "Emergency hospital admission (procedure)"
+                },
+                {
+                  "code": "32485007",
+                  "display": "Hospital admission (procedure)"
+                },
+                {
+                  "code": "8715000",
+                  "display": "Hospital admission, elective (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.666.5.307"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1108.15",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1108.15",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113762.1.4.1108.15"
+          }
+        ],
+        "version": "20170504",
+        "name": "Hospicecareambulatory",
+        "title": "Hospice care ambulatory",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "385763009",
+                  "display": "Hospice care (regime/therapy)"
+                },
+                {
+                  "code": "385765002",
+                  "display": "Hospice care management (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1108.15"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.101.12.1001",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.101.12.1001"
+          }
+        ],
+        "version": "20180310",
+        "name": "OfficeVisit",
+        "title": "Office Visit",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "99201",
+                  "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99202",
+                  "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: An expanded problem focused history; An expanded problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 20 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99203",
+                  "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A detailed history; A detailed examination; Medical decision making of low complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate severity. Typically, 30 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99204",
+                  "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 45 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99205",
+                  "display": "Office or other outpatient visit for the evaluation and management of a new patient, which requires these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 60 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99212",
+                  "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A problem focused history; A problem focused examination; Straightforward medical decision making. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are self limited or minor. Typically, 10 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99213",
+                  "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: An expanded problem focused history; An expanded problem focused examination; Medical decision making of low complexity. Counseling and coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of low to moderate severity. Typically, 15 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99214",
+                  "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A detailed history; A detailed examination; Medical decision making of moderate complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 25 minutes are spent face-to-face with the patient and/or family."
+                },
+                {
+                  "code": "99215",
+                  "display": "Office or other outpatient visit for the evaluation and management of an established patient, which requires at least 2 of these 3 key components: A comprehensive history; A comprehensive examination; Medical decision making of high complexity. Counseling and/or coordination of care with other physicians, other qualified health care professionals, or agencies are provided consistent with the nature of the problem(s) and the patient's and/or family's needs. Usually, the presenting problem(s) are of moderate to high severity. Typically, 40 minutes are spent face-to-face with the patient and/or family."
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "185463005",
+                  "display": "Visit out of hours (procedure)"
+                },
+                {
+                  "code": "185464004",
+                  "display": "Out of hours visit - not night visit (procedure)"
+                },
+                {
+                  "code": "185465003",
+                  "display": "Weekend visit (procedure)"
+                },
+                {
+                  "code": "30346009",
+                  "display": "Evaluation and management of established outpatient in office or other outpatient facility (procedure)"
+                },
+                {
+                  "code": "3391000175108",
+                  "display": "Office visit for pediatric care and assessment (procedure)"
+                },
+                {
+                  "code": "37894004",
+                  "display": "Evaluation and management of new outpatient in office or other outpatient facility (procedure)"
+                },
+                {
+                  "code": "439740005",
+                  "display": "Postoperative follow-up visit (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1001"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.101.12.1023",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.101.12.1023"
+          }
+        ],
+        "version": "20170504",
+        "name": "PreventiveCareServices-InitialOfficeVisit,18andUp",
+        "title": "Preventive Care Services-Initial Office Visit, 18 and Up",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "99385",
+                  "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 18-39 years"
+                },
+                {
+                  "code": "99386",
+                  "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 40-64 years"
+                },
+                {
+                  "code": "99387",
+                  "display": "Initial comprehensive preventive medicine evaluation and management of an individual including an age and gender appropriate history, examination, counseling/anticipatory guidance/risk factor reduction interventions, and the ordering of laboratory/diagnostic procedures, new patient; 65 years and older"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.101.12.1023"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.464.1003.198.12.1019",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.198.12.1019",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.464.1003.198.12.1019"
+          }
+        ],
+        "version": "20171222",
+        "name": "TotalColectomy",
+        "title": "Total Colectomy",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2006",
+              "concept": [
+                {
+                  "code": "44152",
+                  "display": "Colectomy, total, abdominal, without proctectomy; with rectal mucosectomy, ileoanal anastomosis, with or without loop ileostomy"
+                },
+                {
+                  "code": "44153",
+                  "display": "Colectomy, total, abdominal, without proctectomy; with rectal mucosectomy, ileoanal anastomosis, creation of ileal reservoir (S or J), with or without loop ileostomy"
+                }
+              ]
+            },
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "version": "2018",
+              "concept": [
+                {
+                  "code": "44150",
+                  "display": "Colectomy, total, abdominal, without proctectomy; with ileostomy or ileoproctostomy"
+                },
+                {
+                  "code": "44151",
+                  "display": "Colectomy, total, abdominal, without proctectomy; with continent ileostomy"
+                },
+                {
+                  "code": "44155",
+                  "display": "Colectomy, total, abdominal, with proctectomy; with ileostomy"
+                },
+                {
+                  "code": "44156",
+                  "display": "Colectomy, total, abdominal, with proctectomy; with continent ileostomy"
+                },
+                {
+                  "code": "44157",
+                  "display": "Colectomy, total, abdominal, with proctectomy; with ileoanal anastomosis, includes loop ileostomy, and rectal mucosectomy, when performed"
+                },
+                {
+                  "code": "44158",
+                  "display": "Colectomy, total, abdominal, with proctectomy; with ileoanal anastomosis, creation of ileal reservoir (S or J), includes loop ileostomy, and rectal mucosectomy, when performed"
+                },
+                {
+                  "code": "44210",
+                  "display": "Laparoscopy, surgical; colectomy, total, abdominal, without proctectomy, with ileostomy or ileoproctostomy"
+                },
+                {
+                  "code": "44211",
+                  "display": "Laparoscopy, surgical; colectomy, total, abdominal, with proctectomy, with ileoanal anastomosis, creation of ileal reservoir (S or J), with loop ileostomy, includes rectal mucosectomy, when performed"
+                },
+                {
+                  "code": "44212",
+                  "display": "Laparoscopy, surgical; colectomy, total, abdominal, with proctectomy, with ileostomy"
+                }
+              ]
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "26390003",
+                  "display": "Total colectomy (procedure)"
+                },
+                {
+                  "code": "303401008",
+                  "display": "Parks panproctocolectomy, anastomosis of ileum to anus and creation of pouch (procedure)"
+                },
+                {
+                  "code": "307666008",
+                  "display": "Total colectomy and ileostomy (procedure)"
+                },
+                {
+                  "code": "307667004",
+                  "display": "Total colectomy, ileostomy and rectal mucous fistula (procedure)"
+                },
+                {
+                  "code": "307669001",
+                  "display": "Total colectomy, ileostomy and closure of rectal stump (procedure)"
+                },
+                {
+                  "code": "31130001",
+                  "display": "Total abdominal colectomy with proctectomy and ileostomy (procedure)"
+                },
+                {
+                  "code": "36192008",
+                  "display": "Total abdominal colectomy with ileoproctostomy (procedure)"
+                },
+                {
+                  "code": "44751009",
+                  "display": "Total abdominal colectomy with proctectomy and continent ileostomy (procedure)"
+                },
+                {
+                  "code": "456004",
+                  "display": "Total abdominal colectomy with ileostomy (procedure)"
+                },
+                {
+                  "code": "80294005",
+                  "display": "Total abdominal colectomy with rectal mucosectomy and ileoanal anastomosis (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.464.1003.198.12.1019"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.114222.4.11.836",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.114222.4.11.836"
+          }
+        ],
+        "version": "20121025",
+        "name": "Race",
+        "title": "Race",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.cdc.gov/phin/resources/vocabulary/index.html",
+              "version": "1.2",
+              "concept": [
+                {
+                  "code": "1002-5",
+                  "display": "American Indian or Alaska Native"
+                },
+                {
+                  "code": "2028-9",
+                  "display": "Asian"
+                },
+                {
+                  "code": "2054-5",
+                  "display": "Black or African American"
+                },
+                {
+                  "code": "2076-8",
+                  "display": "Native Hawaiian or Other Pacific Islander"
+                },
+                {
+                  "code": "2106-3",
+                  "display": "White"
+                },
+                {
+                  "code": "2131-1",
+                  "display": "Other Race"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.114222.4.11.836"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113762.1.4.1"
+          }
+        ],
+        "version": "20150331",
+        "name": "ONCAdministrativeSex",
+        "title": "ONC Administrative Sex",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+              "version": "HL7V3.0_2017-07",
+              "concept": [
+                {
+                  "code": "F",
+                  "display": "Female"
+                },
+                {
+                  "code": "M",
+                  "display": "Male"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.114222.4.11.837",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.114222.4.11.837"
+          }
+        ],
+        "version": "20121025",
+        "name": "Ethnicity",
+        "title": "Ethnicity",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.cdc.gov/phin/resources/vocabulary/index.html",
+              "version": "1.2",
+              "concept": [
+                {
+                  "code": "2135-2",
+                  "display": "Hispanic or Latino"
+                },
+                {
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.114222.4.11.837"
+      }
+    }
+  ]
+}

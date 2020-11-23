@@ -14,13 +14,13 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.opencds.cqf.r4.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -72,36 +72,39 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	}
 
 	// FIXME KBD
-	//@Test
 	@Disabled
-	public void evaluateMeasure() throws IOException {
-		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
-		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
-		Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
-		assertNotNull(result);
-		List<Bundle.BundleEntryComponent> entries = result.getEntry();
-		assertThat(entries, hasSize(22));
-		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-		assertEquals(entries.get(21).getResponse().getStatus(), "201 Created");
+	//@Test
+	public void evaluateColMeasure() throws IOException {
+		loadResource("r4/EXM130/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-FHIRHelpers-4.0.0.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-EXM130_FHIR4-7.2.000.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-deps-EXM130_FHIR4-7.2.000-bundle.json", myFhirContext, myDaoRegistry);
+		//loadResource("r4/EXM130/valuesets-EXM130_FHIR4-7.2.000-bundle.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-matglobalcommonfunctions-fhir.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-MATGlobalCommonFunctions-FHIR4-4.0.000.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-hospice-fhir.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-AdultOutpatientEncounters-FHIR4-1.1.000.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/library-SupplementalDataElements-FHIR4-1.0.0.json", myFhirContext, myDaoRegistry);
+		loadResource("r4/EXM130/measure-EXM130_FHIR4-7.2.000.json", myFhirContext, myDaoRegistry);
 
-		IdType measureId = new IdType("Measure", "measure-asf");
-		String patientIdentifier = "Patient/Patient-6529";
+		loadBundle("dstu3/test-patient-6529-data.json");
+
+		IdType measureId = new IdType("Measure", "measure-EXM130-FHIR4-7.2.000");
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
-
-		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-			patientIdentifier, null, null, null, null, null, null);
-		// Assert it worked
-		assertThat(report.getGroup(), hasSize(1));
-		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
+		String patient = "Patient/Patient-6529";
+		MeasureReport measureReport = myProvider.evaluateMeasure(measureId, null,
+			null, null, "patient", patient, null, null,
+			null, null, null, null);
+		assertThat(measureReport.getGroup(), hasSize(1));
+		assertThat(measureReport.getGroup().get(0).getPopulation(), hasSize(3));
+		for (MeasureReport.MeasureReportGroupComponent group : measureReport.getGroup()) {
 			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
 				assertTrue(population.getCount() > 0);
 			}
 		}
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(measureReport));
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {
