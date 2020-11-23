@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 public class ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(ReadOnlySearchParamCache.class);
@@ -48,6 +49,10 @@ public class ReadOnlySearchParamCache {
 
 	public static ReadOnlySearchParamCache fromRuntimeSearchParamCache(RuntimeSearchParamCache theRuntimeSearchParamCache) {
 		return new ReadOnlySearchParamCache(theRuntimeSearchParamCache);
+	}
+
+	public Stream<RuntimeSearchParam> getSearchParamStream() {
+		return myMap.values().stream().flatMap(entry -> entry.values().stream());
 	}
 
 	protected Map<String, RuntimeSearchParam> getSearchParamMap(String theResourceName) {

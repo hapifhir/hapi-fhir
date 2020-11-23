@@ -1,19 +1,17 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.model.primitive.IdDt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeSearchParamCache.class);
 
-	private RuntimeSearchParamCache() {
+	protected RuntimeSearchParamCache() {
 	}
 
 	public static RuntimeSearchParamCache fromReadOnlySearchParmCache(ReadOnlySearchParamCache theBuiltInSearchParams) {
@@ -56,14 +54,6 @@ public class RuntimeSearchParamCache extends ReadOnlySearchParamCache {
 
 	public Set<String> getResourceNameKeys() {
 		return myMap.keySet();
-	}
-
-	public Stream<RuntimeSearchParam> getSearchParamStream() {
-		return myMap.values().stream().flatMap(entry -> entry.values().stream());
-	}
-
-	private boolean idMatches(IdDt theTheIdToDelete, RuntimeSearchParam theSearchParam) {
-		return theSearchParam.getId() != null && theTheIdToDelete.equals(new IdDt(theSearchParam.getId().toVersionless()));
 	}
 
 	@Override
