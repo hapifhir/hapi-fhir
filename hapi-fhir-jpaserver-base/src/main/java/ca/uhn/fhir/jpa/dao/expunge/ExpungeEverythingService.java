@@ -162,7 +162,9 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceTable.class));
 		counter.addAndGet(expungeEverythingByType(PartitionEntity.class));
 		myTxTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
+			//TODO GGG HS: This definitely isn't right, but I don't know the real name of the class.
+			//counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.mapper.orm.entity.SearchIndexedEntity.class.getSimpleName() + " d"));
 			return null;
 		});
 
