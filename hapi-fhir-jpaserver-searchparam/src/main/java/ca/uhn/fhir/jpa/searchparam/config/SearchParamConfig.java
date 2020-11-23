@@ -94,12 +94,12 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	public InMemoryResourceMatcher InMemoryResourceMatcher() {
+	public InMemoryResourceMatcher inMemoryResourceMatcher() {
 		return new InMemoryResourceMatcher();
 	}
 
 	@Bean
-	public SearchParamMatcher SearchParamMatcher() {
+	public SearchParamMatcher searchParamMatcher() {
 		return new SearchParamMatcher();
 	}
 
