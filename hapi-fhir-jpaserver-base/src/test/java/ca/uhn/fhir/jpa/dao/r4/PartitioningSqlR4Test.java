@@ -1358,6 +1358,50 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testSearch_NoParams_SearchMultiplePartitionsByName_NoDefault() {
+		createPatient(withPartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		createPatient(withPartition(3), withActiveTrue());
+
+		addReadPartitions(PARTITION_1, PARTITION_2);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids, Matchers.contains(patientId1, patientId2));
+
+		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertThat(searchSql, containsString("PARTITION_ID IN ('1','2')"));
+	}
+
+	@Test
+	public void testSearch_NoParams_SearchMultiplePartitionsByName_WithDefault() {
+		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
+		createPatient(withPartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+		createPatient(withPartition(3), withActiveTrue());
+
+		addReadPartitions(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_2);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+
+		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertThat(searchSql, containsString("PARTITION_ID IN ('a1', '2')"));
+
+// FIXME: move up
+		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientIdNull, patientId2));
+	}
+
+	@Test
 	public void testSearch_DateParam_SearchAllPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
@@ -2542,6 +2586,12 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	private void addReadPartition(Integer thePartitionId) {
 		Validate.notNull(thePartitionId);
 		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionId(thePartitionId, null));
+	}
+
+	private void addReadPartitions(String... thePartitionNames) {
+		Validate.notNull(thePartitionNames);
+		Validate.isTrue(thePartitionNames.length > 0);
+		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(thePartitionNames));
 	}
 
 	private void addReadDefaultPartition() {
