@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -154,6 +155,11 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		// git clone git@github.com:DBCG/connectathon.git
 		Bundle bundle = loadBundle("r4/Connectathon/EXM104-8.2.000/EXM104-8.2.000-bundle.json");
 		ourLog.info("Data imported successfully!");
+		assertNotNull(bundle);
+		List<Bundle.BundleEntryComponent> entries = bundle.getEntry();
+		assertThat(entries, hasSize(40));
+		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
+		assertEquals(entries.get(39).getResponse().getStatus(), "201 Created");
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {
