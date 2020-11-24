@@ -29,10 +29,8 @@ public interface IBasePersistedResource {
 
 	IIdType getIdDt();
 
-	boolean isDeleted();
-
 	/**
-	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwie, returns <code>null</code>
+	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
 	 */
 	Date getDeleted();
 

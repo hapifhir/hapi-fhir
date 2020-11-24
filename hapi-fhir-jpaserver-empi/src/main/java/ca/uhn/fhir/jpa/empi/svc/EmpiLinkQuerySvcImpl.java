@@ -67,10 +67,10 @@ public class EmpiLinkQuerySvcImpl implements IEmpiLinkQuerySvc {
 		String personId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getPersonPid()).toVersionless().getValue();
 		retval.setPersonId(personId);
 		retval.setCreated(theLink.getCreated());
-		retval.setEidMatch(theLink.getEidMatch());
+		retval.setEidMatch(theLink.isEidMatch());
 		retval.setLinkSource(theLink.getLinkSource());
 		retval.setMatchResult(theLink.getMatchResult());
-		retval.setNewPerson(theLink.getNewPerson());
+		retval.setNewPerson(theLink.isNewPerson());
 		retval.setScore(theLink.getScore());
 		retval.setUpdated(theLink.getUpdated());
 		retval.setVector(theLink.getVector());

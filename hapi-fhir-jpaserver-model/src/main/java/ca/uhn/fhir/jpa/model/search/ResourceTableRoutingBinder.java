@@ -10,7 +10,7 @@ import org.hibernate.search.mapper.pojo.route.DocumentRoutes;
 public class ResourceTableRoutingBinder implements RoutingBinder {
 	@Override
 	public void bind(RoutingBindingContext theRoutingBindingContext) {
-		theRoutingBindingContext.dependencies().use("myNarrativeText").use("myResourceLinkFields").use("myResourceType").use("myContentText");
+		theRoutingBindingContext.dependencies().use("myDeleted").use("myIndexStatus");
 		theRoutingBindingContext.bridge(ResourceTable.class, new ResourceTableBridge());
 	}
 

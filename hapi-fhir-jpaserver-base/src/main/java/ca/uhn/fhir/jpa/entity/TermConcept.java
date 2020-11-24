@@ -33,8 +33,10 @@ import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.PropertyBinderRef;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.ValueBridgeRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hl7.fhir.r4.model.Coding;
@@ -79,7 +81,7 @@ public class TermConcept implements Serializable {
 	private TermCodeSystemVersion myCodeSystem;
 
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
-	@FullTextField(name = "myCodeSystemVersionPId")
+	@GenericField(name = "myCodeSystemVersionPId")
 	private long myCodeSystemVersionPid;
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
@@ -90,8 +92,8 @@ public class TermConcept implements Serializable {
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
-	@FullTextField(name = "PROPmyProperties", analyzer = "termConceptPropertyAnalyzer")
-	@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
+	@FullTextField(name = "PROPmyProperties", analyzer = "termConceptPropertyAnalyzer", valueBridge = @ValueBridgeRef(type=TermConceptValueBridge.class))
+	//@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
 	private Collection<TermConceptProperty> myProperties;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)

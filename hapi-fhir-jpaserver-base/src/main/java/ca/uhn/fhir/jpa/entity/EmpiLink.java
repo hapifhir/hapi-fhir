@@ -254,10 +254,6 @@ public class EmpiLink {
 		return this;
 	}
 
-	public Boolean getEidMatch() {
-		return myEidMatch;
-	}
-
 	public boolean isEidMatch() {
 		return myEidMatch != null && myEidMatch;
 	}
@@ -265,10 +261,6 @@ public class EmpiLink {
 	public EmpiLink setEidMatch(Boolean theEidMatch) {
 		myEidMatch = theEidMatch;
 		return this;
-	}
-
-	public Boolean getNewPerson() {
-		return myNewPerson;
 	}
 
 	public boolean isNewPerson() {

@@ -31,6 +31,7 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import javax.annotation.Nullable;
 import javax.persistence.Column;
@@ -57,7 +58,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 	private static final long serialVersionUID = 1L;
 
-	@FullTextField
+	@GenericField
 	@Column(name = "SP_MISSING", nullable = false)
 	private boolean myMissing = false;
 
@@ -78,7 +79,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Column(name = "RES_TYPE", updatable = false, nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
-	@FullTextField
+	@GenericField
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;

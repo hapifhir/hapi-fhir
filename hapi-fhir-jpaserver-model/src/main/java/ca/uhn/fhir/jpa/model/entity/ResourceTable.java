@@ -32,10 +32,15 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -63,13 +68,23 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 * Note the extra config needed in HS6 for indexing transient props:
+	 * https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#indexed-transient-requires-configuration
+	 *
+	 * TODO GGG HS
+	 * Normally with a transient field, we would indicated it is `derivedFrom` some other fields, but in our case, it isn't
+	 * and we are literally only using this field for storing fulltext. Thus we indicate reindexOnUpdate=SHALLOW which
+	 * means that any wholesale replacement of the field, via setter, will cause a reindex.
 	 */
-	@Transient()
+	@Transient
 	@FullTextField(name = "myContentText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
 	@FullTextField(name = "myContentTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
 	@FullTextField(name = "myContentTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
 	@FullTextField(name = "myContentTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
+	//@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myContentText")))
+	//TODO GGG HS waiting on an answer to this here: https://discourse.hibernate.org/t/transient-attribute-that-is-not-derived-in-hs6/4803
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
 	private String myContentText;
 
 	@Column(name = "HASH_SHA256", length = 64, nullable = true)
@@ -104,6 +119,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@FullTextField(name = "myNarrativeTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
 	@FullTextField(name = "myNarrativeTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
+	//TODO GGG HS waiting on an answer to this here: https://discourse.hibernate.org/t/transient-attribute-that-is-not-derived-in-hs6/4803
+	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
 	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -190,6 +207,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 */
 	@FullTextField
 	@Transient
+	//TODO GGG HS this line here indicates that we should reindex when the derived-from field is updated.
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myResourceLinks")))
 	private String myResourceLinksField;
 
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -528,14 +547,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * and was not re-saved in the database
 	 */
 	public void setUnchangedInCurrentOperation(boolean theUnchangedInCurrentOperation) {
+
 		myUnchangedInCurrentOperation = theUnchangedInCurrentOperation;
 	}
 
-	public void setContentTextParsedIntoWords(String theContentText) {
+	public void setContentText(String theContentText) {
 		myContentText = theContentText;
 	}
 
-	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
+	@Transient
+	public String getContentText() {
+		return myContentText;
+	}
+
+	public void setNarrativeText(String theNarrativeText) {
 		myNarrativeText = theNarrativeText;
 	}
 

@@ -414,11 +414,11 @@ abstract public class BaseEmpiR4Test extends BaseJpaR4Test {
 	}
 
 	protected void assertLinksNewPerson(Boolean... theExpectedValues) {
-		assertFields(EmpiLink::getNewPerson, theExpectedValues);
+		assertFields(EmpiLink::isNewPerson, theExpectedValues);
 	}
 
 	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {
-		assertFields(EmpiLink::getEidMatch, theExpectedValues);
+		assertFields(EmpiLink::isEidMatch, theExpectedValues);
 	}
 
 	private <T> void assertFields(Function<EmpiLink, T> theAccessor, T... theExpectedValues) {

@@ -47,7 +47,6 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(id.getIdPartAsLong()).get();
 			assertNotNull(resourceTable.getDeleted());
-			assertTrue(resourceTable.isDeleted());
 		});
 
 		// Current version should be marked as deleted
