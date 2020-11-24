@@ -261,14 +261,14 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 
@@ -286,14 +286,14 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 

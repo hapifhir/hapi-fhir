@@ -343,7 +343,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
@@ -866,7 +866,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-			.andParameter("filter", new StringType("first"))
+			.andParameter("filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
