@@ -1,5 +1,36 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.hamcrest.Matchers;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -24,38 +55,8 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
@@ -155,11 +156,63 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
-
-
 	}
 
 
+	@Test
+	public void testExpandWithFilter() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+	
+		ValueSet result = myValueSetDao.expand(vs, "child");
+				
+		logAndValidateValueSet(result);
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(resp);
+		
+		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>"));
+	}
+
+	@Test
+	public void testExpandWithFilterContainsLeftMatchingValue() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+	
+		ValueSet result = myValueSetDao.expand(vs, "chi");
+				
+		logAndValidateValueSet(result);
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(resp);
+		
+		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>"));
+	}
+
+	@Test
+	public void testExpandWithFilterContainsNotLeftMatchingValue() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+	
+		ValueSet result = myValueSetDao.expand(vs, "hil");
+				
+		logAndValidateValueSet(result);
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
+		ourLog.info(resp);
+		
+		assertThat(resp, not(stringContainsInOrder("<code value=\"childCA\"/>","<display value=\"Child CA\"/>")));
+	}
+	
 	@Test
 	public void testExpandVsWithMultiInclude_All() throws IOException {
 		CodeSystem cs = loadResource(myFhirCtx, CodeSystem.class, "/r4/expand-multi-cs.json");
@@ -270,7 +323,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest {
 		}
 		return retVal;
 	}
-
 
 	private void logAndValidateValueSet(ValueSet theResult) {
 		IParser parser = myFhirCtx.newXmlParser().setPrettyPrint(true);
