@@ -92,7 +92,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	}
 
 	private boolean subscriptionsDaoExists() {
-		return myDaoRegistry == null || myDaoRegistry.isResourceTypeSupported("Subscription");
+		return myDaoRegistry != null && myDaoRegistry.isResourceTypeSupported("Subscription");
 	}
 
 	/**
