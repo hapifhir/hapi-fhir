@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
@@ -162,9 +163,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceTable.class));
 		counter.addAndGet(expungeEverythingByType(PartitionEntity.class));
 		myTxTemplate.execute(t -> {
-			//TODO GGG HS: This definitely isn't right, but I don't know the real name of the class.
-			//counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.mapper.orm.entity.SearchIndexedEntity.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 			return null;
 		});
 

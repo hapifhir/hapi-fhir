@@ -171,12 +171,14 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		//extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		//extraProperties.put("hibernate.search.autoregister_listeners", "true");
 		//TODO GGG HS: validate these settings.
-		extraProperties.put(HibernateOrmMapperSettings.MAPPING_CONFIGURER, HapiLuceneAnalysisConfigurer.class.getName());
+		//extraProperties.put(HibernateOrmMapperSettings.MAPPING_CONFIGURER, HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "8.6.2");
 		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 
-		extraProperties.put("hibernate.temp.use_jdbc_metadata_defaults","false");
+		//extraProperties.put("hibernate.temp.use_jdbc_metadata_defaults","false");
 
 		return extraProperties;
 	}

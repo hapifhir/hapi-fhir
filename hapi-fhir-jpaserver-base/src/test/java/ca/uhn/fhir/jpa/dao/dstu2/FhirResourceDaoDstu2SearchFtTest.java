@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.primitive.Base64BinaryDt;
@@ -31,114 +30,6 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	@BeforeEach
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-	}
-
-	@Test
-	public void testSuggestIgnoresBase64Content() {
-		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
-		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-
-		Media med = new Media();
-		med.getSubject().setReference(ptId);
-		med.getSubtype().setText("Systolic Blood Pressure");
-		med.getContent().setContentType("LCws");
-		med.getContent().setData(new Base64BinaryDt(new byte[] { 44, 44, 44, 44, 44, 44, 44, 44 }));
-		med.getContent().setTitle("bbbb syst");
-		myMediaDao.create(med, mySrd);
-		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
-
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press", null);
-		ourLog.info("Found: " + output);
-		assertEquals(2, output.size());
-		assertEquals("Pressure", output.get(0).getTerm());
-		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "prezure", null);
-		ourLog.info("Found: " + output);
-		assertEquals(2, output.size());
-		assertEquals("Pressure", output.get(0).getTerm());
-		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "syst", null);
-		ourLog.info("Found: " + output);
-		assertEquals(4, output.size());
-		assertEquals("syst", output.get(0).getTerm());
-		assertEquals("bbbb syst", output.get(1).getTerm());
-		assertEquals("Systolic", output.get(2).getTerm());
-		assertEquals("Systolic Blood Pressure", output.get(3).getTerm());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws", null);
-		ourLog.info("Found: " + output);
-		assertEquals(0, output.size());
-	}
-
-	@Test
-	public void testSuggest() {
-		Patient patient = new Patient();
-		patient.addName().addFamily("testSuggest");
-		IIdType ptId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-
-		Observation obs = new Observation();
-		obs.getSubject().setReference(ptId);
-		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
-		myObservationDao.create(obs, mySrd);
-
-		obs = new Observation();
-		obs.getSubject().setReference(ptId);
-		obs.getCode().setText("MNBVCXZ");
-		myObservationDao.create(obs, mySrd);
-
-		obs = new Observation();
-		obs.getSubject().setReference(ptId);
-		obs.getCode().setText("ZXC HELLO");
-		obs.addComponent().getCode().setText("HHHHHHHHHH");
-		myObservationDao.create(obs, mySrd);
-
-		/*
-		 * These shouldn't match since they're for another patient
-		 */
-		patient = new Patient();
-		patient.addName().addFamily("testSuggest2");
-		IIdType ptId2 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-
-		Observation obs2 = new Observation();
-		obs2.getSubject().setReference(ptId2);
-		obs2.getCode().setText("ZXCVBNMZZ");
-		myObservationDao.create(obs2, mySrd);
-
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM", null);
-		ourLog.info("Found: " + output);
-		assertEquals(4, output.size());
-		assertEquals("ZXCVBNM", output.get(0).getTerm());
-		assertEquals("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL", output.get(1).getTerm());
-		assertEquals("ZXC", output.get(2).getTerm());
-		assertEquals("ZXC HELLO", output.get(3).getTerm());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXC", null);
-		ourLog.info("Found: " + output);
-		assertEquals(4, output.size());
-		assertEquals("ZXC", output.get(0).getTerm());
-		assertEquals("ZXC HELLO", output.get(1).getTerm());
-		assertEquals("ZXCVBNM", output.get(2).getTerm());
-		assertEquals("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL", output.get(3).getTerm());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO", null);
-		ourLog.info("Found: " + output);
-		assertEquals(2, output.size());
-		assertEquals("HELLO", output.get(0).getTerm());
-		assertEquals("ZXC HELLO", output.get(1).getTerm());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z", null);
-		ourLog.info("Found: " + output);
-		assertEquals(0, output.size());
-
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX", null);
-		ourLog.info("Found: " + output);
-		assertEquals(2, output.size());
-		assertEquals("ZXC", output.get(0).getTerm());
-		assertEquals("ZXC HELLO", output.get(1).getTerm());
-
 	}
 
 	@Test

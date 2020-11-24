@@ -64,12 +64,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
-	//Conversion from HS 5 -> 6
-	//name --> name
-	//index --> searchable
-	//store --> projectable
-	//analyzed == implied by the fact that this is an @FullTextField
-	//analyzer --> analyzer (but refer to by string name)
 	@Transient()
 	@FullTextField(name = "myContentText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
 	@FullTextField(name = "myContentTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
@@ -90,7 +84,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@SequenceGenerator(name = "SEQ_RESOURCE_ID", sequenceName = "SEQ_RESOURCE_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
-	//TODO GGG HS not sure if i need this document ID.
 	@DocumentId
 	private Long myId;
 

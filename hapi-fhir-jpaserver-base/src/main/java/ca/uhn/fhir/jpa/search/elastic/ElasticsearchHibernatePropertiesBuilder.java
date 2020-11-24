@@ -135,6 +135,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
+
 	public ElasticsearchHibernatePropertiesBuilder setDebugPrettyPrintJsonLog(boolean theDebugPrettyPrintJsonLog) {
 		myDebugPrettyPrintJsonLog = theDebugPrettyPrintJsonLog;
 		return this;

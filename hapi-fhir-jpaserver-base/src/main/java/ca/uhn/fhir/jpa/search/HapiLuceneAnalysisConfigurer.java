@@ -34,10 +34,13 @@ import org.apache.lucene.analysis.snowball.SnowballPorterFilterFactory;
 import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurationContext;
 import org.hibernate.search.backend.lucene.analysis.LuceneAnalysisConfigurer;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Factory for defining the analysers.
  */
+@Component
 public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
 	@Override
@@ -52,9 +55,6 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 
 		theLuceneCtx.analyzer("autocompletePhoneticAnalyzer").custom()
 			.tokenizer(StandardTokenizerFactory.class)
-			//TODO GGG HS: org.apache.lucene.analysis.standard.StandardFilterFactory
-			//StandardFilter is a no-op and can be removed from filter chains
-			//.tokenFilter(StandardFilterFactory.class)
 			.tokenFilter(StopFilterFactory.class)
 			.tokenFilter(PhoneticFilterFactory.class).param("encoder", "DoubleMetaphone")
 			.tokenFilter(SnowballPorterFilterFactory.class).param("language", "English");

@@ -25,39 +25,3 @@ package ca.uhn.fhir.jpa.search;
  */
 @Deprecated
 public class LuceneSearchMappingFactory {}
-/*
-	@Factory
-	public SearchMapping getSearchMapping() {
-		SearchMapping mapping = new SearchMapping();
-
-		mapping.analyzerDef("autocompleteEdgeAnalyzer", PatternTokenizerFactory.class)
-				.tokenizerParam("pattern", "(.*)")
-				.tokenizerParam("group", "1")
-				.filter(LowerCaseFilterFactory.class)
-				.filter(StopFilterFactory.class)
-				.filter(EdgeNGramFilterFactory.class)
-				.param("minGramSize", "3")
-				.param("maxGramSize", "50")
-			.analyzerDef("autocompletePhoneticAnalyzer", StandardTokenizerFactory.class)
-				.filter(StandardFilterFactory.class)
-				.filter(StopFilterFactory.class)
-				.filter(PhoneticFilterFactory.class)
-				.param("encoder", "DoubleMetaphone")
-				.filter(SnowballPorterFilterFactory.class)
-				.param("language", "English")
-			.analyzerDef("autocompleteNGramAnalyzer", StandardTokenizerFactory.class)
-				.filter(WordDelimiterFilterFactory.class)
-				.filter(LowerCaseFilterFactory.class)
-				.filter(NGramFilterFactory.class)
-				.param("minGramSize", "3")
-				.param("maxGramSize", "20")
-			.analyzerDef("standardAnalyzer", StandardTokenizerFactory.class)
-				.filter(LowerCaseFilterFactory.class)
-			.analyzerDef("exactAnalyzer", KeywordTokenizerFactory.class)
-			.analyzerDef("conceptParentPidsAnalyzer", WhitespaceTokenizerFactory.class)
-			.analyzerDef("termConceptPropertyAnalyzer", WhitespaceTokenizerFactory.class);
-
-		return mapping;
-	}
-}
-*/

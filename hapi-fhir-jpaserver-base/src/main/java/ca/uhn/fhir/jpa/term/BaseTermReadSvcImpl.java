@@ -876,25 +876,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Ok, let's use hibernate search to build the expansion
 		 */
-		SearchQuery<TermConcept> termConceptSearchQuery = searchSession.search(TermConcept.class)
-			.where(f -> f.bool(b -> {
-					b.must(f.match().field("myCodeSystemVersionPid").matching(csv.getPid()));
-
-					if (theExpansionFilter.hasCode()) {
-						b.must(f.match().field("myCode").matching(theExpansionFilter.getCode()));
-					}
-
-					String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, includeOrExcludeVersion);
-					for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-						handleFilter(codeSystemUrlAndVersion, f, b, nextFilter);
-					}
-					for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
-						handleFilter(codeSystemUrlAndVersion, f, b, nextFilter);
-					}
-
-				})
-			).toQuery();
-
 		//Manually building a predicate since we need to throw it around.
 		SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 
@@ -1148,6 +1129,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b) {
 		//TODO GGG HS These used to be Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE", ".*");, which was lucene-specific.
+		//TODO GGG HS ask diederik if this is equivalent.
 		//This old .* regex is the same as an existence check on a field, which I've implemented here.
 		b.must(f.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
@@ -1230,6 +1212,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
 			ourLog.debug(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+
 			b.must(f.match().field("myParentPids").matching("" + code.getId()));
 		} else {
 			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
