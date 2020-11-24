@@ -149,6 +149,13 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		ourLog.info("Data imported successfully!");
 	}
 
+	@Test
+	public void testConnectathonExample_EXM104() throws IOException {
+		// git clone git@github.com:DBCG/connectathon.git
+		Bundle bundle = loadBundle("r4/Connectathon/EXM104-8.2.000/EXM104-8.2.000-bundle.json");
+		ourLog.info("Data imported successfully!");
+	}
+
 	private Bundle loadBundle(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);

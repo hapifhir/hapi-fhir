@@ -181,8 +181,8 @@ Direct Reference Codes:
 	}
 
 
-	//@Test
 	// Result: java.lang.IllegalArgumentException: Could not load library source for libraries referenced in Measure/Measure/measure-EXM104-FHIR3-8.1.000/_history/1.
+	@Test
 	public void testEXM104() throws IOException {
 		Bundle result = loadBundle("dstu3/EXM104/valuesets-EXM104_FHIR3-8.1.000-bundle.json");
 		result = loadBundle("dstu3/EXM104/library-deps-EXM104_FHIR3-8.1.000-bundle.json");

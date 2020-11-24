@@ -1,0 +1,249 @@
+{
+  "resourceType": "MeasureReport",
+  "id": "measurereport-denom-EXM104-9.1.000-expectedresults",
+  "contained": [ {
+    "resourceType": "Bundle",
+    "id": "4e9ea2cf-bdfc-460f-b7a0-49f70201e177",
+    "type": "collection",
+    "entry": [ {
+      "fullUrl": "1a19a371-91b8-4a1d-9bb0-e8a997baa655",
+      "resource": {
+        "resourceType": "List",
+        "id": "1a19a371-91b8-4a1d-9bb0-e8a997baa655",
+        "title": "denominator",
+        "entry": [ {
+          "item": {
+            "reference": "denom-EXM104"
+          }
+        }, {
+          "item": {
+            "reference": "denom-EXM104-2"
+          }
+        }, {
+          "item": {
+            "reference": "denom-EXM104-1"
+          }
+        } ]
+      }
+    }, {
+      "fullUrl": "Patient/denom-EXM104",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "denom-EXM104",
+        "meta": {
+          "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient" ]
+        },
+        "extension": [ {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race",
+          "extension": [ {
+            "url": "ombCategory",
+            "valueCoding": {
+              "system": "urn:oid:2.16.840.1.113883.6.238",
+              "code": "2054-5",
+              "display": "Black or African American"
+            }
+          } ]
+        }, {
+          "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-ethnicity",
+          "extension": [ {
+            "url": "ombCategory",
+            "valueCoding": {
+              "system": "urn:oid:2.16.840.1.113883.6.238",
+              "code": "2135-2",
+              "display": "Hispanic or Latino"
+            }
+          } ]
+        } ],
+        "identifier": [ {
+          "use": "usual",
+          "type": {
+            "coding": [ {
+              "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+              "code": "MR",
+              "display": "Medical Record Number"
+            } ]
+          },
+          "system": "http://hospital.smarthealthit.org",
+          "value": "9999999910"
+        } ],
+        "name": [ {
+          "family": "Jones",
+          "given": [ "Rick" ]
+        } ],
+        "gender": "male",
+        "birthDate": "1955-11-05"
+      }
+    }, {
+      "fullUrl": "c247b95f-44a0-4ba4-af88-29419f6454af",
+      "resource": {
+        "resourceType": "List",
+        "id": "c247b95f-44a0-4ba4-af88-29419f6454af",
+        "title": "initial-population",
+        "entry": [ {
+          "item": {
+            "reference": "denom-EXM104"
+          }
+        }, {
+          "item": {
+            "reference": "denom-EXM104-2"
+          }
+        }, {
+          "item": {
+            "reference": "denom-EXM104-1"
+          }
+        } ]
+      }
+    }, {
+      "fullUrl": "Encounter/denom-EXM104-2",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "denom-EXM104-2",
+        "meta": {
+          "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-encounter" ]
+        },
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "IMP",
+          "display": "inpatient encounter"
+        },
+        "type": [ {
+          "coding": [ {
+            "system": "http://snomed.info/sct",
+            "code": "32485007",
+            "display": "Hospital admission (procedure)"
+          } ]
+        } ],
+        "subject": {
+          "reference": "Patient/denom-EXM104"
+        },
+        "period": {
+          "start": "2019-08-21T00:00:00-06:00",
+          "end": "2019-12-19T08:15:00-07:00"
+        },
+        "diagnosis": [ {
+          "condition": {
+            "reference": "Condition/denom-EXM104-1"
+          },
+          "use": {
+            "coding": [ {
+              "system": "http://hl7.org/fhir/diagnosis-role",
+              "code": "billing",
+              "display": "Billing"
+            } ]
+          },
+          "rank": 1
+        } ]
+      }
+    }, {
+      "fullUrl": "0f7a251e-fc83-461c-8a9b-ce07bc2d067d",
+      "resource": {
+        "resourceType": "List",
+        "id": "0f7a251e-fc83-461c-8a9b-ce07bc2d067d",
+        "title": "numerator",
+        "entry": [ {
+          "item": {
+            "reference": "denom-EXM104"
+          }
+        }, {
+          "item": {
+            "reference": "denom-EXM104-2"
+          }
+        }, {
+          "item": {
+            "reference": "denom-EXM104-1"
+          }
+        } ]
+      }
+    }, {
+      "fullUrl": "Condition/denom-EXM104-1",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "denom-EXM104-1",
+        "meta": {
+          "profile": [ "http://hl7.org/fhir/us/core/StructureDefinition/us-core-condition" ]
+        },
+        "verificationStatus": {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+            "code": "confirmed",
+            "display": "Confirmed"
+          } ]
+        },
+        "category": [ {
+          "coding": [ {
+            "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+            "code": "encounter-diagnosis",
+            "display": "Encounter Diagnosis"
+          } ]
+        } ],
+        "code": {
+          "coding": [ {
+            "system": "http://snomed.info/sct",
+            "code": "116288000",
+            "display": "Paralytic stroke (disorder)"
+          } ]
+        },
+        "subject": {
+          "reference": "Patient/denom-EXM104"
+        }
+      }
+    } ]
+  } ],
+  "status": "complete",
+  "type": "individual",
+  "measure": "Measure/measure-EXM104-8.2.000",
+  "subject": {
+    "reference": "Patient/denom-EXM104"
+  },
+  "period": {
+    "start": "2018-12-31T17:00:00-07:00",
+    "end": "2019-12-30T17:00:00-07:00"
+  },
+  "group": [ {
+    "id": "group-1",
+    "population": [ {
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "initial-population",
+          "display": "Initial Population"
+        } ]
+      },
+      "count": 1
+    }, {
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "numerator",
+          "display": "Numerator"
+        } ]
+      },
+      "count": 0
+    }, {
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator",
+          "display": "Denominator"
+        } ]
+      },
+      "count": 1
+    }, {
+      "code": {
+        "coding": [ {
+          "system": "http://terminology.hl7.org/CodeSystem/measure-population",
+          "code": "denominator-exclusion",
+          "display": "Denominator Exclusion"
+        } ]
+      },
+      "count": 0
+    } ],
+    "measureScore": {
+      "value": 0.0
+    }
+  } ],
+  "evaluatedResource": [ {
+    "reference": "#4e9ea2cf-bdfc-460f-b7a0-49f70201e177"
+  } ]
+}
