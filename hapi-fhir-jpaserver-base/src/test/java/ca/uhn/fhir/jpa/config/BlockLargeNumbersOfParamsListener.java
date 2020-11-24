@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
@@ -30,7 +31,7 @@ public class BlockLargeNumbersOfParamsListener implements ProxyDataSourceBuilder
 			ourLog.trace("Have {} param lists", next.getParametersList().size());
 			for (List<ParameterSetOperation> nextParamsList : next.getParametersList()) {
 				ourLog.trace("Have {} sub-param lists", nextParamsList.size());
-				Validate.isTrue(nextParamsList.size() < 1000, "SqlQuery has %s parameters: %s", nextParamsList.size(), next.getQuery());
+				Validate.isTrue(nextParamsList.size() <= SearchBuilder.getMaximumPageSize(), "SqlQuery has %s parameters: %s", nextParamsList.size(), next.getQuery());
 			}
 		}
 	}

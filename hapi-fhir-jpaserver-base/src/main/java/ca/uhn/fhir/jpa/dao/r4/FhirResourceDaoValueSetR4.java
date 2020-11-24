@@ -21,47 +21,27 @@ package ca.uhn.fhir.jpa.dao.r4;
  */
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ElementUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetFilterComponent;
-import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
 import java.util.Date;
-import java.util.List;
 
 import static ca.uhn.fhir.jpa.dao.FhirResourceDaoValueSetDstu2.toStringOrNull;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoValueSetDstu3.vsValidateCodeOptions;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
-
-	private IValidationSupport myValidationSupport;
-
-	@Override
-	public void start() {
-		super.start();
-		myValidationSupport = getApplicationContext().getBean(IValidationSupport.class, "myJpaValidationSupportChain");
-	}
 
 	@Override
 	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
@@ -75,156 +55,26 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		return expand(source, theFilter, theOffset, theCount);
 	}
 
-	private ValueSet doExpand(ValueSet theSource) {
-		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, theSource);
-		validateHaveExpansionOrThrowInternalErrorException(retVal);
-		return (ValueSet) retVal.getValueSet();
-
-	}
-
-	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {
-		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
-			.setOffset(theOffset)
-			.setCount(theCount);
-		IValidationSupport.ValueSetExpansionOutcome retVal = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, theSource);
-		validateHaveExpansionOrThrowInternalErrorException(retVal);
-		return (ValueSet) retVal.getValueSet();
-	}
-
 	@Override
 	public ValueSet expandByIdentifier(String theUri, String theFilter) {
-		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
-		}
-
-		ValueSet source = new ValueSet();
-		source.setUrl(theUri);
-
-		if (isNotBlank(theFilter)) {
-			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
-			filter.setProperty("display");
-			filter.setOp(FilterOperator.EQUAL);
-			filter.setValue(theFilter);
-		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
-		}
-
-		return doExpand(source);
-
-		// if (defaultValueSet != null) {
-		// source = getContext().newJsonParser().parseResource(ValueSet.class, getContext().newJsonParser().encodeResourceToString(defaultValueSet));
-		// } else {
-		// IBundleProvider ids = search(ValueSet.SP_URL, new UriParam(theUri));
-		// if (ids.size() == 0) {
-		// throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
-		// }
-		// source = (ValueSet) ids.getResources(0, 1).get(0);
-		// }
-		//
-		// return expand(defaultValueSet, theFilter);
+		return myTerminologySvc.expandValueSet(null, theUri, theFilter);
 	}
 
 	@Override
 	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
-		if (isBlank(theUri)) {
-			throw new InvalidRequestException("URI must not be blank or missing");
-		}
-
-		ValueSet source = new ValueSet();
-		source.setUrl(theUri);
-
-		if (isNotBlank(theFilter)) {
-			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
-			filter.setProperty("display");
-			filter.setOp(FilterOperator.EQUAL);
-			filter.setValue(theFilter);
-		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
-		}
-
-		return doExpand(source, theOffset, theCount);
+		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
+		return myTerminologySvc.expandValueSet(options, theUri, theFilter);
 	}
 
 	@Override
 	public ValueSet expand(ValueSet theSource, String theFilter) {
-		ValueSet toExpand = new ValueSet();
-
-		// for (UriType next : theSource.getCompose().getInclude()) {
-		// ConceptSetComponent include = toExpand.getCompose().addInclude();
-		// include.setSystem(next.getValue());
-		// addFilterIfPresent(theFilter, include);
-		// }
-
-		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			toExpand.getCompose().addInclude(next);
-			addFilterIfPresent(theFilter, next);
-		}
-
-		if (toExpand.getCompose().isEmpty()) {
-			throw new InvalidRequestException("ValueSet does not have any compose.include or compose.import values, can not expand");
-		}
-
-		toExpand.getCompose().getExclude().addAll(theSource.getCompose().getExclude());
-
-		ValueSet retVal = doExpand(toExpand);
-
-		if (isNotBlank(theFilter)) {
-			applyFilter(retVal.getExpansion().getTotalElement(), retVal.getExpansion().getContains(), theFilter);
-		}
-
-		return retVal;
+		return myTerminologySvc.expandValueSet(null, theSource, theFilter);
 	}
 
 	@Override
 	public ValueSet expand(ValueSet theSource, String theFilter, int theOffset, int theCount) {
-		ValueSet toExpand = new ValueSet();
-		toExpand.setId(theSource.getId());
-		toExpand.setUrl(theSource.getUrl());
-		if (theSource.getVersion() != null) {
-			toExpand.setVersion(theSource.getVersion());
-		}
-
-		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			toExpand.getCompose().addInclude(next);
-			addFilterIfPresent(theFilter, next);
-		}
-
-		if (toExpand.getCompose().isEmpty()) {
-			throw new InvalidRequestException("ValueSet does not have any compose.include or compose.import values, can not expand");
-		}
-
-		toExpand.getCompose().getExclude().addAll(theSource.getCompose().getExclude());
-
-		ValueSet retVal = doExpand(toExpand, theOffset, theCount);
-
-		if (isNotBlank(theFilter)) {
-			applyFilter(retVal.getExpansion().getTotalElement(), retVal.getExpansion().getContains(), theFilter);
-		}
-
-		return retVal;
-	}
-
-	private void applyFilter(IntegerType theTotalElement, List<ValueSetExpansionContainsComponent> theContains, String theFilter) {
-
-		for (int idx = 0; idx < theContains.size(); idx++) {
-			ValueSetExpansionContainsComponent next = theContains.get(idx);
-			if (isBlank(next.getDisplay()) || !org.apache.commons.lang3.StringUtils.containsIgnoreCase(next.getDisplay(), theFilter)) {
-				theContains.remove(idx);
-				idx--;
-				if (theTotalElement.getValue() != null) {
-					theTotalElement.setValue(theTotalElement.getValue() - 1);
-				}
-			}
-			applyFilter(theTotalElement, next.getContains(), theFilter);
-		}
-	}
-
-	private void addFilterIfPresent(String theFilter, ConceptSetComponent include) {
-		if (ElementUtil.isEmpty(include.getConcept())) {
-			if (isNotBlank(theFilter)) {
-				include.addFilter().setProperty(JpaConstants.VALUESET_FILTER_DISPLAY).setOp(FilterOperator.EQUAL).setValue(theFilter);
-			}
-		}
+		ValueSetExpansionOptions options = ValueSetExpansionOptions.forOffsetAndCount(theOffset, theCount);
+		return myTerminologySvc.expandValueSet(options, theSource, theFilter);
 	}
 
 	@Override
