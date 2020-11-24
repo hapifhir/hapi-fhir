@@ -211,6 +211,13 @@ Direct Reference Codes:
 
 	}
 
+	@Test
+	public void testConnectathonExample_EXM104() throws IOException {
+		// git clone git@github.com:DBCG/connectathon.git
+		Bundle bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-bundle.json");
+		ourLog.info("Data imported successfully!");
+	}
+
 	private Bundle loadBundle(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);

@@ -1,0 +1,2683 @@
+{
+  "resourceType": "Bundle",
+  "id": "valuesets-EXM104-FHIR3-8.1.000-bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.209",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.209",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.117.1.7.1.209"
+          }
+        ],
+        "version": "20170725",
+        "name": "DischargedtoHomeforHospiceCare",
+        "title": "Discharged to Home for Hospice Care",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "428361000124107",
+                  "display": "Discharge to home for hospice care (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.209"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.308",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.308",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.117.1.7.1.308"
+          }
+        ],
+        "version": "20170726",
+        "name": "LeftAgainstMedicalAdvice",
+        "title": "Left Against Medical Advice",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "445060000",
+                  "display": "Left against medical advice (finding)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.308"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.309",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.309",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.117.1.7.1.309"
+          }
+        ],
+        "version": "20170726",
+        "name": "PatientExpired",
+        "title": "Patient Expired",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "371828006",
+                  "display": "Patient deceased during stay (discharge status = dead) (finding)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.309"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.424",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.424",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.117.1.7.1.424"
+          }
+        ],
+        "version": "20170726",
+        "name": "Non-ElectiveInpatientEncounter",
+        "title": "Non-Elective Inpatient Encounter",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "183452005",
+                  "display": "Emergency hospital admission (procedure)"
+                },
+                {
+                  "code": "32485007",
+                  "display": "Hospital admission (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.424"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.114222.4.11.3591",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.3591",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.114222.4.11.3591"
+          }
+        ],
+        "version": "20180718",
+        "name": "Payer",
+        "title": "Payer",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.phdsc.org/standards/pdfs/SourceofPaymentTypologyVersion6FINALSeptember2015.pdf",
+              "version": "8.0",
+              "concept": [
+                {
+                  "code": "1",
+                  "display": "MEDICARE"
+                },
+                {
+                  "code": "11",
+                  "display": "Medicare (Managed Care)"
+                },
+                {
+                  "code": "111",
+                  "display": "Medicare HMO"
+                },
+                {
+                  "code": "112",
+                  "display": "Medicare PPO"
+                },
+                {
+                  "code": "113",
+                  "display": "Medicare POS"
+                },
+                {
+                  "code": "119",
+                  "display": "Medicare Managed Care Other"
+                },
+                {
+                  "code": "12",
+                  "display": "Medicare (Non-managed Care)"
+                },
+                {
+                  "code": "121",
+                  "display": "Medicare FFS"
+                },
+                {
+                  "code": "122",
+                  "display": "Medicare Drug Benefit"
+                },
+                {
+                  "code": "123",
+                  "display": "Medicare Medical Savings Account (MSA)"
+                },
+                {
+                  "code": "129",
+                  "display": "Medicare Non-managed Care Other"
+                },
+                {
+                  "code": "13",
+                  "display": "Medicare Hospice"
+                },
+                {
+                  "code": "14",
+                  "display": "Dual Eligibility Medicare/Medicaid Organization"
+                },
+                {
+                  "code": "19",
+                  "display": "Medicare Other"
+                },
+                {
+                  "code": "191",
+                  "display": "Medicare Pharmacy Benefit Manager"
+                },
+                {
+                  "code": "2",
+                  "display": "MEDICAID"
+                },
+                {
+                  "code": "21",
+                  "display": "Medicaid (Managed Care)"
+                },
+                {
+                  "code": "211",
+                  "display": "Medicaid HMO"
+                },
+                {
+                  "code": "212",
+                  "display": "Medicaid PPO"
+                },
+                {
+                  "code": "213",
+                  "display": "Medicaid PCCM (Primary Care Case Management)"
+                },
+                {
+                  "code": "219",
+                  "display": "Medicaid Managed Care Other"
+                },
+                {
+                  "code": "22",
+                  "display": "Medicaid (Non-managed Care Plan)"
+                },
+                {
+                  "code": "23",
+                  "display": "Medicaid/SCHIP"
+                },
+                {
+                  "code": "25",
+                  "display": "Medicaid - Out of State"
+                },
+                {
+                  "code": "26",
+                  "display": "Medicaid -- Long Term Care"
+                },
+                {
+                  "code": "29",
+                  "display": "Medicaid Other"
+                },
+                {
+                  "code": "291",
+                  "display": "Medicaid Pharmacy Benefit Manager"
+                },
+                {
+                  "code": "299",
+                  "display": "Medicaid - Dental"
+                },
+                {
+                  "code": "3",
+                  "display": "OTHER GOVERNMENT (Federal/State/Local) (excluding Department of Corrections)"
+                },
+                {
+                  "code": "31",
+                  "display": "Department of Defense"
+                },
+                {
+                  "code": "311",
+                  "display": "TRICARE (CHAMPUS)"
+                },
+                {
+                  "code": "3111",
+                  "display": "TRICARE Prime--HMO"
+                },
+                {
+                  "code": "3112",
+                  "display": "TRICARE Extra--PPO"
+                },
+                {
+                  "code": "3113",
+                  "display": "TRICARE Standard - Fee For Service"
+                },
+                {
+                  "code": "3114",
+                  "display": "TRICARE For Life--Medicare Supplement"
+                },
+                {
+                  "code": "3115",
+                  "display": "TRICARE Reserve Select"
+                },
+                {
+                  "code": "3116",
+                  "display": "Uniformed Services Family Health Plan (USFHP) -- HMO"
+                },
+                {
+                  "code": "3119",
+                  "display": "Department of Defense - (other)"
+                },
+                {
+                  "code": "312",
+                  "display": "Military Treatment Facility"
+                },
+                {
+                  "code": "3121",
+                  "display": "Enrolled Prime--HMO"
+                },
+                {
+                  "code": "3122",
+                  "display": "Non-enrolled Space Available"
+                },
+                {
+                  "code": "3123",
+                  "display": "TRICARE For Life (TFL)"
+                },
+                {
+                  "code": "313",
+                  "display": "Dental --Stand Alone"
+                },
+                {
+                  "code": "32",
+                  "display": "Department of Veterans Affairs"
+                },
+                {
+                  "code": "321",
+                  "display": "Veteran care--Care provided to Veterans"
+                },
+                {
+                  "code": "3211",
+                  "display": "Direct Care--Care provided in VA facilities"
+                },
+                {
+                  "code": "3212",
+                  "display": "Indirect Care--Care provided outside VA facilities"
+                },
+                {
+                  "code": "32121",
+                  "display": "Fee Basis"
+                },
+                {
+                  "code": "32122",
+                  "display": "Foreign Fee/Foreign Medical Program (FMP)"
+                },
+                {
+                  "code": "32123",
+                  "display": "Contract Nursing Home/Community Nursing Home"
+                },
+                {
+                  "code": "32124",
+                  "display": "State Veterans Home"
+                },
+                {
+                  "code": "32125",
+                  "display": "Sharing Agreements"
+                },
+                {
+                  "code": "32126",
+                  "display": "Other Federal Agency"
+                },
+                {
+                  "code": "32127",
+                  "display": "Dental Care"
+                },
+                {
+                  "code": "32128",
+                  "display": "Vision Care"
+                },
+                {
+                  "code": "322",
+                  "display": "Non-veteran care"
+                },
+                {
+                  "code": "3221",
+                  "display": "Civilian Health and Medical Program for the VA (CHAMPVA)"
+                },
+                {
+                  "code": "3222",
+                  "display": "Spina Bifida Health Care Program (SB)"
+                },
+                {
+                  "code": "3223",
+                  "display": "Children of Women Vietnam Veterans (CWVV)"
+                },
+                {
+                  "code": "3229",
+                  "display": "Other non-veteran care"
+                },
+                {
+                  "code": "33",
+                  "display": "Indian Health Service or Tribe"
+                },
+                {
+                  "code": "331",
+                  "display": "Indian Health Service -- Regular"
+                },
+                {
+                  "code": "332",
+                  "display": "Indian Health Service -- Contract"
+                },
+                {
+                  "code": "333",
+                  "display": "Indian Health Service - Managed Care"
+                },
+                {
+                  "code": "334",
+                  "display": "Indian Tribe - Sponsored Coverage"
+                },
+                {
+                  "code": "34",
+                  "display": "HRSA Program"
+                },
+                {
+                  "code": "341",
+                  "display": "Title V (MCH Block Grant)"
+                },
+                {
+                  "code": "342",
+                  "display": "Migrant Health Program"
+                },
+                {
+                  "code": "343",
+                  "display": "Ryan White Act"
+                },
+                {
+                  "code": "349",
+                  "display": "Other"
+                },
+                {
+                  "code": "35",
+                  "display": "Black Lung"
+                },
+                {
+                  "code": "36",
+                  "display": "State Government"
+                },
+                {
+                  "code": "361",
+                  "display": "State SCHIP program (codes for individual states)"
+                },
+                {
+                  "code": "362",
+                  "display": "Specific state programs (list/ local code)"
+                },
+                {
+                  "code": "369",
+                  "display": "State, not otherwise specified (other state)"
+                },
+                {
+                  "code": "37",
+                  "display": "Local Government"
+                },
+                {
+                  "code": "371",
+                  "display": "Local - Managed care"
+                },
+                {
+                  "code": "3711",
+                  "display": "HMO"
+                },
+                {
+                  "code": "3712",
+                  "display": "PPO"
+                },
+                {
+                  "code": "3713",
+                  "display": "POS"
+                },
+                {
+                  "code": "372",
+                  "display": "FFS/Indemnity"
+                },
+                {
+                  "code": "379",
+                  "display": "Local, not otherwise specified (other local, county)"
+                },
+                {
+                  "code": "38",
+                  "display": "Other Government (Federal, State, Local not specified)"
+                },
+                {
+                  "code": "381",
+                  "display": "Federal, State, Local not specified managed care"
+                },
+                {
+                  "code": "3811",
+                  "display": "Federal, State, Local not specified - HMO"
+                },
+                {
+                  "code": "3812",
+                  "display": "Federal, State, Local not specified - PPO"
+                },
+                {
+                  "code": "3813",
+                  "display": "Federal, State, Local not specified - POS"
+                },
+                {
+                  "code": "3819",
+                  "display": "Federal, State, Local not specified - not specified managed care"
+                },
+                {
+                  "code": "382",
+                  "display": "Federal, State, Local not specified - FFS"
+                },
+                {
+                  "code": "389",
+                  "display": "Federal, State, Local not specified - Other"
+                },
+                {
+                  "code": "39",
+                  "display": "Other Federal"
+                },
+                {
+                  "code": "391",
+                  "display": "Federal Employee Health Plan - Use when known"
+                },
+                {
+                  "code": "4",
+                  "display": "DEPARTMENTS OF CORRECTIONS"
+                },
+                {
+                  "code": "41",
+                  "display": "Corrections Federal"
+                },
+                {
+                  "code": "42",
+                  "display": "Corrections State"
+                },
+                {
+                  "code": "43",
+                  "display": "Corrections Local"
+                },
+                {
+                  "code": "44",
+                  "display": "Corrections Unknown Level"
+                },
+                {
+                  "code": "5",
+                  "display": "PRIVATE HEALTH INSURANCE"
+                },
+                {
+                  "code": "51",
+                  "display": "Managed Care (Private)"
+                },
+                {
+                  "code": "511",
+                  "display": "Commercial Managed Care - HMO"
+                },
+                {
+                  "code": "512",
+                  "display": "Commercial Managed Care - PPO"
+                },
+                {
+                  "code": "513",
+                  "display": "Commercial Managed Care - POS"
+                },
+                {
+                  "code": "514",
+                  "display": "Exclusive Provider Organization"
+                },
+                {
+                  "code": "515",
+                  "display": "Gatekeeper PPO (GPPO)"
+                },
+                {
+                  "code": "516",
+                  "display": "Commercial Managed Care - Pharmacy Benefit Manager"
+                },
+                {
+                  "code": "517",
+                  "display": "Commercial Managed Care - Dental"
+                },
+                {
+                  "code": "519",
+                  "display": "Managed Care, Other (non HMO)"
+                },
+                {
+                  "code": "52",
+                  "display": "Private Health Insurance - Indemnity"
+                },
+                {
+                  "code": "521",
+                  "display": "Commercial Indemnity"
+                },
+                {
+                  "code": "522",
+                  "display": "Self-insured (ERISA) Administrative Services Only (ASO) plan"
+                },
+                {
+                  "code": "523",
+                  "display": "Medicare supplemental policy (as second payer)"
+                },
+                {
+                  "code": "524",
+                  "display": "Indemnity Insurance - Dental"
+                },
+                {
+                  "code": "529",
+                  "display": "Private health insurance--other commercial Indemnity"
+                },
+                {
+                  "code": "53",
+                  "display": "Managed Care (private) or private health insurance (indemnity), not otherwise specified"
+                },
+                {
+                  "code": "54",
+                  "display": "Organized Delivery System"
+                },
+                {
+                  "code": "55",
+                  "display": "Small Employer Purchasing Group"
+                },
+                {
+                  "code": "56",
+                  "display": "Specialized Stand Alone Plan"
+                },
+                {
+                  "code": "561",
+                  "display": "Dental"
+                },
+                {
+                  "code": "562",
+                  "display": "Vision"
+                },
+                {
+                  "code": "59",
+                  "display": "Other Private Insurance"
+                },
+                {
+                  "code": "6",
+                  "display": "BLUE CROSS/BLUE SHIELD"
+                },
+                {
+                  "code": "61",
+                  "display": "BC Managed Care"
+                },
+                {
+                  "code": "611",
+                  "display": "BC Managed Care -- HMO"
+                },
+                {
+                  "code": "612",
+                  "display": "BC Managed Care -- PPO"
+                },
+                {
+                  "code": "613",
+                  "display": "BC Managed Care -- POS"
+                },
+                {
+                  "code": "614",
+                  "display": "BC Managed Care - Dental"
+                },
+                {
+                  "code": "619",
+                  "display": "BC Managed Care -- Other"
+                },
+                {
+                  "code": "62",
+                  "display": "BC Insurance Indemnity"
+                },
+                {
+                  "code": "621",
+                  "display": "BC Indemnity"
+                },
+                {
+                  "code": "622",
+                  "display": "BC Self-insured (ERISA) Administrative Services Only (ASO)Plan"
+                },
+                {
+                  "code": "623",
+                  "display": "BC Medicare Supplemental Plan"
+                },
+                {
+                  "code": "629",
+                  "display": "BC Indemnity - Dental"
+                },
+                {
+                  "code": "7",
+                  "display": "MANAGED CARE, UNSPECIFIED (to be used only if one can't distinguish public from private)"
+                },
+                {
+                  "code": "71",
+                  "display": "HMO"
+                },
+                {
+                  "code": "72",
+                  "display": "PPO"
+                },
+                {
+                  "code": "73",
+                  "display": "POS"
+                },
+                {
+                  "code": "79",
+                  "display": "Other Managed Care"
+                },
+                {
+                  "code": "8",
+                  "display": "NO PAYMENT from an Organization/Agency/Program/Private Payer Listed"
+                },
+                {
+                  "code": "81",
+                  "display": "Self-pay (Includes applicants for insurance and Medicaid applicants)"
+                },
+                {
+                  "code": "82",
+                  "display": "No Charge"
+                },
+                {
+                  "code": "821",
+                  "display": "Charity"
+                },
+                {
+                  "code": "822",
+                  "display": "Professional Courtesy"
+                },
+                {
+                  "code": "823",
+                  "display": "Research/Clinical Trial"
+                },
+                {
+                  "code": "83",
+                  "display": "Refusal to Pay/Bad Debt"
+                },
+                {
+                  "code": "84",
+                  "display": "Hill Burton Free Care"
+                },
+                {
+                  "code": "85",
+                  "display": "Research/Donor"
+                },
+                {
+                  "code": "89",
+                  "display": "No Payment, Other"
+                },
+                {
+                  "code": "9",
+                  "display": "MISCELLANEOUS/OTHER"
+                },
+                {
+                  "code": "91",
+                  "display": "Foreign National"
+                },
+                {
+                  "code": "92",
+                  "display": "Other (Non-government)"
+                },
+                {
+                  "code": "93",
+                  "display": "Disability Insurance"
+                },
+                {
+                  "code": "94",
+                  "display": "Long-term Care Insurance"
+                },
+                {
+                  "code": "95",
+                  "display": "Worker's Compensation"
+                },
+                {
+                  "code": "951",
+                  "display": "Worker's Comp HMO"
+                },
+                {
+                  "code": "953",
+                  "display": "Worker's Comp Fee-for-Service"
+                },
+                {
+                  "code": "954",
+                  "display": "Worker's Comp Other Managed Care"
+                },
+                {
+                  "code": "959",
+                  "display": "Worker's Comp, Other unspecified"
+                },
+                {
+                  "code": "96",
+                  "display": "Auto Insurance (includes no fault)"
+                },
+                {
+                  "code": "97",
+                  "display": "Legal Liability / Liability Insurance"
+                },
+                {
+                  "code": "98",
+                  "display": "Other specified but not otherwise classifiable (includes Hospice - Unspecified plan)"
+                },
+                {
+                  "code": "99",
+                  "display": "No Typology Code available for payment source"
+                },
+                {
+                  "code": "9999",
+                  "display": "Unavailable / No Payer Specified / Blank"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.114222.4.11.3591"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.207",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.207",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.117.1.7.1.207"
+          }
+        ],
+        "version": "20170725",
+        "name": "DischargedtoHealthCareFacilityforHospiceCare",
+        "title": "Discharged to Health Care Facility for Hospice Care",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "428371000124100",
+                  "display": "Discharge to healthcare facility for hospice care (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.207"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1110.39",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1110.39",
+        "title": "Ticagrelor Therapy",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "version": "2019-08",
+              "concept": [
+                {
+                  "code": "1116635",
+                  "display": "Ticagrelor 90 MG Oral Tablet"
+                },
+                {
+                  "code": "1666332",
+                  "display": "Ticagrelor 60 MG Oral Tablet"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1110.39"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.87",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.87",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.117.1.7.1.87"
+          }
+        ],
+        "version": "20170725",
+        "name": "DischargeToAcuteCareFacility",
+        "title": "Discharge To Acute Care Facility",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "306701001",
+                  "display": "Discharge to community hospital (procedure)"
+                },
+                {
+                  "code": "306703003",
+                  "display": "Discharge to tertiary referral hospital (procedure)"
+                },
+                {
+                  "code": "434781000124105",
+                  "display": "Discharge to acute care hospital (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.87"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.93",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.93",
+        "title": "Patient Refusal",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-03",
+              "concept": [
+                {
+                  "code": "105480006",
+                  "display": "Refusal of treatment by patient (situation)"
+                },
+                {
+                  "code": "182890002",
+                  "display": "Patient requests alternative treatment (finding)"
+                },
+                {
+                  "code": "182895007",
+                  "display": "Drug declined by patient (situation)"
+                },
+                {
+                  "code": "182896008",
+                  "display": "Drug declined by patient - dislikes taste (situation)"
+                },
+                {
+                  "code": "182897004",
+                  "display": "Drug declined by patient - side effects (situation)"
+                },
+                {
+                  "code": "182898009",
+                  "display": "Drug declined by patient - inconvenient (situation)"
+                },
+                {
+                  "code": "182900006",
+                  "display": "Drug declined by patient - patient beliefs (situation)"
+                },
+                {
+                  "code": "182901005",
+                  "display": "Drug declined by patient - alternative therapy (situation)"
+                },
+                {
+                  "code": "182903008",
+                  "display": "Drug declined by patient - reason unknown (situation)"
+                },
+                {
+                  "code": "183944003",
+                  "display": "Procedure refused (situation)"
+                },
+                {
+                  "code": "183945002",
+                  "display": "Procedure refused for religious reason (situation)"
+                },
+                {
+                  "code": "183946001",
+                  "display": "Procedure refused - uncooperative (situation)"
+                },
+                {
+                  "code": "183947005",
+                  "display": "Refused procedure - after thought (situation)"
+                },
+                {
+                  "code": "183948000",
+                  "display": "Refused procedure - parent's wish (situation)"
+                },
+                {
+                  "code": "275936005",
+                  "display": "Patient noncompliance - general (situation)"
+                },
+                {
+                  "code": "371138003",
+                  "display": "Refusal of treatment by parents (situation)"
+                },
+                {
+                  "code": "406149000",
+                  "display": "Medication refused (situation)"
+                },
+                {
+                  "code": "413312003",
+                  "display": "Patient non-compliant - refused service (situation)"
+                },
+                {
+                  "code": "416432009",
+                  "display": "Procedure not wanted (situation)"
+                },
+                {
+                  "code": "443390004",
+                  "display": "Refused (qualifier value)"
+                },
+                {
+                  "code": "609589008",
+                  "display": "Refused by parents of subject (qualifier value)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.93"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.292",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.292",
+        "title": "Emergency Department Visit",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-03",
+              "concept": [
+                {
+                  "code": "4525004",
+                  "display": "Emergency department patient visit (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.292"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1111.143",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1111.143",
+        "title": "Observation Services",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-09",
+              "concept": [
+                {
+                  "code": "448851000124103",
+                  "display": "Hospital admission from observation unit (procedure)"
+                },
+                {
+                  "code": "448951000124107",
+                  "display": "Admission to observation unit (procedure)"
+                },
+                {
+                  "code": "76464004",
+                  "display": "Hospital admission, for observation (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1111.143"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.666.5.307",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113883.3.666.5.307"
+          }
+        ],
+        "version": "20170504",
+        "name": "EncounterInpatient",
+        "title": "Encounter Inpatient",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "183452005",
+                  "display": "Emergency hospital admission (procedure)"
+                },
+                {
+                  "code": "32485007",
+                  "display": "Hospital admission (procedure)"
+                },
+                {
+                  "code": "8715000",
+                  "display": "Hospital admission, elective (procedure)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.666.5.307"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "1.3.6.1.4.1.33895.1.3.0.45",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/1.3.6.1.4.1.33895.1.3.0.45",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "1.3.6.1.4.1.33895.1.3.0.45"
+          }
+        ],
+        "version": "20160331",
+        "name": "ComfortMeasures",
+        "title": "Comfort Measures",
+        "status": "active",
+        "publisher": "TJC EH Steward",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2018-03",
+              "concept": [
+                {
+                  "code": "133918004",
+                  "display": "Comfort measures (regime/therapy)"
+                },
+                {
+                  "code": "182964004",
+                  "display": "Terminal care (regime/therapy)"
+                },
+                {
+                  "code": "385736008",
+                  "display": "Dying care (regime/therapy)"
+                },
+                {
+                  "code": "385763009",
+                  "display": "Hospice care (regime/therapy)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/1.3.6.1.4.1.33895.1.3.0.45"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.201",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.201",
+        "title": "Antithrombotic Therapy",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.nlm.nih.gov/research/umls/rxnorm",
+              "version": "2019-08",
+              "concept": [
+                {
+                  "code": "1037045",
+                  "display": "dabigatran etexilate 150 MG Oral Capsule"
+                },
+                {
+                  "code": "1037179",
+                  "display": "dabigatran etexilate 75 MG Oral Capsule"
+                },
+                {
+                  "code": "103863",
+                  "display": "Aspirin 150 MG Rectal Suppository"
+                },
+                {
+                  "code": "1092398",
+                  "display": "Aspirin 500 MG / Diphenhydramine Hydrochloride 25 MG Oral Tablet"
+                },
+                {
+                  "code": "1114198",
+                  "display": "rivaroxaban 10 MG Oral Tablet"
+                },
+                {
+                  "code": "1232082",
+                  "display": "rivaroxaban 15 MG Oral Tablet"
+                },
+                {
+                  "code": "1232086",
+                  "display": "rivaroxaban 20 MG Oral Tablet"
+                },
+                {
+                  "code": "1250907",
+                  "display": "Aspirin 500 MG / Diphenhydramine Citrate 38.3 MG Oral Tablet"
+                },
+                {
+                  "code": "1291868",
+                  "display": "Aspirin 325 MG / Diphenhydramine Citrate 38 MG Oral Tablet"
+                },
+                {
+                  "code": "1361574",
+                  "display": "heparin sodium, porcine 20000 UNT/ML Injectable Solution"
+                },
+                {
+                  "code": "1364435",
+                  "display": "apixaban 2.5 MG Oral Tablet"
+                },
+                {
+                  "code": "1364445",
+                  "display": "apixaban 5 MG Oral Tablet"
+                },
+                {
+                  "code": "1536467",
+                  "display": "Aspirin 325 MG / Citric Acid 1000 MG / Sodium Bicarbonate 1700 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1536498",
+                  "display": "Aspirin 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1536503",
+                  "display": "Aspirin 500 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1536675",
+                  "display": "Aspirin 325 MG / Citric Acid 1000 MG / Sodium Bicarbonate 1916 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1536815",
+                  "display": "Aspirin 500 MG / Caffeine 65 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1536833",
+                  "display": "Aspirin 500 MG / Citric Acid 1000 MG / Sodium Bicarbonate 1985 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1536840",
+                  "display": "Aspirin 325 MG / Chlorpheniramine Maleate 2 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1537029",
+                  "display": "Aspirin 325 MG / Chlorpheniramine Maleate 2 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet"
+                },
+                {
+                  "code": "1549682",
+                  "display": "{42 (rivaroxaban 15 MG Oral Tablet) / 9 (rivaroxaban 20 MG Oral Tablet) } Pack"
+                },
+                {
+                  "code": "1593110",
+                  "display": "Acetaminophen 250 MG / Aspirin 250 MG / Diphenhydramine Citrate 38 MG Oral Tablet"
+                },
+                {
+                  "code": "1599543",
+                  "display": "edoxaban 15 MG Oral Tablet"
+                },
+                {
+                  "code": "1599551",
+                  "display": "edoxaban 30 MG Oral Tablet"
+                },
+                {
+                  "code": "1599555",
+                  "display": "edoxaban 60 MG Oral Tablet"
+                },
+                {
+                  "code": "1658717",
+                  "display": "250 ML heparin sodium, porcine 100 UNT/ML Injection"
+                },
+                {
+                  "code": "1659195",
+                  "display": "500 ML heparin sodium, porcine 50 UNT/ML Injection"
+                },
+                {
+                  "code": "1659197",
+                  "display": "250 ML heparin sodium, porcine 50 UNT/ML Injection"
+                },
+                {
+                  "code": "1665356",
+                  "display": "24 HR Aspirin 162.5 MG Extended Release Oral Capsule"
+                },
+                {
+                  "code": "1722689",
+                  "display": "Aspirin 81 MG / Calcium Carbonate 777 MG Oral Tablet"
+                },
+                {
+                  "code": "1723476",
+                  "display": "dabigatran etexilate 110 MG Oral Capsule"
+                },
+                {
+                  "code": "1730187",
+                  "display": "{12 (Aspirin 325 MG / Dextromethorphan Hydrobromide 10 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet) / 8 (Aspirin 500 MG / Dextromethorphan Hydrobromide 10 MG / doxylamine succinate 6.25 MG / Phenylephrine bitartrate 7.8 MG Effervescent Oral Tablet) } Pack"
+                },
+                {
+                  "code": "1804735",
+                  "display": "50 ML argatroban 1 MG/ML Injection"
+                },
+                {
+                  "code": "1804737",
+                  "display": "125 ML argatroban 1 MG/ML Injection"
+                },
+                {
+                  "code": "1804738",
+                  "display": "250 ML argatroban 1 MG/ML Injection"
+                },
+                {
+                  "code": "1811631",
+                  "display": "Aspirin 81 MG / Omeprazole 40 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "1811632",
+                  "display": "Aspirin 325 MG / Omeprazole 40 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "198464",
+                  "display": "Aspirin 300 MG Rectal Suppository"
+                },
+                {
+                  "code": "198466",
+                  "display": "Aspirin 325 MG Oral Capsule"
+                },
+                {
+                  "code": "198467",
+                  "display": "Aspirin 325 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "198471",
+                  "display": "Aspirin 500 MG Oral Tablet"
+                },
+                {
+                  "code": "198473",
+                  "display": "Aspirin 600 MG Rectal Suppository"
+                },
+                {
+                  "code": "198475",
+                  "display": "Aspirin 650 MG Oral Tablet"
+                },
+                {
+                  "code": "198479",
+                  "display": "Aspirin 400 MG / Caffeine 32 MG Oral Tablet"
+                },
+                {
+                  "code": "198480",
+                  "display": "Aspirin 500 MG / Caffeine 32 MG Oral Tablet"
+                },
+                {
+                  "code": "1992427",
+                  "display": "{74 (apixaban 5 MG Oral Tablet) } Pack"
+                },
+                {
+                  "code": "199274",
+                  "display": "Aspirin 300 MG Oral Capsule"
+                },
+                {
+                  "code": "212033",
+                  "display": "Aspirin 325 MG Oral Tablet"
+                },
+                {
+                  "code": "243670",
+                  "display": "Aspirin 81 MG Oral Tablet"
+                },
+                {
+                  "code": "243685",
+                  "display": "Aspirin 421 MG / Caffeine 32 MG Oral Tablet"
+                },
+                {
+                  "code": "243694",
+                  "display": "Acetaminophen 194 MG / Aspirin 227 MG / Caffeine 33 MG Oral Tablet"
+                },
+                {
+                  "code": "259081",
+                  "display": "12 HR Aspirin 25 MG / Dipyridamole 200 MG Extended Release Oral Capsule"
+                },
+                {
+                  "code": "308278",
+                  "display": "Acetaminophen 115 MG / Aspirin 210 MG / Caffeine 16 MG / salicylamide 65 MG Oral Tablet"
+                },
+                {
+                  "code": "308297",
+                  "display": "Acetaminophen 250 MG / Aspirin 250 MG / Caffeine 65 MG Oral Tablet"
+                },
+                {
+                  "code": "308351",
+                  "display": "2.5 ML argatroban 100 MG/ML Injection"
+                },
+                {
+                  "code": "308363",
+                  "display": "Aspirin 325 MG / Caffeine 16 MG / salicylamide 95 MG Oral Tablet"
+                },
+                {
+                  "code": "308409",
+                  "display": "Aspirin 500 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "308411",
+                  "display": "Aspirin 650 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "308416",
+                  "display": "Aspirin 81 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "308417",
+                  "display": "Aspirin 975 MG Delayed Release Oral Tablet"
+                },
+                {
+                  "code": "309362",
+                  "display": "clopidogrel 75 MG Oral Tablet"
+                },
+                {
+                  "code": "313406",
+                  "display": "Ticlopidine Hydrochloride 250 MG Oral Tablet"
+                },
+                {
+                  "code": "318272",
+                  "display": "Aspirin 81 MG Chewable Tablet"
+                },
+                {
+                  "code": "359221",
+                  "display": "Acetaminophen 110 MG / Aspirin 162 MG / Caffeine 32.4 MG / salicylamide 152 MG Oral Tablet"
+                },
+                {
+                  "code": "432638",
+                  "display": "Acetaminophen 250 MG / Aspirin 250 MG Oral Tablet"
+                },
+                {
+                  "code": "605252",
+                  "display": "Aspirin 650 MG / Caffeine 33.3 MG / salicylamide 195 MG Oral Powder"
+                },
+                {
+                  "code": "692836",
+                  "display": "Acetaminophen 325 MG / Aspirin 500 MG / Caffeine 65 MG Oral Powder"
+                },
+                {
+                  "code": "702316",
+                  "display": "Aspirin 500 MG / Caffeine 32.5 MG Oral Tablet"
+                },
+                {
+                  "code": "747211",
+                  "display": "Aspirin 81 MG Disintegrating Oral Tablet"
+                },
+                {
+                  "code": "749196",
+                  "display": "clopidogrel 300 MG Oral Tablet"
+                },
+                {
+                  "code": "763111",
+                  "display": "Acetaminophen 325 MG / Aspirin 500 MG Oral Powder"
+                },
+                {
+                  "code": "763116",
+                  "display": "Acetaminophen 260 MG / Aspirin 520 MG / Caffeine 32.5 MG Oral Powder"
+                },
+                {
+                  "code": "797050",
+                  "display": "Aspirin 650 MG / Caffeine 32 MG / salicylamide 200 MG Oral Powder"
+                },
+                {
+                  "code": "827318",
+                  "display": "Acetaminophen 250 MG / Aspirin 250 MG / Caffeine 65 MG Oral Capsule"
+                },
+                {
+                  "code": "854238",
+                  "display": "0.6 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "854241",
+                  "display": "0.8 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "854245",
+                  "display": "0.8 ML Enoxaparin sodium 150 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "854248",
+                  "display": "1 ML Enoxaparin sodium 100 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "854252",
+                  "display": "1 ML Enoxaparin sodium 150 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "854255",
+                  "display": "Enoxaparin sodium 100 MG/ML Injectable Solution"
+                },
+                {
+                  "code": "855288",
+                  "display": "Warfarin Sodium 1 MG Oral Tablet"
+                },
+                {
+                  "code": "855296",
+                  "display": "Warfarin Sodium 10 MG Oral Tablet"
+                },
+                {
+                  "code": "855302",
+                  "display": "Warfarin Sodium 2 MG Oral Tablet"
+                },
+                {
+                  "code": "855312",
+                  "display": "Warfarin Sodium 2.5 MG Oral Tablet"
+                },
+                {
+                  "code": "855318",
+                  "display": "Warfarin Sodium 3 MG Oral Tablet"
+                },
+                {
+                  "code": "855324",
+                  "display": "Warfarin Sodium 4 MG Oral Tablet"
+                },
+                {
+                  "code": "855332",
+                  "display": "Warfarin Sodium 5 MG Oral Tablet"
+                },
+                {
+                  "code": "855338",
+                  "display": "Warfarin Sodium 6 MG Oral Tablet"
+                },
+                {
+                  "code": "855344",
+                  "display": "Warfarin Sodium 7.5 MG Oral Tablet"
+                },
+                {
+                  "code": "861356",
+                  "display": "0.8 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "861360",
+                  "display": "0.5 ML Fondaparinux sodium 5 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "861363",
+                  "display": "0.4 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "861365",
+                  "display": "0.6 ML Fondaparinux sodium 12.5 MG/ML Prefilled Syringe"
+                },
+                {
+                  "code": "863184",
+                  "display": "Aspirin 360 MG / Caffeine 75 MG / magnesium carbonate 100 MG / Magnesium Salicylate 60 MG Oral Tablet"
+                },
+                {
+                  "code": "863186",
+                  "display": "Aspirin 410 MG / Caffeine 60 MG / salicylamide 30 MG Oral Tablet"
+                },
+                {
+                  "code": "896884",
+                  "display": "Aspirin 742 MG / Caffeine 38 MG / salicylamide 222 MG Oral Powder"
+                },
+                {
+                  "code": "900528",
+                  "display": "Aspirin 850 MG / Caffeine 65 MG Oral Powder"
+                },
+                {
+                  "code": "978725",
+                  "display": "0.2 ML Dalteparin Sodium 12500 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978733",
+                  "display": "0.2 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978736",
+                  "display": "0.3 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978740",
+                  "display": "0.5 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978744",
+                  "display": "0.6 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978746",
+                  "display": "0.72 ML Dalteparin Sodium 25000 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978755",
+                  "display": "1 ML Dalteparin Sodium 10000 UNT/ML Prefilled Syringe"
+                },
+                {
+                  "code": "978759",
+                  "display": "Dalteparin Sodium 10000 UNT/ML Injectable Solution"
+                },
+                {
+                  "code": "978777",
+                  "display": "Dalteparin Sodium 25000 UNT/ML Injectable Solution"
+                },
+                {
+                  "code": "994430",
+                  "display": "Aspirin 1000 MG / Caffeine 65 MG Oral Powder"
+                },
+                {
+                  "code": "994435",
+                  "display": "Aspirin 845 MG / Caffeine 65 MG Oral Powder"
+                },
+                {
+                  "code": "994528",
+                  "display": "Aspirin 385 MG / Caffeine 30 MG / Orphenadrine Citrate 25 MG Oral Tablet"
+                },
+                {
+                  "code": "994535",
+                  "display": "Aspirin 770 MG / Caffeine 60 MG / Orphenadrine Citrate 50 MG Oral Tablet"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.201"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.212",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.212",
+        "title": "Hemorrhagic Stroke",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-03",
+              "concept": [
+                {
+                  "code": "195155004",
+                  "display": "Subarachnoid hemorrhage from carotid siphon and bifurcation (disorder)"
+                },
+                {
+                  "code": "195160000",
+                  "display": "Intracranial subarachnoid hemorrhage from vertebral artery (disorder)"
+                },
+                {
+                  "code": "195165005",
+                  "display": "Basal ganglia hemorrhage (disorder)"
+                },
+                {
+                  "code": "195167002",
+                  "display": "External capsule hemorrhage (disorder)"
+                },
+                {
+                  "code": "195168007",
+                  "display": "Intracerebral hemorrhage with intraventricular hemorrhage (disorder)"
+                },
+                {
+                  "code": "195169004",
+                  "display": "Intracerebral hemorrhage, multiple localized (disorder)"
+                },
+                {
+                  "code": "20908003",
+                  "display": "Subcortical cerebral hemorrhage (disorder)"
+                },
+                {
+                  "code": "230706003",
+                  "display": "Hemorrhagic cerebral infarction (disorder)"
+                },
+                {
+                  "code": "230707007",
+                  "display": "Anterior cerebral circulation hemorrhagic infarction (disorder)"
+                },
+                {
+                  "code": "230708002",
+                  "display": "Posterior cerebral circulation hemorrhagic infarction (disorder)"
+                },
+                {
+                  "code": "230709005",
+                  "display": "Massive supratentorial cerebral hemorrhage (disorder)"
+                },
+                {
+                  "code": "230710000",
+                  "display": "Lobar cerebral hemorrhage (disorder)"
+                },
+                {
+                  "code": "230711001",
+                  "display": "Thalamic hemorrhage (disorder)"
+                },
+                {
+                  "code": "230712008",
+                  "display": "Lacunar hemorrhage (disorder)"
+                },
+                {
+                  "code": "23276006",
+                  "display": "Ventricular hemorrhage (disorder)"
+                },
+                {
+                  "code": "270907008",
+                  "display": "Spontaneous intracranial subarachnoid hemorrhage (disorder)"
+                },
+                {
+                  "code": "274100004",
+                  "display": "Cerebral hemorrhage (disorder)"
+                },
+                {
+                  "code": "276277008",
+                  "display": "Subarachnoid hemorrhage from multiple aneurysms (disorder)"
+                },
+                {
+                  "code": "276278003",
+                  "display": "Subarachnoid hemorrhage from anterior cerebral artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276280009",
+                  "display": "Subarachnoid hemorrhage from middle cerebral artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276281008",
+                  "display": "Subarachnoid hemorrhage from posterior cerebral artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276282001",
+                  "display": "Subarachnoid hemorrhage from anterior communicating artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276283006",
+                  "display": "Subarachnoid hemorrhage from posterior communicating artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276284000",
+                  "display": "Subarachnoid hemorrhage from basilar artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276285004",
+                  "display": "Subarachnoid hemorrhage from posterior inferior cerebellar artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276286003",
+                  "display": "Subarachnoid hemorrhage from carotid artery aneurysm (disorder)"
+                },
+                {
+                  "code": "276722003",
+                  "display": "Intracerebellar and posterior fossa hemorrhage (disorder)"
+                },
+                {
+                  "code": "28318001",
+                  "display": "Basilar hemorrhage (disorder)"
+                },
+                {
+                  "code": "42429001",
+                  "display": "Cerebromeningeal hemorrhage (disorder)"
+                },
+                {
+                  "code": "425957003",
+                  "display": "Non-traumatic intracerebral ventricular hemorrhage (disorder)"
+                },
+                {
+                  "code": "449020009",
+                  "display": "Intraparenchymal hemorrhage of brain (disorder)"
+                },
+                {
+                  "code": "49422009",
+                  "display": "Cortical hemorrhage (disorder)"
+                },
+                {
+                  "code": "52201006",
+                  "display": "Internal capsule hemorrhage (disorder)"
+                },
+                {
+                  "code": "73020009",
+                  "display": "Cerebral hemisphere hemorrhage (disorder)"
+                },
+                {
+                  "code": "75038005",
+                  "display": "Cerebellar hemorrhage (disorder)"
+                },
+                {
+                  "code": "7713009",
+                  "display": "Intrapontine hemorrhage (disorder)"
+                },
+                {
+                  "code": "95454007",
+                  "display": "Brain stem hemorrhage (disorder)"
+                }
+              ]
+            },
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "version": "2020",
+              "concept": [
+                {
+                  "code": "I60.00",
+                  "display": "Nontraumatic subarachnoid hemorrhage from unspecified carotid siphon and bifurcation"
+                },
+                {
+                  "code": "I60.01",
+                  "display": "Nontraumatic subarachnoid hemorrhage from right carotid siphon and bifurcation"
+                },
+                {
+                  "code": "I60.02",
+                  "display": "Nontraumatic subarachnoid hemorrhage from left carotid siphon and bifurcation"
+                },
+                {
+                  "code": "I60.10",
+                  "display": "Nontraumatic subarachnoid hemorrhage from unspecified middle cerebral artery"
+                },
+                {
+                  "code": "I60.11",
+                  "display": "Nontraumatic subarachnoid hemorrhage from right middle cerebral artery"
+                },
+                {
+                  "code": "I60.12",
+                  "display": "Nontraumatic subarachnoid hemorrhage from left middle cerebral artery"
+                },
+                {
+                  "code": "I60.2",
+                  "display": "Nontraumatic subarachnoid hemorrhage from anterior communicating artery"
+                },
+                {
+                  "code": "I60.30",
+                  "display": "Nontraumatic subarachnoid hemorrhage from unspecified posterior communicating artery"
+                },
+                {
+                  "code": "I60.31",
+                  "display": "Nontraumatic subarachnoid hemorrhage from right posterior communicating artery"
+                },
+                {
+                  "code": "I60.32",
+                  "display": "Nontraumatic subarachnoid hemorrhage from left posterior communicating artery"
+                },
+                {
+                  "code": "I60.4",
+                  "display": "Nontraumatic subarachnoid hemorrhage from basilar artery"
+                },
+                {
+                  "code": "I60.50",
+                  "display": "Nontraumatic subarachnoid hemorrhage from unspecified vertebral artery"
+                },
+                {
+                  "code": "I60.51",
+                  "display": "Nontraumatic subarachnoid hemorrhage from right vertebral artery"
+                },
+                {
+                  "code": "I60.52",
+                  "display": "Nontraumatic subarachnoid hemorrhage from left vertebral artery"
+                },
+                {
+                  "code": "I60.6",
+                  "display": "Nontraumatic subarachnoid hemorrhage from other intracranial arteries"
+                },
+                {
+                  "code": "I60.7",
+                  "display": "Nontraumatic subarachnoid hemorrhage from unspecified intracranial artery"
+                },
+                {
+                  "code": "I60.8",
+                  "display": "Other nontraumatic subarachnoid hemorrhage"
+                },
+                {
+                  "code": "I60.9",
+                  "display": "Nontraumatic subarachnoid hemorrhage, unspecified"
+                },
+                {
+                  "code": "I61.0",
+                  "display": "Nontraumatic intracerebral hemorrhage in hemisphere, subcortical"
+                },
+                {
+                  "code": "I61.1",
+                  "display": "Nontraumatic intracerebral hemorrhage in hemisphere, cortical"
+                },
+                {
+                  "code": "I61.2",
+                  "display": "Nontraumatic intracerebral hemorrhage in hemisphere, unspecified"
+                },
+                {
+                  "code": "I61.3",
+                  "display": "Nontraumatic intracerebral hemorrhage in brain stem"
+                },
+                {
+                  "code": "I61.4",
+                  "display": "Nontraumatic intracerebral hemorrhage in cerebellum"
+                },
+                {
+                  "code": "I61.5",
+                  "display": "Nontraumatic intracerebral hemorrhage, intraventricular"
+                },
+                {
+                  "code": "I61.6",
+                  "display": "Nontraumatic intracerebral hemorrhage, multiple localized"
+                },
+                {
+                  "code": "I61.8",
+                  "display": "Other nontraumatic intracerebral hemorrhage"
+                },
+                {
+                  "code": "I61.9",
+                  "display": "Nontraumatic intracerebral hemorrhage, unspecified"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.212"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.247",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.247",
+        "title": "Ischemic Stroke",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-03",
+              "concept": [
+                {
+                  "code": "111297002",
+                  "display": "Nonparalytic stroke (disorder)"
+                },
+                {
+                  "code": "116288000",
+                  "display": "Paralytic stroke (disorder)"
+                },
+                {
+                  "code": "195185009",
+                  "display": "Cerebral infarct due to thrombosis of precerebral arteries (disorder)"
+                },
+                {
+                  "code": "195186005",
+                  "display": "Cerebral infarction due to embolism of precerebral arteries (disorder)"
+                },
+                {
+                  "code": "195189003",
+                  "display": "Cerebral infarction due to thrombosis of cerebral arteries (disorder)"
+                },
+                {
+                  "code": "195190007",
+                  "display": "Cerebral infarction due to embolism of cerebral arteries (disorder)"
+                },
+                {
+                  "code": "195212005",
+                  "display": "Brainstem stroke syndrome (disorder)"
+                },
+                {
+                  "code": "195213000",
+                  "display": "Cerebellar stroke syndrome (disorder)"
+                },
+                {
+                  "code": "195216008",
+                  "display": "Left sided cerebral hemisphere cerebrovascular accident (disorder)"
+                },
+                {
+                  "code": "195217004",
+                  "display": "Right sided cerebral hemisphere cerebrovascular accident (disorder)"
+                },
+                {
+                  "code": "195230003",
+                  "display": "Cerebral infarction due to cerebral venous thrombosis, non-pyogenic (disorder)"
+                },
+                {
+                  "code": "230690007",
+                  "display": "Cerebrovascular accident (disorder)"
+                },
+                {
+                  "code": "230691006",
+                  "display": "Cerebrovascular accident due to occlusion of cerebral artery (disorder)"
+                },
+                {
+                  "code": "230692004",
+                  "display": "Infarction - precerebral (disorder)"
+                },
+                {
+                  "code": "230693009",
+                  "display": "Anterior cerebral circulation infarction (disorder)"
+                },
+                {
+                  "code": "230694003",
+                  "display": "Total anterior cerebral circulation infarction (disorder)"
+                },
+                {
+                  "code": "230695002",
+                  "display": "Partial anterior cerebral circulation infarction (disorder)"
+                },
+                {
+                  "code": "230696001",
+                  "display": "Posterior cerebral circulation infarction (disorder)"
+                },
+                {
+                  "code": "230698000",
+                  "display": "Lacunar infarction (disorder)"
+                },
+                {
+                  "code": "230699008",
+                  "display": "Pure motor lacunar infarction (disorder)"
+                },
+                {
+                  "code": "230700009",
+                  "display": "Pure sensory lacunar infarction (disorder)"
+                },
+                {
+                  "code": "230701008",
+                  "display": "Pure sensorimotor lacunar infarction (disorder)"
+                },
+                {
+                  "code": "307363008",
+                  "display": "Multiple lacunar infarcts (disorder)"
+                },
+                {
+                  "code": "426107000",
+                  "display": "Acute lacunar infarction (disorder)"
+                }
+              ]
+            },
+            {
+              "system": "http://hl7.org/fhir/sid/icd-10",
+              "version": "2020",
+              "concept": [
+                {
+                  "code": "I63.00",
+                  "display": "Cerebral infarction due to thrombosis of unspecified precerebral artery"
+                },
+                {
+                  "code": "I63.011",
+                  "display": "Cerebral infarction due to thrombosis of right vertebral artery"
+                },
+                {
+                  "code": "I63.012",
+                  "display": "Cerebral infarction due to thrombosis of left vertebral artery"
+                },
+                {
+                  "code": "I63.013",
+                  "display": "Cerebral infarction due to thrombosis of bilateral vertebral arteries"
+                },
+                {
+                  "code": "I63.019",
+                  "display": "Cerebral infarction due to thrombosis of unspecified vertebral artery"
+                },
+                {
+                  "code": "I63.02",
+                  "display": "Cerebral infarction due to thrombosis of basilar artery"
+                },
+                {
+                  "code": "I63.031",
+                  "display": "Cerebral infarction due to thrombosis of right carotid artery"
+                },
+                {
+                  "code": "I63.032",
+                  "display": "Cerebral infarction due to thrombosis of left carotid artery"
+                },
+                {
+                  "code": "I63.033",
+                  "display": "Cerebral infarction due to thrombosis of bilateral carotid arteries"
+                },
+                {
+                  "code": "I63.039",
+                  "display": "Cerebral infarction due to thrombosis of unspecified carotid artery"
+                },
+                {
+                  "code": "I63.09",
+                  "display": "Cerebral infarction due to thrombosis of other precerebral artery"
+                },
+                {
+                  "code": "I63.10",
+                  "display": "Cerebral infarction due to embolism of unspecified precerebral artery"
+                },
+                {
+                  "code": "I63.111",
+                  "display": "Cerebral infarction due to embolism of right vertebral artery"
+                },
+                {
+                  "code": "I63.112",
+                  "display": "Cerebral infarction due to embolism of left vertebral artery"
+                },
+                {
+                  "code": "I63.113",
+                  "display": "Cerebral infarction due to embolism of bilateral vertebral arteries"
+                },
+                {
+                  "code": "I63.119",
+                  "display": "Cerebral infarction due to embolism of unspecified vertebral artery"
+                },
+                {
+                  "code": "I63.12",
+                  "display": "Cerebral infarction due to embolism of basilar artery"
+                },
+                {
+                  "code": "I63.131",
+                  "display": "Cerebral infarction due to embolism of right carotid artery"
+                },
+                {
+                  "code": "I63.132",
+                  "display": "Cerebral infarction due to embolism of left carotid artery"
+                },
+                {
+                  "code": "I63.133",
+                  "display": "Cerebral infarction due to embolism of bilateral carotid arteries"
+                },
+                {
+                  "code": "I63.139",
+                  "display": "Cerebral infarction due to embolism of unspecified carotid artery"
+                },
+                {
+                  "code": "I63.19",
+                  "display": "Cerebral infarction due to embolism of other precerebral artery"
+                },
+                {
+                  "code": "I63.20",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified precerebral arteries"
+                },
+                {
+                  "code": "I63.211",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of right vertebral artery"
+                },
+                {
+                  "code": "I63.212",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of left vertebral artery"
+                },
+                {
+                  "code": "I63.213",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of bilateral vertebral arteries"
+                },
+                {
+                  "code": "I63.219",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified vertebral artery"
+                },
+                {
+                  "code": "I63.22",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of basilar artery"
+                },
+                {
+                  "code": "I63.231",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of right carotid arteries"
+                },
+                {
+                  "code": "I63.232",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of left carotid arteries"
+                },
+                {
+                  "code": "I63.233",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of bilateral carotid arteries"
+                },
+                {
+                  "code": "I63.239",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified carotid artery"
+                },
+                {
+                  "code": "I63.29",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of other precerebral arteries"
+                },
+                {
+                  "code": "I63.30",
+                  "display": "Cerebral infarction due to thrombosis of unspecified cerebral artery"
+                },
+                {
+                  "code": "I63.311",
+                  "display": "Cerebral infarction due to thrombosis of right middle cerebral artery"
+                },
+                {
+                  "code": "I63.312",
+                  "display": "Cerebral infarction due to thrombosis of left middle cerebral artery"
+                },
+                {
+                  "code": "I63.313",
+                  "display": "Cerebral infarction due to thrombosis of bilateral middle cerebral arteries"
+                },
+                {
+                  "code": "I63.319",
+                  "display": "Cerebral infarction due to thrombosis of unspecified middle cerebral artery"
+                },
+                {
+                  "code": "I63.321",
+                  "display": "Cerebral infarction due to thrombosis of right anterior cerebral artery"
+                },
+                {
+                  "code": "I63.322",
+                  "display": "Cerebral infarction due to thrombosis of left anterior cerebral artery"
+                },
+                {
+                  "code": "I63.323",
+                  "display": "Cerebral infarction due to thrombosis of bilateral anterior cerebral arteries"
+                },
+                {
+                  "code": "I63.329",
+                  "display": "Cerebral infarction due to thrombosis of unspecified anterior cerebral artery"
+                },
+                {
+                  "code": "I63.331",
+                  "display": "Cerebral infarction due to thrombosis of right posterior cerebral artery"
+                },
+                {
+                  "code": "I63.332",
+                  "display": "Cerebral infarction due to thrombosis of left posterior cerebral artery"
+                },
+                {
+                  "code": "I63.333",
+                  "display": "Cerebral infarction due to thrombosis of bilateral posterior cerebral arteries"
+                },
+                {
+                  "code": "I63.339",
+                  "display": "Cerebral infarction due to thrombosis of unspecified posterior cerebral artery"
+                },
+                {
+                  "code": "I63.341",
+                  "display": "Cerebral infarction due to thrombosis of right cerebellar artery"
+                },
+                {
+                  "code": "I63.342",
+                  "display": "Cerebral infarction due to thrombosis of left cerebellar artery"
+                },
+                {
+                  "code": "I63.343",
+                  "display": "Cerebral infarction due to thrombosis of bilateral cerebellar arteries"
+                },
+                {
+                  "code": "I63.349",
+                  "display": "Cerebral infarction due to thrombosis of unspecified cerebellar artery"
+                },
+                {
+                  "code": "I63.39",
+                  "display": "Cerebral infarction due to thrombosis of other cerebral artery"
+                },
+                {
+                  "code": "I63.40",
+                  "display": "Cerebral infarction due to embolism of unspecified cerebral artery"
+                },
+                {
+                  "code": "I63.411",
+                  "display": "Cerebral infarction due to embolism of right middle cerebral artery"
+                },
+                {
+                  "code": "I63.412",
+                  "display": "Cerebral infarction due to embolism of left middle cerebral artery"
+                },
+                {
+                  "code": "I63.413",
+                  "display": "Cerebral infarction due to embolism of bilateral middle cerebral arteries"
+                },
+                {
+                  "code": "I63.419",
+                  "display": "Cerebral infarction due to embolism of unspecified middle cerebral artery"
+                },
+                {
+                  "code": "I63.421",
+                  "display": "Cerebral infarction due to embolism of right anterior cerebral artery"
+                },
+                {
+                  "code": "I63.422",
+                  "display": "Cerebral infarction due to embolism of left anterior cerebral artery"
+                },
+                {
+                  "code": "I63.423",
+                  "display": "Cerebral infarction due to embolism of bilateral anterior cerebral arteries"
+                },
+                {
+                  "code": "I63.429",
+                  "display": "Cerebral infarction due to embolism of unspecified anterior cerebral artery"
+                },
+                {
+                  "code": "I63.431",
+                  "display": "Cerebral infarction due to embolism of right posterior cerebral artery"
+                },
+                {
+                  "code": "I63.432",
+                  "display": "Cerebral infarction due to embolism of left posterior cerebral artery"
+                },
+                {
+                  "code": "I63.433",
+                  "display": "Cerebral infarction due to embolism of bilateral posterior cerebral arteries"
+                },
+                {
+                  "code": "I63.439",
+                  "display": "Cerebral infarction due to embolism of unspecified posterior cerebral artery"
+                },
+                {
+                  "code": "I63.441",
+                  "display": "Cerebral infarction due to embolism of right cerebellar artery"
+                },
+                {
+                  "code": "I63.442",
+                  "display": "Cerebral infarction due to embolism of left cerebellar artery"
+                },
+                {
+                  "code": "I63.443",
+                  "display": "Cerebral infarction due to embolism of bilateral cerebellar arteries"
+                },
+                {
+                  "code": "I63.449",
+                  "display": "Cerebral infarction due to embolism of unspecified cerebellar artery"
+                },
+                {
+                  "code": "I63.49",
+                  "display": "Cerebral infarction due to embolism of other cerebral artery"
+                },
+                {
+                  "code": "I63.50",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified cerebral artery"
+                },
+                {
+                  "code": "I63.511",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of right middle cerebral artery"
+                },
+                {
+                  "code": "I63.512",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of left middle cerebral artery"
+                },
+                {
+                  "code": "I63.513",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of bilateral middle cerebral arteries"
+                },
+                {
+                  "code": "I63.519",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified middle cerebral artery"
+                },
+                {
+                  "code": "I63.521",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of right anterior cerebral artery"
+                },
+                {
+                  "code": "I63.522",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of left anterior cerebral artery"
+                },
+                {
+                  "code": "I63.523",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of bilateral anterior cerebral arteries"
+                },
+                {
+                  "code": "I63.529",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified anterior cerebral artery"
+                },
+                {
+                  "code": "I63.531",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of right posterior cerebral artery"
+                },
+                {
+                  "code": "I63.532",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of left posterior cerebral artery"
+                },
+                {
+                  "code": "I63.533",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of bilateral posterior cerebral arteries"
+                },
+                {
+                  "code": "I63.539",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified posterior cerebral artery"
+                },
+                {
+                  "code": "I63.541",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of right cerebellar artery"
+                },
+                {
+                  "code": "I63.542",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of left cerebellar artery"
+                },
+                {
+                  "code": "I63.543",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of bilateral cerebellar arteries"
+                },
+                {
+                  "code": "I63.549",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of unspecified cerebellar artery"
+                },
+                {
+                  "code": "I63.59",
+                  "display": "Cerebral infarction due to unspecified occlusion or stenosis of other cerebral artery"
+                },
+                {
+                  "code": "I63.6",
+                  "display": "Cerebral infarction due to cerebral venous thrombosis, nonpyogenic"
+                },
+                {
+                  "code": "I63.81",
+                  "display": "Other cerebral infarction due to occlusion or stenosis of small artery"
+                },
+                {
+                  "code": "I63.89",
+                  "display": "Other cerebral infarction"
+                },
+                {
+                  "code": "I63.9",
+                  "display": "Cerebral infarction, unspecified"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.247"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113883.3.117.1.7.1.473",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.117.1.7.1.473",
+        "title": "Medical Reason",
+        "status": "active",
+        "publisher": "The Joint Commission",
+        "compose": {
+          "include": [
+            {
+              "system": "http://snomed.info/sct",
+              "version": "2019-03",
+              "concept": [
+                {
+                  "code": "183932001",
+                  "display": "Procedure contraindicated (situation)"
+                },
+                {
+                  "code": "183964008",
+                  "display": "Treatment not indicated (situation)"
+                },
+                {
+                  "code": "183966005",
+                  "display": "Drug treatment not indicated (situation)"
+                },
+                {
+                  "code": "266721009",
+                  "display": "Absent response to treatment (situation)"
+                },
+                {
+                  "code": "31438003",
+                  "display": "Drug resistance (disorder)"
+                },
+                {
+                  "code": "35688006",
+                  "display": "Complication of medical care (disorder)"
+                },
+                {
+                  "code": "397745006",
+                  "display": "Medical contraindication (finding)"
+                },
+                {
+                  "code": "407563006",
+                  "display": "Treatment not tolerated (situation)"
+                },
+                {
+                  "code": "410529002",
+                  "display": "Not needed (qualifier value)"
+                },
+                {
+                  "code": "410534003",
+                  "display": "Not indicated (qualifier value)"
+                },
+                {
+                  "code": "410536001",
+                  "display": "Contraindicated (qualifier value)"
+                },
+                {
+                  "code": "416098002",
+                  "display": "Allergy to drug (finding)"
+                },
+                {
+                  "code": "419511003",
+                  "display": "Propensity to adverse reactions to drug (finding)"
+                },
+                {
+                  "code": "428024001",
+                  "display": "Clinical trial participant (person)"
+                },
+                {
+                  "code": "428119001",
+                  "display": "Procedure not indicated (situation)"
+                },
+                {
+                  "code": "59037007",
+                  "display": "Intolerance to drug (finding)"
+                },
+                {
+                  "code": "62014003",
+                  "display": "Adverse reaction caused by drug (disorder)"
+                },
+                {
+                  "code": "79899007",
+                  "display": "Drug interaction (finding)"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113883.3.117.1.7.1.473"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.114222.4.11.836",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.836",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.114222.4.11.836"
+          }
+        ],
+        "version": "20121025",
+        "name": "Race",
+        "title": "Race",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.cdc.gov/phin/resources/vocabulary/index.html",
+              "version": "1.2",
+              "concept": [
+                {
+                  "code": "1002-5",
+                  "display": "American Indian or Alaska Native"
+                },
+                {
+                  "code": "2028-9",
+                  "display": "Asian"
+                },
+                {
+                  "code": "2054-5",
+                  "display": "Black or African American"
+                },
+                {
+                  "code": "2076-8",
+                  "display": "Native Hawaiian or Other Pacific Islander"
+                },
+                {
+                  "code": "2106-3",
+                  "display": "White"
+                },
+                {
+                  "code": "2131-1",
+                  "display": "Other Race"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.114222.4.11.836"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.114222.4.11.837",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.114222.4.11.837",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.114222.4.11.837"
+          }
+        ],
+        "version": "20121025",
+        "name": "Ethnicity",
+        "title": "Ethnicity",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://www.cdc.gov/phin/resources/vocabulary/index.html",
+              "version": "1.2",
+              "concept": [
+                {
+                  "code": "2135-2",
+                  "display": "Hispanic or Latino"
+                },
+                {
+                  "code": "2186-5",
+                  "display": "Not Hispanic or Latino"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.114222.4.11.837"
+      }
+    },
+    {
+      "resource": {
+        "resourceType": "ValueSet",
+        "id": "2.16.840.1.113762.1.4.1",
+        "url": "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113762.1.4.1",
+        "identifier": [
+          {
+            "system": "urn:ietf:rfc:3986",
+            "value": "2.16.840.1.113762.1.4.1"
+          }
+        ],
+        "version": "20150331",
+        "name": "ONCAdministrativeSex",
+        "title": "ONC Administrative Sex",
+        "status": "active",
+        "publisher": "NLM",
+        "compose": {
+          "include": [
+            {
+              "system": "http://hl7.org/fhir/v3/AdministrativeGender",
+              "version": "HL7V3.0_2017-07",
+              "concept": [
+                {
+                  "code": "F",
+                  "display": "Female"
+                },
+                {
+                  "code": "M",
+                  "display": "Male"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "ValueSet/2.16.840.1.113762.1.4.1"
+      }
+    }
+  ]
+}
