@@ -12,8 +12,9 @@
   "type": {
     "coding": [
       {
-        "system": "http://hl7.org/fhir/codesystem-library-type.html",
-        "code": "logic-library"
+        "system": "http://hl7.org/fhir/library-type",
+        "code": "logic-library",
+			"display": "http://hl7.org/fhir/codesystem-library-type.html"
       }
     ]
   },

@@ -2,7 +2,7 @@
   "resourceType": "Measure",
   "id": "measure-EXM104-FHIR3-8.1.000",
   "meta": {
-    "versionId": "4",
+    "versionId": "1",
     "lastUpdated": "2019-09-13T20:33:19.546+00:00",
     "profile": [
       "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/proportion-measure-cqfm"

@@ -9,6 +9,8 @@ import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.util.StopWatch;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
@@ -19,8 +21,12 @@ import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -138,7 +144,6 @@ Direct Reference Codes:
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
-
 	}
 
 	@Test
@@ -154,7 +159,7 @@ Direct Reference Codes:
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
-		// FIXME KBD Why does this call accept a reportType of "population" ? http://hl7.org/fhir/STU3/valueset-measure-report-type.html
+		// TODO KBD Why does this call accept a reportType of "population" ? http://hl7.org/fhir/STU3/valueset-measure-report-type.html
 		// First run to absorb startup costs
 		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
 			null, null, null, null, null, null, null);
@@ -177,12 +182,11 @@ Direct Reference Codes:
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
-
 	}
 
-
-	// Result: java.lang.IllegalArgumentException: Could not load library source for libraries referenced in Measure/Measure/measure-EXM104-FHIR3-8.1.000/_history/1.
-	@Test
+	// Fails with:
+	// java.lang.IllegalArgumentException: Could not load library source for libraries referenced in Measure/Measure/measure-EXM104-FHIR3-8.1.000/_history/1.
+	//@Test
 	public void testEXM104() throws IOException {
 		Bundle result = loadBundle("dstu3/EXM104/valuesets-EXM104_FHIR3-8.1.000-bundle.json");
 		result = loadBundle("dstu3/EXM104/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
@@ -211,11 +215,69 @@ Direct Reference Codes:
 
 	}
 
+	// Fails with:
+	//	java.lang.IllegalArgumentException: [MATGlobalCommonFunctions_FHIR3-4.0.000[40:74, 40:92]Timezone keyword is only valid in 1.3 or lower,
+	//	MATGlobalCommonFunctions_FHIR3-4.0.000[223:19, 223:53]Could not resolve membership operator for terminology target of the retrieve.,
+	//	MATGlobalCommonFunctions_FHIR3-4.0.000[229:21, 229:90]Could not resolve membership operator for terminology target of the retrieve.,
+	//	MATGlobalCommonFunctions_FHIR3-4.0.000[40:74, 40:92]Timezone keyword is only valid in 1.3 or lower,
+	//	MATGlobalCommonFunctions_FHIR3-4.0.000[223:19, 223:53]Could not resolve membership operator for terminology target of the retrieve.,
+	//	MATGlobalCommonFunctions_FHIR3-4.0.000[229:21, 229:90]Could not resolve membership operator for terminology target of the retrieve.,
+	//	TJCOverall_FHIR3-3.6.000[74:18, 74:37]Could not resolve call to operator ToDate with signature (System.DateTime).]
+	//	at org.opencds.cqf.common.evaluation.LibraryLoader.loadLibrary(LibraryLoader.java:86)
+	//	at org.opencds.cqf.common.evaluation.LibraryLoader.resolveLibrary(LibraryLoader.java:63)
+	//	at org.opencds.cqf.common.evaluation.LibraryLoader.load(LibraryLoader.java:105)
+	//	at org.opencds.cqf.dstu3.helpers.LibraryHelper.loadLibraries(LibraryHelper.java:61)
+	//	at org.opencds.cqf.dstu3.evaluation.MeasureEvaluationSeed.setup(MeasureEvaluationSeed.java:57)
+	//	at org.opencds.cqf.dstu3.providers.MeasureOperationsProvider.evaluateMeasure(MeasureOperationsProvider.java:184)
+	//	at ca.uhn.fhir.cql.provider.CqlProviderDstu3Test.testConnectathonExample_EXM104(CqlProviderDstu3Test.java:238)
 	@Test
 	public void testConnectathonExample_EXM104() throws IOException {
 		// git clone git@github.com:DBCG/connectathon.git
-		Bundle bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-bundle.json");
+		Bundle bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
+		loadResource("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-EXM104_FHIR3-8.1.000.json", myFhirContext, myDaoRegistry);
+		bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-bundle.json");
+		int numFilesLoaded = loadDataFromDirectory("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files");
+		assertEquals(numFilesLoaded, 6);
 		ourLog.info("Data imported successfully!");
+		assertNotNull(bundle);
+		List<Bundle.BundleEntryComponent> entries = bundle.getEntry();
+		assertThat(entries, hasSize(35));
+		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
+		assertEquals(entries.get(34).getResponse().getStatus(), "201 Created");
+
+		IdType measureId = new IdType("Measure", "measure-EXM104-FHIR3-8.1.000");
+		String patient = "Patient/numer-EXM104-FHIR3";
+
+		MeasureReport report = myProvider.evaluateMeasure(measureId, null, null, null, null,
+			patient, null, null, null, null, null, null);
+		assertThat(report.getGroup(), hasSize(1));
+		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+	}
+
+	private int loadDataFromDirectory(String theDirectoryName) throws IOException {
+		int count = 0;
+		ourLog.info("Reading files in directory: {}", theDirectoryName);
+		ClassPathResource dir = new ClassPathResource(theDirectoryName);
+		Collection<File> files = FileUtils.listFiles(dir.getFile(), null, false);
+		ourLog.info("{} files found.", files.size());
+		for (File file : files) {
+			String filename = file.getAbsolutePath();
+			ourLog.info("Processing filename '{}'", filename);
+			if (filename.endsWith(".cql") || filename.contains("expectedresults")) {
+				// Ignore .cql and expectedresults files
+				ourLog.info("Ignoring file: '{}'", filename);
+			} else if (filename.endsWith(".json")) {
+				if (filename.contains("bundle")) {
+					loadBundle(filename);
+				} else {
+					loadResource(filename, myFhirContext, myDaoRegistry);
+				}
+				count++;
+			} else {
+				ourLog.info("Ignoring file: '{}'", filename);
+			}
+		}
+		return count;
 	}
 
 	private Bundle loadBundle(String theLocation) throws IOException {
