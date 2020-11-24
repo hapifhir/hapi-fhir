@@ -70,7 +70,6 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
 	private IIdType myLocalValueSetId;
-	private Long myExtensionalCsIdOnResourceTable;
 	private Long myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
@@ -82,11 +81,6 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	private void loadAndPersistCodeSystemAndValueSetWithDesignations(HTTPVerb theVerb) throws IOException {
 		loadAndPersistCodeSystemWithDesignations(theVerb);
 		loadAndPersistValueSet(theVerb);
-	}
-
-	private void loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HTTPVerb theVerb) throws IOException {
-		loadAndPersistCodeSystemWithDesignations(theVerb);
-		loadAndPersistValueSetWithExclude(theVerb);
 	}
 
 	private void loadAndPersistCodeSystem(HTTPVerb theVerb) throws IOException {
@@ -123,17 +117,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
-		myExtensionalCsIdOnResourceTable = myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
 	}
 
 	private void loadAndPersistValueSet(HTTPVerb theVerb) throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		valueSet.setId("ValueSet/vs");
-		persistValueSet(valueSet, theVerb);
-	}
-
-	private void loadAndPersistValueSetWithExclude(HTTPVerb theVerb) throws IOException {
-		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs-with-exclude.xml");
 		valueSet.setId("ValueSet/vs");
 		persistValueSet(valueSet, theVerb);
 	}
@@ -404,14 +391,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 
@@ -426,14 +413,14 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 
@@ -1449,7 +1436,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.onType(ValueSet.class)
 			.named("expand")
 			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
-			.andParameter("filter", new StringType("first"))
+			.andParameter("filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -29,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 class ExpansionFilter {
@@ -94,5 +96,20 @@ class ExpansionFilter {
 
 	public Integer getMaxCount() {
 		return myMaxCount;
+	}
+
+	@Nonnull
+	public static ExpansionFilter fromFilterString(@Nullable String theFilter) {
+		ExpansionFilter filter;
+		if (isNoneBlank(theFilter)) {
+			List<ValueSet.ConceptSetFilterComponent> filters = Collections.singletonList(new ValueSet.ConceptSetFilterComponent()
+				.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue(theFilter));
+			filter = new ExpansionFilter(null, null, filters, null);
+		} else {
+			filter = ExpansionFilter.NO_FILTER;
+		}
+		return filter;
 	}
 }
