@@ -72,7 +72,6 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@Autowired
 	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
-	private IFhirResourceDao<?> mySubscriptionDao;
 	private SearchParameterMap mySearchParameterMap;
 
 	/**
@@ -84,9 +83,6 @@ public class SubscriptionLoader implements IResourceChangeListener {
 
 	@PostConstruct
 	public void registerListener() {
-		if (subscriptionsDaoExists()) {
-			mySubscriptionDao = myDaoRegistry.getSubscriptionDao();
-		}
 		mySearchParameterMap = getSearchParameterMap();
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
 	}
@@ -138,7 +134,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 		synchronized (mySyncSubscriptionsLock) {
 			ourLog.debug("Starting sync subscriptions");
 
-			IBundleProvider subscriptionBundleList =  mySubscriptionDao.search(mySearchParameterMap);
+			IBundleProvider subscriptionBundleList =  getSubscriptionDao().search(mySearchParameterMap);
 
 			Integer subscriptionCount = subscriptionBundleList.size();
 			assert subscriptionCount != null;
@@ -150,6 +146,10 @@ public class SubscriptionLoader implements IResourceChangeListener {
 
 			return updateSubscriptionRegistry(resourceList);
 		}
+	}
+
+	private IFhirResourceDao<?> getSubscriptionDao() {
+		return myDaoRegistry.getSubscriptionDao();
 	}
 
 	@Nonnull
@@ -192,7 +192,7 @@ public class SubscriptionLoader implements IResourceChangeListener {
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
-		List<IBaseResource> resourceList = theResourceIds.stream().map(mySubscriptionDao::read).collect(Collectors.toList());
+		List<IBaseResource> resourceList = theResourceIds.stream().map(getSubscriptionDao()::read).collect(Collectors.toList());
 		updateSubscriptionRegistry(resourceList);
 	}
 
