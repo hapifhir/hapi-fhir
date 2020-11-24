@@ -50,6 +50,8 @@ import java.util.List;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_MY_VALUE_SET;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -350,7 +352,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, Matchers.containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, Matchers.not(Matchers.containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 
