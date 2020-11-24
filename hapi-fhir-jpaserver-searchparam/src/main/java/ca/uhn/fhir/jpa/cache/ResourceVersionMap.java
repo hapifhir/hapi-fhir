@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.cache;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collections;
@@ -22,6 +23,12 @@ public class ResourceVersionMap {
 	public static ResourceVersionMap fromResourceTableEntities(List<ResourceTable> theEntities) {
 		ResourceVersionMap retval = new ResourceVersionMap();
 		theEntities.forEach(entity -> retval.add(entity.getIdDt()));
+		return retval;
+	}
+
+	public static ResourceVersionMap fromResources(List<? extends IBaseResource> theResources) {
+		ResourceVersionMap retval = new ResourceVersionMap();
+		theResources.forEach(resource -> retval.add(resource.getIdElement()));
 		return retval;
 	}
 
@@ -48,10 +55,10 @@ public class ResourceVersionMap {
 	}
 
 	public String get(IIdType theId) {
-		return myMap.get(theId);
+		return myMap.get(new IdDt(theId.toUnqualifiedVersionless()));
 	}
 
 	public boolean containsKey(IIdType theId) {
-		return myMap.containsKey(theId);
+		return myMap.containsKey(new IdDt(theId.toUnqualifiedVersionless()));
 	}
 }

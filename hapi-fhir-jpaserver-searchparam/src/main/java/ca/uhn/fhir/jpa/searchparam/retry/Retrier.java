@@ -28,15 +28,11 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
-import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
-import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class Retrier<T> {
@@ -63,7 +59,8 @@ public class Retrier<T> {
 
 			@Override
 			public boolean canRetry(RetryContext context) {
-				if (context.getLastThrowable() instanceof BeanCreationException) {
+				Throwable lastThrowable = context.getLastThrowable();
+				if (lastThrowable instanceof BeanCreationException || lastThrowable instanceof NullPointerException) {
 					return false;
 				}
 				return super.canRetry(context);
