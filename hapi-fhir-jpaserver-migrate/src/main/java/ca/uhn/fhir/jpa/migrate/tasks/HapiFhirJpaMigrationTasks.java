@@ -68,7 +68,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
 		init501(); // 20200514 - 20200515
-		init510(); // 20200516 - present
+		init510(); // 20200516 - 20201028
+		init520(); // 20201029 - Present
+	}
+
+	protected void init520() {
+		Builder version = forVersion(VersionEnum.V5_2_0);
+
+		Builder.BuilderWithTableName mdmLink = version.onTable("MPI_LINK");
+		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		mdmLink.addColumn("20201029.2", "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
+		mdmLink
+			.addForeignKey("20201029.3", "FK_EMPI_LINK_GOLDEN_RESOURCE")
+			.toColumn("GOLDEN_RESOURCE_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
 	}
 
 	protected void init510() {
