@@ -70,4 +70,10 @@ public interface IMdmSubmitSvc {
 	 */
 	long submitTargetToMdm(IIdType theId);
 
+	/**
+	 * This setter exists to allow imported modules to override settings.
+	 *
+	 * @param theMdmSettings Settings to set
+	 */
+	void setMdmSettings(IMdmSettings theMdmSettings);
 }

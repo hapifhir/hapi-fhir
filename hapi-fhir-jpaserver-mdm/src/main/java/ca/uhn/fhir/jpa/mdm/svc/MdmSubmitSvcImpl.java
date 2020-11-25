@@ -50,6 +50,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -146,6 +147,11 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		IBaseResource read = resourceDao.read(theId);
 		myMdmChannelSubmitterSvc.submitResourceToMdmChannel(read);
 		return 1;
+	}
+
+	@Override
+	public void setMdmSettings(IMdmSettings theMdmSettings) {
+		myMdmSettings = theMdmSettings;
 	}
 
 	private void validateTargetType(String theResourceType) {

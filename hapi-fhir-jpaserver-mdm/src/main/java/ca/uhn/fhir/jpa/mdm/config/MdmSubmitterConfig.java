@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDeleteSvc;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmGoldenResourceDeletingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSearchParamSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmSubmitSvcImpl;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
+import ca.uhn.fhir.mdm.util.MessageHelper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -70,7 +72,7 @@ public class MdmSubmitterConfig {
 	}
 
 	@Bean
-	IMdmSubmitSvc mdmBatchService() {
+	IMdmSubmitSvc mdmBatchService(IMdmSettings theMdmSetting) {
 		return new MdmSubmitSvcImpl();
 	}
 }
