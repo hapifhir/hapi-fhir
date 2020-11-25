@@ -30,6 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -137,7 +138,8 @@ class ResourceChangeListenerRegistryImplTest {
 		assertThat(resourceNames, contains(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME));
 
 		IResourceChangeListenerCache firstEntry = entries.iterator().next();
-		assertEquals(ourMap, firstEntry.getSearchParameterMap());
+		// We made a copy
+		assertTrue(ourMap != firstEntry.getSearchParameterMap());
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener1);
 		assertEquals(1, myResourceChangeListenerRegistry.size());

@@ -49,18 +49,18 @@ class ResourceChangeListenerCacheTest {
 		assertNotEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
 
 		// Don't reset timer if it doesn't match any searchparams
-		mockInMemorySupported(InMemoryMatchResult.fromBoolean(false));
+		mockInMemorySupported(entry, InMemoryMatchResult.fromBoolean(false));
 		entry.requestRefreshIfWatching(ourPatient);
 		assertNotEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
 
 		// Reset timer if it does match searchparams
-		mockInMemorySupported(InMemoryMatchResult.successfulMatch());
+		mockInMemorySupported(entry, InMemoryMatchResult.successfulMatch());
 		entry.requestRefreshIfWatching(ourPatient);
 		assertEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
 	}
 
-	private void mockInMemorySupported(InMemoryMatchResult theTheInMemoryMatchResult) {
-		when(mySearchParamMatcher.match(ourMap, ourPatient)).thenReturn(theTheInMemoryMatchResult);
+	private void mockInMemorySupported(ResourceChangeListenerCache theEntry, InMemoryMatchResult theTheInMemoryMatchResult) {
+		when(mySearchParamMatcher.match(theEntry.getSearchParameterMap(), ourPatient)).thenReturn(theTheInMemoryMatchResult);
 	}
 
 	@Test
