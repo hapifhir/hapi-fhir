@@ -42,11 +42,11 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 
 	public static final String LOINC_SCT_PART_MAP_ID = "loinc-parts-to-snomed-ct";
 	public static final String LOINC_SCT_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-snomed-ct";
-	public static final String LOINC_TERM_TO_RPID_PART_MAP_ID = "loinc-to-rpids";
-	public static final String LOINC_TERM_TO_RPID_PART_MAP_URI = "http://loinc.org/cm/loinc-to-rpids";
+	public static final String LOINC_TERM_TO_RPID_PART_MAP_ID = "loinc-to-radlex";
+	public static final String LOINC_TERM_TO_RPID_PART_MAP_URI = "http://loinc.org/cm/loinc-to-radlex";
 	public static final String LOINC_TERM_TO_RPID_PART_MAP_NAME = "LOINC Terms to RadLex RPIDs";
-	public static final String LOINC_PART_TO_RID_PART_MAP_ID = "loinc-part-to-rids";
-	public static final String LOINC_PART_TO_RID_PART_MAP_URI = "http://loinc.org/cm/loinc-part-to-rids";
+	public static final String LOINC_PART_TO_RID_PART_MAP_ID = "loinc-parts-to-radlex";
+	public static final String LOINC_PART_TO_RID_PART_MAP_URI = "http://loinc.org/cm/loinc-parts-to-radlex";
 	public static final String LOINC_PART_TO_RID_PART_MAP_NAME = "LOINC Parts to RadLex RIDs";
 	private static final String LOINC_SCT_PART_MAP_NAME = "LOINC Part Map to SNOMED CT";
 	private static final String LOINC_RXNORM_PART_MAP_ID = "loinc-parts-to-rxnorm";
