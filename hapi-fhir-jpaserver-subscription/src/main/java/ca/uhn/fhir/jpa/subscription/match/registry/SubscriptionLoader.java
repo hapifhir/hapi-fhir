@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.match.registry;
  */
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -28,6 +29,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -129,14 +131,21 @@ public class SubscriptionLoader {
 					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
 					.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			}
-			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
+			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS)
+				.setSummaryMode(SummaryEnum.COUNT);
+
+			IBundleProvider countSubscriptionBundle = myDaoRegistry.getSubscriptionDao().search(map);
+			Integer subscriptionCount = countSubscriptionBundle.size();
+			if (subscriptionCount == 0) {
+				ourLog.debug("Count subscriptions is zero.");
+				return 0;
+			} else {
+				map.setSummaryMode(null);
+			}
 
 			IBundleProvider subscriptionBundleList =  myDaoRegistry.getSubscriptionDao().search(map);
-
-			Integer subscriptionCount = subscriptionBundleList.size();
-			assert subscriptionCount != null;
 			if (subscriptionCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
-				ourLog.error("Currently over " + SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
+				ourLog.error("Currently over " + SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS + " subscriptions. Some subscriptions have not been loaded.");
 			}
 
 			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionCount);
