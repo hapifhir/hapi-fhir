@@ -35,7 +35,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	@Autowired
 	RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
 
-	private final Queue<RegisteredResourceChangeListener> myListenerEntries = new ConcurrentLinkedQueue<RegisteredResourceChangeListener>();
+	private final Queue<ResourceChangeListenerCache> myListenerEntries = new ConcurrentLinkedQueue<>();
 
 	/**
 	 * Register a listener in order to be notified whenever a resource matching the provided SearchParameterMap
@@ -51,7 +51,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	 * @return RegisteredResourceChangeListener that stores the resource id cache, and the next refresh time
 	 */
 	@Override
-	public RegisteredResourceChangeListener registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+	public IResourceChangeListenerCache registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
 		// Clone searchparameter map
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
 		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParameterMap, resourceDef);
@@ -71,15 +71,19 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 		myListenerEntries.removeIf(l -> l.getResourceChangeListener().equals(theResourceChangeListener));
 	}
 
-	private RegisteredResourceChangeListener add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap, long theRemoteRefreshIntervalMs) {
-		RegisteredResourceChangeListener retval = myRegisteredResourceListenerFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+	@Override
+	public void unregisterResourceResourceChangeListener(IResourceChangeListenerCache theResourceChangeListenerCache) {
+		myListenerEntries.remove(theResourceChangeListenerCache);
+	}
+
+	private IResourceChangeListenerCache add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap, long theRemoteRefreshIntervalMs) {
+		ResourceChangeListenerCache retval = myRegisteredResourceListenerFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 		myListenerEntries.add(retval);
 		return retval;
 	}
 
-	@Override
 	@Nonnull
-	public Iterator<RegisteredResourceChangeListener> iterator() {
+	public Iterator<ResourceChangeListenerCache> iterator() {
 		return myListenerEntries.iterator();
 	}
 
@@ -89,18 +93,18 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@VisibleForTesting
 	public void clearCachesForUnitTest() {
-		myListenerEntries.forEach(RegisteredResourceChangeListener::clear);
+		myListenerEntries.forEach(ResourceChangeListenerCache::clear);
 	}
 
 	@Override
-	public boolean contains(RegisteredResourceChangeListener theEntry) {
-		return myListenerEntries.contains(theEntry);
+	public boolean contains(IResourceChangeListenerCache theCache) {
+		return myListenerEntries.contains(theCache);
 	}
 
 	@VisibleForTesting
 	public int getResourceVersionCacheSizeForUnitTest() {
 		int retval = 0;
-		for (RegisteredResourceChangeListener entry : myListenerEntries) {
+		for (ResourceChangeListenerCache entry : myListenerEntries) {
 			retval += entry.getResourceVersionCache().size();
 		}
 		return retval;
@@ -109,7 +113,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	@Override
 	public void requestRefreshIfWatching(IBaseResource theResource) {
 		String resourceName = myFhirContext.getResourceType(theResource);
-		for (RegisteredResourceChangeListener entry : myListenerEntries) {
+		for (ResourceChangeListenerCache entry : myListenerEntries) {
 			if (resourceName.equals(entry.getResourceName())) {
 				entry.requestRefreshIfWatching(theResource);
 			}

@@ -4,9 +4,6 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.annotation.Nonnull;
-import java.util.Iterator;
-
 /**
  * This service contains an in-memory list of all registered {@link IResourceChangeListener} instances along
  * with their caches and other details needed to maintain those caches.  Register an {@link IResourceChangeListener} instance
@@ -29,7 +26,7 @@ public interface IResourceChangeListenerRegistry {
 	 * @throws IllegalArgumentException if theSearchParamMap cannot be evaluated in-memory
 	 * @return RegisteredResourceChangeListener that stores the resource id cache, and the next refresh time
 	 */
-	RegisteredResourceChangeListener registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs);
+	IResourceChangeListenerCache registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs);
 
 	/**
 	 * Unregister a listener from this service
@@ -38,21 +35,22 @@ public interface IResourceChangeListenerRegistry {
 	 */
 	void unregisterResourceResourceChangeListener(IResourceChangeListener theResourceChangeListener);
 
+	/**
+	 * Unregister a listener from this service using its cache
+	 *
+	 * @param theResourceChangeListenerCache
+	 */
+	void unregisterResourceResourceChangeListener(IResourceChangeListenerCache theResourceChangeListenerCache);
+
 	@VisibleForTesting
 	void clearListenersForUnitTest();
 
 	/**
-	 * @return iterator over all {@link RegisteredResourceChangeListener} entries.
-	 */
-	@Nonnull
-	Iterator<RegisteredResourceChangeListener> iterator();
-
-	/**
 	 *
-	 * @param theEntry
-	 * @return Whether theEntry has been registered
+	 * @param theCache
+	 * @return Whether theCache has been registered
 	 */
-	boolean contains(RegisteredResourceChangeListener theEntry);
+	boolean contains(IResourceChangeListenerCache theCache);
 
 	/**
 	 * Called by the {@link ResourceChangeListenerRegistryInterceptor} when a resource is changed to invalidate matching

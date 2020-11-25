@@ -10,7 +10,7 @@ public class RegisteredResourceListenerFactory {
 	@Autowired
 	ApplicationContext myApplicationContext;
 
-	public RegisteredResourceChangeListener create(String theResourceName, SearchParameterMap theMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
-		return myApplicationContext.getBean(RegisteredResourceChangeListener.class, theResourceName, theResourceChangeListener, theMap, theRemoteRefreshIntervalMs);
+	public ResourceChangeListenerCache create(String theResourceName, SearchParameterMap theMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
+		return myApplicationContext.getBean(ResourceChangeListenerCache.class, theResourceName, theResourceChangeListener, theMap, theRemoteRefreshIntervalMs);
 	}
 }

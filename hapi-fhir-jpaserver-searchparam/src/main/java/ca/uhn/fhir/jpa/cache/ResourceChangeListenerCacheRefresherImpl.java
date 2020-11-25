@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This service refreshes the {@link RegisteredResourceChangeListener} caches and notifies their listener when
+ * This service refreshes the {@link IResourceChangeListenerCache} caches and notifies their listener when
  * those caches change.
  */
 @Service
@@ -34,7 +34,7 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@Autowired
 	private IResourceVersionSvc myResourceVersionSvc;
 	@Autowired
-	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
 	@PostConstruct
 	public void start() {
@@ -57,9 +57,9 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@Override
 	public ResourceChangeResult refreshExpiredCachesAndNotifyListeners() {
 		ResourceChangeResult retval = new ResourceChangeResult();
-		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerRegistry.iterator();
+		Iterator<ResourceChangeListenerCache> iterator = myResourceChangeListenerRegistry.iterator();
 		while (iterator.hasNext()) {
-			RegisteredResourceChangeListener entry = iterator.next();
+			ResourceChangeListenerCache entry = iterator.next();
 			retval = retval.plus(entry.refreshCacheIfNecessary());
 		}
 		return retval;
@@ -68,9 +68,9 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	@VisibleForTesting
 	public ResourceChangeResult forceRefreshAllCachesForUnitTest() {
 		ResourceChangeResult retval = new ResourceChangeResult();
-		Iterator<RegisteredResourceChangeListener> iterator = myResourceChangeListenerRegistry.iterator();
+		Iterator<ResourceChangeListenerCache> iterator = myResourceChangeListenerRegistry.iterator();
 		while (iterator.hasNext()) {
-			RegisteredResourceChangeListener entry = iterator.next();
+			IResourceChangeListenerCache entry = iterator.next();
 			retval = retval.plus(entry.forceRefresh());
 		}
 		return retval;
@@ -81,16 +81,15 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 	}
 
-	@Override
-	public ResourceChangeResult refreshCacheAndNotifyListener(RegisteredResourceChangeListener theEntry) {
+	public ResourceChangeResult refreshCacheAndNotifyListener(ResourceChangeListenerCache theCache) {
 		ResourceChangeResult retval = new ResourceChangeResult();
-		if (!myResourceChangeListenerRegistry.contains(theEntry)) {
-			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theEntry);
+		if (!myResourceChangeListenerRegistry.contains(theCache)) {
+			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theCache);
 			return new ResourceChangeResult();
 		}
-		SearchParameterMap searchParamMap = theEntry.getSearchParameterMap();
-		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theEntry.getResourceName(), searchParamMap);
-		retval = retval.plus(notifyListener(theEntry, newResourceVersionMap));
+		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
+		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
+		retval = retval.plus(notifyListener(theCache, newResourceVersionMap));
 
 		return retval;
 	}
@@ -98,20 +97,20 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	/**
 	 * Notify a listener with all matching resources if it hasn't been initialized yet, otherwise only notify it if
 	 * any resources have changed
-	 * @param theListenerEntry
+	 * @param theCache
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
-	ResourceChangeResult notifyListener(RegisteredResourceChangeListener theListenerEntry, ResourceVersionMap theNewResourceVersionMap) {
+	ResourceChangeResult notifyListener(ResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
-		IResourceChangeListener resourceChangeListener = theListenerEntry.getResourceChangeListener();
-		if (theListenerEntry.isInitialized()) {
-			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, theListenerEntry.getResourceVersionCache(), theNewResourceVersionMap);
+		IResourceChangeListener resourceChangeListener = theCache.getResourceChangeListener();
+		if (theCache.isInitialized()) {
+			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, theCache.getResourceVersionCache(), theNewResourceVersionMap);
 		} else {
-			theListenerEntry.getResourceVersionCache().initialize(theNewResourceVersionMap);
+			theCache.getResourceVersionCache().initialize(theNewResourceVersionMap);
 			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
 			retval = ResourceChangeResult.fromCreated(theNewResourceVersionMap.size());
-			theListenerEntry.setInitialized(true);
+			theCache.setInitialized(true);
 		}
 		return retval;
 	}

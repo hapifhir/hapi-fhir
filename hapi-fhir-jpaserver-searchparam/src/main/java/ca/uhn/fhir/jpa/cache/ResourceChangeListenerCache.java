@@ -20,14 +20,14 @@ import java.time.ZoneId;
 
 @Component
 @Scope("prototype")
-public class RegisteredResourceChangeListener {
-	private static final Logger ourLog = LoggerFactory.getLogger(RegisteredResourceChangeListener.class);
+public class ResourceChangeListenerCache implements IResourceChangeListenerCache {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCache.class);
 	private static final int MAX_RETRIES = 60;
 
 	private static Instant ourNowForUnitTests;
 
 	@Autowired
-	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 
@@ -39,9 +39,10 @@ public class RegisteredResourceChangeListener {
 	private Instant myNextRefreshTime = Instant.MIN;
 	private final long myRemoteRefreshIntervalMs;
 
-	public RegisteredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+	public ResourceChangeListenerCache(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
 		myResourceName = theResourceName;
 		myResourceChangeListener = theResourceChangeListener;
+		// FIXME KHS clone
 		mySearchParameterMap = theSearchParameterMap;
 		myRemoteRefreshIntervalMs = theRemoteRefreshIntervalMs;
 	}
@@ -50,19 +51,22 @@ public class RegisteredResourceChangeListener {
 		return myResourceChangeListener;
 	}
 
+	@Override
 	public SearchParameterMap getSearchParameterMap() {
 		return mySearchParameterMap;
 	}
 
+	@Override
 	public boolean isInitialized() {
 		return myInitialized;
 	}
 
-	public RegisteredResourceChangeListener setInitialized(boolean theInitialized) {
+	public ResourceChangeListenerCache setInitialized(boolean theInitialized) {
 		myInitialized = theInitialized;
 		return this;
 	}
 
+	@Override
 	public String getResourceName() {
 		return myResourceName;
 	}
@@ -86,6 +90,7 @@ public class RegisteredResourceChangeListener {
 		myResourceVersionCache.clear();
 	}
 
+	@Override
 	public Instant getNextRefreshTime() {
 		return myNextRefreshTime;
 	}
@@ -93,6 +98,7 @@ public class RegisteredResourceChangeListener {
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
+	@Override
 	public void requestRefresh() {
 		myNextRefreshTime = Instant.MIN;
 	}
@@ -130,6 +136,7 @@ public class RegisteredResourceChangeListener {
 	/**
 	 * Request that a cache be refreshed now, in the current thread
 	 */
+	@Override
 	public ResourceChangeResult forceRefresh() {
 		requestRefresh();
 		return refreshCacheWithRetry();
@@ -141,6 +148,7 @@ public class RegisteredResourceChangeListener {
 		}
 	}
 
+	@Override
 	public ResourceChangeResult refreshCacheIfNecessary() {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		if (isTimeToRefresh()) {

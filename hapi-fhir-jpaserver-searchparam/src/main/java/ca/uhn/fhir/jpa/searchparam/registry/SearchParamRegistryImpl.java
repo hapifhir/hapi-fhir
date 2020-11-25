@@ -27,8 +27,8 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.cache.RegisteredResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -79,7 +79,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
-	private RegisteredResourceChangeListener myRegisteredResourceChangeListener;
+	private IResourceChangeListenerCache myResourceChangeListenerCache;
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
@@ -101,7 +101,7 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
-			myRegisteredResourceChangeListener.refreshCacheWithRetry();
+			myResourceChangeListenerCache.forceRefresh();
 		}
 	}
 
@@ -214,22 +214,22 @@ public class SearchParamRegistryImpl implements ISearchParamRegistry, IResourceC
 
 	@Override
 	public void requestRefresh() {
-		myRegisteredResourceChangeListener.requestRefresh();
+		myResourceChangeListenerCache.requestRefresh();
 	}
 
 	@Override
 	public void forceRefresh() {
-		myRegisteredResourceChangeListener.forceRefresh();
+		myResourceChangeListenerCache.forceRefresh();
 	}
 
 	@Override
 	public ResourceChangeResult refreshCacheIfNecessary() {
-		return myRegisteredResourceChangeListener.refreshCacheIfNecessary();
+		return myResourceChangeListenerCache.refreshCacheIfNecessary();
 	}
 
 	@PostConstruct
 	public void registerListener() {
-		myRegisteredResourceChangeListener = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
+		myResourceChangeListenerCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("SearchParameter", SearchParameterMap.newSynchronous(), this, REFRESH_INTERVAL);
 	}
 
 	@PreDestroy

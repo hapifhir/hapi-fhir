@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 /**
- * This interceptor watches all resource changes on the server and compares them to the {@link RegisteredResourceChangeListener}
+ * This interceptor watches all resource changes on the server and compares them to the {@link IResourceChangeListenerCache}
  * entries.  If the resource matches the resource type and search parameter map of that entry, then the corresponding cache
  * will be expired so it is refreshed and listeners are quickly notified of that change on the next cycle.
  */
