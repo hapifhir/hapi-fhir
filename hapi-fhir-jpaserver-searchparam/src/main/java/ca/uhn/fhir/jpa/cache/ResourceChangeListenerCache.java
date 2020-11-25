@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
@@ -42,8 +43,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	public ResourceChangeListenerCache(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
 		myResourceName = theResourceName;
 		myResourceChangeListener = theResourceChangeListener;
-		// FIXME KHS clone
-		mySearchParameterMap = theSearchParameterMap;
+		mySearchParameterMap = SerializationUtils.clone(theSearchParameterMap);
 		myRemoteRefreshIntervalMs = theRemoteRefreshIntervalMs;
 	}
 

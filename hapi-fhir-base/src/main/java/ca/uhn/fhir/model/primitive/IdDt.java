@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  */
 @DatatypeDef(name = "id", profileOf = StringDt.class)
-public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdType, Cloneable {
+public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdType {
 
 	private String myBaseUrl;
 	private boolean myHaveComponentParts;
@@ -174,9 +174,11 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		setValue(theUrl.getValueAsString());
 	}
 
-	@Override
-	protected IdDt clone() {
-		return new IdDt(myBaseUrl, myResourceType, myUnqualifiedId, myUnqualifiedVersionId);
+	/**
+	 * Copy Constructor
+	 */
+	public IdDt(IdDt theIdDt) {
+		this(theIdDt.myBaseUrl, theIdDt.myResourceType, theIdDt.myUnqualifiedId, theIdDt.myUnqualifiedVersionId);
 	}
 
 	private void setHaveComponentParts(IdDt theIdDt) {
@@ -661,7 +663,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 			value = existingValue;
 		}
 
-		IdDt retval = clone();
+		IdDt retval = new IdDt(this);
+
 		retval.myUnqualifiedVersionId = theVersion;
 		return retval;
 	}
