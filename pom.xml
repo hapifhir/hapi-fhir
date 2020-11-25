@@ -740,7 +740,7 @@
 		<hibernate_version>5.4.23.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
-		<lucene_version>8.7.0</lucene_version>
+		<lucene_version>8.6.2</lucene_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
@@ -1416,7 +1416,7 @@
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-mapper-orm</artifactId>
-				<version>6.0.0.CR2</version>
+				<version>6.0.0.CR1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
@@ -1426,12 +1426,12 @@
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-backend-elasticsearch</artifactId>
-				<version>6.0.0.CR2</version>
+				<version>6.0.0.CR1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-backend-lucene</artifactId>
-				<version>6.0.0.CR2</version>
+				<version>6.0.0.CR1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>

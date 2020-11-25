@@ -20,12 +20,8 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.hibernate.search.engine.backend.document.DocumentElement;
 import org.hibernate.search.engine.backend.document.model.dsl.IndexSchemaElement;
-import org.hibernate.search.engine.environment.bean.BeanHolder;
 import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBinder;
@@ -45,13 +41,14 @@ public class TermConceptPropertyBinder implements PropertyBinder {
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
-		thePropertyBindingContext.dependencies().use("myProperties");
+		thePropertyBindingContext.dependencies().use("myKey").use("myValue");
 		IndexSchemaElement indexSchemaElement = thePropertyBindingContext.indexSchemaElement();
 
 		//In order to support dynamic fields, we have to use field templates. We _must_ define the template at bootstrap time and cannot
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
 		//TODO GGG HS -> I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
-		indexSchemaElement.fieldTemplate("propTemplate", f -> f.asString().analyzer("termConceptPropertyAnalyzer")).matchingPathGlob(CONCEPT_FIELD_PROPERTY_PREFIX + "*");
+		//TODO GGG HS Does this field need to be multivalued? e.g. PROPCOMPONENT -> ["a", "b"] ?
+		indexSchemaElement.fieldTemplate("propTemplate", f -> f.asString().analyzer("termConceptPropertyAnalyzer")).matchingPathGlob(CONCEPT_FIELD_PROPERTY_PREFIX + "*").multiValued();
 
 
 		thePropertyBindingContext.bridge(new TermConceptPropertyBridge());

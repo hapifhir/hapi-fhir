@@ -82,9 +82,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@FullTextField(name = "myContentTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
 	@FullTextField(name = "myContentTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
-	//@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myContentText")))
 	//TODO GGG HS waiting on an answer to this here: https://discourse.hibernate.org/t/transient-attribute-that-is-not-derived-in-hs6/4803
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
 
 	@Column(name = "HASH_SHA256", length = 64, nullable = true)
@@ -120,7 +119,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@FullTextField(name = "myNarrativeTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
 	//TODO GGG HS waiting on an answer to this here: https://discourse.hibernate.org/t/transient-attribute-that-is-not-derived-in-hs6/4803
-	@IndexingDependency(reindexOnUpdate = ReindexOnUpdate.NO)
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -555,7 +554,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myContentText = theContentText;
 	}
 
-	@Transient
 	public String getContentText() {
 		return myContentText;
 	}

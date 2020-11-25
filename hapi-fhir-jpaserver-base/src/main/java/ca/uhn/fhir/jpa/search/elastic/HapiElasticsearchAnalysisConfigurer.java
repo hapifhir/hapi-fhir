@@ -28,7 +28,8 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 
 	@Override
 	public void configure(ElasticsearchAnalysisConfigurationContext theConfigCtx) {
-		theConfigCtx.analyzer("autcompleteEdgeAnalyzer").custom()
+
+		theConfigCtx.analyzer("autocompleteEdgeAnalyzer").custom()
 			.tokenizer("pattern_all")
 			.tokenFilters("lowercase", "stop", "edgengram_3_50");
 

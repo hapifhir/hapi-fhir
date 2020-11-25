@@ -33,9 +33,11 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 	public Properties jpaProperties() {
 		Properties retVal = super.jpaProperties();
 
+		//Override default lucene settings
 		// Force elasticsearch to start first
 		int httpPort = embeddedElasticSearch().getHttpPort();
 		ourLog.info("ElasticSearch started on port: {}", httpPort);
+
 
 		new ElasticsearchHibernatePropertiesBuilder()
 			//TODO GGG HS According to these docs (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#_configuration_property_reference) the best approximation to `refreshAfterWrite=True`,
@@ -45,7 +47,8 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 			.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)
 			.setRequiredIndexStatus(IndexStatus.YELLOW)
-			.setRestUrl("http://"+ elasticsearchHost + ":" + httpPort)
+			.setRestUrl(elasticsearchHost + ":" + httpPort)
+			.setProtocol("http")
 			.setUsername(elasticsearchUserId)
 			.setPassword(elasticsearchPassword)
 			.apply(retVal);

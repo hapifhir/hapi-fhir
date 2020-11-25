@@ -81,19 +81,19 @@ public class TermConcept implements Serializable {
 	private TermCodeSystemVersion myCodeSystem;
 
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
-	@GenericField(name = "myCodeSystemVersionPId")
+	@GenericField(name = "myCodeSystemVersionPid")
 	private long myCodeSystemVersionPid;
 
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
-	@FullTextField(name = "myDisplayText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myDisplayTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myDisplayTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myDisplayTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
+	@FullTextField(name = "myDisplay", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+	@FullTextField(name = "myDisplayEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myDisplayNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myDisplayPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
-	@FullTextField(name = "PROPmyProperties", analyzer = "termConceptPropertyAnalyzer", valueBridge = @ValueBridgeRef(type=TermConceptValueBridge.class))
-	//@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
+//	@FullTextField(name = "PROPmyProperties", analyzer = "termConceptPropertyAnalyzer", valueBridge = @ValueBridgeRef(type=TermConceptValueBridge.class))
+	@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
 	private Collection<TermConceptProperty> myProperties;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)

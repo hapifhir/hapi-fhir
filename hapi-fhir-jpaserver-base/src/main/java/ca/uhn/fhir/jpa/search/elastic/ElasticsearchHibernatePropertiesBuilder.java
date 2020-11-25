@@ -47,6 +47,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
 	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;//TODO GGG HS not sure if this is the right
 	private boolean myDebugPrettyPrintJsonLog = false;
+	private String myProtocol;
 
 	public ElasticsearchHibernatePropertiesBuilder setUsername(String theUsername) {
 		myUsername = theUsername;
@@ -74,7 +75,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		//theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
 		//TODO GGG note that we MUST exclude the protocol from this URL, and it should be set via the protocol hibernate prop.
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myRestUrl);
-		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), "https");
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), myProtocol);
 
 		if (StringUtils.isNotBlank(myUsername)) {
 			//theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
@@ -117,6 +118,11 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 	public ElasticsearchHibernatePropertiesBuilder setRestUrl(String theRestUrl) {
 		myRestUrl = theRestUrl;
+		return this;
+	}
+
+	public ElasticsearchHibernatePropertiesBuilder setProtocol(String theProtocol) {
+		myProtocol = theProtocol;
 		return this;
 	}
 
