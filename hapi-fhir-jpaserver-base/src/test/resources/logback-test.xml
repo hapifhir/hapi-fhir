@@ -52,7 +52,7 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-	<root level="trace">
+	<root level="info">
 		<appender-ref ref="STDOUT" />
 	</root>
 

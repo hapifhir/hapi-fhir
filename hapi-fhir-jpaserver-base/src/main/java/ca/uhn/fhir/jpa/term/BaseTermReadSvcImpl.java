@@ -97,15 +97,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.RegexpQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
 import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
-import org.hibernate.search.engine.search.query.SearchQuery;
-import org.hibernate.search.engine.search.query.SearchResult;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -1293,19 +1290,32 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		addLoincFilterDescendantEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
 	}
 
-	private void addLoincFilterDescendantEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
-		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
-		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
-	}
-
 	private void addLoincFilterDescendantIn(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
 			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
 		}
-		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+		searchByParentPids(f, b, terms);
 	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
+		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
+		searchByParentPids(f, b, terms);
+	}
+
+	private void searchByParentPids(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<Term> theTerms) {
+		List<Long> parentPids = convertTermsToParentPids(theTerms);
+		parentPids.stream()
+			.forEach(pid -> {
+				b.must(f.bool().should(f.match().field(theTerms.get(0).field()).matching(pid)));
+			});
+	}
+
+	private List<Long> convertTermsToParentPids(List<Term> theTerms) {
+		return theTerms.stream().map(Term::text).map(Long::valueOf).collect(Collectors.toList());
+	}
+
 
 	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
 		List<Term> retVal = new ArrayList<>();
@@ -1315,7 +1325,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		String[] parentPids = code.getParentPidsAsString().split(" ");
 		for (String parentPid : parentPids) {
-			retVal.add(new Term("myId", parentPid));
+			if (!StringUtils.equals(parentPid, "NONE")) {
+				retVal.add(new Term("myId", parentPid));
+			}
 		}
 		logFilteringValueOnProperty(theValue, theProperty);
 

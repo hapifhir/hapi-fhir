@@ -38,6 +38,7 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
 import org.hl7.fhir.r4.model.Coding;
 
@@ -99,11 +100,11 @@ public class TermConcept implements Serializable {
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
 	private Collection<TermConceptDesignation> myDesignations;
 
-	@Id()
+	@Id
 	@SequenceGenerator(name = "SEQ_CONCEPT_PID", sequenceName = "SEQ_CONCEPT_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_CONCEPT_PID")
 	@Column(name = "PID")
-	@DocumentId
+	@GenericField
 	private Long myId;
 
 	@Column(name = "INDEX_STATUS", nullable = true)
