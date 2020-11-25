@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.cache.config;
 
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
-import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.RegisteredResourceListenerFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -17,7 +16,7 @@ public class RegisteredResourceListenerFactoryConfig {
 	}
 	@Bean
 	@Scope("prototype")
-	IResourceChangeListenerCache registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+	ResourceChangeListenerCache registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
 		return new ResourceChangeListenerCache(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
 }

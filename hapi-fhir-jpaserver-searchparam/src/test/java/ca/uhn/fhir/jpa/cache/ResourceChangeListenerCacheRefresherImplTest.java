@@ -37,7 +37,7 @@ class ResourceChangeListenerCacheRefresherImplTest {
 	@MockBean
 	private IResourceVersionSvc myResourceVersionSvc;
 	@MockBean
-	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
+	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
 	@Configuration
 	@Import(RegisteredResourceListenerFactoryConfig.class)
