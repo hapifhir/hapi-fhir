@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeEvent;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -44,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -84,7 +86,13 @@ public class SubscriptionLoader implements IResourceChangeListener {
 	@PostConstruct
 	public void registerListener() {
 		mySearchParameterMap = getSearchParameterMap();
-		myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
+		IResourceChangeListenerCache subscriptionCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Subscription", mySearchParameterMap, this, REFRESH_INTERVAL);
+		subscriptionCache.forceRefresh();
+	}
+
+	@PreDestroy
+	public void unregisterListener() {
+		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(this);
 	}
 
 	private boolean subscriptionsDaoExists() {
