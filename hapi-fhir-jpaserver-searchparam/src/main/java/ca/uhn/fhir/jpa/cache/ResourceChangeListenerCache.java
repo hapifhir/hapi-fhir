@@ -27,7 +27,7 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	private static Instant ourNowForUnitTests;
 
 	@Autowired
-	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
+	IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 	@Autowired
 	SearchParamMatcher mySearchParamMatcher;
 

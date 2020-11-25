@@ -24,4 +24,11 @@ public interface IResourceChangeListenerCacheRefresher {
 	 * @param theResource the resource that changed that might trigger a refresh
 	 */
 	void requestRefreshIfWatching(IBaseResource theResource);
+
+	/**
+	 * Refresh the cache in this entry and notify the entry's listener if the cache changed
+	 * @param theEntry the {@link IResourceChangeListenerCache} with the cache and the listener
+	 * @return the number of resources that have been created, updated and deleted since the last time the cache was refreshed
+	 */
+	ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theEntry);
 }

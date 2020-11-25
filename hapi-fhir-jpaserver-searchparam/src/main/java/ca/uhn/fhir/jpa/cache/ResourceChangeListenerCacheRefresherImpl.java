@@ -81,7 +81,7 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 	}
 
-	public ResourceChangeResult refreshCacheAndNotifyListener(ResourceChangeListenerCache theCache) {
+	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
 		ResourceChangeResult retval = new ResourceChangeResult();
 		if (!myResourceChangeListenerRegistry.contains(theCache)) {
 			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theCache);
@@ -101,16 +101,17 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 	 * @param theNewResourceVersionMap the measured new resources
 	 * @return the list of created, updated and deleted ids
 	 */
-	ResourceChangeResult notifyListener(ResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
+	ResourceChangeResult notifyListener(IResourceChangeListenerCache theCache, ResourceVersionMap theNewResourceVersionMap) {
 		ResourceChangeResult retval;
-		IResourceChangeListener resourceChangeListener = theCache.getResourceChangeListener();
+		ResourceChangeListenerCache cache = (ResourceChangeListenerCache) theCache;
+		IResourceChangeListener resourceChangeListener = cache.getResourceChangeListener();
 		if (theCache.isInitialized()) {
-			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, theCache.getResourceVersionCache(), theNewResourceVersionMap);
+			retval = compareLastVersionMapToNewVersionMapAndNotifyListenerOfChanges(resourceChangeListener, cache.getResourceVersionCache(), theNewResourceVersionMap);
 		} else {
-			theCache.getResourceVersionCache().initialize(theNewResourceVersionMap);
+			cache.getResourceVersionCache().initialize(theNewResourceVersionMap);
 			resourceChangeListener.handleInit(theNewResourceVersionMap.getSourceIds());
 			retval = ResourceChangeResult.fromCreated(theNewResourceVersionMap.size());
-			theCache.setInitialized(true);
+			cache.setInitialized(true);
 		}
 		return retval;
 	}
