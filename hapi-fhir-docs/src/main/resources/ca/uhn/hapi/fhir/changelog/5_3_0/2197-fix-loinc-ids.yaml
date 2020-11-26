@@ -1,0 +1,4 @@
+---
+type: change
+issue: 2197
+title: The resource IDs for several LOINC resources were corrected. Thanks to Steven Wagers for the pull request!
