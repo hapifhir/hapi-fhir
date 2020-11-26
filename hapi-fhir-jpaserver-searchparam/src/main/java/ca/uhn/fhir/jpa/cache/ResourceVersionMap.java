@@ -32,6 +32,10 @@ public class ResourceVersionMap {
 		return retval;
 	}
 
+	public static ResourceVersionMap empty() {
+		return new ResourceVersionMap();
+	}
+
 	private void add(IIdType theId) {
 		IdDt id = new IdDt(theId);
 		mySourceIds.add(id);

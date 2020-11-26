@@ -200,7 +200,12 @@ public class SubscriptionLoader implements IResourceChangeListener {
 
 	@Override
 	public void handleInit(Collection<IIdType> theResourceIds) {
-		List<IBaseResource> resourceList = theResourceIds.stream().map(getSubscriptionDao()::read).collect(Collectors.toList());
+		if (!subscriptionsDaoExists()) {
+			ourLog.warn("Subsriptions are enabled on this server, but there is no Subscription DAO configured.");
+			return;
+		}
+		IFhirResourceDao<?> subscriptionDao = getSubscriptionDao();
+		List<IBaseResource> resourceList = theResourceIds.stream().map(subscriptionDao::read).collect(Collectors.toList());
 		updateSubscriptionRegistry(resourceList);
 	}
 

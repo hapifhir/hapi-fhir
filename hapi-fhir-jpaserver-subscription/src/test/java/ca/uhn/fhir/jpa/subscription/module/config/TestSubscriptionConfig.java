@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.config;
 
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
@@ -9,8 +10,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @Configuration
 @TestPropertySource(properties = {
@@ -40,6 +42,8 @@ public class TestSubscriptionConfig {
 
 	@Bean
 	public IResourceVersionSvc resourceVersionSvc() {
-		return mock(IResourceVersionSvc.class, RETURNS_DEEP_STUBS);
+		IResourceVersionSvc retval = mock(IResourceVersionSvc.class);
+		when(retval.getVersionMap(any(), any())).thenReturn(ResourceVersionMap.empty());
+		return retval;
 	}
 }
