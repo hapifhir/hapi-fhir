@@ -240,6 +240,11 @@ public class RequestPartitionId {
 	}
 
 	@Nonnull
+	public static RequestPartitionId fromPartitionIds(Integer... thePartitionIds) {
+		return new RequestPartitionId(null, toListOrNull(thePartitionIds), null);
+	}
+
+	@Nonnull
 	public static RequestPartitionId fromPartitionName(@Nullable String thePartitionName) {
 		return fromPartitionName(thePartitionName, null);
 	}
