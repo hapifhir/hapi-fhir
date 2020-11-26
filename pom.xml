@@ -684,6 +684,11 @@
 			<id>blangley28</id>
 			<organization>MITRE</organization>
 		</developer>
+		<developer>
+			<id>swagers</id>
+			<name>Steven Wagers</name>
+			<organization>Regenstrief Institute</organization>
+		</developer>
 	</developers>
 
 	<licenses>
