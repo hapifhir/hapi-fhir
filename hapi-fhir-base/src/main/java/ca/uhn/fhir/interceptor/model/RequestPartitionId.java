@@ -62,7 +62,6 @@ public class RequestPartitionId {
 	/**
 	 * Constructor for a multiple partition
 	 */
-	// FIXME: don't allow mixed null and non-null, and document this
 	private RequestPartitionId(@Nullable List<String> thePartitionName, @Nullable List<Integer> thePartitionId, @Nullable LocalDate thePartitionDate) {
 		myPartitionIds = toListOrNull(thePartitionId);
 		myPartitionNames = toListOrNull(thePartitionName);
