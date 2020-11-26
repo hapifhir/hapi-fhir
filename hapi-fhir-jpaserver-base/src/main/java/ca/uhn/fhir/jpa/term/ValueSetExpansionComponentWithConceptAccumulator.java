@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -48,6 +49,15 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	/**
 	 * Constructor
 	 *
+	 * @param theDaoConfig Will be used to determine the max capacity for this accumulator
+	 */
+	public ValueSetExpansionComponentWithConceptAccumulator(FhirContext theContext, DaoConfig theDaoConfig) {
+		this(theContext, theDaoConfig.getMaximumExpansionSize());
+	}
+
+	/**
+	 * Constructor
+	 *
 	 * @param theMaxCapacity The maximum number of results this accumulator will accept before throwing
 	 *                       an {@link InternalErrorException}
 	 */
@@ -56,7 +66,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		myContext = theContext;
 	}
 
-	@Nonnull
+    @Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
 		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;
