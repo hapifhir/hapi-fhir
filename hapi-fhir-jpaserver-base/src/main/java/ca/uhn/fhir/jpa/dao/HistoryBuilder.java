@@ -142,10 +142,15 @@ public class HistoryBuilder {
 		List<Predicate> predicates = new ArrayList<>();
 
 		if (!thePartitionId.isAllPartitions()) {
-			if (thePartitionId.getFirstPartitionIdOrNull() != null) {
-				predicates.add(theCriteriaBuilder.equal(theFrom.get("myPartitionIdValue").as(Integer.class), thePartitionId.getFirstPartitionIdOrNull()));
-			} else {
+			if (thePartitionId.isDefaultPartition()) {
 				predicates.add(theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue").as(Integer.class)));
+			} else if (thePartitionId.hasDefaultPartitionId()) {
+				predicates.add(theCriteriaBuilder.or(
+					theCriteriaBuilder.isNull(theFrom.get("myPartitionIdValue").as(Integer.class)),
+					theFrom.get("myPartitionIdValue").as(Integer.class).in(thePartitionId.getPartitionIdsWithoutDefault())
+				));
+			} else {
+				predicates.add(theFrom.get("myPartitionIdValue").as(Integer.class).in(thePartitionId.getPartitionIds()));
 			}
 		}
 
