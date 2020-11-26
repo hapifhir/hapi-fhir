@@ -223,11 +223,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	 */
 	@VisibleForTesting
 	public synchronized void clearDeferred() {
+		myProcessDeferred = true;
 		myDeferredValueSets.clear();
 		myDeferredConceptMaps.clear();
 		myDeferredConcepts.clear();
 		myDefferedCodeSystemsDeletions.clear();
 		myConceptLinksToSaveLater.clear();
+		myDefferedCodeSystemVersionsDeletions.clear();
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
