@@ -914,7 +914,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
 		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
 		 */
-		BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
+		//BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
 		//TODO GGG HS looks like we can't set max clause count, but it can be set server side.
 		//BooleanQuery.setMaxClauseCount(10000);
 
@@ -937,8 +937,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
-		jpaQuery.setMaxResults(maxResultsPerBatch);
-		jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
+//		jpaQuery.setMaxResults(maxResultsPerBatch);
+//		jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
 
 		ourLog.debug("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
 
@@ -947,11 +947,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		List<TermConcept> termConcepts = searchSession.search(TermConcept.class)
 			.where(f -> finishedQuery)
-			.fetchHits(theQueryIndex * pageSize, pageSize);
+			.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
 
 
 		int resultsInBatch = termConcepts.size();
-		int firstResult = theQueryIndex * pageSize;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
+		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
 		int delta = 0;
 		for (TermConcept concept: termConcepts) {
 			count.incrementAndGet();
