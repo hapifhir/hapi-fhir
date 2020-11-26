@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2195
+title: "When performing a ValueSet expansion with a filter a large pre-expanded 
+   ValueSet (more than 1000 codes), the filter failed to find concepts appearing 
+   after the first thousand. This has been corrected."

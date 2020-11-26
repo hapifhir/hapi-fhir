@@ -90,11 +90,11 @@
 		<display value="Systolic blood pressure 24 hour mean" />
 	</concept>
 	<concept>
-		<code value="8491-3" />
-		<display value="Systolic blood pressure 1 hour minimum" />
-	</concept>
-	<concept>
 		<code value="8492-1" />
 		<display value="Systolic blood pressure 8 hour minimum" />
+	</concept>
+	<concept>
+		<code value="9999-9" />
+		<display value="Foo Code" />
 	</concept>
 </CodeSystem>
