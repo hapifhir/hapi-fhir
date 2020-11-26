@@ -157,7 +157,8 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		//extraProperties.put("hibernate.search.autoregister_listeners", "true");
 
 		//TODO GGG HS: validate these settings.
-		extraProperties.put(HibernateOrmMapperSettings.MAPPING_CONFIGURER, HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "true");

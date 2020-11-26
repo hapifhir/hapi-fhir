@@ -2128,7 +2128,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ConceptSubsumptionOutcome testForSubsumption(SearchSession theSearchSession, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
 		List<TermConcept> fetch = theSearchSession.search(TermConcept.class)
 			.where(f -> f.bool()
-				.must(f.match().field("myId").matching(Long.toString(theRight.getId())))
+				.must(f.match().field("myId").matching(theRight.getId()))
 				.must(f.match().field("myParentPids").matching(Long.toString(theLeft.getId())))
 			).fetchHits(1);
 

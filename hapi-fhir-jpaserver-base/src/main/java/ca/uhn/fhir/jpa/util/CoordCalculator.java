@@ -23,11 +23,14 @@ package ca.uhn.fhir.jpa.util;
 
 import org.hibernate.search.engine.spatial.GeoPoint;
 import org.hibernate.search.engine.spatial.GeoBoundingBox;
+import org.slf4j.Logger;
 
 import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLatitude;
 import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLongitude;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public class CoordCalculator {
+	private static final Logger ourLog = getLogger(CoordCalculator.class);
 	public static final double MAX_SUPPORTED_DISTANCE_KM = 10000.0; // Slightly less than a quarter of the earth's circumference
 	private static final double RADIUS_EARTH_KM = 6378.1;
 
@@ -45,7 +48,11 @@ public class CoordCalculator {
 		double targetLongitude = longitudeRadians + Math.atan2(Math.sin(bearingRadians) * Math.sin(distanceRadians) * Math.cos(latitudeRadians),
 			Math.cos(distanceRadians)-Math.sin(latitudeRadians) * Math.sin(targetLatitude));
 
-		return GeoPoint.of(Math.toDegrees(targetLatitude), Math.toDegrees(targetLongitude));
+		double latitude = Math.toDegrees(targetLatitude);
+		double longitude = Math.toDegrees(targetLongitude);
+
+		GeoPoint of = GeoPoint.of(normalizeLatitude(latitude), normalizeLongitude(longitude));
+		return of;
 	}
 
 	/**
@@ -55,8 +62,9 @@ public class CoordCalculator {
 	public static GeoBoundingBox getBox(double theLatitudeDegrees, double theLongitudeDegrees, Double theDistanceKm) {
 		double diagonalDistanceKm = theDistanceKm * Math.sqrt(2.0);
 
-		GeoPoint northEast = CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 45.0, diagonalDistanceKm);
-		GeoPoint southWest = CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 225.0, diagonalDistanceKm);
-		return GeoBoundingBox.of(southWest, northEast);
+		GeoPoint topLeft= CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 315.0, diagonalDistanceKm);
+		GeoPoint bottomRight = CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 135.0, diagonalDistanceKm);
+
+		return GeoBoundingBox.of(topLeft, bottomRight);
 	}
 }

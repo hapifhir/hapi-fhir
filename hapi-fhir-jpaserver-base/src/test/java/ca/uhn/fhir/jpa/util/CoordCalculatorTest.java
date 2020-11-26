@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CoordCalculatorTest {
-	private final Logger ourLog = LoggerFactory.getLogger(CoordCalculatorTest.class);
 	// CHIN and UHN coordinates from Google Maps
 	// Distance and bearing from https://www.movable-type.co.uk/scripts/latlong.html
 	public static final double LATITUDE_CHIN = 43.65513;
