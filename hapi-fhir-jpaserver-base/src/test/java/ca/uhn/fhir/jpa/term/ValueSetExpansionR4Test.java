@@ -1577,37 +1577,18 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
+			TermValueSetConcept concept = assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertEquals(termValueSet.getConcepts().indexOf(concept), concept.getOrder());
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
-
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
 			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			TermValueSetConcept concept2 = assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
+			assertEquals(termValueSet.getConcepts().indexOf(concept2), concept.getOrder());
 
-			// ...
+
+			//TODO START HERE REFACTORING THESE TESTS
 
 			concept = termValueSet.getConcepts().get(22);
 			ourLog.info("Concept:\n" + concept.toString());
