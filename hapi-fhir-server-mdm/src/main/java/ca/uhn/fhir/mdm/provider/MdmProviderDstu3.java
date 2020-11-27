@@ -141,10 +141,10 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theLinkSource,
 										  ServletRequestDetails theRequestDetails) {
 
-		Stream<MdmLinkJson> empiLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId), extractStringOrNull(theTargetResourceId),
+		Stream<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId), extractStringOrNull(theTargetResourceId),
 			extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createMdmContext(theRequestDetails,
 				MdmTransactionContext.OperationType.QUERY_LINKS, getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
-		return (Parameters) parametersFromMdmLinks(empiLinkJson, true);
+		return (Parameters) parametersFromMdmLinks(mdmLinkJson, true);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES)
@@ -171,12 +171,12 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
 	})
-	public Parameters empiBatchOnAllTargets(
+	public Parameters mdmBatchOnAllTargets(
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
 		ServletRequestDetails theRequestDetails) {
 		String criteria = convertCriteriaToString(theCriteria);
 		long submittedCount  = myMdmSubmitSvc.submitAllTargetTypesToMdm(criteria);
-		return buildEmpiOutParametersWithCount(submittedCount);
+		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	private String convertCriteriaToString(StringType theCriteria) {
@@ -186,8 +186,8 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
 	})
-	public Parameters clearEmpiLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
-												ServletRequestDetails theRequestDetails) {
+	public Parameters clearMdmLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
+											  ServletRequestDetails theRequestDetails) {
 		long resetCount;
 		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
 			resetCount = myMdmExpungeSvc.expungeAllMdmLinks(theRequestDetails);
@@ -203,49 +203,49 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
-	public Parameters empiBatchPatientInstance(
+	public Parameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
 		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
-		return buildEmpiOutParametersWithCount(submittedCount);
+		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
-	public Parameters empiBatchPatientType(
+	public Parameters mdmBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertCriteriaToString(theCriteria);
 		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria);
-		return buildEmpiOutParametersWithCount(submittedCount);
+		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
-	public Parameters empiBatchPractitionerInstance(
+	public Parameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
 		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
-		return buildEmpiOutParametersWithCount(submittedCount);
+		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
 	})
-	public Parameters empiBatchPractitionerType(
+	public Parameters mdmBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertCriteriaToString(theCriteria);
 		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria);
-		return buildEmpiOutParametersWithCount(submittedCount);
+		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	/**
-	 * Helper function to build the out-parameters for all batch EMPI operations.
+	 * Helper function to build the out-parameters for all batch MDM operations.
 	 */
-	private Parameters buildEmpiOutParametersWithCount(long theCount) {
+	private Parameters buildMdmOutParametersWithCount(long theCount) {
 		Parameters parameters = new Parameters();
 		parameters.addParameter()
 			.setName(ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)

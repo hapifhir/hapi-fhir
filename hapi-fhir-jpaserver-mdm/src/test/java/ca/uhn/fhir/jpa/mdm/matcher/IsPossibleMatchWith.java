@@ -23,7 +23,7 @@ public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		List<MdmLink> mdmLinks = getEmpiLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
+		List<MdmLink> mdmLinks = getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 
 		List<Long> personPidsToMatch = myBaseResources.stream()
 			.map(this::getMatchedResourcePidFromResource)
@@ -36,8 +36,11 @@ public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
 				.collect(Collectors.toList());
 		}
 
-		List<Long> empiLinkSourcePersonPids = mdmLinks.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toList());
-		return empiLinkSourcePersonPids.containsAll(personPidsToMatch);
+		List<Long> mdmLinkGoldenResourcePids = mdmLinks
+			.stream().map(MdmLink::getGoldenResourcePid)
+			.collect(Collectors.toList());
+
+		return mdmLinkGoldenResourcePids.containsAll(personPidsToMatch);
 	}
 
 	@Override
@@ -48,7 +51,7 @@ public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
 	@Override
 	protected void describeMismatchSafely(IAnyResource item, Description mismatchDescription) {
 		super.describeMismatchSafely(item, mismatchDescription);
-		mismatchDescription.appendText("No Empi Link With POSSIBLE_MATCH was found");
+		mismatchDescription.appendText("No MDM Link With POSSIBLE_MATCH was found");
 	}
 
 	public static Matcher<IAnyResource> possibleMatchWith(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {

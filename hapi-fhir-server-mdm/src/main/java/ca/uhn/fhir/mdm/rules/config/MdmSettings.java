@@ -40,11 +40,10 @@ public class MdmSettings implements IMdmSettings {
 	private boolean myPreventEidUpdates;
 
 	/**
-	 * If disabled, the underlying EMPI system will operate under the following assumptions:
+	 * If disabled, the underlying MDM system will operate under the following assumptions:
 	 *
-	 * 1. Patients/Practitioners may have more than 1 EID of the same system simultaneously.
-	 * 2. During linking, incoming patient EIDs will be merged with existing Person EIDs.
-	 *
+	 * 1. Target resource may have more than 1 EID of the same system simultaneously.
+	 * 2. During linking, incoming patient EIDs will be merged with existing Golden Resource EIDs.
 	 */
 	private boolean myPreventMultipleEids;
 

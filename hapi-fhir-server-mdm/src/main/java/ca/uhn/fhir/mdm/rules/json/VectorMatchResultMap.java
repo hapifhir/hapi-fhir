@@ -38,7 +38,7 @@ public class VectorMatchResultMap {
 
 	VectorMatchResultMap(MdmRulesJson theMdmRulesJson) {
 		myMdmRulesJson = theMdmRulesJson;
-		//no reason to hold the entire empirulesjson here
+		// no reason to hold the entire mdmRulesJson here
 		initMap();
 	}
 

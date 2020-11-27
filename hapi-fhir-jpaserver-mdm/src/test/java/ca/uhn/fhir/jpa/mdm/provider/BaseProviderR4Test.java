@@ -32,7 +32,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	private String defaultScript;
 
-	protected void setEmpiRuleJson(String theString) throws IOException {
+	protected void setMdmRuleJson(String theString) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
 		Resource resource = resourceLoader.getResource(theString);
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);

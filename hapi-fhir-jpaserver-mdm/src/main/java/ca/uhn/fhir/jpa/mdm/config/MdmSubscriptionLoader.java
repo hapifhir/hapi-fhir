@@ -42,9 +42,11 @@ import java.util.stream.Collectors;
 
 @Service
 public class MdmSubscriptionLoader {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	public static final String MDM_SUBSCIPRION_ID_PREFIX = "empi-";
+	public static final String MDM_SUBSCIPRION_ID_PREFIX = "mdm-";
+
 	@Autowired
 	public FhirContext myFhirContext;
 	@Autowired

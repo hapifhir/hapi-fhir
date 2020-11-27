@@ -48,15 +48,14 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
-
 	<!--
-	Configuration for EMPI troubleshooting log
+	Configuration for MDM troubleshooting log
 	-->
-	<appender name="EMPI_TROUBLESHOOTING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+	<appender name="MDM_TROUBLESHOOTING" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter"><level>DEBUG</level></filter>
-		<file>${smile.basedir}/log/empi-troubleshooting.log</file>
+		<file>${smile.basedir}/log/mdm-troubleshooting.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-			<fileNamePattern>${smile.basedir}/log/empi-troubleshooting.log.%i.gz</fileNamePattern>
+			<fileNamePattern>${smile.basedir}/log/mdm-troubleshooting.log.%i.gz</fileNamePattern>
 			<minIndex>1</minIndex>
 			<maxIndex>9</maxIndex>
 		</rollingPolicy>
@@ -67,11 +66,10 @@
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
-	<logger name="ca.uhn.fhir.log.empi_troubleshooting" level="TRACE">
-		<appender-ref ref="EMPI_TROUBLESHOOTING"/>
+
+	<logger name="ca.uhn.fhir.log.mdm_troubleshooting" level="TRACE">
+		<appender-ref ref="MDM_TROUBLESHOOTING"/>
 	</logger>
-
-
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

@@ -18,7 +18,7 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testFilterResourcesWhichHaveNoRelevantAttributes() {
 		Patient patient = new Patient();
-		patient.setDeceased(new BooleanType(true)); //EMPI rules defined do not care about the deceased attribute.
+		patient.setDeceased(new BooleanType(true)); // MDM rules defined do not care about the deceased attribute.
 
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
@@ -27,9 +27,9 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testDoNotFilterResourcesWithEMPIAttributes() {
+	public void testDoNotFilterResourcesWithMdmAttributes() {
 		Patient patient = new Patient();
-		patient.addIdentifier().setValue("Hey I'm an ID! rules defined in empi-rules.json care about me!");
+		patient.addIdentifier().setValue("Hey I'm an ID! rules defined in mdm-rules.json care about me!");
 
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);

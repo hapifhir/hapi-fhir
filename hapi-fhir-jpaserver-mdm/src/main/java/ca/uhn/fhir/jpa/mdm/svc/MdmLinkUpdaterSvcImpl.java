@@ -159,7 +159,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		}
 
 		if (!MdmUtil.isMdmManaged(theGoldenResource) || !MdmUtil.isMdmManaged(theTarget)) {
-			throw new InvalidRequestException("Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by hapi-empi");
+			throw new InvalidRequestException("Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by hapi-mdm");
 		}
 	}
 }

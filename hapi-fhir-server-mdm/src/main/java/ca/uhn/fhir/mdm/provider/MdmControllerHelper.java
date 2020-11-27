@@ -39,14 +39,14 @@ import org.springframework.stereotype.Service;
 public class MdmControllerHelper {
 	private final FhirContext myFhirContext;
 	private final IResourceLoader myResourceLoader;
-	private final IMdmSettings myEmpiSettings;
+	private final IMdmSettings myMdmSettings;
 	private final MessageHelper myMessageHelper;
 
 	@Autowired
-	public MdmControllerHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IMdmSettings theEmpiSettings, MessageHelper theMessageHelper) {
+	public MdmControllerHelper(FhirContext theFhirContext, IResourceLoader theResourceLoader, IMdmSettings theMdmSettings, MessageHelper theMessageHelper) {
 		myFhirContext = theFhirContext;
 		myResourceLoader = theResourceLoader;
-		myEmpiSettings = theEmpiSettings;
+		myMdmSettings = theMdmSettings;
 		myMessageHelper = theMessageHelper;
 	}
 
@@ -78,17 +78,17 @@ public class MdmControllerHelper {
 	}
 
 	public void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
-		validateIsEmpiManaged(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPerson);
-		validateIsEmpiManaged(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPerson);
+		validateIsMdmManaged(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPerson);
+		validateIsMdmManaged(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPerson);
 	}
 
 	public String toJson(IAnyResource theAnyResource) {
 		return myFhirContext.newJsonParser().encodeResourceToString(theAnyResource);
 	}
 
-	public void validateIsEmpiManaged(String theName, IAnyResource theResource) {
+	public void validateIsMdmManaged(String theName, IAnyResource theResource) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		if (!myEmpiSettings.isSupportedMdmType(resourceType)) {
+		if (!myMdmSettings.isSupportedMdmType(resourceType)) {
 			throw new InvalidRequestException(
 				myMessageHelper.getMessageForUnsupportedResource(theName, resourceType)
 			);

@@ -53,15 +53,11 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
 
 	@Autowired
-	IMdmLinkSvc myEmpiLinkSvc;
+	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
 	private EIDHelper myEidHelper;
 	@Autowired
 	private GoldenResourceHelper myGoldenResourceHelper;
-	@Autowired
-	private IMdmLinkDao myEmpiLinkDao;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	@BeforeEach
 	public void before() {
@@ -123,9 +119,9 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		//Create a manual NO_MATCH between janePerson and unmatchedJane.
 		Patient unmatchedJane = createPatient(buildJanePatient());
-		myEmpiLinkSvc.updateLink(janePerson, unmatchedJane, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(janePerson, unmatchedJane, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
-		//rerun EMPI rules against unmatchedJane.
+		//rerun MDM rules against unmatchedJane.
 		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(unmatchedJane, createContextForCreate("Patient"));
 
 		assertThat(unmatchedJane, is(not(sameSourceResourceAs(janePerson))));
@@ -146,7 +142,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient unmatchedPatient = createPatient(buildJanePatient());
 
 		// This simulates an admin specifically saying that unmatchedPatient does NOT match janePerson.
-		myEmpiLinkSvc.updateLink(janePerson, unmatchedPatient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(janePerson, unmatchedPatient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		// TODO change this so that it will only partially match.
 
 		//Now normally, when we run update links, it should link to janePerson. However, this manual NO_MATCH link
@@ -167,10 +163,10 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient = addExternalEID(buildJanePatient(), sampleEID);
 		janePatient = createPatientAndUpdateLinks(janePatient);
 
-		Optional<MdmLink> empiLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(janePatient.getIdElement().getIdPartAsLong());
-		assertThat(empiLink.isPresent(), is(true));
+		Optional<MdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(janePatient.getIdElement().getIdPartAsLong());
+		assertThat(mdmLink.isPresent(), is(true));
 
-		Patient patient = getTargetResourceFromEmpiLink(empiLink.get(), "Patient");
+		Patient patient = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
 		assertThat(externalEid.get(0).getSystem(), is(equalTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystem())));
@@ -182,7 +178,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong()).get();
 
-		Patient targetPatient = getTargetResourceFromEmpiLink(mdmLink, "Patient");
+		Patient targetPatient = getTargetResourceFromMdmLink(mdmLink, "Patient");
 		Identifier identifierFirstRep = targetPatient.getIdentifierFirstRep();
 		assertThat(identifierFirstRep.getSystem(), is(equalTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM)));
 		assertThat(identifierFirstRep.getValue(), not(blankOrNullString()));
@@ -192,8 +188,8 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientAttributesAreCopiedOverWhenPersonIsCreatedFromPatient() {
 		Patient patient = createPatientAndUpdateLinks(buildPatientWithNameIdAndBirthday("Gary", "GARY_ID", new Date()));
 
-		Optional<MdmLink> empiLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
-		Patient read = getTargetResourceFromEmpiLink(empiLink.get(), "Patient");
+		Optional<MdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(patient.getIdElement().getIdPartAsLong());
+		Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
 		// TODO NG - rules haven't been determined yet revisit once implemented...
 //		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
@@ -290,17 +286,17 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 			.map(myIdHelperService::getPidOrNull)
 			.collect(Collectors.toList());
 
-		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE EmpiLink.
+		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
 		assertThat(mdmLink.getGoldenResourcePid(), is(in(duplicatePids)));
 		assertThat(mdmLink.getTargetPid(), is(in(duplicatePids)));
 	}
 
 	@Test
-	public void testPatientWithNoEmpiTagIsNotMatched() {
-		// Patient with "no-empi" tag is not matched
+	public void testPatientWithNoMdmTagIsNotMatched() {
+		// Patient with "no-mdm" tag is not matched
 		Patient janePatient = buildJanePatient();
-		janePatient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't EMPI on me!");
+		janePatient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
 		createPatientAndUpdateLinks(janePatient);
 		assertLinkCount(0);
 	}
@@ -364,7 +360,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual Persons for the purpose of this test.
 		IAnyResource person = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(janePatient2);
-		myEmpiLinkSvc.updateLink(person, janePatient2, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+		myMdmLinkSvc.updateLink(person, janePatient2, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertThat(janePatient, is(not(sameSourceResourceAs(janePatient2))));
 
 		//In theory, this will match both Persons!
@@ -389,7 +385,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoSourceResourceIsCreated() {
 		/**
-		 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, empi-link records are created with POSSIBLE_MATCH
+		 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, mdm-link records are created with POSSIBLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person link is added.
 		 */
 		Patient patient = buildJanePatient();
@@ -451,7 +447,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testCreateSourceResourceFromEmpiTarget() {
+	public void testCreateSourceResourceFromMdmTarget() {
 		// Create Use Case #2 - adding patient with no EID
 		Patient janePatient = buildJanePatient();
 		Patient janeSourceResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(janePatient);

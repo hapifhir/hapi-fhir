@@ -145,7 +145,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMatchWithEmptySearchParamCandidates() throws Exception {
-		setEmpiRuleJson("empi/empty-candidate-search-params.json");
+		setMdmRuleJson("mdm/empty-candidate-search-params.json");
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);

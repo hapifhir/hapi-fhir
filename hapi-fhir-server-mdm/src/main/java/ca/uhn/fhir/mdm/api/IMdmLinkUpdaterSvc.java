@@ -24,6 +24,6 @@ import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkUpdaterSvc {
-	IAnyResource updateLink(IAnyResource thePerson, IAnyResource theTarget, MdmMatchResultEnum theMatchResult, MdmTransactionContext theEmpiContext);
-	void notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, MdmTransactionContext theEmpiContext);
+	IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theTarget, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext);
+	void notDuplicatePerson(IAnyResource theGoldenResource, IAnyResource theTarget, MdmTransactionContext theMdmContext);
 }

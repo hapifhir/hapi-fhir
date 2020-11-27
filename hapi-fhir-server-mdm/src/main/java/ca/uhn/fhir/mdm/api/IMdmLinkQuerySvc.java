@@ -26,9 +26,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.util.stream.Stream;
 
 /**
- * This service supports the EMPI Operation providers for those services that return multiple empi links.
+ * This service supports the MDM operation providers for those services that return multiple MDM links.
  */
 public interface IMdmLinkQuerySvc {
-	Stream<MdmLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theEmpiContext);
-	Stream<MdmLinkJson> getDuplicatePersons(MdmTransactionContext theEmpiContext);
+	Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext);
+	Stream<MdmLinkJson> getDuplicatePersons(MdmTransactionContext theMdmContext);
 }

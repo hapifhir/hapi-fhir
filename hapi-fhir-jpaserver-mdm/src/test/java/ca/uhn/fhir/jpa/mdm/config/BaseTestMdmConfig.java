@@ -17,16 +17,16 @@ import java.io.IOException;
 @Configuration
 public abstract class BaseTestMdmConfig {
 
-	@Value("${empi.prevent_eid_updates:true}")
+	@Value("${mdm.prevent_eid_updates:true}")
 	boolean myPreventEidUpdates;
 
-	@Value("${empi.prevent_multiple_eids:true}")
+	@Value("${mdm.prevent_multiple_eids:true}")
 	boolean myPreventMultipleEids;
 
 	@Bean
 	IMdmSettings mdmSettings(MdmRuleValidator theMdmRuleValidator) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
+		Resource resource = resourceLoader.getResource("mdm/mdm-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 		return new MdmSettings(theMdmRuleValidator)
 			.setEnabled(false)

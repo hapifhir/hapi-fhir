@@ -59,10 +59,10 @@ public class MdmMatchLinkSvc {
 
 	/**
 	 * Given an MDM Target (consisting of either a Patient or a Practitioner), find a suitable Person candidate for them,
-	 * or create one if one does not exist. Performs matching based on rules defined in empi-rules.json.
+	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
 	 * Does nothing if resource is determined to be not managed by MDM.
 	 *
-	 * @param theResource the incoming MDM target, which is either a Patient or Practitioner.
+	 * @param theResource the incoming MDM target, which can be any supported MDM type.
 	 * @param theMdmTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to MDM processing of this resource.
 	 */

@@ -11,6 +11,7 @@ Here is an example of a full HAPI MDM rules json document:
 ```json
 {
 	"version": "1",
+    "mdmTypes" : ["Patient", "Practitioner"],
 	"candidateSearchParams": [
 		{
 			"resourceType": "Patient",

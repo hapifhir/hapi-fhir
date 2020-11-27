@@ -73,7 +73,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = null;
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.empiBatchOnAllTargets(new StringType("Medication"), criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchOnAllTargets(new StringType("Medication"), criteria, null));
 		assertLinkCount(1);
 	}
 
@@ -82,13 +82,13 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = null;
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.empiBatchPractitionerType(criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchPractitionerType(criteria, null));
 		assertLinkCount(1);
 	}
 	@Test
 	public void testBatchRunOnSpecificPractitioner() throws InterruptedException {
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.empiBatchPractitionerInstance(myPractitioner.getIdElement(), null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchPractitionerInstance(myPractitioner.getIdElement(), null));
 		assertLinkCount(1);
 	}
 
@@ -96,7 +96,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnNonExistentSpecificPractitioner() {
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 		try {
-			myMdmProviderR4.empiBatchPractitionerInstance(new IdType("Practitioner/999"), null);
+			myMdmProviderR4.mdmBatchPractitionerInstance(new IdType("Practitioner/999"), null);
 			fail();
 		} catch (ResourceNotFoundException e){}
 	}
@@ -106,7 +106,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		assertLinkCount(3);
 		StringType criteria = null;
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.empiBatchPatientType(criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchPatientType(criteria, null));
 		assertLinkCount(1);
 	}
 
@@ -114,7 +114,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	public void testBatchRunOnSpecificPatient() throws InterruptedException {
 		assertLinkCount(3);
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.empiBatchPatientInstance(myPatient.getIdElement(), null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchPatientInstance(myPatient.getIdElement(), null));
 		assertLinkCount(1);
 	}
 
@@ -123,7 +123,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		assertLinkCount(3);
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 		try {
-			myMdmProviderR4.empiBatchPatientInstance(new IdType("Patient/999"), null);
+			myMdmProviderR4.mdmBatchPatientInstance(new IdType("Patient/999"), null);
 			fail();
 		} catch (ResourceNotFoundException e){}
 	}
@@ -134,7 +134,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = new StringType("");
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 		afterMdmLatch.runWithExpectedCount(3, () -> {
-			myMdmProviderR4.empiBatchOnAllTargets(null, criteria, null);
+			myMdmProviderR4.mdmBatchOnAllTargets(null, criteria, null);
 		});
 		assertLinkCount(3);
 	}
@@ -146,7 +146,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 
 		try {
-			myMdmProviderR4.empiBatchPractitionerType(criteria, null);
+			myMdmProviderR4.mdmBatchPractitionerType(criteria, null);
 			fail();
 		} catch(InvalidRequestException e) {
 			assertThat(e.getMessage(), is(equalTo("Failed to parse match URL[death-date=2020-06-01] - Resource type Practitioner does not have a parameter with name: death-date")));

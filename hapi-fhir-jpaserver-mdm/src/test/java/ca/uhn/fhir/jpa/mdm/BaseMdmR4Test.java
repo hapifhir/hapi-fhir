@@ -139,12 +139,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected void saveLink(MdmLink theMdmLink) {
 		myMdmLinkDaoSvc.save(theMdmLink);
 	}
-//
-//	@Nonnull
-//	protected Patient createUnmanagedSourceResource() {
-//		// return createGoldenPatient(new Patient(), false);
-//		return createGoldenPatient(new Patient(), false);
-//	}
 
 	@Nonnull
 	protected Patient createGoldenPatient() {
@@ -169,7 +163,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient createPatient(Patient thePatient, boolean theMdmManaged, boolean isRedirect) {
 		if (theMdmManaged) {
-			MdmUtil.setEmpiManaged(thePatient);
+			MdmUtil.setMdmManaged(thePatient);
 			if (isRedirect) {
 				MdmUtil.setGoldenResourceRedirected(thePatient);
 			} else {
@@ -185,7 +179,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createPatient(Patient thePatient) {
-		//Note that since our empi-rules block on active=true, all patients must be active.
+		//Note that since our mdm-rules block on active=true, all patients must be active.
 		thePatient.setActive(true);
 
 		DaoMethodOutcome outcome = myPatientDao.create(thePatient);
@@ -197,7 +191,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Medication createMedication(Medication theMedication) {
-		//Note that since our empi-rules block on active=true, all patients must be active.
+		//Note that since our mdm-rules block on active=true, all patients must be active.
 		DaoMethodOutcome outcome = myMedicationDao.create(theMedication);
 		Medication medication = (Medication) outcome.getResource();
 		medication.setId(outcome.getId());
@@ -206,7 +200,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Practitioner createPractitioner(Practitioner thePractitioner) {
-		//Note that since our empi-rules block on active=true, all patients must be active.
+		//Note that since our mdm-rules block on active=true, all patients must be active.
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
@@ -329,7 +323,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	protected <T extends IBaseResource> T getTargetResourceFromEmpiLink(MdmLink theMdmLink, String theResourceType) {
+	protected <T extends IBaseResource> T getTargetResourceFromMdmLink(MdmLink theMdmLink, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		return (T) resourceDao.readByPid(new ResourcePersistentId(theMdmLink.getGoldenResourcePid()));
 	}
@@ -470,7 +464,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	protected void logAllLinks() {
-		ourLog.info("Logging all EMPI Links:");
+		ourLog.info("Logging all MDM Links:");
 		List<MdmLink> links = myMdmLinkDao.findAll();
 		for (MdmLink link : links) {
 			ourLog.info(link.toString());
@@ -530,8 +524,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 
 	protected void printLinks() {
-		myMdmLinkDao.findAll().forEach(empiLink -> {
-			ourLog.info(String.valueOf(empiLink));
+		myMdmLinkDao.findAll().forEach(mdmLink -> {
+			ourLog.info(String.valueOf(mdmLink));
 		});
 	}
 

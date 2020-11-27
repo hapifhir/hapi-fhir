@@ -25,8 +25,9 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This SearchParamJson, unlike EmpiREsourceSearchParamJson, is responsible for doing inclusions during empi
- * candidate searching. e.g. When doing candidate matching, only consider candidates that match all EmpiFilterSearchParams.
+ * This class, unlike {@link MdmResourceSearchParamJson}, is responsible for doing inclusions during MDM
+ * candidate searching. e.g. When doing candidate matching, only consider candidates that match all
+ * MdmFilterSearchParams.
  */
 public class MdmFilterSearchParamJson implements IModelJson {
 	@JsonProperty(value = "resourceType", required = true)

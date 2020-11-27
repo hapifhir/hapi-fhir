@@ -194,12 +194,12 @@ public class MdmProviderR4 extends BaseMdmProvider {
 									 @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1) StringType theLinkSource,
 									 ServletRequestDetails theRequestDetails) {
 
-		Stream<MdmLinkJson> empiLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
+		Stream<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId),
 			extractStringOrNull(theResourceId), extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
 				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId))
 		);
-		return (Parameters) parametersFromMdmLinks(empiLinkJson, true);
+		return (Parameters) parametersFromMdmLinks(mdmLinkJson, true);
 	}
 
 	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
@@ -229,7 +229,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
 	})
-	public Parameters empiBatchOnAllTargets(
+	public Parameters mdmBatchOnAllTargets(
 		//TODO GGG MDM: also have to take it an optional resourceType here, to clarify which resources should have MDM run on them.
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0 , max = 1) StringType theResourceType,
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
@@ -255,7 +255,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
-	public Parameters empiBatchPatientInstance(
+	public Parameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
 		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
@@ -265,7 +265,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
-	public Parameters empiBatchPatientType(
+	public Parameters mdmBatchPatientType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertStringTypeToString(theCriteria);
@@ -276,7 +276,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
-	public Parameters empiBatchPractitionerInstance(
+	public Parameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
 		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
@@ -286,7 +286,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
 	})
-	public Parameters empiBatchPractitionerType(
+	public Parameters mdmBatchPractitionerType(
 		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
 		RequestDetails theRequest) {
 		String criteria = convertStringTypeToString(theCriteria);
@@ -295,7 +295,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 	}
 
 	/**
-	 * Helper function to build the out-parameters for all batch EMPI operations.
+	 * Helper function to build the out-parameters for all batch MDM operations.
 	 */
 	private Parameters buildMdmOutParametersWithCount(long theCount) {
 		Parameters parameters = new Parameters();

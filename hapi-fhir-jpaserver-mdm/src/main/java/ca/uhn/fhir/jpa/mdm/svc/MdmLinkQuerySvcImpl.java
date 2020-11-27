@@ -45,8 +45,8 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Override
-	public Stream<MdmLinkJson> queryLinks(IIdType thePersonId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(thePersonId, theTargetId, theMatchResult, theLinkSource);
+	public Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext) {
+		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theTargetId, theMatchResult, theLinkSource);
 		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink).stream()
 			.filter(mdmLink -> mdmLink.getMatchResult() != MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.map(this::toJson);

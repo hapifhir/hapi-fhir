@@ -43,6 +43,7 @@ import java.util.Optional;
 
 @Service
 public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -50,7 +51,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 	@Autowired
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	IMdmLinkSvc myEmpiLinkSvc;
+	IMdmLinkSvc myMdmLinkSvc;
 	@Autowired
 	IdHelperService myIdHelperService;
 	@Autowired
@@ -170,7 +171,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 	private Optional<MdmLink> findFirstLinkWithMatchingTarget(List<MdmLink> theMdmLinks, MdmLink theLinkWithTargetToMatch) {
 		return theMdmLinks.stream()
-			.filter(empiLink -> empiLink.getTargetPid().equals(theLinkWithTargetToMatch.getTargetPid()))
+			.filter(mdmLink -> mdmLink.getTargetPid().equals(theLinkWithTargetToMatch.getTargetPid()))
 			.findFirst();
 	}
 

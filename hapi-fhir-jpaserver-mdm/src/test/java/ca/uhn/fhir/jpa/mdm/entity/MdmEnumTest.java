@@ -7,10 +7,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MdmEnumTest {
-	@Test
-	public void empiEnumOrdinals() {
-		// This test is here to enforce that new values in these enums are always added to the end
 
+	@Test
+	public void mdmEnumOrdinals() {
+		// This test is here to enforce that new values in these enums are always added to the end
 		assertEquals(6, MdmMatchResultEnum.values().length);
 		assertEquals(MdmMatchResultEnum.REDIRECT, MdmMatchResultEnum.values()[MdmMatchResultEnum.values().length - 1]);
 

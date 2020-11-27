@@ -72,6 +72,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	public void validateMdmTypes(MdmRulesJson theMdmRulesJson) {
+		ourLog.info("Validating MDM types {}", theMdmRulesJson.getMdmTypes());
+
 		if (theMdmRulesJson.getMdmTypes() == null) {
 			throw new ConfigurationException("mdmTypes must be set to a list of resource types.");
 		}
@@ -87,6 +89,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateSearchParams(MdmRulesJson theMdmRulesJson) {
+		ourLog.info("Validating search parameters {}", theMdmRulesJson.getCandidateSearchParams());
+
 		for (MdmResourceSearchParamJson searchParams : theMdmRulesJson.getCandidateSearchParams()) {
 			searchParams.iterator().forEachRemaining(
 				searchParam -> validateSearchParam("candidateSearchParams", searchParams.getResourceType(), searchParam));
@@ -112,6 +116,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateMatchFields(MdmRulesJson theMdmRulesJson) {
+		ourLog.info("Validating match fields {}", theMdmRulesJson.getMatchFields());
+
 		Set<String> names = new HashSet<>();
 		for (MdmFieldMatchJson fieldMatch : theMdmRulesJson.getMatchFields()) {
 			if (names.contains(fieldMatch.getName())) {
@@ -137,7 +143,6 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	private void validatePath(List<String> theMdmTypes, MdmFieldMatchJson theFieldMatch) {
 		String resourceType = theFieldMatch.getResourceType();
 
-
 		if (MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE.equals(resourceType)) {
 			validateFieldPathForAllTypes(theMdmTypes, theFieldMatch);
 		} else {
@@ -153,18 +158,20 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	private void validateFieldPathForType(String theResourceType, MdmFieldMatchJson theFieldMatch) {
+		ourLog.debug(" validating resource {} for {} ", theResourceType, theFieldMatch.getResourcePath());
+
 		try {
 			RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceType);
 			Class<? extends IBaseResource> implementingClass = resourceDefinition.getImplementingClass();
-			myTerser.getDefinition(implementingClass, theResourceType + "." + theFieldMatch.getResourcePath());
-		} catch (DataFormatException | ConfigurationException e) {
+			String path = theResourceType + "." + theFieldMatch.getResourcePath();
+			myTerser.getDefinition(implementingClass, path);
+		} catch (DataFormatException | ConfigurationException | ClassCastException e) {
 			throw new ConfigurationException("MatchField " +
 				theFieldMatch.getName() +
 				" resourceType " +
 				theFieldMatch.getResourceType() +
 				" has invalid path '" + theFieldMatch.getResourcePath() + "'.  " +
 				e.getMessage());
-
 		}
 	}
 
@@ -176,6 +183,8 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 		if (theMdmRulesJson.getEnterpriseEIDSystem() == null) {
 			return;
 		}
+
+		ourLog.info("Validating system URI {}", theMdmRulesJson.getEnterpriseEIDSystem());
 
 		try {
 			new URI(theMdmRulesJson.getEnterpriseEIDSystem());

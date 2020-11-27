@@ -59,7 +59,7 @@ public class CanonicalEID {
 
 	/**
 	 * Get the appropriate FHIRPath expression to extract the EID identifier value, regardless of resource type.
-	 * e.g. if theBaseResource is a patient, and the EMPI EID system is test-system, this will return
+	 * e.g. if theBaseResource is a patient, and the MDM EID system is test-system, this will return
 	 *
 	 * Patient.identifier.where(system='test-system').value
 	 *

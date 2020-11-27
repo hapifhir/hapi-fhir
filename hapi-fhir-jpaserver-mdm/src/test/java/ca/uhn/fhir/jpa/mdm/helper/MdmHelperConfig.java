@@ -27,9 +27,9 @@ public class MdmHelperConfig {
 
 	@Primary
 	@Bean
-	IMdmSettings empiSettings(MdmRuleValidator theMdmRuleValidator) throws IOException {
+	IMdmSettings mdmSettings(MdmRuleValidator theMdmRuleValidator) throws IOException {
 		DefaultResourceLoader resourceLoader = new DefaultResourceLoader();
-		Resource resource = resourceLoader.getResource("empi/empi-rules.json");
+		Resource resource = resourceLoader.getResource("mdm/mdm-rules.json");
 		String json = IOUtils.toString(resource.getInputStream(), Charsets.UTF_8);
 
 		// Set Enabled to true, and set strict mode.

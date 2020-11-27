@@ -26,7 +26,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	@Autowired
 	IInterceptorService myInterceptorService;
 	@Autowired
-	IMdmStorageInterceptor myEmpiStorageInterceptor;
+	IMdmStorageInterceptor myMdmStorageInterceptor;
 	@Autowired
 	DaoConfig myDaoConfig;
 	private ResourceTable myTargetEntity;
@@ -50,7 +50,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testUninterceptedDeleteRemovesEMPIReference() {
+	public void testUninterceptedDeleteRemovesMdmReference() {
 		assertEquals(1, myMdmLinkDao.count());
 		myPatientDao.delete(myTargetEntity.getIdDt());
 		assertEquals(1, myMdmLinkDao.count());
@@ -63,14 +63,14 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 			assertThat(e.getMessage(), containsString("ViolationException"));
 			assertThat(e.getMessage(), containsString("FK_EMPI_LINK_TARGET"));
 		}
-		myInterceptorService.registerInterceptor(myEmpiStorageInterceptor);
+		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
 		assertEquals(0, myMdmLinkDao.count());
 	}
 
 	@AfterEach
 	public void afterUnregisterInterceptor() {
-		myInterceptorService.unregisterInterceptor(myEmpiStorageInterceptor);
+		myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
 	}
 
 }

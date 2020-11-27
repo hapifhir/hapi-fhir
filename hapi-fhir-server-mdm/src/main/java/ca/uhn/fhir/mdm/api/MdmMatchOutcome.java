@@ -108,13 +108,13 @@ public final class MdmMatchOutcome {
 	/**
 	 * Sets the number of MDM rules checked for this match outcome
 	 *
-	 * @param theEmpiRuleCount
+	 * @param theMdmRuleCount
 	 * 	Number of MDM rules that were checked for this match outcome
 	 * @return
 	 * 	Returns this instance
 	 */
-	public MdmMatchOutcome setMdmRuleCount(int theEmpiRuleCount) {
-		myMdmRuleCount = theEmpiRuleCount;
+	public MdmMatchOutcome setMdmRuleCount(int theMdmRuleCount) {
+		myMdmRuleCount = theMdmRuleCount;
 		return this;
 	}
 

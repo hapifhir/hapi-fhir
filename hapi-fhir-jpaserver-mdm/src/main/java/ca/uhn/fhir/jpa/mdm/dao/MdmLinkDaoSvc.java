@@ -267,7 +267,7 @@ public class MdmLinkDaoSvc {
 	}
 
 	/**
-	 * Persist an EmpiLink to the database.
+	 * Persist an MDM link to the database.
 	 *
 	 * @param theMdmLink the link to save.
 	 * @return the persisted {@link MdmLink} entity.
@@ -284,7 +284,7 @@ public class MdmLinkDaoSvc {
 	/**
 	 * Given an example {@link MdmLink}, return all links from the database which match the example.
 	 *
-	 * @param theExampleLink The EmpiLink containing the data we would like to search for.
+	 * @param theExampleLink The MDM link containing the data we would like to search for.
 	 * @return a list of {@link MdmLink} entities which match the example.
 	 */
 	public List<MdmLink> findMdmLinkByExample(Example<MdmLink> theExampleLink) {

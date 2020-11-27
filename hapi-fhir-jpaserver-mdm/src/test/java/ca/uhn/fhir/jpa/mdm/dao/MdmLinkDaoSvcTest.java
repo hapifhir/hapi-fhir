@@ -18,10 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
-	@Autowired
-	MdmLinkDaoSvc myMdmLinkDaoSvc;
-	@Autowired
-	IMdmSettings myEmpiSettings;
 
 	@Test
 	public void testCreate() {
@@ -47,7 +43,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testNew() {
 		MdmLink newLink = myMdmLinkDaoSvc.newMdmLink();
-		MdmRulesJson rules = myEmpiSettings.getMdmRules();
+		MdmRulesJson rules = myMdmSettings.getMdmRules();
 		assertEquals("1", rules.getVersion());
 		assertEquals(rules.getVersion(), newLink.getVersion());
 	}

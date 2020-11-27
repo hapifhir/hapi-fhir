@@ -62,6 +62,7 @@ import static ca.uhn.fhir.context.FhirVersionEnum.R4;
 
 @Service
 public class GoldenResourceHelper {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	private static final String FIELD_NAME_IDENTIFIER = "identifier";
@@ -100,7 +101,7 @@ public class GoldenResourceHelper {
 
 		addHapiEidIfNoExternalEidIsPresent(newSourceResource, sourceResourceIdentifier, theIncomingResource);
 
-		MdmUtil.setEmpiManaged(newSourceResource);
+		MdmUtil.setMdmManaged(newSourceResource);
 		MdmUtil.setGoldenResource(newSourceResource);
 
 		return (T) newSourceResource;
@@ -192,12 +193,11 @@ public class GoldenResourceHelper {
 		for (IBase base : sourceResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				String empiSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
+				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
-				if (Objects.equals(baseSystem, empiSystem)) {
+				if (Objects.equals(baseSystem, mdmSystem)) {
 					cloneEidIntoResource(theSourceResourceIdentifier, base, theNewSourceResource);
-				} else if (ourLog.isDebugEnabled()) {
-					ourLog.debug(String.format("System %s differs from system in the EMPI rules %s", baseSystem, empiSystem));
+					ourLog.debug("System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
 				}
 			} else {
 				ourLog.debug("System is missing, skipping");
@@ -257,12 +257,10 @@ public class GoldenResourceHelper {
 		for (IBase base : sourceResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
-				String empiSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
+				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
-				if (Objects.equals(baseSystem, empiSystem)) {
-					if (ourLog.isDebugEnabled()) {
-						ourLog.debug(String.format("Found EID confirming to EMPI rules %s. It should not be copied, skipping", baseSystem));
-					}
+				if (Objects.equals(baseSystem, mdmSystem)) {
+					ourLog.debug(String.format("Found EID confirming to MDM rules {}. It should not be copied, skipping", baseSystem));
 					continue;
 				}
 			}

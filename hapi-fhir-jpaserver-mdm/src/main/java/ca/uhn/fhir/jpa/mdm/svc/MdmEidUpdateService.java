@@ -44,6 +44,7 @@ import java.util.Optional;
 
 @Service
 public class MdmEidUpdateService {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -129,7 +130,7 @@ public class MdmEidUpdateService {
 	}
 
 	/**
-	 * Data class to hold context surrounding an update operation for an EMPI target.
+	 * Data class to hold context surrounding an update operation for an MDM target.
 	 */
 	class MdmUpdateContext {
 		private final boolean myHasEidsInCommon;

@@ -29,23 +29,26 @@ import javax.annotation.Nonnull;
 import java.util.Optional;
 
 public final class MdmUtil {
-	private MdmUtil() {}
+
+	private MdmUtil() {
+	}
 
 	/**
-	 * If the resource is tagged as not managed by empi, return false. Otherwise true.
-	 * @param theBaseResource The Patient/Practitioner that is potentially managed by EMPI.
-	 * @return A boolean indicating whether EMPI should manage this resource.
+	 * If the resource is tagged as not managed by MDM, return false. Otherwise true.
+	 *
+	 * @param theBaseResource The FHIR resource that is potentially managed by MDM.
+	 * @return A boolean indicating whether MDM can manage this resource.
 	 */
 	public static boolean isMdmAllowed(IBaseResource theBaseResource) {
 		return theBaseResource.getMeta().getTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED) == null;
 	}
 
 	/**
-	 * Checks for the presence of the EMPI-managed tag, indicating the EMPI system has ownership
+	 * Checks for the presence of the MDM-managed tag, indicating the MDM system has ownership
 	 * of this Person's links.
 	 *
 	 * @param theBaseResource the resource to check.
-	 * @return a boolean indicating whether or not EMPI manages this Person.
+	 * @return a boolean indicating whether or not MDM manages this FHIR resource.
 	 */
 	public static boolean isMdmManaged(IBaseResource theBaseResource) {
 		return resourceHasTag(theBaseResource, MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED);
@@ -85,14 +88,13 @@ public final class MdmUtil {
 
 
 	/**
-	 * Sets the EMPI-managed tag, indicating the EMPI system has ownership of this
-	 * Resource. No changes are made if resource is already maanged by EMPI.
+	 * Sets the MDM-managed tag, indicating the MDM system has ownership of this
+	 * Resource. No changes are made if resource is already maanged by MDM.
 	 *
 	 * @param theBaseResource resource to set the tag for
-	 * @return
-	 * 		Returns resource with the tag set.
+	 * @return Returns resource with the tag set.
 	 */
-	public static IBaseResource setEmpiManaged(IBaseResource theBaseResource) {
+	public static IBaseResource setMdmManaged(IBaseResource theBaseResource) {
 		return setTagOnResource(theBaseResource, MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED, MdmConstants.DISPLAY_HAPI_MDM_MANAGED);
 	}
 
@@ -124,11 +126,5 @@ public final class MdmUtil {
 
 		}
 		return theGoldenResource;
-	}
-
-	public static boolean isEmpiManagedPerson(FhirContext theFhirContext, IBaseResource theResource) {
-		String resourceType = theFhirContext.getResourceType(theResource);
-
-		return "Person".equals(resourceType) && isMdmManaged(theResource);
 	}
 }

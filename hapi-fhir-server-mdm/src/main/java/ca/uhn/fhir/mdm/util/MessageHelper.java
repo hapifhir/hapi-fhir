@@ -33,13 +33,13 @@ import org.springframework.stereotype.Service;
 public class MessageHelper {
 
 	@Autowired
-	private final IMdmSettings myEmpiSettings;
+	private final IMdmSettings myMdmSettings;
 
 	@Autowired
 	private final FhirContext myFhirContext;
 
-	public MessageHelper(IMdmSettings theEmpiSettings, FhirContext theFhirContext) {
-		myEmpiSettings = theEmpiSettings;
+	public MessageHelper(IMdmSettings theMdmSettings, FhirContext theFhirContext) {
+		myMdmSettings = theMdmSettings;
 		myFhirContext = theFhirContext;
 	}
 
@@ -55,7 +55,7 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedResource(String theName, String theResourceType) {
 		return String.format("Only %s resources can be merged. The %s points to a %s",
-			myEmpiSettings.getSupportedMdmTypes(), theName, theResourceType);
+			myMdmSettings.getSupportedMdmTypes(), theName, theResourceType);
 	}
 
 	public String getMessageForUnsupportedMatchResult() {
@@ -64,12 +64,12 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedFirstArgumentTypeInUpdate(String goldenRecordType) {
 		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
-			+ myEmpiSettings.getSupportedMdmTypes() + ".  Was " + goldenRecordType;
+			+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + goldenRecordType;
 	}
 
 	public String getMessageForUnsupportedSecondArgumentTypeInUpdate(String theGoldenRecordType) {
 		return "First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be a "
-			+ myEmpiSettings.getSupportedMdmTypes() + ".  Was " + theGoldenRecordType;
+			+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + theGoldenRecordType;
 	}
 
 	public String getMessageForArgumentTypeMismatchInUpdate(String theGoldenRecordType, String theTargetType) {
@@ -79,7 +79,7 @@ public class MessageHelper {
 
 	public String getMessageForUnsupportedTarget() {
 		return "The target is marked with the " + MdmConstants.CODE_NO_MDM_MANAGED
-			+ " tag which means it may not be EMPI linked.";
+			+ " tag which means it may not be MDM linked.";
 	}
 
 	public String getMessageForNoLink(IAnyResource theGoldenRecord, IAnyResource theTarget) {

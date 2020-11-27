@@ -28,7 +28,7 @@ This automatic linking is done via configurable matching rules that create links
  of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCH.
 
 It is important to note that before a resource is processed by MDM, it is first checked to ensure that it has at least
- one attribute that the MDM system cares about, as defined in the `empi-rules.json` file. If the incoming resource has 
+ one attribute that the MDM system cares about, as defined in the `mdm-rules.json` file. If the incoming resource has
  no such attributes, then MDM processing does not occur on it. In this case, no Golden Resource Patient is created for 
  them. If in the future that Patient is updated to contain attributes the MDM system does concern itself with, it will 
  be processed at that time.
@@ -110,6 +110,6 @@ no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICAT
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:
 
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
-1. It creates two MESSAGE subscriptions, called 'empi-patient' and 'empi-practitioner' that match all incoming Patient and Practitioner resources and send them to an internal queue called "empi".  The JPA Server listens to this queue and links incoming resources to Persons.
+1. It creates two MESSAGE subscriptions, called 'mdm-patient' and 'mdm-practitioner' that match all incoming MDM managed resources and send them to an internal queue called "mdm". The JPA Server listens to this queue and links incoming resources to the appropriate golden resources.
 1. The [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html) are registered with the server.
 1. It registers a new dao interceptor that restricts access to MDM managed Golden Patient records.

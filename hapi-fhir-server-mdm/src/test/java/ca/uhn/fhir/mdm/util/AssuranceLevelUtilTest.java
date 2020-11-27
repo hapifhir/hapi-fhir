@@ -34,31 +34,31 @@ public class AssuranceLevelUtilTest {
 			AssuranceLevelUtil.getAssuranceLevel(NO_MATCH, AUTO);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("An AUTO EMPI Link may not have a match result of NO_MATCH", e.getMessage());
+			assertEquals("An AUTO MDM Link may not have a match result of NO_MATCH", e.getMessage());
 		}
 		try {
 			AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_DUPLICATE, AUTO);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("An AUTO EMPI Link may not have a match result of POSSIBLE_DUPLICATE", e.getMessage());
+			assertEquals("An AUTO MDM Link may not have a match result of POSSIBLE_DUPLICATE", e.getMessage());
 		}
 		try {
 			AssuranceLevelUtil.getAssuranceLevel(NO_MATCH, MANUAL);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL EMPI Link may not have a match result of NO_MATCH", e.getMessage());
+			assertEquals("A MANUAL MDM Link may not have a match result of NO_MATCH", e.getMessage());
 		}
 		try {
 			AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_MATCH, MANUAL);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL EMPI Link may not have a match result of POSSIBLE_MATCH", e.getMessage());
+			assertEquals("A MANUAL MDM Link may not have a match result of POSSIBLE_MATCH", e.getMessage());
 		}
 		try {
 			AssuranceLevelUtil.getAssuranceLevel(POSSIBLE_DUPLICATE, MANUAL);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("A MANUAL EMPI Link may not have a match result of POSSIBLE_DUPLICATE", e.getMessage());
+			assertEquals("A MANUAL MDM Link may not have a match result of POSSIBLE_DUPLICATE", e.getMessage());
 		}
 	}
 

@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MdmGoldenResourceFindingSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -52,8 +53,8 @@ public class MdmGoldenResourceFindingSvc {
 	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
 	 * 1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
 	 * 2. If none are found, attempt to find Person Resources which link to this theResource.
-	 * 3. If none are found, attempt to find Person Resources similar to our incoming resource based on the EMPI rules and field matchers.
-	 * 4. If none are found, attempt to find Persons that are linked to Patients/Practitioners that are similar to our incoming resource based on the EMPI rules and
+	 * 3. If none are found, attempt to find Person Resources similar to our incoming resource based on the MDM rules and field matchers.
+	 * 4. If none are found, attempt to find Persons that are linked to Patients/Practitioners that are similar to our incoming resource based on the MDM rules and
 	 * field matchers.
 	 *
 	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
@@ -67,9 +68,8 @@ public class MdmGoldenResourceFindingSvc {
 		}
 
 		if (matchedSourceResourceCandidates.isEmpty()) {
-			//OK, so we have not found any links in the EmpiLink table with us as a target. Next, let's find possible Patient/Practitioner
-			//matches by following EMPI rules.
-
+			//OK, so we have not found any links in the MdmLink table with us as a target. Next, let's find
+			//possible Golden Resources matches by following MDM rules.
 			matchedSourceResourceCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
 		}
 

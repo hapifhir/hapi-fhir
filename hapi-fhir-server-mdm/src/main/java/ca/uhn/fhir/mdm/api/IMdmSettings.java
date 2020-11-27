@@ -25,7 +25,9 @@ import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import java.util.stream.Collectors;
 
 public interface IMdmSettings {
-	String MDM_CHANNEL_NAME = "empi";
+
+	String MDM_CHANNEL_NAME = "mdm";
+
 	// Parallel processing of MDM can result in missed matches.  Best to single-thread.
 	int MDM_DEFAULT_CONCURRENT_CONSUMERS = 1;
 

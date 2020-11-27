@@ -17,8 +17,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class MdmResourceFilteringSvcMockTest {
+
 	@MockBean
-	private IMdmSettings myEmpiSettings;
+	private IMdmSettings myMdmSettings;
 	@MockBean
 	MdmSearchParamSvc myMdmSearchParamSvc;
 	@MockBean
@@ -29,14 +30,14 @@ class MdmResourceFilteringSvcMockTest {
 	@Configuration
 	static class SpringConfig {
 		@Bean
-		MdmResourceFilteringSvc empiResourceFilteringSvc() {
+		MdmResourceFilteringSvc mdmResourceFilteringSvc() {
 			return new MdmResourceFilteringSvc();
 		}
 	}
 
 	@Test
 	public void testEmptyCriteriaShouldBeProcessed() {
-		when(myEmpiSettings.getMdmRules()).thenReturn(new MdmRulesJson());
+		when(myMdmSettings.getMdmRules()).thenReturn(new MdmRulesJson());
 		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(new Patient()));
 	}
 }

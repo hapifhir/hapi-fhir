@@ -36,7 +36,7 @@ public class MdmTransactionContext {
 	}
 
 	/**
-	 * Any EMPI methods may add transaction log messages.
+	 * Any MDM methods may add transaction log messages.
 	 */
 	private TransactionLogMessages myTransactionLogMessages;
 

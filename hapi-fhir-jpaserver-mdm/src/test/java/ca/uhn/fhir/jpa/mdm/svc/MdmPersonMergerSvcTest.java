@@ -76,7 +76,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		myTargetPatient2 = createPatient();
 		myTargetPatient3 = createPatient();
 
-		// Register the empi storage interceptor after the creates so the delete hook is fired when we merge
+		// Register the mdm storage interceptor after the creates so the delete hook is fired when we merge
 		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 	}
 
@@ -102,7 +102,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 
 	private Patient mergeGoldenPatients() {
 		assertEquals(0, redirectLinkCount());
-		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, myToGoldenPatient, createEmpiContext());
+		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, myToGoldenPatient, createMdmContext());
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
@@ -113,7 +113,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		return myMdmLinkDao.findAll(example).size();
 	}
 
-	private MdmTransactionContext createEmpiContext() {
+	private MdmTransactionContext createMdmContext() {
 		MdmTransactionContext mdmTransactionContext = new MdmTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), MdmTransactionContext.OperationType.MERGE_PERSONS);
 		mdmTransactionContext.setResourceType("Patient");
 		return mdmTransactionContext;

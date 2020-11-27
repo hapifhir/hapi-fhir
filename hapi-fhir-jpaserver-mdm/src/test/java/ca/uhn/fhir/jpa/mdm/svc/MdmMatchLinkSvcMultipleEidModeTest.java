@@ -153,7 +153,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 			.map(myIdHelperService::getPidOrNull)
 			.collect(Collectors.toList());
 
-		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE EmpiLink.
+		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
 		assertThat(mdmLink.getGoldenResourcePid(), is(in(duplicatePids)));
 		assertThat(mdmLink.getTargetPid(), is(in(duplicatePids)));

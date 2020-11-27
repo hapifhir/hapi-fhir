@@ -48,6 +48,7 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
 
 @Service
 public class MdmCandidateSearchSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -65,7 +66,7 @@ public class MdmCandidateSearchSvc {
 	}
 
 	/**
-	 * Given a target resource, search for all resources that are considered an EMPI match based on defined EMPI rules.
+	 * Given a target resource, search for all resources that are considered an MDM match based on defined MDM rules.
 	 *
 	 *
 	 * @param theResourceType
@@ -79,8 +80,8 @@ public class MdmCandidateSearchSvc {
 		List<String> filterCriteria = buildFilterQuery(filterSearchParams, theResourceType);
 		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
 
-		//If there are zero EmpiResourceSearchParamJson, we end up only making a single search, otherwise we
-		//must perform one search per EmpiResourceSearchParamJson.
+		//If there are zero MdmResourceSearchParamJson, we end up only making a single search, otherwise we
+		//must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
 			searchForIdsAndAddToMap(theResourceType, theResource, matchedPidsToResources, filterCriteria, null);
 		} else {
@@ -129,7 +130,7 @@ public class MdmCandidateSearchSvc {
 
 		searchParameterMap.setLoadSynchronous(true);
 
-		//TODO EMPI this will blow up under large scale i think.
+		//TODO MDM this will blow up under large scale i think.
 		//3.
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(searchParameterMap);

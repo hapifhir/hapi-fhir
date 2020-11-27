@@ -34,8 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@JsonDeserialize(converter = MdmRulesJson.EmpiRulesJsonConverter.class)
+@JsonDeserialize(converter = MdmRulesJson.MdmRulesJsonConverter.class)
 public class MdmRulesJson implements IModelJson {
+
 	@JsonProperty(value = "version", required = true)
 	String myVersion;
 	@JsonProperty(value = "candidateSearchParams", required = true)
@@ -163,12 +164,12 @@ public class MdmRulesJson implements IModelJson {
 	/**
 	 * Ensure the vector map is initialized after we deserialize
 	 */
-	static class EmpiRulesJsonConverter extends StdConverter<MdmRulesJson, MdmRulesJson> {
+	static class MdmRulesJsonConverter extends StdConverter<MdmRulesJson, MdmRulesJson> {
 
 		/**
 		 * This empty constructor is required by Jackson
 		 */
-		public EmpiRulesJsonConverter() {
+		public MdmRulesJsonConverter() {
 		}
 
 		@Override

@@ -179,7 +179,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertNotNull(daoMethodOutcome.getId());
 
 		//Updating that person to set them as MDM managed is not allowed.
-		person.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by EMPI");
+		person.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
 			myMdmHelper.doUpdateResource(person, true);
 			fail();
@@ -190,19 +190,19 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testMdmManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
-		// When EMPI is enabled, only the EMPI system is allowed to modify Person links of Persons with the EMPI-MANAGED tag.
+		// When MDM is enabled, only the MDM system is allowed to modify Person links of Persons with the MDM-MANAGED tag.
 		Patient patient = new Patient();
 		IIdType patientId = myMdmHelper.createWithLatch(buildPaulPatient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
 
 		patient.setId(patientId);
 
-		//Updating a Person who was created via EMPI should fail.
+		// Updating a Golden Resource Patient who was created via MDM should fail.
 		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
 		Long sourcePatientPid = mdmLink.getGoldenResourcePid();
-		Patient empiSourcePatient = (Patient) myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
-		empiSourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
+		Patient goldenResourcePatient = (Patient) myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
+		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);
 		try {
-			myMdmHelper.doUpdateResource(empiSourcePatient, true);
+			myMdmHelper.doUpdateResource(goldenResourcePatient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage(), startsWith("Cannot create or modify Resources that are managed by MDM."));
@@ -213,12 +213,12 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public void testMdmPointcutReceivesTransactionLogMessages() throws InterruptedException {
 		MdmHelperR4.OutcomeAndLogMessageWrapper wrapper = myMdmHelper.createWithLatch(buildJanePatient());
 
-		TransactionLogMessages empiTransactionLogMessages = wrapper.getLogMessages();
+		TransactionLogMessages mdmTransactionLogMessages = wrapper.getLogMessages();
 
 		//There is no TransactionGuid here as there is no TransactionLog in this context.
-		assertThat(empiTransactionLogMessages.getTransactionGuid(), is(nullValue()));
+		assertThat(mdmTransactionLogMessages.getTransactionGuid(), is(nullValue()));
 
-		List<String> messages = empiTransactionLogMessages.getValues();
+		List<String> messages = mdmTransactionLogMessages.getValues();
 		assertThat(messages.isEmpty(), is(false));
 	}
 

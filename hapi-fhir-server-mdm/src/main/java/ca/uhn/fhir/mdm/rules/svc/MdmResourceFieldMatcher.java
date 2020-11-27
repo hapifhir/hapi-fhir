@@ -38,6 +38,7 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.ALL_RESOURCE_SEARCH_PARAM_TYPE;
  * This class is responsible for performing matching between raw-typed values of a left record and a right record.
  */
 public class MdmResourceFieldMatcher {
+
 	private final FhirContext myFhirContext;
 	private final MdmFieldMatchJson myMdmFieldMatchJson;
 	private final String myResourceType;
@@ -55,7 +56,8 @@ public class MdmResourceFieldMatcher {
 	}
 
 	/**
-	 * Compares two {@link IBaseResource}s and determines if they match, using the algorithm defined in this object's EmpiFieldMatchJson.
+	 * Compares two {@link IBaseResource}s and determines if they match, using the algorithm defined in this object's
+	 * {@link MdmFieldMatchJson}.
 	 *
 	 * In this implementation, it determines whether a given field matches between two resources. Internally this is evaluated using FhirPath. If any of the elements of theLeftResource
 	 * match any of the elements of theRightResource, will return true. Otherwise, false.

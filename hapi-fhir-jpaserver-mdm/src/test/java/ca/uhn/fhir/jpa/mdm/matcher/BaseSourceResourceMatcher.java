@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyResource> {
+
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSourceResourceMatcher.class);
 
 	protected IdHelperService myIdHelperService;
@@ -39,7 +40,7 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 		if (isGoldenRecord) {
 			return myIdHelperService.getPidOrNull(theResource);
 		}
-		MdmLink matchLink = getMatchedEmpiLink(theResource);
+		MdmLink matchLink = getMatchedMdmLink(theResource);
 
 		if (matchLink == null) {
 			return null;
@@ -51,11 +52,11 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 	}
 
 	protected List<Long> getPossibleMatchedSourceResourcePidsFromTarget(IAnyResource theBaseResource) {
-		return getEmpiLinksForTarget(theBaseResource, MdmMatchResultEnum.POSSIBLE_MATCH).stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toList());
+		return getMdmLinksForTarget(theBaseResource, MdmMatchResultEnum.POSSIBLE_MATCH).stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toList());
 	}
 
-	protected MdmLink getMatchedEmpiLink(IAnyResource thePatientOrPractitionerResource) {
-		List<MdmLink> mdmLinks = getEmpiLinksForTarget(thePatientOrPractitionerResource, MdmMatchResultEnum.MATCH);
+	protected MdmLink getMatchedMdmLink(IAnyResource thePatientOrPractitionerResource) {
+		List<MdmLink> mdmLinks = getMdmLinksForTarget(thePatientOrPractitionerResource, MdmMatchResultEnum.MATCH);
 		if (mdmLinks.size() == 0) {
 			return null;
 		} else if (mdmLinks.size() == 1) {
@@ -65,7 +66,7 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 		}
 	}
 
-	protected List<MdmLink> getEmpiLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
+	protected List<MdmLink> getMdmLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
 		Long pidOrNull = myIdHelperService.getPidOrNull(theTargetResource);
 		List<MdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
 		if (!matchLinkForTarget.isEmpty()) {

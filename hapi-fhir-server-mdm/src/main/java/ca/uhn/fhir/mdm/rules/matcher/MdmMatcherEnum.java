@@ -26,9 +26,11 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 /**
  * Enum for holding all the known FHIR Element matchers that we support in HAPI.  The string matchers first
- * encode the string using an Apache Encoder before comparing them.  https://commons.apache.org/proper/commons-codec/userguide.html
+ * encode the string using an Apache Encoder before comparing them.
+ * https://commons.apache.org/proper/commons-codec/userguide.html
  */
 public enum MdmMatcherEnum {
+
 	CAVERPHONE1(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE1))),
 	CAVERPHONE2(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.CAVERPHONE2))),
 	COLOGNE(new HapiStringMatcher(new PhoneticEncoderMatcher(PhoneticEncoderEnum.COLOGNE))),
@@ -48,22 +50,23 @@ public enum MdmMatcherEnum {
 
 	IDENTIFIER(new IdentifierMatcher());
 
-	private final IMdmFieldMatcher myEmpiFieldMatcher;
+	private final IMdmFieldMatcher myMdmFieldMatcher;
 
-	MdmMatcherEnum(IMdmFieldMatcher theEmpiFieldMatcher) {
-		myEmpiFieldMatcher = theEmpiFieldMatcher;
+	MdmMatcherEnum(IMdmFieldMatcher theMdmFieldMatcher) {
+		myMdmFieldMatcher = theMdmFieldMatcher;
 	}
 
 	/**
-	 * Determines whether two FHIR elements match according using the provided IEmpiFieldMatcher
+	 * Determines whether two FHIR elements match according using the provided {@link IMdmFieldMatcher}
+	 *
 	 * @param theFhirContext
-	 * @param theLeftBase left FHIR element to compare
-	 * @param theRightBase right FHIR element to compare
-	 * @param theExact used by String matchers.  If "false" then the string is normalized (case, accents) before comparing.  If "true" then an exact string comparison is performed.
+	 * @param theLeftBase         left FHIR element to compare
+	 * @param theRightBase        right FHIR element to compare
+	 * @param theExact            used by String matchers.  If "false" then the string is normalized (case, accents) before comparing.  If "true" then an exact string comparison is performed.
 	 * @param theIdentifierSystem used optionally by the IDENTIFIER matcher, when present, only matches the identifiers if they belong to this system.
 	 * @return
 	 */
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
-		return myEmpiFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact, theIdentifierSystem);
+		return myMdmFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact, theIdentifierSystem);
 	}
 }
