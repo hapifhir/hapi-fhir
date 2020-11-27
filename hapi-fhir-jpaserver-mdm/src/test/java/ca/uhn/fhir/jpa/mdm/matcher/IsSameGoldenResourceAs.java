@@ -9,38 +9,38 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class IsSameSourceResourceAs extends BaseSourceResourceMatcher {
+public class IsSameGoldenResourceAs extends BaseGoldenResourceMatcher {
 
-	private List<Long> sourceResourcePidsToMatch;
-	private Long incomingSourceResourcePid;
+	private List<Long> goldenResourcePidsToMatch;
+	private Long incomingGoldenResourcePid;
 
-	public IsSameSourceResourceAs(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	public IsSameGoldenResourceAs(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		incomingSourceResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
-		sourceResourcePidsToMatch = myBaseResources.stream().map(this::getMatchedResourcePidFromResource).collect(Collectors.toList());
-		boolean allToCheckAreSame = sourceResourcePidsToMatch.stream().allMatch(pid -> pid.equals(sourceResourcePidsToMatch.get(0)));
+		incomingGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
+		goldenResourcePidsToMatch = myBaseResources.stream().map(this::getMatchedResourcePidFromResource).collect(Collectors.toList());
+		boolean allToCheckAreSame = goldenResourcePidsToMatch.stream().allMatch(pid -> pid.equals(goldenResourcePidsToMatch.get(0)));
 		if (!allToCheckAreSame) {
 			throw new IllegalStateException("You wanted to do a source resource comparison, but the pool of source resources you submitted for checking don't match! We won't even check the incoming source resource against them.");
 		}
-		return sourceResourcePidsToMatch.contains(incomingSourceResourcePid);
+		return goldenResourcePidsToMatch.contains(incomingGoldenResourcePid);
 	}
 
 	@Override
 	public void describeTo(Description theDescription) {
-		theDescription.appendText(String.format(" %s linked to source resource %s/%s", myTargetType, myTargetType, sourceResourcePidsToMatch));
+		theDescription.appendText(String.format(" %s linked to source resource %s/%s", myTargetType, myTargetType, goldenResourcePidsToMatch));
 	}
 
 	@Override
 	protected void describeMismatchSafely(IAnyResource item, Description mismatchDescription) {
 		super.describeMismatchSafely(item, mismatchDescription);
-		mismatchDescription.appendText(String.format(" was actually linked to %s/%s", myTargetType, incomingSourceResourcePid));
+		mismatchDescription.appendText(String.format(" was actually linked to %s/%s", myTargetType, incomingGoldenResourcePid));
 	}
 
-	public static Matcher<IAnyResource> sameSourceResourceAs(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
-		return new IsSameSourceResourceAs(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
+	public static Matcher<IAnyResource> sameGoldenResourceAs(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+		return new IsSameGoldenResourceAs(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
 	}
 }

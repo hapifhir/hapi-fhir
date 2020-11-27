@@ -74,7 +74,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenResourceId, targetId);
+		Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenResourceId, targetId);
 		if (!optionalMdmLink.isPresent()) {
 			throw new InvalidRequestException(myMessageHelper.getMessageForNoLink(theGoldenResource, theTarget));
 		}
@@ -89,7 +89,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setMatchResult(theMatchResult);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(mdmLink);
-		myMdmResourceDaoSvc.upsertSourceResource(theGoldenResource, theMdmContext.getResourceType());
+		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
 			// Need to find a new Person to link this target to
 			myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(theTarget, theMdmContext);
@@ -134,7 +134,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		Optional<MdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(personId, targetId);
+		Optional<MdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(personId, targetId);
 		if (!oMdmLink.isPresent()) {
 			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
 		}

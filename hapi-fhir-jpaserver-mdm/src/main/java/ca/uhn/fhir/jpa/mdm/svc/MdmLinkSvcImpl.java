@@ -70,7 +70,7 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		MdmMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
 		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
 
-		myMdmResourceDaoSvc.upsertSourceResource(thePerson, theMdmTransactionContext.getResourceType());
+		myMdmResourceDaoSvc.upsertGoldenResource(thePerson, theMdmTransactionContext.getResourceType());
 		createOrUpdateLinkEntity(thePerson, theTarget, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
@@ -83,12 +83,11 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	}
 
 	@Override
-	public void deleteLink(IAnyResource theSourceResource, IAnyResource theTargetResource, MdmTransactionContext theMdmTransactionContext) {
-
-		Optional<MdmLink> optionalMdmLink = getMdmLinkForGoldenResourceTargetPair(theSourceResource, theTargetResource);
+	public void deleteLink(IAnyResource theGoldenResource, IAnyResource theTargetResource, MdmTransactionContext theMdmTransactionContext) {
+		Optional<MdmLink> optionalMdmLink = getMdmLinkForGoldenResourceTargetPair(theGoldenResource, theTargetResource);
 		if (optionalMdmLink.isPresent()) {
 			MdmLink mdmLink = optionalMdmLink.get();
-			log(theMdmTransactionContext, "Deleting MdmLink [" + theSourceResource.getIdElement().toVersionless() + " -> " + theTargetResource.getIdElement().toVersionless() + "] with result: " + mdmLink.getMatchResult());
+			log(theMdmTransactionContext, "Deleting MdmLink [" + theGoldenResource.getIdElement().toVersionless() + " -> " + theTargetResource.getIdElement().toVersionless() + "] with result: " + mdmLink.getMatchResult());
 			myMdmLinkDaoSvc.deleteLink(mdmLink);
 		}
 	}
@@ -125,15 +124,15 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		if (thePerson.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
-			return myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(
+			return myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(
 				myIdHelperService.getPidOrNull(thePerson),
 				myIdHelperService.getPidOrNull(theCandidate)
 			);
 		}
 	}
 
-	private void createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(theSourceResource, theTargetResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+	private void createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theTargetResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theTargetResource, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {

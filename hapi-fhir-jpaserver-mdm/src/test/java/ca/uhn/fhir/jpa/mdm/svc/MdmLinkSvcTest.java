@@ -90,8 +90,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
 		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
-		assertFalse(myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
-		assertFalse(myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
 		saveNoMatchLink(goldenPatient1Pid, goldenPatient2Pid);
 
@@ -108,8 +108,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
 		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
-		assertFalse(myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
-		assertFalse(myMdmLinkDaoSvc.getLinkBySourceResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
 		saveNoMatchLink(goldenPatient2Pid, goldenPatient1Pid);
 

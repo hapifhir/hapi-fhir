@@ -80,7 +80,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		myGoldenResourceHelper.deactivateResource(theFromGoldenResource);
 
 		//Save the deprecated resource.
-		myMdmResourceDaoSvc.upsertSourceResource(theFromGoldenResource, resourceType);
+		myMdmResourceDaoSvc.upsertGoldenResource(theFromGoldenResource, resourceType);
 
 		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless() + " into " + theToGoldenResource.getIdElement().toVersionless());
 		return theToGoldenResource;
@@ -105,9 +105,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 			});
 	}
 
-	private void addMergeLink(Long theSourceResourcePidAkaActive, Long theTargetResourcePidAkaDeactivated, String theResourceType) {
+	private void addMergeLink(Long theGoldenResourcePidAkaActive, Long theTargetResourcePidAkaDeactivated, String theResourceType) {
 		MdmLink mdmLink = myMdmLinkDaoSvc
-			.getOrCreateMdmLinkBySourceResourcePidAndTargetResourcePid(theSourceResourcePidAkaActive, theTargetResourcePidAkaDeactivated);
+			.getOrCreateMdmLinkByGoldenResourcePidAndTargetResourcePid(theGoldenResourcePidAkaActive, theTargetResourcePidAkaDeactivated);
 
 		mdmLink
 			.setMdmTargetType(theResourceType)

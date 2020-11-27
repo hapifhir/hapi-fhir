@@ -8,8 +8,6 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmUtil;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -91,7 +89,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		assertLinkCount(2);
 
-		assertThat(patient1, is(not(sameSourceResourceAs(patient2))));
+		assertThat(patient1, is(not(sameGoldenResourceAs(patient2))));
 
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, true);
@@ -106,7 +104,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient2 = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinkCount(2);
 
-		assertThat(patient1, is(sameSourceResourceAs(patient2)));
+		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 		assertLinksMatchResult(MATCH, MATCH);
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
@@ -124,7 +122,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		//rerun MDM rules against unmatchedJane.
 		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(unmatchedJane, createContextForCreate("Patient"));
 
-		assertThat(unmatchedJane, is(not(sameSourceResourceAs(janePerson))));
+		assertThat(unmatchedJane, is(not(sameGoldenResourceAs(janePerson))));
 		assertThat(unmatchedJane, is(not(linkedTo(originalJane))));
 
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
@@ -149,7 +147,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		//should cause a whole new Person to be created.
 		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(unmatchedPatient, createContextForCreate("Patient"));
 
-		assertThat(unmatchedPatient, is(not(sameSourceResourceAs(janePerson))));
+		assertThat(unmatchedPatient, is(not(sameGoldenResourceAs(janePerson))));
 		assertThat(unmatchedPatient, is(not(linkedTo(originalJane))));
 
 		assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
@@ -204,7 +202,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testPatientMatchingAnotherPatientLinksToSamePerson() {
 		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
 		Patient sameJanePatient = createPatientAndUpdateLinks(buildJanePatient());
-		assertThat(janePatient, is(sameSourceResourceAs(sameJanePatient)));
+		assertThat(janePatient, is(sameGoldenResourceAs(sameJanePatient)));
 	}
 
 	@Test
@@ -220,7 +218,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		createPatientAndUpdateLinks(janePatient);
 
 		//We want to make sure the patients were linked to the same person.
-		assertThat(patient, is(sameSourceResourceAs(janePatient)));
+		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
 
 		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
 
@@ -247,7 +245,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		patient2 = addExternalEID(patient2, "uniqueid");
 		createPatientAndUpdateLinks(patient2);
 
-		assertThat(patient1, is(sameSourceResourceAs(patient2)));
+		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 	}
 
 	@Test
@@ -265,7 +263,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		addExternalEID(patient2, "id_1");
 		createPatientAndUpdateLinks(patient2);
 
-		assertThat(patient1, is(sameSourceResourceAs(patient2)));
+		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 	}
 
 	@Test
@@ -307,7 +305,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Practitioner janePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
 
 		assertLinkCount(2);
-		assertThat(janePatient, is(not(sameSourceResourceAs(janePractitioner))));
+		assertThat(janePatient, is(not(sameGoldenResourceAs(janePractitioner))));
 	}
 
 	@Test
@@ -316,7 +314,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Practitioner anotherJanePractitioner = createPractitionerAndUpdateLinks(buildJanePractitioner());
 
 		assertLinkCount(2);
-		assertThat(anotherJanePractitioner, is(sameSourceResourceAs(janePractitioner)));
+		assertThat(anotherJanePractitioner, is(sameGoldenResourceAs(janePractitioner)));
 	}
 
 	@Test
@@ -341,10 +339,10 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
 
 		assertLinkCount(2);
-		assertThat(janePatient, is(sameSourceResourceAs(janePatient2)));
+		assertThat(janePatient, is(sameGoldenResourceAs(janePatient2)));
 
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
-		assertThat(incomingJanePatient, is(sameSourceResourceAs(janePatient, janePatient2)));
+		assertThat(incomingJanePatient, is(sameGoldenResourceAs(janePatient, janePatient2)));
 		assertThat(incomingJanePatient, is(linkedTo(janePatient, janePatient2)));
 	}
 
@@ -361,7 +359,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		//own individual Persons for the purpose of this test.
 		IAnyResource person = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(janePatient2);
 		myMdmLinkSvc.updateLink(person, janePatient2, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
-		assertThat(janePatient, is(not(sameSourceResourceAs(janePatient2))));
+		assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));
 
 		//In theory, this will match both Persons!
 		Patient incomingJanePatient = createPatientAndUpdateLinks(buildJanePatient());
@@ -383,7 +381,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoSourceResourceIsCreated() {
+	public void testWhenAllMatchResultsArePOSSIBLE_MATCHThattheyAreLinkedAndNoGoldenResourceIsCreated() {
 		/**
 		 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, mdm-link records are created with POSSIBLE_MATCH
 		 * outcome and await manual assignment to either NO_MATCH or MATCHED. Person link is added.
@@ -391,7 +389,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
 		patient = createPatientAndUpdateLinks(patient);
-		assertThat(patient, is(sameSourceResourceAs(patient)));
+		assertThat(patient, is(sameGoldenResourceAs(patient)));
 
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
@@ -431,7 +429,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = buildJanePatient();
 		patient.getNameFirstRep().setFamily("familyone");
 		patient = createPatientAndUpdateLinks(patient);
-		assertThat(patient, is(sameSourceResourceAs(patient)));
+		assertThat(patient, is(sameGoldenResourceAs(patient)));
 
 		Patient patient2 = buildJanePatient();
 		patient2.getNameFirstRep().setFamily("pleasedonotmatchatall");
@@ -441,34 +439,32 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		patient3.getNameFirstRep().setFamily("familyone");
 		patient3 = createPatientAndUpdateLinks(patient3);
 
-		assertThat(patient2, is(not(sameSourceResourceAs(patient))));
+		assertThat(patient2, is(not(sameGoldenResourceAs(patient))));
 		assertThat(patient2, is(possibleMatchWith(patient)));
-		assertThat(patient3, is(sameSourceResourceAs(patient)));
+		assertThat(patient3, is(sameGoldenResourceAs(patient)));
 	}
 
 	@Test
-	public void testCreateSourceResourceFromMdmTarget() {
+	public void testCreateGoldenResourceFromMdmTarget() {
 		// Create Use Case #2 - adding patient with no EID
 		Patient janePatient = buildJanePatient();
-		Patient janeSourceResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(janePatient);
+		Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(janePatient);
 
 		// golden record now contains HAPI-generated EID and HAPI tag
-		assertTrue(MdmUtil.isMdmManaged(janeSourceResourcePatient));
-		assertFalse(myEidHelper.getHapiEid(janeSourceResourcePatient).isEmpty());
+		assertTrue(MdmUtil.isMdmManaged(janeGoldenResourcePatient));
+		assertFalse(myEidHelper.getHapiEid(janeGoldenResourcePatient).isEmpty());
 
 		// original checks - verifies that EIDs are assigned
-		assertThat("Resource must not be identical", janePatient != janeSourceResourcePatient);
+		assertThat("Resource must not be identical", janePatient != janeGoldenResourcePatient);
 		assertFalse(janePatient.getIdentifier().isEmpty());
-		assertFalse(janeSourceResourcePatient.getIdentifier().isEmpty());
+		assertFalse(janeGoldenResourcePatient.getIdentifier().isEmpty());
 
-//		Identifier janeId = janePatient.getIdentifier().get(0);
-//		Identifier janeSourceResourceId = janeSourceResourcePatient.getIdentifier().get(0);
 		CanonicalEID janeId = myEidHelper.getHapiEid(janePatient).get(0);
-		CanonicalEID janeSourceResourceId = myEidHelper.getHapiEid(janeSourceResourcePatient).get(0);
+		CanonicalEID janeGoldenResourceId = myEidHelper.getHapiEid(janeGoldenResourcePatient).get(0);
 
 		// source and target EIDs must match, as target EID should be reset to the newly created EID
-		assertEquals(janeId.getValue(), janeSourceResourceId.getValue());
-		assertEquals(janeId.getSystem(), janeSourceResourceId.getSystem());
+		assertEquals(janeId.getValue(), janeGoldenResourceId.getValue());
+		assertEquals(janeId.getSystem(), janeGoldenResourceId.getSystem());
 	}
 
 	//Case #1
@@ -482,7 +478,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		patient1.setId(janePatient.getId());
 		Patient janePaulPatient = updatePatientAndUpdateLinks(patient1);
 
-		assertThat(janeSourcePatient, is(sameSourceResourceAs(janePaulPatient)));
+		assertThat(janeSourcePatient, is(sameGoldenResourceAs(janePaulPatient)));
 
 		//Ensure the related person was updated with new info.
 		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(janePaulPatient);
@@ -507,7 +503,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		paul2.setGender(Enumerations.AdministrativeGender.FEMALE);
 		paul2 = createPatientAndUpdateLinks(paul2);
 
-		assertThat(paul2, is(sameSourceResourceAs(paul)));
+		assertThat(paul2, is(sameGoldenResourceAs(paul)));
 
 		//Newly matched patients aren't allowed to overwrite Person Attributes unless they are empty, so gender should still be set to male.
 		Patient paul2Person = (Patient) getGoldenResourceFromTargetResource(paul2);
@@ -554,7 +550,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		updatePatientAndUpdateLinks(paul);
 
 		assertThat(originalJanePatient, is(possibleDuplicateOf(originalPaulPatient)));
-		assertThat(jane, is(sameSourceResourceAs(paul)));
+		assertThat(jane, is(sameGoldenResourceAs(paul)));
 	}
 
 	@Test
@@ -576,7 +572,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		assertNoDuplicates();
 
 		Patient newlyFoundPaulPatient = (Patient) getGoldenResourceFromTargetResource(paul);
-		assertThat(originalPaulPatient, is(sameSourceResourceAs(newlyFoundPaulPatient)));
+		assertThat(originalPaulPatient, is(sameGoldenResourceAs(newlyFoundPaulPatient)));
 		String newEid = myEidHelper.getExternalEid(newlyFoundPaulPatient).get(0).getValue();
 		assertThat(newEid, is(equalTo(EID_2)));
 	}
@@ -602,7 +598,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		patient3 = createPatientAndUpdateLinks(patient3);
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
-		assertThat(patient2, is(sameSourceResourceAs(patient3)));
+		assertThat(patient2, is(sameGoldenResourceAs(patient3)));
 		assertNoDuplicates();
 		//	Person A -> {P1}
 		//	Person B -> {P2, P3}
@@ -615,7 +611,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		// Person B -> {P3}
 		// Possible duplicates A<->B
 
-		assertThat(patient2, is(sameSourceResourceAs(patient1)));
+		assertThat(patient2, is(sameGoldenResourceAs(patient1)));
 
 		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Matcher with tells us if there is an MdmLink with between these two resources that are considered POSSIBLE_MATCH
  */
-public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
+public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 
 	protected IsPossibleMatchWith(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
@@ -32,7 +32,7 @@ public class IsPossibleMatchWith extends BaseSourceResourceMatcher {
 
 		if (personPidsToMatch.isEmpty()) {
 			personPidsToMatch = myBaseResources.stream()
-				.flatMap(iBaseResource -> getPossibleMatchedSourceResourcePidsFromTarget(iBaseResource).stream())
+				.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
 				.collect(Collectors.toList());
 		}
 

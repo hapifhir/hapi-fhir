@@ -47,7 +47,7 @@ public class MdmGoldenResourceFindingSvc {
 	private FindCandidateByScoreSvc myFindCandidateByScoreSvc;
 
 	/**
-	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedSourceResourceCandidate}
+	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedGoldenResourceCandidate}
 	 * indicating possible candidates for a matching Person. Uses several separate methods for finding candidates:
 	 * <p>
 	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
@@ -58,26 +58,26 @@ public class MdmGoldenResourceFindingSvc {
 	 * field matchers.
 	 *
 	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
-	 * @return A list of {@link MatchedSourceResourceCandidate} indicating all potential Person matches.
+	 * @return A list of {@link MatchedGoldenResourceCandidate} indicating all potential Person matches.
 	 */
-	public CandidateList findSourceResourceCandidates(IAnyResource theResource) {
-		CandidateList matchedSourceResourceCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
+	public CandidateList findGoldenResourceCandidates(IAnyResource theResource) {
+		CandidateList matchedGoldenResourceCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
 
-		if (matchedSourceResourceCandidates.isEmpty()) {
-			matchedSourceResourceCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
+		if (matchedGoldenResourceCandidates.isEmpty()) {
+			matchedGoldenResourceCandidates = myFindCandidateByLinkSvc.findCandidates(theResource);
 		}
 
-		if (matchedSourceResourceCandidates.isEmpty()) {
+		if (matchedGoldenResourceCandidates.isEmpty()) {
 			//OK, so we have not found any links in the MdmLink table with us as a target. Next, let's find
 			//possible Golden Resources matches by following MDM rules.
-			matchedSourceResourceCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
+			matchedGoldenResourceCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
 		}
 
-		return matchedSourceResourceCandidates;
+		return matchedGoldenResourceCandidates;
 	}
 
-	public IAnyResource getSourceResourceFromMatchedSourceResourceCandidate(MatchedSourceResourceCandidate theMatchedSourceResourceCandidate, String theResourceType) {
-		ResourcePersistentId personPid = theMatchedSourceResourceCandidate.getCandidatePersonPid();
-		return myMdmResourceDaoSvc.readSourceResourceByPid(personPid, theResourceType);
+	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
+		ResourcePersistentId personPid = theMatchedGoldenResourceCandidate.getCandidatePersonPid();
+		return myMdmResourceDaoSvc.readGoldenResourceByPid(personPid, theResourceType);
 	}
 }

@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.mdm.matcher.IsMatchedToAPerson;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleDuplicateOf;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleMatchWith;
-import ca.uhn.fhir.jpa.mdm.matcher.IsSameSourceResourceAs;
+import ca.uhn.fhir.jpa.mdm.matcher.IsSameGoldenResourceAs;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -316,8 +316,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
-			Long sourceResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
-			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(sourceResourcePid));
+			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
+			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
 		} else {
 			return null;
 		}
@@ -393,8 +393,8 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return thePractitioner;
 	}
 
-	protected Matcher<IAnyResource> sameSourceResourceAs(IAnyResource... theBaseResource) {
-		return IsSameSourceResourceAs.sameSourceResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
+	protected Matcher<IAnyResource> sameGoldenResourceAs(IAnyResource... theBaseResource) {
+		return IsSameGoldenResourceAs.sameGoldenResourceAs(myIdHelperService, myMdmLinkDaoSvc, theBaseResource);
 	}
 
 	protected Matcher<IAnyResource> linkedTo(IAnyResource... theBaseResource) {

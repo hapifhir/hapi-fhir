@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * is linked to a set of patients/practitioners via a person.
  *
  */
-public class IsLinkedTo extends BaseSourceResourceMatcher {
+public class IsLinkedTo extends BaseGoldenResourceMatcher {
 
 	private List<Long> baseResourcePersonPids;
 	private Long incomingResourcePersonPid;

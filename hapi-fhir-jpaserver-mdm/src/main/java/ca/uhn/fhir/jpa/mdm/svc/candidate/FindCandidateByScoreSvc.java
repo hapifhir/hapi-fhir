@@ -59,11 +59,11 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 	 * entries in the MdmLink table, and returns all the matches found therein.
 	 *
 	 * @param theTarget the {@link IBaseResource} which we want to find candidate Persons for.
-	 * @return an Optional list of {@link MatchedSourceResourceCandidate} indicating matches.
+	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedSourceResourceCandidate> findMatchSourceResourceCandidates(IAnyResource theTarget) {
-		List<MatchedSourceResourceCandidate> retval = new ArrayList<>();
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
 		List<Long> personPidsToExclude = getNoMatchPersonPids(theTarget);
 
@@ -86,7 +86,7 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 				continue;
 			}
 
-			MatchedSourceResourceCandidate candidate = new MatchedSourceResourceCandidate(getResourcePersistentId(matchMdmLink.getGoldenResourcePid()), match.getMatchResult());
+			MatchedGoldenResourceCandidate candidate = new MatchedGoldenResourceCandidate(getResourcePersistentId(matchMdmLink.getGoldenResourcePid()), match.getMatchResult());
 			retval.add(candidate);
 		}
 		return retval;

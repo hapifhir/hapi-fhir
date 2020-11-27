@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 public class CandidateList {
 	private final CandidateStrategyEnum myStrategy;
-	private final List<MatchedSourceResourceCandidate> myList = new ArrayList<>();
+	private final List<MatchedGoldenResourceCandidate> myList = new ArrayList<>();
 
 	public CandidateList(CandidateStrategyEnum theStrategy) {
 		myStrategy = theStrategy;
@@ -41,9 +41,9 @@ public class CandidateList {
 		return myList.isEmpty();
 	}
 
-	public void addAll(List<MatchedSourceResourceCandidate> theList) { myList.addAll(theList); }
+	public void addAll(List<MatchedGoldenResourceCandidate> theList) { myList.addAll(theList); }
 
-	public MatchedSourceResourceCandidate getOnlyMatch() {
+	public MatchedGoldenResourceCandidate getOnlyMatch() {
 		assert myList.size() == 1;
 		return myList.get(0);
 	}
@@ -52,15 +52,15 @@ public class CandidateList {
 		return myList.size()== 1;
 	}
 
-	public Stream<MatchedSourceResourceCandidate> stream() {
+	public Stream<MatchedGoldenResourceCandidate> stream() {
 		return myList.stream();
 	}
 
-	public List<MatchedSourceResourceCandidate> getCandidates() {
+	public List<MatchedGoldenResourceCandidate> getCandidates() {
 		return Collections.unmodifiableList(myList);
 	}
 
-	public MatchedSourceResourceCandidate getFirstMatch() {
+	public MatchedGoldenResourceCandidate getFirstMatch() {
 		return myList.get(0);
 	}
 

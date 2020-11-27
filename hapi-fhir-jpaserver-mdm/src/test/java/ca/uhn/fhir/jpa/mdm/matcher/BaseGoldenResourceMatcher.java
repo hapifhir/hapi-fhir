@@ -17,16 +17,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyResource> {
+public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyResource> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseSourceResourceMatcher.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseGoldenResourceMatcher.class);
 
 	protected IdHelperService myIdHelperService;
 	protected MdmLinkDaoSvc myMdmLinkDaoSvc;
 	protected Collection<IAnyResource> myBaseResources;
 	protected String myTargetType;
 
-	protected BaseSourceResourceMatcher(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
+	protected BaseGoldenResourceMatcher(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		myIdHelperService = theIdHelperService;
 		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
 		myBaseResources = Arrays.stream(theBaseResource).collect(Collectors.toList());
@@ -51,7 +51,7 @@ public abstract class BaseSourceResourceMatcher extends TypeSafeMatcher<IAnyReso
 		return retval;
 	}
 
-	protected List<Long> getPossibleMatchedSourceResourcePidsFromTarget(IAnyResource theBaseResource) {
+	protected List<Long> getPossibleMatchedGoldenResourcePidsFromTarget(IAnyResource theBaseResource) {
 		return getMdmLinksForTarget(theBaseResource, MdmMatchResultEnum.POSSIBLE_MATCH).stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toList());
 	}
 

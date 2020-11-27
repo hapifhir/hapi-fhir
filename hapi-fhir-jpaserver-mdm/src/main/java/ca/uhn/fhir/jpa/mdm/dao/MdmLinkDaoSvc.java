@@ -60,11 +60,11 @@ public class MdmLinkDaoSvc {
 	private FhirContext myFhirContext;
 
 	@Transactional
-	public MdmLink createOrUpdateLinkEntity(IBaseResource theSourceResource, IBaseResource theTargetResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
-		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
+	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theTargetResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
+		Long goldenResourcePid = myIdHelperService.getPidOrNull(theGoldenResource);
 		Long targetResourcePid = myIdHelperService.getPidOrNull(theTargetResource);
 
-		MdmLink mdmLink = getOrCreateMdmLinkBySourceResourcePidAndTargetResourcePid(sourceResourcePid, targetResourcePid);
+		MdmLink mdmLink = getOrCreateMdmLinkByGoldenResourcePidAndTargetResourcePid(goldenResourcePid, targetResourcePid);
 		mdmLink.setLinkSource(theLinkSource);
 		mdmLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
@@ -77,7 +77,7 @@ public class MdmLinkDaoSvc {
 			mdmLink.setScore(theMatchOutcome.score);
 		}
 
-		String message = String.format("Creating MdmLink from %s to %s -> %s", theSourceResource.getIdElement().toUnqualifiedVersionless(), theTargetResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
+		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theTargetResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
@@ -85,26 +85,26 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Nonnull
-	public MdmLink getOrCreateMdmLinkBySourceResourcePidAndTargetResourcePid(Long theSourceResourcePid, Long theTargetResourcePid) {
-		Optional<MdmLink> oExisting = getLinkBySourceResourcePidAndTargetResourcePid(theSourceResourcePid, theTargetResourcePid);
+	public MdmLink getOrCreateMdmLinkByGoldenResourcePidAndTargetResourcePid(Long theGoldenResourcePid, Long theTargetResourcePid) {
+		Optional<MdmLink> oExisting = getLinkByGoldenResourcePidAndTargetResourcePid(theGoldenResourcePid, theTargetResourcePid);
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
 			MdmLink newLink = myMdmLinkFactory.newMdmLink();
-			newLink.setGoldenResourcePid(theSourceResourcePid);
-			newLink.setPersonPid(theSourceResourcePid);
+			newLink.setGoldenResourcePid(theGoldenResourcePid);
+			newLink.setPersonPid(theGoldenResourcePid);
 			newLink.setTargetPid(theTargetResourcePid);
 			return newLink;
 		}
 	}
 
-	public Optional<MdmLink> getLinkBySourceResourcePidAndTargetResourcePid(Long theSourceResourcePid, Long theTargetResourcePid) {
-		if (theTargetResourcePid == null || theSourceResourcePid == null) {
+	public Optional<MdmLink> getLinkByGoldenResourcePidAndTargetResourcePid(Long theGoldenResourcePid, Long theTargetResourcePid) {
+		if (theTargetResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
 		MdmLink link = myMdmLinkFactory.newMdmLink();
 		link.setTargetPid(theTargetResourcePid);
-		link.setGoldenResourcePid(theSourceResourcePid);
+		link.setGoldenResourcePid(theGoldenResourcePid);
 		Example<MdmLink> example = Example.of(link);
 		return myMdmLinkDao.findOne(example);
 	}
@@ -309,14 +309,14 @@ public class MdmLinkDaoSvc {
 	}
 
 	/**
-	 * Finds all {@link MdmLink} entities in which theSourceResource's PID is the source
+	 * Finds all {@link MdmLink} entities in which theGoldenResource's PID is the source
 	 * of the relationship.
 	 *
-	 * @param theSourceResource the source resource to find links for.
+	 * @param theGoldenResource the source resource to find links for.
 	 * @return all links for the source.
 	 */
-	public List<MdmLink> findMdmMatchLinksBySource(IBaseResource theSourceResource) {
-		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
+	public List<MdmLink> findMdmMatchLinksBySource(IBaseResource theGoldenResource) {
+		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}

@@ -157,10 +157,10 @@ public class MdmLink {
 		return this;
 	}
 
-	public MdmLink setGoldenResourcePid(Long theSourceResourcePid) {
-		setPersonPid(theSourceResourcePid);
+	public MdmLink setGoldenResourcePid(Long theGoldenResourcePid) {
+		setPersonPid(theGoldenResourcePid);
 
-		myGoldenResourcePid = theSourceResourcePid;
+		myGoldenResourcePid = theGoldenResourcePid;
 		return this;
 	}
 

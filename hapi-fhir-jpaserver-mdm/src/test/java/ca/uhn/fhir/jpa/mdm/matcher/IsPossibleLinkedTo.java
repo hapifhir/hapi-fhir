@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * is linked to a set of patients/practitioners via a person.
  *
  */
-public class IsPossibleLinkedTo extends BaseSourceResourceMatcher {
+public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 
 	private List<Long> baseResourcePersonPids;
 	private Long incomingResourcePersonPid;
@@ -24,12 +24,12 @@ public class IsPossibleLinkedTo extends BaseSourceResourceMatcher {
 	}
 
 	@Override
-	protected boolean matchesSafely(IAnyResource theSourceResource) {
-		incomingResourcePersonPid = myIdHelperService.getPidOrNull(theSourceResource);
+	protected boolean matchesSafely(IAnyResource theGoldenResource) {
+		incomingResourcePersonPid = myIdHelperService.getPidOrNull(theGoldenResource);
 
 		//OK, lets grab all the person pids of the resources passed in via the constructor.
 		baseResourcePersonPids = myBaseResources.stream()
-			.flatMap(iBaseResource -> getPossibleMatchedSourceResourcePidsFromTarget(iBaseResource).stream())
+			.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
 			.collect(Collectors.toList());
 
 		//The resources are linked if all person pids match the incoming person pid.

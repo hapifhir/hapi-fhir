@@ -32,16 +32,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
-	protected IAnyResource myPractitionerSourceResource;
-	protected StringType myPractitionerSourceResourceId;
+	protected IAnyResource myPractitionerGoldenResource;
+	protected StringType myPractitionerGoldenResourceId;
 
 	@BeforeEach
 	public void before() {
 		super.before();
 		myPractitioner = createPractitionerAndUpdateLinks(new Practitioner());
 		myPractitionerId = new StringType(myPractitioner.getIdElement().getValue());
-		myPractitionerSourceResource = getGoldenResourceFromTargetResource(myPractitioner);
-		myPractitionerSourceResourceId = new StringType(myPractitionerSourceResource.getIdElement().getValue());
+		myPractitionerGoldenResource = getGoldenResourceFromTargetResource(myPractitioner);
+		myPractitionerGoldenResourceId = new StringType(myPractitionerGoldenResource.getIdElement().getValue());
 	}
 
 	@Test
@@ -106,7 +106,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 
 		assertNoPatientLinksExist();
-		IBundleProvider search = myPatientDao.search(buildSourceResourceParameterMap());
+		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
 	}
 
@@ -114,7 +114,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	 * Build a SearchParameterMap which looks up Golden Records (Source resources).
 	 * @return
 	 */
-	private SearchParameterMap buildSourceResourceParameterMap() {
+	private SearchParameterMap buildGoldenResourceParameterMap() {
 		return new SearchParameterMap().setLoadSynchronous(true).add("_tag", new TokenParam(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_HAPI_MDM_MANAGED));
 	}
 
@@ -139,7 +139,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		printLinks();
 
 		assertNoPatientLinksExist();
-		IBundleProvider search = myPatientDao.search(buildSourceResourceParameterMap());
+		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
 		assertThat(search.size(), is(equalTo(0)));
 
 	}
@@ -154,12 +154,12 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
-		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerSourceResourceId.getValueAsString()).toVersionless());
+		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
 		myMdmProviderR4.clearMdmLinks(new StringType("Practitioner"), myRequestDetails);
 		assertNoPractitionerLinksExist();
 		try {
-			myPractitionerDao.read(new IdDt(myPractitionerSourceResourceId.getValueAsString()).toVersionless());
+			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 			fail();
 		} catch (ResourceNotFoundException e) {}
 	}

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class IsPossibleDuplicateOf extends BaseSourceResourceMatcher {
+public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 	/**
 	 * Matcher with tells us if there is an MdmLink with between these two resources that are considered POSSIBLE DUPLICATE.
 	 * For use only on persons.

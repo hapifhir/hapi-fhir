@@ -95,7 +95,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedGoldenPatient.getIdElement());
-		assertThat(mergedGoldenPatient, is(sameSourceResourceAs(mergedGoldenPatient)));
+		assertThat(mergedGoldenPatient, is(sameGoldenResourceAs(mergedGoldenPatient)));
 		assertEquals(1, getAllGoldenPatients().size());
 		assertEquals(1, getAllRedirectedGoldenPatients().size());
 	}

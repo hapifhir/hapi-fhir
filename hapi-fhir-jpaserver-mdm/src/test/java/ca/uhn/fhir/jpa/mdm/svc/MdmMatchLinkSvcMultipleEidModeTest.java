@@ -63,7 +63,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchedByEid(false, false);
 
 		//We want to make sure the patients were linked to the same person.
-		assertThat(patient, is(sameSourceResourceAs(janePatient)));
+		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
 
 		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
 
@@ -106,7 +106,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, true);
 
-		assertThat(patient1, is(sameSourceResourceAs(patient2)));
+		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 
 		clearExternalEIDs(patient2);
 		addExternalEID(patient2, "id_6");
@@ -120,7 +120,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, true);
 
-		assertThat(patient1, is(sameSourceResourceAs(patient2)));
+		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 
 		personFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
 		assertThat(personFromTarget.getIdentifier(), hasSize(6));
@@ -186,7 +186,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksMatchedByEid(false, false, true);
 
 		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
-		assertThat(patient2, is(sameSourceResourceAs(patient3)));
+		assertThat(patient2, is(sameGoldenResourceAs(patient3)));
 
 		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
 		//This should create a situation in which the incoming EIDs are matched to _two_ different persons. In this case, we want to

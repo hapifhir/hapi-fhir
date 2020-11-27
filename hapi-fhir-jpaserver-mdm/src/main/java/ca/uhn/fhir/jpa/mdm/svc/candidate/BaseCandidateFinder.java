@@ -35,11 +35,11 @@ public abstract class BaseCandidateFinder {
 
 	CandidateList findCandidates(IAnyResource theTarget) {
 		CandidateList candidateList = new CandidateList(getStrategy());
-		candidateList.addAll(findMatchSourceResourceCandidates(theTarget));
+		candidateList.addAll(findMatchGoldenResourceCandidates(theTarget));
 		return candidateList;
 	}
 
-	protected abstract List<MatchedSourceResourceCandidate> findMatchSourceResourceCandidates(IAnyResource theTarget);
+	protected abstract List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget);
 
 	protected abstract CandidateStrategyEnum getStrategy();
 }

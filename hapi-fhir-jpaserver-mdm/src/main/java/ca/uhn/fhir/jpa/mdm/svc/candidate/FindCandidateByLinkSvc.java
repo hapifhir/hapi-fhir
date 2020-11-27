@@ -39,11 +39,11 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	 * Attempt to find a currently matching Person, based on the presence of an {@link MdmLink} entity.
 	 *
 	 * @param theTarget the {@link IAnyResource} that we want to find candidate Persons for.
-	 * @return an Optional list of {@link MatchedSourceResourceCandidate} indicating matches.
+	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedSourceResourceCandidate> findMatchSourceResourceCandidates(IAnyResource theTarget) {
-		List<MatchedSourceResourceCandidate> retval = new ArrayList<>();
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
 		Long targetPid = myIdHelperService.getPidOrNull(theTarget);
 		if (targetPid != null) {
@@ -51,7 +51,7 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 			if (oLink.isPresent()) {
 				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getGoldenResourcePid());
 				ourLog.debug("Resource previously linked. Using existing link.");
-					retval.add(new MatchedSourceResourceCandidate(personPid, oLink.get()));
+					retval.add(new MatchedGoldenResourceCandidate(personPid, oLink.get()));
 			}
 		}
 		return retval;

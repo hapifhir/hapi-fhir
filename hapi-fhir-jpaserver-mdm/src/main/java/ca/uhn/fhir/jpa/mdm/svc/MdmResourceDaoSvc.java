@@ -50,12 +50,12 @@ public class MdmResourceDaoSvc {
 	@Autowired
 	IMdmSettings myMdmSettings;
 
-	public DaoMethodOutcome upsertSourceResource(IAnyResource theSourceResource, String theResourceType) {
+	public DaoMethodOutcome upsertGoldenResource(IAnyResource theGoldenResource, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		if (theSourceResource.getIdElement().hasIdPart()) {
-			return resourceDao.update(theSourceResource);
+		if (theGoldenResource.getIdElement().hasIdPart()) {
+			return resourceDao.update(theGoldenResource);
 		} else {
-			return resourceDao.create(theSourceResource);
+			return resourceDao.create(theGoldenResource);
 		}
 	}
 
@@ -69,9 +69,9 @@ public class MdmResourceDaoSvc {
 		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
 	}
 
-	public IAnyResource readSourceResourceByPid(ResourcePersistentId theSourceResourcePid, String theResourceType) {
+	public IAnyResource readGoldenResourceByPid(ResourcePersistentId theGoldenResourcePid, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
-		return (IAnyResource) resourceDao.readByPid(theSourceResourcePid);
+		return (IAnyResource) resourceDao.readByPid(theGoldenResourcePid);
 	}
 
 	//TODO GGG MDM address this
