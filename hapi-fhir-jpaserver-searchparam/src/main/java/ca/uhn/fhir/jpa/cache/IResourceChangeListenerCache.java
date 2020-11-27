@@ -40,7 +40,6 @@ public interface IResourceChangeListenerCache {
 	 * Refresh the cache immediately in the current thread and notify its listener if there are any changes
 	 * @return counts of detected resource creates, updates and deletes
 	 */
-	// FIXME KHS test this does not call listener if no changes are detected
 	ResourceChangeResult forceRefresh();
 
 	/**

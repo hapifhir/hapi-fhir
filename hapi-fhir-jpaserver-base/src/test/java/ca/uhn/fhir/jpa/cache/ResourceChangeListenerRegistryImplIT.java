@@ -53,26 +53,31 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testRegisterInterceptor() throws InterruptedException {
+	public void testRegisterListener() throws InterruptedException {
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
-		Patient patient = createPatientAndEnsureTestListenerIsInitialized(null, myMaleTestCallback);
+		Patient patient = createPatientWithInitLatch(null, myMaleTestCallback);
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		IdDt patientId = new IdDt(patient.getIdElement().toUnqualifiedVersionless());
 
 		patient.setActive(false);
 		patient.setGender(Enumerations.AdministrativeGender.FEMALE);
-		myMaleTestCallback.setExpectedCount(1);
 		myPatientDao.update(patient);
 
+		myMaleTestCallback.setExpectedCount(1);
 		ResourceChangeResult result = cache.forceRefresh();
-		assertResult(result, 0, 1, 0);
 		myMaleTestCallback.awaitExpected();
+
+		assertResult(result, 0, 1, 0);
 		assertEquals(2L, myMaleTestCallback.getUpdateResourceId().getVersionIdPartAsLong());
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+
+		// Calling forceRefresh with no changes does not call listener
+		result = cache.forceRefresh();
+		assertResult(result, 0, 0, 0);
 
 		myMaleTestCallback.setExpectedCount(1);
 		myPatientDao.delete(patientId.toVersionless());
@@ -105,7 +110,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		assertResult(theResult, 0, 0, 0);
 	}
 
-	private Patient createPatientAndEnsureTestListenerIsInitialized(Enumerations.AdministrativeGender theGender, TestCallback theTestCallback) throws InterruptedException {
+	private Patient createPatientWithInitLatch(Enumerations.AdministrativeGender theGender, TestCallback theTestCallback) throws InterruptedException {
 		Patient patient = new Patient();
 		patient.setActive(true);
 		if (theGender != null) {
@@ -135,7 +140,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void testRegisterPolling() throws InterruptedException {
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
-		Patient patient = createPatientAndEnsureTestListenerIsInitialized(null, myMaleTestCallback);
+		Patient patient = createPatientWithInitLatch(null, myMaleTestCallback);
 		IdDt patientId = new IdDt(patient.getIdElement());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the cache yet
@@ -152,7 +157,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void testRegisterInterceptorFor2Patients() throws InterruptedException {
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
-		createPatientAndEnsureTestListenerIsInitialized(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
+		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 
 		myMaleTestCallback.clear();
 
@@ -171,18 +176,18 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	@Test
 	public void testRegister2InterceptorsFor2Patients() throws InterruptedException {
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
-		createPatientAndEnsureTestListenerIsInitialized(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
+		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 		myMaleTestCallback.clear();
 
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.FEMALE), myFemaleTestCallback, TEST_REFRESH_INTERVAL);
-		createPatientAndEnsureTestListenerIsInitialized(Enumerations.AdministrativeGender.FEMALE, myFemaleTestCallback);
+		createPatientWithInitLatch(Enumerations.AdministrativeGender.FEMALE, myFemaleTestCallback);
 	}
 
 	@Test
 	public void testRegisterPollingFor2Patients() throws InterruptedException {
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, createSearchParameterMap(Enumerations.AdministrativeGender.MALE), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
-		Patient patientMale = createPatientAndEnsureTestListenerIsInitialized(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
+		Patient patientMale = createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 		IdDt patientIdMale = new IdDt(patientMale.getIdElement());
 
 		Patient patientFemale = new Patient();
@@ -215,7 +220,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, searchParameterMap, myMaleTestCallback, TEST_REFRESH_INTERVAL);
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
-		createPatientAndEnsureTestListenerIsInitialized(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
+		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
 		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 
 		TestCallback otherTestCallback = new TestCallback("OTHER_MALE");
