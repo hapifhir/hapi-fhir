@@ -148,4 +148,9 @@ public class CanonicalEID {
 			&& Objects.equals(otherEid.getValue(), this.getValue())
 			&& Objects.equals(otherEid.getUse(), this.getUse());
 	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(mySystem, myValue, myUse);
+	}
 }

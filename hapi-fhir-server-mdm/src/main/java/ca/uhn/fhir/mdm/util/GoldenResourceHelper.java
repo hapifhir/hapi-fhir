@@ -261,7 +261,7 @@ public class GoldenResourceHelper {
 				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
-					ourLog.debug(String.format("Found EID confirming to MDM rules {}. It should not be copied, skipping", baseSystem));
+					ourLog.debug("Found EID confirming to MDM rules {}. It should not be copied, skipping", baseSystem);
 					continue;
 				}
 			}
