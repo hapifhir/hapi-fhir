@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;

@@ -684,6 +684,11 @@
 			<id>blangley28</id>
 			<organization>MITRE</organization>
 		</developer>
+		<developer>
+			<id>swagers</id>
+			<name>Steven Wagers</name>
+			<organization>Regenstrief Institute</organization>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -733,7 +738,7 @@
 		<jena_version>3.16.0</jena_version>
 		<jersey_version>2.25.1</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
-		<jetty_version>9.4.30.v20200611</jetty_version>
+		<jetty_version>9.4.34.v20201102</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.6.2</junit_version>
 		<flyway_version>6.5.4</flyway_version>

@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -22,10 +23,12 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -59,6 +62,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 	@Mock
 	private IValueSetConceptAccumulator myValueSetCodeAccumulator;
+
+	@AfterEach
+	public void afterEach() {
+		SearchBuilder.setMaxPageSize50ForTest(false);
+	}
 
 	@Test
 	public void testDeletePreExpandedValueSet() throws IOException {
@@ -181,7 +189,53 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString("concept_display like 'display value 9%'"));
+		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
+
+	}
+
+	@Test
+	public void testExpandHugeValueSet_FilterOnDisplay_LeftMatch_SelectAll() {
+		SearchBuilder.setMaxPageSize50ForTest(true);
+		myDaoConfig.setPreExpandValueSets(true);
+		IIdType vsId = createConceptsCodeSystemAndValueSet(1005);
+
+		// Inline ValueSet
+		{
+			ValueSet input = new ValueSet();
+			input.getCompose()
+				.addInclude()
+				.addValueSet("http://foo/vs")
+				.addFilter()
+				.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+				.setOp(ValueSet.FilterOperator.EQUAL)
+				.setValue("display value 100");
+
+			// Expansion should contain all codes
+			myCaptureQueriesListener.clear();
+			ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
+			List<String> codes = expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+			assertThat(codes.toString(), codes, contains("code100", "code1000", "code1001", "code1002", "code1003", "code1004"));
+
+			// Make sure we used the pre-expanded version
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
+			ourLog.info("SQL: {}", lastSelectQuery);
+			assertThat(lastSelectQuery, containsString(" like 'display value 100%'"));
+		}
+
+		// ValueSet by ID
+		{
+			myCaptureQueriesListener.clear();
+			ValueSet expandedValueSet = myValueSetDao.expand(vsId, "display value 100", 0, 1000, mySrd);
+			List<String> codes = expandedValueSet.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+			assertThat(codes.toString(), codes, contains("code100", "code1000", "code1001", "code1002", "code1003", "code1004"));
+
+			// Make sure we used the pre-expanded version
+			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+			String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
+			ourLog.info("SQL: {}", lastSelectQuery);
+			assertThat(lastSelectQuery, containsString(" like 'display value 100%'"));
+		}
 
 	}
 
@@ -215,10 +269,37 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString("concept_display like 'display value 9%'"));
+		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
 
 	}
 
+
+	@Test
+	public void testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatchCaseInsensitive() {
+		myDaoConfig.setPreExpandValueSets(true);
+		create100ConceptsCodeSystemAndValueSet();
+
+		ValueSet input = new ValueSet();
+		input.getCompose()
+			.addInclude()
+			.addValueSet("http://foo/vs")
+			.addFilter()
+			.setProperty(JpaConstants.VALUESET_FILTER_DISPLAY)
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("dIsPlAy valuE 99");
+
+		myCaptureQueriesListener.clear();
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, input);
+		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), contains(			"code99"		));
+
+		// Make sure we used the pre-expanded version
+		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
+		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
+		assertThat(lastSelectQuery, containsString("like 'display value 99%'"));
+
+	}
 
 	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_ExcludeCodes_FilterOnDisplay_LeftMatch_SelectAll() {
@@ -254,7 +335,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString("concept_display like 'display value 90%'"));
+		assertThat(lastSelectQuery, containsString(" like 'display value 90%'"));
 
 	}
 
@@ -292,24 +373,38 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		}
 	}
 
-
 	public void create100ConceptsCodeSystemAndValueSet() {
+		createConceptsCodeSystemAndValueSet(100);
+	}
+
+	public IIdType createConceptsCodeSystemAndValueSet(int theCount) {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemDao.create(cs);
 
 		CustomTerminologySet additions = new CustomTerminologySet();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < theCount; i++) {
 			additions.addRootConcept("code" + i, "display value " + i);
 		}
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", additions);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo/vs");
 		vs.getCompose().addInclude().setSystem("http://foo/cs");
-		myValueSetDao.create(vs);
+		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		// Confirm we pre-expanded successfully
+		runInTransaction(() -> {
+			Pageable page = Pageable.unpaged();
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(page, "http://foo/vs");
+			assertEquals(1, valueSets.size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, valueSets.get(0).getExpansionStatus());
+		});
+
+		return vsId;
 	}
 
 	@Test
@@ -339,7 +434,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString("concept_display like 'display value 9%'"));
+		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
 	}
 
 	@Nonnull

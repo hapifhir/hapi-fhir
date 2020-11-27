@@ -20,6 +20,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,11 @@ import java.util.Set;
  */
 public interface ITermReadSvc extends IValidationSupport {
 
-	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand);
+	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl, @Nullable String theExpansionFilter);
+
+	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand);
+
+	ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand, @Nullable String theFilter);
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
@@ -68,7 +73,7 @@ public interface ITermReadSvc extends IValidationSupport {
 
 	void expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
-	List<FhirVersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet);
+	List<FhirVersionIndependentConcept> expandValueSetIntoConceptList(ValueSetExpansionOptions theExpansionOptions, String theValueSetCanonicalUrl);
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 

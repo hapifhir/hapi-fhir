@@ -46,11 +46,13 @@ The `$partition-management-create-partition` operation can be used to create a n
 </table>
 
 ### Example
+Note that once multitenancy is enabled, all requests to the FHIR server must contain a tenant. These operations are no exception.
+If you fail to include a tenant identifier in the request, an error will be returned.
 
-An HTTP POST to the following URL would be used to invoke this operation:
+An HTTP POST to the following URL would be used to invoke this operation. Notice that we use the DEFAULT partition, as it always exists by default.
 
 ```url
-http://example.com/$partition-management-create-partition 
+http://example.com/DEFAULT/$partition-management-create-partition
 ```
 
 The following request body could be used:
@@ -117,7 +119,7 @@ The `$partition-management-update-partition` operation can be used to update an 
 An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-http://example.com/$partition-management-update-partition 
+http://example.com/DEFAULT/$partition-management-update-partition
 ```
 
 The following request body could be used:
@@ -168,7 +170,7 @@ The `$partition-management-delete-partition` operation can be used to delete an 
 An HTTP POST to the following URL would be used to invoke this operation:
 
 ```url
-http://example.com/$partition-management-delete-partition 
+http://example.com/DEFAULT/$partition-management-delete-partition
 ```
 
 The following request body could be used:

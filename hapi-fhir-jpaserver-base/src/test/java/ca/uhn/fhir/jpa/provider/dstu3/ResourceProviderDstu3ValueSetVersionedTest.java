@@ -385,28 +385,28 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 		// Verify ValueSet v2
 		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v2)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration v2\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 
@@ -425,28 +425,28 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.operation()
 			.onInstance(myExtensionalVsId_v1)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 		// Validate ValueSet v2
 		respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId_v2)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("first"))
+			.withParameter(Parameters.class, "filter", new StringType("systolic"))
 			.execute();
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter v2\"/>"));
-		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure--expiration v2\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
 
 	}
 
