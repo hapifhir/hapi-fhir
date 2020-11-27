@@ -24,7 +24,6 @@ import java.io.CharArrayWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.util.Arrays;
-import java.util.StringTokenizer;
 
 public class StringUtil {
 
