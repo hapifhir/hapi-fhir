@@ -39,7 +39,7 @@ public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefini
 		builder.analyzer("autocompleteWordEdgeAnalyzer")
      		.withTokenizer("standard")
 		    .withTokenFilters("lowercase", "stop", "edgengram_3_50");
-	    builder.tokenFilter("edgengram_3_50")
+	    builder.tokenFilter("wordedgengram_3_50")
 		    .type("edgeNGram")
 		    .param("min_gram", "2")
 		    .param("max_gram", "20");
