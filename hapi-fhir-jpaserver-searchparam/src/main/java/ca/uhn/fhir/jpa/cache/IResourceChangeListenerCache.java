@@ -4,6 +4,10 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 
 import java.time.Instant;
 
+/**
+ * This is a handle to the cache created by {@link IResourceChangeListenerRegistry} when a listener is registered.
+ * This this handle can be used to refresh the cache if required.
+ */
 public interface IResourceChangeListenerCache {
 	/**
 	 * @return the search parameter map the listener was registered with
@@ -16,28 +20,27 @@ public interface IResourceChangeListenerCache {
 	boolean isInitialized();
 
 	/**
-	 *
 	 * @return the name of the resource type the listener was registered with
 	 */
 	String getResourceName();
 
 	/**
-	 *
-	 * @return the next scheduled time the cache will update its contents with the current repository contents and notify
+	 * @return the next scheduled time the cache will search the repository, update its cache and notify
 	 * its listener of any changes
 	 */
 	Instant getNextRefreshTime();
 
 	/**
-	 * sets the nextRefreshTime to {@link Instant.MIN} so that the cache will be refreshed in another thread with current repository
-	 * contents the next time cache refresh times are checked (every {@link ResourceChangeListenerCacheRefresherImpl.LOCAL_REFRESH_INTERVAL_MS}.
+	 * sets the nextRefreshTime to {@link Instant.MIN} so that the cache will be refreshed and listeners notified in another thread
+	 * the next time cache refresh times are checked (every {@link ResourceChangeListenerCacheRefresherImpl.LOCAL_REFRESH_INTERVAL_MS}.
 	 */
 	void requestRefresh();
 
 	/**
-	 * Refresh the cache immediately in the current thread and notify its listener
+	 * Refresh the cache immediately in the current thread and notify its listener if there are any changes
 	 * @return counts of detected resource creates, updates and deletes
 	 */
+	// FIXME KHS test this does not call listener if no changes are detected
 	ResourceChangeResult forceRefresh();
 
 	/**

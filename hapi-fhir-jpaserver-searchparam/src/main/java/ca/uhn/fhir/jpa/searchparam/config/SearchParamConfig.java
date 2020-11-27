@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
-import ca.uhn.fhir.jpa.cache.RegisteredResourceListenerFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -121,8 +121,8 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	RegisteredResourceListenerFactory registeredResourceListenerFactory() {
-		return new RegisteredResourceListenerFactory();
+    ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
+		return new ResourceChangeListenerCacheFactory();
 	}
 	@Bean
 	@Scope("prototype")

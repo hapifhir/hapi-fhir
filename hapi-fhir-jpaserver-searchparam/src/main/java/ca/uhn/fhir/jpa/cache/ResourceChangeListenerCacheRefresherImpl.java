@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -22,11 +21,19 @@ import java.util.List;
 /**
  * This service refreshes the {@link IResourceChangeListenerCache} caches and notifies their listener when
  * those caches change.
+ *
+ * Think of it like a Ferris Wheel that completes a full rotation once every 10 seconds.
+ * Every time a chair passes the bottom it checks to see if it's time to refresh that seat.  If so,
+ * the Ferris Wheel stops, removes the riders, and loads a fresh cache for that chair, and calls the listener
+ * if any entries in the new cache are different from the last time that cache was loaded.
  */
 @Service
 public class ResourceChangeListenerCacheRefresherImpl implements IResourceChangeListenerCacheRefresher {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceChangeListenerCacheRefresherImpl.class);
 
+	/**
+	 * All cache entries are checked at this interval to see if they need to be refreshed
+	 */
 	static long LOCAL_REFRESH_INTERVAL_MS = 10 * DateUtils.MILLIS_PER_SECOND;
 
 	@Autowired
@@ -74,11 +81,6 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 			retval = retval.plus(entry.forceRefresh());
 		}
 		return retval;
-	}
-
-	@Override
-	public void requestRefreshIfWatching(IBaseResource theResource) {
-		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 	}
 
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {

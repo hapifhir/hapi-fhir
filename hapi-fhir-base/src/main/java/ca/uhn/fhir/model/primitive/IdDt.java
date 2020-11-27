@@ -182,9 +182,10 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	}
 
 	private void setHaveComponentParts(IdDt theIdDt) {
-		myHaveComponentParts = true;
 		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
 			myHaveComponentParts = false;
+		} else {
+			myHaveComponentParts = true;
 		}
 	}
 
@@ -664,7 +665,6 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		}
 
 		IdDt retval = new IdDt(this);
-
 		retval.myUnqualifiedVersionId = theVersion;
 		return retval;
 	}

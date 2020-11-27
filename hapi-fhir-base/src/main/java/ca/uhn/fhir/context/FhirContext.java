@@ -33,6 +33,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -555,22 +556,28 @@ public class FhirContext {
 	 */
 	public Set<String> getResourceTypes() {
 		if (myResourceNames == null) {
-			myResourceNames = new HashSet<>();
-			Properties props = new Properties();
-			try {
-				props.load(myVersion.getFhirVersionPropertiesFile());
-			} catch (IOException theE) {
-				throw new ConfigurationException("Failed to load version properties file");
-			}
-			Enumeration<?> propNames = props.propertyNames();
-			while (propNames.hasMoreElements()) {
-				String next = (String) propNames.nextElement();
-				if (next.startsWith("resource.")) {
-					myResourceNames.add(next.substring("resource.".length()).trim());
-				}
-			}
+			myResourceNames = buildResourceNames();
 		}
 		return myResourceNames;
+	}
+
+	@Nonnull
+	private Set<String> buildResourceNames() {
+		Set<String> retval = new HashSet<>();
+		Properties props = new Properties();
+		try {
+			props.load(myVersion.getFhirVersionPropertiesFile());
+		} catch (IOException theE) {
+			throw new ConfigurationException("Failed to load version properties file");
+		}
+		Enumeration<?> propNames = props.propertyNames();
+		while (propNames.hasMoreElements()) {
+			String next = (String) propNames.nextElement();
+			if (next.startsWith("resource.")) {
+				retval.add(next.substring("resource.".length()).trim());
+			}
+		}
+		return retval;
 	}
 
 	/**
@@ -1058,4 +1065,5 @@ public class FhirContext {
 		}
 		return retVal;
 	}
+
 }

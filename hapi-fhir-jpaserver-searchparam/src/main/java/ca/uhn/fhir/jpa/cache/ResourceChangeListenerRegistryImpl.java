@@ -18,7 +18,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * This service contains an in-memory list of all registered {@link IResourceChangeListener} instances along
+ * This component holds an in-memory list of all registered {@link IResourceChangeListener} instances along
  * with their caches and other details needed to maintain those caches.  Register an {@link IResourceChangeListener} instance
  * with this service to be notified when resources you care about are changed.  This service quickly notifies listeners
  * of changes that happened on the local process and also eventually notifies listeners of changes that were made by
@@ -33,7 +33,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
-	RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
+    ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 
 	private final Queue<ResourceChangeListenerCache> myListenerEntries = new ConcurrentLinkedQueue<>();
 
@@ -54,7 +54,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	public IResourceChangeListenerCache registerResourceResourceChangeListener(String theResourceName, SearchParameterMap theSearchParameterMap, IResourceChangeListener theResourceChangeListener, long theRemoteRefreshIntervalMs) {
 		// Clone searchparameter map
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceName);
-		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.checkIfInMemorySupported(theSearchParameterMap, resourceDef);
+		InMemoryMatchResult inMemoryMatchResult = myInMemoryResourceMatcher.canBeEvaluatedInMemory(theSearchParameterMap, resourceDef);
 		if (!inMemoryMatchResult.supported()) {
 			throw new IllegalArgumentException("SearchParameterMap " + theSearchParameterMap + " cannot be evaluated in-memory: " + inMemoryMatchResult.getUnsupportedReason() + ".  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
@@ -77,7 +77,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 	}
 
 	private IResourceChangeListenerCache add(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theMap, long theRemoteRefreshIntervalMs) {
-		ResourceChangeListenerCache retval = myRegisteredResourceListenerFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
+		ResourceChangeListenerCache retval = myResourceChangeListenerCacheFactory.create(theResourceName, theMap, theResourceChangeListener, theRemoteRefreshIntervalMs);
 		myListenerEntries.add(retval);
 		return retval;
 	}
@@ -93,7 +93,7 @@ public class ResourceChangeListenerRegistryImpl implements IResourceChangeListen
 
 	@VisibleForTesting
 	public void clearCachesForUnitTest() {
-		myListenerEntries.forEach(ResourceChangeListenerCache::clear);
+		myListenerEntries.forEach(ResourceChangeListenerCache::clearForUnitTest);
 	}
 
 	@Override

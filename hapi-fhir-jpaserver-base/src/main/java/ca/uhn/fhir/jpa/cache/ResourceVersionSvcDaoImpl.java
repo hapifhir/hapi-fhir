@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service returns a map of resource ids to versions.  Used by the in-memory resource-version cache to detect
- * when resource versions have been changed by remote processes.
+ * This service builds a map of resource ids to versions based on a SearchParameterMap.
+ * It is used by the in-memory resource-version cache to detect when resource versions have been changed by remote processes.
  */
 @Service
 public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {

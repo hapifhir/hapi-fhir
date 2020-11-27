@@ -35,7 +35,7 @@ class ResourceChangeListenerCacheTest {
 	private static final Patient ourPatient = new Patient();
 
 	@Autowired
-	private RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
+	private ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 
 	@MockBean
 	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
@@ -44,7 +44,7 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
-		ResourceChangeListenerCache entry = myRegisteredResourceListenerFactory.create(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache entry = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
 		entry.forceRefresh();
 		assertNotEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
 
@@ -65,7 +65,7 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void testSchedule() {
-		ResourceChangeListenerCache entry = myRegisteredResourceListenerFactory.create(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache entry = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
 		ResourceChangeListenerCache.setNowForUnitTests("08:00:00");
 		entry.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());

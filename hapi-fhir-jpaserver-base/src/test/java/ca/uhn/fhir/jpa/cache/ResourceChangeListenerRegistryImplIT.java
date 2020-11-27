@@ -50,6 +50,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	public void after() {
 		myResourceChangeListenerRegistry.clearListenersForUnitTest();
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
+		// FIXME KHS needed?
 		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 	}
 
@@ -96,10 +97,10 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		}
 	}
 
-	private void assertResult(ResourceChangeResult theResult, long theExpectedAdded, long theExpectedUpdated, long theExpectedRemoved) {
-		assertEquals(theExpectedAdded, theResult.created, "added results");
+	private void assertResult(ResourceChangeResult theResult, long theExpectedCreated, long theExpectedUpdated, long theExpectedDeleted) {
+		assertEquals(theExpectedCreated, theResult.created, "created results");
 		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedRemoved, theResult.deleted, "removed results");
+		assertEquals(theExpectedDeleted, theResult.deleted, "deleted results");
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {
@@ -209,6 +210,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	// FIXME KHS rename
 	public void removingLastListenerEmptiesCache() throws InterruptedException {
 		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
 

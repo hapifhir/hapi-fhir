@@ -46,7 +46,7 @@ class ResourceChangeListenerRegistryImplTest {
 	@Autowired
 	ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 	@Autowired
-	RegisteredResourceListenerFactory myRegisteredResourceListenerFactory;
+	ResourceChangeListenerCacheFactory myResourceChangeListenerCacheFactory;
 	@MockBean
 	private ISchedulerService mySchedulerService;
 	@MockBean
@@ -78,9 +78,9 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		Set<IResourceChangeListenerCache> entries = new HashSet<>();
-		IResourceChangeListenerCache entry = myRegisteredResourceListenerFactory.create(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+		IResourceChangeListenerCache entry = myResourceChangeListenerCacheFactory.create(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 		entries.add(entry);
-		when(myInMemoryResourceMatcher.checkIfInMemorySupported(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 	}
 
 	@Test
@@ -105,7 +105,7 @@ class ResourceChangeListenerRegistryImplTest {
 	}
 
 	private void mockInMemorySupported(InMemoryMatchResult theTheInMemoryMatchResult) {
-		when(myInMemoryResourceMatcher.checkIfInMemorySupported(ourMap, ourFhirContext.getResourceDefinition(PATIENT_RESOURCE_NAME))).thenReturn(theTheInMemoryMatchResult);
+		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(ourMap, ourFhirContext.getResourceDefinition(PATIENT_RESOURCE_NAME))).thenReturn(theTheInMemoryMatchResult);
 	}
 
 	@AfterEach

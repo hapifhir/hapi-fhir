@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.cache;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 /**
  * This is an internal service and is not intended to be used outside this package.  Implementers should only directly
  * call the {@link IResourceChangeListenerRegistry}.
  *
- * This service refreshes the {@link ResourceChangeListenerCache} caches and notifies their listener when
- * those caches change.
+ * This service refreshes a {@link ResourceChangeListenerCache} cache and notifies its listener when
+ * the cache changes.
  */
 public interface IResourceChangeListenerCacheRefresher {
 	/**
@@ -16,14 +14,6 @@ public interface IResourceChangeListenerCacheRefresher {
 	 * @return an aggregate of all changes sent to all listeners
 	 */
 	ResourceChangeResult refreshExpiredCachesAndNotifyListeners();
-
-	/**
-	 * If any listeners have been registered with searchparams that match the incoming resource, then
-	 * call requestRefresh(theResourceName) for that resource type.
-	 *
-	 * @param theResource the resource that changed that might trigger a refresh
-	 */
-	void requestRefreshIfWatching(IBaseResource theResource);
 
 	/**
 	 * Refresh the cache in this entry and notify the entry's listener if the cache changed

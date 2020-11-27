@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RegisteredResourceListenerFactory {
+public class ResourceChangeListenerCacheFactory {
 	@Autowired
 	ApplicationContext myApplicationContext;
 

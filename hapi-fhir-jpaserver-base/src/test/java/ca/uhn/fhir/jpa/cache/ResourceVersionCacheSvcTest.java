@@ -21,5 +21,7 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionMap("Patient", SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
 		assertEquals(patientId.getVersionIdPart(), versionMap.getVersion(patientId));
+		// FIXME KHS update
+		// FIXME KHS entry -> cache
 	}
 }

@@ -13,14 +13,14 @@ import javax.annotation.PreDestroy;
 /**
  * This interceptor watches all resource changes on the server and compares them to the {@link IResourceChangeListenerCache}
  * entries.  If the resource matches the resource type and search parameter map of that entry, then the corresponding cache
- * will be expired so it is refreshed and listeners are quickly notified of that change on the next cycle.
+ * will be expired so it is refreshed and listeners are notified of that change within {@link ResourceChangeListenerCacheRefresherImpl#LOCAL_REFRESH_INTERVAL_MS}.
  */
 @Service
 public class ResourceChangeListenerRegistryInterceptor {
 	@Autowired
 	private IInterceptorService myInterceptorBroadcaster;
 	@Autowired
-	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
+	private IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@PostConstruct
 	public void start() {
@@ -51,6 +51,6 @@ public class ResourceChangeListenerRegistryInterceptor {
 		if (theResource == null) {
 			return;
 		}
-		myResourceChangeListenerCacheRefresher.requestRefreshIfWatching(theResource);
+		myResourceChangeListenerRegistry.requestRefreshIfWatching(theResource);
 	}
 }

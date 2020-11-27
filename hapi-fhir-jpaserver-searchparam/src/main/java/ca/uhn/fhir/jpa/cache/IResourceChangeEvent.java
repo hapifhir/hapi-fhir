@@ -12,5 +12,9 @@ public interface IResourceChangeEvent {
 	List<IIdType> getCreatedResourceIds();
 	List<IIdType> getUpdatedResourceIds();
 	List<IIdType> getDeletedResourceIds();
+
+	/**
+	 * @return true when all three lists are empty
+	 */
 	boolean isEmpty();
 }

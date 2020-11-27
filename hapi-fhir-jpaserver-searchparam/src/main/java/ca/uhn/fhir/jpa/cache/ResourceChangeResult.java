@@ -3,7 +3,8 @@ package ca.uhn.fhir.jpa.cache;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * An immutable object containing the list of resource creates, updates and deletes detected by a cache refresh operation.
+ * An immutable object containing the count of resource creates, updates and deletes detected by a cache refresh operation.
+ * Used internally for testing.
  */
 public class ResourceChangeResult {
 	public final long created;

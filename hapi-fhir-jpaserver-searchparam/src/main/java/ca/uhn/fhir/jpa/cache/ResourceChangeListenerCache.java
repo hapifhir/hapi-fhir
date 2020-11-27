@@ -36,9 +36,10 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	private final IResourceChangeListener myResourceChangeListener;
 	private final SearchParameterMap mySearchParameterMap;
 	private final ResourceVersionCache myResourceVersionCache = new ResourceVersionCache();
+	private final long myRemoteRefreshIntervalMs;
+
 	private boolean myInitialized = false;
 	private Instant myNextRefreshTime = Instant.MIN;
-	private final long myRemoteRefreshIntervalMs;
 
 	public ResourceChangeListenerCache(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
 		myResourceName = theResourceName;
@@ -47,8 +48,84 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		myRemoteRefreshIntervalMs = theRemoteRefreshIntervalMs;
 	}
 
-	public IResourceChangeListener getResourceChangeListener() {
-		return myResourceChangeListener;
+	/**
+	 * Request that the cache be refreshed at the next convenient time (in a different thread)
+	 */
+	@Override
+	public void requestRefresh() {
+		myNextRefreshTime = Instant.MIN;
+	}
+
+	/**
+	 * Request that a cache be refreshed now, in the current thread
+	 */
+	@Override
+	public ResourceChangeResult forceRefresh() {
+		requestRefresh();
+		return refreshCacheWithRetry();
+	}
+
+	/**
+	 * Refresh the cache if theResource matches our SearchParameterMap
+	 * @param theResource
+	 */
+	public void requestRefreshIfWatching(IBaseResource theResource) {
+		if (matches(theResource)) {
+			requestRefresh();
+		}
+	}
+
+	public boolean matches(IBaseResource theResource) {
+		InMemoryMatchResult result = mySearchParamMatcher.match(mySearchParameterMap, theResource);
+		if (!result.supported()) {
+			// This should never happen since we enforce only in-memory SearchParamMaps at registration time
+			throw new IllegalStateException("Search Parameter Map " + mySearchParameterMap + " cannot be processed in-memory: " + result.getUnsupportedReason());
+		}
+		return result.matched();
+	}
+
+	@Override
+	public ResourceChangeResult refreshCacheIfNecessary() {
+		ResourceChangeResult retval = new ResourceChangeResult();
+		if (isTimeToRefresh()) {
+			retval = refreshCacheWithRetry();
+		}
+		return retval;
+	}
+
+	private boolean isTimeToRefresh() {
+		return myNextRefreshTime.isBefore(now());
+	}
+
+	private static Instant now() {
+		if (ourNowForUnitTests != null) {
+			return ourNowForUnitTests;
+		}
+		return Instant.now();
+	}
+
+	public ResourceChangeResult refreshCacheWithRetry() {
+		ResourceChangeResult retval;
+		try {
+			retval = refreshCacheAndNotifyListenersWithRetry();
+		} finally {
+			myNextRefreshTime = now().plus(Duration.ofMillis(myRemoteRefreshIntervalMs));
+		}
+		return retval;
+	}
+
+	private ResourceChangeResult refreshCacheAndNotifyListenersWithRetry() {
+		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
+			synchronized (this) {
+				return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
+			}
+		}, MAX_RETRIES);
+		return refreshCacheRetrier.runWithRetry();
+	}
+
+	@Override
+	public Instant getNextRefreshTime() {
+		return myNextRefreshTime;
 	}
 
 	@Override
@@ -75,43 +152,8 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return myResourceVersionCache;
 	}
 
-	public boolean matches(IBaseResource theResource) {
-		InMemoryMatchResult result = mySearchParamMatcher.match(mySearchParameterMap, theResource);
-		if (!result.supported()) {
-			// This should never happen since we enforce only in-memory SearchParamMaps at registration time
-			throw new IllegalStateException("Search Parameter Map " + mySearchParameterMap + " cannot be processed in-memory: " + result.getUnsupportedReason());
-		}
-		return result.matched();
-	}
-
-
-	public void clear() {
-		requestRefresh();
-		myResourceVersionCache.clear();
-	}
-
-	@Override
-	public Instant getNextRefreshTime() {
-		return myNextRefreshTime;
-	}
-
-	/**
-	 * Request that the cache be refreshed at the next convenient time (in a different thread)
-	 */
-	@Override
-	public void requestRefresh() {
-		myNextRefreshTime = Instant.MIN;
-	}
-
-	public boolean isTimeToRefresh() {
-		return myNextRefreshTime.isBefore(now());
-	}
-
-	private static Instant now() {
-		if (ourNowForUnitTests != null) {
-			return ourNowForUnitTests;
-		}
-		return Instant.now();
+	public IResourceChangeListener getResourceChangeListener() {
+		return myResourceChangeListener;
 	}
 
 	/**
@@ -133,47 +175,10 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return myNextRefreshTime;
 	}
 
-	/**
-	 * Request that a cache be refreshed now, in the current thread
-	 */
-	@Override
-	public ResourceChangeResult forceRefresh() {
+	@VisibleForTesting
+	public void clearForUnitTest() {
 		requestRefresh();
-		return refreshCacheWithRetry();
-	}
-
-	public void requestRefreshIfWatching(IBaseResource theResource) {
-		if (matches(theResource)) {
-			requestRefresh();
-		}
-	}
-
-	@Override
-	public ResourceChangeResult refreshCacheIfNecessary() {
-		ResourceChangeResult retval = new ResourceChangeResult();
-		if (isTimeToRefresh()) {
-			retval = refreshCacheWithRetry();
-		}
-		return retval;
-	}
-
-	public ResourceChangeResult refreshCacheWithRetry() {
-		ResourceChangeResult retval;
-		try {
-			retval = refreshCacheAndNotifyListenersWithRetry();
-		} finally {
-			myNextRefreshTime = now().plus(Duration.ofMillis(myRemoteRefreshIntervalMs));
-		}
-		return retval;
-	}
-
-	private ResourceChangeResult refreshCacheAndNotifyListenersWithRetry() {
-		Retrier<ResourceChangeResult> refreshCacheRetrier = new Retrier<>(() -> {
-			synchronized (this) {
-				return myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(this);
-			}
-		}, MAX_RETRIES);
-		return refreshCacheRetrier.runWithRetry();
+		myResourceVersionCache.clear();
 	}
 
 	@Override

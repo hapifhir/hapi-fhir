@@ -134,7 +134,7 @@ public class SearchParamRegistryImplTest {
 		@Bean
 		InMemoryResourceMatcher inMemoryResourceMatcher() {
 			InMemoryResourceMatcher retval = mock(InMemoryResourceMatcher.class);
-			when(retval.checkIfInMemorySupported(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
+			when(retval.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 			return retval;
 		}
 
