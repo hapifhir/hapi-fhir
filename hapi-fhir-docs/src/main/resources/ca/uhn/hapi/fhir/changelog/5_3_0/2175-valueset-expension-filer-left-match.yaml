@@ -1,5 +1,5 @@
 ---
 type: fix
-pr: 2175
+issue: 2175
 title: "Expanding a ValueSet using a filter now evaluates the display with left-matching 
    by string token, case-insensitive."
