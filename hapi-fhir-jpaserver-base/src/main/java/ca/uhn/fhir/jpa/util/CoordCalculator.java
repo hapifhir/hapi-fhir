@@ -62,7 +62,7 @@ public class CoordCalculator {
 	public static GeoBoundingBox getBox(double theLatitudeDegrees, double theLongitudeDegrees, Double theDistanceKm) {
 		double diagonalDistanceKm = theDistanceKm * Math.sqrt(2.0);
 
-		GeoPoint topLeft= CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 315.0, diagonalDistanceKm);
+		GeoPoint topLeft = CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 315.0, diagonalDistanceKm);
 		GeoPoint bottomRight = CoordCalculator.findTarget(theLatitudeDegrees, theLongitudeDegrees, 135.0, diagonalDistanceKm);
 
 		return GeoBoundingBox.of(topLeft, bottomRight);

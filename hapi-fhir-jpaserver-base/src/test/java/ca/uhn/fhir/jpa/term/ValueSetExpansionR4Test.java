@@ -38,8 +38,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -565,108 +568,149 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
 
-		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("8450-9", containsComponent.getCode());
-		assertEquals("Systolic blood pressure--expiration", containsComponent.getDisplay());
-		assertEquals(2, containsComponent.getDesignation().size());
+		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
-		ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.getDesignation().get(0);
-		assertEquals("nl", designationComponent.getLanguage());
-		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
-		assertEquals("900000000000013009", designationComponent.getUse().getCode());
-		assertEquals("Synonym", designationComponent.getUse().getDisplay());
-		assertEquals("Systolische bloeddruk - expiratie", designationComponent.getValue());
+		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+		assertConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
+		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
+		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
+		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 
-		designationComponent = containsComponent.getDesignation().get(1);
-		assertEquals("sv", designationComponent.getLanguage());
-		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
-		assertEquals("900000000000013009", designationComponent.getUse().getCode());
-		assertEquals("Synonym", designationComponent.getUse().getDisplay());
-		assertEquals("Systoliskt blodtryck - utgång", designationComponent.getValue());
+		ValueSet reexpandedValueSet = myTermSvc.expandValueSet(null, valueSet);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(reexpandedValueSet));
 
-		containsComponent = expandedValueSet.getExpansion().getContains().get(1);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("11378-7", containsComponent.getCode());
-		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
-		assertFalse(containsComponent.hasDesignation());
+		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getTotal());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), reexpandedValueSet.getExpansion().getOffset());
+		assertEquals(0, reexpandedValueSet.getExpansion().getParameter().size());
+		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getContains().size());
 
-		// ...
+		concept = assertExpandedValueSetContainsConcept(reexpandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+		assertConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
+		assertExpandedValueSetContainsConcept(reexpandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
+		otherConcept = assertExpandedValueSetContainsConcept(reexpandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-		containsComponent = expandedValueSet.getExpansion().getContains().get(22);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("8491-3", containsComponent.getCode());
-		assertEquals("Systolic blood pressure 1 hour minimum", containsComponent.getDisplay());
-		assertEquals(1, containsComponent.getDesignation().size());
+		//Ensure they are streamed back in the same order.
+		List<String> firstExpansionCodes = reexpandedValueSet.getExpansion().getContains().stream().map(cn -> cn.getCode()).collect(Collectors.toList());
+		List<String> secondExpansionCodes = expandedValueSet.getExpansion().getContains().stream().map(cn -> cn.getCode()).collect(Collectors.toList());
+		assertThat(firstExpansionCodes, is(equalTo(secondExpansionCodes)));
 
-		designationComponent = containsComponent.getDesignation().get(0);
-		assertEquals("nl", designationComponent.getLanguage());
-		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
-		assertEquals("900000000000013009", designationComponent.getUse().getCode());
-		assertEquals("Synonym", designationComponent.getUse().getDisplay());
-		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
+		//Ensure that internally the designations are expanded back in the same order.
+		List<String> firstExpansionDesignationValues = reexpandedValueSet.getExpansion().getContains().stream().flatMap(cn -> cn.getDesignation().stream()).map(desig -> desig.getValue()).collect(Collectors.toList());
+		List<String> secondExpansionDesignationValues = expandedValueSet.getExpansion().getContains().stream().flatMap(cn -> cn.getDesignation().stream()).map(desig -> desig.getValue()).collect(Collectors.toList());
+		assertThat(firstExpansionDesignationValues, is(equalTo(secondExpansionDesignationValues)));
+	}
+	private TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
 
-		containsComponent = expandedValueSet.getExpansion().getContains().get(23);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("8492-1", containsComponent.getCode());
-		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
-		assertFalse(containsComponent.hasDesignation());
+		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
 
-		expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+	}
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
+	private ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
+		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
 
-		containsComponent = expandedValueSet.getExpansion().getContains().get(0);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("8450-9", containsComponent.getCode());
-		assertEquals("Systolic blood pressure--expiration", containsComponent.getDisplay());
-		assertEquals(2, containsComponent.getDesignation().size());
+	private TermValueSetConcept assertTermValueSetContainsConcept(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<TermValueSetConcept> contains = theValueSet.getConcepts();
 
-		designationComponent = containsComponent.getDesignation().get(0);
-		assertEquals("nl", designationComponent.getLanguage());
-		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
-		assertEquals("900000000000013009", designationComponent.getUse().getCode());
-		assertEquals("Synonym", designationComponent.getUse().getDisplay());
-		assertEquals("Systolische bloeddruk - expiratie", designationComponent.getValue());
+		Stream<TermValueSetConcept> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null ) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null){
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignations().size() == theDesignationCount);
+		}
 
-		designationComponent = containsComponent.getDesignation().get(1);
-		assertEquals("sv", designationComponent.getLanguage());
-		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
-		assertEquals("900000000000013009", designationComponent.getUse().getCode());
-		assertEquals("Synonym", designationComponent.getUse().getDisplay());
-		assertEquals("Systoliskt blodtryck - utgång", designationComponent.getValue());
+		Optional<TermValueSetConcept> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
 
-		containsComponent = expandedValueSet.getExpansion().getContains().get(1);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("11378-7", containsComponent.getCode());
-		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
-		assertFalse(containsComponent.hasDesignation());
+	private ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
 
-		// ...
+		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null ) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null){
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		}
 
-		containsComponent = expandedValueSet.getExpansion().getContains().get(22);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("8491-3", containsComponent.getCode());
-		assertEquals("Systolic blood pressure 1 hour minimum", containsComponent.getDisplay());
-		assertEquals(1, containsComponent.getDesignation().size());
-
-		designationComponent = containsComponent.getDesignation().get(0);
-		assertEquals("nl", designationComponent.getLanguage());
-		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
-		assertEquals("900000000000013009", designationComponent.getUse().getCode());
-		assertEquals("Synonym", designationComponent.getUse().getDisplay());
-		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
-
-		containsComponent = expandedValueSet.getExpansion().getContains().get(23);
-		assertEquals("http://acme.org", containsComponent.getSystem());
-		assertEquals("8492-1", containsComponent.getCode());
-		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
-		assertFalse(containsComponent.hasDesignation());
+		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
 	}
 
 	@Test
@@ -1839,61 +1883,27 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+			TermValueSetConcept concept = assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertEquals(termValueSet.getConcepts().indexOf(concept), concept.getOrder());
 
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			TermValueSetConcept concept1 = assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
+			assertEquals(termValueSet.getConcepts().indexOf(concept1), concept1.getOrder());
 
-			// ...
+			assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 
-			concept = termValueSet.getConcepts().get(20);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8491-3", concept.getCode());
-			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-			assertEquals(1, concept.getDesignations().size());
-			assertEquals(20, concept.getOrder());
+			TermValueSetConcept concept2 = assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+			assertEquals(termValueSet.getConcepts().indexOf(concept2), concept2.getOrder());
+			assertTermConceptContainsDesignation(concept2, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(21);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("8492-1", concept.getCode());
-			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(21, concept.getOrder());
+			TermValueSetConcept concept3 = assertTermValueSetContainsConcept(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
+			assertEquals(termValueSet.getConcepts().indexOf(concept3), concept3.getOrder());
 		});
 	}
+
+
 
 }
