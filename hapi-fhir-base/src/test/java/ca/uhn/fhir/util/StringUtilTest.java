@@ -53,14 +53,4 @@ public class StringUtilTest {
 		assertEquals("a/a", StringUtil.chompCharacter("a/a////", '/'));
 	}
 
-	@Test
-	public void testIsStartsWithIgnoreCase() {
-		assertFalse(StringUtil.isStartsWithIgnoreCase(null, null));
-		assertFalse(StringUtil.isStartsWithIgnoreCase(null, "hei"));
-		assertFalse(StringUtil.isStartsWithIgnoreCase("Body height", null));
-		assertTrue(StringUtil.isStartsWithIgnoreCase("Body height", "he"));
-		assertTrue(StringUtil.isStartsWithIgnoreCase("Body height", "bo"));
-		assertFalse(StringUtil.isStartsWithIgnoreCase("Body height", "ei"));
-		assertFalse(StringUtil.isStartsWithIgnoreCase("Body height", "dy"));
-	}
 }

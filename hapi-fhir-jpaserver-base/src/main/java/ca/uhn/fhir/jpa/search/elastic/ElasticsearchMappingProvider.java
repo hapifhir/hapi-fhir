@@ -36,6 +36,14 @@ public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefini
 			.param("min_gram", "3")
 			.param("max_gram", "50");
 
+		builder.analyzer("autocompleteWordEdgeAnalyzer")
+     		.withTokenizer("standard")
+		    .withTokenFilters("lowercase", "stop", "edgengram_3_50");
+	    builder.tokenFilter("edgengram_3_50")
+		    .type("edgeNGram")
+		    .param("min_gram", "2")
+		    .param("max_gram", "20");
+	
 		builder.analyzer("autocompletePhoneticAnalyzer")
 			.withTokenizer("standard")
 			.withTokenFilters("standard", "stop", "snowball_english");
