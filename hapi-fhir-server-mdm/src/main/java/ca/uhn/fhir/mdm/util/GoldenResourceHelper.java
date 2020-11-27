@@ -92,35 +92,35 @@ public class GoldenResourceHelper {
 
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theIncomingResource);
-		IBaseResource newSourceResource = resourceDefinition.newInstance();
+		IBaseResource newGoldenResource = resourceDefinition.newInstance();
 
 		// hapi has 2 metamodels: for children and types
-		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
 
-		cloneAllExternalEidsIntoNewSourceResource(sourceResourceIdentifier, theIncomingResource, newSourceResource);
+		cloneAllExternalEidsIntoNewGoldenResource(goldenResourceIdentifier, theIncomingResource, newGoldenResource);
 
-		addHapiEidIfNoExternalEidIsPresent(newSourceResource, sourceResourceIdentifier, theIncomingResource);
+		addHapiEidIfNoExternalEidIsPresent(newGoldenResource, goldenResourceIdentifier, theIncomingResource);
 
-		MdmUtil.setMdmManaged(newSourceResource);
-		MdmUtil.setGoldenResource(newSourceResource);
+		MdmUtil.setMdmManaged(newGoldenResource);
+		MdmUtil.setGoldenResource(newGoldenResource);
 
-		return (T) newSourceResource;
+		return (T) newGoldenResource;
 	}
 
 	/**
-	 * If there are no external EIDs on the incoming resource, create a new HAPI EID on the new SourceResource.
+	 * If there are no external EIDs on the incoming resource, create a new HAPI EID on the new Golden Resource.
 	 */
 	//TODO GGG ask james if there is any way we can convert this canonical EID into a generic STU-agnostic IBase.
 	private <T extends IAnyResource> void addHapiEidIfNoExternalEidIsPresent(
-		IBaseResource theNewSourceResource, BaseRuntimeChildDefinition theSourceResourceIdentifier, IAnyResource theTargetResource) {
+		IBaseResource theNewGoldenResource, BaseRuntimeChildDefinition theGoldenResourceIdentifier, IAnyResource theTargetResource) {
 
-		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theNewSourceResource);
+		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theNewGoldenResource);
 		if (!eidsToApply.isEmpty()) {
 			return;
 		}
 
 		CanonicalEID hapiEid = myEIDHelper.createHapiEid();
-		theSourceResourceIdentifier.getMutator().addValue(theNewSourceResource, toId(hapiEid));
+		theGoldenResourceIdentifier.getMutator().addValue(theNewGoldenResource, toId(hapiEid));
 
 		// set identifier on the target resource
 		cloneEidIntoResource(theTargetResource, hapiEid);
@@ -185,18 +185,19 @@ public class GoldenResourceHelper {
 		}).findFirst().isPresent();
 	}
 
-	private void cloneAllExternalEidsIntoNewSourceResource(BaseRuntimeChildDefinition theSourceResourceIdentifier, IBase theSourceResource, IBase theNewSourceResource) {
+	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
+																			 IBase theGoldenResource, IBase theNewGoldenResource) {
 		// FHIR choice types - fields within fhir where we have a choice of ids
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> sourceResourceIdentifiers = theSourceResourceIdentifier.getAccessor().getValues(theSourceResource);
+		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
 
-		for (IBase base : sourceResourceIdentifiers) {
+		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
 				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
-					cloneEidIntoResource(theSourceResourceIdentifier, base, theNewSourceResource);
+					cloneEidIntoResource(theGoldenResourceIdentifier, base, theNewGoldenResource);
 					ourLog.debug("System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
 				}
 			} else {
@@ -214,47 +215,47 @@ public class GoldenResourceHelper {
 	}
 
 	/**
-	 * Update a Person's EID based on the incoming target resource. If the incoming resource has an external EID, it is applied
-	 * to the Person, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
+	 * Updates EID on Golden Resource, based on the incoming target resource. If the incoming resource has an external EID, it is applied
+	 * to the Golden Resource, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
 	 * <p>
-	 * If running in multiple EID mode, then incoming EIDs are simply added to the Person without checking for matches.
+	 * If running in multiple EID mode, then incoming EIDs are simply added to the Golden Resource without checking for matches.
 	 *
-	 * @param theSourceResource The person to update the external EID on.
+	 * @param theGoldenResource The golden resource to update the external EID on.
 	 * @param theTargetResource The target we will retrieve the external EID from.
-	 * @return the modified {@link IBaseResource} representing the person.
+	 * @return the modified {@link IBaseResource} representing the Golden Resource.
 	 */
-	public IAnyResource updateSourceResourceExternalEidFromTargetResource(IAnyResource theSourceResource, IAnyResource
+	public IAnyResource updateGoldenResourceExternalEidFromTargetResource(IAnyResource theGoldenResource, IAnyResource
 		theTargetResource, MdmTransactionContext theMdmTransactionContext) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theTargetResource);
-		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(theSourceResource);
+		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(theGoldenResource);
 
 		if (!incomingTargetEid.isEmpty()) {
 			if (personOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
 				log(theMdmTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
-				addCanonicalEidsToSourceResourceIfAbsent(theSourceResource, incomingTargetEid);
+				addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingTargetEid);
 			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
 				log(theMdmTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite person, as this EID is already present");
 			} else {
 				throw new IllegalArgumentException("This would create a duplicate person!");
 			}
 		}
-		return theSourceResource;
+		return theGoldenResource;
 	}
 
-	public IBaseResource overwriteExternalEids(IBaseResource theSourceResource, List<CanonicalEID> theNewEid) {
-		clearExternalEids(theSourceResource);
-		addCanonicalEidsToSourceResourceIfAbsent(theSourceResource, theNewEid);
-		return theSourceResource;
+	public IBaseResource overwriteExternalEids(IBaseResource theGoldenResource, List<CanonicalEID> theNewEid) {
+		clearExternalEids(theGoldenResource);
+		addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, theNewEid);
+		return theGoldenResource;
 	}
 
-	private void clearExternalEidsFromTheSourceResource(BaseRuntimeChildDefinition theSourceResourceIdentifier, IBase theSourceResource) {
+	private void clearExternalEidsFromTheGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier, IBase theGoldenResource) {
 		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> sourceResourceIdentifiers = theSourceResourceIdentifier.getAccessor().getValues(theSourceResource);
+		List<IBase> goldenResourceIdentifiers = theGoldenResourceIdentifier.getAccessor().getValues(theGoldenResource);
 		List<IBase> clonedIdentifiers = new ArrayList<>();
 		FhirTerser terser = myFhirContext.newTerser();
 
-		for (IBase base : sourceResourceIdentifiers) {
+		for (IBase base : goldenResourceIdentifiers) {
 			Optional<IPrimitiveType> system = fhirPath.evaluateFirst(base, "system", IPrimitiveType.class);
 			if (system.isPresent()) {
 				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
@@ -266,38 +267,38 @@ public class GoldenResourceHelper {
 			}
 
 			BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>)
-					theSourceResourceIdentifier.getChildByName(FIELD_NAME_IDENTIFIER);
-			IBase sourceResourceNewIdentifier = childIdentifier.newInstance();
-			terser.cloneInto(base, sourceResourceNewIdentifier, true);
+					theGoldenResourceIdentifier.getChildByName(FIELD_NAME_IDENTIFIER);
+			IBase goldenResourceNewIdentifier = childIdentifier.newInstance();
+			terser.cloneInto(base, goldenResourceNewIdentifier, true);
 
-			clonedIdentifiers.add(sourceResourceNewIdentifier);
+			clonedIdentifiers.add(goldenResourceNewIdentifier);
 		}
 
-		sourceResourceIdentifiers.clear();
-		sourceResourceIdentifiers.addAll(clonedIdentifiers);
+		goldenResourceIdentifiers.clear();
+		goldenResourceIdentifiers.addAll(clonedIdentifiers);
 	}
 
-	private void clearExternalEids(IBaseResource theSourceResource) {
+	private void clearExternalEids(IBaseResource theGoldenResource) {
 		// validate the system - if it's set to EID system - then clear it - type and STU version
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theSourceResource);
-		BaseRuntimeChildDefinition sourceResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		clearExternalEidsFromTheSourceResource(sourceResourceIdentifier, theSourceResource);
+		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theGoldenResource);
+		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
+		clearExternalEidsFromTheGoldenResource(goldenResourceIdentifier, theGoldenResource);
 	}
 
 	/**
-	 * Given a list of incoming External EIDs, and a Source Resource, apply all the EIDs to this resource, which did not already exist on it.
+	 * Given a list of incoming External EIDs, and a Golden Resource, apply all the EIDs to this resource, which did not already exist on it.
 	 */
-	private void addCanonicalEidsToSourceResourceIfAbsent(IBaseResource theSourceResource, List<CanonicalEID> theIncomingTargetExternalEids) {
-		List<CanonicalEID> sourceResourceExternalEids = myEIDHelper.getExternalEid(theSourceResource);
+	private void addCanonicalEidsToGoldenResourceIfAbsent(IBaseResource theGoldenResource, List<CanonicalEID> theIncomingTargetExternalEids) {
+		List<CanonicalEID> goldenResourceExternalEids = myEIDHelper.getExternalEid(theGoldenResource);
 
 		for (CanonicalEID incomingExternalEid : theIncomingTargetExternalEids) {
-			if (sourceResourceExternalEids.contains(incomingExternalEid)) {
+			if (goldenResourceExternalEids.contains(incomingExternalEid)) {
 				continue;
 			} else {
-				cloneEidIntoResource(theSourceResource, incomingExternalEid);
+				cloneEidIntoResource(theGoldenResource, incomingExternalEid);
 			}
 		}
 	}
@@ -489,11 +490,11 @@ public class GoldenResourceHelper {
 		ourLog.debug(theMessage);
 	}
 
-	public void handleExternalEidAddition(IAnyResource theSourceResource, IAnyResource theTargetResource, MdmTransactionContext
+	public void handleExternalEidAddition(IAnyResource theGoldenResource, IAnyResource theTargetResource, MdmTransactionContext
 			  theMdmTransactionContext) {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theTargetResource);
 		if (!eidFromResource.isEmpty()) {
-			updateSourceResourceExternalEidFromTargetResource(theSourceResource, theTargetResource, theMdmTransactionContext);
+			updateGoldenResourceExternalEidFromTargetResource(theGoldenResource, theTargetResource, theMdmTransactionContext);
 		}
 	}
 
