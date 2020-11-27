@@ -51,23 +51,23 @@ class ResourceChangeListenerCacheRefresherImplTest {
 	@Test
 	public void testNotifyListenersEmptyEmptyNotInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache entry = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
-		assertFalse(entry.isInitialized());
-		myResourceChangeListenerCacheRefresher.notifyListener(entry, newResourceVersionMap);
-		assertTrue(entry.isInitialized());
+		assertFalse(cache.isInitialized());
+		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
+		assertTrue(cache.isInitialized());
 		verify(listener, times(1)).handleInit(any());
 	}
 
 	@Test
 	public void testNotifyListenersEmptyEmptyInitialized() {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
-		ResourceChangeListenerCache entry = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
-		entry.setInitialized(true);
-		assertTrue(entry.isInitialized());
-		myResourceChangeListenerCacheRefresher.notifyListener(entry, newResourceVersionMap);
-		assertTrue(entry.isInitialized());
+		cache.setInitialized(true);
+		assertTrue(cache.isInitialized());
+		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
+		assertTrue(cache.isInitialized());
 		verifyNoInteractions(listener);
 	}
 }

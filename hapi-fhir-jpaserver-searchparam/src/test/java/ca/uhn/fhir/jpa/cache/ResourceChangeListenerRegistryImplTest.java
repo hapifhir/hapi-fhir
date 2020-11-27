@@ -78,8 +78,8 @@ class ResourceChangeListenerRegistryImplTest {
 	@BeforeEach
 	public void before() {
 		Set<IResourceChangeListenerCache> entries = new HashSet<>();
-		IResourceChangeListenerCache entry = myResourceChangeListenerCacheFactory.create(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
-		entries.add(entry);
+		IResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
+		entries.add(cache);
 		when(myInMemoryResourceMatcher.canBeEvaluatedInMemory(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 	}
 
@@ -137,15 +137,15 @@ class ResourceChangeListenerRegistryImplTest {
 		List<String> resourceNames = entries.stream().map(IResourceChangeListenerCache::getResourceName).collect(Collectors.toList());
 		assertThat(resourceNames, contains(PATIENT_RESOURCE_NAME, OBSERVATION_RESOURCE_NAME, PATIENT_RESOURCE_NAME));
 
-		IResourceChangeListenerCache firstEntry = entries.iterator().next();
+		IResourceChangeListenerCache firstcache = entries.iterator().next();
 		// We made a copy
-		assertTrue(ourMap != firstEntry.getSearchParameterMap());
+		assertTrue(ourMap != firstcache.getSearchParameterMap());
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener1);
 		assertEquals(1, myResourceChangeListenerRegistry.size());
-		ResourceChangeListenerCache entry = myResourceChangeListenerRegistry.iterator().next();
-		assertEquals(PATIENT_RESOURCE_NAME, entry.getResourceName());
-		assertEquals(listener2, entry.getResourceChangeListener());
+		ResourceChangeListenerCache cache = myResourceChangeListenerRegistry.iterator().next();
+		assertEquals(PATIENT_RESOURCE_NAME, cache.getResourceName());
+		assertEquals(listener2, cache.getResourceChangeListener());
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener2);
 		assertEquals(0, myResourceChangeListenerRegistry.size());
 	}

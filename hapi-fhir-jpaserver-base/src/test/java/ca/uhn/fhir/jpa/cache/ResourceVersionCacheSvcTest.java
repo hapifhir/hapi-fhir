@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,12 @@ public class ResourceVersionCacheSvcTest extends BaseJpaR4Test {
 		IIdType patientId = myPatientDao.create(patient).getId();
 		ResourceVersionMap versionMap = myResourceVersionCacheSvc.getVersionMap("Patient", SearchParameterMap.newSynchronous());
 		assertEquals(1, versionMap.size());
-		assertEquals(patientId.getVersionIdPart(), versionMap.getVersion(patientId));
-		// FIXME KHS update
-		// FIXME KHS entry -> cache
+		assertEquals("1", versionMap.getVersion(patientId));
+
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		myPatientDao.update(patient);
+		versionMap = myResourceVersionCacheSvc.getVersionMap("Patient", SearchParameterMap.newSynchronous());
+		assertEquals(1, versionMap.size());
+		assertEquals("2", versionMap.getVersion(patientId));
 	}
 }

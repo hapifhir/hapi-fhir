@@ -44,52 +44,52 @@ class ResourceChangeListenerCacheTest {
 
 	@Test
 	public void doNotRefreshIfNotMatches() {
-		ResourceChangeListenerCache entry = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
-		entry.forceRefresh();
-		assertNotEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, mock(IResourceChangeListener.class), TEST_REFRESH_INTERVAL);
+		cache.forceRefresh();
+		assertNotEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 
 		// Don't reset timer if it doesn't match any searchparams
-		mockInMemorySupported(entry, InMemoryMatchResult.fromBoolean(false));
-		entry.requestRefreshIfWatching(ourPatient);
-		assertNotEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
+		mockInMemorySupported(cache, InMemoryMatchResult.fromBoolean(false));
+		cache.requestRefreshIfWatching(ourPatient);
+		assertNotEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 
 		// Reset timer if it does match searchparams
-		mockInMemorySupported(entry, InMemoryMatchResult.successfulMatch());
-		entry.requestRefreshIfWatching(ourPatient);
-		assertEquals(Instant.MIN, entry.getNextRefreshTimeForUnitTest());
+		mockInMemorySupported(cache, InMemoryMatchResult.successfulMatch());
+		cache.requestRefreshIfWatching(ourPatient);
+		assertEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 	}
 
-	private void mockInMemorySupported(ResourceChangeListenerCache theEntry, InMemoryMatchResult theTheInMemoryMatchResult) {
-		when(mySearchParamMatcher.match(theEntry.getSearchParameterMap(), ourPatient)).thenReturn(theTheInMemoryMatchResult);
+	private void mockInMemorySupported(ResourceChangeListenerCache thecache, InMemoryMatchResult theTheInMemoryMatchResult) {
+		when(mySearchParamMatcher.match(thecache.getSearchParameterMap(), ourPatient)).thenReturn(theTheInMemoryMatchResult);
 	}
 
 	@Test
 	public void testSchedule() {
-		ResourceChangeListenerCache entry = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
+		ResourceChangeListenerCache cache = myResourceChangeListenerCacheFactory.create(TEST_RESOURCE_NAME, ourMap, ourListener, TEST_REFRESH_INTERVAL);
 		ResourceChangeListenerCache.setNowForUnitTests("08:00:00");
-		entry.refreshCacheIfNecessary();
+		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());
 
 		reset(myResourceChangeListenerCacheRefresher);
 		ResourceChangeListenerCache.setNowForUnitTests("08:00:01");
-		entry.refreshCacheIfNecessary();
+		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
 		reset(myResourceChangeListenerCacheRefresher);
 		ResourceChangeListenerCache.setNowForUnitTests("08:59:59");
-		entry.refreshCacheIfNecessary();
+		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
 
 		reset(myResourceChangeListenerCacheRefresher);
 		ResourceChangeListenerCache.setNowForUnitTests("09:00:00");
-		entry.refreshCacheIfNecessary();
+		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, never()).refreshCacheAndNotifyListener(any());
 
 		reset(myResourceChangeListenerCacheRefresher);
 		// Now that we passed TEST_REFRESH_INTERVAL, the cache should refresh
 		ResourceChangeListenerCache.setNowForUnitTests("09:00:01");
-		entry.refreshCacheIfNecessary();
+		cache.refreshCacheIfNecessary();
 		verify(myResourceChangeListenerCacheRefresher, times(1)).refreshCacheAndNotifyListener(any());
 	}
 
