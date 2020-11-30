@@ -870,7 +870,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
 		}
-//		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+
 		SearchSession searchSession = Search.session(myEntityManager);
 		/*
 		 * If FullText searching is not enabled, we can handle only basic expansions
@@ -902,7 +902,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
 				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
 			}
-
 		});
 
 		PredicateFinalStep expansionStep = buildExpansionPredicate(theIncludeOrExclude, predicate);
@@ -1322,10 +1321,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private void searchByParentPids(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<Term> theTerms) {
 		List<Long> parentPids = convertTermsToParentPids(theTerms);
-		parentPids.stream()
-			.forEach(pid -> {
-				b.must(f.bool().should(f.match().field(theTerms.get(0).field()).matching(pid)));
-			});
+		b.must(f.bool(innerB -> {
+			parentPids.forEach(pid -> innerB.should(f.match().field(theTerms.get(0).field()).matching(pid)));
+		}));
+
+//		parentPids.stream()
+//			.forEach(pid -> {
+//				b.must(f.bool().should(f.match().field(theTerms.get(0).field()).matching(pid)));
+//			});
 	}
 
 	private List<Long> convertTermsToParentPids(List<Term> theTerms) {
@@ -1351,10 +1354,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
-	private RegexpQuery getRegexQueryForFilterLoincCopyright() {
-		Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE", ".*");
-		return new RegexpQuery(term);
-	}
 
 	private void logFilteringValueOnProperty(String theValue, String theProperty) {
 		ourLog.debug(" * Filtering with value={} on property {}", theValue, theProperty);

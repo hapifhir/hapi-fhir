@@ -247,6 +247,14 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
+		runInTransaction(()->{
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://foo/vs");
+			assertEquals(1, valueSets.size());
+			TermValueSet valueSet = valueSets.get(0);
+			List<TermValueSetConcept> concepts = valueSet.getConcepts();
+			ourLog.info("Concepts:\n * " + concepts.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		ValueSet input = new ValueSet();
 		input.getCompose()
 			.addInclude()
@@ -260,9 +268,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSetExpansionOptions expansionOptions = new ValueSetExpansionOptions()
 			.setOffset(3)
 			.setCount(4);
+
+
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(expansionOptions, input);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
+		//TODO GGG HS run the preexpansion once, and compare the results of offset with queries with sublist of original pre-expansion
 		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), containsInAnyOrder(
 			"code92", "code93", "code94", "code95"
 		));
@@ -1006,6 +1017,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
 
 		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8493-9", "Systolic blood pressure 10 hour minimum", 0);
+
 
 		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
 		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
