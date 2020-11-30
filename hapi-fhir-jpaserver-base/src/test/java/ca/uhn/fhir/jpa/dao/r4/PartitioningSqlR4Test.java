@@ -1450,8 +1450,9 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientIdNull, patientId2));
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(searchSql, containsString("PARTITION_ID IN ('a1', '2')"));
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+		assertThat(sql, sql, containsString("PARTITION_ID IN ('2')"));
+		assertThat(sql, sql, containsString("PARTITION_ID IS NULL"));
 	}
 
 	@Test
@@ -2499,21 +2500,22 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Count
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "count("));
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID='1'"));
+		ourLog.info("SQL:{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
+		assertEquals(1, countMatches(sql, "COUNT("), sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 
 		// Fetch history
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertEquals(1, countMatches(searchSql, "PARTITION_ID='1'"));
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
+		ourLog.info("SQL:{}", sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 
 		// Fetch history resource
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
-		ourLog.info("SQL:{}", searchSql);
-		assertEquals(0, countMatches(searchSql, "PARTITION_ID="), searchSql.replace(" ", "").toUpperCase());
-		assertEquals(0, countMatches(searchSql, "PARTITION_IDIN"), searchSql.replace(" ", "").toUpperCase());
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, false);
+		sql = sql.replace(" ", "").toUpperCase();
+		ourLog.info("SQL:{}", sql);
+		assertEquals(0, countMatches(sql, "PARTITION_ID="), sql);
+		assertEquals(0, countMatches(sql, "PARTITION_IDIN"), sql);
 	}
 
 	@Test
@@ -2619,20 +2621,20 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 
 		// Count
-		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
-		assertEquals(1, countMatches(sql, "count("));
-		assertEquals(1, countMatches(sql, "PARTITION_ID='1'"));
+		assertEquals(1, countMatches(sql, "COUNT("), sql);
+		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 
 		// Fetch history resources
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
-		assertEquals(1, countMatches(sql, "PARTITION_ID='1'"));
+		assertEquals(1, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 
 		// Resolve forced ID
-		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, true);
+		sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(2).getSql(true, false).toUpperCase();
 		ourLog.info("SQL:{}", sql);
-		assertEquals(0, countMatches(sql, "PARTITION_ID='1'"));
+		assertEquals(0, countMatches(sql, "PARTITION_ID IN ('1')"), sql);
 	}
 
 

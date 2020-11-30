@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.dao.index;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
@@ -33,7 +32,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -45,7 +43,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -93,8 +90,6 @@ public class IdHelperService {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
-	@Autowired
 	private FhirContext myFhirCtx;
 	@Autowired
 	private MemoryCacheService myMemoryCacheService;
@@ -110,14 +105,25 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
+	public IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceType, theResourceId);
-		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestPartitionId, theRequestDetails, Collections.singletonList(id));
-		assert matches.size() <= 1;
+		Collection<IResourceLookup> matches = translateForcedIdToPids(theRequestPartitionId, Collections.singletonList(id));
+
 		if (matches.isEmpty()) {
 			throw new ResourceNotFoundException(id);
 		}
+
+		if (matches.size() > 1) {
+			/*
+			 *  This means that:
+			 *  1. There are two resources with the exact same resource type and forced id
+			 *  2. The unique constraint on this column-pair has been dropped
+			 */
+			String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
+			throw new PreconditionFailedException(msg);
+		}
+
 		return matches.iterator().next();
 	}
 
@@ -133,10 +139,10 @@ public class IdHelperService {
 		Long retVal;
 		if (myDaoConfig.getResourceClientIdStrategy() == DaoConfig.ClientIdStrategyEnum.ANY || !isValidPid(theId)) {
 			if (myDaoConfig.isDeleteEnabled()) {
-				retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, theId);
+				retVal = resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId();
 			} else {
 				String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + theResourceType + "/" + theId;
-				retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.PERSISTENT_ID, key, t -> resolveResourceIdentity(theRequestPartitionId, theResourceType, theId));
+				retVal = myMemoryCacheService.get(MemoryCacheService.CacheEnum.PERSISTENT_ID, key, t -> resolveResourceIdentity(theRequestPartitionId, theResourceType, theId).getResourceId());
 			}
 
 		} else {
@@ -259,37 +265,7 @@ public class IdHelperService {
 		return typeToIds;
 	}
 
-	private Long resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, @Nonnull String theResourceType, @Nonnull String theId) {
-		Optional<Long> pid;
-		if (theRequestPartitionId.isAllPartitions()) {
-			try {
-				pid = myForcedIdDao.findByTypeAndForcedId(theResourceType, theId);
-			} catch (IncorrectResultSizeDataAccessException e) {
-				/*
-				 *  This means that:
-				 *  1. There are two resources with the exact same resource type and forced id
-				 *  2. The unique constraint on this column-pair has been dropped
-				 */
-				String msg = myFhirCtx.getLocalizer().getMessage(IdHelperService.class, "nonUniqueForcedId");
-				throw new PreconditionFailedException(msg);
-			}
-		} else {
-			if (theRequestPartitionId.isDefaultPartition()) {
-				pid = myForcedIdDao.findByPartitionIdNullAndTypeAndForcedId(theResourceType, theId);
-			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
-				pid = myForcedIdDao.findByPartitionIdOrNullAndTypeAndForcedId(theRequestPartitionId.getPartitionIdsWithoutDefault(), theResourceType, theId);
-			} else {
-				pid = myForcedIdDao.findByPartitionIdAndTypeAndForcedId(theRequestPartitionId.getPartitionIds(), theResourceType, theId);
-			}
-		}
-
-		if (!pid.isPresent()) {
-			throw new ResourceNotFoundException(new IdDt(theResourceType, theId));
-		}
-		return pid.get();
-	}
-
-	private Collection<IResourceLookup> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, RequestDetails theRequest, Collection<IIdType> theId) {
+	private Collection<IResourceLookup> translateForcedIdToPids(@Nonnull RequestPartitionId theRequestPartitionId, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
@@ -317,7 +293,7 @@ public class IdHelperService {
 			if (!myDaoConfig.isDeleteEnabled()) {
 				for (Iterator<String> forcedIdIterator = nextIds.iterator(); forcedIdIterator.hasNext(); ) {
 					String nextForcedId = forcedIdIterator.next();
-					String nextKey = nextResourceType + "/" + nextForcedId; // FIXME: add partition ID to cache key
+					String nextKey = nextResourceType + "/" + nextForcedId;
 					IResourceLookup cachedLookup = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.RESOURCE_LOOKUP, nextKey);
 					if (cachedLookup != null) {
 						forcedIdIterator.remove();
