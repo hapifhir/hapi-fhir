@@ -105,6 +105,8 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 				requestPartitionId = null;
 			}
 
+			validateRequestPartitionNotNull(requestPartitionId, Pointcut.STORAGE_PARTITION_IDENTIFY_READ);
+
 			return validateNormalizeAndNotifyHooksForRead(requestPartitionId, theRequest);
 		}
 
@@ -252,9 +254,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 	}
 
 	private void validateSinglePartitionForCreate(RequestPartitionId theRequestPartitionId, @Nonnull String theResourceName, Pointcut thePointcut) {
-		if (theRequestPartitionId == null) {
-			throw new InternalErrorException("No interceptor provided a value for pointcut: " + thePointcut);
-		}
+		validateRequestPartitionNotNull(theRequestPartitionId, thePointcut);
 
 		if (theRequestPartitionId.hasPartitionIds()) {
 			validateSinglePartitionIdOrNameForCreate(theRequestPartitionId.getPartitionIds());
@@ -272,6 +272,12 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		}
 
+	}
+
+	private void validateRequestPartitionNotNull(RequestPartitionId theTheRequestPartitionId, Pointcut theThePointcut) {
+		if (theTheRequestPartitionId == null) {
+			throw new InternalErrorException("No interceptor provided a value for pointcut: " + theThePointcut);
+		}
 	}
 
 	private void validateSinglePartitionIdOrNameForCreate(@Nullable List<?> thePartitionIds) {
