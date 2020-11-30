@@ -29,6 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,12 +55,15 @@ public class CqlProviderLoader {
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 
+	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
+				myLogger.info("Registering CQL Provider for DSTU3");
 				myResourceProviderFactory.addSupplier(() -> buildDstu3Provider());
 				break;
 			case R4:
+				myLogger.info("Registering CQL Provider for R4");
 				myResourceProviderFactory.addSupplier(() -> buildR4Provider());
 				break;
 			default:
