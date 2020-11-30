@@ -470,9 +470,6 @@ public class FhirContext {
 
 	/**
 	 * Returns the name of a given resource class.
-	 *
-	 * @param theResourceType
-	 * @return
 	 */
 	public String getResourceType(final Class<? extends IBaseResource> theResourceType) {
 		return getResourceDefinition(theResourceType).getName();
@@ -603,7 +600,7 @@ public class FhirContext {
 	/**
 	 * Set the restful client factory
 	 *
-	 * @param theRestfulClientFactory
+	 * @param theRestfulClientFactory The new client factory (must not be null)
 	 */
 	public void setRestfulClientFactory(final IRestfulClientFactory theRestfulClientFactory) {
 		Validate.notNull(theRestfulClientFactory, "theRestfulClientFactory must not be null");

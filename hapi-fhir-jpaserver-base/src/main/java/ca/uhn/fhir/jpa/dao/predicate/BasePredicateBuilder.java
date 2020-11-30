@@ -92,10 +92,10 @@ abstract class BasePredicateBuilder {
 
 	void addPredicateParamMissingForNonReference(String theResourceName, String theParamName, boolean theMissing, From<?, ? extends BaseResourceIndexedSearchParam> theJoin, RequestPartitionId theRequestPartitionId) {
 		if (!theRequestPartitionId.isAllPartitions()) {
-			if (theRequestPartitionId.getPartitionId() != null) {
-				myQueryStack.addPredicate(myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue"), theRequestPartitionId.getPartitionId()));
-			} else {
+			if (theRequestPartitionId.isDefaultPartition()) {
 				myQueryStack.addPredicate(myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue")));
+			} else {
+				myQueryStack.addPredicate(theJoin.get("myPartitionIdValue").in(theRequestPartitionId.getPartitionIds()));
 			}
 		}
 		myQueryStack.addPredicateWithImplicitTypeSelection(myCriteriaBuilder.equal(theJoin.get("myResourceType"), theResourceName));
@@ -184,12 +184,11 @@ abstract class BasePredicateBuilder {
 
 	void addPartitionIdPredicate(RequestPartitionId theRequestPartitionId, From<?, ? extends BasePartitionable> theJoin, List<Predicate> theCodePredicates) {
 		if (!theRequestPartitionId.isAllPartitions()) {
-			Integer partitionId = theRequestPartitionId.getPartitionId();
 			Predicate partitionPredicate;
-			if (partitionId != null) {
-				partitionPredicate = myCriteriaBuilder.equal(theJoin.get("myPartitionIdValue").as(Integer.class), partitionId);
-			} else {
+			if (theRequestPartitionId.isDefaultPartition()) {
 				partitionPredicate = myCriteriaBuilder.isNull(theJoin.get("myPartitionIdValue").as(Integer.class));
+			} else {
+				partitionPredicate = theJoin.get("myPartitionIdValue").as(Integer.class).in(theRequestPartitionId.getPartitionIds());
 			}
 			myQueryStack.addPredicate(partitionPredicate);
 		}

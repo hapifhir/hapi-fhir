@@ -40,11 +40,10 @@ public class EmpiLinkDeleteSvc {
 
 	/**
 	 * Delete all EmpiLink records with any reference to this resource.  (Used by Expunge.)
-	 * @param theResource
 	 * @return the number of records deleted
 	 */
 	public int deleteWithAnyReferenceTo(IBaseResource theResource) {
-		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
+		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
 		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPid(pid);
 		if (removed > 0) {
 			ourLog.info("Removed {} EMPI links with references to {}", removed, theResource.getIdElement().toVersionless());
@@ -53,7 +52,7 @@ public class EmpiLinkDeleteSvc {
 	}
 
 	public int deleteNonRedirectWithWithAnyReferenceTo(IBaseResource theResource) {
-		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement(), null);
+		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
 		int removed =  myEmpiLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, EmpiMatchResultEnum.REDIRECT);
 		if (removed > 0) {
 			ourLog.info("Removed {} non-redirect EMPI links with references to {}", removed, theResource.getIdElement().toVersionless());
