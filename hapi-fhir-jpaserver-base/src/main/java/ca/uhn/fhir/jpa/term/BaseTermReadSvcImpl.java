@@ -1270,7 +1270,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private void addDisplayFilterInexact(SearchPredicateFactory f, BooleanPredicateClausesStep<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(f.phrase()
 			.field("myDisplay").boost(4.0f)
-			.field("myDisplayEdgeNGram").boost(2.0f)
+			.field("myDisplayEdgeNGram").boost(1.0f)
 			.matching(nextFilter.getValue().toLowerCase())
 			.slop(2)
 		);

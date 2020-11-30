@@ -88,6 +88,7 @@ public class TermConcept implements Serializable {
 	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
 	@FullTextField(name = "myDisplay", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
 	@FullTextField(name = "myDisplayEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myDisplayWordEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletWordeEdgeAnalyzer")
 	@FullTextField(name = "myDisplayNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
 	@FullTextField(name = "myDisplayPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	private String myDisplay;
