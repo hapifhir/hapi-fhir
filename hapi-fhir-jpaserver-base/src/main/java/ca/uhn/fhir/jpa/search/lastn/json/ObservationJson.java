@@ -1,37 +1,21 @@
 package ca.uhn.fhir.jpa.search.lastn.json;
 
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2020 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ObservationJson {
+public class ObservationJson implements Comparable<ObservationJson>{
+
+	@Override
+	public String toString() {
+		return "ObservationJson [myIdentifier=" + myIdentifier + "]";
+	}
 
 	@JsonProperty(value = "identifier", required = true)
 	private String myIdentifier;
@@ -61,16 +45,16 @@ public class ObservationJson {
 	private String myCode_concept_text;
 
 	@JsonProperty(value = "codeconceptcodingcode", required = false)
-	private String myCode_coding_code;
+	private List<String> myCode_coding_code = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptcodingcode_system_hash", required = false)
-	private String myCode_coding_code_system_hash;
+	private List<String> myCode_coding_code_system_hash = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptcodingdisplay", required = false)
-	private String myCode_coding_display;
+	private List<String>  myCode_coding_display = new ArrayList<>();
 
 	@JsonProperty(value = "codeconceptcodingsystem", required = false)
-	private String myCode_coding_system;
+	private List<String> myCode_coding_system =  new ArrayList<>();
 
 	@JsonProperty(value = "effectivedtm", required = true)
 	private Date myEffectiveDtm;
@@ -135,10 +119,10 @@ public class ObservationJson {
 	public void setCode(CodeJson theCode) {
 		myCode_concept_text = theCode.getCodeableConceptText();
 		// Currently can only support one Coding for Observation Code
-		myCode_coding_code_system_hash = theCode.getCoding_code_system_hash().get(0);
-		myCode_coding_code = theCode.getCoding_code().get(0);
-		myCode_coding_display = theCode.getCoding_display().get(0);
-		myCode_coding_system = theCode.getCoding_system().get(0);
+		myCode_coding_code_system_hash.addAll(theCode.getCoding_code_system_hash());
+		myCode_coding_code.addAll(theCode.getCoding_code());
+		myCode_coding_display.addAll(theCode.getCoding_display());
+		myCode_coding_system.addAll(theCode.getCoding_system());
 
 	}
 
@@ -146,19 +130,19 @@ public class ObservationJson {
 		return myCode_concept_text;
 	}
 
-	public String getCode_coding_code_system_hash() {
+	public List<String> getCode_coding_code_system_hash() {
 		return myCode_coding_code_system_hash;
 	}
 
-	public String getCode_coding_code() {
+	public List<String> getCode_coding_code() {
 		return myCode_coding_code;
 	}
 
-	public String getCode_coding_display() {
+	public List<String> getCode_coding_display() {
 		return myCode_coding_display;
 	}
 
-	public String getCode_coding_system() {
+	public List<String> getCode_coding_system() {
 		return myCode_coding_system;
 	}
 
@@ -184,6 +168,39 @@ public class ObservationJson {
 
 	public String getIdentifier() {
 		return myIdentifier;
+	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myIdentifier == null) ? 0 : myIdentifier.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ObservationJson other = (ObservationJson) obj;
+		if (myIdentifier == null) {
+			if (other.myIdentifier != null)
+				return false;
+		} else if (!myIdentifier.equals(other.myIdentifier))
+			return false;
+		return true;
+	}
+	
+	@Override
+	public int compareTo(ObservationJson o) {		
+		if (o == null || o.getEffectiveDtm() == null || getEffectiveDtm() == null)
+			return 0;
+		return -getEffectiveDtm().compareTo(o.getEffectiveDtm());
 	}
 
 }

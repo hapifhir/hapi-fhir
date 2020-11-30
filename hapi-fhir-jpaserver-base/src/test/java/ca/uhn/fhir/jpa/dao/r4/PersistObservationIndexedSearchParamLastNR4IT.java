@@ -118,7 +118,7 @@ public class PersistObservationIndexedSearchParamLastNR4IT {
 		// assertEquals(1, persistedObservationCodes.size());
 
 		// Check that we can retrieve code by hash value.
-		String codeSystemHash = persistedObservationEntity.getCode_coding_code_system_hash();
+		String codeSystemHash = persistedObservationEntity.getCode_coding_code_system_hash().get(0);
 		CodeJson persistedObservationCode = elasticsearchSvc.getObservationCodeDocument(codeSystemHash, null);
 		assertNotNull(persistedObservationCode);
 		assertEquals(observationCodeNormalizedId, persistedObservationCode.getCodeableConceptId());

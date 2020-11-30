@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.DisjointSet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
@@ -74,8 +75,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.validation.constraints.NotNull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -178,7 +184,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Override
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
-		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
+		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME, OBSERVATION_EFFECTIVEDTM_FIELD_NAME};
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude,
 			ObservationJson::getIdentifier, theMaxResultsToFetch);
 	}
@@ -291,46 +297,107 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue,
 														  SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
 														  Integer theMaxResultsToFetch) throws IOException {
-		List<T> theObservationList = new ArrayList<>();
+		
+		//-- K: the group key, V: the ObservationJson of this group
+		Map<String, List<ObservationJson>> theGrpMap = new HashMap<>(); 
 		if (theSearchParameterMap.containsKey(LastNParameterHelper.getPatientParamName(theFhirContext))
 			|| theSearchParameterMap.containsKey(LastNParameterHelper.getSubjectParamName(theFhirContext))) {
 			for (ParsedComposite.ParsedBucket subjectBucket : getSubjectBuckets(theSearchResponse)) {
-				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+				if (theMaxResultsToFetch != null && getGrpMapSize(theGrpMap) >= theMaxResultsToFetch) {
 					break;
 				}
 				for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(subjectBucket)) {
-					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+					if (theMaxResultsToFetch != null && getGrpMapSize(theGrpMap) >= theMaxResultsToFetch) {
 						break;
 					}
+					String theGrpKey = (String)observationCodeBucket.getKey();
 					for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
-						if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+						if (theMaxResultsToFetch != null && getGrpMapSize(theGrpMap) >= theMaxResultsToFetch) {
 							break;
 						}
 						String indexedObservation = lastNMatch.getSourceAsString();
 						ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
-						theObservationList.add(setValue.apply(observationJson));
+						addToGrpMap(theGrpMap, theGrpKey, observationJson);
 					}
 				}
 			}
 		} else {
 			for (Terms.Bucket observationCodeBucket : getObservationCodeBuckets(theSearchResponse)) {
-				if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+				
+				String theGrpKey = (String)observationCodeBucket.getKey();
+				if (theMaxResultsToFetch != null && getGrpMapSize(theGrpMap) >= theMaxResultsToFetch) {
 					break;
 				}
 				for (SearchHit lastNMatch : getLastNMatches(observationCodeBucket)) {
-					if (theMaxResultsToFetch != null && theObservationList.size() >= theMaxResultsToFetch) {
+					if (theMaxResultsToFetch != null && getGrpMapSize(theGrpMap) >= theMaxResultsToFetch) {
 						break;
 					}
 					String indexedObservation = lastNMatch.getSourceAsString();
 					ObservationJson observationJson = objectMapper.readValue(indexedObservation, ObservationJson.class);
-					theObservationList.add(setValue.apply(observationJson));
+					addToGrpMap(theGrpMap, theGrpKey, observationJson);
 				}
 			}
 		}
 
+
+		// regroup based on DisjointSet algorithm e.g 
+		// Bucket 1 has element (a)
+		// Bucket 2 has element (b)
+		// Bucket 3 has element (a, c)
+		// Result two new Buckets, Bucket x with element (a,c), Bucket y has element b
+		DisjointSet<ObservationJson> theDisjointSet = new DisjointSet<ObservationJson>(new ArrayList<List<ObservationJson>>(theGrpMap.values()));				
+		List<List<ObservationJson>> theNewGrpList = theDisjointSet.getNewGrp();
+				
+		// covert to theObservationList
+		//-- the final result, sort by effective date and remove extra element if exceed max
+		List<T> theObservationList = new ArrayList<>();
+		int max = getMaxParameter(theSearchParameterMap);
+		
+		for (List<ObservationJson> theGrp : theNewGrpList) {
+			
+			List<ObservationJson> theObsJList = theGrp.stream().sorted().collect(Collectors.toList());
+			int count = 0;
+			for (ObservationJson obsJ : theObsJList) {				
+				if (count < max) {
+					theObservationList.add(setValue.apply(obsJ));
+					count++;
+				} else {
+					break;
+				}
+			}
+		}
+				
 		return theObservationList;
 	}
 
+	private void addToGrpMap(Map<String, List<ObservationJson>> theGrpMap, String theGrpKey, ObservationJson theNewObsJ) {
+		
+		List<ObservationJson> theCurrGrp = theGrpMap.get(theGrpKey);
+
+		if (theCurrGrp == null) {
+			// create new group, K: theCurrGrpKey, V: theNewObsJ
+			List<ObservationJson> theNewGrp = new ArrayList<>();
+			theNewGrp.add(theNewObsJ);
+			theGrpMap.put(theGrpKey, theNewGrp);			
+		} else {
+			ObservationJson theObsj = theCurrGrp.stream().filter(t->theNewObsJ.getIdentifier().equals(t.getIdentifier())).findAny().orElse(null);
+			if (theObsj == null) {
+				theCurrGrp.add(theNewObsJ);
+			}
+		}
+	}
+	
+	private int getGrpMapSize(@NotNull Map<String, List<ObservationJson>> theGrpMap) {
+		
+		int size = 0;
+		Collection<List<ObservationJson>> values = theGrpMap.values();
+		for (List<ObservationJson> obsJ : values) {
+			size += obsJ.size();
+		}
+		
+		return size;
+	}
+	
 	private List<ParsedComposite.ParsedBucket> getSubjectBuckets(SearchResponse theSearchResponse) {
 		Aggregations responseAggregations = theSearchResponse.getAggregations();
 		ParsedComposite aggregatedSubjects = responseAggregations.get(GROUP_BY_SUBJECT);

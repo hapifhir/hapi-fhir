@@ -567,8 +567,8 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 		assertEquals(2, observations.size());
 
-		String observationCode1 = observations.get(0).getCode_coding_code_system_hash();
-		String observationCode2 = observations.get(1).getCode_coding_code_system_hash();
+		String observationCode1 = observations.get(0).getCode_coding_code_system_hash().get(0);
+		String observationCode2 = observations.get(1).getCode_coding_code_system_hash().get(0);
 
 		assertNotEquals(observationCode1, observationCode2);
 

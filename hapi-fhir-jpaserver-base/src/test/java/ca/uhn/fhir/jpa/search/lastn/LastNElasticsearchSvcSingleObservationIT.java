@@ -204,16 +204,16 @@ public class LastNElasticsearchSvcSingleObservationIT {
 		String code_concept_text_values = observation.getCode_concept_text();
 		assertEquals(OBSERVATIONCODETEXT, code_concept_text_values);
 
-		String code_coding_systems = observation.getCode_coding_system();
+		String code_coding_systems = observation.getCode_coding_system().get(0);
 		assertEquals(CODEFIRSTCODINGSYSTEM, code_coding_systems);
 
-		String code_coding_codes = observation.getCode_coding_code();
+		String code_coding_codes = observation.getCode_coding_code().get(0);
 		assertEquals(CODEFIRSTCODINGCODE, code_coding_codes);
 
-		String code_coding_display = observation.getCode_coding_display();
+		String code_coding_display = observation.getCode_coding_display().get(0);
 		assertEquals(CODEFIRSTCODINGDISPLAY, code_coding_display);
 
-		String code_coding_code_system_hash = observation.getCode_coding_code_system_hash();
+		String code_coding_code_system_hash = observation.getCode_coding_code_system_hash().get(0);
 		assertEquals(String.valueOf(CodeSystemHash.hashCodeSystem(CODEFIRSTCODINGSYSTEM, CODEFIRSTCODINGCODE)), code_coding_code_system_hash);
 
 		// Retrieve all Observation codes
