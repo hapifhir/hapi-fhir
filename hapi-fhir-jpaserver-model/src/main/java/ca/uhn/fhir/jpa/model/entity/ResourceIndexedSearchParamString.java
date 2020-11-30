@@ -86,8 +86,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_SPIDXSTR_RESOURCE"))
-	//TODO GGG HS it said we were cool to rip these out.
-	//@ContainedIn
 	private ResourceTable myResourceTable;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)

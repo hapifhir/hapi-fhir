@@ -174,7 +174,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 	/**
 	 * A handler for rejected tasks that will have the caller block until space is available.
-	 * TODO GGG HS: This was stolen from old hibernate, as it has been removed in HS6. We can probably come up with a better solution though.
+	 * This was stolen from old hibernate search(5.X.X), as it has been removed in HS6. We can probably come up with a better solution though.
 	 */
 	public static class BlockPolicy implements RejectedExecutionHandler {
 
@@ -545,7 +545,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 						/*
 						 * This part is because from HAPI 1.5 - 1.6 we changed the format of forced ID to be "type/id" instead of just "id"
 						 */
-						//TODO GGG HS: Can we remove this call? Not sure how many cycles it would really save, but reindexing is slow as it is.
 						ForcedId forcedId = resourceTable.getForcedId();
 						if (forcedId != null) {
 							if (isBlank(forcedId.getResourceType())) {

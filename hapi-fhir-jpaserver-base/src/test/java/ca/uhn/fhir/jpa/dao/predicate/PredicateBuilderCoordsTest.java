@@ -66,7 +66,6 @@ public class PredicateBuilderCoordsTest {
 	public void testAntiMeridianLongitudePredicateFromBox() {
 		GeoBoundingBox box = CoordCalculator.getBox(CoordCalculatorTest.LATITUDE_TAVEUNI, CoordCalculatorTest.LONGITIDE_TAVEUNI, CoordCalculatorTest.DISTANCE_TAVEUNI);
 		assertThat(box.bottomRight().longitude(), lessThan(box.topLeft().longitude()));
-		//TODO GGG HS this used to be  an assert for crossesAntiMeridian but feels useless now.
 		assertTrue(box.bottomRight().longitude() < box.topLeft().longitude());
 
 		ArgumentCaptor<Predicate> orLeft = ArgumentCaptor.forClass(Predicate.class);

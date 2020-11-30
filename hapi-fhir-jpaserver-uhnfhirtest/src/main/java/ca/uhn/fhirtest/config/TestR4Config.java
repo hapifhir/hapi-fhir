@@ -156,13 +156,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
 
-//		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-//		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
-//		extraProperties.put("hibernate.search.default.indexBase", myFhirLuceneLocation);
-//		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-
-		//TODO GGG HS: validate these settings.
-		extraProperties.put(HibernateOrmMapperSettings.MAPPING_CONFIGURER, HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), myFhirLuceneLocation);
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");

@@ -26,9 +26,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -152,19 +154,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		//TODO GGG HS, evaluate these changes.
-		//extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-
-		//extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-
-		//extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
 
 		return extraProperties;
 	}
+
 
 	/**
 	 * Bean which validates incoming requests

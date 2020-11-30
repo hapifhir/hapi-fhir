@@ -72,10 +72,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Note the extra config needed in HS6 for indexing transient props:
 	 * https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#indexed-transient-requires-configuration
 	 *
-	 * TODO GGG HS
-	 * Normally with a transient field, we would indicated it is `derivedFrom` some other fields, but in our case, it isn't
-	 * and we are literally only using this field for storing fulltext. Thus we indicate reindexOnUpdate=SHALLOW which
-	 * means that any wholesale replacement of the field, via setter, will cause a reindex.
+	 * Note that we depend on `myVersion` updated for this field to be indexed.
 	 */
 	@Transient
 	@FullTextField(name = "myContentText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
@@ -83,7 +80,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@FullTextField(name = "myContentTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
 	@FullTextField(name = "myContentTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
-	//TODO GGG HS waiting on an answer to this here: https://discourse.hibernate.org/t/transient-attribute-that-is-not-derived-in-hs6/4803
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
 
@@ -119,7 +115,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@FullTextField(name = "myNarrativeTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
 	@FullTextField(name = "myNarrativeTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
-	//TODO GGG HS waiting on an answer to this here: https://discourse.hibernate.org/t/transient-attribute-that-is-not-derived-in-hs6/4803
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
 
@@ -207,7 +202,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 */
 	@FullTextField
 	@Transient
-	//TODO GGG HS this line here indicates that we should reindex when the derived-from field is updated.
 	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myResourceLinks")))
 	private String myResourceLinksField;
 

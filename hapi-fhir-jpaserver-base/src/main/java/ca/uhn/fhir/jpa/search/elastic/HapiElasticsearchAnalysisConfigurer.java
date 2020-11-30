@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.search.elastic;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurationContext;
 import org.hibernate.search.backend.elasticsearch.analysis.ElasticsearchAnalysisConfigurer;
 
-//TODO GGG HS: Note that the interface changed here, but the functionality is near identical. @Ian can you review my changes here to make sure I didn't miss anything?
 public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysisConfigurer{
 
 	@Override

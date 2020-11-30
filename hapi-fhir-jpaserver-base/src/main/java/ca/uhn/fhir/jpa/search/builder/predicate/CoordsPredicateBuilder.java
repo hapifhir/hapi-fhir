@@ -140,7 +140,6 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	}
 
 	public Condition createLongitudePredicateFromBox(GeoBoundingBox theBox) {
-//		if (theBox.crossesAntiMeridian()) { //TODO GGG HS: Geoboundingbox doesnt support this method, reimplementing here.
 		if (theBox.bottomRight().longitude() < theBox.topLeft().longitude()) {
 			return ComboCondition.or(
 				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude())),

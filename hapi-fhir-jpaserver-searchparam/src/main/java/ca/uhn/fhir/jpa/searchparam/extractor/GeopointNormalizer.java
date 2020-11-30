@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
 /**
- * TODO GGG HS: This class fully and unabashedly stolen from Hibernate search 5.11.4 FINAL's implementation.
+ * This class fully and unabashedly stolen from Hibernate search 5.11.4 FINAL's implementation as it was stripped in HS6
  */
 public class GeopointNormalizer {
 

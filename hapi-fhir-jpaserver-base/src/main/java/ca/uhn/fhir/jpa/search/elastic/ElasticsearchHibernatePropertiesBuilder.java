@@ -45,7 +45,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	private String myUsername;
 	private String myPassword;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
-	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;//TODO GGG HS not sure if this is the right
+	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;
 	private boolean myDebugPrettyPrintJsonLog = false;
 	private String myProtocol;
 
@@ -61,19 +61,13 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 	public void apply(Properties theProperties) {
 
-		// Don't use the Lucene properties as they conflict
-		theProperties.remove("hibernate.search.model_mapping");
-
 		// the below properties are used for ElasticSearch integration
-		//theProperties.put("hibernate.search.default." + INDEX_MANAGER_IMPL_NAME, "elasticsearch");
 		theProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
 
 
-		//theProperties.put("hibernate.search." + ANALYSIS_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
 		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER), HapiElasticsearchAnalysisConfigurer.class.getName());
 
 		//theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
-		//TODO GGG note that we MUST exclude the protocol from this URL, and it should be set via the protocol hibernate prop.
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myRestUrl);
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), myProtocol);
 

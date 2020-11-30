@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
-	//TODO GGG HS update this to 7.9
-	private static final String ELASTIC_VERSION = "6.5.4";
+	private static final String ELASTIC_VERSION = "7.9.0";
 	protected final String elasticsearchHost = "localhost";
 	protected final String elasticsearchUserId = "";
 	protected final String elasticsearchPassword = "";
@@ -40,8 +39,6 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 
 		new ElasticsearchHibernatePropertiesBuilder()
-			//TODO GGG HS According to these docs (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#_configuration_property_reference) the best approximation to `refreshAfterWrite=True`,
-			//Which was the previous behaviour
 			.setDebugIndexSyncStrategy("read-sync")
 			.setDebugPrettyPrintJsonLog(true)
 			.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)

@@ -46,9 +46,10 @@ public class TermConceptPropertyBinder implements PropertyBinder {
 
 		//In order to support dynamic fields, we have to use field templates. We _must_ define the template at bootstrap time and cannot
 		//create them adhoc. https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#mapper-orm-bridge-index-field-dsl-dynamic
-		//TODO GGG HS -> I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
-		//TODO GGG HS Does this field need to be multivalued? e.g. PROPCOMPONENT -> ["a", "b"] ?
-		indexSchemaElement.fieldTemplate("propTemplate", f -> f.asString().analyzer("termConceptPropertyAnalyzer")).matchingPathGlob(CONCEPT_FIELD_PROPERTY_PREFIX + "*").multiValued();
+		//I _think_ im doing the right thing here by indicating that everything matching this template uses this analyzer.
+		indexSchemaElement.fieldTemplate("propTemplate", f -> f.asString().analyzer("termConceptPropertyAnalyzer"))
+			.matchingPathGlob(CONCEPT_FIELD_PROPERTY_PREFIX + "*")
+			.multiValued();
 
 
 		thePropertyBindingContext.bridge(new TermConceptPropertyBridge());
@@ -64,9 +65,10 @@ public class TermConceptPropertyBinder implements PropertyBinder {
 			if (properties != null) {
 				for (TermConceptProperty next : properties) {
 					theDocument.addValue(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getValue());
-
+					System.out.println("Adding Prop: " + CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey() + " -- " + next.getValue());
 					if (next.getType() == TermConceptPropertyTypeEnum.CODING && isNotBlank(next.getDisplay())) {
 							theDocument.addValue(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getDisplay());
+							System.out.println("Adding multivalue Prop: " + CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey() + " -- " + next.getDisplay());
 					}
 				}
 			}
