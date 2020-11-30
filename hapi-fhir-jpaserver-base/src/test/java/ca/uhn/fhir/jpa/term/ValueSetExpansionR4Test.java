@@ -193,7 +193,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
 		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
-
 	}
 
 	@Test

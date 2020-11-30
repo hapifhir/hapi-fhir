@@ -40,12 +40,13 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 		theConfigCtx.tokenFilter("edgengram_3_50")
 			.type("edgeNGram")
 			.param("min_gram", "3")
-			.param("max_gram", "50");
+			.param("max_gram", "4");
+//			.param("max_gram", "50");//TODO GGG HS ES 7.10 says we have to set `max_ngram_diff:47` on each index we create, since the default is 1.
 
 
 		theConfigCtx.analyzer("autocompletePhoneticAnalyzer").custom()
 			.tokenizer("standard")
-			.tokenFilters("standard", "stop", "snowball_english");
+			.tokenFilters("stop", "snowball_english");
 
 		theConfigCtx.tokenFilter("snowball_english")
 			.type("snowball")
@@ -58,7 +59,8 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 		theConfigCtx.tokenFilter("ngram_3_20")
 			.type("nGram")
 			.param("min_gram", "3")
-			.param("max_gram", "20");
+			.param("max_gram", "4");
+//			.param("max_gram", "20");//TODO GGG HS ES 7.10 says we have to set `max_ngram_diff:47` on each index we create, since the default is 1.
 
 
 		theConfigCtx.analyzer("standardAnalyzer").custom()

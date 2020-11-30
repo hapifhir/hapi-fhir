@@ -27,6 +27,10 @@
 		<appender-ref ref="STDOUT" />
 	</logger>
 
+	<logger name="org.elasticsearch.client" additivity="true" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
 	<logger name="org.eclipse" additivity="false" level="error">
 	</logger>
 

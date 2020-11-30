@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.search.lastn;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
-import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchConfig;
+import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
@@ -44,10 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestElasticsearchConfig.class})
 @Testcontainers
 public class LastNElasticsearchSvcSingleObservationIT {
-
 
 	static ObjectMapper ourMapperNonPrettyPrint;
 	final String RESOURCEPID = "123";
@@ -88,12 +85,13 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	ElasticsearchSvcImpl elasticsearchSvc;
 
 	@Container
-	public ElasticsearchContainer myElasticsearchContainer = new ElasticsearchContainer(TestElasticsearchConfig.ELASTIC_IMAGE).withStartupTimeout(Duration.of(60, SECONDS));
+	public ElasticsearchContainer myElasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
 
 	@BeforeEach
 	public void before() {
 		elasticsearchSvc = new ElasticsearchSvcImpl("localhost", myElasticsearchContainer.getMappedPort(9200), "", "");
 	}
+
 	@AfterEach
 	public void after() throws IOException {
 		elasticsearchSvc.deleteAllDocumentsForTest(ElasticsearchSvcImpl.OBSERVATION_INDEX);
