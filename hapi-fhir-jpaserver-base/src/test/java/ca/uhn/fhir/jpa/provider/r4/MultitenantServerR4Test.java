@@ -83,7 +83,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertNull(resourceTable.getPartitionId().getPartitionId());
+			assertNull(resourceTable.getPartitionId());
 		});
 
 

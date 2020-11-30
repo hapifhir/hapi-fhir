@@ -80,14 +80,14 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdatePartition_TryToRenameDefault() {
 		PartitionEntity partition = new PartitionEntity();
-		partition.setId(0);
+		partition.setId(null);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
 		try {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Can not rename default partition", e.getMessage());
+			assertEquals("Partition must have an ID and a Name", e.getMessage());
 		}
 	}
 
