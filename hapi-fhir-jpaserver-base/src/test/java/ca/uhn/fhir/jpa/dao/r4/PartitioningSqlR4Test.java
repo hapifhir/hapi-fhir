@@ -1447,13 +1447,11 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myPatientDao.search(map);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientIdNull, patientId2));
 
 		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(searchSql, containsString("PARTITION_ID IN ('a1', '2')"));
-
-// FIXME: move up
-		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientIdNull, patientId2));
 	}
 
 	@Test
