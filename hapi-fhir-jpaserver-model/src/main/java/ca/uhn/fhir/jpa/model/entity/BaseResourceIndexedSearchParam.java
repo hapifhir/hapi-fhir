@@ -20,10 +20,12 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
@@ -195,6 +197,9 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		Hasher hasher = HASH_FUNCTION.newHasher();
 
 		if (thePartitionSettings.isPartitioningEnabled() && thePartitionSettings.isIncludePartitionInSearchHashes() && theRequestPartitionId != null) {
+			if (theRequestPartitionId.getPartitionIds().size() > 1) {
+				throw new InternalErrorException("Can not search multiple partitions when partitions are included in search hashes");
+			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
 			if (partitionId != null) {
 				hasher.putInt(partitionId);

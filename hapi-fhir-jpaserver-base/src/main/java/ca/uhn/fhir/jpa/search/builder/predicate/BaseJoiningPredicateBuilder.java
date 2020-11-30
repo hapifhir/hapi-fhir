@@ -36,6 +36,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.toAndPredicate;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.toEqualToOrInPredicate;
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.toOrPredicate;
 
 public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 
@@ -73,6 +74,11 @@ public abstract class BaseJoiningPredicateBuilder extends BasePredicateBuilder {
 			Condition condition;
 			if (theRequestPartitionId.isDefaultPartition()) {
 				condition = UnaryCondition.isNull(getPartitionIdColumn());
+			} else if (theRequestPartitionId.hasDefaultPartitionId()) {
+				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIdsWithoutDefault());
+				UnaryCondition partitionNullPredicate = UnaryCondition.isNull(getPartitionIdColumn());
+				InCondition partitionIdsPredicate = new InCondition(getPartitionIdColumn(), placeholders);
+				condition = toOrPredicate(partitionNullPredicate, partitionIdsPredicate);
 			} else {
 				List<String> placeholders = generatePlaceholders(theRequestPartitionId.getPartitionIds());
 				condition = new InCondition(getPartitionIdColumn(), placeholders);
