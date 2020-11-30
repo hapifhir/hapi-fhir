@@ -247,12 +247,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
-		runInTransaction(()->{
+		List<String> expandedConceptCodes = runInTransaction(() -> {
 			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://foo/vs");
 			assertEquals(1, valueSets.size());
 			TermValueSet valueSet = valueSets.get(0);
 			List<TermValueSetConcept> concepts = valueSet.getConcepts();
-			ourLog.info("Concepts:\n * " + concepts.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
 		});
 
 		ValueSet input = new ValueSet();
@@ -264,19 +265,22 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("display value 9");
 
+		int offset = 3;
+		int count = 4;
 		myCaptureQueriesListener.clear();
 		ValueSetExpansionOptions expansionOptions = new ValueSetExpansionOptions()
-			.setOffset(3)
-			.setCount(4);
+			.setOffset(offset)
+			.setCount(count);
 
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(expansionOptions, input);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		//TODO GGG HS run the preexpansion once, and compare the results of offset with queries with sublist of original pre-expansion
-		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), containsInAnyOrder(
-			"code92", "code93", "code94", "code95"
-		));
+		//Take our intial expanded list, and only get the elements that are relevant.
+		expandedConceptCodes.removeIf(concept -> !concept.startsWith("code9"));
+
+		//Ensure that the subsequent expansion with offset returns the same slice we are anticipating.
+		assertThat(toCodes(expandedValueSet).toString(), toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(offset, offset + count))));
 		assertEquals(4, expandedValueSet.getExpansion().getContains().size(), toCodes(expandedValueSet).toString());
 		assertEquals(11, expandedValueSet.getExpansion().getTotal());
 
@@ -284,7 +288,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
 		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
-
 	}
 
 
@@ -743,6 +746,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
+		List<String> expandedConceptCodes = runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertEquals(1, valueSets.size());
+			TermValueSet vs = valueSets.get(0);
+			List<TermValueSetConcept> concepts = vs.getConcepts();
+			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+		});
+
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(0)
 			.setCount(23);
@@ -758,18 +770,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
 		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
-
-		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
-
-		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
-		assertConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
-
-		// ...
-
-		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
+		//It is enough to test that the sublist returned is the correct one.
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(0, 23))));
 	}
 
 	@Test
@@ -969,7 +971,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		//TODO GGG HS grab original pre-expansion to use for subsequent sublist comparisons
+		List<String> expandedConceptCodes = runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertEquals(1, valueSets.size());
+			TermValueSet vs = valueSets.get(0);
+			List<TermValueSetConcept> concepts = vs.getConcepts();
+			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+		});
+
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(1)
 			.setCount(22);
@@ -986,13 +996,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
 
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8493-9", "Systolic blood pressure 10 hour minimum", 0);
-
-
-		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
+		//It is enough to test that the sublist returned is the correct one.
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
 	}
 
 	@Test
@@ -1024,6 +1029,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
+		List<String> expandedConceptCodes = runInTransaction(() -> {
+			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertEquals(1, valueSets.size());
+			TermValueSet vs = valueSets.get(0);
+			List<TermValueSetConcept> concepts = vs.getConcepts();
+			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
+		});
+
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(1)
 			.setCount(22);
@@ -1040,12 +1054,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
 
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8493-9", "Systolic blood pressure 10 hour minimum", 0);
-
-		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
+		//It is enough to test that the sublist returned is the correct one.
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConceptCodes.subList(1, 23))));
 	}
 
 	@Test

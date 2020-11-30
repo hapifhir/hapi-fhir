@@ -8,20 +8,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
+import org.testcontainers.junit.jupiter.Container;
 import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
 import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
 
 @Configuration
 public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
-	private static final String ELASTIC_VERSION = "7.9.0";
+	public static final String ELASTIC_VERSION = "7.9.2";
+	public static final String ELASTIC_IMAGE  = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTIC_VERSION;
 	protected final String elasticsearchHost = "localhost";
 	protected final String elasticsearchUserId = "";
 	protected final String elasticsearchPassword = "";
@@ -34,7 +40,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 		//Override default lucene settings
 		// Force elasticsearch to start first
-		int httpPort = embeddedElasticSearch().getHttpPort();
+		int httpPort = elasticContainer().getMappedPort(9200);//9200 is the HTTP port
 		ourLog.info("ElasticSearch started on port: {}", httpPort);
 
 
@@ -54,27 +60,17 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 	}
 
 	@Bean
-	public EmbeddedElastic embeddedElasticSearch() {
-		EmbeddedElastic embeddedElastic = null;
-		try {
-			embeddedElastic = EmbeddedElastic.builder()
-				.withElasticVersion(ELASTIC_VERSION)
-				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
-				.withSetting(PopularProperties.HTTP_PORT, 0)
-				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
-				.withStartTimeout(60, TimeUnit.SECONDS)
-				.build()
-				.start();
-		} catch (IOException | InterruptedException e) {
-			throw new ConfigurationException(e);
-		}
-
-		return embeddedElastic;
+	public ElasticsearchContainer elasticContainer() {
+		ElasticsearchContainer container = new ElasticsearchContainer(ELASTIC_IMAGE);
+		container.withStartupTimeout(Duration.of(60, SECONDS));
+		container.start();
+		return container;
 	}
+
 
 	@PreDestroy
 	public void stop() {
-		embeddedElasticSearch().stop();
+		elasticContainer().stop();
 	}
 
 }

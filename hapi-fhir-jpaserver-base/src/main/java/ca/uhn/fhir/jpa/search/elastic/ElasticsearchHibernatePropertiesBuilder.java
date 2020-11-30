@@ -89,6 +89,9 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		//theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REQUIRED_INDEX_STATUS, myRequiredIndexStatus.getElasticsearchString());
 		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.SCHEMA_MANAGEMENT_MINIMAL_REQUIRED_STATUS), myRequiredIndexStatus.externalRepresentation());
 
+		//Index NGRAM diff changes require this change.
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.), myRequiredIndexStatus.externalRepresentation());
+
 
 		// Need the mapping to be dynamic because of terminology indexes.
 		//theProperties.put("hibernate.search.default.elasticsearch.dynamic_mapping", "true");
