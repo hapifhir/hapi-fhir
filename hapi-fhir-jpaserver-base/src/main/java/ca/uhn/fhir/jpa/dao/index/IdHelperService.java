@@ -189,9 +189,10 @@ public class IdHelperService {
 
 			} else {
 
+				String partitionIdStringForKey = RequestPartitionId.stringifyForKey(theRequestPartitionId);
 				for (Iterator<String> idIterator = nextIds.iterator(); idIterator.hasNext(); ) {
 					String nextId = idIterator.next();
-					String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + nextResourceType + "/" + nextId;
+					String key = partitionIdStringForKey + "/" + nextResourceType + "/" + nextId;
 					Long nextCachedPid = myMemoryCacheService.getIfPresent(MemoryCacheService.CacheEnum.PERSISTENT_ID, key);
 					if (nextCachedPid != null) {
 						idIterator.remove();
@@ -218,7 +219,7 @@ public class IdHelperService {
 						Long pid = (Long) nextView[1];
 						retVal.add(new ResourcePersistentId(pid));
 
-						String key = RequestPartitionId.stringifyForKey(theRequestPartitionId) + "/" + nextResourceType + "/" + forcedId;
+						String key = partitionIdStringForKey + "/" + nextResourceType + "/" + forcedId;
 						myMemoryCacheService.put(MemoryCacheService.CacheEnum.PERSISTENT_ID, key, pid);
 					}
 				}
