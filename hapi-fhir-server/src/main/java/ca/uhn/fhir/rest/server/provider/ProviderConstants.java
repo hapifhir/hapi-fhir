@@ -59,6 +59,14 @@ public class ProviderConstants {
 	public static final String DIFF_INCLUDE_META_PARAMETER = "includeMeta";
 
 	/**
+	 * CQL Operations
+	 */
+	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
+	public static final String CQL_EVALUATE_MEASURE_PATIENT_ID = "patientId";
+	public static final String CQL_EVALUATE_MEASURE_PERIOD_START = "periodStart";
+	public static final String CQL_EVALUATE_MEASURE_PERIOD_END = "periodEnd";
+
+	/**
 	 * EMPI Operations
 	 */
 	public static final String EMPI_MATCH = "$match";

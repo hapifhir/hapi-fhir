@@ -55,7 +55,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 	@Autowired
 	private ValueSetResourceProvider myValueSetResourceProvider;
 
-	MeasureOperationsProvider myProvider;
+	CqlProviderDstu3 myProvider;
 
 	@BeforeEach
 	public void before() throws IOException {
@@ -123,8 +123,9 @@ Direct Reference Codes:
 		String periodEnd = "2003-12-31";
 
 		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-			patient, null, null, null, null, null, null);
+		MeasureReport report = myProvider.getMeasureOperationsProvider().evaluateMeasure(measureId, periodStart,
+			periodEnd, null, null, patient, null, null, null,
+			null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -139,8 +140,8 @@ Direct Reference Codes:
 		int runCount = 10;
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < runCount; ++i) {
-			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
-				patient, null, null, null, null, null, null);
+			myProvider.getMeasureOperationsProvider().evaluateMeasure(measureId, periodStart, periodEnd, null,
+				null, patient, null, null, null, null, null, null);
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
@@ -161,8 +162,9 @@ Direct Reference Codes:
 
 		// TODO KBD Why does this call accept a reportType of "population" ? http://hl7.org/fhir/STU3/valueset-measure-report-type.html
 		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
-			null, null, null, null, null, null, null);
+		MeasureReport report = myProvider.getMeasureOperationsProvider().evaluateMeasure(measureId, periodStart,
+			periodEnd, null, "population", null, null, null,
+			null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -177,8 +179,9 @@ Direct Reference Codes:
 		int runCount = 10;
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < runCount; ++i) {
-			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
-				null, null, null, null, null, null, null);
+			myProvider.getMeasureOperationsProvider().evaluateMeasure(measureId, periodStart, periodEnd, null,
+				"population", null, null, null, null,
+				null, null, null);
 		}
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
@@ -207,8 +210,9 @@ Direct Reference Codes:
 		//String periodEnd = "2003-12-31";
 
 		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, null, null, null, null,
-			null, null, null, null, null, null, null);
+		MeasureReport report = myProvider.getMeasureOperationsProvider().evaluateMeasure(measureId, null,
+			null, null, null, null, null, null,
+			null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -248,8 +252,9 @@ Direct Reference Codes:
 		IdType measureId = new IdType("Measure", "measure-EXM104-FHIR3-8.1.000");
 		String patient = "Patient/numer-EXM104-FHIR3";
 
-		MeasureReport report = myProvider.evaluateMeasure(measureId, null, null, null, null,
-			patient, null, null, null, null, null, null);
+		MeasureReport report = myProvider.getMeasureOperationsProvider().evaluateMeasure(measureId, null,
+			null, null, null, patient, null, null,
+			null, null, null, null);
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
 	}

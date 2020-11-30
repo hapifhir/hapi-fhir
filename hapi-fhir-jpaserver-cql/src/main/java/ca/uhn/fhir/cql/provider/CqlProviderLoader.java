@@ -67,8 +67,8 @@ public class CqlProviderLoader {
 	}
 
 	@VisibleForTesting
-	org.opencds.cqf.dstu3.providers.MeasureOperationsProvider buildDstu3Provider() {
-		return myCqlProviderFactory.getMeasureOperationsProviderDstu3();
+	ca.uhn.fhir.cql.provider.CqlProviderDstu3 buildDstu3Provider() {
+		return new CqlProviderDstu3(myCqlProviderFactory.getMeasureOperationsProviderDstu3());
 	}
 
 	@VisibleForTesting
