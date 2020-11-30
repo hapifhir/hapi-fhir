@@ -21,6 +21,7 @@ package ca.uhn.fhir.test;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -40,6 +41,11 @@ public class BaseTest {
 
 	protected String loadCompressedResource(String theClasspath) throws IOException {
 		return ClasspathUtil.loadCompressedResource(theClasspath);
+	}
+
+	protected IBaseResource loadResource(FhirContext theCtx, String theClasspath) throws IOException {
+		String raw = loadResource(theClasspath);
+		return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(raw);
 	}
 
 	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {

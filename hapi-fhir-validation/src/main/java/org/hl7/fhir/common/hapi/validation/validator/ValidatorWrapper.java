@@ -34,12 +34,16 @@ class ValidatorWrapper {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorWrapper.class);
 	private IResourceValidator.BestPracticeWarningLevel myBestPracticeWarningLevel;
+	private Collection<? extends String> myExtensionDomains;
+	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
+
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
 	private boolean myAssumeValidRestReferences;
-	private Collection<? extends String> myExtensionDomains;
-	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
+	private boolean myAllowExamples;
+	private boolean myAllowXsiLocation;
+	private boolean myWantCheckSnapshotUnchanged;
 
 	/**
 	 * Constructor
@@ -67,6 +71,11 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setAllowExamples(boolean allowExamples) {
+		this.myAllowExamples = allowExamples;
+		return this;
+	}
+
 	public ValidatorWrapper setErrorForUnknownProfiles(boolean theErrorForUnknownProfiles) {
 		myErrorForUnknownProfiles = theErrorForUnknownProfiles;
 		return this;
@@ -82,9 +91,16 @@ class ValidatorWrapper {
 		return this;
 	}
 
-
 	public ValidatorWrapper setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
 		this.myValidatorResourceFetcher = validatorResourceFetcher;
+		return this;
+	}
+	public ValidatorWrapper setWantCheckSnapshotUnchanged(boolean wantCheckSnapshotUnchanged) {
+		this.myWantCheckSnapshotUnchanged = wantCheckSnapshotUnchanged;
+		return this;
+	}
+	public ValidatorWrapper setAllowXsiLocation(boolean allowXsiLocation) {
+		this.myAllowXsiLocation = allowXsiLocation;
 		return this;
 	}
 
@@ -105,7 +121,9 @@ class ValidatorWrapper {
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
-		v.setAllowXsiLocation(true);
+		v.setAllowExamples(myAllowExamples);
+		v.setWantCheckSnapshotUnchanged(myWantCheckSnapshotUnchanged);
+		v.setAllowXsiLocation(myAllowXsiLocation);
 
 		List<ValidationMessage> messages = new ArrayList<>();
 
@@ -217,5 +235,4 @@ class ValidatorWrapper {
 		}
 		return profileNames;
 	}
-
 }

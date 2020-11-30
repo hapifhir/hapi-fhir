@@ -29,15 +29,19 @@ import java.util.List;
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {
 
-	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private IValidationSupport myValidationSupport;
-	private boolean noTerminologyChecks = false;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
-	private boolean errorForUnknownProfiles;
-	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
+
+	private boolean myAnyExtensionsAllowed = false;
+	private boolean noTerminologyChecks = false;
+	private boolean errorForUnknownProfiles;
+	private boolean assumeValidRestReferences;
+	private boolean allowExamples = true;
+	private boolean wantCheckSnapshotUnchanged = true;
+	private boolean allowXsiLocation = false;
 
 	/**
 	 * Constructor
@@ -97,6 +101,10 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	public FhirInstanceValidator setCustomExtensionDomains(String... extensionDomains) {
 		this.myExtensionDomains = Arrays.asList(extensionDomains);
 		return this;
+	}
+
+	public List<String> getExtensionDomains() {
+		return myExtensionDomains;
 	}
 
 	/**
@@ -188,8 +196,44 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		noTerminologyChecks = theNoTerminologyChecks;
 	}
 
-	public List<String> getExtensionDomains() {
-		return myExtensionDomains;
+	public boolean isAssumeValidRestReferences() {
+		return assumeValidRestReferences;
+	}
+
+	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
+		this.assumeValidRestReferences = assumeValidRestReferences;
+	}
+
+	public boolean isAllowExamples() {
+		return allowExamples;
+	}
+
+	public void setAllowExamples(boolean allowExamples) {
+		this.allowExamples = allowExamples;
+	}
+
+	public boolean isWantCheckSnapshotUnchanged() {
+		return wantCheckSnapshotUnchanged;
+	}
+
+	public void setWantCheckSnapshotUnchanged(boolean wantCheckSnapshotUnchanged) {
+		this.wantCheckSnapshotUnchanged = wantCheckSnapshotUnchanged;
+	}
+
+	public boolean isAllowXsiLocation() {
+		return allowXsiLocation;
+	}
+
+	public void setAllowXsiLocation(boolean allowXsiLocation) {
+		this.allowXsiLocation = allowXsiLocation;
+	}
+
+	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
+		return validatorResourceFetcher;
+	}
+
+	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
+		this.validatorResourceFetcher = validatorResourceFetcher;
 	}
 
 	@Override
@@ -204,6 +248,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setNoTerminologyChecks(isNoTerminologyChecks())
 			.setValidatorResourceFetcher(getValidatorResourceFetcher())
 			.setAssumeValidRestReferences(isAssumeValidRestReferences())
+			.setAllowExamples(isAllowExamples())
+			.setWantCheckSnapshotUnchanged(isWantCheckSnapshotUnchanged())
+			.setAllowXsiLocation(isAllowXsiLocation())
 			.validate(wrappedWorkerContext, theValidationCtx);
 	}
 
@@ -272,22 +319,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		return wrappedWorkerContext;
 	}
 
-	public IResourceValidator.IValidatorResourceFetcher getValidatorResourceFetcher() {
-		return validatorResourceFetcher;
-	}
-
-	public void setValidatorResourceFetcher(IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher) {
-		this.validatorResourceFetcher = validatorResourceFetcher;
-	}
-
-	public boolean isAssumeValidRestReferences() {
-		return assumeValidRestReferences;
-	}
-
-	public void setAssumeValidRestReferences(boolean assumeValidRestReferences) {
-		this.assumeValidRestReferences = assumeValidRestReferences;
-	}
-
 	/**
 	 * Clear any cached data held by the validator or any of its internal stores. This is mostly intended
 	 * for unit tests, but could be used for production uses too.
@@ -298,7 +329,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			myWrappedWorkerContext.invalidateCaches();
 		}
 	}
-
 
 	public static class NullEvaluationContext implements FHIRPathEngine.IEvaluationContext {
 		@Override
@@ -346,6 +376,4 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			return null;
 		}
 	}
-
-
 }

@@ -933,7 +933,7 @@
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
-				<version>1.1.14</version>
+				<version>1.1.50</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains</groupId>

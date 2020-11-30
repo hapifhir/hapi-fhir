@@ -91,7 +91,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Lazy
 	public IInstanceValidatorModule instanceValidator() {
 		FhirInstanceValidator val = new JpaFhirInstanceValidator(fhirContext());
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
 		val.setValidationSupport(validationSupportChain());
 		return val;
 	}

@@ -14,6 +14,11 @@
 
 	<name>HAPI FHIR JPA Server</name>
 
+	<properties>
+		<kotlin.version>1.4.20</kotlin.version>
+		<jackson.version>2.7.1</jackson.version>
+	</properties>
+
 	<dependencies>
 		<!--
 				<dependency>
@@ -609,12 +614,40 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.hl7.fhir.testcases</groupId>
+			<artifactId>fhir-test-cases</artifactId>
+			<version>1.1.50</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib-jdk8</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-test</artifactId>
+			<version>${kotlin.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib-jdk8</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib-jdk8</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
 	</dependencies>
-
-
-	<properties>
-		<jackson.version>2.7.1</jackson.version>
-	</properties>
 
 	<build>
 		<pluginManagement>
@@ -837,6 +870,56 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.jetbrains.kotlin</groupId>
+				<artifactId>kotlin-maven-plugin</artifactId>
+				<version>${kotlin.version}</version>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+						<configuration>
+							<sourceDirs>
+								<source>target/generated-sources/tinder</source>
+								<source>src/main/java</source>
+							</sourceDirs>
+						</configuration>
+					</execution>
+					<execution>
+						<id>test-compile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<jvmTarget>1.8</jvmTarget>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>compile</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>testCompile</id>
+						<phase>test-compile</phase>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
@@ -916,6 +999,30 @@
 								<exclude>**/*Dstu3*</exclude>
 								<exclude>**/stresstest/*</exclude>
 							</excludes>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.jetbrains.kotlin</groupId>
+						<artifactId>kotlin-maven-plugin</artifactId>
+						<version>${kotlin.version}</version>
+						<executions>
+							<execution>
+								<id>compile</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>compile</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>test-compile</id>
+								<phase>test-compile</phase>
+								<goals>
+									<goal>test-compile</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<jvmTarget>1.8</jvmTarget>
 						</configuration>
 					</plugin>
 				</plugins>
