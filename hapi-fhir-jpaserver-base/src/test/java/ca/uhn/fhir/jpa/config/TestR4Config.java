@@ -32,6 +32,7 @@ import java.sql.Connection;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -166,19 +167,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-		//extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
-		//extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
-		//extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		//extraProperties.put("hibernate.search.autoregister_listeners", "true");
-		//TODO GGG HS: validate these settings.
-		//extraProperties.put(HibernateOrmMapperSettings.MAPPING_CONFIGURER, HapiLuceneAnalysisConfigurer.class.getName());
-		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
-
-		//extraProperties.put("hibernate.temp.use_jdbc_metadata_defaults","false");
+		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
 
 		return extraProperties;
 	}

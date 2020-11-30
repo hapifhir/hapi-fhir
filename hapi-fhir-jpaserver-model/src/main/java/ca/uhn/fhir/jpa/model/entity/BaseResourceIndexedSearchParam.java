@@ -68,8 +68,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false)
-	//TODO GGG HS: migration guide says just dump these
-	//@ContainedIn
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false, nullable = false)

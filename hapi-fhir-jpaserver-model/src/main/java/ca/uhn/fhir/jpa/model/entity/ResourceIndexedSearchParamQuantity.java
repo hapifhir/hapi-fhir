@@ -71,10 +71,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	public String myUnits;
 	@Column(name = "SP_VALUE", nullable = true)
 
-	//TODO GGG HS: check if scalednumberfield works
-	//@Field
-	//@NumericField
-	//@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
 	@ScaledNumberField
 	public BigDecimal myValue;
 

@@ -42,7 +42,6 @@ public class TermConceptParentChildLink implements Serializable {
 	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
 
-	//TODO GGG HS: Why is this field indexed? It seems to never get set.
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
 	@FullTextField(name = "myCodeSystemVersionPid")
 	private long myCodeSystemVersionPid;

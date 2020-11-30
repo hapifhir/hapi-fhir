@@ -776,7 +776,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 		// We only accept coordinates when both are present
 		if (latitude != null && longitude != null) {
-			//TODO GGG HS This used to use the hibernate search impl for this, but it no longer exists.
 			double normalizedLatitude = GeopointNormalizer.normalizeLatitude(latitude.doubleValue());
 			double normalizedLongitude = GeopointNormalizer.normalizeLongitude(longitude.doubleValue());
 			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(myPartitionSettings, theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);

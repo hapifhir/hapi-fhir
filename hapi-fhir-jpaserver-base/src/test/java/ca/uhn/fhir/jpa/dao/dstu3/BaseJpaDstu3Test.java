@@ -378,7 +378,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 			SearchSession searchSession  = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
 			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
-			//TODO GGG HS ok so docs (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#fulltextsession-flushtoindexes) say this is unnecessary but gonna call it anyhow
 			searchSession.indexingPlan().execute();
 		});
 

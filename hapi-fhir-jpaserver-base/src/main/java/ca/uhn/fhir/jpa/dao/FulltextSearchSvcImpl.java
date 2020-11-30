@@ -114,8 +114,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 					String joinedTerms = StringUtils.join(terms, ' ');
 					b.must(f.match().field(theFieldName).matching(joinedTerms));
 				} else {
-					//donothing
-					//TODO GGG HS add some logging.
+					ourLog.debug("No Terms found in query parameter {}", nextAnd);
 				}
 			}
 		}
@@ -170,59 +169,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		return convertLongsToResourcePersistentIds(longPids);
 	}
 
-
-	private List<ResourcePersistentId> doSearchOld(String theResourceName, SearchParameterMap theParams, ResourcePersistentId theReferencingPid) {
-
-
-//		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-//		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
-//		BooleanJunction<?> bool = qb.bool();
-//
-//		/*
-//		 * Handle _content parameter (resource body content)
-//		 */
-//		addTextSearch(qb, bool, contentAndTerms, "myContentText", "myContentTextEdgeNGram", "myContentTextNGram");
-//
-//		/*
-//		 * Handle _text parameter (resource narrative content)
-//		 */
-//		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
-//
-//		if (theReferencingPid != null) {
-//			bool.must(qb.keyword().onField("myResourceLinksField").matching(theReferencingPid.toString()).createQuery());
-//		}
-//
-//		TODO GGG HS exit early here?
-//		if (bool.isEmpty()) {
-//			return pids;
-//		}
-//
-//		if (isNotBlank(theResourceName)) {
-//			bool.must(qb.keyword().onField("myResourceType").matching(theResourceName).createQuery());
-//		}
-//
-//		Query luceneQuery = bool.createQuery();
-//
-//		 wrap Lucene query in a javax.persistence.SqlQuery
-//		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, ResourceTable.class);
-//		jpaQuery.setProjection("myId");
-//
-//		 execute search
-//		List<?> result = jpaQuery.getResultList();
-//
-//		ArrayList<ResourcePersistentId> retVal = new ArrayList<>();
-//		for (Object object : result) {
-//			Object[] nextArray = (Object[]) object;
-//			Long next = (Long) nextArray[0];
-//			if (next != null) {
-//				retVal.add(new ResourcePersistentId(next));
-//			}
-//		}
-//
-//		return retVal;
-		return null;
-	}
-
 	private List<ResourcePersistentId> convertLongsToResourcePersistentIds(List<Long> theLongPids) {
 		return theLongPids.stream()
 			.map(pid -> new ResourcePersistentId(pid))
@@ -261,10 +207,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (retVal == null) {
 			retVal = new TransactionTemplate(myTxManager).execute(t -> {
 				try {
-					//TODO GGG HS leaving the old code in for code review purposes. This QB is clearly just checking if it worked or not, not sure
-					//what the HS6 equivalent is.
-					//FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-					//em.getSearchFactory().buildQueryBuilder().forEntity(ResourceTable.class).get();
 					SearchSession searchSession = Search.session(myEntityManager);
 					searchSession.search(ResourceTable.class);
 					return Boolean.FALSE;

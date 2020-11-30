@@ -53,11 +53,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_VALUE", nullable = true)
-	//TODO GGG HS : as per changes in 6.0, @Field, @NumericField is replaced with @GenericField with a particular value bridge.
-	// Alternatively, can use @ScaledNumberField We will have to see if this works.
-	//@Field
-	//@NumericField
-	//@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
 	@ScaledNumberField
 	public BigDecimal myValue;
 

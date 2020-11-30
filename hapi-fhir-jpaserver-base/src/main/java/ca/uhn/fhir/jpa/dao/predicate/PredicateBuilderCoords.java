@@ -132,7 +132,6 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 
 	@VisibleForTesting
 	Predicate longitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, GeoBoundingBox theBox) {
-		//if (theBox.crossesAntiMeridian()) { //TODO GGG HS deprecating this class.
 		if (theBox.bottomRight().longitude() < theBox.topLeft().longitude()) {
 			return theBuilder.or(
 				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.bottomRight().longitude()),

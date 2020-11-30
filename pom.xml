@@ -1426,7 +1426,7 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.9.2</version>
+				<version>7.9.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -1662,6 +1662,24 @@
 				<groupId>pl.allegro.tech</groupId>
 				<artifactId>embedded-elasticsearch</artifactId>
 				<version>2.10.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>1.15.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>1.15.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>1.15.0</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>xpp3</groupId>

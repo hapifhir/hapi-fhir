@@ -35,12 +35,17 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
+import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
@@ -160,17 +165,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private boolean createIndex(String theIndexName, String theMapping) throws IOException {
 		CreateIndexRequest request = new CreateIndexRequest(theIndexName);
 		request.source(theMapping, XContentType.JSON);
-		//TODO GGG HS CreateIndexResponse createIndexResponse = myRestHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
-		return true;
-		//return createIndexResponse.isAcknowledged();
+		CreateIndexResponse createIndexResponse = myRestHighLevelClient.indices().create(request, RequestOptions.DEFAULT);
+		return createIndexResponse.isAcknowledged();
 
 	}
 
 	private boolean indexExists(String theIndexName) throws IOException {
-		GetIndexRequest request = new GetIndexRequest();
-		request.indices(theIndexName);
-		return true;
-		// TODO GGG HS return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
+		GetIndexRequest request = new GetIndexRequest(theIndexName);
+		return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
 	}
 
 	@Override
@@ -268,22 +270,23 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE).field(OBSERVATION_CODEVALUE_FIELD_NAME);
+		/**
+//		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field(OBSERVATION_CODEVALUE_FIELD_NAME);
 		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
 		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
 			.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
 		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
+		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
 		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
 		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
 		return observationCodeSystemAggregationBuilder;
+		 */ return null;
 	}
 
 	private SearchResponse executeSearchRequest(SearchRequest searchRequest) throws IOException {
-		// TODO GGG HS: return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-		return null;
+		return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 	}
 
 	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue,
@@ -705,12 +708,10 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private boolean performIndex(String theIndexName, String theDocumentId, String theIndexDocument, String theDocumentType) throws IOException {
-		return true;
-		//TODO GGG HS
-		//IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
-	//		RequestOptions.DEFAULT);
+		IndexResponse indexResponse = myRestHighLevelClient.index(createIndexRequest(theIndexName, theDocumentId, theIndexDocument, theDocumentType),
+			RequestOptions.DEFAULT);
 
-		//return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
+		return (indexResponse.getResult() == DocWriteResponse.Result.CREATED) || (indexResponse.getResult() == DocWriteResponse.Result.UPDATED);
 	}
 
 	@Override
@@ -731,24 +732,23 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	public void deleteObservationDocument(String theDocumentId) {
 		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(OBSERVATION_INDEX);
 		deleteByQueryRequest.setQuery(QueryBuilders.termQuery(OBSERVATION_IDENTIFIER_FIELD_NAME, theDocumentId));
-//		try {
-			//TODO GGG HS myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
-			return;
-		//} catch (IOException theE) {
-	//		throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
-	//	}
+		try {
+			myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		} catch (IOException theE) {
+			throw new InvalidRequestException("Unable to delete Observation " + theDocumentId);
+		}
 	}
 
 	@VisibleForTesting
 	public void deleteAllDocumentsForTest(String theIndexName) throws IOException {
 		DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(theIndexName);
 		deleteByQueryRequest.setQuery(QueryBuilders.matchAllQuery());
-		//TODO GGG HS: myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+		myRestHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
 	}
 
 	@VisibleForTesting
 	public void refreshIndex(String theIndexName) throws IOException {
-		//TODO GGG HS myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
+		myRestHighLevelClient.indices().refresh(new RefreshRequest(theIndexName), RequestOptions.DEFAULT);
 	}
 
 }
