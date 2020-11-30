@@ -23,16 +23,13 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
+import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.rest.api.Constants;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 public interface ISearchParamRegistry {
 
@@ -46,9 +43,12 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
-	boolean refreshCacheIfNecessary();
+	/**
+	 * @return the number of search parameter entries changed
+	 */
+	ResourceChangeResult refreshCacheIfNecessary();
 
-	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
+	ReadOnlySearchParamCache getActiveSearchParams();
 
 	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);
 
@@ -79,9 +79,6 @@ public interface ISearchParamRegistry {
 	 * such as <code>_id</code> and <code>_lastUpdated</code>.
 	 */
 	default Collection<String> getValidSearchParameterNamesIncludingMeta(String theResourceName) {
-		TreeSet<String> retVal = new TreeSet<>(getActiveSearchParams().get(theResourceName).keySet());
-		retVal.add(IAnyResource.SP_RES_ID);
-		retVal.add(Constants.PARAM_LASTUPDATED);
-		return retVal;
+		return getActiveSearchParams().getValidSearchParameterNamesIncludingMeta(theResourceName);
 	}
 }

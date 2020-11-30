@@ -1,14 +1,11 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.dstu3.model.BodySite;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -37,7 +34,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,8 +48,6 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	SearchParamMatcher mySearchParamMatcher;
 	@Autowired
 	ModelConfig myModelConfig;
-	@Autowired
-	FhirContext myFhirContext;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
 		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
@@ -372,8 +366,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
-		initSearchParamRegistry(bundle);
+		initSearchParamRegistry(sp);
 
 		{
 			Provenance prov = new Provenance();
@@ -404,8 +397,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
-		initSearchParamRegistry(bundle);
+		initSearchParamRegistry(sp);
 
 		{
 			BodySite bodySite = new BodySite();
@@ -496,8 +488,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		sp.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 
-		IBundleProvider bundle = new SimpleBundleProvider(Collections.singletonList(sp), "uuid");
-		initSearchParamRegistry(bundle);
+		initSearchParamRegistry(sp);
 
 		{
 			ProcedureRequest pr = new ProcedureRequest();

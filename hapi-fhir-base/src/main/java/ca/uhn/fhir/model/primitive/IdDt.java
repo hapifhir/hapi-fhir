@@ -17,7 +17,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -154,10 +156,15 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		myResourceType = theResourceType;
 		myUnqualifiedId = theId;
 		myUnqualifiedVersionId = StringUtils.defaultIfBlank(theVersionId, null);
-		myHaveComponentParts = true;
-		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
-			myHaveComponentParts = false;
-		}
+		setHaveComponentParts(this);
+	}
+
+	public IdDt(IIdType theId) {
+		myBaseUrl = theId.getBaseUrl();
+		myResourceType = theId.getResourceType();
+		myUnqualifiedId = theId.getIdPart();
+		myUnqualifiedVersionId = theId.getVersionIdPart();
+		setHaveComponentParts(this);
 	}
 
 	/**
@@ -165,6 +172,21 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 	 */
 	public IdDt(UriDt theUrl) {
 		setValue(theUrl.getValueAsString());
+	}
+
+	/**
+	 * Copy Constructor
+	 */
+	public IdDt(IdDt theIdDt) {
+		this(theIdDt.myBaseUrl, theIdDt.myResourceType, theIdDt.myUnqualifiedId, theIdDt.myUnqualifiedVersionId);
+	}
+
+	private void setHaveComponentParts(IdDt theIdDt) {
+		if (isBlank(myBaseUrl) && isBlank(myResourceType) && isBlank(myUnqualifiedId) && isBlank(myUnqualifiedVersionId)) {
+			myHaveComponentParts = false;
+		} else {
+			myHaveComponentParts = true;
+		}
 	}
 
 	@Override
@@ -642,7 +664,9 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 			value = existingValue;
 		}
 
-		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
+		IdDt retval = new IdDt(this);
+		retval.myUnqualifiedVersionId = theVersion;
+		return retval;
 	}
 
 	public static boolean isValidLong(String id) {
