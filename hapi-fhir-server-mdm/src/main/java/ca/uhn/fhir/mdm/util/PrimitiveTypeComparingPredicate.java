@@ -63,6 +63,9 @@ public class PrimitiveTypeComparingPredicate implements BiPredicate {
 			if (val1 == null && val2 != null) {
 				return false;
 			}
+			if (val1 != null && val2 == null) {
+				return false;
+			}
 
 			Object actualVal1 = val1.getValue();
 			Object actualVal2 = val2.getValue();
