@@ -67,6 +67,7 @@ import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -183,6 +184,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.lowerCase;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -394,25 +396,44 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 
 	@Override
-	public List<FhirVersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet) {
-		ExpansionFilter expansionFilter = ExpansionFilter.NO_FILTER;
-		return expandValueSet(theExpansionOptions, theValueSet, expansionFilter);
-	}
-
-	private List<FhirVersionIndependentConcept> expandValueSet(ValueSetExpansionOptions theExpansionOptions, String theValueSet, ExpansionFilter theExpansionFilter) {
+	@Transactional
+	public List<FhirVersionIndependentConcept> expandValueSetIntoConceptList(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl) {
+		String expansionFilter = null;
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 
-		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSet);
+		ValueSet expanded = expandValueSet(theExpansionOptions, theValueSetCanonicalUrl, expansionFilter);
+
+		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
+		for (ValueSet.ValueSetExpansionContainsComponent nextContains : expanded.getExpansion().getContains()) {
+			retVal.add(new FhirVersionIndependentConcept(nextContains.getSystem(), nextContains.getCode(), nextContains.getDisplay(), nextContains.getVersion()));
+		}
+		return retVal;
+	}
+
+	@Override
+	@Transactional
+	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetCanonicalUrl, @Nullable String theExpansionFilter) {
+		ValueSet valueSet = fetchCanonicalValueSetFromCompleteContext(theValueSetCanonicalUrl);
 		if (valueSet == null) {
-			throwInvalidValueSet(theValueSet);
+			throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetCanonicalUrl));
 		}
 
-		return expandValueSetAndReturnVersionIndependentConcepts(theExpansionOptions, valueSet, theExpansionFilter);
+		return expandValueSet(theExpansionOptions, valueSet, theExpansionFilter);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand) {
+	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand) {
+		return expandValueSet(theExpansionOptions, theValueSetToExpand, (String) null);
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
+	public ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull ValueSet theValueSetToExpand, @Nullable String theFilter) {
+		return expandValueSet(theExpansionOptions, theValueSetToExpand, ExpansionFilter.fromFilterString(theFilter));
+	}
+
+	private ValueSet expandValueSet(@Nullable ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, ExpansionFilter theFilter) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		ValueSetExpansionOptions expansionOptions = provideExpansionOptions(theExpansionOptions);
@@ -431,9 +452,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			accumulator.addParameter().setName("count").setValue(new IntegerType(count));
 		}
 
-		ExpansionFilter filter = ExpansionFilter.NO_FILTER;
 
-		expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, filter, true);
+		expandValueSetIntoAccumulator(theValueSetToExpand, theExpansionOptions, accumulator, theFilter, true);
 
 		if (accumulator.getTotalConcepts() != null) {
 			accumulator.setTotal(accumulator.getTotalConcepts());
@@ -449,7 +469,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				.setUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE)
 				.setValue(new StringType(next));
 		}
-
 		return valueSet;
 	}
 
@@ -513,6 +532,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		boolean wasFilteredResult = false;
 		if (!theFilter.getFilters().isEmpty() && JpaConstants.VALUESET_FILTER_DISPLAY.equals(theFilter.getFilters().get(0).getProperty()) && theFilter.getFilters().get(0).getOp() == ValueSet.FilterOperator.EQUAL) {
 			String displayValue = theFilter.getFilters().get(0).getValue().replace("%", "[%]") + "%";
+			displayValue = lowerCase(displayValue);
 			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			wasFilteredResult = true;
 		} else {
@@ -675,7 +695,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (TransactionSynchronizationManager.isSynchronizationActive()) {
 			return theAction.get();
 		}
-		return myTxTemplate.execute(t->theAction.get());
+		return myTxTemplate.execute(t -> theAction.get());
 	}
 
 	private String getValueSetInfo(ValueSet theValueSet) {
@@ -700,18 +720,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		return sb.toString();
-	}
-
-	protected List<FhirVersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpandR4, @Nonnull ExpansionFilter theExpansionFilter) {
-		int maxCapacity = myDaoConfig.getMaximumExpansionSize();
-		ValueSetExpansionComponentWithConceptAccumulator accumulator = new ValueSetExpansionComponentWithConceptAccumulator(myContext, maxCapacity);
-		expandValueSet(theExpansionOptions, theValueSetToExpandR4, accumulator, theExpansionFilter);
-
-		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>();
-		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : accumulator.getContains()) {
-			retVal.add(new FhirVersionIndependentConcept(nextContains.getSystem(), nextContains.getCode(), nextContains.getDisplay(), nextContains.getVersion()));
-		}
-		return retVal;
 	}
 
 	/**
@@ -938,12 +946,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
 		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
 		 */
-		BooleanQuery.setMaxClauseCount(10000);
+		BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
 
 		StopWatch sw = new StopWatch();
 		AtomicInteger count = new AtomicInteger(0);
 
-		int maxResultsPerBatch = 10000;
+		int maxResultsPerBatch = SearchBuilder.getMaximumPageSize();
 
 		/*
 		 * If the accumulator is bounded, we may reduce the size of the query to
@@ -1083,8 +1091,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			.phrase()
 			.withSlop(2)
 			.onField("myDisplay").boostedTo(4.0f)
-			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			// .andField("myDisplayNGram").boostedTo(1.0f)
+			//.andField("myDisplayEdgeNGram").boostedTo(2.0f)
+			.andField("myDisplayWordEdgeNGram").boostedTo(1.0f)
 			// .andField("myDisplayPhonetic").boostedTo(0.5f)
 			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
 		bool.must(textQuery);
@@ -1395,7 +1403,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				}
 			}
 
-			return createFailureCodeValidationResult(theSystem, theCode,  " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\"").setDisplay(concepts.get(0).getDisplay());
+			return createFailureCodeValidationResult(theSystem, theCode, " - Concept Display \"" + theDisplay + "\" does not match expected \"" + concepts.get(0).getDisplay() + "\"").setDisplay(concepts.get(0).getDisplay());
 		}
 
 		if (!concepts.isEmpty()) {
@@ -1424,7 +1432,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		int versionIndex = theSystem.indexOf("|");
 		if (versionIndex >= 0) {
 			String systemUrl = theSystem.substring(0, versionIndex);
-			String systemVersion = theSystem.substring(versionIndex+1);
+			String systemVersion = theSystem.substring(versionIndex + 1);
 			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCodeWithVersion(theResourcePid.getIdAsLong(), systemUrl, systemVersion, theCode);
 		} else {
 			optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid.getIdAsLong(), theSystem, theCode);
@@ -1526,7 +1534,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	private String getUrlFromIdentifier(String theUri) {
 		String retVal = theUri;
-		if (StringUtils.isNotEmpty((theUri))){
+		if (StringUtils.isNotEmpty((theUri))) {
 			int versionSeparator = theUri.lastIndexOf('|');
 			if (versionSeparator != -1) {
 				retVal = theUri.substring(0, versionSeparator);
@@ -1781,9 +1789,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			} else {
 				String msg = myContext.getLocalizer().getMessage(
 					BaseTermReadSvcImpl.class,
-				    "cannotCreateDuplicateConceptMapUrlAndVersion",
-				    conceptMapUrl, conceptMapVersion,
-				    existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+					"cannotCreateDuplicateConceptMapUrlAndVersion",
+					conceptMapUrl, conceptMapVersion,
+					existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
 		}
@@ -1818,7 +1826,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			// We have a ValueSet to pre-expand.
 			try {
 				ValueSet valueSet = txTemplate.execute(t -> {
-					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).orElseThrow(()->new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
+					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).orElseThrow(() -> new IllegalStateException("Unknown VS ID: " + valueSetToExpand.getId()));
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
 				assert valueSet != null;
@@ -1988,7 +1996,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Override
 	@Transactional
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB,
-		IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
+																				 IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
 		FhirVersionIndependentConcept conceptA = toConcept(theCodeA, theSystem, theCodingA);
 		FhirVersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
 
@@ -2002,7 +2010,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		String codeASystemIdentifier;
 		if (StringUtils.isNotEmpty(conceptA.getSystemVersion())) {
-			 codeASystemIdentifier = conceptA.getSystem() + "|" + conceptA.getSystemVersion();
+			codeASystemIdentifier = conceptA.getSystem() + "|" + conceptA.getSystemVersion();
 		} else {
 			codeASystemIdentifier = conceptA.getSystem();
 		}
@@ -2342,7 +2350,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theConceptMapList = myConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page,
-				theTranslationRequest.getUrl().asStringValue());
+			theTranslationRequest.getUrl().asStringValue());
 		if (!theConceptMapList.isEmpty()) {
 			return theConceptMapList.get(0).getVersion();
 		}
@@ -2553,6 +2561,136 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@Nullable
 	protected abstract CodeableConcept toCanonicalCodeableConcept(@Nullable IBaseDatatype theCodeableConcept);
 
+	@NotNull
+	private FhirVersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theCodeSystemIdentifierType, IBaseCoding theCodingType) {
+		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
+		String system = theCodeSystemIdentifierType != null ? getUrlFromIdentifier(theCodeSystemIdentifierType.getValueAsString()) : null;
+		String systemVersion = theCodeSystemIdentifierType != null ? getVersionFromIdentifier(theCodeSystemIdentifierType.getValueAsString()) : null;
+		if (theCodingType != null) {
+			Coding canonicalizedCoding = toCanonicalCoding(theCodingType);
+			assert canonicalizedCoding != null; // Shouldn't be null, since theCodingType isn't
+			code = canonicalizedCoding.getCode();
+			system = canonicalizedCoding.getSystem();
+			systemVersion = canonicalizedCoding.getVersion();
+		}
+		return new FhirVersionIndependentConcept(system, code, null, systemVersion);
+	}
+
+	@Override
+	@Transactional
+	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+
+		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
+		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
+
+		Coding coding = toCanonicalCoding(theCoding);
+		boolean haveCoding = coding != null && coding.isEmpty() == false;
+
+		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+
+		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate.");
+		}
+		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+			throw new InvalidRequestException("$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
+		}
+
+		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
+		String codeSystemUrl;
+		if (theCodeSystemId != null) {
+			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
+			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
+		} else if (haveIdentifierParam) {
+			codeSystemUrl = theCodeSystemUrl;
+		} else {
+			throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+		}
+
+
+		String code = theCode;
+		String display = theDisplay;
+
+		if (haveCodeableConcept) {
+			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
+				Coding nextCoding = codeableConcept.getCoding().get(i);
+				if (nextCoding.hasSystem()) {
+					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
+						throw new InvalidRequestException("Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+					}
+					codeSystemUrl = nextCoding.getSystem();
+				}
+				code = nextCoding.getCode();
+				display = nextCoding.getDisplay();
+				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
+				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
+					return nextValidation;
+				}
+			}
+		} else if (haveCoding) {
+			if (coding.hasSystem()) {
+				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
+					throw new InvalidRequestException("Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
+				}
+				codeSystemUrl = coding.getSystem();
+			}
+			code = coding.getCode();
+			display = coding.getDisplay();
+		}
+
+		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
+	}
+
+	@SuppressWarnings("unchecked")
+	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
+
+		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+		CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
+		Root<TermConcept> root = query.from(TermConcept.class);
+
+		Fetch<TermCodeSystemVersion, TermConcept> systemVersionFetch = root.fetch("myCodeSystem", JoinType.INNER);
+		Join<TermCodeSystemVersion, TermConcept> systemVersionJoin = (Join<TermCodeSystemVersion, TermConcept>) systemVersionFetch;
+		Fetch<TermCodeSystem, TermCodeSystemVersion> systemFetch = systemVersionFetch.fetch("myCodeSystem", JoinType.INNER);
+		Join<TermCodeSystem, TermCodeSystemVersion> systemJoin = (Join<TermCodeSystem, TermCodeSystemVersion>) systemFetch;
+
+		ArrayList<Predicate> predicates = new ArrayList<>();
+
+		if (isNotBlank(theCode)) {
+			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
+		}
+
+		if (isNotBlank(theDisplay)) {
+			predicates.add(criteriaBuilder.equal(root.get("myDisplay"), theDisplay));
+		}
+
+		if (isNoneBlank(theCodeSystemUrl)) {
+			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
+		}
+
+		if (isNoneBlank(theCodeSystemVersion)) {
+			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
+		} else {
+			query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
+		}
+
+		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+		query.where(outerPredicate);
+
+		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
+		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
+		hibernateQuery.setFetchSize(SINGLE_FETCH_SIZE);
+		List<TermConcept> resultsList = hibernateQuery.getResultList();
+
+		if (!resultsList.isEmpty()) {
+			TermConcept concept = resultsList.get(0);
+			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
+		}
+
+		if (isBlank(theDisplay))
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
+		else
+			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, " - Concept Display : " + theDisplay);
+	}
+
 	public static class Job implements HapiJob {
 		@Autowired
 		private ITermReadSvc myTerminologySvc;
@@ -2640,21 +2778,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return termConcept;
 	}
 
-	@NotNull
-	private FhirVersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theCodeSystemIdentifierType, IBaseCoding theCodingType) {
-		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
-		String system = theCodeSystemIdentifierType != null ? getUrlFromIdentifier(theCodeSystemIdentifierType.getValueAsString()): null;
-		String systemVersion = theCodeSystemIdentifierType != null ? getVersionFromIdentifier(theCodeSystemIdentifierType.getValueAsString()): null;
-		if (theCodingType != null) {
-			Coding canonicalizedCoding = toCanonicalCoding(theCodingType);
-			assert canonicalizedCoding != null; // Shouldn't be null, since theCodingType isn't
-			code = canonicalizedCoding.getCode();
-			system = canonicalizedCoding.getSystem();
-			systemVersion = canonicalizedCoding.getVersion();
-		}
-		return new FhirVersionIndependentConcept(system, code, null, systemVersion);
-	}
-
 	/**
 	 * This method is present only for unit tests, do not call from client code
 	 */
@@ -2685,121 +2808,5 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	@VisibleForTesting
 	static boolean isOurLastResultsFromTranslationWithReverseCache() {
 		return ourLastResultsFromTranslationWithReverseCache;
-	}
-
-	@Override
-	@Transactional
-	public CodeValidationResult codeSystemValidateCode(IIdType theCodeSystemId, String theCodeSystemUrl, String theVersion, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
-
-		CodeableConcept codeableConcept = toCanonicalCodeableConcept(theCodeableConcept);
-		boolean haveCodeableConcept = codeableConcept != null && codeableConcept.getCoding().size() > 0;
-
-		Coding coding = toCanonicalCoding(theCoding);
-		boolean haveCoding = coding != null && coding.isEmpty() == false;
-
-		boolean haveCode = theCode != null && theCode.isEmpty() == false;
-
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate.");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException("$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
-		}
-
-		boolean haveIdentifierParam = isNotBlank(theCodeSystemUrl);
-		String codeSystemUrl;
-		if (theCodeSystemId != null) {
-			IBaseResource codeSystem = myDaoRegistry.getResourceDao("CodeSystem").read(theCodeSystemId);
-			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(codeSystem);
-		} else if (haveIdentifierParam) {
-			codeSystemUrl = theCodeSystemUrl;
-		} else {
-			throw new InvalidRequestException("Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
-		}
-
-
-		String code = theCode;
-		String display = theDisplay;
-
-		if (haveCodeableConcept) {
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				if (nextCoding.hasSystem()) {
-					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException("Coding.system '" + nextCoding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
-					}
-					codeSystemUrl = nextCoding.getSystem();
-				}
-				code = nextCoding.getCode();
-				display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation = codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
-				if (nextValidation.isOk() || i == codeableConcept.getCoding().size() - 1) {
-					return nextValidation;
-				}
-			}
-		} else if (haveCoding) {
-			if (coding.hasSystem()) {
-				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
-					throw new InvalidRequestException("Coding.system '" + coding.getSystem() + "' does not equal with CodeSystem.url '" + theCodeSystemUrl + "'. Unable to validate.");
-				}
-			    codeSystemUrl = coding.getSystem();
-			}
-			code = coding.getCode();
-			display = coding.getDisplay();
-		}
-
-		return codeSystemValidateCode(codeSystemUrl, theVersion, code, display);
-	}
-
-
-	@SuppressWarnings("unchecked")
-	private CodeValidationResult codeSystemValidateCode(String theCodeSystemUrl, String theCodeSystemVersion, String theCode, String theDisplay) {
-
-		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-		CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
-		Root<TermConcept> root = query.from(TermConcept.class);
-
-		Fetch<TermCodeSystemVersion, TermConcept> systemVersionFetch = root.fetch("myCodeSystem", 	JoinType.INNER);
-		Join<TermCodeSystemVersion, TermConcept> systemVersionJoin = (Join<TermCodeSystemVersion, TermConcept>)systemVersionFetch;
-		Fetch<TermCodeSystem, TermCodeSystemVersion> systemFetch = systemVersionFetch.fetch("myCodeSystem", JoinType.INNER);
-		Join<TermCodeSystem, TermCodeSystemVersion> systemJoin = (Join<TermCodeSystem, TermCodeSystemVersion>)systemFetch;
-
-		ArrayList<Predicate> predicates = new ArrayList<>();
-
-		if (isNotBlank(theCode)) {
-			predicates.add(criteriaBuilder.equal(root.get("myCode"), theCode));
-		}
-
-		if (isNotBlank(theDisplay)) {
-			predicates.add(criteriaBuilder.equal(root.get("myDisplay"), theDisplay));
-		}
-
-		if (isNoneBlank(theCodeSystemUrl)) {
-			predicates.add(criteriaBuilder.equal(systemJoin.get("myCodeSystemUri"), theCodeSystemUrl));
-		}
-
-		if (isNoneBlank(theCodeSystemVersion)) {
-			predicates.add(criteriaBuilder.equal(systemVersionJoin.get("myCodeSystemVersionId"), theCodeSystemVersion));
-		} else {
-			query.orderBy(criteriaBuilder.desc(root.get("myUpdated")));
-		}
-
-		Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-		query.where(outerPredicate);
-
-		final TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
-		org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
-		hibernateQuery.setFetchSize(SINGLE_FETCH_SIZE);
-		List<TermConcept> resultsList = hibernateQuery.getResultList();
-
-		if (!resultsList.isEmpty()) {
-			TermConcept concept = resultsList.get(0);
-			return new CodeValidationResult().setCode(concept.getCode()).setDisplay(concept.getDisplay());
-		}
-
-		if (isBlank(theDisplay))
-			return createFailureCodeValidationResult(theCodeSystemUrl, theCode);
-		else
-			return createFailureCodeValidationResult(theCodeSystemUrl, theCode, " - Concept Display : "  + theDisplay);
 	}
 }

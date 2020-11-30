@@ -154,7 +154,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			 */
 
 			if (modifier == TokenParamModifier.IN) {
-				codes.addAll(myTerminologySvc.expandValueSet(null, code));
+				codes.addAll(myTerminologySvc.expandValueSetIntoConceptList(null, code));
 			} else if (modifier == TokenParamModifier.ABOVE) {
 				system = determineSystemIfMissing(theSearchParam, code, system);
 				validateHaveSystemAndCodeForToken(paramName, code, system);
@@ -228,7 +228,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					String valueSet = valueSetUris.iterator().next();
 					ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 						.setFailOnMissingCodeSystem(false);
-					List<FhirVersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSet(options, valueSet);
+					List<FhirVersionIndependentConcept> candidateCodes = myTerminologySvc.expandValueSetIntoConceptList(options, valueSet);
 					for (FhirVersionIndependentConcept nextCandidate : candidateCodes) {
 						if (nextCandidate.getCode().equals(code)) {
 							retVal = nextCandidate.getSystem();
