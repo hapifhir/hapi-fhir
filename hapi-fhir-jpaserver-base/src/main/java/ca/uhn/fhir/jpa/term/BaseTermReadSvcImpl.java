@@ -1098,17 +1098,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			} else if (value.startsWith("^")) {
 				value = value.substring(1);
 			}
-//			String hs6Wildcard = convertToHs6WildcardQuery(theFilter.getValue());
 
 			Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
 			RegexpQuery query = new RegexpQuery(term);
-
 			//TODO GGG HS write the equivalent ES Query here.
 			theB.must(theF.extension(LuceneExtension.get()).fromLuceneQuery(query));
 
 			//Given that we want to be backend-agnostic, we can't really suport RegExpQuery here as it is lucene based. Will
 			//Probably have to replace with wildcard query :https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#search-dsl-predicate-wildcard.
 			//This query is _almost certainly wrong right now_
+			//theB.must(theF.match().field(term.field()).matching(term.text()));
+//			theB.must(theF.match().field(term.field()).matching(term.text()));
+
 
 		} else {
 			String value = theFilter.getValue();
