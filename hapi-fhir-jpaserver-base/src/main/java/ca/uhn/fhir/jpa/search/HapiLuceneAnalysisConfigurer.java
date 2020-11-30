@@ -67,6 +67,14 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.param("minGramSize", "3")
 			.param("maxGramSize", "20");
 
+		theLuceneCtx.analyzer("autocompleteWordEdgeAnalyzer").custom()
+			.tokenizer(StandardTokenizerFactory.class)
+			.tokenFilter(LowerCaseFilterFactory.class)
+			.tokenFilter(StopFilterFactory.class)
+			.tokenFilter(EdgeNGramFilterFactory.class)
+			.param("minGramSize", "2")
+			.param("maxGramSize", "20");
+
 		theLuceneCtx.analyzer("standardAnalyzer").custom()
 			.tokenizer(StandardTokenizerFactory.class)
 			.tokenFilter(LowerCaseFilterFactory.class);

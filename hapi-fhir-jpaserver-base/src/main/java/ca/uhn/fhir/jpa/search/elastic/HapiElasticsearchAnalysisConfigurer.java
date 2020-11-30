@@ -44,6 +44,16 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 //			.param("max_gram", "50");//TODO GGG HS ES 7.10 says we have to set `max_ngram_diff:47` on each index we create, since the default is 1.
 
 
+		theConfigCtx.analyzer("autocompleteWordEdgeAnalyzer").custom()
+			.tokenizer("standard")
+			.tokenFilters("lowercase", "stop", "wordedgengram_3_50");
+
+		theConfigCtx.tokenFilter("wordedgengram_3_50")
+			.type("edgeNGram")
+			.param("min_gram", "2")
+			.param("max_gram", "3");
+//			.param("max_gram", "20");//TODO GGG HS ES 7.10 says we have to set `max_ngram_diff:47` on each index we create, since the default is 1.
+
 		theConfigCtx.analyzer("autocompletePhoneticAnalyzer").custom()
 			.tokenizer("standard")
 			.tokenFilters("stop", "snowball_english");
