@@ -53,6 +53,9 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -168,11 +171,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
@@ -744,4 +750,117 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		return uuid;
 	}
 
+
+	protected TermValueSetConceptDesignation assertTermConceptContainsDesignation(TermValueSetConcept theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<TermValueSetConceptDesignation> stream = theConcept.getDesignations().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUseSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUseCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUseDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<TermValueSetConceptDesignation> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+
+	}
+
+	protected ValueSet.ConceptReferenceDesignationComponent assertConceptContainsDesignation(ValueSet.ValueSetExpansionContainsComponent theConcept, String theLanguage, String theUseSystem, String theUseCode, String theUseDisplay, String theDesignationValue) {
+		Stream<ValueSet.ConceptReferenceDesignationComponent> stream = theConcept.getDesignation().stream();
+		if (theLanguage != null) {
+			stream = stream.filter(designation -> theLanguage.equalsIgnoreCase(designation.getLanguage()));
+		}
+		if (theUseSystem != null) {
+			stream = stream.filter(designation -> theUseSystem.equalsIgnoreCase(designation.getUse().getSystem()));
+		}
+		if (theUseCode != null) {
+			stream = stream.filter(designation -> theUseCode.equalsIgnoreCase(designation.getUse().getCode()));
+		}
+		if (theUseDisplay != null) {
+			stream = stream.filter(designation -> theUseDisplay.equalsIgnoreCase(designation.getUse().getDisplay()));
+		}
+		if (theDesignationValue != null) {
+			stream = stream.filter(designation -> theDesignationValue.equalsIgnoreCase(designation.getValue()));
+		}
+
+		Optional<ValueSet.ConceptReferenceDesignationComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Concept %s did not contain designation [%s|%s|%s|%s|%s] ", theConcept.toString(), theLanguage, theUseSystem, theUseCode, theUseDisplay, theDesignationValue);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
+
+	protected TermValueSetConcept assertTermValueSetContainsConceptAndIsInDeclaredOrder(TermValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<TermValueSetConcept> contains = theValueSet.getConcepts();
+
+		Stream<TermValueSetConcept> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null ) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null){
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignations().size() == theDesignationCount);
+		}
+
+		Optional<TermValueSetConcept> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			fail(failureMessage);
+			return null;
+		} else {
+			TermValueSetConcept termValueSetConcept = first.get();
+			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
+			return termValueSetConcept;
+		}
+	}
+
+	protected ValueSet.ValueSetExpansionContainsComponent assertExpandedValueSetContainsConcept(ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Integer theDesignationCount) {
+		List<ValueSet.ValueSetExpansionContainsComponent> contains = theValueSet.getExpansion().getContains();
+
+		Stream<ValueSet.ValueSetExpansionContainsComponent> stream = contains.stream();
+		if (theSystem != null) {
+			stream = stream.filter(concept -> theSystem.equalsIgnoreCase(concept.getSystem()));
+		}
+		if (theCode != null ) {
+			stream = stream.filter(concept -> theCode.equalsIgnoreCase(concept.getCode()));
+		}
+		if (theDisplay != null){
+			stream = stream.filter(concept -> theDisplay.equalsIgnoreCase(concept.getDisplay()));
+		}
+		if (theDesignationCount != null) {
+			stream = stream.filter(concept -> concept.getDesignation().size() == theDesignationCount);
+		}
+
+		Optional<ValueSet.ValueSetExpansionContainsComponent> first = stream.findFirst();
+		if (!first.isPresent()) {
+			String failureMessage = String.format("Expanded ValueSet %s did not contain concept [%s|%s|%s] with [%d] designations", theValueSet.getId(), theSystem, theCode, theDisplay, theDesignationCount);
+			fail(failureMessage);
+			return null;
+		} else {
+			return first.get();
+		}
+	}
 }

@@ -746,6 +746,7 @@
 		<hibernate_search_version>6.0.0.CR2</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.7.0</lucene_version>
+		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
@@ -1385,7 +1386,7 @@
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest</artifactId>
-				<version>2.2</version>
+				<version>${hamcrest_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
