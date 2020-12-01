@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static ca.uhn.fhir.jpa.partition.PartitionLookupSvcImpl.DEFAULT_PERSISTED_PARTITION_NAME;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.DEFAULT_PARTITION_NAME;
 
 public abstract class BaseMultitenantResourceProviderR4Test extends BaseResourceProviderR4Test implements ITestDataBuilder {
 
@@ -88,7 +88,7 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 
 
 	private void createTenants() {
-		myTenantClientInterceptor.setTenantId(DEFAULT_PERSISTED_PARTITION_NAME);
+		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
 
 		myClient
 			.operation()

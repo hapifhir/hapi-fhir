@@ -282,8 +282,18 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return retval;
 	}
 
+	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashSystemAndUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
+	}
+
 	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
+	}
+
+	public static long calculateHashUnits(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUnits);
 	}
 
 	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {

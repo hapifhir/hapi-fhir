@@ -209,6 +209,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
+	public static long calculateHashUri(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
+		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
+	}
+
 	public static long calculateHashUri(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUri) {
 		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
