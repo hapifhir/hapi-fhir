@@ -105,7 +105,6 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		return outcome.getResource().getIdElement();
 	}
 
-
 	@SuppressWarnings("unchecked")
 	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
 		return myDaoRegistry.getResourceDao("Binary");

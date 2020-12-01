@@ -148,7 +148,7 @@ public abstract class BaseStorageDao {
 		}
 
 		outcome.setId(id);
-		if (theEntity.getDeleted() != null) {
+		if (theEntity.getDeleted() == null) {
 			outcome.setResource(theResource);
 		}
 		outcome.setEntity(theEntity);
