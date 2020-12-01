@@ -94,7 +94,6 @@ public class TermConcept implements Serializable {
 	private String myDisplay;
 
 	@OneToMany(mappedBy = "myConcept", orphanRemoval = false, fetch = FetchType.LAZY)
-//	@FullTextField(name = "PROPmyProperties", analyzer = "termConceptPropertyAnalyzer", valueBridge = @ValueBridgeRef(type=TermConceptValueBridge.class))
 	@PropertyBinding(binder = @PropertyBinderRef(type = TermConceptPropertyBinder.class))
 	private Collection<TermConceptProperty> myProperties;
 

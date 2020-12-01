@@ -84,7 +84,7 @@
 					<checkCompileClasspath>true</checkCompileClasspath>
 					<checkRuntimeClasspath>false</checkRuntimeClasspath>
 					<checkTestClasspath>false</checkTestClasspath>
-					<skip>true</skip>
+					<skip>false</skip>
 					<quiet>false</quiet>
 					<preferLocal>true</preferLocal>
 					<useResultFile>true</useResultFile>

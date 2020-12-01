@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
+import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
 import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
 import org.slf4j.Logger;
@@ -9,14 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Properties;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
@@ -24,7 +21,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
-	public static final String ELASTIC_VERSION = "7.9.2";
+	public static final String ELASTIC_VERSION = "7.10.0";
 	public static final String ELASTIC_IMAGE  = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTIC_VERSION;
 	protected final String elasticsearchHost = "localhost";
 	protected final String elasticsearchUserId = "";
@@ -59,10 +56,9 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 
 	@Bean
 	public ElasticsearchContainer elasticContainer() {
-		ElasticsearchContainer container = new ElasticsearchContainer(ELASTIC_IMAGE);
-		container.withStartupTimeout(Duration.of(60, SECONDS));
-		container.start();
-		return container;
+		ElasticsearchContainer embeddedElasticSearch = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+		embeddedElasticSearch.start();
+		return embeddedElasticSearch;
 	}
 
 

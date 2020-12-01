@@ -156,16 +156,10 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 
-//		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-		extraProperties.put(BackendSettings.backendKey("io.writer.infostream"), "true");
 		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
-	//	extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-	//	extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
-
-		//extraProperties.put("hibernate.search.autoregister_listeners", "true");
 		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 
 		return extraProperties;

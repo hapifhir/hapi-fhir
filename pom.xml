@@ -1164,17 +1164,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-highlighter</artifactId>
-				<version>${lucene_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-analyzers-phonetic</artifactId>
-				<version>${lucene_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-codecs</artifactId>
 				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
