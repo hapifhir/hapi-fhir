@@ -43,8 +43,21 @@ When a resource is **updated**, the partition ID and date from the previous vers
 
 When a **read operation** is being performed (e.g. a read, search, history, etc.), a separate [interceptor hook](#partition-interceptors) is invoked in order to determine whether the operation should target a specific partition. The outcome of this hook determines how the partitioning manifests itself to the end user: 
 
-* The system can be configured to operate as a **multitenant** solution by configuring the partition interceptor to scope all read operations to read data only from the partition that request has access to.```
+* The system can be configured to operate as a **multitenant** solution by configuring the partition interceptor to scope all read operations to read data only from the partition that request has access to.
 * The system can be configured to operate with logical segments by configuring the partition interceptor to scope read operations to access all partitions.
+
+
+# Partitioning and Resource IDs
+
+In a partitioned repository, it is important to understand that only a single pool of resource IDs exists. In other words, only one resource with the ID `Patient/1` can exist across all partitions, and it must be in a single partition.
+
+This fact can have security implications:
+
+* A client might be blocked from creating `Patient/ABC` in the partition they have access to because this ID is already in use in another partition.
+
+* In a server using the default configuration of SEQUENTIAL_NUMERIC [Server ID Strategy](/hapi-fhir/apidocs/hapi-fhir-jpaserver-api/ca/uhn/fhir/jpa/api/config/DaoConfig.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.DaoConfig.IdStrategyEnum)) a client may be able to infer the IDs of resources in other partitions based on the ID they were assigned.
+
+These considerations can be addressed by using UUID Server ID Strategy, and disallowing client-assigned IDs.  
 
 
 # Partition Interceptors
@@ -66,6 +79,8 @@ The criteria for determining the partition will depend on your use case. For exa
 ## Identify Partition for Read (Optional)
 
 A hook against the [`Pointcut.STORAGE_PARTITION_IDENTIFY_READ`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_IDENTIFY_READ) pointcut must be registered, and this hook method will be invoked every time a resource is created in order to determine the partition to assign the resource to.
+
+As of HAPI FHIR 5.3.0, the *Identify Partition for Read* hook method may return multiple partition names or IDs. If more than one partition is identified, the server will search in all identified partitions.  
 
 ## Examples
 

@@ -1249,9 +1249,9 @@
 				<version>3.1.0</version>
 			</dependency>
 			<dependency>
-				<groupId>org.codehaus.woodstox</groupId>
-				<artifactId>woodstox-core-asl</artifactId>
-				<version>${woodstox_core_asl_version}</version>
+				<groupId>com.fasterxml.woodstox</groupId>
+				<artifactId>woodstox-core</artifactId>
+				<version>6.2.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ebaysf.web</groupId>

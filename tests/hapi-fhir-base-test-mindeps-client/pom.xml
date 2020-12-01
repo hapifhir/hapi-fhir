@@ -53,8 +53,8 @@
 					<groupId>org.slf4j</groupId>
 				</exclusion>
 				<exclusion>
-					<artifactId>woodstox-core-asl</artifactId>
-					<groupId>org.codehaus.woodstox</groupId>
+					<groupId>com.fasterxml.woodstox</groupId>
+					<artifactId>woodstox-core</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>javax.servlet</groupId>
@@ -79,8 +79,8 @@
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
-					<artifactId>woodstox-core-asl</artifactId>
-					<groupId>org.codehaus.woodstox</groupId>
+					<groupId>com.fasterxml.woodstox</groupId>
+					<artifactId>woodstox-core</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

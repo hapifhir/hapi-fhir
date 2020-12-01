@@ -26,13 +26,25 @@ public class InMemoryMatchResult {
 	public static final String CHAIN = "Chained parameters are not supported";
 	public static final String PARAM = "Parameter not supported";
 	public static final String QUALIFIER = "Qualified parameter not supported";
-    public static final String LOCATION_NEAR = "Location.position near not supported";
+	public static final String LOCATION_NEAR = "Location.position near not supported";
 
-    private final boolean myMatch;
+	private final boolean myMatch;
+	/**
+	 * True if it is expected that a search will be performed in-memory
+	 */
 	private final boolean mySupported;
+	/**
+	 * if mySupported is false, then the parameter responsible for in-memory search not being supported
+	 */
 	private final String myUnsupportedParameter;
+	/**
+	 * if mySupported is false, then the reason in-memory search is not supported
+	 */
 	private final String myUnsupportedReason;
-
+	/**
+	 * Only used by CompositeInMemoryDaoSubscriptionMatcher to track whether we had to go
+	 * out to the database to resolve the match.
+	 */
 	private boolean myInMemory = false;
 
 	private InMemoryMatchResult(boolean theMatch) {
@@ -43,10 +55,10 @@ public class InMemoryMatchResult {
 	}
 
 	private InMemoryMatchResult(String theUnsupportedParameter, String theUnsupportedReason) {
-		this.myMatch = false;
-		this.mySupported = false;
-		this.myUnsupportedParameter = theUnsupportedParameter;
-		this.myUnsupportedReason = theUnsupportedReason;
+		myMatch = false;
+		mySupported = false;
+		myUnsupportedParameter = theUnsupportedParameter;
+		myUnsupportedReason = theUnsupportedReason;
 	}
 
 	public static InMemoryMatchResult successfulMatch() {

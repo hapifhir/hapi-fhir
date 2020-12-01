@@ -51,18 +51,6 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testDeletePartition_TryToDeleteDefault() {
-
-		try {
-			myPartitionConfigSvc.deletePartition(0);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Can not delete default partition", e.getMessage());
-		}
-
-	}
-
-	@Test
 	public void testUpdatePartition_TryToUseExistingName() {
 
 		PartitionEntity partition = new PartitionEntity();
@@ -92,14 +80,14 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdatePartition_TryToRenameDefault() {
 		PartitionEntity partition = new PartitionEntity();
-		partition.setId(0);
+		partition.setId(null);
 		partition.setName("NAME123");
 		partition.setDescription("A description");
 		try {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Can not rename default partition", e.getMessage());
+			assertEquals("Partition must have an ID and a Name", e.getMessage());
 		}
 	}
 
@@ -137,21 +125,6 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Partition name \"NAME 123\" is not valid", e.getMessage());
-		}
-
-	}
-
-	@Test
-	public void testCreatePartition_0Blocked() {
-		PartitionEntity partition = new PartitionEntity();
-		partition.setId(0);
-		partition.setName("NAME123");
-		partition.setDescription("A description");
-		try {
-			myPartitionConfigSvc.createPartition(partition);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Can not create a partition with ID 0 (this is a reserved value)", e.getMessage());
 		}
 
 	}

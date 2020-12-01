@@ -33,8 +33,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -118,6 +120,7 @@ public class FhirContext {
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
 	private IValidationSupport myValidationSupport;
 	private Map<FhirVersionEnum, Map<String, Class<? extends IBaseResource>>> myVersionToNameToResourceType = Collections.emptyMap();
+	private volatile Set<String> myResourceNames;
 
 	/**
 	 * @deprecated It is recommended that you use one of the static initializer methods instead
@@ -467,9 +470,6 @@ public class FhirContext {
 
 	/**
 	 * Returns the name of a given resource class.
-	 *
-	 * @param theResourceType
-	 * @return
 	 */
 	public String getResourceType(final Class<? extends IBaseResource> theResourceType) {
 		return getResourceDefinition(theResourceType).getName();
@@ -553,29 +553,31 @@ public class FhirContext {
 	 * @since 5.1.0
 	 */
 	public Set<String> getResourceTypes() {
-		Set<String> resourceNames = new HashSet<>();
+		Set<String> resourceNames = myResourceNames;
+		if (resourceNames == null) {
+			resourceNames = buildResourceNames();
+			myResourceNames = resourceNames;
+		}
+		return resourceNames;
+	}
 
-		if (myNameToResourceDefinition.isEmpty()) {
-			Properties props = new Properties();
-			try {
-				props.load(myVersion.getFhirVersionPropertiesFile());
-			} catch (IOException theE) {
-				throw new ConfigurationException("Failed to load version properties file");
-			}
-			Enumeration<?> propNames = props.propertyNames();
-			while (propNames.hasMoreElements()) {
-				String next = (String) propNames.nextElement();
-				if (next.startsWith("resource.")) {
-					resourceNames.add(next.substring("resource.".length()).trim());
-				}
+	@Nonnull
+	private Set<String> buildResourceNames() {
+		Set<String> retVal = new HashSet<>();
+		Properties props = new Properties();
+		try (InputStream propFile = myVersion.getFhirVersionPropertiesFile()) {
+			props.load(propFile);
+		} catch (IOException e) {
+			throw new ConfigurationException("Failed to load version properties file", e);
+		}
+		Enumeration<?> propNames = props.propertyNames();
+		while (propNames.hasMoreElements()) {
+			String next = (String) propNames.nextElement();
+			if (next.startsWith("resource.")) {
+				retVal.add(next.substring("resource.".length()).trim());
 			}
 		}
-
-		for (RuntimeResourceDefinition next : myNameToResourceDefinition.values()) {
-			resourceNames.add(next.getName());
-		}
-
-		return Collections.unmodifiableSet(resourceNames);
+		return retVal;
 	}
 
 	/**
@@ -598,7 +600,7 @@ public class FhirContext {
 	/**
 	 * Set the restful client factory
 	 *
-	 * @param theRestfulClientFactory
+	 * @param theRestfulClientFactory The new client factory (must not be null)
 	 */
 	public void setRestfulClientFactory(final IRestfulClientFactory theRestfulClientFactory) {
 		Validate.notNull(theRestfulClientFactory, "theRestfulClientFactory must not be null");

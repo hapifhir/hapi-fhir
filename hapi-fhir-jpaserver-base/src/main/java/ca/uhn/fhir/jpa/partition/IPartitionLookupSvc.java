@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.partition;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 
+import javax.annotation.Nullable;
+
 public interface IPartitionLookupSvc {
 
 	/**
@@ -33,6 +35,7 @@ public interface IPartitionLookupSvc {
 	/**
 	 * @throws ResourceNotFoundException If the name is not known
 	 */
+	@Nullable
 	PartitionEntity getPartitionByName(String theName) throws ResourceNotFoundException;
 
 	/**

@@ -205,6 +205,11 @@ public class JpaConstants {
 	public static final String VALUESET_FILTER_DISPLAY = "display";
 
 	/**
+	 * The name of the default partition
+	 */
+	public static final String DEFAULT_PARTITION_NAME = "DEFAULT";
+
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

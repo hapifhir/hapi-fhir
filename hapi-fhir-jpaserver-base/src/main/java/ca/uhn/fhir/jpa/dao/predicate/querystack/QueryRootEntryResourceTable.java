@@ -63,8 +63,8 @@ class QueryRootEntryResourceTable extends QueryRootEntry {
 			}
 			addPredicate(myCriteriaBuilder.isNull(getRoot().get("myDeleted")));
 			if (!myRequestPartitionId.isAllPartitions()) {
-				if (myRequestPartitionId.getPartitionId() != null) {
-					addPredicate(myCriteriaBuilder.equal(getRoot().get("myPartitionIdValue").as(Integer.class), myRequestPartitionId.getPartitionId()));
+				if (!myRequestPartitionId.isDefaultPartition()) {
+					addPredicate(getRoot().get("myPartitionIdValue").as(Integer.class).in(myRequestPartitionId.getPartitionIds()));
 				} else {
 					addPredicate(myCriteriaBuilder.isNull(getRoot().get("myPartitionIdValue").as(Integer.class)));
 				}

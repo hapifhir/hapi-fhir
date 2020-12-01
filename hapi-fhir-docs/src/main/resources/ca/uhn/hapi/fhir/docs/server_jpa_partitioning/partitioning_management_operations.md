@@ -4,7 +4,7 @@ Several operations exist that can be used to manage the existence of partitions.
 
 Before a partition can be used, it must be registered using these methods.
 
-## Creating a Partition
+# Creating a Partition
 
 The `$partition-management-create-partition` operation can be used to create a new partition. This operation takes the following parameters:
 
@@ -45,7 +45,8 @@ The `$partition-management-create-partition` operation can be used to create a n
     </tbody>
 </table>
 
-### Example
+## Example
+
 Note that once multitenancy is enabled, all requests to the FHIR server must contain a tenant. These operations are no exception.
 If you fail to include a tenant identifier in the request, an error will be returned.
 
@@ -73,7 +74,7 @@ The following request body could be used:
 }
 ```
 
-## Updating a Partition
+# Updating a Partition
 
 The `$partition-management-update-partition` operation can be used to update an existing partition. This operation takes the following parameters:
 
@@ -114,7 +115,7 @@ The `$partition-management-update-partition` operation can be used to update an 
     </tbody>
 </table>
 
-### Example
+## Example
 
 An HTTP POST to the following URL would be used to invoke this operation:
 
@@ -140,7 +141,7 @@ The following request body could be used:
 }
 ```
 
-## Deleting a Partition
+# Deleting a Partition
 
 The `$partition-management-delete-partition` operation can be used to delete an existing partition. This operation takes the following parameters:
 
@@ -165,7 +166,7 @@ The `$partition-management-delete-partition` operation can be used to delete an 
     </tbody>
 </table>
 
-### Example
+## Example
 
 An HTTP POST to the following URL would be used to invoke this operation:
 
