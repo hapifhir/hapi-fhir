@@ -21,7 +21,15 @@ package ca.uhn.fhir.jpa.searchparam.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
@@ -38,10 +46,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
-@EnableScheduling
 public class SearchParamConfig {
 
 	@Autowired
@@ -94,13 +101,32 @@ public class SearchParamConfig {
 	}
 
 	@Bean
-	public InMemoryResourceMatcher InMemoryResourceMatcher() {
+	public InMemoryResourceMatcher inMemoryResourceMatcher() {
 		return new InMemoryResourceMatcher();
 	}
 
 	@Bean
-	public SearchParamMatcher SearchParamMatcher() {
+	public SearchParamMatcher searchParamMatcher() {
 		return new SearchParamMatcher();
 	}
 
+	@Bean
+	IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
+		return new ResourceChangeListenerRegistryImpl();
+	}
+
+	@Bean
+	IResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
+		return new ResourceChangeListenerCacheRefresherImpl();
+	}
+
+	@Bean
+    ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
+		return new ResourceChangeListenerCacheFactory();
+	}
+	@Bean
+	@Scope("prototype")
+	ResourceChangeListenerCache registeredResourceChangeListener(String theResourceName, IResourceChangeListener theResourceChangeListener, SearchParameterMap theSearchParameterMap, long theRemoteRefreshIntervalMs) {
+		return new ResourceChangeListenerCache(theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
+	}
 }

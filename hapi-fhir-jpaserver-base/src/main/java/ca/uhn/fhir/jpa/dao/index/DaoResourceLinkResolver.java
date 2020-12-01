@@ -68,7 +68,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
-			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart, theRequest);
+			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 

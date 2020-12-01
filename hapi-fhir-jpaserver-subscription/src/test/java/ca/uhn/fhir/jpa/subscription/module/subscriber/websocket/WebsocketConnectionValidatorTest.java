@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -35,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -69,6 +71,8 @@ public class WebsocketConnectionValidatorTest {
 
 	@Autowired
 	WebsocketConnectionValidator myWebsocketConnectionValidator;
+	@Autowired
+	IResourceChangeListenerRegistry myResourceChangeListenerRegistry;
 
 	@BeforeEach
 	public void before() {
@@ -141,6 +145,10 @@ public class WebsocketConnectionValidatorTest {
 			return new WebsocketConnectionValidator();
 		}
 
+		@Bean
+		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
+			return mock(IResourceChangeListenerRegistry.class, RETURNS_DEEP_STUBS);
+		}
 
 	}
 }

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2198
+title: "It is now possible for read operations (read/history/search/etc) in a partitioned server to read across more than one
+   partition if the partitioning interceptor indicates multiple partitions."

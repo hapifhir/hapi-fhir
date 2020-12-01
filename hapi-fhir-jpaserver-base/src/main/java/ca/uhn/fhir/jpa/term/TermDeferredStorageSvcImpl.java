@@ -69,8 +69,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
    @Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	private boolean myProcessDeferred = true;
-	final private List<TermCodeSystem> myDefferedCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
-	final private List<TermCodeSystemVersion> myDefferedCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
+	final private List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
+	final private List<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
@@ -113,7 +113,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
 		theCodeSystem.setCodeSystemUri("urn:uuid:" + UUID.randomUUID().toString());
 		myCodeSystemDao.save(theCodeSystem);
-		myDefferedCodeSystemsDeletions.add(theCodeSystem);
+		myDeferredCodeSystemsDeletions.add(theCodeSystem);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		List<TermCodeSystemVersion> codeSystemVersionsToDelete = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
 		for (TermCodeSystemVersion codeSystemVersionToDelete : codeSystemVersionsToDelete){
 			if (codeSystemVersionToDelete != null) {
-				myDefferedCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
+				myDeferredCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
 			}
 		}
 		TermCodeSystem codeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getResourceId());
@@ -223,11 +223,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	 */
 	@VisibleForTesting
 	public synchronized void clearDeferred() {
+		myProcessDeferred = true;
 		myDeferredValueSets.clear();
 		myDeferredConceptMaps.clear();
 		myDeferredConcepts.clear();
-		myDefferedCodeSystemsDeletions.clear();
+		myDeferredCodeSystemsDeletions.clear();
 		myConceptLinksToSaveLater.clear();
+		myDeferredCodeSystemVersionsDeletions.clear();
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
@@ -284,15 +286,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private void processDeferredCodeSystemDeletions() {
 
-		for (TermCodeSystemVersion next : myDefferedCodeSystemVersionsDeletions) {
+		for (TermCodeSystemVersion next : myDeferredCodeSystemVersionsDeletions) {
 			myCodeSystemStorageSvc.deleteCodeSystemVersion(next);
 		}
 
-		myDefferedCodeSystemVersionsDeletions.clear();
-		for (TermCodeSystem next : myDefferedCodeSystemsDeletions) {
+		myDeferredCodeSystemVersionsDeletions.clear();
+		for (TermCodeSystem next : myDeferredCodeSystemsDeletions) {
 			myCodeSystemStorageSvc.deleteCodeSystem(next);
 		}
-		myDefferedCodeSystemsDeletions.clear();
+		myDeferredCodeSystemsDeletions.clear();
 	}
 
 	@Override
@@ -322,7 +324,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	private boolean isDeferredCodeSystemDeletions() {
-		return !myDefferedCodeSystemsDeletions.isEmpty() || !myDefferedCodeSystemVersionsDeletions.isEmpty();
+		return !myDeferredCodeSystemsDeletions.isEmpty() || !myDeferredCodeSystemVersionsDeletions.isEmpty();
 	}
 
 	private boolean isDeferredConcepts() {

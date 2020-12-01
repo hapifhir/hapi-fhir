@@ -1091,8 +1091,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			.phrase()
 			.withSlop(2)
 			.onField("myDisplay").boostedTo(4.0f)
-			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			// .andField("myDisplayNGram").boostedTo(1.0f)
+			//.andField("myDisplayEdgeNGram").boostedTo(2.0f)
+			.andField("myDisplayWordEdgeNGram").boostedTo(1.0f)
 			// .andField("myDisplayPhonetic").boostedTo(0.5f)
 			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
 		bool.must(textQuery);
