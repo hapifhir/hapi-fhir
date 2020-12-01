@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.bulk.job;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.batch.log.Logs;
 import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
@@ -100,7 +101,8 @@ public class ResourceToFileWriter implements ItemWriter<List<IBaseResource>> {
 		binary.setContentType(Constants.CT_FHIR_NDJSON);
 		binary.setContent(myOutputStream.toByteArray());
 
-		return myBinaryDao.create(binary).getResource().getIdElement();
+		DaoMethodOutcome outcome = myBinaryDao.create(binary);
+		return outcome.getResource().getIdElement();
 	}
 
 
