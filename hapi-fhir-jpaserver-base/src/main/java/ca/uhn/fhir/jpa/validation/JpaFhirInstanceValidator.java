@@ -33,13 +33,18 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
 import org.hl7.fhir.r5.elementmodel.JsonParser;
+import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.utilities.TextFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Locale;
 
 public class JpaFhirInstanceValidator extends FhirInstanceValidator {
@@ -97,18 +102,30 @@ public class JpaFhirInstanceValidator extends FhirInstanceValidator {
 
 		@Override
 		public boolean resolveURL(Object appContext, String path, String url) throws IOException, FHIRException {
-			return true;
+			return !url.contains("example.org") && !url.startsWith("http://hl7.org/fhir/invalid");
 		}
 
 		@Override
 		public byte[] fetchRaw(String url) throws IOException {
-			return new byte[0];
+			URLConnection c = new URL(url).openConnection();
+			return TextFile.streamToBytes(c.getInputStream());
 		}
 
 		@Override
 		public void setLocale(Locale locale) {
 			// ignore
 		}
+
+		@Override
+		public CanonicalResource fetchCanonicalResource(String s) throws URISyntaxException {
+			return null;
+		}
+
+		@Override
+		public boolean fetchesCanonicalResource(String url) {
+			return false;
+		}
+
 
 	}
 }

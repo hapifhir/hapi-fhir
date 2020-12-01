@@ -43,6 +43,7 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
          println("test case for file $fileName contains no valid test results")
       } else {
          println("test id $fileName")
+         //validator.configureValidator(testEntry)
          val resourceAsString: String = loadFileContents(TEST_FILES_BASE_PATH + fileName)
          Assertions.assertNotNull(resourceAsString, "Could not load resource string from file <$fileName>")
          validate(fileName, testEntry.testResult!!, resourceAsString, getTestProfile(testEntry))
@@ -53,7 +54,7 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
       validator.isAssumeValidRestReferences = testEntry.profile.assumeValidRestReferences
       validator.isAllowExamples = testEntry.allowExamples
       validator.validatorResourceFetcher = TestResourceFetcher(testEntry)
-      validator.bestPracticeWarningLevel = IResourceValidator.BestPracticeWarningLevel.Ignore
+//      validator.bestPracticeWarningLevel = IResourceValidator.BestPracticeWarningLevel.Ignore
       myDaoConfig.isAllowExternalReferences = true
       return this
    }
@@ -167,7 +168,7 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
             .sortedBy { it.key }
             .map { (testId, testContent) ->
                Arguments.arguments(testId, gson.fromJson(testContent, TestEntry::class.java))
-            }.subList(4, 5).stream()
+            }.subList(6, 7).stream()
       }
 
       fun getTestProfile(testEntry: TestEntry): String {

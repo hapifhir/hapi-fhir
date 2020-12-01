@@ -5,6 +5,7 @@ import org.hl7.fhir.exceptions.FHIRException
 import org.hl7.fhir.r5.elementmodel.Element
 import org.hl7.fhir.r5.elementmodel.Manager
 import org.hl7.fhir.r5.elementmodel.ObjectConverter
+import org.hl7.fhir.r5.model.CanonicalResource
 import org.hl7.fhir.r5.model.Patient
 import org.hl7.fhir.r5.test.utils.TestingUtilities
 import org.hl7.fhir.r5.utils.IResourceValidator
@@ -67,6 +68,14 @@ class TestResourceFetcher(private val testEntry: TestEntry) : IResourceValidator
    }
 
    override fun setLocale(p0: Locale?) {
+      TODO("Not yet implemented")
+   }
+
+   override fun fetchCanonicalResource(p0: String?): CanonicalResource {
+      TODO("Not yet implemented")
+   }
+
+   override fun fetchesCanonicalResource(p0: String?): Boolean {
       TODO("Not yet implemented")
    }
 }
