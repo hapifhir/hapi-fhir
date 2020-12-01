@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
-import pl.allegro.tech.embeddedelasticsearch.EmbeddedElastic;
-import pl.allegro.tech.embeddedelasticsearch.PopularProperties;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;

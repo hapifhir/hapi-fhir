@@ -12,7 +12,7 @@ public class TestElasticsearchContainerHelper {
 	public final String ELASTICSEARCH_USERNAME= "";
 	public final String ELASTICSEARCH_PASSWORD= "";
 
-	public static final String ELASTICSEARCH_VERSION = "7.9.2";
+	public static final String ELASTICSEARCH_VERSION = "7.10.0";
 	public static final String ELASTICSEARCH_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTICSEARCH_VERSION;
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {

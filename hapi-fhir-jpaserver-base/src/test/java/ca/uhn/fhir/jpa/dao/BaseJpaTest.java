@@ -123,7 +123,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		props.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
 		props.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
 		props.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
-		props.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		props.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "8.7.0");
 		props.put(HibernateOrmMapperSettings.ENABLED, "true");
 		return props;
 	}
