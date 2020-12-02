@@ -25,12 +25,13 @@ import ca.uhn.fhir.empi.api.EmpiMatchOutcome;
 import ca.uhn.fhir.empi.api.IEmpiLinkSvc;
 import ca.uhn.fhir.empi.log.Logs;
 import ca.uhn.fhir.empi.model.EmpiTransactionContext;
+import ca.uhn.fhir.empi.model.TransactionLogMessages;
 import ca.uhn.fhir.empi.util.EmpiUtil;
 import ca.uhn.fhir.empi.util.PersonHelper;
 import ca.uhn.fhir.jpa.empi.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.empi.svc.candidate.EmpiPersonFindingSvc;
 import ca.uhn.fhir.jpa.empi.svc.candidate.MatchedPersonCandidate;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
+
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

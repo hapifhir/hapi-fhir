@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.empi.interceptor;
 
 import ca.uhn.fhir.empi.model.CanonicalEID;
+import ca.uhn.fhir.empi.model.TransactionLogMessages;
 import ca.uhn.fhir.empi.rules.config.EmpiSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.jpa.entity.EmpiLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;

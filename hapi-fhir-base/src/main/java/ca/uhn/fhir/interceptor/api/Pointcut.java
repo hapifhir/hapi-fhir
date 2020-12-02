@@ -1717,7 +1717,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
+	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.empi.model.TransactionLogMessages"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>
