@@ -354,12 +354,7 @@ public class SearchQueryBuilder {
 		if (maxResultsToFetch != null || offset != null) {
 
 			maxResultsToFetch = defaultIfNull(maxResultsToFetch, 10000);
-
-			sql = "SELECT " +
-				myFirstPredicateBuilder.getResourceIdColumn().getColumnNameSQL() +
-				" FROM ( " + sql + " ) " +
-				" AS " + myFirstPredicateBuilder.getResourceIdColumn().getColumnNameSQL();
-
+			
 			LimitHandler limitHandler = myDialect.getLimitHandler();
 			RowSelection selection = new RowSelection();
 			selection.setFirstRow(offset);

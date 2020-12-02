@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2205
+title: "The new JPA SearchBuilder failed to perform FHIR Searches on Oracle DB with an invalid SQL error. This has been corrected."
