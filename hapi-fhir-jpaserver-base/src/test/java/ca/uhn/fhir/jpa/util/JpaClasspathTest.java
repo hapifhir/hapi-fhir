@@ -12,7 +12,6 @@ public class JpaClasspathTest {
 	 * slf4j which is super annoying..
 	 */
 	@Test
-	@Disabled //TODO GGG HS re-enable once i figure out how to exclude it.
 	public void testNoLog4jOnClasspath() {
 
 		try {
