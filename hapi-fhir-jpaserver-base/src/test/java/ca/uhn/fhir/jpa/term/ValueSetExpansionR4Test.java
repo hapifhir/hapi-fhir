@@ -246,14 +246,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 		create100ConceptsCodeSystemAndValueSet();
 
-		List<String> expandedConceptCodes = runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://foo/vs");
-			assertEquals(1, valueSets.size());
-			TermValueSet valueSet = valueSets.get(0);
-			List<TermValueSetConcept> concepts = valueSet.getConcepts();
-			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
+		List<String> expandedConceptCodes = getExpandedConceptsByValueSetUrl("http://foo/vs");
 
 		ValueSet input = new ValueSet();
 		input.getCompose()
@@ -288,7 +281,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
 		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
 	}
-
 
 	@Test
 	public void testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatchCaseInsensitive() {
@@ -633,14 +625,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConceptCodes = runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-			assertEquals(1, valueSets.size());
-			TermValueSet vs = valueSets.get(0);
-			List<TermValueSetConcept> concepts = vs.getConcepts();
-			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
+		List<String> expandedConceptCodes = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(0)
@@ -778,7 +763,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(1)
 			.setCount(1000);
@@ -794,14 +779,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8493-9", "Systolic blood pressure 10 hour minimum", 0);
-
-		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConcepts.subList(1,expandedConcepts.size()))));
 	}
 
 	@Test
@@ -817,9 +795,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
+		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
-			.setOffset(1)
+			.setOffset(0)
 			.setCount(1000);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
@@ -833,15 +811,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8493-9", "Systolic blood pressure 10 hour minimum", 0);
-
-		ValueSet.ValueSetExpansionContainsComponent otherConcept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
-		assertConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
-
-		assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
+		assertThat(toCodes(expandedValueSet), is(equalTo(expandedConcepts.subList(1,expandedConcepts.size()))));
 	}
 
 	@Test
@@ -858,14 +828,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConceptCodes = runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-			assertEquals(1, valueSets.size());
-			TermValueSet vs = valueSets.get(0);
-			List<TermValueSetConcept> concepts = vs.getConcepts();
-			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
+		List<String> expandedConceptCodes = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(1)
@@ -916,14 +879,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		List<String> expandedConceptCodes = runInTransaction(() -> {
-			List<TermValueSet> valueSets = myTermValueSetDao.findTermValueSetByUrl(Pageable.unpaged(), "http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-			assertEquals(1, valueSets.size());
-			TermValueSet vs = valueSets.get(0);
-			List<TermValueSetConcept> concepts = vs.getConcepts();
-			ourLog.info("Concepts:\n * " + concepts.stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-			return concepts.stream().map(concept -> concept.getCode()).collect(Collectors.toList());
-		});
+		List<String> expandedConceptCodes = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
 			.setOffset(1)
