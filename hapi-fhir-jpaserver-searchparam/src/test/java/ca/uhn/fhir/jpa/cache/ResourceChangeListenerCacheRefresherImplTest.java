@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(SpringExtension.class)
@@ -70,4 +71,16 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		assertTrue(cache.isInitialized());
 		verifyNoInteractions(listener);
 	}
+
+	@Test
+	public void testNoActionOnStoppingScheduler() {
+		when(mySchedulerService.isStopping()).thenReturn(true);
+
+		IResourceChangeListener listener = mock(IResourceChangeListener.class);
+		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
+		myResourceChangeListenerCacheRefresher.refreshCacheAndNotifyListener(cache);
+
+		verify(myResourceVersionSvc, times(0)).getVersionMap(any(), any());
+	}
+
 }
