@@ -1,0 +1,5 @@
+---
+type: change
+issue: 2190
+title: "Updates to Hibernate Search require a full reindexing of all indexed fulltext data, which is held in Lucene or Elasticsearch.
+    Users using elasticsearch for fulltext indexing must upgrade to Elasticsearch 7.10.0."

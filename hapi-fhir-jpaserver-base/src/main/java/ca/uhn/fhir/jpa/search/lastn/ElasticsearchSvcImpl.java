@@ -720,8 +720,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
 		IndexRequest request = new IndexRequest(theIndexName);
 		request.id(theDocumentId);
-//		request.type(theDocumentType);
-
 		request.source(theObservationDocument, XContentType.JSON);
 		return request;
 	}
