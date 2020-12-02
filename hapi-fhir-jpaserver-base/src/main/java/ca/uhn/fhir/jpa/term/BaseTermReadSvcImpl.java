@@ -535,7 +535,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			wasFilteredResult = true;
 		} else {
-			// TODO GGG HS: I'm pretty sure we are overfetching here.  test says offset 3, count 4, but we are fetching index 3 -> 10 here, grabbing 7 concepts.
+			// TODO JA HS: I'm pretty sure we are overfetching here.  test says offset 3, count 4, but we are fetching index 3 -> 10 here, grabbing 7 concepts.
 			//Specifically this test testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRange
 			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());
 			theAccumulator.consumeSkipCount(offset);
@@ -1037,7 +1037,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void handleFilter(String theCodeSystemIdentifier, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilter(String theCodeSystemIdentifier, SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
 			return;
 		}
@@ -1049,31 +1049,31 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		switch (theFilter.getProperty()) {
 			case "display:exact":
 			case "display":
-				handleFilterDisplay(f, b, theFilter);
+				handleFilterDisplay(theF, theB, theFilter);
 				break;
 			case "concept":
 			case "code":
-				handleFilterConceptAndCode(theCodeSystemIdentifier, f, b, theFilter);
+				handleFilterConceptAndCode(theCodeSystemIdentifier, theF, theB, theFilter);
 				break;
 			case "parent":
 			case "child":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincParentChild(f, b, theFilter);
+				handleFilterLoincParentChild(theF, theB, theFilter);
 				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincAncestor2(theCodeSystemIdentifier, f, b, theFilter);
+				handleFilterLoincAncestor2(theCodeSystemIdentifier, theF, theB, theFilter);
 				break;
 			case "descendant":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincDescendant(theCodeSystemIdentifier, f, b, theFilter);
+				handleFilterLoincDescendant(theCodeSystemIdentifier, theF, theB, theFilter);
 				break;
 			case "copyright":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincCopyright(f, b, theFilter);
+				handleFilterLoincCopyright(theF, theB, theFilter);
 				break;
 			default:
-				handleFilterRegex(f, b, theFilter);
+				handleFilterRegex(theF, theB, theFilter);
 				break;
 		}
 	}
@@ -1102,6 +1102,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
 			RegexpQuery query = new RegexpQuery(term);
 			//TODO GGG HS write the equivalent ES Query here.
+
 			theB.must(theF.extension(LuceneExtension.get()).fromLuceneQuery(query));
 
 			//Given that we want to be backend-agnostic, we can't really suport RegExpQuery here as it is lucene based. Will
@@ -1141,15 +1142,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB) {
-		theB.mustNot(theF.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
+	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory thePredicateFactory, BooleanPredicateClausesStep<?> theBooleanClause) {
+		theBooleanClause.mustNot(thePredicateFactory.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
-	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b) {
+	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory thePredicateFactory, BooleanPredicateClausesStep<?> theBooleanClause) {
 		//TODO GGG HS These used to be Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE", ".*");, which was lucene-specific.
 		//TODO GGG HS ask diederik if this is equivalent.
 		//This old .* regex is the same as an existence check on a field, which I've implemented here.
-		b.must(f.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
+		theBooleanClause.must(thePredicateFactory.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
 	}
 
 	private void handleFilterLoincAncestor2(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1331,11 +1332,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		b.must(f.bool(innerB -> {
 			parentPids.forEach(pid -> innerB.should(f.match().field(theTerms.get(0).field()).matching(pid)));
 		}));
-
-//		parentPids.stream()
-//			.forEach(pid -> {
-//				b.must(f.bool().should(f.match().field(theTerms.get(0).field()).matching(pid)));
-//			});
 	}
 
 	private List<Long> convertTermsToParentPids(List<Term> theTerms) {
@@ -1696,7 +1692,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	public void scheduleJob() {
-		// TODO KHS what does this mean?
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();

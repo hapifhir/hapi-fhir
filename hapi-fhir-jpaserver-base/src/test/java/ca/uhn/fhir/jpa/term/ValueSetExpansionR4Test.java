@@ -660,21 +660,21 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-//		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
-//			.setOffset(0)
-//			.setCount(23);
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
+		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
+			.setOffset(0)
+			.setCount(23);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-//		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-//		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-//		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-//		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-//		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
 
-//		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
+		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
