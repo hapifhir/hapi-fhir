@@ -797,7 +797,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		List<String> expandedConcepts = getExpandedConceptsByValueSetUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
 		ValueSetExpansionOptions options = new ValueSetExpansionOptions()
-			.setOffset(0)
+			.setOffset(1)
 			.setCount(1000);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
