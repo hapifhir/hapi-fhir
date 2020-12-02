@@ -466,6 +466,11 @@
 			<artifactId>javax.el</artifactId>
 		</dependency>
 
+		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-to-slf4j</artifactId>
+		</dependency>
 		<!-- Hibernate Search -->
 		<dependency>
 			<groupId>org.hibernate.search</groupId>

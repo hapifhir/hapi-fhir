@@ -761,6 +761,7 @@
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.28</slf4j_version>
+		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
 		<spring_version>5.2.9.RELEASE</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.2.0.RELEASE</spring_data_version>
@@ -1414,6 +1415,11 @@
 				<version>${hibernate_validator_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-to-slf4j</artifactId>
+				<version>${log4j_to_slf4j_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.hibernate.search</groupId>
 				<artifactId>hibernate-search-mapper-orm</artifactId>
 				<version>${hibernate_search_version}</version>
@@ -1506,6 +1512,11 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
 				<version>${slf4j_version}</version>
 			</dependency>
 			<dependency>
