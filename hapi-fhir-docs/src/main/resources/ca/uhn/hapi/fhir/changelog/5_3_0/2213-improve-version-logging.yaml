@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2213
+title: "Non release (i.e. SNAPSHOT) builds of HAPI FHIR will now include the Git revision hash as well as the build date in the 
+   version string that is logged on initialization, and included in the default server X-Powered-By string. Release builds are
+   not affected by this change."
