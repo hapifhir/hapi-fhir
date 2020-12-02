@@ -115,7 +115,7 @@ public interface ITestDataBuilder {
 
 	default Consumer<IBaseResource> withId(String theId) {
 		return t -> {
-			assertThat(theId, matchesPattern("[a-zA-Z0-9]+"));
+			assertThat(theId, matchesPattern("[a-zA-Z0-9-]+"));
 			t.setId(theId);
 		};
 	}

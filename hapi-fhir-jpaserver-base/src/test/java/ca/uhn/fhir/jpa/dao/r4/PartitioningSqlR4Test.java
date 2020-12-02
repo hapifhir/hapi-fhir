@@ -1137,6 +1137,231 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testSearch_IdParamOnly_PidId_SpecificPartition() {
+		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+
+		/* *******************************
+		 * _id param is only parameter
+		 * *******************************/
+
+		// Read in correct Partition
+		{
+			myCaptureQueriesListener.clear();
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(1, searchOutcome.size());
+			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			assertEquals(patientId1, gotId1);
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			ourLog.info("Search SQL:\n{}", searchSql);
+
+			// Only the read columns should be used, no criteria use partition
+			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		}
+
+		// Read in null Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+		// Read in wrong Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+	}
+
+
+	@Test
+	public void testSearch_IdParamSecond_PidId_SpecificPartition() {
+		IIdType patientIdNull = createPatient(withPartition(null), withActiveTrue());
+		IIdType patientId1 = createPatient(withPartition(1), withActiveTrue());
+		IIdType patientId2 = createPatient(withPartition(2), withActiveTrue());
+
+		/* *******************************
+		 * _id param is second parameter
+		 * *******************************/
+
+		// Read in correct Partition
+		{
+			myCaptureQueriesListener.clear();
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add(Patient.SP_ACTIVE, new TokenParam("true"))
+				.add(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(1, searchOutcome.size());
+			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			assertEquals(patientId1, gotId1);
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+			ourLog.info("Search SQL:\n{}", searchSql);
+
+			// Only the read columns should be used, no criteria use partition
+			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql); // If this switches to 1 that would be fine
+		}
+
+		// Read in null Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add(Patient.SP_ACTIVE, new TokenParam("true"))
+				.add(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+		// Read in wrong Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add(Patient.SP_ACTIVE, new TokenParam("true"))
+				.add(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+	}
+
+
+	@Test
+	public void testSearch_IdParamOnly_ForcedId_SpecificPartition() {
+		addReadPartition(new Integer[]{null});
+		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
+		addReadPartition(1);
+		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
+		addReadPartition(2);
+		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+
+		/* *******************************
+		 * _id param is only parameter
+		 * *******************************/
+
+		// Read in correct Partition
+		{
+			myCaptureQueriesListener.clear();
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(1, searchOutcome.size());
+			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			assertEquals(patientId1, gotId1);
+
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
+			ourLog.info("Search SQL:\n{}", searchSql);
+
+			// Only the read columns should be used, no criteria use partition
+			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+		}
+
+		// Read in null Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+		// Read in wrong Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+	}
+
+
+	@Test
+	public void testSearch_IdParamSecond_ForcedId_SpecificPartition() {
+		addReadPartition(new Integer[]{null});
+		IIdType patientIdNull = createPatient(withPartition(null), withId("PT-NULL"), withActiveTrue());
+		addReadPartition(1);
+		IIdType patientId1 = createPatient(withPartition(1), withId("PT-1"), withActiveTrue());
+		addReadPartition(2);
+		IIdType patientId2 = createPatient(withPartition(2), withId("PT-2"), withActiveTrue());
+
+		/* *******************************
+		 * _id param is second parameter
+		 * *******************************/
+
+		// Read in correct Partition
+		{
+			myCaptureQueriesListener.clear();
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add(Patient.SP_ACTIVE, new TokenParam("true"))
+				.add(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(1, searchOutcome.size());
+			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			assertEquals(patientId1, gotId1);
+
+			// First SQL resolves the forced ID
+			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
+
+			// Second SQL performs the search
+			searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false).toUpperCase();
+			ourLog.info("Search SQL:\n{}", searchSql);
+			assertThat(searchSql, searchSql, containsString("PARTITION_ID IN ('1')"));
+			assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql); // If this switches to 1 that would be fine
+		}
+
+		// Read in null Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add(Patient.SP_ACTIVE, new TokenParam("true"))
+				.add(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+		// Read in wrong Partition
+		{
+			addReadPartition(1);
+
+			SearchParameterMap map = SearchParameterMap.newSynchronous()
+				.add(Patient.SP_ACTIVE, new TokenParam("true"))
+				.add(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map);
+			assertEquals(0, searchOutcome.size());
+		}
+
+	}
+
+
+
+
+	@Test
 	public void testSearch_MissingParamString_SearchAllPartitions() {
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
 
