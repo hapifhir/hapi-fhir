@@ -1330,6 +1330,12 @@
 				<version>${ucum_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.rauschig</groupId>
+				<artifactId>jarchivelib</artifactId>
+				<version>1.0.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
 				<version>1.18</version>

@@ -262,7 +262,6 @@
         <dependency>
             <groupId>org.rauschig</groupId>
             <artifactId>jarchivelib</artifactId>
-            <version>1.0.0</version>
             <scope>test</scope>
         </dependency>
 
