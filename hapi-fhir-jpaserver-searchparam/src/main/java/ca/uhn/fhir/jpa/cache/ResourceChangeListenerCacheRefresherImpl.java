@@ -103,17 +103,22 @@ public class ResourceChangeListenerCacheRefresherImpl implements IResourceChange
 		return retval;
 	}
 
+	@Override
 	public ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theCache) {
-		ResourceChangeResult retval = new ResourceChangeResult();
+		ResourceChangeResult retVal = new ResourceChangeResult();
+		if (mySchedulerService.isStopping()) {
+			ourLog.info("Scheduler service is stopping, aborting cache refresh");
+			return retVal;
+		}
 		if (!myResourceChangeListenerRegistry.contains(theCache)) {
 			ourLog.warn("Requesting cache refresh for unregistered listener {}.  Aborting.", theCache);
-			return new ResourceChangeResult();
+			return retVal;
 		}
 		SearchParameterMap searchParamMap = theCache.getSearchParameterMap();
 		ResourceVersionMap newResourceVersionMap = myResourceVersionSvc.getVersionMap(theCache.getResourceName(), searchParamMap);
-		retval = retval.plus(notifyListener(theCache, newResourceVersionMap));
+		retVal = retVal.plus(notifyListener(theCache, newResourceVersionMap));
 
-		return retval;
+		return retVal;
 	}
 
 	/**
