@@ -37,9 +37,14 @@ public class VersionUtil {
 	private static String ourVersion;
 	private static String ourBuildNumber;
 	private static String ourBuildTime;
+	private static boolean ourSnapshot;
 
 	static {
 		initialize();
+	}
+
+	public static boolean isSnapshot() {
+		return ourSnapshot;
 	}
 
 	public static String getBuildNumber() {
@@ -65,16 +70,27 @@ public class VersionUtil {
 			ourVersion = p.getProperty("hapifhir.version");
 			ourVersion = defaultIfBlank(ourVersion, "(unknown)");
 
-			ourBuildNumber = p.getProperty("hapifhir.buildnumber");
+			ourSnapshot = ourVersion.contains("SNAPSHOT");
+
+			ourBuildNumber = StringUtils.left(p.getProperty("hapifhir.buildnumber"), 10);
 			ourBuildTime = p.getProperty("hapifhir.timestamp");
 
 			if (System.getProperty("suppress_hapi_fhir_version_log") == null) {
-				ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, StringUtils.right(ourBuildNumber, 10));
+				String buildNumber = ourBuildNumber;
+				if (isSnapshot()) {
+					buildNumber = buildNumber + "/" + getBuildDate();
+				}
+
+				ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, buildNumber);
 			}
 
 		} catch (Exception e) {
 			ourLog.warn("Unable to determine HAPI version information", e);
 		}
+	}
+
+	public static String getBuildDate() {
+		return ourBuildTime.substring(0, 10);
 	}
 
 }

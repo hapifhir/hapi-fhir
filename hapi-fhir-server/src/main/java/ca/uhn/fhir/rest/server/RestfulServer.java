@@ -299,7 +299,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * @see #createPoweredByHeader()
 	 */
 	protected String createPoweredByHeaderProductVersion() {
-		return VersionUtil.getVersion();
+		String version = VersionUtil.getVersion();
+		if (VersionUtil.isSnapshot()) {
+			version = version + "/" + VersionUtil.getBuildNumber() + "/" + VersionUtil.getBuildDate();
+		}
+		return version;
 	}
 
 	@Override
