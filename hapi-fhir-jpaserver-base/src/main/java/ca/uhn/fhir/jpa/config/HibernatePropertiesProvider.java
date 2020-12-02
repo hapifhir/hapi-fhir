@@ -21,16 +21,19 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.search.engine.cfg.BackendSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
-public class HibernateDialectProvider {
+public class HibernatePropertiesProvider {
 
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private Dialect myDialect;
+	private String myHibernateSearchBackend;
 
 	public Dialect getDialect() {
 		Dialect dialect = myDialect;
@@ -43,4 +46,13 @@ public class HibernateDialectProvider {
 		return dialect;
 	}
 
+	public String getHibernateSearchBackend(){
+		String hibernateSearchBackend = myHibernateSearchBackend;
+		if (StringUtils.isBlank(hibernateSearchBackend)) {
+			hibernateSearchBackend = (String) myEntityManagerFactory.getJpaPropertyMap().get(BackendSettings.backendKey(BackendSettings.TYPE));
+			Validate.notNull(hibernateSearchBackend, BackendSettings.backendKey(BackendSettings.TYPE) + " property is unset!");
+			myHibernateSearchBackend = hibernateSearchBackend;
+		}
+		return myHibernateSearchBackend;
+	}
 }

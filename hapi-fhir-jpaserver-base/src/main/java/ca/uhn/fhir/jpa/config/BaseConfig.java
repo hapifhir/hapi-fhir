@@ -450,8 +450,8 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public HibernateDialectProvider hibernateDialectProvider() {
-		return new HibernateDialectProvider();
+	public HibernatePropertiesProvider hibernateDialectProvider() {
+		return new HibernatePropertiesProvider();
 	}
 
 	@Bean

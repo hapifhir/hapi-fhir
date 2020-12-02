@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -98,10 +99,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.RegexpQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
 import org.hibernate.search.backend.lucene.LuceneExtension;
 import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
 import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
@@ -249,6 +250,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ApplicationContext myApplicationContext;
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
+
+	//We need this bean so we can tell which mode hibernate search is running in.
+	@Autowired
+	private HibernatePropertiesProvider myHibernatePropertiesProvider;
+
+	private boolean isFullTextSetToUseElastic() {
+		return "elasticsearch".equalsIgnoreCase(myHibernatePropertiesProvider.getHibernateSearchBackend());
+	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
@@ -1100,18 +1109,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 
 			Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
-			RegexpQuery query = new RegexpQuery(term);
-			//TODO GGG HS write the equivalent ES Query here.
 
-			theB.must(theF.extension(LuceneExtension.get()).fromLuceneQuery(query));
-
-			//Given that we want to be backend-agnostic, we can't really suport RegExpQuery here as it is lucene based. Will
-			//Probably have to replace with wildcard query :https://docs.jboss.org/hibernate/search/6.0/reference/en-US/html_single/#search-dsl-predicate-wildcard.
-			//This query is _almost certainly wrong right now_
-			//theB.must(theF.match().field(term.field()).matching(term.text()));
-//			theB.must(theF.match().field(term.field()).matching(term.text()));
-
-
+			if (isFullTextSetToUseElastic()) {
+				String regexpQuery = "{'regexp':{'" + term.field() + "':{'value':'" + term.text() + "'}}}";
+				ourLog.debug("Build Elasticsearch Regexp Query: {}", regexpQuery);
+				theB.must(theF.extension(ElasticsearchExtension.get()).fromJson(regexpQuery));
+			} else {
+				RegexpQuery query = new RegexpQuery(term);
+				theB.must(theF.extension(LuceneExtension.get()).fromLuceneQuery(query));
+			}
 		} else {
 			String value = theFilter.getValue();
 			Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
