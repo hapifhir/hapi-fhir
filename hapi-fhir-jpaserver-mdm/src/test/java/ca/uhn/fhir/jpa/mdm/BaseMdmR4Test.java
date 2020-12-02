@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
 import ca.uhn.fhir.jpa.mdm.config.TestMdmConfigR4;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.matcher.IsLinkedTo;
-import ca.uhn.fhir.jpa.mdm.matcher.IsMatchedToAPerson;
+import ca.uhn.fhir.jpa.mdm.matcher.IsMatchedToAGoldenResource;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleDuplicateOf;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleMatchWith;
@@ -414,7 +414,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	protected Matcher<IAnyResource> matchedToAGoldenResource() {
-		return IsMatchedToAPerson.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc);
+		return IsMatchedToAGoldenResource.matchedToAGoldenResource(myIdHelperService, myMdmLinkDaoSvc);
 	}
 
 	protected Patient getOnlyGoldenPatient() {

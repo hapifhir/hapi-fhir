@@ -27,7 +27,7 @@ import java.util.List;
 
 public interface IMdmMatchFinderSvc {
 	/**
-	 * Retrieve a list of possible Patient/Practitioner candidates for matching, based on the given {@link IAnyResource}
+	 * Retrieve a list of possible target candidates for matching, based on the given {@link IAnyResource}
 	 * Internally, performs all MDM matching rules on the type of the resource.
 	 *
 	 * @param theResourceType the type of the resource.

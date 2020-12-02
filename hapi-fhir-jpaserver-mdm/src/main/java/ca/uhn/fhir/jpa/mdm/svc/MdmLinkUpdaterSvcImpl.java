@@ -91,7 +91,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		myMdmLinkDaoSvc.save(mdmLink);
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
-			// Need to find a new Person to link this target to
+			// Need to find a new Golden Resource to link this target to
 			myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(theTarget, theMdmContext);
 		}
 		return theGoldenResource;
@@ -128,20 +128,20 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public void notDuplicatePerson(IAnyResource thePerson, IAnyResource theTarget, MdmTransactionContext theMdmContext) {
-		validateNotDuplicatePersonRequest(thePerson, theTarget);
+	public void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTarget, MdmTransactionContext theMdmContext) {
+		validateNotDuplicateGoldenResourceRequest(theGoldenResource, theTarget);
 
-		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
+		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 
-		Optional<MdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(personId, targetId);
+		Optional<MdmLink> oMdmLink = myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenResourceId, targetId);
 		if (!oMdmLink.isPresent()) {
-			throw new InvalidRequestException("No link exists between " + thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
+			throw new InvalidRequestException("No link exists between " + theGoldenResource.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless());
 		}
 
 		MdmLink mdmLink = oMdmLink.get();
 		if (!mdmLink.isPossibleDuplicate()) {
-			throw new InvalidRequestException(thePerson.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless() + " are not linked as POSSIBLE_DUPLICATE.");
+			throw new InvalidRequestException(theGoldenResource.getIdElement().toVersionless() + " and " + theTarget.getIdElement().toVersionless() + " are not linked as POSSIBLE_DUPLICATE.");
 		}
 		mdmLink.setMatchResult(MdmMatchResultEnum.NO_MATCH);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
@@ -151,7 +151,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	/**
 	 * Ensure that the two resources are of the same type and both are managed by HAPI-MDM
 	 */
-	private void validateNotDuplicatePersonRequest(IAnyResource theGoldenResource, IAnyResource theTarget) {
+	private void validateNotDuplicateGoldenResourceRequest(IAnyResource theGoldenResource, IAnyResource theTarget) {
 		String goldenResourceType = myFhirContext.getResourceType(theGoldenResource);
 		String targetType = myFhirContext.getResourceType(theTarget);
 		if (!goldenResourceType.equalsIgnoreCase(targetType)) {
@@ -159,7 +159,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		}
 
 		if (!MdmUtil.isMdmManaged(theGoldenResource) || !MdmUtil.isMdmManaged(theTarget)) {
-			throw new InvalidRequestException("Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by hapi-mdm");
+			throw new InvalidRequestException("Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by HAPI-MDM");
 		}
 	}
 }

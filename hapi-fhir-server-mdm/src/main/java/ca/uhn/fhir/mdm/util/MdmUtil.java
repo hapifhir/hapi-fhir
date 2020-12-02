@@ -20,7 +20,6 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,7 +44,7 @@ public final class MdmUtil {
 
 	/**
 	 * Checks for the presence of the MDM-managed tag, indicating the MDM system has ownership
-	 * of this Person's links.
+	 * of this golden resource's links.
 	 *
 	 * @param theBaseResource the resource to check.
 	 * @return a boolean indicating whether or not MDM manages this FHIR resource.

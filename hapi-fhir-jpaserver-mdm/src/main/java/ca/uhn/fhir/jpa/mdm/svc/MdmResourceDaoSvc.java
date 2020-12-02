@@ -43,7 +43,7 @@ import java.util.Optional;
 @Service
 public class MdmResourceDaoSvc {
 
-	private static final int MAX_MATCHING_PERSONS = 1000;
+	private static final int MAX_MATCHING_GOLDEN_RESOURCES = 1000;
 
 	@Autowired
 	DaoRegistry myDaoRegistry;
@@ -80,14 +80,14 @@ public class MdmResourceDaoSvc {
 
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		IBundleProvider search = resourceDao.search(map);
-		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_PERSONS);
+		List<IBaseResource> resources = search.getResources(0, MAX_MATCHING_GOLDEN_RESOURCES);
 
 		if (resources.isEmpty()) {
 			return Optional.empty();
 		} else if (resources.size() > 1) {
 			throw new InternalErrorException("Found more than one active " +
 				MdmConstants.CODE_HAPI_MDM_MANAGED +
-				" Person with EID " +
+				" Golden Resource with EID " +
 				theEid +
 				": " +
 				resources.get(0).getIdElement().getValue() +

@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.api;
  */
 
 public enum MdmMatchResultEnum {
+
 	/**
 	 * Manually confirmed to not be a match.
 	 */
@@ -37,21 +38,21 @@ public enum MdmMatchResultEnum {
 	MATCH,
 
 	/**
-	 * Link between two Person resources indicating they may be duplicates.
+	 * Link between two Golden Records resources indicating they may be duplicates.
 	 */
 	POSSIBLE_DUPLICATE,
 
 	/**
-	 * Link between Person and Target pointing to the Golden Record for that Person
+	 * Link between Golden Record and Target pointing to the Golden Record for that Target
 	 */
 
 	GOLDEN_RECORD,
 
 	/**
-	 * Link between two Person resources resulting from a merge.  The Person points to the active person after the merge
-	 * and the Target points to the inactive person after the merge.
+	 * Link between two Golden Resources resulting from a merge. One golden resource is deactivated. The inactive golden
+	 * resource points to the active golden resource after the merge. The target resource points to the inactive golden
+	 * resource after the merge.
 	 */
-
 	REDIRECT
 	// Stored in database as ORDINAL.  Only add new values to bottom!
 }

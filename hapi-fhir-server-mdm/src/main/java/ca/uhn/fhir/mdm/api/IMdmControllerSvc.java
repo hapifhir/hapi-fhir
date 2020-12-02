@@ -28,13 +28,13 @@ import java.util.stream.Stream;
 
 public interface IMdmControllerSvc {
 
-	Stream<MdmLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext);
+	Stream<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext);
 
 	Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext);
 
-	void notDuplicateGoldenResource(String thePersonId, String theTargetPersonId, MdmTransactionContext theMdmTransactionContext);
+	void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource mergeGoldenResources(String theFromPersonId, String theToPersonId, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource updateLink(String thePersonId, String theTargetId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource updateLink(String theGoldenResourceId, String theTargetId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
 }

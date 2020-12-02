@@ -32,7 +32,7 @@ public class MdmTransactionContext {
 		UPDATE_LINK,
 		DUPLICATE_GOLDEN_RESOURCES,
 		NOT_DUPLICATE,
-		MERGE_PERSONS
+		MERGE_GOLDEN_RESOURCES
 	}
 
 	/**

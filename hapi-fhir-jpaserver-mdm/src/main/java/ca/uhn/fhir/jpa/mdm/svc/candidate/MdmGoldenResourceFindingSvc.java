@@ -47,18 +47,18 @@ public class MdmGoldenResourceFindingSvc {
 	private FindCandidateByScoreSvc myFindCandidateByScoreSvc;
 
 	/**
-	 * Given an incoming IBaseResource, limited to Patient/Practitioner, return a list of {@link MatchedGoldenResourceCandidate}
-	 * indicating possible candidates for a matching Person. Uses several separate methods for finding candidates:
+	 * Given an incoming IBaseResource, limited to the supported MDM type, return a list of {@link MatchedGoldenResourceCandidate}
+	 * indicating possible candidates for a matching Golden Resource. Uses several separate methods for finding candidates:
 	 * <p>
-	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Person with this EID, it automatically matches.
-	 * 1. First, check link table for any entries where this baseresource is the target of a person. If found, return.
-	 * 2. If none are found, attempt to find Person Resources which link to this theResource.
-	 * 3. If none are found, attempt to find Person Resources similar to our incoming resource based on the MDM rules and field matchers.
-	 * 4. If none are found, attempt to find Persons that are linked to Patients/Practitioners that are similar to our incoming resource based on the MDM rules and
+	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Golden Resource with this EID, it automatically matches.
+	 * 1. First, check link table for any entries where this baseresource is the target of a Golden Resource. If found, return.
+	 * 2. If none are found, attempt to find Golden Resources which link to this theResource.
+	 * 3. If none are found, attempt to find Golden Resources similar to our incoming resource based on the MDM rules and field matchers.
+	 * 4. If none are found, attempt to find Golden Resources that are linked to targets that are similar to our incoming resource based on the MDM rules and
 	 * field matchers.
 	 *
-	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Persons for.
-	 * @return A list of {@link MatchedGoldenResourceCandidate} indicating all potential Person matches.
+	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Golden Resources for.
+	 * @return A list of {@link MatchedGoldenResourceCandidate} indicating all potential Golden Resource matches.
 	 */
 	public CandidateList findGoldenResourceCandidates(IAnyResource theResource) {
 		CandidateList matchedGoldenResourceCandidates = myFindCandidateByEidSvc.findCandidates(theResource);
@@ -77,7 +77,7 @@ public class MdmGoldenResourceFindingSvc {
 	}
 
 	public IAnyResource getGoldenResourceFromMatchedGoldenResourceCandidate(MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, String theResourceType) {
-		ResourcePersistentId personPid = theMatchedGoldenResourceCandidate.getCandidatePersonPid();
-		return myMdmResourceDaoSvc.readGoldenResourceByPid(personPid, theResourceType);
+		ResourcePersistentId goldenResourcePid = theMatchedGoldenResourceCandidate.getCandidateGoldenResourcePid();
+		return myMdmResourceDaoSvc.readGoldenResourceByPid(goldenResourcePid, theResourceType);
 	}
 }

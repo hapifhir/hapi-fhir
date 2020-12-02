@@ -45,8 +45,8 @@ public enum MdmMatcherEnum {
 	SUBSTRING(new HapiStringMatcher(new SubstringStringMatcher())),
 
 	DATE(new HapiDateMatcher()),
-	NAME_ANY_ORDER(new NameMatcher(MdmPersonNameMatchModeEnum.ANY_ORDER)),
-	NAME_FIRST_AND_LAST(new NameMatcher(MdmPersonNameMatchModeEnum.FIRST_AND_LAST)),
+	NAME_ANY_ORDER(new NameMatcher(MdmNameMatchModeEnum.ANY_ORDER)),
+	NAME_FIRST_AND_LAST(new NameMatcher(MdmNameMatchModeEnum.FIRST_AND_LAST)),
 
 	IDENTIFIER(new IdentifierMatcher());
 

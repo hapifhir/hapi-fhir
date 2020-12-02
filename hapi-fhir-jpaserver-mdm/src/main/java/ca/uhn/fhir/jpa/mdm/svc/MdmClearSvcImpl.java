@@ -34,8 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 /**
- * This class is responsible for clearing out existing MDM links, as well as deleting all persons related to those MDM Links.
- *
+ * This class is responsible for clearing out existing MDM links, as well as deleting all Golden Resources related to those MDM Links.
  */
 public class MdmClearSvcImpl implements IMdmExpungeSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
@@ -55,10 +54,10 @@ public class MdmClearSvcImpl implements IMdmExpungeSvc {
 	public long expungeAllMdmLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails) {
 		throwExceptionIfInvalidTargetType(theResourceType);
 		ourLog.info("Clearing all MDM Links for resource type {}...", theResourceType);
-		List<Long> personPids = myMdmLinkDaoSvc.deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(theResourceType);
-		DeleteMethodOutcome deleteOutcome = myMdmGoldenResourceDeletingSvcImpl.expungeGoldenResourcePids(personPids, theRequestDetails);
-		ourLog.info("MDM clear operation complete.  Removed {} MDM links and {} Person resources.", personPids.size(), deleteOutcome.getExpungedResourcesCount());
-		return personPids.size();
+		List<Long> goldenResourcePids = myMdmLinkDaoSvc.deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(theResourceType);
+		DeleteMethodOutcome deleteOutcome = myMdmGoldenResourceDeletingSvcImpl.expungeGoldenResourcePids(goldenResourcePids, theResourceType, theRequestDetails);
+		ourLog.info("MDM clear operation complete.  Removed {} MDM links and {} Golden Resources.", goldenResourcePids.size(), deleteOutcome.getExpungedResourcesCount());
+		return goldenResourcePids.size();
 	}
 
 	private void throwExceptionIfInvalidTargetType(String theResourceType) {
@@ -70,10 +69,16 @@ public class MdmClearSvcImpl implements IMdmExpungeSvc {
 	@Override
 	public long expungeAllMdmLinks(ServletRequestDetails theRequestDetails) {
 		ourLog.info("Clearing all MDM Links...");
-		List<Long> goldenResourcePids = myMdmLinkDaoSvc.deleteAllMdmLinksAndReturnGoldenResourcePids();
-		DeleteMethodOutcome deleteOutcome = myMdmGoldenResourceDeletingSvcImpl.expungeGoldenResourcePids(goldenResourcePids, theRequestDetails);
-		ourLog.info("MDM clear operation complete.  Removed {} MDM links and expunged {} Golden resources.", goldenResourcePids.size(), deleteOutcome.getExpungedResourcesCount());
-		return goldenResourcePids.size();
+		long retVal = 0;
+
+		for(String mdmType : myMdmSettings.getMdmRules().getMdmTypes()) {
+			List<Long> goldenResourcePids = myMdmLinkDaoSvc.deleteAllMdmLinksAndReturnGoldenResourcePids();
+			DeleteMethodOutcome deleteOutcome = myMdmGoldenResourceDeletingSvcImpl.expungeGoldenResourcePids(goldenResourcePids, null, theRequestDetails);
+			ourLog.info("MDM clear operation on type {} complete.  Removed {} MDM links and expunged {} Golden resources.", mdmType, goldenResourcePids.size(), deleteOutcome.getExpungedResourcesCount());
+			retVal += goldenResourcePids.size();
+		}
+		ourLog.info("MDM clear complete expunged a total of golden resources.", retVal);
+		return retVal;
 	}
 }
 

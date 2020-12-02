@@ -36,9 +36,9 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	/**
-	 * Attempt to find a currently matching Person, based on the presence of an {@link MdmLink} entity.
+	 * Attempt to find a currently matching Golden Resource, based on the presence of an {@link MdmLink} entity.
 	 *
-	 * @param theTarget the {@link IAnyResource} that we want to find candidate Persons for.
+	 * @param theTarget the {@link IAnyResource} that we want to find candidate Golden Resources for.
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
@@ -49,9 +49,9 @@ public class FindCandidateByLinkSvc extends BaseCandidateFinder {
 		if (targetPid != null) {
 			Optional<MdmLink> oLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(targetPid);
 			if (oLink.isPresent()) {
-				ResourcePersistentId personPid = new ResourcePersistentId(oLink.get().getGoldenResourcePid());
+				ResourcePersistentId goldenResourcePid = new ResourcePersistentId(oLink.get().getGoldenResourcePid());
 				ourLog.debug("Resource previously linked. Using existing link.");
-					retval.add(new MatchedGoldenResourceCandidate(personPid, oLink.get()));
+					retval.add(new MatchedGoldenResourceCandidate(goldenResourcePid, oLink.get()));
 			}
 		}
 		return retval;

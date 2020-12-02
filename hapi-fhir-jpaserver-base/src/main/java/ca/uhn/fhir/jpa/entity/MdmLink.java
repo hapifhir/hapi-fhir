@@ -53,7 +53,6 @@ public class MdmLink {
 	private static final int LINK_SOURCE_LENGTH = 16;
 	public static final int TARGET_TYPE_LENGTH = 40;
 
-
 	@SequenceGenerator(name = "SEQ_EMPI_LINK_ID", sequenceName = "SEQ_EMPI_LINK_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_EMPI_LINK_ID")
 	@Id

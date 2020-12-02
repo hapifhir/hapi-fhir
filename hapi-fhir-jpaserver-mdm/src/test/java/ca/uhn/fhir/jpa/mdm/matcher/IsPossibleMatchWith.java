@@ -25,13 +25,13 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
 		List<MdmLink> mdmLinks = getMdmLinksForTarget(theIncomingResource, MdmMatchResultEnum.POSSIBLE_MATCH);
 
-		List<Long> personPidsToMatch = myBaseResources.stream()
+		List<Long> goldenResourcePidsToMatch = myBaseResources.stream()
 			.map(this::getMatchedResourcePidFromResource)
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
 
-		if (personPidsToMatch.isEmpty()) {
-			personPidsToMatch = myBaseResources.stream()
+		if (goldenResourcePidsToMatch.isEmpty()) {
+			goldenResourcePidsToMatch = myBaseResources.stream()
 				.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
 				.collect(Collectors.toList());
 		}
@@ -40,7 +40,7 @@ public class IsPossibleMatchWith extends BaseGoldenResourceMatcher {
 			.stream().map(MdmLink::getGoldenResourcePid)
 			.collect(Collectors.toList());
 
-		return mdmLinkGoldenResourcePids.containsAll(personPidsToMatch);
+		return mdmLinkGoldenResourcePids.containsAll(goldenResourcePidsToMatch);
 	}
 
 	@Override

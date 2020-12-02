@@ -25,5 +25,5 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IMdmLinkUpdaterSvc {
 	IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theTarget, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext);
-	void notDuplicatePerson(IAnyResource theGoldenResource, IAnyResource theTarget, MdmTransactionContext theMdmContext);
+	void notDuplicateGoldenResource(IAnyResource theGoldenResource, IAnyResource theTarget, MdmTransactionContext theMdmContext);
 }

@@ -21,6 +21,7 @@ package ca.uhn.fhir.mdm.api;
  */
 
 public class MdmMatchEvaluation {
+
 	public final boolean match;
 	public final double score;
 

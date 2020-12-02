@@ -1,13 +1,13 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
-import ca.uhn.fhir.mdm.model.CanonicalEID;
-import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
-import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Person;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,7 +72,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testDeletePersonDeletesLinks() throws InterruptedException {
+	public void testDeleteGoldenResourceDeletesLinks() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildPaulPatient());
 		assertLinkCount(1);
 		Patient sourcePatient = getOnlyGoldenPatient();
@@ -83,7 +82,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 	@Test
 	public void testCreatePatientWithMdmTagForbidden() throws InterruptedException {
-		//Creating a person with the MDM-MANAGED tag should fail
+		//Creating a golden resource with the MDM-MANAGED tag should fail
 		Patient patient = new Patient();
 		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
@@ -119,7 +118,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testCreatingPersonWithInsufficentMDMAttributesIsNotMDMProcessed() throws InterruptedException {
+	public void testCreatingGoldenResourceWithInsufficentMDMAttributesIsNotMDMProcessed() throws InterruptedException {
 		myMdmHelper.doCreateResource(new Patient(), true);
 		assertLinkCount(0);
 	}
@@ -158,7 +157,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testPersonRecordsManagedByMdmAllShareSameTag() throws InterruptedException {
+	public void testGoldenResourceRecordsManagedByMdmAllShareSameTag() throws InterruptedException {
 		myMdmHelper.createWithLatch(buildJanePatient());
 		myMdmHelper.createWithLatch(buildPaulPatient());
 
@@ -166,22 +165,22 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceSearchParameterMap());
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
-		for (IBaseResource person : resources) {
-			assertThat(person.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED), is(notNullValue()));
+		for (IBaseResource r : resources) {
+			assertThat(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED), is(notNullValue()));
 		}
 	}
 
 	@Test
-	public void testNonMdmManagedPersonCannotHaveMdmManagedTagAddedToThem() {
-		//Person created manually.
-		Person person = new Person();
-		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(person, true);
+	public void testNonMdmManagedGoldenResourceCannotHaveMdmManagedTagAddedToThem() {
+		// GoldenResource created manually.
+		Patient patient = new Patient();
+		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
 		assertNotNull(daoMethodOutcome.getId());
 
-		//Updating that person to set them as MDM managed is not allowed.
-		person.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
+		//Updating that patient to set them as MDM managed is not allowed.
+		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
 		try {
-			myMdmHelper.doUpdateResource(person, true);
+			myMdmHelper.doUpdateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
@@ -189,8 +188,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testMdmManagedPersonCannotBeModifiedByPersonUpdateRequest() throws InterruptedException {
-		// When MDM is enabled, only the MDM system is allowed to modify Person links of Persons with the MDM-MANAGED tag.
+	public void testMdmManagedGoldenResourceCannotBeModifiedByGoldenResourceUpdateRequest() throws InterruptedException {
+		// When MDM is enabled, only the MDM system is allowed to modify GoldenResource links of GoldenResources with the MDM-MANAGED tag.
 		Patient patient = new Patient();
 		IIdType patientId = myMdmHelper.createWithLatch(buildPaulPatient()).getDaoMethodOutcome().getId().toUnqualifiedVersionless();
 
@@ -223,7 +222,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testWhenASingularPatientUpdatesExternalEidThatPersonEidIsUpdated() throws InterruptedException {
+	public void testWhenASingularPatientUpdatesExternalEidThatGoldenResourceEidIsUpdated() throws InterruptedException {
 		Patient jane = addExternalEID(buildJanePatient(), "some_eid");
 		MdmHelperR4.OutcomeAndLogMessageWrapper latch = myMdmHelper.createWithLatch(jane);
 		jane.setId(latch.getDaoMethodOutcome().getId());
@@ -231,8 +230,8 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		jane = addExternalEID(jane, "some_new_eid");
 
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcomeWrapper = myMdmHelper.updateWithLatch(jane);
-		IAnyResource person = getGoldenResourceFromTargetResource(jane);
-		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(person);
+		IAnyResource patient = getGoldenResourceFromTargetResource(jane);
+		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
 		assertThat(externalEids, hasSize(1));
 		assertThat("some_new_eid", is(equalTo(externalEids.get(0).getValue())));
 	}

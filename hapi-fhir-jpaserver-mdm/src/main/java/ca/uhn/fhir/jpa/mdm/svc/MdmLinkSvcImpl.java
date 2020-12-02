@@ -29,7 +29,6 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -45,6 +44,7 @@ import java.util.Optional;
  */
 @Service
 public class MdmLinkSvcImpl implements IMdmLinkSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -52,15 +52,13 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 	@Autowired
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
-	private GoldenResourceHelper myGoldenResourceHelper;
-	@Autowired
 	private IdHelperService myIdHelperService;
 
 	@Override
 	@Transactional
-	public void updateLink(IAnyResource thePerson, IAnyResource theTarget, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		if (theMatchOutcome.isPossibleDuplicate() && personsLinkedAsNoMatch(thePerson, theTarget)) {
-			log(theMdmTransactionContext, thePerson.getIdElement().toUnqualifiedVersionless() +
+	public void updateLink(IAnyResource theGoldenResource, IAnyResource theTarget, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+		if (theMatchOutcome.isPossibleDuplicate() && goldenResourceLinkedAsNoMatch(theGoldenResource, theTarget)) {
+			log(theMdmTransactionContext, theGoldenResource.getIdElement().toUnqualifiedVersionless() +
 				" is linked as NO_MATCH with " +
 				theTarget.getIdElement().toUnqualifiedVersionless() +
 				" not linking as POSSIBLE_DUPLICATE.");
@@ -68,18 +66,18 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		}
 
 		MdmMatchResultEnum matchResultEnum = theMatchOutcome.getMatchResultEnum();
-		validateRequestIsLegal(thePerson, theTarget, matchResultEnum, theLinkSource);
+		validateRequestIsLegal(theGoldenResource, theTarget, matchResultEnum, theLinkSource);
 
-		myMdmResourceDaoSvc.upsertGoldenResource(thePerson, theMdmTransactionContext.getResourceType());
-		createOrUpdateLinkEntity(thePerson, theTarget, theMatchOutcome, theLinkSource, theMdmTransactionContext);
+		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmTransactionContext.getResourceType());
+		createOrUpdateLinkEntity(theGoldenResource, theTarget, theMatchOutcome, theLinkSource, theMdmTransactionContext);
 	}
 
-	private boolean personsLinkedAsNoMatch(IAnyResource thePerson, IAnyResource theTarget) {
-		Long personId = myIdHelperService.getPidOrThrowException(thePerson);
+	private boolean goldenResourceLinkedAsNoMatch(IAnyResource theGoldenResource, IAnyResource theTarget) {
+		Long goldenResourceId = myIdHelperService.getPidOrThrowException(theGoldenResource);
 		Long targetId = myIdHelperService.getPidOrThrowException(theTarget);
 		// TODO perf collapse into one query
-		return myMdmLinkDaoSvc.getMdmLinksByPersonPidTargetPidAndMatchResult(personId, targetId, MdmMatchResultEnum.NO_MATCH).isPresent() ||
-			myMdmLinkDaoSvc.getMdmLinksByPersonPidTargetPidAndMatchResult(targetId, personId, MdmMatchResultEnum.NO_MATCH).isPresent();
+		return myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(goldenResourceId, targetId, MdmMatchResultEnum.NO_MATCH).isPresent() ||
+			myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(targetId, goldenResourceId, MdmMatchResultEnum.NO_MATCH).isPresent();
 	}
 
 	@Override
@@ -120,12 +118,12 @@ public class MdmLinkSvcImpl implements IMdmLinkSvc {
 		return theIncomingSource == MdmLinkSourceEnum.AUTO && theExistingSource.isManual();
 	}
 
-	private Optional<MdmLink> getMdmLinkForGoldenResourceTargetPair(IAnyResource thePerson, IAnyResource theCandidate) {
-		if (thePerson.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
+	private Optional<MdmLink> getMdmLinkForGoldenResourceTargetPair(IAnyResource theGoldenResource, IAnyResource theCandidate) {
+		if (theGoldenResource.getIdElement().getIdPart() == null || theCandidate.getIdElement().getIdPart() == null) {
 			return Optional.empty();
 		} else {
 			return myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(
-				myIdHelperService.getPidOrNull(thePerson),
+				myIdHelperService.getPidOrNull(theGoldenResource),
 				myIdHelperService.getPidOrNull(theCandidate)
 			);
 		}

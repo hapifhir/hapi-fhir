@@ -54,47 +54,47 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 
 	@Override
-	public IAnyResource mergeGoldenResources(String theFromPersonId, String theToPersonId, MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource fromPerson = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPersonId);
-		IAnyResource toPerson = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPersonId);
-		myMdmControllerHelper.validateMergeResources(fromPerson, toPerson);
-		myMdmControllerHelper.validateSameVersion(fromPerson, theFromPersonId);
-		myMdmControllerHelper.validateSameVersion(toPerson, theToPersonId);
+	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
+		IAnyResource toGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
+		myMdmControllerHelper.validateMergeResources(fromGoldenResource, toGoldenResource);
+		myMdmControllerHelper.validateSameVersion(fromGoldenResource, theFromGoldenResourceId);
+		myMdmControllerHelper.validateSameVersion(toGoldenResource, theToGoldenResourceId);
 
-		return myGoldenResourceMergerSvc.mergeGoldenResources(fromPerson, toPerson, theMdmTransactionContext);
+		return myGoldenResourceMergerSvc.mergeGoldenResources(fromGoldenResource, toGoldenResource, theMdmTransactionContext);
 	}
 
 	@Override
-	public Stream<MdmLinkJson> queryLinks(@Nullable String thePersonId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext) {
-		IIdType personId = MdmControllerUtil.extractPersonIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, thePersonId);
+	public Stream<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+		IIdType goldenResourceId = MdmControllerUtil.extractGoldenResourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		IIdType targetId = MdmControllerUtil.extractTargetIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theTargetId);
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
 		MdmLinkSourceEnum linkSource = MdmControllerUtil.extractLinkSourceOrNull(theLinkSource);
 
-		return myMdmLinkQuerySvc.queryLinks(personId, targetId, matchResult, linkSource, theMdmTransactionContext);
+		return myMdmLinkQuerySvc.queryLinks(goldenResourceId, targetId, matchResult, linkSource, theMdmTransactionContext);
 	}
 
 	@Override
 	public Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmTransactionContext) {
-		return myMdmLinkQuerySvc.getDuplicatePersons(theMdmTransactionContext);
+		return myMdmLinkQuerySvc.getDuplicateGoldenResources(theMdmTransactionContext);
 	}
 
 	@Override
 	public IAnyResource updateLink(String theGoldenResourceId, String theTargetId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
-		IAnyResource person = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		IAnyResource target = myMdmControllerHelper.getLatestTargetFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
-		myMdmControllerHelper.validateSameVersion(person, theGoldenResourceId);
+		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(target, theTargetId);
 
-		return myIMdmLinkUpdaterSvc.updateLink(person, target, matchResult, theMdmTransactionContext);
+		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, target, matchResult, theMdmTransactionContext);
 	}
 
 	@Override
-	public void notDuplicateGoldenResource(String thePersonId, String theTargetPersonId, MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource person = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, thePersonId);
-		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetPersonId);
+	public void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
+		IAnyResource target = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetGoldenResourceId);
 
-		myIMdmLinkUpdaterSvc.notDuplicatePerson(person, target, theMdmTransactionContext);
+		myIMdmLinkUpdaterSvc.notDuplicateGoldenResource(goldenResource, target, theMdmTransactionContext);
 	}
 }

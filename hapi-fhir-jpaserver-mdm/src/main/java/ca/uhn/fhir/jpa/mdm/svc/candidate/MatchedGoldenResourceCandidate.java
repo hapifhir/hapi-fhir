@@ -34,12 +34,12 @@ public class MatchedGoldenResourceCandidate {
 		myMdmMatchOutcome = theMdmMatchOutcome;
 	}
 
-	public MatchedGoldenResourceCandidate(ResourcePersistentId thePersonPid, MdmLink theMdmLink) {
-		myCandidateGoldenResourcePid = thePersonPid;
+	public MatchedGoldenResourceCandidate(ResourcePersistentId theGoldenResourcePid, MdmLink theMdmLink) {
+		myCandidateGoldenResourcePid = theGoldenResourcePid;
 		myMdmMatchOutcome = new MdmMatchOutcome(theMdmLink.getVector(), theMdmLink.getScore()).setMatchResultEnum(theMdmLink.getMatchResult());
 	}
 
-	public ResourcePersistentId getCandidatePersonPid() {
+	public ResourcePersistentId getCandidateGoldenResourcePid() {
 		return myCandidateGoldenResourcePid;
 	}
 

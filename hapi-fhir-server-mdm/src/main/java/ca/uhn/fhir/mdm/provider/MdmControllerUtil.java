@@ -41,11 +41,11 @@ public class MdmControllerUtil {
 		return MdmLinkSourceEnum.valueOf(theLinkSource);
 	}
 
-	public static IIdType extractPersonIdDtOrNull(String theName, String thePersonId) {
-		if (thePersonId == null) {
+	public static IIdType extractGoldenResourceIdDtOrNull(String theName, String theGoldenResourceId) {
+		if (theGoldenResourceId == null) {
 			return null;
 		}
-		return getGoldenIdDtOrThrowException(theName, thePersonId);
+		return getGoldenIdDtOrThrowException(theName, theGoldenResourceId);
 	}
 
 	public static IIdType extractTargetIdDtOrNull(String theName, String theTargetId) {

@@ -43,15 +43,16 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testIncomingPatientWithEIDThatMatchesPersonWithHapiEidAddsExternalEidsToPerson() {
-		// Existing Person with system-assigned EID found linked from matched Patient.  incoming Patient has EID.  Replace Person system-assigned EID with Patient EID.
+	public void testIncomingPatientWithEIDThatMatchesGoldenResourceWithHapiEidAddsExternalEidsToGoldenResource() {
+		// Existing GoldenResource with system-assigned EID found linked from matched Patient.  incoming Patient has EID.
+		// Replace GoldenResource system-assigned EID with Patient EID.
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		assertLinksMatchResult(MATCH);
 		assertLinksCreatedNewResource(true);
 		assertLinksMatchedByEid(false);
 
-		IAnyResource janePerson = getGoldenResourceFromTargetResource(patient);
-		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janePerson);
+		IAnyResource janeGoldenResource = getGoldenResourceFromTargetResource(patient);
+		List<CanonicalEID> hapiEid = myEidHelper.getHapiEid(janeGoldenResource);
 		String foundHapiEid = hapiEid.get(0).getValue();
 
 		Patient janePatient = buildJanePatient();
@@ -62,7 +63,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksCreatedNewResource(true, false);
 		assertLinksMatchedByEid(false, false);
 
-		//We want to make sure the patients were linked to the same person.
+		//We want to make sure the patients were linked to the same GoldenResource.
 		assertThat(patient, is(sameGoldenResourceAs(janePatient)));
 
 		Patient sourcePatient = (Patient) getGoldenResourceFromTargetResource(patient);
@@ -111,9 +112,9 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		clearExternalEIDs(patient2);
 		addExternalEID(patient2, "id_6");
 
-		//At this point, there should be 5 EIDs on the person
-		Patient personFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
-		assertThat(personFromTarget.getIdentifier(), hasSize(5));
+		//At this point, there should be 5 EIDs on the GoldenResource
+		Patient patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
+		assertThat(patientFromTarget.getIdentifier(), hasSize(5));
 
 		updatePatientAndUpdateLinks(patient2);
 		assertLinksMatchResult(MATCH, MATCH);
@@ -122,13 +123,12 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 		assertThat(patient1, is(sameGoldenResourceAs(patient2)));
 
-		personFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
-		assertThat(personFromTarget.getIdentifier(), hasSize(6));
+		patientFromTarget = (Patient) getGoldenResourceFromTargetResource(patient2);
+		assertThat(patientFromTarget.getIdentifier(), hasSize(6));
 	}
 
 	@Test
-	public void testDuplicatePersonLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
-
+	public void testDuplicateGoldenResourceLinkIsCreatedWhenAnIncomingPatientArrivesWithEIDThatMatchesAnotherEIDPatient() {
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "eid-1");
 		addExternalEID(patient1, "eid-11");
@@ -153,7 +153,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 			.map(myIdHelperService::getPidOrNull)
 			.collect(Collectors.toList());
 
-		//The two Persons related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
+		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
 		assertThat(mdmLink.getGoldenResourcePid(), is(in(duplicatePids)));
 		assertThat(mdmLink.getTargetPid(), is(in(duplicatePids)));
@@ -161,7 +161,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 	@Test
 	// Test Case #5
-	public void testWhenPatientEidUpdateWouldCauseALinkChangeThatDuplicatePersonIsCreatedInstead() {
+	public void testWhenPatientEidUpdateWouldCauseALinkChangeThatDuplicateGoldenResourceIsCreatedInstead() {
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "eid-1");
 		addExternalEID(patient1, "eid-11");
@@ -185,12 +185,12 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		assertLinksCreatedNewResource(true, true, false);
 		assertLinksMatchedByEid(false, false, true);
 
-		//Now, Patient 2 and 3 are linked, and the person has 2 eids.
+		//Now, Patient 2 and 3 are linked, and the GoldenResource has 2 eids.
 		assertThat(patient2, is(sameGoldenResourceAs(patient3)));
 
 		//Now lets change one of the EIDs on the second patient to one that matches our original patient.
-		//This should create a situation in which the incoming EIDs are matched to _two_ different persons. In this case, we want to
-		//set them all to possible_match, and set the two persons as possible duplicates.
+		//This should create a situation in which the incoming EIDs are matched to _two_ different GoldenResources. In this case, we want to
+		//set them all to possible_match, and set the two GoldenResources as possible duplicates.
 		patient2.getIdentifier().clear();
 		addExternalEID(patient2, "eid-11");
 		addExternalEID(patient2, "eid-22");

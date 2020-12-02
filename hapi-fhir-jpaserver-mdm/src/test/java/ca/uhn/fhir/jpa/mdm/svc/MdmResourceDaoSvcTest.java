@@ -35,13 +35,13 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		MdmUtil.setGoldenResourceRedirected(badSourcePatient);
 		myPatientDao.update(badSourcePatient);
 
-		Optional<IAnyResource> foundPerson = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertTrue(foundPerson.isPresent());
-		assertThat(foundPerson.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
+		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
+		assertTrue(foundGoldenResource.isPresent());
+		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue(), is(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue()));
 	}
 
 	@Test
-	public void testSearchPersonByEidExcludesNonMdmManaged() {
+	public void testSearcGoldenResourceByEidExcludesNonMdmManaged() {
 		Patient goodSourcePatient = addExternalEID(createGoldenPatient(), TEST_EID);
 		myPatientDao.update(goodSourcePatient);
 

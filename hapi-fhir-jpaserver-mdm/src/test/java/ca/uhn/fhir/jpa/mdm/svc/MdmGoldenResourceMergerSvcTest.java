@@ -37,7 +37,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
+public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
+
 	public static final String GIVEN_NAME = "Jenn";
 	public static final String FAMILY_NAME = "Chan";
 	public static final String POSTAL_CODE = "M6G 1B4";
@@ -114,7 +115,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 	}
 
 	private MdmTransactionContext createMdmContext() {
-		MdmTransactionContext mdmTransactionContext = new MdmTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), MdmTransactionContext.OperationType.MERGE_PERSONS);
+		MdmTransactionContext mdmTransactionContext = new MdmTransactionContext(TransactionLogMessages.createFromTransactionGuid(UUID.randomUUID().toString()), MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES);
 		mdmTransactionContext.setResourceType("Patient");
 		return mdmTransactionContext;
 	}
@@ -149,7 +150,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void fullFromEmptyTo() {
-		populatePerson(myFromGoldenPatient);
+		populatePatient(myFromGoldenPatient);
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
 		// TODO NG - Revisit when rules are ready
@@ -162,7 +163,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 	@Test
 	public void emptyFromFullTo() {
 		myFromGoldenPatient.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
-		populatePerson(myToGoldenPatient);
+		populatePatient(myToGoldenPatient);
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
 		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
@@ -176,7 +177,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		createMdmLink(myFromGoldenPatient, myTargetPatient1);
 
 		Patient mergedGoldenPatient = mergeGoldenPatients();
-		List<MdmLink> links = getNonRedirectLinksByPerson(mergedGoldenPatient);
+		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedGoldenPatient);
 		assertEquals(1, links.size());
 		assertThat(mergedGoldenPatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
@@ -186,7 +187,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		createMdmLink(myToGoldenPatient, myTargetPatient1);
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
-		List<MdmLink> links = getNonRedirectLinksByPerson(mergedSourcePatient);
+		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedSourcePatient);
 		assertEquals(1, links.size());
 		assertThat(mergedSourcePatient, is(possibleLinkedTo(myTargetPatient1)));
 	}
@@ -201,12 +202,12 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		createMdmLink(myToGoldenPatient, myTargetPatient1);
 
 		mergeGoldenPatients();
-		List<MdmLink> links = getNonRedirectLinksByPerson(myToGoldenPatient);
+		List<MdmLink> links = getNonRedirectLinksByGoldenResource(myToGoldenPatient);
 		assertEquals(1, links.size());
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 	}
 
-	private List<MdmLink> getNonRedirectLinksByPerson(Patient theGoldenPatient) {
+	private List<MdmLink> getNonRedirectLinksByGoldenResource(Patient theGoldenPatient) {
 		return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
 			.filter(link -> !link.isRedirect())
 			.collect(Collectors.toList());
@@ -223,7 +224,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		createMdmLink(myToGoldenPatient, myTargetPatient1);
 
 		mergeGoldenPatients();
-		List<MdmLink> links = getNonRedirectLinksByPerson(myToGoldenPatient);
+		List<MdmLink> links = getNonRedirectLinksByGoldenResource(myToGoldenPatient);
 		assertEquals(1, links.size());
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
@@ -239,7 +240,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		saveLink(toLink);
 
 		mergeGoldenPatients();
-		List<MdmLink> links = getNonRedirectLinksByPerson(myToGoldenPatient);
+		List<MdmLink> links = getNonRedirectLinksByGoldenResource(myToGoldenPatient);
 		assertEquals(1, links.size());
 		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
 		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
@@ -434,7 +435,7 @@ public class MdmPersonMergerSvcTest extends BaseMdmR4Test {
 		return myMdmLinkDaoSvc.createOrUpdateLinkEntity(theSourcePatient, theTargetPatient, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 	}
 
-	private void populatePerson(Patient theSourcePatient) {
+	private void populatePatient(Patient theSourcePatient) {
 		theSourcePatient.addName(new HumanName().addGiven(GIVEN_NAME).setFamily(FAMILY_NAME));
 		theSourcePatient.setGender(Enumerations.AdministrativeGender.FEMALE);
 		theSourcePatient.setBirthDateElement(new DateType("1981-01-01"));

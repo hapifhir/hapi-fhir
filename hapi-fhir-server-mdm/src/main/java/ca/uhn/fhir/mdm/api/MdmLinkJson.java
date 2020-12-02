@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 
 public class MdmLinkJson implements IModelJson {
+
 	@JsonProperty("goldenResourceId")
 	private String myGoldenResourceId;
 
@@ -51,7 +52,7 @@ public class MdmLinkJson implements IModelJson {
 	@JsonProperty("eidMatch")
 	private Boolean myEidMatch;
 
-	/** This link created a new person **/
+	/** This link created a new golden resource **/
 	@JsonProperty("linkCreatedNewGoldenResource")
 	private Boolean myLinkCreatedNewResource;
 

@@ -25,26 +25,17 @@ import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
-import ca.uhn.fhir.mdm.model.CanonicalIdentityAssuranceLevel;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.ContactPoint;
-import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.Person;
-import org.hl7.fhir.r4.model.Reference;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,8 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.context.FhirVersionEnum.DSTU3;
@@ -152,8 +141,8 @@ public class GoldenResourceHelper {
 	 * contract.
 	 *
 	 * @param theFrom Resource to clone the specified filed from
-	 * @param theTo Resource to clone the specified filed to
-	 * @param field Field name to be copied
+	 * @param theTo   Resource to clone the specified filed to
+	 * @param field   Field name to be copied
 	 */
 	private void cloneCompositeField(IBaseResource theFrom, IBaseResource theTo, String field) {
 		FhirTerser terser = myFhirContext.newTerser();
@@ -165,7 +154,7 @@ public class GoldenResourceHelper {
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
 
-		for (IBase theFromFieldValue: theFromFieldValues) {
+		for (IBase theFromFieldValue : theFromFieldValues) {
 			if (contains(theFromFieldValue, theToFieldValues)) {
 				continue;
 			}
@@ -216,7 +205,7 @@ public class GoldenResourceHelper {
 
 	/**
 	 * Updates EID on Golden Resource, based on the incoming target resource. If the incoming resource has an external EID, it is applied
-	 * to the Golden Resource, unless that person already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
+	 * to the Golden Resource, unless that golden resource already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
 	 * <p>
 	 * If running in multiple EID mode, then incoming EIDs are simply added to the Golden Resource without checking for matches.
 	 *
@@ -228,17 +217,22 @@ public class GoldenResourceHelper {
 		theTargetResource, MdmTransactionContext theMdmTransactionContext) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
 		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theTargetResource);
-		List<CanonicalEID> personOfficialEid = myEIDHelper.getExternalEid(theGoldenResource);
+		List<CanonicalEID> goldenResourceOfficialEid = myEIDHelper.getExternalEid(theGoldenResource);
 
-		if (!incomingTargetEid.isEmpty()) {
-			if (personOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
-				log(theMdmTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
-				addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingTargetEid);
-			} else if (!personOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(personOfficialEid, incomingTargetEid)) {
-				log(theMdmTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite person, as this EID is already present");
-			} else {
-				throw new IllegalArgumentException("This would create a duplicate person!");
-			}
+		if (incomingTargetEid.isEmpty()) {
+			return theGoldenResource;
+		}
+
+		if (goldenResourceOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
+			log(theMdmTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
+				+ " is applying this EIDs to its related Target Resource, as this Target Resource does not yet have an external EID");
+			addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingTargetEid);
+		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingTargetEid)) {
+			log(theMdmTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite Golden Resource, as this EID is already present");
+		} else {
+			throw new IllegalArgumentException(
+				String.format("Target EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
+					incomingTargetEid.toString(), goldenResourceOfficialEid.toString()));
 		}
 		return theGoldenResource;
 	}
@@ -267,7 +261,7 @@ public class GoldenResourceHelper {
 			}
 
 			BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>)
-					theGoldenResourceIdentifier.getChildByName(FIELD_NAME_IDENTIFIER);
+				theGoldenResourceIdentifier.getChildByName(FIELD_NAME_IDENTIFIER);
 			IBase goldenResourceNewIdentifier = childIdentifier.newInstance();
 			terser.cloneInto(base, goldenResourceNewIdentifier, true);
 
@@ -327,162 +321,37 @@ public class GoldenResourceHelper {
 	private <T extends IBase> boolean fromBooleanType(T theFlag) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case R4:
-				return ((BooleanType)theFlag).booleanValue();
+				return ((BooleanType) theFlag).booleanValue();
 			case DSTU3:
-				return ((org.hl7.fhir.dstu3.model.BooleanType)theFlag).booleanValue();
+				return ((org.hl7.fhir.dstu3.model.BooleanType) theFlag).booleanValue();
 		}
 		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
 	}
 
-	/**
-	 * To avoid adding duplicate
-	 *
-	 * @param thePerson
-	 * @param theIdentifier
-	 */
-	private void addIdentifierIfAbsent(org.hl7.fhir.dstu3.model.Person thePerson, org.hl7.fhir.dstu3.model.Identifier
-		theIdentifier) {
-		Optional<org.hl7.fhir.dstu3.model.Identifier> first = thePerson.getIdentifier().stream().filter(identifier -> identifier.getSystem().equals(theIdentifier.getSystem())).filter(identifier -> identifier.getValue().equals(theIdentifier.getValue())).findFirst();
-		if (first.isPresent()) {
-			return;
-		} else {
-			thePerson.addIdentifier(theIdentifier);
-		}
-	}
-
-	public void mergeFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
+	public void mergeFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource) {
 		//	TODO NG - Revisit when merge rules are defined
-		cloneCompositeField(theFromPerson, theToPerson, FIELD_NAME_IDENTIFIER);
+		cloneCompositeField(theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
 
 //		switch (myFhirContext.getVersion().getVersion()) {
 //			case R4:
-//				mergeR4PersonFields(theFromPerson, theToPerson);
+//				mergeR4PersonFields(theFromGoldenResource, theToGoldenResource);
 //				break;
 //			case DSTU3:
-//				mergeDstu3PersonFields(theFromPerson, theToPerson);
+//				mergeDstu3PersonFields(theFromGoldenResource, theToGoldenResource);
 //				break;
 //			default:
 //				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
 //		}
 	}
 
-	private void mergeR4PersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
-		Person fromPerson = (Person) theFromPerson;
-		Person toPerson = (Person) theToPerson;
-
-		mergeElementList(fromPerson, toPerson, HumanName.class, Person::getName, HumanName::equalsDeep);
-		mergeElementList(fromPerson, toPerson, Identifier.class, Person::getIdentifier, Identifier::equalsDeep);
-		mergeElementList(fromPerson, toPerson, Address.class, Person::getAddress, Address::equalsDeep);
-		mergeElementList(fromPerson, toPerson, ContactPoint.class, Person::getTelecom, ContactPoint::equalsDeep);
-		if (!toPerson.hasBirthDate()) {
-			toPerson.setBirthDate(fromPerson.getBirthDate());
-		}
-		if (!toPerson.hasGender()) {
-			toPerson.setGender(fromPerson.getGender());
-		}
-		if (!toPerson.hasPhoto()) {
-			toPerson.setPhoto(fromPerson.getPhoto());
-		}
-	}
-
-	private <P, T> void mergeElementList(P fromPerson, P
-		toPerson, Class<T> theBase, Function<P, List<T>> theGetList, BiPredicate<T, T> theEquals) {
-		List<T> fromList = theGetList.apply(fromPerson);
-		List<T> toList = theGetList.apply(toPerson);
-		List<T> itemsToAdd = new ArrayList<>();
-
-		for (T fromItem : fromList) {
-			if (toList.stream().noneMatch(t -> theEquals.test(fromItem, t))) {
-				itemsToAdd.add(fromItem);
-			}
-		}
-		toList.addAll(itemsToAdd);
-	}
-
-	private void mergeDstu3PersonFields(IBaseResource theFromPerson, IBaseResource theToPerson) {
-		org.hl7.fhir.dstu3.model.Person fromPerson = (org.hl7.fhir.dstu3.model.Person) theFromPerson;
-		org.hl7.fhir.dstu3.model.Person toPerson = (org.hl7.fhir.dstu3.model.Person) theToPerson;
-
-		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.HumanName.class, org.hl7.fhir.dstu3.model.Person::getName, org.hl7.fhir.dstu3.model.HumanName::equalsDeep);
-		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.Identifier.class, org.hl7.fhir.dstu3.model.Person::getIdentifier, org.hl7.fhir.dstu3.model.Identifier::equalsDeep);
-		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.Address.class, org.hl7.fhir.dstu3.model.Person::getAddress, org.hl7.fhir.dstu3.model.Address::equalsDeep);
-		mergeElementList(fromPerson, toPerson, org.hl7.fhir.dstu3.model.ContactPoint.class, org.hl7.fhir.dstu3.model.Person::getTelecom, org.hl7.fhir.dstu3.model.ContactPoint::equalsDeep);
-
-		if (!toPerson.hasBirthDate()) {
-			toPerson.setBirthDate(fromPerson.getBirthDate());
-		}
-		if (!toPerson.hasGender()) {
-			toPerson.setGender(fromPerson.getGender());
-		}
-		if (!toPerson.hasPhoto()) {
-			toPerson.setPhoto(fromPerson.getPhoto());
-		}
-	}
-
 	/**
-	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
-	 * the incoming resource also has an EID that does not match.
-	 *
-	 * @param theExistingPerson
-	 * @param theComparingPerson
-	 * @return
+	 * An incoming resource is a potential duplicate if it matches a target that has a golden resource with an official
+	 * EID, but the incoming resource also has an EID that does not match.
 	 */
-	public boolean isPotentialDuplicate(IAnyResource theExistingPerson, IAnyResource theComparingPerson) {
-		List<CanonicalEID> externalEidsPerson = myEIDHelper.getExternalEid(theExistingPerson);
-		List<CanonicalEID> externalEidsResource = myEIDHelper.getExternalEid(theComparingPerson);
-		return !externalEidsPerson.isEmpty() && !externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsPerson);
-	}
-
-	public IBaseBackboneElement newPersonLink(IIdType theTargetId, CanonicalIdentityAssuranceLevel theAssuranceLevel) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				return newR4PersonLink(theTargetId, theAssuranceLevel);
-			case DSTU3:
-				return newDstu3PersonLink(theTargetId, theAssuranceLevel);
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
-	}
-
-	private IBaseBackboneElement newR4PersonLink(IIdType theTargetId, CanonicalIdentityAssuranceLevel
-		theAssuranceLevel) {
-		Person.PersonLinkComponent retval = new Person.PersonLinkComponent();
-		retval.setTarget(new Reference(theTargetId));
-		retval.setAssurance(theAssuranceLevel.toR4());
-		return retval;
-	}
-
-	private IBaseBackboneElement newDstu3PersonLink(IIdType theTargetId, CanonicalIdentityAssuranceLevel
-		theAssuranceLevel) {
-		org.hl7.fhir.dstu3.model.Person.PersonLinkComponent retval = new org.hl7.fhir.dstu3.model.Person.PersonLinkComponent();
-		retval.setTarget(new org.hl7.fhir.dstu3.model.Reference(theTargetId));
-		retval.setAssurance(theAssuranceLevel.toDstu3());
-		return retval;
-	}
-
-	public void setLinks(IAnyResource thePersonResource, List<IBaseBackboneElement> theNewLinks) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				setLinksR4(thePersonResource, theNewLinks);
-				break;
-			case DSTU3:
-				setLinksDstu3(thePersonResource, theNewLinks);
-				break;
-			default:
-				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-		}
-	}
-
-	private void setLinksDstu3(IAnyResource thePersonResource, List<IBaseBackboneElement> theLinks) {
-		org.hl7.fhir.dstu3.model.Person person = (org.hl7.fhir.dstu3.model.Person) thePersonResource;
-		List<org.hl7.fhir.dstu3.model.Person.PersonLinkComponent> links = (List<org.hl7.fhir.dstu3.model.Person.PersonLinkComponent>) (List<?>) theLinks;
-		person.setLink(links);
-	}
-
-	private void setLinksR4(IAnyResource thePersonResource, List<IBaseBackboneElement> theLinks) {
-		Person person = (Person) thePersonResource;
-		List<Person.PersonLinkComponent> links = (List<Person.PersonLinkComponent>) (List<?>) theLinks;
-		person.setLink(links);
+	public boolean isPotentialDuplicate(IAnyResource theExistingGoldenResource, IAnyResource theComparingGoldenResource) {
+		List<CanonicalEID> externalEidsGoldenResource = myEIDHelper.getExternalEid(theExistingGoldenResource);
+		List<CanonicalEID> externalEidsResource = myEIDHelper.getExternalEid(theComparingGoldenResource);
+		return !externalEidsGoldenResource.isEmpty() && !externalEidsResource.isEmpty() && !myEIDHelper.eidMatchExists(externalEidsResource, externalEidsGoldenResource);
 	}
 
 	private void log(MdmTransactionContext theMdmTransactionContext, String theMessage) {
@@ -491,7 +360,7 @@ public class GoldenResourceHelper {
 	}
 
 	public void handleExternalEidAddition(IAnyResource theGoldenResource, IAnyResource theTargetResource, MdmTransactionContext
-			  theMdmTransactionContext) {
+		theMdmTransactionContext) {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theTargetResource);
 		if (!eidFromResource.isEmpty()) {
 			updateGoldenResourceExternalEidFromTargetResource(theGoldenResource, theTargetResource, theMdmTransactionContext);

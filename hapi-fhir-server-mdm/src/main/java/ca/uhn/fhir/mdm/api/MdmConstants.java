@@ -22,12 +22,12 @@ package ca.uhn.fhir.mdm.api;
 
 public class MdmConstants {
 	/**
-	 * TAG system for Person resources which are managed by HAPI MDM.
+	 * TAG system for Golden Resources which are managed by HAPI MDM.
 	 */
 
 	public static final String SYSTEM_MDM_MANAGED = "https://hapifhir.org/NamingSystem/managing-mdm-system";
 	public static final String CODE_HAPI_MDM_MANAGED = "HAPI-MDM";
-	public static final String DISPLAY_HAPI_MDM_MANAGED = "This Person can only be modified by Smile CDR's MDM system.";
+	public static final String DISPLAY_HAPI_MDM_MANAGED = "This Golden Resource can only be modified by Smile CDR's MDM system.";
 	public static final String CODE_NO_MDM_MANAGED = "NO-MDM";
 	public static final String HAPI_ENTERPRISE_IDENTIFIER_SYSTEM = "http://hapifhir.io/fhir/NamingSystem/mdm-golden-resource-enterprise-id";
 	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "*";

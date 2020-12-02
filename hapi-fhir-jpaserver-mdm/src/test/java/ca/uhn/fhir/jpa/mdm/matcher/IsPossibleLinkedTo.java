@@ -10,14 +10,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A Matcher which allows us to check that a target patient/practitioner at a given link level.
- * is linked to a set of patients/practitioners via a person.
- *
+ * A Matcher which allows us to check that a target resource at a given link level
+ * is linked to a set of target resources via a golden resource.
  */
 public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 
-	private List<Long> baseResourcePersonPids;
-	private Long incomingResourcePersonPid;
+	private List<Long> baseResourceGoldenResourcePids;
+	private Long incomingResourceGoldenResourcePid;
 
 	protected IsPossibleLinkedTo(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theTargetResources) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theTargetResources);
@@ -25,16 +24,16 @@ public class IsPossibleLinkedTo extends BaseGoldenResourceMatcher {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theGoldenResource) {
-		incomingResourcePersonPid = myIdHelperService.getPidOrNull(theGoldenResource);
+		incomingResourceGoldenResourcePid = myIdHelperService.getPidOrNull(theGoldenResource);
 
-		//OK, lets grab all the person pids of the resources passed in via the constructor.
-		baseResourcePersonPids = myBaseResources.stream()
+		//OK, lets grab all the golden resource pids of the resources passed in via the constructor.
+		baseResourceGoldenResourcePids = myBaseResources.stream()
 			.flatMap(iBaseResource -> getPossibleMatchedGoldenResourcePidsFromTarget(iBaseResource).stream())
 			.collect(Collectors.toList());
 
-		//The resources are linked if all person pids match the incoming person pid.
-		return baseResourcePersonPids.stream()
-			.allMatch(pid -> pid.equals(incomingResourcePersonPid));
+		//The resources are linked if all golden resource pids match the incoming golden resource pid.
+		return baseResourceGoldenResourcePids.stream()
+			.allMatch(pid -> pid.equals(incomingResourceGoldenResourcePid));
 	}
 
 	@Override

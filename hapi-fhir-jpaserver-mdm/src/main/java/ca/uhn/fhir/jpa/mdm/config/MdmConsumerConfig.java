@@ -128,7 +128,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmGoldenResourceFindingSvc mdmPersonFindingSvc() {
+	MdmGoldenResourceFindingSvc mdmGoldenResourceFindingSvc() {
 		return new MdmGoldenResourceFindingSvc();
 	}
 
@@ -163,7 +163,7 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	IGoldenResourceMergerSvc mdmPersonMergerSvc() {
+	IGoldenResourceMergerSvc mdmGoldenResourceMergerSvc() {
 		return new GoldenResourceMergerSvcImpl();
 	}
 

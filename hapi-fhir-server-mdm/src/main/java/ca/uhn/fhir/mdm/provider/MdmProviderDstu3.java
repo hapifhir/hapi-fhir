@@ -118,7 +118,7 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 		String resourceType = getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 
 		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS, resourceType));
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES, resourceType));
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)

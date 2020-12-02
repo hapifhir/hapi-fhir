@@ -10,12 +10,12 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import java.util.Optional;
 
-public class IsMatchedToAPerson extends TypeSafeMatcher<IAnyResource> {
+public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 
 	private final IdHelperService myIdHelperService;
 	private final MdmLinkDaoSvc myMdmLinkDaoSvc;
 
-	public IsMatchedToAPerson(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
+	public IsMatchedToAGoldenResource(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
 		myIdHelperService = theIdHelperService;
 		myMdmLinkDaoSvc = theMdmLinkDaoSvc;
 	}
@@ -28,10 +28,10 @@ public class IsMatchedToAPerson extends TypeSafeMatcher<IAnyResource> {
 
 	@Override
 	public void describeTo(Description theDescription) {
-		theDescription.appendText("patient/practitioner was not linked to a Person.");
+		theDescription.appendText("target was not linked to a Golden Resource.");
 	}
 
 	public static Matcher<IAnyResource> matchedToAGoldenResource(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc) {
-		return new IsMatchedToAPerson(theIdHelperService, theMdmLinkDaoSvc);
+		return new IsMatchedToAGoldenResource(theIdHelperService, theMdmLinkDaoSvc);
 	}
 }

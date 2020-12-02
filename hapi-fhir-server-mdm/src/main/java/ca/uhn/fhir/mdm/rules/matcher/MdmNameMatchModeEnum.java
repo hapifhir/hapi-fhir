@@ -20,7 +20,7 @@ package ca.uhn.fhir.mdm.rules.matcher;
  * #L%
  */
 
-public enum MdmPersonNameMatchModeEnum {
+public enum MdmNameMatchModeEnum {
 	ANY_ORDER,
 	FIRST_AND_LAST
 }

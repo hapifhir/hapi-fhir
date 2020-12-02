@@ -51,12 +51,12 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theBaseResource);
 		if (!eidFromResource.isEmpty()) {
 			for (CanonicalEID eid : eidFromResource) {
-				Optional<IAnyResource> oFoundPerson = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType());
-				if (oFoundPerson.isPresent()) {
-					IAnyResource foundPerson = oFoundPerson.get();
-					Long pidOrNull = myIdHelperService.getPidOrNull(foundPerson);
+				Optional<IAnyResource> oFoundGoldenResource = myMdmResourceDaoSvc.searchGoldenResourceByEID(eid.getValue(), theBaseResource.getIdElement().getResourceType());
+				if (oFoundGoldenResource.isPresent()) {
+					IAnyResource foundGoldenResource = oFoundGoldenResource.get();
+					Long pidOrNull = myIdHelperService.getPidOrNull(foundGoldenResource);
 					MatchedGoldenResourceCandidate mpc = new MatchedGoldenResourceCandidate(new ResourcePersistentId(pidOrNull), MdmMatchOutcome.EID_MATCH);
-					ourLog.debug("Matched {} by EID {}", foundPerson.getIdElement(), eid);
+					ourLog.debug("Matched {} by EID {}", foundGoldenResource.getIdElement(), eid);
 					retval.add(mpc);
 				}
 			}

@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class MdmProviderMergePersonsR4Test extends BaseProviderR4Test {
+public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 	private Patient myFromGoldenPatient;
 	private StringType myFromGoldenPatientId;
@@ -70,10 +70,10 @@ public class MdmProviderMergePersonsR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testUnmanagedMerge() {
-		StringType fromPersonId = new StringType(createPatient().getIdElement().getValue());
-		StringType toPersonId = new StringType(createPatient().getIdElement().getValue());
+		StringType fromGoldenResourceId = new StringType(createPatient().getIdElement().getValue());
+		StringType toGoldenResourceId = new StringType(createPatient().getIdElement().getValue());
 		try {
-			myMdmProviderR4.mergeGoldenResources(fromPersonId, toPersonId, myRequestDetails);
+			myMdmProviderR4.mergeGoldenResources(fromGoldenResourceId, toGoldenResourceId, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Only MDM managed resources can be merged. MDM managed resources must have the HAPI-MDM tag.", e.getMessage());
@@ -105,24 +105,31 @@ public class MdmProviderMergePersonsR4Test extends BaseProviderR4Test {
 	@Test
 	public void testBadParams() {
 		try {
-			myMdmProviderR4.mergeGoldenResources(new StringType("Person/1"), new StringType("Person/1"), myRequestDetails);
+			myMdmProviderR4.mergeGoldenResources(new StringType("Patient/1"), new StringType("Patient/1"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("fromPersonId must be different from toPersonId", e.getMessage());
+			assertEquals("fromGoldenResourceId must be different from toGoldenResourceId", e.getMessage());
 		}
 
 		try {
-			myMdmProviderR4.mergeGoldenResources(new StringType("Person/abc"), myToGoldenPatientId, myRequestDetails);
+			myMdmProviderR4.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Person/abc is not known", e.getMessage());
+			assertEquals("Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
-			myMdmProviderR4.mergeGoldenResources(myFromGoldenPatientId, new StringType("Person/abc"), myRequestDetails);
+			myMdmProviderR4.mergeGoldenResources(new StringType("Organization/abc"), myToGoldenPatientId, myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Person/abc is not known", e.getMessage());
+			assertEquals("Resource Organization/abc is not known", e.getMessage());
+		}
+
+		try {
+			myMdmProviderR4.mergeGoldenResources(myFromGoldenPatientId, new StringType("Patient/abc"), myRequestDetails);
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Resource Patient/abc is not known", e.getMessage());
 		}
 	}
 }

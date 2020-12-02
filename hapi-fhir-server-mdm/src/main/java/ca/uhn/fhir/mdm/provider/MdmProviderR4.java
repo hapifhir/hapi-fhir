@@ -151,7 +151,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
 		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_PERSONS,
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES,
 				getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId))
 		);
 	}

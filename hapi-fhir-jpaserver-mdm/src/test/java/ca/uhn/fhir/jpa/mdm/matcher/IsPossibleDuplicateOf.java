@@ -13,11 +13,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
+
 	/**
 	 * Matcher with tells us if there is an MdmLink with between these two resources that are considered POSSIBLE DUPLICATE.
-	 * For use only on persons.
+	 * For use only on GoldenResource.
 	 */
-	private Long incomingPersonPid;
+	private Long incomingGoldenResourcePid;
 
 	protected IsPossibleDuplicateOf(IdHelperService theIdHelperService, MdmLinkDaoSvc theMdmLinkDaoSvc, IAnyResource... theBaseResource) {
 		super(theIdHelperService, theMdmLinkDaoSvc, theBaseResource);
@@ -25,20 +26,19 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
+		incomingGoldenResourcePid = getMatchedResourcePidFromResource(theIncomingResource);
 
-		incomingPersonPid = getMatchedResourcePidFromResource(theIncomingResource);
-
-		List<Long> personPidsToMatch = myBaseResources.stream()
+		List<Long> goldenResourcePidsToMatch = myBaseResources.stream()
 			.map(this::getMatchedResourcePidFromResource)
 			.collect(Collectors.toList());
 
 
 		//Returns true if there is a POSSIBLE_DUPLICATE between the incoming resource, and all of the resources passed in via the constructor.
-		return personPidsToMatch.stream()
+		return goldenResourcePidsToMatch.stream()
 			.map(baseResourcePid -> {
-				Optional<MdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByPersonPidTargetPidAndMatchResult(baseResourcePid, incomingPersonPid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+				Optional<MdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 				if (!duplicateLink.isPresent()) {
-					duplicateLink = myMdmLinkDaoSvc.getMdmLinksByPersonPidTargetPidAndMatchResult(incomingPersonPid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+					duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(incomingGoldenResourcePid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 				}
 				return duplicateLink;
 			}).allMatch(Optional::isPresent);
@@ -46,7 +46,7 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 
 	@Override
 	public void describeTo(Description theDescription) {
-		theDescription.appendText("Resource was not duplicate of Resource/" + incomingPersonPid);
+		theDescription.appendText("Resource was not duplicate of Resource/" + incomingGoldenResourcePid);
 	}
 
 	@Override

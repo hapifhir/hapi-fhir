@@ -140,10 +140,10 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testUpdateStrangePerson() {
-		Patient person = createPatient();
+	public void testUpdateStrangePatient() {
+		Patient patient = createPatient();
 		try {
-			myMdmProviderR4.updateLink(new StringType(person.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);
+			myMdmProviderR4.updateLink(new StringType(patient.getIdElement().getValue()), myPatientId, NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForUnmanagedResource();
@@ -152,7 +152,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testExcludedPerson() {
+	public void testExcludedGoldenResource() {
 		Patient patient = new Patient();
 		patient.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_NO_MDM_MANAGED);
 		createPatient(patient);

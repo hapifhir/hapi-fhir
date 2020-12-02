@@ -26,20 +26,22 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 public interface IMdmLinkSvc {
 
 	/**
-	 * Update a link between a Person record and its target Patient/Practitioner record. If a link does not exist between
+	 * Update a link between a Golden Resource record and its target record. If a link does not exist between
 	 * these two records, create it.
-	 *  @param thePerson                 the Person to link the target resource to.
-	 * @param theTargetResource               the target resource, which is a Patient or Practitioner
-	 * @param theMatchResult            the current status of the match to set the link to.
-	 * @param theLinkSource             MANUAL or AUTO: what caused the link.
+	 *
+	 * @param theGoldenResource        the Golden Resource to link the target resource to.
+	 * @param theTargetResource        the target resource, which can be of the MDM supported types
+	 * @param theMatchResult           the current status of the match to set the link to.
+	 * @param theLinkSource            MANUAL or AUTO: what caused the link.
 	 * @param theMdmTransactionContext
 	 */
-	void updateLink(IAnyResource thePerson, IAnyResource theTargetResource, MdmMatchOutcome theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext);
+	void updateLink(IAnyResource theGoldenResource, IAnyResource theTargetResource, MdmMatchOutcome theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext);
 
 	/**
-	 * Delete a link between given Person and target patient/practitioner
-	 * @param theExistingPerson
+	 * Delete a link between given Golden Resource and the corresponing target
+	 *
+	 * @param theExistingGoldenResource
 	 * @param theResource
 	 */
-	void deleteLink(IAnyResource theExistingPerson, IAnyResource theResource, MdmTransactionContext theMdmTransactionContext);
+	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theResource, MdmTransactionContext theMdmTransactionContext);
 }

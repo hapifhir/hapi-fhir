@@ -41,8 +41,8 @@ import java.util.List;
 
 /**
  * MdmMatchLinkSvc is the entrypoint for HAPI's MDM system. An incoming resource can call
- * updateMdmLinksForMdmTarget and the underlying MDM system will take care of matching it to a person, or creating a
- * new Person if a suitable one was not found.
+ * updateMdmLinksForMdmTarget and the underlying MDM system will take care of matching it to a GoldenResource, or creating a
+ * new GoldenResource if a suitable one was not found.
  */
 @Service
 public class MdmMatchLinkSvc {
@@ -58,7 +58,7 @@ public class MdmMatchLinkSvc {
 	private MdmEidUpdateService myEidUpdateService;
 
 	/**
-	 * Given an MDM Target (consisting of either a Patient or a Practitioner), find a suitable Person candidate for them,
+	 * Given an MDM Target (consisting of either a Patient or a Practitioner), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
 	 * Does nothing if resource is determined to be not managed by MDM.
 	 *
@@ -89,33 +89,33 @@ public class MdmMatchLinkSvc {
 
 	private void handleMdmWithMultipleCandidates(IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
 		MatchedGoldenResourceCandidate firstMatch = theCandidateList.getFirstMatch();
-		Long samplePersonPid = firstMatch.getCandidatePersonPid().getIdAsLong();
-		boolean allSamePerson = theCandidateList.stream()
-			.allMatch(candidate -> candidate.getCandidatePersonPid().getIdAsLong().equals(samplePersonPid));
+		Long sampleGoldenResourcePid = firstMatch.getCandidateGoldenResourcePid().getIdAsLong();
+		boolean allSameGoldenResource = theCandidateList.stream()
+			.allMatch(candidate -> candidate.getCandidateGoldenResourcePid().getIdAsLong().equals(sampleGoldenResourcePid));
 
-		if (allSamePerson) {
-			log(theMdmTransactionContext, "MDM received multiple match candidates, but they are all linked to the same person.");
+		if (allSameGoldenResource) {
+			log(theMdmTransactionContext, "MDM received multiple match candidates, but they are all linked to the same Golden Resource.");
 			handleMdmWithSingleCandidate(theResource, firstMatch, theMdmTransactionContext);
 		} else {
-			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Persons. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
+			log(theMdmTransactionContext, "MDM received multiple match candidates, that were linked to different Golden Resources. Setting POSSIBLE_DUPLICATES and POSSIBLE_MATCHES.");
 			//Set them all as POSSIBLE_MATCH
-			List<IAnyResource> persons = new ArrayList<>();
+			List<IAnyResource> goldenResources = new ArrayList<>();
 			for (MatchedGoldenResourceCandidate matchedGoldenResourceCandidate : theCandidateList.getCandidates()) {
-				IAnyResource person = myMdmGoldenResourceFindingSvc
+				IAnyResource goldenResource = myMdmGoldenResourceFindingSvc
 					.getGoldenResourceFromMatchedGoldenResourceCandidate(matchedGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 				MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_MATCH;
 				outcome.setEidMatch(theCandidateList.isEidMatch());
-				myMdmLinkSvc.updateLink(person, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
-				persons.add(person);
+				myMdmLinkSvc.updateLink(goldenResource, theResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+				goldenResources.add(goldenResource);
 			}
 
-			//Set all Persons as POSSIBLE_DUPLICATE of the last person.
-			IAnyResource firstPerson = persons.get(0);
-			persons.subList(1, persons.size())
-				.forEach(possibleDuplicatePerson -> {
+			//Set all GoldenResources as POSSIBLE_DUPLICATE of the last GoldenResource.
+			IAnyResource firstGoldenResource = goldenResources.get(0);
+			goldenResources.subList(1, goldenResources.size())
+				.forEach(possibleDuplicateGoldenResource -> {
 					MdmMatchOutcome outcome = MdmMatchOutcome.POSSIBLE_DUPLICATE;
 					outcome.setEidMatch(theCandidateList.isEidMatch());
-					myMdmLinkSvc.updateLink(firstPerson, possibleDuplicatePerson, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+					myMdmLinkSvc.updateLink(firstGoldenResource, possibleDuplicateGoldenResource, outcome, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 				});
 		}
 	}
@@ -128,33 +128,33 @@ public class MdmMatchLinkSvc {
 		// 2. Create source resoruce for the MDM target
 		// 3. UPDATE MDM LINK TABLE
 
-		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
-	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate thePersonCandidate, MdmTransactionContext theMdmTransactionContext) {
+	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
-		IAnyResource golenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(thePersonCandidate, theMdmTransactionContext.getResourceType());
+		IAnyResource golenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 
 		if (myGoldenResourceHelper.isPotentialDuplicate(golenResource, theTargetResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
 			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(theTargetResource);
-			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, golenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
-			if (thePersonCandidate.isMatch()) {
+			if (theGoldenResourceCandidate.isMatch()) {
 				myGoldenResourceHelper.handleExternalEidAddition(golenResource, theTargetResource, theMdmTransactionContext);
 				//TODO MDM GGG/NG: eventually we need to add survivorship rules of attributes here. Currently no data is copied over except EIDs.
 			}
-			myMdmLinkSvc.updateLink(golenResource, theTargetResource, thePersonCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			myMdmLinkSvc.updateLink(golenResource, theTargetResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}
 
-	private void handleMdmWithSingleCandidate(IAnyResource theResource, MatchedGoldenResourceCandidate thePersonCandidate, MdmTransactionContext theMdmTransactionContext) {
+	private void handleMdmWithSingleCandidate(IAnyResource theResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		if (theMdmTransactionContext.getRestOperation().equals(MdmTransactionContext.OperationType.UPDATE_RESOURCE)) {
-			myEidUpdateService.handleMdmUpdate(theResource, thePersonCandidate, theMdmTransactionContext);
+			myEidUpdateService.handleMdmUpdate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		} else {
-			handleMdmCreate(theResource, thePersonCandidate, theMdmTransactionContext);
+			handleMdmCreate(theResource, theGoldenResourceCandidate, theMdmTransactionContext);
 		}
 	}
 

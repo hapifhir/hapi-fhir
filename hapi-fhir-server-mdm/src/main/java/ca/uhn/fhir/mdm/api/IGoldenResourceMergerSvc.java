@@ -25,10 +25,11 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 public interface IGoldenResourceMergerSvc {
 	/**
-	 * Move all links from the theFromGoldenResource to theToGoldenResource and then set active=false on theFromGoldenResource.  Merge all Person
-	 * fields.
-	 * @param theFromGoldenResource the person we are merging from
-	 * @param theToGoldenResource the person we are merging to
+	 * Move all links from the theFromGoldenResource to theToGoldenResource and then set active=false on theFromGoldenResource.
+	 * Merge all Golden Resource fields subject to survivorship rules.
+	 *
+	 * @param theFromGoldenResource the golden resource we are merging from
+	 * @param theToGoldenResource the golden resource we are merging to
 	 * @return updated theToGoldenResource with the merged fields and links.
 	 */
 	IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext);

@@ -30,5 +30,5 @@ import java.util.stream.Stream;
  */
 public interface IMdmLinkQuerySvc {
 	Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext);
-	Stream<MdmLinkJson> getDuplicatePersons(MdmTransactionContext theMdmContext);
+	Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext);
 }

@@ -77,9 +77,9 @@ public class MdmControllerHelper {
 		return (IAnyResource) myResourceLoader.load(resourceClass, theResourceId);
 	}
 
-	public void validateMergeResources(IAnyResource theFromPerson, IAnyResource theToPerson) {
-		validateIsMdmManaged(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromPerson);
-		validateIsMdmManaged(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToPerson);
+	public void validateMergeResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource) {
+		validateIsMdmManaged(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResource);
+		validateIsMdmManaged(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResource);
 	}
 
 	public String toJson(IAnyResource theAnyResource) {

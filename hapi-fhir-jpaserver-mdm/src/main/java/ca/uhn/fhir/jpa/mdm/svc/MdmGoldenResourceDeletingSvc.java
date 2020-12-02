@@ -36,6 +36,7 @@ import java.util.List;
 
 @Service
 public class MdmGoldenResourceDeletingSvc {
+
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	/**
@@ -50,7 +51,7 @@ public class MdmGoldenResourceDeletingSvc {
 	@Autowired
 	DeleteExpungeService myDeleteExpungeService;
 
-	public DeleteMethodOutcome expungeGoldenResourcePids(List<Long> thePersonPids, ServletRequestDetails theRequestDetails) {
-		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.MDM_CLEAR, "Person", new SliceImpl<>(thePersonPids), theRequestDetails);
+	public DeleteMethodOutcome expungeGoldenResourcePids(List<Long> theGoldenResourcePids, String theResourceType, ServletRequestDetails theRequestDetails) {
+		return myDeleteExpungeService.expungeByResourcePids(ProviderConstants.MDM_CLEAR, theResourceType, new SliceImpl<>(theGoldenResourcePids), theRequestDetails);
 	}
 }

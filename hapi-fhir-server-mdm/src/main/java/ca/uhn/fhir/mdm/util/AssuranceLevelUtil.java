@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
 /**
  * Helper class to determine assurance level based on Link Source and Match Result.
- * This is strictly for use in populating Person links.
+ * This is strictly for use in populating Golden Resource links.
  */
 public final class AssuranceLevelUtil {
 

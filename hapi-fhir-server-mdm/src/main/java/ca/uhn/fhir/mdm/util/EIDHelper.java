@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 public final class EIDHelper {
+
 	private final FhirContext myFhirContext;
 	private final IMdmSettings myMdmSettings;
 
@@ -54,7 +55,7 @@ public final class EIDHelper {
 	}
 
 	/**
-	 * Given an {@link IAnyResource} representing a patient/practitioner/person, retrieve their externally-assigned EID,
+	 * Given an {@link IAnyResource} representing a type supported by MDM, retrieve their externally-assigned EID,
 	 * represented as a {@link CanonicalEID}
 	 *
 	 * @param theResource the resource to extract the EID from.
@@ -66,7 +67,7 @@ public final class EIDHelper {
 	}
 
 	/**
-	 * Given an {@link IAnyResource} representing a patient/practitioner/person, retrieve their internally-assigned EID,
+	 * Given an {@link IAnyResource} representing a type supported by MDM, retrieve their internally-assigned EID,
 	 * represented as a {@link CanonicalEID}
 	 *
 	 * @param theResource the resource to extract the EID from.
@@ -96,16 +97,12 @@ public final class EIDHelper {
 	}
 
 	/**
-	 * An incoming resource is a potential duplicate if it matches a Patient that has a Person with an official EID, but
-	 * the incoming resource also has an EID that does not match.
-	 *
-	 * @param theExistingPerson
-	 * @param theComparingPerson
-	 * @return
+	 * An incoming resource is a potential duplicate if it matches a target resource that has a golden resource with an
+	 * official EID, but the incoming resource also has an EID that does not match.
 	 */
-	public boolean hasEidOverlap(IAnyResource theExistingPerson, IAnyResource theComparingPerson) {
-		List<CanonicalEID> firstEids = this.getExternalEid(theExistingPerson);
-		List<CanonicalEID> secondEids = this.getExternalEid(theComparingPerson);
+	public boolean hasEidOverlap(IAnyResource theExistingGoldenResource, IAnyResource theComparingGoldenResource) {
+		List<CanonicalEID> firstEids = this.getExternalEid(theExistingGoldenResource);
+		List<CanonicalEID> secondEids = this.getExternalEid(theComparingGoldenResource);
 		if (firstEids.isEmpty() || secondEids.isEmpty()) {
 			return false;
 		}

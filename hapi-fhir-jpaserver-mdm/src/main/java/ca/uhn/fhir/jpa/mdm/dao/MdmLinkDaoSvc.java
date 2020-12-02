@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.mdm.dao;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +92,6 @@ public class MdmLinkDaoSvc {
 		} else {
 			MdmLink newLink = myMdmLinkFactory.newMdmLink();
 			newLink.setGoldenResourcePid(theGoldenResourcePid);
-			newLink.setPersonPid(theGoldenResourcePid);
 			newLink.setTargetPid(theTargetResourcePid);
 			return newLink;
 		}
@@ -160,16 +159,16 @@ public class MdmLinkDaoSvc {
 	}
 
 	/**
-	 * Given a person a target and a match result, return the matching {@link MdmLink}, if it exists.
+	 * Given a golden resource a target and a match result, return the matching {@link MdmLink}, if it exists.
 	 *
-	 * @param thePersonPid   The Pid of the Person in the relationship
-	 * @param theTargetPid   The Pid of the target in the relationship
-	 * @param theMatchResult The MatchResult you are looking for.
+	 * @param theGoldenResourcePid The Pid of the Golden Resource in the relationship
+	 * @param theTargetPid         The Pid of the target in the relationship
+	 * @param theMatchResult       The MatchResult you are looking for.
 	 * @return an Optional {@link MdmLink} containing the matched link if it exists.
 	 */
-	public Optional<MdmLink> getMdmLinksByPersonPidTargetPidAndMatchResult(Long thePersonPid, Long theTargetPid, MdmMatchResultEnum theMatchResult) {
+	public Optional<MdmLink> getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(Long theGoldenResourcePid, Long theTargetPid, MdmMatchResultEnum theMatchResult) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setGoldenResourcePid(thePersonPid);
+		exampleLink.setGoldenResourcePid(theGoldenResourcePid);
 		exampleLink.setTargetPid(theTargetPid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<MdmLink> example = Example.of(exampleLink);
@@ -179,7 +178,7 @@ public class MdmLinkDaoSvc {
 	/**
 	 * Get all {@link MdmLink} which have {@link MdmMatchResultEnum#POSSIBLE_DUPLICATE} as their match result.
 	 *
-	 * @return A list of {@link MdmLink} that hold potential duplicate persons.
+	 * @return A list of {@link MdmLink} that hold potential duplicate golden resources.
 	 */
 	public List<MdmLink> getPossibleDuplicates() {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
@@ -210,10 +209,10 @@ public class MdmLinkDaoSvc {
 	}
 
 	/**
-	 * Given a Golden Resource , return all links in which they are the source Person of the {@link MdmLink}
+	 * Given a Golden Resource, return all links in which they are the source Golden Resource of the {@link MdmLink}
 	 *
-	 * @param theGoldenResource The {@link IBaseResource} Person who's links you would like to retrieve.
-	 * @return A list of all {@link MdmLink} entities in which theGoldenResource is the source Person.
+	 * @param theGoldenResource The {@link IBaseResource} Golden Resource who's links you would like to retrieve.
+	 * @return A list of all {@link MdmLink} entities in which theGoldenResource is the source Golden Resource
 	 */
 	public List<MdmLink> findMdmLinksByGoldenResource(IBaseResource theGoldenResource) {
 		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
@@ -228,7 +227,7 @@ public class MdmLinkDaoSvc {
 	/**
 	 * Delete all {@link MdmLink} entities, and return all resource PIDs from the source of the relationship.
 	 *
-	 * @return A list of Long representing the related Person Pids.
+	 * @return A list of Long representing the related Golden Resource Pids.
 	 */
 	@Transactional
 	public List<Long> deleteAllMdmLinksAndReturnGoldenResourcePids() {
@@ -237,26 +236,26 @@ public class MdmLinkDaoSvc {
 	}
 
 	private List<Long> deleteMdmLinksAndReturnGoldenResourcePids(List<MdmLink> theLinks) {
-		Set<Long> persons = theLinks.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
+		Set<Long> goldenResources = theLinks.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
 		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
 		//and REDIRECT
-		//persons.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
-		persons.addAll(theLinks.stream()
+		//goldenResources.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
+		goldenResources.addAll(theLinks.stream()
 			.filter(link -> link.getMatchResult().equals(MdmMatchResultEnum.REDIRECT)
 				|| link.getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE))
 			.map(MdmLink::getTargetPid).collect(Collectors.toSet()));
 		ourLog.info("Deleting {} MDM link records...", theLinks.size());
 		myMdmLinkDao.deleteAll(theLinks);
 		ourLog.info("{} MDM link records deleted", theLinks.size());
-		return new ArrayList<>(persons);
+		return new ArrayList<>(goldenResources);
 	}
 
 	/**
 	 * Given a valid {@link String}, delete all {@link MdmLink} entities for that type, and get the Pids
-	 * for the Person resources which were the sources of the links.
+	 * for the Golden Resources which were the sources of the links.
 	 *
 	 * @param theTargetType the type of relationship you would like to delete.
-	 * @return A list of longs representing the Pids of the Person resources used as the sources of the relationships that were deleted.
+	 * @return A list of longs representing the Pids of the Golden Resources resources used as the sources of the relationships that were deleted.
 	 */
 	public List<Long> deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(String theTargetType) {
 		MdmLink link = new MdmLink();

@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
  */
 public class NameMatcher implements IMdmFieldMatcher {
 
-	private final MdmPersonNameMatchModeEnum myMatchMode;
+	private final MdmNameMatchModeEnum myMatchMode;
 
-	public NameMatcher(MdmPersonNameMatchModeEnum theMatchMode) {
+	public NameMatcher(MdmNameMatchModeEnum theMatchMode) {
 		myMatchMode = theMatchMode;
 	}
 
@@ -63,7 +63,7 @@ public class NameMatcher implements IMdmFieldMatcher {
 		for (String leftGivenName : leftGivenNames) {
 			for (String rightGivenName : rightGivenNames) {
 				match |= leftGivenName.equals(rightGivenName) && leftFamilyName.equals(rightFamilyName);
-				if (myMatchMode == MdmPersonNameMatchModeEnum.ANY_ORDER) {
+				if (myMatchMode == MdmNameMatchModeEnum.ANY_ORDER) {
 					match |= leftGivenName.equals(rightFamilyName) && leftFamilyName.equals(rightGivenName);
 				}
 			}

@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
+
 	protected Practitioner myPractitioner;
 	protected StringType myPractitionerId;
 	protected IAnyResource myPractitionerGoldenResource;
@@ -78,29 +79,29 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 	}
 	@Test
-	public void testPersonsWithMultipleHistoricalVersionsCanBeDeleted() {
+	public void testGoldenResourceWithMultipleHistoricalVersionsCanBeDeleted() {
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
-		IAnyResource person = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(person, is(notNullValue()));
+		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		assertThat(goldenResource, is(notNullValue()));
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
-		person = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(person, is(nullValue()));
+		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		assertThat(goldenResource, is(nullValue()));
 	}
 
 	@Test
-	public void testPersonWithLinksToOtherPersonsCanBeDeleted() {
+	public void testGoldenResourceWithLinksToOtherGoldenResourcesCanBeDeleted() {
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
 
-		IAnyResource personFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		IAnyResource personFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
-		linkPersons(personFromTarget, personFromTarget2);
+		IAnyResource goldenResourceFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource goldenResourceFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
+		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget2);
 
 		//SUT
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
@@ -119,19 +120,19 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	}
 
 	@Test
-	public void testPersonsWithCircularReferenceCanBeCleared() {
+	public void testGoldenResourceWithCircularReferenceCanBeCleared() {
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildPaulPatient());
 		Patient patientAndUpdateLinks1 = createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks2 = createPatientAndUpdateLinks(buildFrankPatient());
 
-		IAnyResource personFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		IAnyResource personFromTarget1 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
-		IAnyResource personFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks2);
+		IAnyResource goldenResourceFromTarget = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
+		IAnyResource goldenResourceFromTarget1 = getGoldenResourceFromTargetResource(patientAndUpdateLinks1);
+		IAnyResource goldenResourceFromTarget2 = getGoldenResourceFromTargetResource(patientAndUpdateLinks2);
 
 		// A -> B -> C -> A linkages.
-		linkPersons(personFromTarget, personFromTarget1);
-		linkPersons(personFromTarget1, personFromTarget2);
-		linkPersons(personFromTarget2, personFromTarget);
+		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget1);
+		linkGoldenResources(goldenResourceFromTarget1, goldenResourceFromTarget2);
+		linkGoldenResources(goldenResourceFromTarget2, goldenResourceFromTarget);
 
 		//SUT
 		Parameters parameters = myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
@@ -145,7 +146,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	}
 
 	//TODO GGG unclear if we actually need to reimplement this.
-	private void linkPersons(IAnyResource theGoldenResource, IAnyResource theTargetResource) {
+	private void linkGoldenResources(IAnyResource theGoldenResource, IAnyResource theTargetResource) {
 		// TODO NG - Should be ok to leave this - not really
 		// throw new UnsupportedOperationException("We need to fix this!");
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(theGoldenResource, theTargetResource, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));

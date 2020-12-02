@@ -54,25 +54,25 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 
 	/**
-	 * Attempt to find matching Persons by resolving them from similar Matching target resources, where target resource
-	 * can be either Patient or Practitioner. Runs MDM logic over the existing Patient/Practitioners, then finds their
+	 * Attempt to find matching Golden Resources by resolving them from similar Matching target resources, where target resource
+	 * can be either Patient or Practitioner. Runs MDM logic over the existing target resources, then finds their
 	 * entries in the MdmLink table, and returns all the matches found therein.
 	 *
-	 * @param theTarget the {@link IBaseResource} which we want to find candidate Persons for.
+	 * @param theTarget the {@link IBaseResource} which we want to find candidate Golden Resources for.
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		List<Long> personPidsToExclude = getNoMatchPersonPids(theTarget);
+		List<Long> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
 
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(myFhirContext.getResourceType(theTarget), theTarget);
 
-		//Convert all possible match targets to their equivalent Persons by looking up in the MdmLink table,
+		//Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
 		//while ensuring that the matches aren't in our NO_MATCH list.
 		// The data flow is as follows ->
-		// MatchedTargetCandidate -> Person -> MdmLink -> MatchedPersonCandidate
+		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
 		for (MatchedTarget match : matchedCandidates) {
 			Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(match.getTarget()));
@@ -81,8 +81,8 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 			}
 
 			MdmLink matchMdmLink = optionalMdmLink.get();
-			if (personPidsToExclude.contains(matchMdmLink.getGoldenResourcePid())) {
-				ourLog.info("Skipping MDM on candidate person with PID {} due to manual NO_MATCH", matchMdmLink.getGoldenResourcePid());
+			if (goldenResourcePidsToExclude.contains(matchMdmLink.getGoldenResourcePid())) {
+				ourLog.info("Skipping MDM on candidate Golden Resource with PID {} due to manual NO_MATCH", matchMdmLink.getGoldenResourcePid());
 				continue;
 			}
 
@@ -92,7 +92,7 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 		return retval;
 	}
 
-	private List<Long> getNoMatchPersonPids(IBaseResource theBaseResource) {
+	private List<Long> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
 		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
 		return myMdmLinkDaoSvc.getMdmLinksByTargetPidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
@@ -100,8 +100,8 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 			.collect(Collectors.toList());
 	}
 
-	private ResourcePersistentId getResourcePersistentId(Long thePersonPid) {
-		return new ResourcePersistentId(thePersonPid);
+	private ResourcePersistentId getResourcePersistentId(Long theGoldenResourcePid) {
+		return new ResourcePersistentId(theGoldenResourcePid);
 	}
 
 	@Override

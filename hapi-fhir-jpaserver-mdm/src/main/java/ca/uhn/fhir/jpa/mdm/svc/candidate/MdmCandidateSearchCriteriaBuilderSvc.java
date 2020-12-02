@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MdmCandidateSearchCriteriaBuilderSvc {
+
 	@Autowired
 	private MdmSearchParamSvc myMdmSearchParamSvc;
 
@@ -52,7 +53,7 @@ public class MdmCandidateSearchCriteriaBuilderSvc {
 		// If there are candidate search params, then make use of them, otherwise, search with only the filters.
 		if (resourceSearchParam != null) {
 			resourceSearchParam.iterator().forEachRemaining(searchParam -> {
-				//to compare it to all known PERSON objects, using the overlapping search parameters that they have.
+				//to compare it to all known GOLDEN_RESOURCE objects, using the overlapping search parameters that they have.
 				List<String> valuesFromResourceForSearchParam = myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
 				if (!valuesFromResourceForSearchParam.isEmpty()) {
 					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));

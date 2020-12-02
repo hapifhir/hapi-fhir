@@ -29,7 +29,7 @@ public final class MdmMatchOutcome {
 
 	public static final MdmMatchOutcome POSSIBLE_DUPLICATE = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 	public static final MdmMatchOutcome NO_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.NO_MATCH);
-	public static final MdmMatchOutcome NEW_PERSON_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
+	public static final MdmMatchOutcome NEW_GOLDEN_RESOURCE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setCreatedNewResource(true);
 	public static final MdmMatchOutcome EID_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.MATCH).setEidMatch(true);
 	public static final MdmMatchOutcome POSSIBLE_MATCH = new MdmMatchOutcome(null, null).setMatchResultEnum(MdmMatchResultEnum.POSSIBLE_MATCH);
 
@@ -45,7 +45,7 @@ public final class MdmMatchOutcome {
 	public final Double score;
 
 	/**
-	 * Did the MDM match operation result in creating a new Person resource?
+	 * Did the MDM match operation result in creating a new golden resource resource?
 	 */
 	private boolean myCreatedNewResource;
 
@@ -95,7 +95,7 @@ public final class MdmMatchOutcome {
 		return myCreatedNewResource;
 	}
 
-	/** @param theCreatedNewResource	this match is creating a new person */
+	/** @param theCreatedNewResource	this match is creating a new golden resource */
 	public MdmMatchOutcome setCreatedNewResource(boolean theCreatedNewResource) {
 		myCreatedNewResource = theCreatedNewResource;
 		return this;
@@ -152,7 +152,7 @@ public final class MdmMatchOutcome {
 		return new ToStringBuilder(this)
 			.append("vector", vector)
 			.append("score", score)
-			.append("myNewPerson", myCreatedNewResource)
+			.append("myCreatedNewResource", myCreatedNewResource)
 			.append("myEidMatch", myEidMatch)
 			.append("myMatchResultEnum", myMatchResultEnum)
 			.toString();

@@ -48,7 +48,7 @@ public abstract class BaseMdmProvider {
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
-			throw new InvalidRequestException("fromPersonId must be different from toPersonId");
+			throw new InvalidRequestException("fromGoldenResourceId must be different from toGoldenResourceId");
 		}
 	}
 

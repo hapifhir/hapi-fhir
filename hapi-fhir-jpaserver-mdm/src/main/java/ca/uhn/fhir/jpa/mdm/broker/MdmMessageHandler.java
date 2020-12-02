@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MdmMessageHandler implements MessageHandler {
+	
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -76,7 +77,8 @@ public class MdmMessageHandler implements MessageHandler {
 			throw e;
 		}
 	}
-	public void matchMdmAndUpdateLinks(ResourceModifiedMessage theMsg) {
+
+	private void matchMdmAndUpdateLinks(ResourceModifiedMessage theMsg) {
 		String resourceType = theMsg.getId(myFhirContext).getResourceType();
 		validateResourceType(resourceType);
 		MdmTransactionContext mdmContext =  createMdmContext(theMsg, resourceType);

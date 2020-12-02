@@ -53,7 +53,7 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 	}
 
 	@Override
-	public Stream<MdmLinkJson> getDuplicatePersons(MdmTransactionContext theMdmContext) {
+	public Stream<MdmLinkJson> getDuplicateGoldenResources(MdmTransactionContext theMdmContext) {
 		Example<MdmLink> exampleLink = exampleLinkFromParameters(null, null, MdmMatchResultEnum.POSSIBLE_DUPLICATE, null);
 		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink).stream().map(this::toJson);
 	}
@@ -76,10 +76,10 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 		return retval;
 	}
 
-	private Example<MdmLink> exampleLinkFromParameters(IIdType thePersonId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
+	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
-		if (thePersonId != null) {
-			mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrThrowException(thePersonId));
+		if (theGoldenResourceId != null) {
+			mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrThrowException(theGoldenResourceId));
 		}
 		if (theTargetId != null) {
 			mdmLink.setTargetPid(myIdHelperService.getPidOrThrowException(theTargetId));

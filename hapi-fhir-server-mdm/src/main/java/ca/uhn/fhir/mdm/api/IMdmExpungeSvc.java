@@ -25,18 +25,16 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 public interface IMdmExpungeSvc {
 
 	/**
-	 * Given a resource type, delete the underlying MDM links, and their related person objects.
+	 * Given a resource type, delete the underlying MDM links, and their related golden resource objects.
 	 *
 	 * @param theResourceType The type of resources
-	 *
 	 * @param theRequestDetails
 	 * @return the count of deleted MDM links
 	 */
 	long expungeAllMdmLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails);
 
 	/**
-	 * Delete all MDM links, and their related Person objects.
-	 *
+	 * Delete all MDM links, and their related golden resource objects.
 	 *
 	 * @return the count of deleted MDM links
 	 * @param theRequestDetails

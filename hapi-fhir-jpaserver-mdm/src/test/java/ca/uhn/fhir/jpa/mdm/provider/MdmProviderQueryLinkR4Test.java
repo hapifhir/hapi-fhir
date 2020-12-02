@@ -29,8 +29,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderQueryLinkR4Test.class);
 	private StringType myLinkSource;
-	private StringType myPerson1Id;
-	private StringType myPerson2Id;
+	private StringType myGoldenResource1Id;
+	private StringType myGoldenResource2Id;
 
 	@Override
 	@BeforeEach
@@ -43,10 +43,10 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		// Add a possible duplicate
 		myLinkSource = new StringType(MdmLinkSourceEnum.AUTO.name());
 		Patient sourcePatient1 = createGoldenPatient();
-		myPerson1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
+		myGoldenResource1Id = new StringType(sourcePatient1.getIdElement().toVersionless().getValue());
 		Long sourcePatient1Pid = myIdHelperService.getPidOrNull(sourcePatient1);
 		Patient sourcePatient2 = createGoldenPatient();
-		myPerson2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
+		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
 		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
 
 		MdmLink possibleDuplicateMdmLink = myMdmLinkDaoSvc.newMdmLink().setGoldenResourcePid(sourcePatient1Pid).setTargetPid(sourcePatient2Pid).setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
@@ -69,15 +69,15 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		// Add a third patient
 		Patient patient = createPatientAndUpdateLinks(buildJanePatient());
 		IdType patientId = patient.getIdElement().toVersionless();
-		IAnyResource person = getGoldenResourceFromTargetResource(patient);
-		IIdType personId = person.getIdElement().toVersionless();
+		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patient);
+		IIdType goldenResourceId = goldenResource.getIdElement().toVersionless();
 
 		Parameters result = myMdmProviderR4.queryLinks(null, null, null, myLinkSource, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(3));
 		List<Parameters.ParametersParameterComponent> part = list.get(2).getPart();
-		assertMdmLink(7, part, personId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", "2");
+		assertMdmLink(7, part, goldenResourceId.getValue(), patientId.getValue(), MdmMatchResultEnum.MATCH, "false", "false", "2");
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertMdmLink(2, part, myPerson1Id.getValue(), myPerson2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
+		assertMdmLink(2, part, myGoldenResource1Id.getValue(), myGoldenResource2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(list, hasSize(1));
 		}
 		{
-			Parameters result = myMdmProviderR4.notDuplicate(myPerson1Id, myPerson2Id, myRequestDetails);
+			Parameters result = myMdmProviderR4.notDuplicate(myGoldenResource1Id, myGoldenResource2Id, myRequestDetails);
 			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 			assertEquals("success", result.getParameterFirstRep().getName());
 			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
@@ -111,17 +111,17 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testNotDuplicateBadId() {
 		try {
-			myMdmProviderR4.notDuplicate(myPerson1Id, new StringType("Person/notAnId123"), myRequestDetails);
+			myMdmProviderR4.notDuplicate(myGoldenResource1Id, new StringType("Patient/notAnId123"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Resource Person/notAnId123 is not known", e.getMessage());
+			assertEquals("Resource Patient/notAnId123 is not known", e.getMessage());
 		}
 	}
 
-	private void assertMdmLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String thePersonId, String theTargetId, MdmMatchResultEnum theMatchResult, String theEidMatch, String theNewPerson, String theScore) {
+	private void assertMdmLink(int theExpectedSize, List<Parameters.ParametersParameterComponent> thePart, String theGoldenResourceId, String theTargetId, MdmMatchResultEnum theMatchResult, String theEidMatch, String theNewGoldenResource, String theScore) {
 		assertThat(thePart, hasSize(theExpectedSize));
 		assertThat(thePart.get(0).getName(), is("goldenResourceId"));
-		assertThat(thePart.get(0).getValue().toString(), is(removeVersion(thePersonId)));
+		assertThat(thePart.get(0).getValue().toString(), is(removeVersion(theGoldenResourceId)));
 		assertThat(thePart.get(1).getName(), is("targetResourceId"));
 		assertThat(thePart.get(1).getValue().toString(), is(removeVersion(theTargetId)));
 		if (theExpectedSize > 2) {
@@ -134,7 +134,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(thePart.get(4).getValue().primitiveValue(), is(theEidMatch));
 
 			assertThat(thePart.get(5).getName(), is("hadToCreateNewResource"));
-			assertThat(thePart.get(5).getValue().primitiveValue(), is(theNewPerson));
+			assertThat(thePart.get(5).getValue().primitiveValue(), is(theNewGoldenResource));
 
 			assertThat(thePart.get(6).getName(), is("score"));
 			assertThat(thePart.get(6).getValue().primitiveValue(), is(theScore));

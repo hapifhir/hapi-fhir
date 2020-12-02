@@ -78,8 +78,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void blockManualPersonManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theUpdatedResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-
+	public void blockManualGoldenResourceManipulationOnUpdate(IBaseResource theOldResource, IBaseResource theUpdatedResource, RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 		//If running in single EID mode, forbid multiple eids.
 		if (myMdmSettings.isPreventMultipleEids()) {
 			forbidIfHasMultipleEids(theUpdatedResource);
@@ -87,7 +86,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 		//TODO GGG MDM: Check if this is actually handled already in mdm update code or not.
 		if (myGoldenResourceHelper.isDeactivated(theUpdatedResource)) {
-			ourLog.debug("Deleting MDM links to deactivated Person {}", theUpdatedResource.getIdElement().toUnqualifiedVersionless());
+			ourLog.debug("Deleting MDM links to deactivated Golden resource {}", theUpdatedResource.getIdElement().toUnqualifiedVersionless());
 			int deleted = myMdmLinkDeleteSvc.deleteNonRedirectWithWithAnyReferenceTo(theUpdatedResource);
 			if (deleted > 0) {
 				ourLog.debug("Deleted {} MDM links", deleted);

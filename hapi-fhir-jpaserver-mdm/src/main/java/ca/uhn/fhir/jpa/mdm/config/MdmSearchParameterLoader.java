@@ -33,32 +33,34 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MdmSearchParameterLoader {
+
 	public static final String MDM_PERSON_ASSURANCE_SEARCH_PARAMETER_ID = "person-assurance";
 	public static final String MDM_PERSON_ACTIVE_SEARCH_PARAMETER_ID = "person-active";
+
 	@Autowired
 	public FhirContext myFhirContext;
 	@Autowired
 	public DaoRegistry myDaoRegistry;
 
 	synchronized public void daoUpdateMdmSearchParameters() {
-		IBaseResource personAssurance;
-		IBaseResource personActive;
+		IBaseResource goldenResourceAssurance;
+		IBaseResource goldenResourceActive;
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				personAssurance = buildAssuranceMdmSearchParameterDstu3();
-				personActive = buildActiveMdmSearchParameterDstu3();
+				goldenResourceAssurance = buildAssuranceMdmSearchParameterDstu3();
+				goldenResourceActive = buildActiveMdmSearchParameterDstu3();
 				break;
 			case R4:
-				personAssurance = buildAssuranceMdmSearchParameterR4();
-				personActive = buildActiveMdmSearchParameterR4();
+				goldenResourceAssurance = buildAssuranceMdmSearchParameterR4();
+				goldenResourceActive = buildActiveMdmSearchParameterR4();
 				break;
 			default:
 				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
 
 		IFhirResourceDao<IBaseResource> searchParameterDao = myDaoRegistry.getResourceDao("SearchParameter");
-		searchParameterDao.update(personAssurance);
-		searchParameterDao.update(personActive);
+		searchParameterDao.update(goldenResourceAssurance);
+		searchParameterDao.update(goldenResourceActive);
 	}
 
 	private org.hl7.fhir.dstu3.model.SearchParameter buildAssuranceMdmSearchParameterDstu3() {

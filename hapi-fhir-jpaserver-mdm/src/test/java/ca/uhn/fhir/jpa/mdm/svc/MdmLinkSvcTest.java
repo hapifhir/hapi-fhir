@@ -95,8 +95,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		saveNoMatchLink(goldenPatient1Pid, goldenPatient2Pid);
 
-		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Person"));
-		assertFalse(myMdmLinkDaoSvc.getMdmLinksByPersonPidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
@@ -113,8 +113,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		saveNoMatchLink(goldenPatient2Pid, goldenPatient1Pid);
 
-		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Person"));
-		assertFalse(myMdmLinkDaoSvc.getMdmLinksByPersonPidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
+		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
@@ -135,7 +135,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		try {
-			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.AUTO, null);
+			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), is(equalTo("MDM system is not allowed to modify links on manually created links")));
@@ -165,7 +165,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient patient2 = createPatient(buildJanePatient());
 		assertEquals(0, myMdmLinkDao.count());
 
-		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_PERSON_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
+		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient2, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
