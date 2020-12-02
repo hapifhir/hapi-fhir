@@ -2,7 +2,7 @@ package ca.uhn.fhir.cql.provider;
 
 /*-
  * #%L
- * HAPI FHIR - Enterprise Master Patient Index
+ * HAPI FHIR - Clinical Quality Language
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%
