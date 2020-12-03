@@ -77,7 +77,7 @@ public class MdmClearSvcImpl implements IMdmExpungeSvc {
 			ourLog.info("MDM clear operation on type {} complete.  Removed {} MDM links and expunged {} Golden resources.", mdmType, goldenResourcePids.size(), deleteOutcome.getExpungedResourcesCount());
 			retVal += goldenResourcePids.size();
 		}
-		ourLog.info("MDM clear complete expunged a total of golden resources.", retVal);
+		ourLog.info("MDM clear completed expunged with a total of {} golden resources cleared.", retVal);
 		return retVal;
 	}
 }
