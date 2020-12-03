@@ -5,8 +5,11 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import org.junit.jupiter.api.BeforeEach;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 	private RestfulServer myServer;
@@ -17,9 +20,6 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 	public void beforeInitMocks() throws Exception {
 		super.beforeInitMocks();
 
-		// FIXME: remove comments
-//		mySrd = mock(ServletRequestDetails.class);
-
 		if (myServer == null) {
 			myServer = new RestfulServer(myFhirCtx, mySrdInterceptorService);
 
@@ -29,13 +29,12 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 			myServer.init(mock(ServletConfig.class));
 		}
 
-		// FIXME: remove comments
-//		when(mySrd.getServer()).thenReturn(myServer);
-//		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-//		when(mySrd.getServletRequest()).thenReturn(servletRequest);
-//		when(mySrd.getFhirServerBase()).thenReturn("http://example.com/base");
-//		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
-//		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
+		when(mySrd.getServer()).thenReturn(myServer);
+		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+		when(mySrd.getServletRequest()).thenReturn(servletRequest);
+		when(mySrd.getFhirServerBase()).thenReturn("http://example.com/base");
+		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
+		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}
 
 }
