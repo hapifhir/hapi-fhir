@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.empi.helper;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.empi.model.TransactionLogMessages;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;

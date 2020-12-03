@@ -1,5 +1,7 @@
 package ca.uhn.fhir.empi.model;
 
+import ca.uhn.fhir.rest.server.TransactionLogMessages;
+
 public class EmpiTransactionContext {
 
 	/**

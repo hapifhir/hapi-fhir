@@ -1710,14 +1710,14 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage - This parameter should not be modified as processing is complete when this hook is invoked.</li>
-	 * <li>ca.uhn.fhir.empi.model.TransactionLogMessages - This parameter is for informational messages provided by the EMPI module during EMPI procesing. .</li>
+	 * <li>ca.uhn.fhir.rest.server.TransactionLogMessages - This parameter is for informational messages provided by the EMPI module during EMPI procesing. .</li>
 	 * </ul>
 	 * </p>
 	 * <p>
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.empi.model.TransactionLogMessages"),
+	EMPI_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.rest.server.messaging.ResourceOperationMessage", "ca.uhn.fhir.rest.server.TransactionLogMessages"),
 
 	/**
 	 * <b>Performance Tracing Hook:</b>

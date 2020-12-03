@@ -1,4 +1,4 @@
-package ca.uhn.fhir.empi.model;
+package ca.uhn.fhir.rest.server;
 
 /*-
  * #%L
