@@ -33,6 +33,25 @@ import org.elasticsearch.client.RestHighLevelClient;
 
 public class ElasticsearchRestClientFactory {
 
+
+	private static String determineScheme(String theHostname) {
+		int schemeIdx = theHostname.indexOf("://");
+		if (schemeIdx > 0) {
+			return theHostname.substring(0, schemeIdx);
+		} else {
+			return "http";
+		}
+	}
+
+	private static String stripHostOfScheme(String theHostname) {
+		int schemeIdx = theHostname.indexOf("://");
+		if (schemeIdx > 0) {
+			return theHostname.substring(schemeIdx + 3);
+		} else {
+			return theHostname;
+		}
+	}
+
     static public RestHighLevelClient createElasticsearchHighLevelRestClient(String theHostname, int thePort, String theUsername, String thePassword) {
         final CredentialsProvider credentialsProvider =
                 new BasicCredentialsProvider();
@@ -40,7 +59,7 @@ public class ElasticsearchRestClientFactory {
                 new UsernamePasswordCredentials(theUsername, thePassword));
         //TODO GGG HS This doesnt work with HTTPS hosts, btw, only HTTP
         RestClientBuilder clientBuilder = RestClient.builder(
-                new HttpHost(theHostname, thePort))
+                new HttpHost(stripHostOfScheme(theHostname), thePort, determineScheme(theHostname)))
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
                         .setDefaultCredentialsProvider(credentialsProvider));
 
