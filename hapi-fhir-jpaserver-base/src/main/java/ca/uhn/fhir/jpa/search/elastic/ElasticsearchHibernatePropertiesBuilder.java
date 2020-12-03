@@ -93,6 +93,13 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setRestUrl(String theRestUrl) {
+		if (theRestUrl.startsWith("https://")) {
+			myProtocol = "https";
+			myRestUrl = theRestUrl.substring(8);
+		} else if (myProtocol.startsWith("http://")) {
+			myProtocol = "http";
+			myRestUrl = theRestUrl.substring(7);
+		}
 		myRestUrl = theRestUrl;
 		return this;
 	}
