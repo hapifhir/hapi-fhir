@@ -361,7 +361,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	public IInterceptorService jpaInterceptorService() {
-		return new InterceptorService();
+		return new InterceptorService("JPA");
 	}
 
 	/**

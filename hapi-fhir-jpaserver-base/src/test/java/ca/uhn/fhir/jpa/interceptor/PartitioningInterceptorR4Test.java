@@ -67,11 +67,8 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
-	@Override
 	@BeforeEach
 	public void before() throws ServletException {
-		super.before();
-
 		myPartitionSettings.setPartitioningEnabled(true);
 
 		myPartitionInterceptor = new MyWriteInterceptor();
