@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2208
+title: "When performing a JPA server search on a partitioned server, searches with only the `_id` parameter and no other
+   parameters did not include the partition selector in the generated SQL, resulting in leakage across partitions. Thanks to
+   GitHub user @jtheory for reporting!"
