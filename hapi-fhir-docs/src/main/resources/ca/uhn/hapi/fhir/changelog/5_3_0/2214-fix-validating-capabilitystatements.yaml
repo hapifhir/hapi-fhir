@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2214
+title: "When using the validator from within the JPA server, validating CapabilityStatement resources failed with
+  an error when trying to load linked SearchParameter resources. This has been corrected."
