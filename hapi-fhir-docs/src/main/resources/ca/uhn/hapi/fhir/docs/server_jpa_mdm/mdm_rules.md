@@ -2,8 +2,7 @@
 
 HAPI MDM rules are defined in a single json document.
 
-Note that in all the following configuration, valid options for `resourceType` include any supported resource, such as
- `Patient`, `Practitioner`, and `*`. Use `*` if the 
+Note that in all the following configuration, valid options for `resourceType` include any supported resource, such as `Organization`, `Patient`, `Practitioner`, and `*`. Use `*` if the 
 criteria is identical across both resource types and you would like to apply it to all resources.
 
 Here is an example of a full HAPI MDM rules json document:
@@ -11,7 +10,7 @@ Here is an example of a full HAPI MDM rules json document:
 ```json
 {
 	"version": "1",
-    "mdmTypes" : ["Patient", "Practitioner"],
+    "mdmTypes" : ["Organization", "Patient", "Practitioner"],
 	"candidateSearchParams": [
 		{
 			"resourceType": "Patient",
@@ -83,7 +82,15 @@ Here is an example of a full HAPI MDM rules json document:
 				"algorithm": "JARO_WINKLER",
 				"matchThreshold": 0.80
 			}
-		}
+		},
+		{
+			"name": "org-name",
+			"resourceType": "Organization",
+			"resourcePath": "name",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		},
 	],
 	"matchResultMap": {
 		"firstname-meta,lastname-meta,birthday": "MATCH",
@@ -91,7 +98,8 @@ Here is an example of a full HAPI MDM rules json document:
 		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
 		"firstname-jaro,lastname-jaro,phone": "POSSIBLE_MATCH",
 		"lastname-jaro,phone,birthday": "POSSIBLE_MATCH",
-		"firstname-jaro,phone,birthday": "POSSIBLE_MATCH"
+		"firstname-jaro,phone,birthday": "POSSIBLE_MATCH",
+        "org-name": "MATCH"
 	}
 }
 ```
@@ -100,19 +108,9 @@ Here is a description of how each section of this document is configured.
 
 ### candidateSearchParams
 
-These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of
- "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all 
- resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common 
- or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches separately and then takes the 
- union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some MDM systems, 
- these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
+These define fields which must have at least one exact match before two resources are considered for matching.  This is like a list of "pre-searches" that find potential candidates for matches, to avoid the expensive operation of running a match score calculation on all resources in the system.  E.g. you may only wish to consider matching two Patients if they either share at least one identifier in common or have the same birthday or the same phone number. The HAPI FHIR server executes each of these searches separately and then takes the union of the results, so you can think of these as `OR` criteria that cast a wide net for potential candidates.  In some MDM systems, these "pre-searches" are called "blocking" searches (since they identify "blocks" of candidates that will be searched for matches).  
 
-If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters.
-In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient
-and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming 
-Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient
- was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no 
- family name, then only a search for matching identifiers would be performed.
+If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters. In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
 
 ```json
 "candidateSearchParams": [ {
@@ -125,8 +123,7 @@ Patient, and second for all Patient resources that share at least one identifier
 ```
 
 ### candidateFilterSearchParams
-When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients
-for which active=true.
+When searching for match candidates, only resources that match this filter are considered.  E.g. you may wish to only search for Patients for which active=true.
 
 ```json
 [ {
@@ -406,7 +403,7 @@ These entries convert combinations of successful matchFields into an MDM Match R
 {
 	"matchResultMap": {
 		"firstname-meta,lastname-meta,birthday": "MATCH",
-		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH",
+		"firstname-jaro,lastname-jaro,birthday": "POSSIBLE_MATCH"
 	}
 }
 ```

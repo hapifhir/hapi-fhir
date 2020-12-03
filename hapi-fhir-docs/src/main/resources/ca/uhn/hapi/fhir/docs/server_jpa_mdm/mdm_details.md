@@ -2,74 +2,54 @@
 
 This section describes details of how MDM functionality is implemented in HAPI FHIR.
 
-## Patient linking in FHIR
+## Resource linking in FHIR
 
-Because HAPI MDM is implemented on the HAPI JPA Server, it uses the FHIR model to represent roles and links. The 
-following illustration shows an example of how these links work.
+Because HAPI MDM is implemented on the HAPI JPA Server, it uses the FHIR model to represent links. The following illustration shows an example of how these links work.
 
 <a href="/hapi-fhir/docs/images/empi-links.svg"><img src="/hapi-fhir/docs/images/empi-links.svg" alt="MDM links" style="margin-left: 15px; margin-bottom: 15px; width: 500px;" /></a>
 
 There are several resources that are used:
 
-* Patient - Represents the record of a person who receives healthcare services
-* Golden Patient - Represents a master record with links to one or more Patient resources that belong to the same real-world patient
+* Target resource - Represents the record in being matched. For example, it can be a Patient resource who receives healthcare services and that should be mapped to a master record.
+* Golden resource - Represents a master record that the target record should point to. For example, it can be a real-world patient Patient resource that multiple duplicate Patient resources point to. 
 
 # Automatic Linking
 
-With MDM enabled, the default behavior of the MDM is to create a new Golden Patient record for every Patient that is 
-created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually via the 
-[MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).
+With MDM enabled, the default behavior of the MDM is to create a new Golden record for every target record that is created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually via the [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).
 
-In a typical configuration it is often desirable to have links be created automatically using matching rules. For example, 
-you might decide that if a Patient shares the same name, gender, and date of birth as another Patient, you have at 
-least a little confidence that they are the same Patient.
+In a typical configuration it is often desirable to have links created automatically using matching rules. For example, you might decide that if a Patient shares the same name, gender, and date of birth as another Patient, you have at least a little confidence that they are the same Patient.
 
-This automatic linking is done via configurable matching rules that create links among Patients. Based on the strength
- of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCH.
+This automatic linking is done via configurable matching rules that create links between Target record and Golden Record. Based on the strength of the match configured in these rules, the link will be set to either POSSIBLE_MATCH or MATCH.
 
-It is important to note that before a resource is processed by MDM, it is first checked to ensure that it has at least
- one attribute that the MDM system cares about, as defined in the `mdm-rules.json` file. If the incoming resource has
- no such attributes, then MDM processing does not occur on it. In this case, no Golden Resource Patient is created for 
- them. If in the future that Patient is updated to contain attributes the MDM system does concern itself with, it will 
- be processed at that time.
+It is important to note that before a resource is processed by MDM, it is first checked to ensure that it has at least one attribute that the MDM system cares about, as defined in the `mdm-rules.json` file. If the incoming resource has no such attributes, then MDM processing does not occur on it. In this case, no Golden Resource is created for this target resource. If in the future the target resource is updated to contain attributes the MDM system does concern itself with, it will be processed at that time.
 
 ## Design
 
 Below are some simplifying principles HAPI MDM follows to reduce complexity and ensure data integrity.
 
-1. When MDM is enabled on a HAPI FHIR server, any Patient resource in the repository that has the "hapi-mdm" tag is
- considered read-only by the FHIR endpoint. These Golden Patient resources are managed exclusively by HAPI MDM. Users 
- can only change them via [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).  In most cases, users 
- will indirectly change them by creating and updating target Patient resources. For the rest of this document, assume
-  "Golden Patient" refers to a "HAPI-MDM" tagged Patient resource.
+1. When MDM is enabled on a HAPI FHIR server, any Golden Resource in the repository that has the "hapi-mdm" tag is considered read-only by the FHIR endpoint. These Golden Resources are managed exclusively by HAPI MDM. Users can only change them via [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).  In most cases, users will indirectly change them by creating and updating the corresponding target resources.
 
-1. Every Patient in the system has a MATCH link to at most one Golden Patient resource.
+1. Every target resource in the system has a MATCH link to at most one Golden resource.
 
-1. The only Patient resources in the system that do not have a MATCH link are those that have the 'NO-MDM' tag or 
-those that have POSSIBLE_MATCH links pending review.
+1. The only target resources in the system that do not have a MATCH link are those that have the 'NO-MDM' tag or those that have POSSIBLE_MATCH links pending review.
 
-1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a Patient has 
-an external EID, then the Golden Patient it links to always has the same EID. If a patient has no EID when it arrives, 
-a unique UUID will be assigned as that Patient's EID.
+1. The HAPI MDM rules define a single identifier system that holds the external enterprise id ("EID"). If a target resource has an external EID, then the Golden resource it links to always has the same EID. If a target resource has no EID when it arrives, a unique UUID will be assigned as that target resource's EID.
 
-1. A Golden Patient record can have both an internal EID (auto-created by HAPI), and an external EID (provided by an 
+1. A Golden Resource can have both an internal EID (auto-created by HAPI), and an external EID (provided by an 
 external system).
 
-1. Two different Golden Patient resources cannot have the same EID.
+1. Two different Golden resources cannot have the same EID.
 
-1. Patient resources are only ever compared to Golden Patient resources via this EID. For all other matches, Patient 
-resources are only ever compared to Patient resources.
+1. Target resources are only ever compared to Golden resources via this EID.
 
 ## Links
 
-1. HAPI MDM manages mdm-link records ("links") that link a Patient resource to a Golden Patient resource. When these are
- created/updated by matching rules, the links are marked as AUTO.  When these links are changed manually, they are 
- marked as MANUAL.
+1. HAPI MDM manages mdm-link records ("links") that link a target resource to a Golden resource. When these are
+ created/updated by matching rules, the links are marked as AUTO.  When these links are changed manually, they are marked as MANUAL.
 
 1. Once a link has been manually assigned as NO_MATCH or MATCH, the system will not change it.
 
-1. When a new Patient resource is created/updated it is then compared to all other Patient resources in the repository. 
-The outcome of each of these comparisons is either NO_MATCH, POSSIBLE_MATCH or MATCH.
+1. When a new target resource is created/updated it is then compared to all other target resources of the same type in the repository. The outcome of each of these comparisons is either NO_MATCH, POSSIBLE_MATCH or MATCH.
 
 1. HAPI MDM stores these extra link details in a table called `MPI_LINK`.
 
@@ -88,20 +68,17 @@ The outcome of each of these comparisons is either NO_MATCH, POSSIBLE_MATCH or M
 
 ### Possible rule match outcomes:
 
-When a new Patient resource is compared with all other resources of that type in the repository, there are four possible outcomes:
+When a new target resource is compared with all other resources of the same type in the repository, there are four possible outcomes:
 
 <!---
 All fields are copied from the Patient to the Golden Patient.
 -->
 
-* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Golden Patient resource is created and linked to that Patient as MATCH.
-  If the incoming resource has an EID, it is copied to the Golden Patient. Otherwise a new UUID is generated and used as the internal EID.
+* CASE 1: No MATCH and no POSSIBLE_MATCH outcomes -> a new Golden resource is created and linked to that target resource as MATCH. If the incoming resource has an EID, it is copied to the Golden resource. Otherwise a new UUID is generated and used as the internal EID.
 
-* CASE 2: All of the MATCH Patient resources are already linked to the same Golden Patient -> a new Link is created between the new Patient and that Golden Patient and is set to MATCH.
+* CASE 2: All of the MATCH target resources are already linked to the same Golden Resource -> a new Link is created between the new target resource and that Golden Resource and is set to MATCH.
 
-* CASE 3: The MATCH Patient resources link to more than one Golden Patient -> Mark all links as POSSIBLE_MATCH.  All other Golden Patient resources are marked 
-as POSSIBLE_DUPLICATE of this first Golden Patient. These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will 
-no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Golden Patient as both the source and target of the link.
+* CASE 3: The MATCH target resources link to more than one Golden resource -> Mark all links as POSSIBLE_MATCH.  All other Golden resources are marked as POSSIBLE_DUPLICATE of this first Golden Resource. These duplicates are manually reviewed later and either merged or marked as NO_MATCH and the system will no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICATE is the only link type that can have a Golden Resource as both the source and target of the link.
 
 * CASE 4: Only POSSIBLE_MATCH outcomes -> In this case, new POSSIBLE_MATCH links are created and await manual reassignment to either NO_MATCH or MATCH.
 
@@ -110,6 +87,6 @@ no longer consider them as a POSSIBLE_DUPLICATE going forward. POSSIBLE_DUPLICAT
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:
 
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
-1. It creates two MESSAGE subscriptions, called 'mdm-patient' and 'mdm-practitioner' that match all incoming MDM managed resources and send them to an internal queue called "mdm". The JPA Server listens to this queue and links incoming resources to the appropriate golden resources.
+1. It creates MESSAGE subscriptions for each resource type prefixed with 'mdm-'. For example, if MDM supports Patient and Practitioner resource, two subscriptions, called 'mdm-patient' and 'mdm-practitioner' that match all incoming MDM managed resources and send them to an internal queue called "mdm". The JPA Server listens to this queue and links incoming resources to the appropriate golden resources.
 1. The [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html) are registered with the server.
-1. It registers a new dao interceptor that restricts access to MDM managed Golden Patient records.
+1. It registers a new dao interceptor that restricts access to MDM managed Golden Resource records.

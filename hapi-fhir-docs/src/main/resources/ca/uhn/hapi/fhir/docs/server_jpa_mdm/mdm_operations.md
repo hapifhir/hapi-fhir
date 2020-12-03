@@ -84,7 +84,7 @@ This operation returns a `Parameters` resource that looks like the following:
       "name": "goldenResourceId",
       "valueString": "Person/123"
     }, {
-      "name": "resourceId",
+      "name": "targetResourceId",
       "valueString": "Patient/456"
     }, {
       "name": "matchResult",
@@ -96,7 +96,7 @@ This operation returns a `Parameters` resource that looks like the following:
       "name": "eidMatch",
       "valueBoolean": false
     }, {
-      "name": "newPerson",
+      "name": "hadToCreateNewResource",
       "valueBoolean": false
     }, {
       "name": "score",
@@ -131,7 +131,7 @@ This operation returns `Parameters` similar to `$mdm-query-links`:
       "name": "goldenResourceId",
       "valueString": "Person/123"
     }, {
-      "name": "resourceId",
+      "name": "targetResourceId",
       "valueString": "Person/456"
     }, {
       "name": "matchResult",
@@ -254,7 +254,7 @@ Use the `$mdm-update-link` operation to change the `matchResult` update of an md
     </tbody>
 </table>
 
-Mdm links updated in this way will automatically have their `linkSource` set to `MANUAL`.
+MDM links updated in this way will automatically have their `linkSource` set to `MANUAL`.
 
 ### Example
 
@@ -264,7 +264,7 @@ Use an HTTP POST to the following URL to invoke this operation:
 http://example.com/$mdm-update-link
 ```
 
-The following request body could be used:
+Any supported MDM type can be used. The following request body shows how to update link on the Patient resource type:
 
 ```json
 {
@@ -282,7 +282,7 @@ The following request body could be used:
 }
 ```
 
-The operation returns the updated `Patient` resource.  Note that this is the only way to modify MDM-managed `Patient` resources.
+The operation returns the updated Golden Resource. For the query above `Patient` resource will be returned.  Note that this is the only way to modify MDM-managed Golden Resources.
 
 ## Merge Persons
 
@@ -349,15 +349,15 @@ The following request body could be used:
 }
 ```
 
-This operation returns the merged Patient resource.
+This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 # Querying The MDM
 
+## Querying the Patient Resource
+
 When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server.
 
-This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient 
-resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the
-number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
+This operation allows a Patient resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
 For example, the following request may be submitted:
 
@@ -423,14 +423,37 @@ This might result in a response such as the following:
 }
 ```
 
+## Querying the Other Supported MDM Resources via `/$mdm-match`
+
+Query operations on any other supported MDM type is also allowed. This operation will  Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
+
+The request below may be submitted to search for `Orgaization` in case it defined as a supported MDM type:
+
+```http
+POST /Organization/$mdm-match
+Content-Type: application/fhir+json; charset=UTF-8
+
+{
+    "resourceType":"Parameters",
+    "parameter": [
+        {
+            "name":"resource",
+            "resource": {
+                "resourceType":"Orgaization",
+                "name": "McMaster Family Practice"
+            }
+        }
+    ]
+}
+```
+
+MDM will respond with the appropriate resource bundle. 
+
 ## Clearing MDM Links
 
-The `$mdm-clear` operation is used to batch-delete MDM links and related persons from the database. This operation is meant to
-be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset.
-It permits the user to reset the state of their MDM system without manual deletion of all related links and golden resources.
+The `$mdm-clear` operation is used to batch-delete MDM links and related persons from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and golden resources.
 
-After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are
-deleted and expunged from the server.
+After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are deleted and expunged from the server.
 
 This operation takes a single optional Parameter.
 
@@ -489,10 +512,7 @@ This operation returns the number of MDM links that were cleared. The following 
 
 ## Batch-creating MDM Links
 
-Call the `$mdm-submit` operation to submit patients and practitioners for MDM processing. In the rules-tuning phase of your setup, you can 
-use `$mdm-submit` to apply MDM rules across multiple Resources. An important thing to note is that this operation only submits the 
-resources for processing. Actual MDM processing is run asynchronously, and depending on the size
-of the affected bundle of resources, may take some time to complete.
+Call the `$mdm-submit` operation to submit patients and practitioners for MDM processing. In the rules-tuning phase of your setup, you can use `$mdm-submit` to apply MDM rules across multiple Resources. An important thing to note is that this operation only submits the resources for processing. Actual MDM processing is run asynchronously, and depending on the size of the affected bundle of resources, may take some time to complete.
 
 After the operation is complete, all resources that matched the criteria will now have at least one MDM link attached to them.
 
@@ -553,8 +573,7 @@ This operation returns the number of resources that were submitted for MDM proce
 }
 ```
 
-This operation can also be done at the Instance level. When this is the case, the operations accepts no parameters.
-The following are examples of Instance level POSTs, which require no parameters.
+This operation can also be done at the Instance level. When this is the case, the operations accepts no parameters. The following are examples of Instance level POSTs, which require no parameters.
 
 ```url
 http://example.com/Patient/123/$mdm-submit
