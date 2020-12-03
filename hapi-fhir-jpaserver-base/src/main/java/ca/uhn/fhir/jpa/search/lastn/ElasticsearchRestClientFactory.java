@@ -57,7 +57,6 @@ public class ElasticsearchRestClientFactory {
                 new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY,
                 new UsernamePasswordCredentials(theUsername, thePassword));
-        //TODO GGG HS This doesnt work with HTTPS hosts, btw, only HTTP
         RestClientBuilder clientBuilder = RestClient.builder(
                 new HttpHost(stripHostOfScheme(theHostname), thePort, determineScheme(theHostname)))
                 .setHttpClientConfigCallback(httpClientBuilder -> httpClientBuilder
