@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.mdm.broker;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - Enterprise Master Patient Index
+ * HAPI FHIR JPA Server - Master Data Management
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

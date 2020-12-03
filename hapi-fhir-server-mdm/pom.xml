@@ -14,7 +14,7 @@
 	<artifactId>hapi-fhir-server-mdm</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Enterprise Master Patient Index</name>
+	<name>HAPI FHIR - Master Data Management</name>
 
 	<dependencies>
 		<dependency>

@@ -2,7 +2,7 @@ package ca.uhn.fhir.mdm.util;
 
 /*-
  * #%L
- * HAPI FHIR - Enterprise Master Patient Index
+ * HAPI FHIR - Master Data Management
  * %%
  * Copyright (C) 2014 - 2020 University Health Network
  * %%

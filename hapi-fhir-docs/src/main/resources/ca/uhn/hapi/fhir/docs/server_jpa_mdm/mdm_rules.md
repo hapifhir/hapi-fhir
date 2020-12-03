@@ -90,7 +90,7 @@ Here is an example of a full HAPI MDM rules json document:
 			"matcher": {
 				"algorithm": "STRING"
 			}
-		},
+		}
 	],
 	"matchResultMap": {
 		"firstname-meta,lastname-meta,birthday": "MATCH",
@@ -113,13 +113,17 @@ These define fields which must have at least one exact match before two resource
 If a list of searchParams is specified in a given candidateSearchParams item, then these search parameters are treated as `AND` parameters. In the following candidateSearchParams definition, hapi-fhir will extract given name, family name and identifiers from the incoming Patient and perform two separate searches, first for all Patient resources that have the same given `AND` the same family name as the incoming Patient, and second for all Patient resources that share at least one identifier as the incoming Patient.  Note that if the incoming Patient was missing any of these searchParam values, then that search would be skipped.  E.g. if the incoming Patient had a given name but no family name, then only a search for matching identifiers would be performed.
 
 ```json
-"candidateSearchParams": [ {
-    "resourceType" : "Patient",
-    "searchParams" : ["given", "family"]
-}, {
-    "resourceType" : "Patient",
-    "searchParam" : "identifier"
-} ]
+{
+    "candidateSearchParams" : [ 
+        {
+            "resourceType" : "Patient",
+            "searchParams" : ["given", "family"]
+        }, {
+            "resourceType" : "Patient",
+            "searchParam" : "identifier"
+        } 
+  ]
+}
 ```
 
 ### candidateFilterSearchParams
@@ -151,6 +155,7 @@ For example, if the incoming patient looked like this:
         "James"
       ]
     }
+  ]
 }
 ```
 
