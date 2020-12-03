@@ -23,14 +23,15 @@ package ca.uhn.fhir.jpa.cache;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,13 +41,13 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
-	private static final Logger myLogger = LoggerFactory.getLogger(ResourceVersionMap.class);
 
 	@Autowired
 	DaoRegistry myDaoRegistry;
 	@Autowired
 	IResourceTableDao myResourceTableDao;
 
+	@Override
 	@Nonnull
 	public ResourceVersionMap getVersionMap(String theResourceName, SearchParameterMap theSearchParamMap) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceName);
@@ -55,6 +56,12 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 			.map(ResourcePersistentId::getIdAsLong)
 			.collect(Collectors.toList());
 
-		return ResourceVersionMap.fromResourceTableEntities(myResourceTableDao.findAllById(matchingIds));
+		List<ResourceTable> allById = new ArrayList<>();
+		new QueryChunker<Long>().chunk(matchingIds, t -> {
+			List<ResourceTable> nextBatch = myResourceTableDao.findAllById(t);
+			allById.addAll(nextBatch);
+		});
+
+		return ResourceVersionMap.fromResourceTableEntities(allById);
 	}
 }

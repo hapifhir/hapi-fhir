@@ -86,8 +86,8 @@ public class MetadataCapabilityStatementDstu3Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output, containsString("<CapabilityStatement"));
-			assertEquals("HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + FhirVersionEnum.DSTU3.getFhirVersionString() + "/DSTU3)",
-				status.getFirstHeader("X-Powered-By").getValue());
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

@@ -3650,6 +3650,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p2.addName().setFamily(methodName + "2");
 		IIdType pid2 = myClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
 
+		myCaptureQueriesListener.clear();
+
 		HttpGet get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString());
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
@@ -3663,6 +3665,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} finally {
 			response.close();
 		}
+
+		myCaptureQueriesListener.logSelectQueries();
 
 		get = new HttpGet(ourServerBase + "/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString());
 		response = ourHttpClient.execute(get);
