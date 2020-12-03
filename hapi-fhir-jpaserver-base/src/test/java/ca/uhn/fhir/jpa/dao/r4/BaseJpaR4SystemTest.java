@@ -1,33 +1,27 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.rp.r4.PatientResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
-	protected ServletRequestDetails mySrd;
 	private RestfulServer myServer;
 
+	@Override
 	@SuppressWarnings("unchecked")
 	@BeforeEach
-	public void before() throws ServletException {
-		mySrd = mock(ServletRequestDetails.class);
-		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));
+	public void beforeInitMocks() throws Exception {
+		super.beforeInitMocks();
+
+		// FIXME: remove comments
+//		mySrd = mock(ServletRequestDetails.class);
 
 		if (myServer == null) {
-			myServer = new RestfulServer(myFhirCtx);
+			myServer = new RestfulServer(myFhirCtx, mySrdInterceptorService);
 
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(myPatientDao);
@@ -35,12 +29,13 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 			myServer.init(mock(ServletConfig.class));
 		}
 
-		when(mySrd.getServer()).thenReturn(myServer);
-		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
-		when(mySrd.getServletRequest()).thenReturn(servletRequest);
-		when(mySrd.getFhirServerBase()).thenReturn("http://example.com/base");
-		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
-		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
+		// FIXME: remove comments
+//		when(mySrd.getServer()).thenReturn(myServer);
+//		HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+//		when(mySrd.getServletRequest()).thenReturn(servletRequest);
+//		when(mySrd.getFhirServerBase()).thenReturn("http://example.com/base");
+//		when(servletRequest.getHeaderNames()).thenReturn(mock(Enumeration.class));
+//		when(servletRequest.getRequestURL()).thenReturn(new StringBuffer("/Patient"));
 	}
 
 }

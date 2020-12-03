@@ -116,7 +116,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
 
-		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
+		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 		myInterceptor = null;
 
 		if (myHaveDroppedForcedIdUniqueConstraint) {
@@ -127,13 +127,11 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		}
 
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(new DaoConfig().isAutoCreatePlaceholderReferenceTargets());
 	}
 
-	@Override
 	@BeforeEach
 	public void before() throws ServletException {
-		super.before();
-
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
 
@@ -147,7 +145,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		myPartitionId2 = 2;
 
 		myPartitionInterceptor = new MyReadWriteInterceptor();
-		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
+		mySrdInterceptorService.registerInterceptor(myPartitionInterceptor);
 
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
 		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
@@ -158,7 +156,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		// Ensure the partition names are resolved
 		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
-		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
+		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true), mySrd);
 
 	}
 
@@ -379,6 +377,24 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		} catch (UnprocessableEntityException e) {
 			assertEquals("Resource type SearchParameter can not be partitioned", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreate_AutoCreatePlaceholderTargets() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		addCreatePartition(1, null);
+		addCreatePartition(1, null);
+		addReadPartition(1);
+		IIdType patientId1 = createPatient(withOrganization(new IdType("Organization/FOO")));
+
+		addReadPartition(1);
+		IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
+		assertEquals(patientId1, gotId1);
+
+		addReadPartition(1);
+		IdType gotIdOrg = myOrganizationDao.read(new IdType("Organization/FOO"), mySrd).getIdElement().toUnqualifiedVersionless();
+		assertEquals("Organization/FOO", gotIdOrg.toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -1067,6 +1083,21 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage(), matchesPattern("Resource Patient/TWO is not known"));
 		}
+
+		// Read in wrong Partition
+		addReadPartition(2);
+		try {
+			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage(), matchesPattern("Resource Patient/ONE is not known"));
+		}
+
+		// Read in correct Partition
+		addReadPartition(2);
+		IdType gotId2 = myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
+		assertEquals(patientId2, gotId2);
+
 	}
 
 	@Test
