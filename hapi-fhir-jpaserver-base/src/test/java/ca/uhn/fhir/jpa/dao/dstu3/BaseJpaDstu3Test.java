@@ -377,7 +377,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		runInTransaction(() -> {
 			SearchSession searchSession  = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
-			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
+//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
 			searchSession.indexingPlan().execute();
 		});
 

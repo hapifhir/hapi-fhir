@@ -534,7 +534,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		runInTransaction(() -> {
 			SearchSession searchSession  = Search.session(myEntityManager);
 			searchSession.workspace(ResourceTable.class).purge();
-			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
+//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
 			searchSession.indexingPlan().execute();
 		});
 
