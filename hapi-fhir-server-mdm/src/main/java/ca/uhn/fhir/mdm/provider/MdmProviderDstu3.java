@@ -21,13 +21,13 @@ package ca.uhn.fhir.mdm.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
+import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmLinkJson;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -42,6 +42,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.InstantType;
+import org.hl7.fhir.dstu3.model.IntegerType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.dstu3.model.Practitioner;
@@ -95,164 +96,11 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 			throw new InvalidRequestException("resource may not be null");
 		}
 		return getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueNotNull());
-
-	}
-
-	private Bundle.BundleEntrySearchComponent toBundleEntrySearchComponent(MatchedTarget theMatchedTarget) {
-		Bundle.BundleEntrySearchComponent searchComponent = new Bundle.BundleEntrySearchComponent();
-		searchComponent.setMode(Bundle.SearchEntryMode.MATCH);
-		searchComponent.setScore(theMatchedTarget.getMatchResult().getNormalizedScore());
-
-		MatchGrade matchGrade = getMatchGrade(theMatchedTarget);
-
-		searchComponent.addExtension(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE, new CodeType(matchGrade.toCode()));
-		return searchComponent;
-	}
-
-	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
-	public IBaseResource mergeGoldenResource(@OperationParam(name=ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theFromGoldenResourceId,
-														  @OperationParam(name=ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theToGoldenResourceId,
-														  RequestDetails theRequestDetails) {
-		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
-
-		String resourceType = getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
-
-		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES, resourceType));
-	}
-
-	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
-	public IBaseResource updateLink(@OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theGoldenResourceId,
-																  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) StringType theTargetId,
-																  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
-																  ServletRequestDetails theRequestDetails) {
-
-		validateUpdateLinkParameters(theGoldenResourceId, theTargetId, theMatchResult);
-
-		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValue(), theTargetId.getValue(), theMatchResult.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
-				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
-	}
-
-	@Operation(name = ProviderConstants.MDM_QUERY_LINKS)
-	public Parameters queryLinks(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1) StringType theGoldenResourceId,
-										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1) StringType theTargetResourceId,
-										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theMatchResult,
-										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theLinkSource,
-										  ServletRequestDetails theRequestDetails) {
-
-		Stream<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId), extractStringOrNull(theTargetResourceId),
-			extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource), createMdmContext(theRequestDetails,
-				MdmTransactionContext.OperationType.QUERY_LINKS, getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId)));
-		return (Parameters) parametersFromMdmLinks(mdmLinkJson, true);
-	}
-
-	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES)
-	public Parameters getDuplicateGoldenResources(ServletRequestDetails theRequestDetails) {
-		Stream<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS, (String) null));
-		return (Parameters) parametersFromMdmLinks(possibleDuplicates, false);
-	}
-
-	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)
-	// TODO KHS can this return void?
-	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theGoldenResourceId,
-																		  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1) StringType theTargetResourceId,
-																		  ServletRequestDetails theRequestDetails) {
-
-		validateNotDuplicateParameters(theGoldenResourceId, theTargetResourceId);
-		myMdmControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theTargetResourceId.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE, theGoldenResourceId.fhirType()));
-
-		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
-		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
-		return retval;
-	}
-
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
-	})
-	public Parameters mdmBatchOnAllTargets(
-		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
-		ServletRequestDetails theRequestDetails) {
-		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount  = myMdmSubmitSvc.submitAllTargetTypesToMdm(criteria);
-		return buildMdmOutParametersWithCount(submittedCount);
-	}
-
-	private String convertCriteriaToString(StringType theCriteria) {
-		return theCriteria == null ? null : theCriteria.getValueAsString();
-	}
-
-	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
-	})
-	public Parameters clearMdmLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
-											  ServletRequestDetails theRequestDetails) {
-		long resetCount;
-		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
-			resetCount = myMdmExpungeSvc.expungeAllMdmLinks(theRequestDetails);
-		} else {
-			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfTargetType(theTargetType.getValueNotNull(), theRequestDetails);
-		}
-		Parameters parameters = new Parameters();
-		parameters.addParameter().setName(ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT)
-			.setValue(new DecimalType(resetCount));
-		return parameters;
-	}
-
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
-	})
-	public Parameters mdmBatchPatientInstance(
-		@IdParam IIdType theIdParam,
-		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
-		return buildMdmOutParametersWithCount(submittedCount);
-	}
-
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
-	})
-	public Parameters mdmBatchPatientType(
-		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
-		RequestDetails theRequest) {
-		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria);
-		return buildMdmOutParametersWithCount(submittedCount);
-	}
-
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
-	})
-	public Parameters mdmBatchPractitionerInstance(
-		@IdParam IIdType theIdParam,
-		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
-		return buildMdmOutParametersWithCount(submittedCount);
-	}
-
-	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
-		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = DecimalType.class)
-	})
-	public Parameters mdmBatchPractitionerType(
-		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
-		RequestDetails theRequest) {
-		String criteria = convertCriteriaToString(theCriteria);
-		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria);
-		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
 	/**
-	 * Helper function to build the out-parameters for all batch MDM operations.
+	 * Helper method which will return a bundle of all Matches and Possible Matches.
 	 */
-	private Parameters buildMdmOutParametersWithCount(long theCount) {
-		Parameters parameters = new Parameters();
-		parameters.addParameter()
-			.setName(ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)
-			.setValue(new DecimalType(theCount));
-		return parameters;
-	}
-
 	private Bundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType) {
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
 		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
@@ -277,6 +125,175 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 		return retVal;
 	}
 
+	private Bundle.BundleEntrySearchComponent toBundleEntrySearchComponent(MatchedTarget theMatchedTarget) {
+		Bundle.BundleEntrySearchComponent searchComponent = new Bundle.BundleEntrySearchComponent();
+		searchComponent.setMode(Bundle.SearchEntryMode.MATCH);
+		searchComponent.setScore(theMatchedTarget.getMatchResult().getNormalizedScore());
+
+		MatchGrade matchGrade = getMatchGrade(theMatchedTarget);
+
+		searchComponent.addExtension(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE, new CodeType(matchGrade.toCode()));
+		return searchComponent;
+	}
+
+	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
+	public IBaseResource mergeGoldenResources(@OperationParam(name=ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theFromGoldenResourceId,
+															@OperationParam(name=ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theToGoldenResourceId,
+															RequestDetails theRequestDetails) {
+		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
+
+		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValue(), theToGoldenResourceId.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES,
+				getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId))
+		);
+	}
+
+	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
+	public IBaseResource updateLink(@OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theGoldenResourceId,
+								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) StringType theResourceId,
+								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
+								  ServletRequestDetails theRequestDetails) {
+		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
+		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(), theMatchResult.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
+				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
+		);
+	}
+
+	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
+	})
+	public Parameters clearMdmLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
+											  ServletRequestDetails theRequestDetails) {
+		long resetCount;
+		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
+			resetCount = myMdmExpungeSvc.expungeAllMdmLinks(theRequestDetails);
+		} else {
+			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfTargetType(theTargetType.getValueNotNull(), theRequestDetails);
+		}
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT)
+			.setValue(new DecimalType(resetCount));
+		return parameters;
+	}
+
+	@Operation(name = ProviderConstants.MDM_QUERY_LINKS, idempotent = true)
+	public Parameters queryLinks(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 0, max = 1) StringType theGoldenResourceId,
+										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 0, max = 1) StringType theResourceId,
+										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_MATCH_RESULT, min = 0, max = 1) StringType theMatchResult,
+										  @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_LINK_SOURCE, min = 0, max = 1) StringType theLinkSource,
+										  ServletRequestDetails theRequestDetails) {
+
+		Stream<MdmLinkJson> mdmLinkJson = myMdmControllerSvc.queryLinks(extractStringOrNull(theGoldenResourceId), extractStringOrNull(theResourceId),
+			extractStringOrNull(theMatchResult), extractStringOrNull(theLinkSource),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.QUERY_LINKS,
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId))
+		);
+		return (Parameters) parametersFromMdmLinks(mdmLinkJson, true);
+	}
+
+	@Operation(name = ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES, idempotent = true)
+	public Parameters getDuplicateGoldenResources(ServletRequestDetails theRequestDetails) {
+		Stream<MdmLinkJson> possibleDuplicates = myMdmControllerSvc.getDuplicateGoldenResources(
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.DUPLICATE_GOLDEN_RESOURCES, (String) null)
+		);
+		return (Parameters) parametersFromMdmLinks(possibleDuplicates, false);
+	}
+
+	@Operation(name = ProviderConstants.MDM_NOT_DUPLICATE)
+	public Parameters notDuplicate(@OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, min = 1, max = 1) StringType theGoldenResourceId,
+										    @OperationParam(name=ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, min = 1, max = 1) StringType theResourceId,
+										    ServletRequestDetails theRequestDetails) {
+
+		validateNotDuplicateParameters(theGoldenResourceId, theResourceId);
+		myMdmControllerSvc.notDuplicateGoldenResource(theGoldenResourceId.getValue(), theResourceId.getValue(),
+			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.NOT_DUPLICATE,
+				getResourceType(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId))
+		);
+
+		Parameters retval = (Parameters) ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersBoolean(myFhirContext, retval, "success", true);
+		return retval;
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
+	})
+	public Parameters mdmBatchOnAllTargets(
+		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0 , max = 1) StringType theResourceType,
+		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
+		ServletRequestDetails theRequestDetails) {
+		String criteria = convertStringTypeToString(theCriteria);
+		String resourceType = convertStringTypeToString(theResourceType);
+
+		long submittedCount;
+		if (resourceType != null) {
+			submittedCount = myMdmSubmitSvc.submitTargetTypeToMdm(resourceType, criteria);
+		} else {
+			submittedCount = myMdmSubmitSvc.submitAllTargetTypesToMdm(criteria);
+		}
+		return buildMdmOutParametersWithCount(submittedCount);
+	}
+
+	private String convertStringTypeToString(StringType theCriteria) {
+		return theCriteria == null ? null : theCriteria.getValueAsString();
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters mdmBatchPatientInstance(
+		@IdParam IIdType theIdParam,
+		RequestDetails theRequest) {
+		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
+		return buildMdmOutParametersWithCount(submittedCount);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Patient.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters mdmBatchPatientType(
+		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
+		RequestDetails theRequest) {
+		String criteria = convertStringTypeToString(theCriteria);
+		long submittedCount = myMdmSubmitSvc.submitPatientTypeToMdm(criteria);
+		return buildMdmOutParametersWithCount(submittedCount);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters mdmBatchPractitionerInstance(
+		@IdParam IIdType theIdParam,
+		RequestDetails theRequest) {
+		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
+		return buildMdmOutParametersWithCount(submittedCount);
+	}
+
+	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, type = Practitioner.class, returnParameters = {
+		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type = IntegerType.class)
+	})
+	public Parameters mdmBatchPractitionerType(
+		@OperationParam(name = ProviderConstants.MDM_BATCH_RUN_CRITERIA) StringType theCriteria,
+		RequestDetails theRequest) {
+		String criteria = convertStringTypeToString(theCriteria);
+		long submittedCount = myMdmSubmitSvc.submitPractitionerTypeToMdm(criteria);
+		return buildMdmOutParametersWithCount(submittedCount);
+	}
+
+	/**
+	 * Helper function to build the out-parameters for all batch MDM operations.
+	 */
+	private Parameters buildMdmOutParametersWithCount(long theCount) {
+		Parameters parameters = new Parameters();
+		parameters.addParameter()
+			.setName(ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT)
+			.setValue(new DecimalType(theCount));
+		return parameters;
+	}
+
+
+
 	@Nonnull
 	protected MatchGrade getMatchGrade(MatchedTarget theTheMatchedTarget) {
 		MatchGrade matchGrade = MatchGrade.PROBABLE;
@@ -288,7 +305,7 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 		return matchGrade;
 	}
 
-	protected String getResourceType(String theParamName, StringType theResourceId) {
+	private String getResourceType(String theParamName, StringType theResourceId) {
 		if (theResourceId != null) {
 			IIdType idType = MdmControllerUtil.getGoldenIdDtOrThrowException(theParamName, theResourceId.getValueNotNull());
 			return idType.getResourceType();

@@ -84,9 +84,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 		if (thePatient == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		Bundle retVal = getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
-
-		return retVal;
+		return getMatchesAndPossibleMatchesForResource(thePatient, "Patient");
 	}
 
 	@Operation(name = ProviderConstants.MDM_MATCH)
@@ -96,19 +94,14 @@ public class MdmProviderR4 extends BaseMdmProvider {
 		if (theResource == null) {
 			throw new InvalidRequestException("resource may not be null");
 		}
-		Bundle retVal = getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueNotNull());
-
-		return retVal;
+		return getMatchesAndPossibleMatchesForResource(theResource, theResourceType.getValueNotNull());
 	}
 
 	/**
 	 * Helper method which will return a bundle of all Matches and Possible Matches.
-	 * @param theResource
-	 * @param theTheValueNotNull
-	 * @return
 	 */
-	private Bundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theTheValueNotNull) {
-		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theTheValueNotNull, theResource);
+	private Bundle getMatchesAndPossibleMatchesForResource(IAnyResource theResource, String theResourceType) {
+		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
 
 		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 
@@ -162,8 +155,7 @@ public class MdmProviderR4 extends BaseMdmProvider {
 								  @OperationParam(name=ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) StringType theMatchResult,
 								  ServletRequestDetails theRequestDetails) {
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(),
-			theMatchResult.getValue(),
+		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueNotNull(), theResourceId.getValue(), theMatchResult.getValue(),
 			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
 				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
 		);
@@ -230,7 +222,6 @@ public class MdmProviderR4 extends BaseMdmProvider {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
 	})
 	public Parameters mdmBatchOnAllTargets(
-		//TODO GGG MDM: also have to take it an optional resourceType here, to clarify which resources should have MDM run on them.
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0 , max = 1) StringType theResourceType,
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
 		ServletRequestDetails theRequestDetails) {
@@ -242,7 +233,6 @@ public class MdmProviderR4 extends BaseMdmProvider {
 			submittedCount  = myMdmSubmitSvc.submitTargetTypeToMdm(resourceType, criteria);
 		} else {
 			submittedCount  = myMdmSubmitSvc.submitAllTargetTypesToMdm(criteria);
-
 		}
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
