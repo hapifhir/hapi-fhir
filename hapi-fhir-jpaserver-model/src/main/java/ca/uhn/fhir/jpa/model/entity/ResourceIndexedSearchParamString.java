@@ -69,7 +69,6 @@ import static org.apache.commons.lang3.StringUtils.left;
 	@Index(name = "IDX_SP_STRING_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_STRING_RESID", columnList = "RES_ID")
 })
-@Indexed()
 public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchParam {
 
 	/*
@@ -89,10 +88,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	private ResourceTable myResourceTable;
 
 	@Column(name = "SP_VALUE_EXACT", length = MAX_LENGTH, nullable = true)
-	@FullTextField(name = "myValueText", searchable=Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
-	@FullTextField(name = "myValueTextEdgeNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
-	@FullTextField(name = "myValueTextNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
-	@FullTextField(name = "myValueTextPhonetic", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
+//	@FullTextField(name = "myValueText", searchable=Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+//	@FullTextField(name = "myValueTextEdgeNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteEdgeAnalyzer")
+//	@FullTextField(name = "myValueTextNGram", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompleteNGramAnalyzer")
+//	@FullTextField(name = "myValueTextPhonetic", searchable=Searchable.YES, projectable = Projectable.NO, analyzer = "autocompletePhoneticAnalyzer")
 	private String myValueExact;
 
 	@Column(name = "SP_VALUE_NORMALIZED", length = MAX_LENGTH, nullable = true)
