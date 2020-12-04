@@ -10,10 +10,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +101,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		assertEquals(PersistedJpaBundleProvider.class, result.getClass());
 
 		PersistedJpaBundleProvider resultCasted = (PersistedJpaBundleProvider) result;
-		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.isCacheHit());
+		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.getCacheStatus());
 	}
 
 }

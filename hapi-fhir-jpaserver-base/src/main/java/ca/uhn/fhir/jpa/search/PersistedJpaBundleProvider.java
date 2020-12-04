@@ -109,7 +109,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private final RequestDetails myRequest;
 	private Search mySearchEntity;
 	private String myUuid;
-	private SearchCacheStatusEnum myCacheHit;
+	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
 
 	/**
@@ -300,13 +300,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myUuid;
 	}
 
-	// FIXME: rename
-	public SearchCacheStatusEnum isCacheHit() {
-		return myCacheHit;
+	public SearchCacheStatusEnum getCacheStatus() {
+		return myCacheStatus;
 	}
 
-	void setCacheHit(SearchCacheStatusEnum theSearchCacheStatusEnum) {
-		myCacheHit = theSearchCacheStatusEnum;
+	void setCacheStatus(SearchCacheStatusEnum theSearchCacheStatusEnum) {
+		myCacheStatus = theSearchCacheStatusEnum;
 	}
 
 	@Override

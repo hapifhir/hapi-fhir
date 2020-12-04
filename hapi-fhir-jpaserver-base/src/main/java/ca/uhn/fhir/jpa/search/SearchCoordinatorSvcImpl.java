@@ -102,7 +102,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -334,7 +333,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null) {
 					PersistedJpaBundleProvider foundSearchProvider = findCachedQuery(theParams, theResourceType, theRequestDetails, queryString, theRequestPartitionId);
 					if (foundSearchProvider != null) {
-						foundSearchProvider.setCacheHit(SearchCacheStatusEnum.HIT);
+						foundSearchProvider.setCacheStatus(SearchCacheStatusEnum.HIT);
 						return foundSearchProvider;
 					}
 				}
@@ -342,7 +341,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 		PersistedJpaSearchFirstPageBundleProvider retVal = submitSearch(theCallingDao, theParams, theResourceType, theRequestDetails, searchUuid, sb, queryString, theRequestPartitionId);
-		retVal.setCacheHit(cacheStatus);
+		retVal.setCacheStatus(cacheStatus);
 		return retVal;
 
 	}
