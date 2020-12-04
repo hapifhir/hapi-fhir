@@ -3,18 +3,15 @@ package ca.uhn.fhir.cql.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
-import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
@@ -24,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -39,11 +35,9 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
 
 	@Autowired
-	CqlProviderLoader myCqlProviderLoader;
+	CqlProviderFactory myCqlProviderFactory;
 	@Autowired
 	DaoRegistry myDaoRegistry;
-	@Autowired
-	IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -64,7 +58,7 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 		myLibraryResourceProvider.setDao(myDaoRegistry.getResourceDao("Library"));
 		myValueSetResourceProvider.setDao(myDaoRegistry.getResourceDao("ValueSet"));
 
-		myProvider = myCqlProviderLoader.buildDstu3Provider();
+		myProvider = (MeasureOperationsProvider) myCqlProviderFactory.getMeasureOperationsProvider();
 
 		// Load terminology for measure tests (HEDIS measures)
 		loadBundle("dstu3/hedis-valuesets-bundle.json");

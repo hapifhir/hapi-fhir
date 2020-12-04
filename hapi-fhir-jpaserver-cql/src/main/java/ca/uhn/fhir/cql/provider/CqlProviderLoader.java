@@ -22,21 +22,13 @@ package ca.uhn.fhir.cql.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.PostConstruct;
 
 @Service
 public class CqlProviderLoader {
@@ -47,37 +39,17 @@ public class CqlProviderLoader {
 	private ResourceProviderFactory myResourceProviderFactory;
 	@Autowired
 	private CqlProviderFactory myCqlProviderFactory;
-	@Autowired
-	private ApplicationContext myApplicationContext;
 
-	private Lock myProviderRegistrationMutex = new ReentrantLock();
-	private boolean myStarted;
-	private final List<Object> myPlainProviders = new ArrayList<>();
-	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
-
-	@EventListener(classes = {ContextRefreshedEvent.class})
+	@PostConstruct
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myLogger.info("Registering CQL Provider for DSTU3");
-				myResourceProviderFactory.addSupplier(() -> buildDstu3Provider());
-				break;
 			case R4:
-				myLogger.info("Registering CQL Provider for R4");
-				myResourceProviderFactory.addSupplier(() -> buildR4Provider());
+				myLogger.info("Registering CQL Provider");
+				myResourceProviderFactory.addSupplier(() -> myCqlProviderFactory.getMeasureOperationsProvider());
 				break;
 			default:
 				throw new ConfigurationException("CQL not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
-	}
-
-	@VisibleForTesting
-	org.opencds.cqf.dstu3.providers.MeasureOperationsProvider buildDstu3Provider() {
-		return myCqlProviderFactory.getMeasureOperationsProviderDstu3();
-	}
-
-	@VisibleForTesting
-	org.opencds.cqf.r4.providers.MeasureOperationsProvider buildR4Provider() {
-		return myCqlProviderFactory.getMeasureOperationsProviderR4();
 	}
 }

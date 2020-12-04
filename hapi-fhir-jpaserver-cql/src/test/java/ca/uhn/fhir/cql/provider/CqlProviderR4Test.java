@@ -3,7 +3,6 @@ package ca.uhn.fhir.cql.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.BaseCqlR4Test;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.rp.r4.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.MeasureResourceProvider;
@@ -11,7 +10,6 @@ import ca.uhn.fhir.jpa.rp.r4.ValueSetResourceProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MeasureReport;
-import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -25,18 +23,18 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Disabled
 public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestBase {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
 
 	@Autowired
-	CqlProviderLoader myCqlProviderLoader;
+	CqlProviderFactory myCqlProviderFactory;
 	@Autowired
 	DaoRegistry myDaoRegistry;
-	@Autowired
-	IFhirResourceDao<Patient> myPatientDao;
 	@Autowired
 	FhirContext myFhirContext;
 	@Autowired
@@ -57,7 +55,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		myLibraryResourceProvider.setDao(myDaoRegistry.getResourceDao("Library"));
 		myValueSetResourceProvider.setDao(myDaoRegistry.getResourceDao("ValueSet"));
 
-		myProvider = myCqlProviderLoader.buildR4Provider();
+		myProvider = (MeasureOperationsProvider) myCqlProviderFactory.getMeasureOperationsProvider();
 
 		// Load terminology for measure tests (HEDIS measures)
 		loadBundle("dstu3/hedis-valuesets-bundle.json");

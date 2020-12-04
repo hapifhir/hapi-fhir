@@ -52,11 +52,13 @@ public class CqlProviderFactory {
 	@Autowired(required = false)
 	private ca.uhn.fhir.jpa.rp.r4.MeasureResourceProvider myMeasureResourceProviderR4;
 
-	public org.opencds.cqf.dstu3.providers.MeasureOperationsProvider getMeasureOperationsProviderDstu3() {
-		return new org.opencds.cqf.dstu3.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderDstu3, myHQMFProviderDstu3, myLibraryOperationsProviderDstu3, myMeasureResourceProviderDstu3);
-	}
-
-	public org.opencds.cqf.r4.providers.MeasureOperationsProvider getMeasureOperationsProviderR4() {
-		return new org.opencds.cqf.r4.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderR4, myHQMFProviderR4, myLibraryOperationsProviderR4, myMeasureResourceProviderR4);
+	public Object getMeasureOperationsProvider() {
+		if (myNarrativeProviderDstu3 != null) {
+			return new org.opencds.cqf.dstu3.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderDstu3, myHQMFProviderDstu3, myLibraryOperationsProviderDstu3, myMeasureResourceProviderDstu3);
+		}
+		if (myNarrativeProviderR4 != null) {
+			return new org.opencds.cqf.r4.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderR4, myHQMFProviderR4, myLibraryOperationsProviderR4, myMeasureResourceProviderR4);
+		}
+		throw new UnsupportedOperationException("No NarrativeProvider in context");
 	}
 }
