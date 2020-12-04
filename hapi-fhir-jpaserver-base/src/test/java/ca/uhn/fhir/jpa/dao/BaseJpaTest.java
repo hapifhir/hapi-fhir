@@ -43,9 +43,9 @@ import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -80,10 +80,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -98,6 +97,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -140,7 +140,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
-	protected InterceptorService myRequestOperationCallback;
+	protected InterceptorService mySrdInterceptorService;
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
@@ -197,18 +197,13 @@ public abstract class BaseJpaTest extends BaseTest {
 			AtomicBoolean isReadOnly = new AtomicBoolean();
 			Session currentSession;
 			try {
+				assert sessionFactory != null;
 				currentSession = sessionFactory.getCurrentSession();
 			} catch (HibernateException e) {
 				currentSession = null;
 			}
 			if (currentSession != null) {
-				currentSession.doWork(new Work() {
-
-					@Override
-					public void execute(Connection connection) throws SQLException {
-						isReadOnly.set(connection.isReadOnly());
-					}
-				});
+				currentSession.doWork(connection -> isReadOnly.set(connection.isReadOnly()));
 
 				assertFalse(isReadOnly.get());
 			}
@@ -223,12 +218,12 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@BeforeEach
-	public void beforeInitMocks() {
-		myRequestOperationCallback = new InterceptorService();
+	public void beforeInitMocks() throws Exception {
+		mySrdInterceptorService = new InterceptorService();
 
 		MockitoAnnotations.initMocks(this);
 
-		when(mySrd.getInterceptorBroadcaster()).thenReturn(myRequestOperationCallback);
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(mySrdInterceptorService);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
 		when(mySrd.getServer().getDefaultPageSize()).thenReturn(null);
@@ -255,7 +250,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	public void runInTransaction(Runnable theRunnable) {
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				theRunnable.run();
 			}
 		});
@@ -274,16 +269,14 @@ public abstract class BaseJpaTest extends BaseTest {
 	/**
 	 * Sleep until at least 1 ms has elapsed
 	 */
-	public void sleepUntilTimeChanges() throws InterruptedException {
+	public void sleepUntilTimeChanges() {
 		StopWatch sw = new StopWatch();
-		while (sw.getMillis() == 0) {
-			Thread.sleep(10);
-		}
+		await().until(() -> sw.getMillis() > 0);
 	}
 
 	protected org.hl7.fhir.dstu3.model.Bundle toBundle(IBundleProvider theSearch) {
 		org.hl7.fhir.dstu3.model.Bundle bundle = new org.hl7.fhir.dstu3.model.Bundle();
-		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+		for (IBaseResource next : theSearch.getResources(0, theSearch.sizeOrThrowNpe())) {
 			bundle.addEntry().setResource((Resource) next);
 		}
 		return bundle;
@@ -291,7 +284,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected org.hl7.fhir.r4.model.Bundle toBundleR4(IBundleProvider theSearch) {
 		org.hl7.fhir.r4.model.Bundle bundle = new org.hl7.fhir.r4.model.Bundle();
-		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
+		for (IBaseResource next : theSearch.getResources(0, theSearch.sizeOrThrowNpe())) {
 			bundle.addEntry().setResource((org.hl7.fhir.r4.model.Resource) next);
 		}
 		return bundle;
@@ -299,11 +292,11 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@SuppressWarnings({"rawtypes"})
 	protected List toList(IBundleProvider theSearch) {
-		return theSearch.getResources(0, theSearch.size());
+		return theSearch.getResources(0, theSearch.sizeOrThrowNpe());
 	}
 
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
-		List<String> retVal = new ArrayList<String>();
+		List<String> retVal = new ArrayList<>();
 
 		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
 		int size = res.size();
@@ -315,8 +308,8 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
-		List<String> retVal = new ArrayList<String>();
-		int size = theFound.size();
+		List<String> retVal = new ArrayList<>();
+		int size = theFound.sizeOrThrowNpe();
 		ourLog.info("Found {} results", size);
 		List<IBaseResource> resources = theFound.getResources(0, size);
 		for (IBaseResource next : resources) {
@@ -326,7 +319,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBaseBundle theFound) {
-		List<String> retVal = new ArrayList<String>();
+		List<String> retVal = new ArrayList<>();
 
 		List<IBaseResource> res = BundleUtil.toListOfResources(getContext(), theFound);
 		int size = res.size();
@@ -453,6 +446,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal.toArray(new String[0]);
 	}
 
+	@SuppressWarnings("BusyWait")
 	protected void waitForActivatedSubscriptionCount(int theSize) throws Exception {
 		for (int i = 0; ; i++) {
 			if (i == 10) {
@@ -497,6 +491,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		return IOUtils.toByteArray(bundleRes);
 	}
 
+	@SuppressWarnings("BusyWait")
 	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportSvc theBulkDataExportSvc) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
@@ -543,6 +538,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		return retVal;
 	}
 
+	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();
 		while (theList.size() != theTarget && sw.getMillis() <= 16000) {
@@ -573,6 +569,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		waitForSize(theTarget, 10000, theCallable);
 	}
 
+	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable) throws Exception {
 		StopWatch sw = new StopWatch();
 		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
@@ -592,6 +589,7 @@ public abstract class BaseJpaTest extends BaseTest {
 		waitForSize(theTarget, 10000, theCallable, theFailureMessage);
 	}
 
+	@SuppressWarnings("BusyWait")
 	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
 		StopWatch sw = new StopWatch();
 		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {

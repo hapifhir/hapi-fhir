@@ -119,71 +119,82 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 
 			String resourceName = myFhirContext.getResourceType(theClass);
 			IBundleProvider search;
-			if ("ValueSet".equals(resourceName)) {
-				if (localReference) {
-					SearchParameterMap params = new SearchParameterMap();
-					params.setLoadSynchronousUpTo(1);
-					params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
-					search = myDaoRegistry.getResourceDao(resourceName).search(params);
-					if (search.size() == 0) {
-						params = new SearchParameterMap();
+			switch (resourceName) {
+				case "ValueSet":
+					if (localReference) {
+						SearchParameterMap params = new SearchParameterMap();
 						params.setLoadSynchronousUpTo(1);
-						params.add(ValueSet.SP_URL, new UriParam(theUri));
+						params.add(IAnyResource.SP_RES_ID, new StringParam(theUri));
+						search = myDaoRegistry.getResourceDao(resourceName).search(params);
+						if (search.size() == 0) {
+							params = new SearchParameterMap();
+							params.setLoadSynchronousUpTo(1);
+							params.add(ValueSet.SP_URL, new UriParam(theUri));
+							search = myDaoRegistry.getResourceDao(resourceName).search(params);
+						}
+					} else {
+						int versionSeparator = theUri.lastIndexOf('|');
+						SearchParameterMap params = new SearchParameterMap();
+						params.setLoadSynchronousUpTo(1);
+						if (versionSeparator != -1) {
+							params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+							params.add(ValueSet.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
+						} else {
+							params.add(ValueSet.SP_URL, new UriParam(theUri));
+						}
+						params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
 						search = myDaoRegistry.getResourceDao(resourceName).search(params);
 					}
-				} else {
+					break;
+				case "StructureDefinition": {
+					// Don't allow the core FHIR definitions to be overwritten
+					if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+						String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+						if (myFhirContext.getElementDefinition(typeName) != null) {
+							return myNoMatch;
+						}
+					}
+					SearchParameterMap params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
+					params.add(StructureDefinition.SP_URL, new UriParam(theUri));
+					search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
+					break;
+				}
+				case "Questionnaire": {
+					SearchParameterMap params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
+					if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
+						params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
+					} else {
+						params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
+					}
+					search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
+					break;
+				}
+				case "CodeSystem": {
 					int versionSeparator = theUri.lastIndexOf('|');
 					SearchParameterMap params = new SearchParameterMap();
 					params.setLoadSynchronousUpTo(1);
 					if (versionSeparator != -1) {
-						params.add(ValueSet.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-						params.add(ValueSet.SP_URL, new UriParam(theUri.substring(0,versionSeparator)));
+						params.add(CodeSystem.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
+						params.add(CodeSystem.SP_URL, new UriParam(theUri.substring(0, versionSeparator)));
 					} else {
-						params.add(ValueSet.SP_URL, new UriParam(theUri));
+						params.add(CodeSystem.SP_URL, new UriParam(theUri));
 					}
 					params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
 					search = myDaoRegistry.getResourceDao(resourceName).search(params);
+					break;
 				}
-			} else if ("StructureDefinition".equals(resourceName)) {
-				// Don't allow the core FHIR definitions to be overwritten
-				if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-					String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
-					if (myFhirContext.getElementDefinition(typeName) != null) {
-						return myNoMatch;
-					}
+				case "ImplementationGuide":
+				case "SearchParameter": {
+					SearchParameterMap params = new SearchParameterMap();
+					params.setLoadSynchronousUpTo(1);
+					params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+					search = myDaoRegistry.getResourceDao(resourceName).search(params);
+					break;
 				}
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add(StructureDefinition.SP_URL, new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao("StructureDefinition").search(params);
-			} else if ("Questionnaire".equals(resourceName)) {
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				if (localReference || myFhirContext.getVersion().getVersion().isEquivalentTo(FhirVersionEnum.DSTU2)) {
-					params.add(IAnyResource.SP_RES_ID, new StringParam(id.getIdPart()));
-				} else {
-					params.add(Questionnaire.SP_URL, new UriParam(id.getValue()));
-				}
-				search = myDaoRegistry.getResourceDao("Questionnaire").search(params);
-			} else if ("CodeSystem".equals(resourceName)) {
-				int versionSeparator = theUri.lastIndexOf('|');
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				if (versionSeparator != -1) {
-					params.add(CodeSystem.SP_VERSION, new TokenParam(theUri.substring(versionSeparator + 1)));
-					params.add(CodeSystem.SP_URL, new UriParam(theUri.substring(0,versionSeparator)));
-				} else {
-					params.add(CodeSystem.SP_URL, new UriParam(theUri));
-				}
-				params.setSort(new SortSpec("_lastUpdated").setOrder(SortOrderEnum.DESC));
-				search = myDaoRegistry.getResourceDao(resourceName).search(params);
-			} else if ("ImplementationGuide".equals(resourceName)) {
-				SearchParameterMap params = new SearchParameterMap();
-				params.setLoadSynchronousUpTo(1);
-				params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
-				search = myDaoRegistry.getResourceDao("ImplementationGuide").search(params);
-			} else {
-				throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
+				default:
+					throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 			}
 
 			Integer size = search.size();

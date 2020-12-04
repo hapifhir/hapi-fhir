@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2211
+title: "The recent EMPI project accidentally caused a split package in ca.uhn.fhir.rest.server. This has been corrected. Thanks to
+   Bill Denton for the pull request!"

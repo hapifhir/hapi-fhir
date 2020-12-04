@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -52,7 +51,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(ConsentEventsDaoR4Test.class);
 	private List<String> myObservationIds;
 	private List<String> myPatientIds;
-	private InterceptorService myInterceptorService;
 	private List<String> myObservationIdsOddOnly;
 	private List<String> myObservationIdsEvenOnly;
 	private List<String> myObservationIdsWithVersions;
@@ -64,16 +62,11 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}
 
-	@Override
 	@BeforeEach
 	public void before() throws ServletException {
-		super.before();
-
 		RestfulServer restfulServer = new RestfulServer();
 		restfulServer.setPagingProvider(myPagingProvider);
 
-		myInterceptorService = new InterceptorService();
-		when(mySrd.getInterceptorBroadcaster()).thenReturn(myInterceptorService);
 		when(mySrd.getServer()).thenReturn(restfulServer);
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
@@ -86,7 +79,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCounting(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -118,7 +111,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -158,7 +151,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -191,7 +184,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -216,7 +209,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -244,7 +237,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -269,7 +262,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCounting(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -292,7 +285,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
@@ -316,7 +309,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		// Perform a history
 		SearchParameterMap map = new SearchParameterMap();
@@ -346,7 +339,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		AtomicInteger hitCount = new AtomicInteger(0);
 		List<String> interceptedResourceIds = new ArrayList<>();
 		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
-		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		mySrdInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 
 		myObservationDao.read(new IdType(myObservationIdsEvenOnly.get(0)), mySrd);
 		myObservationDao.read(new IdType(myObservationIdsEvenOnly.get(1)), mySrd);

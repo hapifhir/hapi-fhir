@@ -110,7 +110,8 @@ public class MetadataConformanceDstu2_1Test {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output, containsString("<Conformance"));
-			assertEquals("HAPI FHIR " + VersionUtil.getVersion() + " REST Server (FHIR Server; FHIR " + FhirVersionEnum.DSTU2_1.getFhirVersionString() + "/DSTU2_1)", status.getFirstHeader("X-Powered-By").getValue());
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("HAPI FHIR " + VersionUtil.getVersion()));
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -120,7 +121,7 @@ public class MetadataConformanceDstu2_1Test {
 			status = ourClient.execute(httpPost);
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"/metadata request must use HTTP GET\"/></issue></OperationOutcome>", output);
+			assertThat(status.getFirstHeader("X-Powered-By").getValue(), containsString("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")"));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
