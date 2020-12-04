@@ -144,6 +144,7 @@ public class  StringClientParam extends BaseClientParam implements IParam {
 			return new StringCriterion<>(getParamName(), theValue);
 		}
 
+
 		@Override
 		public ICriterion<StringClientParam> value(IPrimitiveType<String> theValue) {
 			return new StringCriterion<>(getParamName(), theValue.getValue());
