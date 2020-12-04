@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -102,7 +103,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		assertEquals(PersistedJpaBundleProvider.class, result.getClass());
 
 		PersistedJpaBundleProvider resultCasted = (PersistedJpaBundleProvider) result;
-		assertTrue(resultCasted.isCacheHit());
+		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.isCacheHit());
 	}
 
 }

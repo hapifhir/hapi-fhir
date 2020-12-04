@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.search.lastn;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
@@ -35,6 +37,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.shadehapi.elasticsearch.action.DocWriteResponse;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
 import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -69,6 +72,7 @@ import org.shadehapi.elasticsearch.search.aggregations.metrics.tophits.ParsedTop
 import org.shadehapi.elasticsearch.search.aggregations.support.ValueType;
 import org.shadehapi.elasticsearch.search.builder.SearchSourceBuilder;
 import org.shadehapi.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -176,8 +180,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
 	}
 
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
+
 	@Override
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
+		Validate.isTrue(!myPartitionSettings.isPartitioningEnabled(), "$lastn is not currently supported on partitioned servers");
+
 		String[] topHitsInclude = {OBSERVATION_IDENTIFIER_FIELD_NAME};
 		return buildAndExecuteSearch(theSearchParameterMap, theFhirContext, topHitsInclude,
 			ObservationJson::getIdentifier, theMaxResultsToFetch);
