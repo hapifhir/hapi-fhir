@@ -38,7 +38,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-			assertEquals(2, selectQueries.size(), logEach(selectQueries)); // Cache check, actual search for PIDs
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -56,7 +55,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-			assertEquals(2, selectQueries.size()); // Cache check, actual search for PIDs
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -74,7 +72,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.logSelectQueries();
-			assertEquals(2, selectQueries.size()); // Cache check, load from cache
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -102,7 +99,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-			assertEquals(2, selectQueries.size()); // Cache check, actual search for PIDs
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -120,7 +116,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-			assertEquals(2, selectQueries.size()); // Cache check, actual search for PIDs
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -138,7 +133,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertEquals(4, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
-			assertEquals(2, selectQueries.size()); // Cache check, actual search for PIDs
 			String searchSql = selectQueries.get(0).getSql(true, false);
 			assertEquals(1, StringUtils.countMatches(searchSql, "from HFJ_SEARCH "), searchSql);
 			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -147,13 +141,6 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			assertThat(ids, containsInAnyOrder(patientId11, patientId12, patientIdNull1, patientIdNull2));
 		}
 
-	}
-
-	private static String logEach(List<SqlQuery> theSelectQueries) {
-		return " * " + theSelectQueries
-			.stream()
-			.map(t -> t.getSql(true, false))
-			.collect(Collectors.joining("\n * "));
 	}
 
 }
