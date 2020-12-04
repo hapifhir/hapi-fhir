@@ -17,7 +17,7 @@ public class TestElasticsearchContainerHelper {
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {
 		return new ElasticsearchContainer(TestElasticsearchContainerHelper.ELASTICSEARCH_IMAGE)
-			.withStartupTimeout(Duration.of(60, SECONDS));
+			.withStartupTimeout(Duration.of(300, SECONDS));
 	}
 
 }
