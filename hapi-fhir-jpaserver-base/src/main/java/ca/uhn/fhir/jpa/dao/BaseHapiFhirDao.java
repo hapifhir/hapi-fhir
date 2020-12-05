@@ -1058,8 +1058,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 					newParams.populateResourceTableSearchParamsPresentFlags(entity);
 					entity.setIndexStatus(INDEX_STATUS_INDEXED);
-					populateFullTextFields(myContext, theResource, entity);
 				}
+				populateFullTextFields(myContext, theResource, entity);
 			} else {
 
 				changed = populateResourceIntoEntity(theRequest, theResource, entity, false);
