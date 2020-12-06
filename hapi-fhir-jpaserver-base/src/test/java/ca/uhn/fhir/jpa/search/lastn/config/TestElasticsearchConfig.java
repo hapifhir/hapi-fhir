@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.lastn.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.lastn.ElasticsearchSvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,9 +22,14 @@ public class TestElasticsearchConfig {
 
 	private static final String ELASTIC_VERSION = "6.5.4";
 
+	@Bean
+	public PartitionSettings partitionSettings() {
+		return new PartitionSettings();
+	}
+
 
 	@Bean()
-	public ElasticsearchSvcImpl myElasticsearchSvc() {
+	public ElasticsearchSvcImpl elasticsearchSvc() {
 		int elasticsearchPort = embeddedElasticSearch().getHttpPort();
 		return new ElasticsearchSvcImpl(elasticsearchHost, elasticsearchPort, elasticsearchUserId, elasticsearchPassword);
 	}
@@ -49,7 +55,7 @@ public class TestElasticsearchConfig {
 
 	@PreDestroy
 	public void stop() throws IOException {
-		myElasticsearchSvc().close();
+		elasticsearchSvc().close();
 		embeddedElasticSearch().stop();
 	}
 

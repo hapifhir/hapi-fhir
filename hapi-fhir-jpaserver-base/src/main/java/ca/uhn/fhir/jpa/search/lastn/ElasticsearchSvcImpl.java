@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.search.lastn;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
@@ -121,6 +120,8 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private final RestHighLevelClient myRestHighLevelClient;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
@@ -138,7 +139,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		BufferedReader reader = new BufferedReader(input);
 		StringBuilder sb = new StringBuilder();
 		String str;
-		while((str = reader.readLine())!= null){
+		while ((str = reader.readLine()) != null) {
 			sb.append(str);
 		}
 
@@ -180,10 +181,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
 	}
 
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
-
 	@Override
 	public List<String> executeLastN(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext, Integer theMaxResultsToFetch) {
 		Validate.isTrue(!myPartitionSettings.isPartitioningEnabled(), "$lastn is not currently supported on partitioned servers");
@@ -194,7 +191,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private <T> List<T> buildAndExecuteSearch(SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
-																		String[] topHitsInclude, Function<ObservationJson,T> setValue, Integer theMaxResultsToFetch) {
+															String[] topHitsInclude, Function<ObservationJson, T> setValue, Integer theMaxResultsToFetch) {
 		String patientParamName = LastNParameterHelper.getPatientParamName(theFhirContext);
 		String subjectParamName = LastNParameterHelper.getSubjectParamName(theFhirContext);
 		List<T> searchResults = new ArrayList<>();
@@ -298,7 +295,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 		return myRestHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 	}
 
-	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson,T> setValue,
+	private <T> List<T> buildObservationList(SearchResponse theSearchResponse, Function<ObservationJson, T> setValue,
 														  SearchParameterMap theSearchParameterMap, FhirContext theFhirContext,
 														  Integer theMaxResultsToFetch) throws IOException {
 		List<T> theObservationList = new ArrayList<>();
@@ -360,7 +357,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private List<? extends Terms.Bucket> getObservationCodeBuckets(Aggregations theObservationCodeSystemAggregations) {
 		List<Terms.Bucket> retVal = new ArrayList<>();
 		ParsedTerms aggregatedObservationCodeSystems = theObservationCodeSystemAggregations.get(GROUP_BY_SYSTEM);
-		for(Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
+		for (Terms.Bucket observationCodeSystem : aggregatedObservationCodeSystems.getBuckets()) {
 			Aggregations observationCodeCodeAggregations = observationCodeSystem.getAggregations();
 			ParsedTerms aggregatedObservationCodeCodes = observationCodeCodeAggregations.get(GROUP_BY_CODE);
 			retVal.addAll(aggregatedObservationCodeCodes.getBuckets());
@@ -657,7 +654,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	@Override
 	public CodeJson getObservationCodeDocument(String theCodeSystemHash, String theText) {
-		if(theCodeSystemHash == null && theText == null) {
+		if (theCodeSystemHash == null && theText == null) {
 			throw new InvalidRequestException("Require a non-null code system hash value or display value for observation code document query");
 		}
 		SearchRequest theSearchRequest = buildSingleObservationCodeSearchRequest(theCodeSystemHash, theText);
@@ -697,7 +694,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	@Override
-	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument){
+	public Boolean createOrUpdateObservationIndex(String theDocumentId, ObservationJson theObservationDocument) {
 		try {
 			String documentToIndex = objectMapper.writeValueAsString(theObservationDocument);
 			return performIndex(OBSERVATION_INDEX, theDocumentId, documentToIndex, ElasticsearchSvcImpl.OBSERVATION_DOCUMENT_TYPE);
