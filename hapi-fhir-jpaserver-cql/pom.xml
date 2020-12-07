@@ -17,7 +17,7 @@
 	<name>HAPI FHIR - Clinical Quality Language</name>
 
 	<properties>
-		<opencds-cqf.version>0.4.0</opencds-cqf.version>
+		<opencds-cqf.version>0.4.1-SNAPSHOT</opencds-cqf.version>
 	</properties>
 
 	<dependencies>
