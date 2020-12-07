@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
@@ -99,7 +100,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		RequestPartitionId partitionId;
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			partitionId = theEntity.getPartitionId();
+			partitionId = PartitionablePartitionId.toRequestPartitionId(theEntity.getPartitionId());
 		} else {
 			partitionId = RequestPartitionId.allPartitions();
 		}
@@ -253,7 +254,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {
 
-					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
+					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest);
 					if (placeholderOpt.isPresent()) {
 						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
 					} else {

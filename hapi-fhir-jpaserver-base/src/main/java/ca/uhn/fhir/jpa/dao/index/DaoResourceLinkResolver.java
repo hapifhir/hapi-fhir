@@ -68,11 +68,11 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		IResourceLookup resolvedResource;
 		String idPart = theSourceResourceId.getIdPart();
 		try {
-			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart, theRequest);
+			resolvedResource = myIdHelperService.resolveResourceIdentity(theRequestPartitionId, theResourceType, idPart);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, idPart, resolvedResource);
 		} catch (ResourceNotFoundException e) {
 
-			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart);
+			Optional<ResourceTable> createdTableOpt = createPlaceholderTargetIfConfiguredToDoSo(theType, theReference, idPart, theRequest);
 			if (!createdTableOpt.isPresent()) {
 
 				if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
@@ -109,7 +109,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	/**
 	 * @param theIdToAssignToPlaceholder If specified, the placeholder resource created will be given a specific ID
 	 */
-	public <T extends IBaseResource> Optional<ResourceTable> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder) {
+	public <T extends IBaseResource> Optional<ResourceTable> createPlaceholderTargetIfConfiguredToDoSo(Class<T> theType, IBaseReference theReference, @Nullable String theIdToAssignToPlaceholder, RequestDetails theRequest) {
 		ResourceTable valueOf = null;
 
 		if (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
@@ -128,9 +128,9 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 
 			if (theIdToAssignToPlaceholder != null) {
 				newResource.setId(resName + "/" + theIdToAssignToPlaceholder);
-				valueOf = ((ResourceTable) placeholderResourceDao.update(newResource).getEntity());
+				valueOf = ((ResourceTable) placeholderResourceDao.update(newResource, theRequest).getEntity());
 			} else {
-				valueOf = ((ResourceTable) placeholderResourceDao.create(newResource).getEntity());
+				valueOf = ((ResourceTable) placeholderResourceDao.create(newResource, theRequest).getEntity());
 			}
 		}
 

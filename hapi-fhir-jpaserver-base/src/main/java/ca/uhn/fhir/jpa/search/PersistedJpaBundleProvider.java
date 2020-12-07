@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -108,7 +109,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private final RequestDetails myRequest;
 	private Search mySearchEntity;
 	private String myUuid;
-	private boolean myCacheHit;
+	private SearchCacheStatusEnum myCacheStatus;
 	private RequestPartitionId myRequestPartitionId;
 
 	/**
@@ -299,12 +300,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return myUuid;
 	}
 
-	public boolean isCacheHit() {
-		return myCacheHit;
+	public SearchCacheStatusEnum getCacheStatus() {
+		return myCacheStatus;
 	}
 
-	void setCacheHit() {
-		myCacheHit = true;
+	void setCacheStatus(SearchCacheStatusEnum theSearchCacheStatusEnum) {
+		myCacheStatus = theSearchCacheStatusEnum;
 	}
 
 	@Override

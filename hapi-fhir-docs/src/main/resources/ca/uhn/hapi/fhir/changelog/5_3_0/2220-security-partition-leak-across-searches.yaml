@@ -1,0 +1,7 @@
+---
+type: security
+issue: 2220
+title: "An important security issue with the JPA Server was solved. This issue applies only to JPA servers running
+  in partitioned mode. When performing searches on a partitioned server, search results from previously cached
+  searches against different partitions may be returned, potentially leaking data across partitions. This issue
+  has been resolved."

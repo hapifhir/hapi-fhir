@@ -4,15 +4,16 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.IChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
-import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionConfig;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.model.primitive.IdDt;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -20,32 +21,42 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Collections;
+
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
 	SearchParamConfig.class,
 	SubscriptionProcessorConfig.class,
-	TestSubscriptionConfig.class,
 	BaseSubscriptionTest.MyConfig.class
 })
 public abstract class BaseSubscriptionTest {
+
+	static {
+		System.setProperty("unit_test_mode", "true");
+	}
 
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
 
 	@Autowired
-	ISearchParamRegistry mySearchParamRegistry;
+	SearchParamRegistryImpl mySearchParamRegistry;
 
 	@Autowired
 	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
+
+	@BeforeEach
+	public void before() {
+		mySearchParamRegistry.handleInit(Collections.emptyList());
+	}
 
 	@AfterEach
 	public void afterClearAnonymousLambdas() {
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
-	public void initSearchParamRegistry(IBundleProvider theBundleProvider) {
-		myMockFhirClientSearchParamProvider.setBundleProvider(theBundleProvider);
-		mySearchParamRegistry.forceRefresh();
+	public void initSearchParamRegistry(IBaseResource theReadResource) {
+		myMockFhirClientSearchParamProvider.setReadResource(theReadResource);
+		mySearchParamRegistry.handleInit(Collections.singletonList(new IdDt()));
 	}
 
 	@Configuration

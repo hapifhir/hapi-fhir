@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 
+import javax.annotation.Nullable;
 import java.util.Date;
 
 public interface IBaseResourceEntity {
@@ -51,5 +52,6 @@ public interface IBaseResourceEntity {
 
 	boolean isHasTags();
 
-	RequestPartitionId getPartitionId();
+	@Nullable
+	PartitionablePartitionId getPartitionId();
 }

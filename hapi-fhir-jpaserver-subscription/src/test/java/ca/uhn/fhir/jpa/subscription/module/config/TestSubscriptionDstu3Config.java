@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -15,15 +17,18 @@ import static org.mockito.Mockito.mock;
 @Configuration
 @Import(TestSubscriptionConfig.class)
 public class TestSubscriptionDstu3Config {
+	private static final Logger ourLog = LoggerFactory.getLogger(TestSubscriptionDstu3Config.class);
+
+	private static final FhirContext ourFhirContext = FhirContext.forDstu3();
 
 	@Bean
 	public FhirContext fhirContext() {
-		return FhirContext.forDstu3();
+		return ourFhirContext;
 	}
 
 	@Bean
-	public IValidationSupport validationSupport() {
-		return FhirContext.forDstu3().getValidationSupport();
+	public IValidationSupport validationSupport(FhirContext theFhirContext) {
+		return theFhirContext.getValidationSupport();
 	}
 
 	@Bean
