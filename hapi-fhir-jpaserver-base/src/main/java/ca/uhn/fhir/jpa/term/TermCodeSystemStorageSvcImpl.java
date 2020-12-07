@@ -46,6 +46,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.jpa.util.SpringObjectCaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -54,7 +55,10 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.sun.mail.imap.protocol.SearchSequence;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -68,6 +72,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
@@ -200,6 +205,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
+	//TODO GGG HS This is the entrypoint for us.
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
 		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
 
@@ -463,6 +469,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			Supplier<Slice<Long>> loader = () -> myConceptDao.findIdsByCodeSystemVersion(page100, theCodeSystemVersionPid);
 			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
 			doDelete(descriptor, loader, counter, myConceptDao);
+//			myConceptDao.deleteAll();
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
@@ -751,17 +758,22 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				break;
 			}
 
-			txTemplate.execute(t -> {
-				link.forEach(id -> theDao.deleteByPid(id));
+			txTemplate.executeWithoutResult(t -> {
+				link.forEach(id -> {
+					theDao.deleteByPid(id);
+					try {
+						ourLog.debug("Deleting pid [{}] from dao, we in transaction? {}", id, TransactionSynchronizationManager.isActualTransactionActive());
+					} catch (Exception theE) {
+						theE.printStackTrace();
+					}
+				});
 				theDao.flush();
-				return null;
+				ourLog.debug("Should be indexing the deletion here!");
 			});
 
 			count += link.getNumberOfElements();
 			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
-
 		}
-
 	}
 
 
