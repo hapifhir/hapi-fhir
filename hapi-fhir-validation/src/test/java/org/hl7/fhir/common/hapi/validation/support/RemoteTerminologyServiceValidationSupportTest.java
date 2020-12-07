@@ -1,8 +1,9 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.support.IssueSeverity;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -72,7 +73,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 
 	@Test
 	public void testValidateCode_SystemCodeDisplayUrl_BlankCode() {
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, "", DISPLAY, VALUE_SET_URL);
+		CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, "", DISPLAY, VALUE_SET_URL);
 		assertEquals(null, outcome);
 	}
 
@@ -80,7 +81,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	public void testValidateCode_SystemCodeDisplayUrl_Success() {
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+		CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -97,10 +98,10 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	public void testValidateCode_SystemCodeDisplayUrl_Error() {
 		createNextValueSetReturnParameters(false, null, ERROR_MESSAGE);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+		CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
 		assertEquals(null, outcome.getCode());
 		assertEquals(null, outcome.getDisplay());
-		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+		assertEquals(IssueSeverity.ERROR, outcome.getSeverity());
 		assertEquals(ERROR_MESSAGE, outcome.getMessage());
 
 		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
@@ -114,7 +115,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 	public void testValidateCodeInCodeSystem_Good() {
 		createNextCodeSystemReturnParameters(true, DISPLAY, null);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
+		CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -133,7 +134,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(VALUE_SET_URL);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
+		CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
 		assertEquals(CODE, outcome.getCode());
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertEquals(null, outcome.getSeverity());
@@ -156,7 +157,7 @@ public class RemoteTerminologyServiceValidationSupportTest {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(VALUE_SET_URL);
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
+		CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 		assertEquals(null, outcome);
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4.core.utils
 
+import ca.uhn.fhir.jpa.dao.r4.core.CoreValidationTests
 import ca.uhn.fhir.jpa.dao.r4.core.model.TestEntry
 import org.hl7.fhir.r4.model.codesystems.FHIRVersion
 
@@ -8,7 +9,13 @@ private const val FOUR_POINT_0 = "4.0"
 private const val THREE_POINT_0 = "3.0"
 private const val ONE_POINT_0 = "1.0"
 
+private const val DEFAULT_VALIDATION_VERSION = "5.0"
+
 private val VALID_FHIR_VERSION = listOf(FHIRVersion._3_0_0, FHIRVersion._3_0_1, FHIRVersion._3_3_0, FHIRVersion._3_5_0, FHIRVersion._4_0_0)
+
+fun extractVersion(testEntry: TestEntry): String {
+   return testEntry.version ?: DEFAULT_VALIDATION_VERSION
+}
 
 /**
  * Returns true, if the provided version in the [TestEntry] is the correct version.

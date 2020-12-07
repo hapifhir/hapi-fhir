@@ -32,15 +32,30 @@ fun verifyOperationOutcome(expected: TestResult, actual: OperationOutcome) {
    println("Expected test output ::\n$expected\n")
    println("Actual test output :: ${actual.prettyPrintString()}")
 
-   val map = (actual.issue ?: emptyList()).groupBy(OperationOutcome.OperationOutcomeIssueComponent::getSeverity, OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+   val map = (actual.issue ?: emptyList()).groupBy(
+      OperationOutcome.OperationOutcomeIssueComponent::getSeverity,
+      OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics
+   )
 
-   if (expected.warningCount == TestResult.NO_WARNING) {
-      Assertions.assertEquals(expected.errorCount, map[OperationOutcome.IssueSeverity.ERROR]?.size ?: 0 ,
-         "Error counts should match test results from manifest.xml file...")
+   if (expected.warningCount == TestResult.DO_NOT_CHECK) {
+      Assertions.assertEquals(
+         expected.errorCount, map[OperationOutcome.IssueSeverity.ERROR]?.size ?: 0,
+         "Error counts should match test results from manifest.xml file..."
+      )
    } else {
       Assertions.assertAll("Error counts and warnings should match test results from manifest.xml file...",
-         Executable { Assertions.assertEquals(expected.errorCount, map[OperationOutcome.IssueSeverity.ERROR]?.size ?: 0) },
-         Executable { Assertions.assertEquals(expected.warningCount, map[OperationOutcome.IssueSeverity.WARNING]?.size ?: 0) })
+         Executable {
+            Assertions.assertEquals(
+               expected.errorCount,
+               map[OperationOutcome.IssueSeverity.ERROR]?.size ?: 0
+            )
+         },
+         Executable {
+            Assertions.assertEquals(
+               expected.warningCount,
+               map[OperationOutcome.IssueSeverity.WARNING]?.size ?: 0
+            )
+         })
    }
 }
 
@@ -59,9 +74,13 @@ fun getEncoding(testFile: String): EncodingEnum {
 }
 
 fun OperationOutcome.prettyPrintString(): String {
-   return issue.groupBy(OperationOutcome.OperationOutcomeIssueComponent::getSeverity, OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+   return issue.groupBy(
+      OperationOutcome.OperationOutcomeIssueComponent::getSeverity,
+      OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics
+   )
       .entries
       .joinToString(separator = "") { entry ->
          "${entry.key.display} <${entry.value.size} entries>\n${entry.value.joinToString(separator = "\n")}\n"
       }
 }
+

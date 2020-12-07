@@ -20,8 +20,9 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.context.support.support.ValueSetExpansionOutcome;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -78,9 +79,9 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	}
 
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
-																					IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
-																					CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
+	public CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
+														  IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
+														  CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
 		return myTerminologySvc.validateCode(vsValidateCodeOptions(), theId, toStringOrNull(theValueSetIdentifier), toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 	}
@@ -107,7 +108,7 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		return retVal;
 	}
 
-	public static void validateHaveExpansionOrThrowInternalErrorException(IValidationSupport.ValueSetExpansionOutcome theRetVal) {
+	public static void validateHaveExpansionOrThrowInternalErrorException(ValueSetExpansionOutcome theRetVal) {
 		if (theRetVal != null && theRetVal.getValueSet() == null) {
 			throw new InternalErrorException("Unable to expand ValueSet: " + theRetVal.getError());
 		}

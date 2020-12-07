@@ -6,11 +6,11 @@ import java.util.*
 
 data class TestResult(
    @SerializedName("errorCount") var errorCount: Int = 0,
-   @SerializedName("warningCount") var warningCount: Int = NO_WARNING,
+   @SerializedName("warningCount") var warningCount: Int = DO_NOT_CHECK,
    @SerializedName("output") var output: List<String> = ArrayList()
 ) {
    companion object {
-      const val NO_WARNING = Int.MIN_VALUE
+      const val DO_NOT_CHECK = Int.MIN_VALUE
    }
 }
 

@@ -5,7 +5,9 @@ import com.google.gson.annotations.SerializedName
 
 data class TestEntry (
    @SerializedName("version") var version: String? = null,
-   @SerializedName("explanation") var explaination: String? = null,
+   @SerializedName("explanation") var explanation: String? = null,
+   @SerializedName("supporting") val supporting: List<String>? = null,
+   @SerializedName("bundle-param") var bundleParam: BundleParam? = null,
    @SerializedName("errorCount") var errorCount: Int? = null,
    @SerializedName("profile") var profile: Profile = Profile(),
    @SerializedName("profiles") var profiles: List<String>? = null,

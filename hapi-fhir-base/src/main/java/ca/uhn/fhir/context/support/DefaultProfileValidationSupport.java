@@ -133,7 +133,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		myStructureDefinitionResources = structureDefinitionResources;
 	}
 
-
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources() {
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
@@ -147,7 +146,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		return toList(provideStructureDefinitionMap());
 	}
-
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
@@ -357,4 +355,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return (List<T>) Collections.unmodifiableList(retVal);
 	}
 
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		return myCodeSystems.containsKey(theSystem);
+	}
 }

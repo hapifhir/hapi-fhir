@@ -1,9 +1,11 @@
 package org.hl7.fhir.r4.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.support.ValueSetExpansionOutcome;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -183,7 +185,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 
   @Override
   public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
+    CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -206,7 +208,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   @Override
   public ValidationResult validateCode(ValidationOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
-    IValidationSupport.CodeValidationResult outcome;
+    CodeValidationResult outcome;
     if (isNotBlank(theVs.getUrl())) {
       outcome = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(theOptions), theSystem, theCode, theDisplay, theVs.getUrl());
     } else {
@@ -265,7 +267,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   public ValueSetExpander.ValueSetExpansionOutcome expandVS(ConceptSetComponent theInc, boolean theHierarchical) throws TerminologyServiceException {
     ValueSet input = new ValueSet();
     input.getCompose().addInclude(theInc);
-    IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
+    ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
     return new ValueSetExpander.ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
   }
 

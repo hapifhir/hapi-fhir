@@ -21,10 +21,13 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.context.support.*;
+import ca.uhn.fhir.context.support.conceptproperty.CodingConceptProperty;
+import ca.uhn.fhir.context.support.conceptproperty.StringConceptProperty;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
+import ca.uhn.fhir.context.support.support.ConceptDesignation;
+import ca.uhn.fhir.context.support.support.IssueSeverity;
+import ca.uhn.fhir.context.support.support.LookupCodeResult;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -1363,7 +1366,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		return true;
 	}
 
-	protected IValidationSupport.CodeValidationResult validateCodeIsInPreExpandedValueSet(
+	protected CodeValidationResult validateCodeIsInPreExpandedValueSet(
 		ConceptValidationOptions theValidationOptions,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
@@ -1397,7 +1400,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		if (theValidationOptions.isValidateDisplay() && concepts.size() > 0) {
 			for (TermValueSetConcept concept : concepts) {
 				if (isBlank(theDisplay) || isBlank(concept.getDisplay()) || theDisplay.equals(concept.getDisplay())) {
-					return new IValidationSupport.CodeValidationResult()
+					return new CodeValidationResult()
 						.setCode(concept.getCode())
 						.setDisplay(concept.getDisplay());
 				}
@@ -1407,7 +1410,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 
 		if (!concepts.isEmpty()) {
-			return new IValidationSupport.CodeValidationResult()
+			return new CodeValidationResult()
 				.setCode(concepts.get(0).getCode())
 				.setDisplay(concepts.get(0).getDisplay());
 		}
@@ -2042,14 +2045,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	protected abstract ValueSet toCanonicalValueSet(IBaseResource theValueSet);
 
-	protected IValidationSupport.LookupCodeResult lookupCode(String theSystem, String theCode) {
+	protected LookupCodeResult lookupCode(String theSystem, String theCode) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
 
-				IValidationSupport.LookupCodeResult result = new IValidationSupport.LookupCodeResult();
+				LookupCodeResult result = new LookupCodeResult();
 				result.setCodeSystemDisplayName(code.getCodeSystemVersion().getCodeSystemDisplayName());
 				result.setCodeSystemVersion(code.getCodeSystemVersion().getCodeSystemVersionId());
 				result.setSearchedForSystem(theSystem);
@@ -2058,7 +2061,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				result.setCodeDisplay(code.getDisplay());
 
 				for (TermConceptDesignation next : code.getDesignations()) {
-					IValidationSupport.ConceptDesignation designation = new IValidationSupport.ConceptDesignation();
+					ConceptDesignation designation = new ConceptDesignation();
 					designation.setLanguage(next.getLanguage());
 					designation.setUseSystem(next.getUseSystem());
 					designation.setUseCode(next.getUseCode());
@@ -2069,10 +2072,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 				for (TermConceptProperty next : code.getProperties()) {
 					if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
-						IValidationSupport.CodingConceptProperty property = new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
+						CodingConceptProperty property = new CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
 						result.getProperties().add(property);
 					} else if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
-						IValidationSupport.StringConceptProperty property = new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
+						StringConceptProperty property = new StringConceptProperty(next.getKey(), next.getValue());
 						result.getProperties().add(property);
 					} else {
 						throw new InternalErrorException("Unknown type: " + next.getType());
@@ -2373,7 +2376,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		invokeRunnableForUnitTest();
 
 		if (isNotBlank(theValueSetUrl)) {
@@ -2399,7 +2402,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
-	IValidationSupport.CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
+	CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theValidationOptions, String theValueSetUrl, String theCodeSystem, String theCode, String theDisplay) {
 		IBaseResource valueSet = theValidationSupportContext.getRootValidationSupport().fetchValueSet(theValueSetUrl);
 
 		// If we don't have a PID, this came from some source other than the JPA

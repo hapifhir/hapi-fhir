@@ -1,9 +1,9 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeType;
@@ -50,7 +50,7 @@ class InMemoryTerminologyServerValidationSupportTest {
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 
-		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
+		CodeValidationResult outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
 		assertTrue(outcome.isOk());
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
@@ -83,7 +83,7 @@ class InMemoryTerminologyServerValidationSupportTest {
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 		ConceptValidationOptions options = new ConceptValidationOptions();
 
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, "http://cs", "code1", null, "http://vs");
+		CodeValidationResult outcome = mySvc.validateCode(valCtx, options, "http://cs", "code1", null, "http://vs");
 		assertTrue(outcome.isOk());
 
 	}

@@ -20,7 +20,9 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.conceptproperty.BaseConceptProperty;
+import ca.uhn.fhir.context.support.conceptproperty.CodingConceptProperty;
+import ca.uhn.fhir.context.support.conceptproperty.StringConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -389,15 +391,15 @@ public class TermConcept implements Serializable {
 		return b.build();
 	}
 
-	public List<IValidationSupport.BaseConceptProperty> toValidationProperties() {
-		List<IValidationSupport.BaseConceptProperty> retVal = new ArrayList<>();
+	public List<BaseConceptProperty> toValidationProperties() {
+		List<BaseConceptProperty> retVal = new ArrayList<>();
 		for (TermConceptProperty next : getProperties()) {
 			switch (next.getType()) {
 				case STRING:
-					retVal.add(new IValidationSupport.StringConceptProperty(next.getKey(), next.getValue()));
+					retVal.add(new StringConceptProperty(next.getKey(), next.getValue()));
 					break;
 				case CODING:
-					retVal.add(new IValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
+					retVal.add(new CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay()));
 					break;
 				default:
 					throw new IllegalStateException("Don't know how to handle " + next.getType());

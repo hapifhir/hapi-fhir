@@ -10,24 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.codec.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
-import org.hl7.fhir.convertors.VersionConvertor_10_50;
-import org.hl7.fhir.convertors.VersionConvertor_14_50;
-import org.hl7.fhir.convertors.VersionConvertor_30_50;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
-import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.exceptions.FHIRFormatError;
-import org.hl7.fhir.r5.conformance.ProfileUtilities;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.elementmodel.Manager;
-import org.hl7.fhir.r5.formats.JsonParser;
-import org.hl7.fhir.r5.formats.XmlParser;
-import org.hl7.fhir.r5.model.Constants;
-import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.StructureDefinition;
-import org.hl7.fhir.r5.test.utils.TestingUtilities;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -37,8 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -59,6 +44,7 @@ class ValidatorWrapper {
 	private boolean myAllowExamples;
 	private boolean myAllowXsiLocation;
 	private boolean myWantCheckSnapshotUnchanged;
+	private List<IResourceValidator.BundleValidationRule> myBundleValidationRules;
 
 	/**
 	 * Constructor
@@ -119,6 +105,11 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setBundleValidationRules(List<IResourceValidator.BundleValidationRule> bundleValidationRules) {
+		this.myBundleValidationRules = bundleValidationRules;
+		return this;
+	}
+
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
@@ -131,7 +122,7 @@ class ValidatorWrapper {
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
 		v.setBestPracticeWarningLevel(myBestPracticeWarningLevel);
 		v.setAnyExtensionsAllowed(myAnyExtensionsAllowed);
-		//v.setResourceIdRule(IResourceValidator.IdStatus.OPTIONAL);
+		v.setResourceIdRule(IResourceValidator.IdStatus.OPTIONAL);
 		v.setNoTerminologyChecks(myNoTerminologyChecks);
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
@@ -139,6 +130,7 @@ class ValidatorWrapper {
 		v.setAllowExamples(myAllowExamples);
 		v.setWantCheckSnapshotUnchanged(myWantCheckSnapshotUnchanged);
 		v.setAllowXsiLocation(myAllowXsiLocation);
+		myBundleValidationRules.forEach(rule -> v.getBundleValidationRules().add(rule));
 
 		List<ValidationMessage> messages = new ArrayList<>();
 		List<StructureDefinition> profileUrls = new ArrayList<>();
@@ -221,63 +213,10 @@ class ValidatorWrapper {
 		try {
 
 			// NOTE: We expect the following call to generate a snapshot if needed
-//			StructureDefinition structureDefinition = theWorkerContext.fetchRawProfile(theUrl);
 			StructureDefinition structureDefinition = theWorkerContext.fetchRawProfile(theUrl);
-			// Mark this profile is always coming back null you need to use the two methods below to fetch it properly
 			if (structureDefinition != null) theProfileStructureDefinitions.add(structureDefinition);
 		} catch (FHIRException e) {
 			ourLog.debug("Failed to load profile: {}", theUrl);
-		}
-	}
-
-	public StructureDefinition loadProfile(String filename, String contents, List<ValidationMessage> messages, IWorkerContext theWorkerContext) throws IOException, FHIRException {
-		StructureDefinition sd = (StructureDefinition) loadResource(filename, contents);
-		ProfileUtilities pu = new ProfileUtilities(theWorkerContext, messages, null);
-		if (!sd.hasSnapshot()) {
-			StructureDefinition base = theWorkerContext.fetchResource(StructureDefinition.class, sd.getBaseDefinition());
-			pu.generateSnapshot(base, sd, sd.getUrl(), null, sd.getTitle());
-		}
-		for (Resource r : sd.getContained()) {
-			if (r instanceof StructureDefinition) {
-				StructureDefinition childSd = (StructureDefinition) r;
-				if (!childSd.hasSnapshot()) {
-					StructureDefinition base = theWorkerContext.fetchResource(StructureDefinition.class, childSd.getBaseDefinition());
-					pu.generateSnapshot(base, childSd, childSd.getUrl(), null, childSd.getTitle());
-				}
-			}
-		}
-		return sd;
-	}
-
-	public Resource loadResource(String filename, String contents) throws IOException, FHIRException {
-		try (InputStream inputStream = IOUtils.toInputStream(contents, Charsets.UTF_8)) {
-			if (filename.contains(".json")) {
-//				if (Constants.VERSION.equals(version) || "5.0".equals(version))
-					return new JsonParser().parse(inputStream);
-//				else if (org.hl7.fhir.dstu3.model.Constants.VERSION.equals(version) || "3.0".equals(version))
-//					return VersionConvertor_30_50.convertResource(new org.hl7.fhir.dstu3.formats.JsonParser().parse(inputStream), false);
-//				else if (org.hl7.fhir.dstu2016may.model.Constants.VERSION.equals(version) || "1.4".equals(version))
-//					return VersionConvertor_14_50.convertResource(new org.hl7.fhir.dstu2016may.formats.JsonParser().parse(inputStream));
-//				else if (org.hl7.fhir.dstu2.model.Constants.VERSION.equals(version) || "1.0".equals(version))
-//					return VersionConvertor_10_50.convertResource(new org.hl7.fhir.dstu2.formats.JsonParser().parse(inputStream));
-//				else if (org.hl7.fhir.r4.model.Constants.VERSION.equals(version) || "4.0".equals(version))
-//					return VersionConvertor_40_50.convertResource(new org.hl7.fhir.r4.formats.JsonParser().parse(inputStream));
-//				else
-//					throw new FHIRException("unknown version " + version);
-			} else {
-//				if (Constants.VERSION.equals(version) || "5.0".equals(version))
-					return new XmlParser().parse(inputStream);
-//				else if (org.hl7.fhir.dstu3.model.Constants.VERSION.equals(version) || "3.0".equals(version))
-//					return VersionConvertor_30_50.convertResource(new org.hl7.fhir.dstu3.formats.XmlParser().parse(inputStream), false);
-//				else if (org.hl7.fhir.dstu2016may.model.Constants.VERSION.equals(version) || "1.4".equals(version))
-//					return VersionConvertor_14_50.convertResource(new org.hl7.fhir.dstu2016may.formats.XmlParser().parse(inputStream));
-//				else if (org.hl7.fhir.dstu2.model.Constants.VERSION.equals(version) || "1.0".equals(version))
-//					return VersionConvertor_10_50.convertResource(new org.hl7.fhir.dstu2.formats.XmlParser().parse(inputStream));
-//				else if (org.hl7.fhir.r4.model.Constants.VERSION.equals(version) || "4.0".equals(version))
-//					return VersionConvertor_40_50.convertResource(new org.hl7.fhir.r4.formats.XmlParser().parse(inputStream));
-//				else
-//					throw new FHIRException("unknown version " + version);
-			}
 		}
 	}
 

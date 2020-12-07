@@ -22,6 +22,7 @@ import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private IValidationSupport myValidationSupport;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
-	private List<String> myExtensionDomains = Collections.emptyList();
+	private List<String> myExtensionDomains = new ArrayList<>();
+	private List<IResourceValidator.BundleValidationRule> bundleValidationRules = new ArrayList<>();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
 
 	private boolean myAnyExtensionsAllowed = false;
@@ -236,6 +238,14 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 		this.validatorResourceFetcher = validatorResourceFetcher;
 	}
 
+	public List<IResourceValidator.BundleValidationRule> getBundleValidationRules() {
+		return bundleValidationRules;
+	}
+
+	public void setBundleValidationRules(List<IResourceValidator.BundleValidationRule> bundleValidationRules) {
+		this.bundleValidationRules = bundleValidationRules;
+	}
+
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = provideWorkerContext();
@@ -251,6 +261,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 			.setAllowExamples(isAllowExamples())
 			.setWantCheckSnapshotUnchanged(isWantCheckSnapshotUnchanged())
 			.setAllowXsiLocation(isAllowXsiLocation())
+			.setBundleValidationRules(getBundleValidationRules())
 			.validate(wrappedWorkerContext, theValidationCtx);
 	}
 

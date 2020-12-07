@@ -2,9 +2,10 @@ package org.hl7.fhir.common.hapi.validation.validator;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.support.ValueSetExpansionOutcome;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -228,7 +229,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Nonnull
-	private ValidationResult convertValidationResult(@Nullable IValidationSupport.CodeValidationResult theResult) {
+	private ValidationResult convertValidationResult(@Nullable CodeValidationResult theResult) {
 		ValidationResult retVal = null;
 		if (theResult != null) {
 			String code = theResult.getCode();
@@ -260,7 +261,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
-		IValidationSupport.ValueSetExpansionOutcome expanded = myValidationSupportContext.getRootValidationSupport().expandValueSet(myValidationSupportContext, null, convertedSource);
+		ValueSetExpansionOutcome expanded = myValidationSupportContext.getRootValidationSupport().expandValueSet(myValidationSupportContext, null, convertedSource);
 
 		org.hl7.fhir.r5.model.ValueSet convertedResult = null;
 		if (expanded.getValueSet() != null) {
@@ -476,7 +477,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public boolean supportsSystem(String system) {
+		// store tx server results initially
+		// check against tx server results
+		//
+
 		return myValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(myValidationSupportContext, system);
+
 	}
 
 	@Override
@@ -554,7 +560,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Nonnull
 	private ValidationResult doValidation(IBaseResource theValueSet, ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
-		IValidationSupport.CodeValidationResult result;
+		CodeValidationResult result;
 		if (theValueSet != null) {
 			result = myValidationSupportContext.getRootValidationSupport().validateCodeInValueSet(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
 		} else {

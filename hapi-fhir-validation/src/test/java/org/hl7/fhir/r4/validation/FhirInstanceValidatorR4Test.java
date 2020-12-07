@@ -1,11 +1,9 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.context.support.*;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
+import ca.uhn.fhir.context.support.support.LookupCodeResult;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
@@ -194,19 +192,19 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 				return retVal;
 			}
 		});
-		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
+		when(mockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<CodeValidationResult>() {
 			@Override
-			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
+			public CodeValidationResult answer(InvocationOnMock theInvocation) {
 				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
 				String system = theInvocation.getArgument(2, String.class);
 				String code = theInvocation.getArgument(3, String.class);
 				String display = theInvocation.getArgument(4, String.class);
 				String valueSetUrl = theInvocation.getArgument(5, String.class);
-				IValidationSupport.CodeValidationResult retVal;
+				CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
+					retVal = new CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+					return new CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -258,7 +256,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			String system = t.getArgument(1, String.class);
 			String code = t.getArgument(2, String.class);
 			if (myValidConcepts.contains(system + "___" + code)) {
-				return new IValidationSupport.LookupCodeResult().setFound(true);
+				return new LookupCodeResult().setFound(true);
 			} else {
 				return null;
 			}
@@ -267,7 +265,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 			String system = t.getArgument(2, String.class);
 			String code = t.getArgument(3, String.class);
 			if (myValidConcepts.contains(system + "___" + code)) {
-				return new IValidationSupport.CodeValidationResult().setCode(code).setDisplay(code);
+				return new CodeValidationResult().setCode(code).setDisplay(code);
 			}
 			return null;
 		});

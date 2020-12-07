@@ -1,9 +1,11 @@
 package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.support.ValueSetExpansionOutcome;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.github.benmanes.caffeine.cache.Cache;
@@ -84,7 +86,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   public ValueSetExpansionComponent expandVS(ConceptSetComponent theInc, boolean theHierarchical) {
     ValueSet input = new ValueSet();
     input.getCompose().addInclude(theInc);
-    IValidationSupport.ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
+    ValueSetExpansionOutcome output = myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
     ValueSet outputValueSet = (ValueSet) output.getValueSet();
     if (outputValueSet != null) {
       return outputValueSet.getExpansion();
@@ -282,7 +284,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
     ValidationOptions options = new ValidationOptions();
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
+    CodeValidationResult result = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(options), theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -311,7 +313,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
-    IValidationSupport.CodeValidationResult outcome;
+    CodeValidationResult outcome;
     ValidationOptions options = new ValidationOptions();
     if (isNotBlank(theVs.getUrl())) {
       outcome = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), convertConceptValidationOptions(options), theSystem, theCode, theDisplay, theVs.getUrl());

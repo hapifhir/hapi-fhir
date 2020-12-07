@@ -17,6 +17,7 @@ import com.google.gson.JsonParser
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.OperationOutcome
+import org.hl7.fhir.r4.model.Resource
 import org.hl7.fhir.r5.utils.IResourceValidator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -24,10 +25,16 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.util.ArrayList
 import java.util.stream.Stream
 
 
 internal open class CoreValidationTests : BaseJpaR4Test() {
+
+   //private lateinit var myCtx: FhirContext
+
+   @Autowired
+   protected lateinit var validator: FhirInstanceValidator
 
    @Autowired
    protected lateinit var daoRegistry: DaoRegistry
@@ -43,21 +50,37 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
          println("test case for file $fileName contains no valid test results")
       } else {
          println("test id $fileName")
-         //validator.configureValidator(testEntry)
+         validator.configureValidator(testEntry)
          val resourceAsString: String = loadFileContents(TEST_FILES_BASE_PATH + fileName)
          Assertions.assertNotNull(resourceAsString, "Could not load resource string from file <$fileName>")
          validate(fileName, testEntry.testResult!!, resourceAsString, getTestProfile(testEntry))
       }
    }
 
-   protected fun FhirInstanceValidator.configureValidator(testEntry: TestEntry): FhirInstanceValidator {
-      validator.isAssumeValidRestReferences = testEntry.profile.assumeValidRestReferences
-      validator.isAllowExamples = testEntry.allowExamples
-      validator.validatorResourceFetcher = TestResourceFetcher(testEntry)
+   private fun FhirInstanceValidator.configureValidator(testEntry: TestEntry): FhirInstanceValidator {
+      testEntry.bundleParam?.let { bundleRule ->
+         println("\nBundle validation rule:\n${bundleRule}\n")
+         val rule = IResourceValidator.BundleValidationRule(bundleRule.rule, bundleRule.profile)
+         this.bundleValidationRules.add(rule)
+      } ?: this.bundleValidationRules.clear()
+      testEntry.supporting?.let { files ->
+         println("\nSupporting files to load for validation:${files.joinToString(prefix = "\n", separator = ",\n")}\n")
+         files.forEach { fileName ->
+            val baseResource: IBaseResource = loadResource(myCtx, TEST_FILES_BASE_PATH + fileName)
+            doCreateResource(baseResource)
+         }
+      }
+//      testEntry.bundleParam?.let { bundleRule -> this.bundleValidationRules.add()}
+//      validator.isAssumeValidRestReferences = testEntry.profile.assumeValidRestReferences
+//      validator.isAllowExamples = testEntry.allowExamples
+//      validator.validatorResourceFetcher = TestResourceFetcher(testEntry)
 //      validator.bestPracticeWarningLevel = IResourceValidator.BestPracticeWarningLevel.Ignore
-      myDaoConfig.isAllowExternalReferences = true
+//      myDaoConfig.isAllowExternalReferences = true
+
       return this
    }
+
+
 
    protected fun validate(
       testFile: String,
@@ -132,20 +155,19 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
    }
 
    companion object {
-      private const val TEST_FILES_BASE_PATH = "/org/hl7/fhir/testcases/validator/"
-      private const val TEST_MANIFEST_PATH = TEST_FILES_BASE_PATH + "manifest.json"
+      protected const val TEST_FILES_BASE_PATH = "/org/hl7/fhir/testcases/validator/"
+      protected const val TEST_MANIFEST_PATH = TEST_FILES_BASE_PATH + "manifest.json"
 
-      private lateinit var myCtx: FhirContext
       private lateinit var gson: Gson
-      private lateinit var validator: FhirInstanceValidator
+      private lateinit var myCtx: FhirContext
 
       @BeforeAll
       @JvmStatic
       fun beforeAll() {
          // We only ever need one FhirContext, InstanceValidator, and Gson parser, so we create them once for all the tests
-         myCtx = FhirContext.forR4()
-         validator = FhirInstanceValidator(myCtx)
+         myCtx = FhirContext.forR4() // Need to create proper context for resource
          gson = Gson()
+         println("---------- Beginning Validation Tests for 4.0 ----------")
       }
 
       @JvmStatic
@@ -162,13 +184,17 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
           * behaviours (formatted as a json entry). We split, sort, then stream these test entries so they can be run
           * individually.
           */
+
          val manifest = JsonParser().parse(contents) as JsonObject
          return manifest.getAsJsonObject("test-cases")
             .entrySet()
             .sortedBy { it.key }
-            .map { (testId, testContent) ->
+            .filter { (_, testContent) ->
+               cleanVersionString(extractVersion(gson.fromJson(testContent, TestEntry::class.java))) == "4.0.0"
+                  || cleanVersionString(extractVersion(gson.fromJson(testContent, TestEntry::class.java))) == "4.0.1"
+            }.map { (testId, testContent) ->
                Arguments.arguments(testId, gson.fromJson(testContent, TestEntry::class.java))
-            }.subList(6, 7).stream()
+            }.subList(9, 10).stream()
       }
 
       fun getTestProfile(testEntry: TestEntry): String {
@@ -185,5 +211,6 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
          return CoreValidationTests::class.java.getResource(path)?.readText()
             ?: throw IllegalStateException("Unable to load <$path>.\nCheck dependencies are loaded correctly.")
       }
+
    }
 }
