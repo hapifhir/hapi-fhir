@@ -1,7 +1,7 @@
 ---
 type: add
 issue: 2177
-title: "Refactoring of the Enterprise Master Patient Index solution to a Master Data Management solution. The new MDM solution supports other FHIR resources where EMPI only allowed Person resource to be used. For example, if MDM is occurring on a patient, we will create a new Patient, and tag that patient as a Golden Record. This means that several things have changed:
+title: "Redesigning the Enterprise Master Patient Index solution to a Master Data Management solution. The new MDM solution supports other FHIR resources where EMPI only allowed Person resource to be used. For example, if MDM is occurring on a patient, we will create a new Patient, and tag that patient as a Golden Record. This means that several things have changed:
    <ul>
    <li>Provider methods that pointed to type of Person are now server-level operations in which you specify a resource type.</li>
    <li>Link updating and querying no longer rely on Person IDs, but instead on arbitrary resource ids, depending on the resource type you are referring to in MDM.</li>
