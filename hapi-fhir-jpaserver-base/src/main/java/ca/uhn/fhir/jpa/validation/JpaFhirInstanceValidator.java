@@ -67,7 +67,6 @@ public class JpaFhirInstanceValidator extends FhirInstanceValidator {
 
 	private class MyValidatorResourceFetcher implements IResourceValidator.IValidatorResourceFetcher {
 
-
 		@SuppressWarnings("ConstantConditions")
 		@Override
 		public Element fetch(Object appContext, String theUrl) throws FHIRException {
@@ -101,7 +100,7 @@ public class JpaFhirInstanceValidator extends FhirInstanceValidator {
 		}
 
 		@Override
-		public boolean resolveURL(Object appContext, String path, String url) throws IOException, FHIRException {
+		public boolean resolveURL(Object appContext, String path, String url, String s2) throws IOException, FHIRException {
 			return !url.contains("example.org") && !url.startsWith("http://hl7.org/fhir/invalid");
 		}
 

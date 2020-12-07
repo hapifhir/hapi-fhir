@@ -114,7 +114,7 @@ class ValidatorWrapper {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		try {
-			v = new InstanceValidator(theWorkerContext, evaluationCtx);
+			v = new InstanceValidator(theWorkerContext, evaluationCtx, null);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}

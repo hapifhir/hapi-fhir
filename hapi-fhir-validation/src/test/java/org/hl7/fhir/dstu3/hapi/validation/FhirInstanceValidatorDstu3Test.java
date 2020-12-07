@@ -1314,7 +1314,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(3)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(3)).resolveURL(any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(4)).fetch(any(), anyString());
 	}

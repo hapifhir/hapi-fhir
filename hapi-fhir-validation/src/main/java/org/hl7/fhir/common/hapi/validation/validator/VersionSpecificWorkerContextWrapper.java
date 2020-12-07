@@ -659,6 +659,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return retVal;
 	}
 
+	@Override
+	public String getSpecUrl() {
+		return null;
+	}
+
+	@Override
+	public Set<String> getCodeSystemsUsed() {
+		return null;
+	}
 }
 
 

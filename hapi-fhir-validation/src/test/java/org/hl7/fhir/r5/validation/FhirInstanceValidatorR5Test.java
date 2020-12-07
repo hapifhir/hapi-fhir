@@ -435,7 +435,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(3)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(3)).fetch(any(), anyString());
 	}

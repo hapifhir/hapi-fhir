@@ -59,7 +59,7 @@ class TestResourceFetcher(private val testEntry: TestEntry) : IResourceValidator
    }
 
    @Throws(FHIRException::class)
-   override fun resolveURL(appContext: Any, path: String, url: String): Boolean {
+   override fun resolveURL(appContext: Any, path: String, url: String, s: String): Boolean {
       return !url.contains("example.org")
    }
 

@@ -51,6 +51,7 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
       } else {
          println("test id $fileName")
          validator.configureValidator(testEntry)
+
          val resourceAsString: String = loadFileContents(TEST_FILES_BASE_PATH + fileName)
          Assertions.assertNotNull(resourceAsString, "Could not load resource string from file <$fileName>")
          validate(fileName, testEntry.testResult!!, resourceAsString, getTestProfile(testEntry))

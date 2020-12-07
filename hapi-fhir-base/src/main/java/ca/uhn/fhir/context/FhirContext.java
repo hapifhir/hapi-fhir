@@ -633,10 +633,11 @@ public class FhirContext {
 			if (ReflectionUtil.typeExists(inMemoryTermSvcType)) {
 				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(inMemoryTermSvcType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
 				IValidationSupport commonCodeSystemsSupport = ReflectionUtil.newInstanceOrReturnNull(commonCodeSystemsSupportType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
-				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain", IValidationSupport.class, new Class<?>[]{IValidationSupport[].class}, new Object[]{new IValidationSupport[]{
+				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain",
+					IValidationSupport.class, new Class<?>[]{ IValidationSupport[].class }, new Object[]{ new IValidationSupport[] {
 					retVal,
 					inMemoryTermSvc,
-					commonCodeSystemsSupport
+					commonCodeSystemsSupport,
 				}});
 				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain";
 			}

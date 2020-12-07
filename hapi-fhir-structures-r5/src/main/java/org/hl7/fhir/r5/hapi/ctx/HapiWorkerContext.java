@@ -457,4 +457,13 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		return retVal;
 	}
 
+	@Override
+	public String getSpecUrl() {
+		return null;
+	}
+
+	@Override
+	public Set<String> getCodeSystemsUsed() {
+		return null;
+	}
 }

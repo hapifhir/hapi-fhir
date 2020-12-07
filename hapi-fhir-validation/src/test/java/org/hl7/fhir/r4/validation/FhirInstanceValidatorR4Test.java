@@ -1400,7 +1400,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}
