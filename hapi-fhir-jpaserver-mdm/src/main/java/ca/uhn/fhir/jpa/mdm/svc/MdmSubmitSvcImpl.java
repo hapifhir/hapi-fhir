@@ -69,9 +69,9 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	@Override
 	@Transactional
-	public long submitAllTargetTypesToMdm(@Nullable String theCriteria) {
+	public long submitAllSourceTypesToMdm(@Nullable String theCriteria) {
 		long submittedCount = myMdmSettings.getMdmRules().getMdmTypes().stream()
-			.mapToLong(targetType -> submitTargetTypeToMdm(targetType, theCriteria))
+			.mapToLong(type -> submitSourceResourceTypeToMdm(type, theCriteria))
 			.sum();
 
 		return submittedCount;
@@ -79,17 +79,17 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	@Override
 	@Transactional
-	public long submitTargetTypeToMdm(String theTargetType, @Nullable String theCriteria) {
+	public long submitSourceResourceTypeToMdm(String theSourceResourceType, @Nullable String theCriteria) {
 		if (theCriteria == null) {
-			ourLog.info("Submitting all resources of type {} to MDM", theTargetType);
+			ourLog.info("Submitting all resources of type {} to MDM", theSourceResourceType);
 		} else {
-			ourLog.info("Submitting resources of type {} with criteria {} to MDM", theTargetType, theCriteria);
+			ourLog.info("Submitting resources of type {} with criteria {} to MDM", theSourceResourceType, theCriteria);
 		}
 
-		validateTargetType(theTargetType);
-		SearchParameterMap spMap = myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theTargetType, theCriteria);
+		validateSourceType(theSourceResourceType);
+		SearchParameterMap spMap = myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
 		spMap.setLoadSynchronousUpTo(BUFFER_SIZE);
-		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theTargetType);
+		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
 		return submitAllMatchingResourcesToMdmChannel(spMap, searchBuilder);
 	}
 
@@ -130,19 +130,19 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	@Override
 	@Transactional
 	public long submitPractitionerTypeToMdm(@Nullable String theCriteria) {
-		return submitTargetTypeToMdm("Practitioner", theCriteria);
+		return submitSourceResourceTypeToMdm("Practitioner", theCriteria);
 	}
 
 	@Override
 	@Transactional
 	public long submitPatientTypeToMdm(@Nullable String theCriteria) {
-		return submitTargetTypeToMdm("Patient", theCriteria);
+		return submitSourceResourceTypeToMdm("Patient", theCriteria);
 	}
 
 	@Override
 	@Transactional
-	public long submitTargetToMdm(IIdType theId) {
-		validateTargetType(theId.getResourceType());
+	public long submitSourceResourceToMdm(IIdType theId) {
+		validateSourceType(theId.getResourceType());
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource read = resourceDao.read(theId);
 		myMdmChannelSubmitterSvc.submitResourceToMdmChannel(read);
@@ -154,7 +154,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		myMdmSettings = theMdmSettings;
 	}
 
-	private void validateTargetType(String theResourceType) {
+	private void validateSourceType(String theResourceType) {
 		if(!myMdmSettings.getMdmRules().getMdmTypes().contains(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.OPERATION_MDM_SUBMIT + " does not support resource type: " + theResourceType);
 		}

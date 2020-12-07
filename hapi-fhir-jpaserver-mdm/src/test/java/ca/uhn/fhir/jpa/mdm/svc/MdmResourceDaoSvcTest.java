@@ -1,10 +1,9 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.mdm.util.MdmUtil;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.mdm.util.MdmUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -18,11 +17,6 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	private static final String TEST_EID = "TEST_EID";
 	@Autowired
 	MdmResourceDaoSvc myResourceDaoSvc;
-
-	@BeforeEach
-	public void before() {
-		super.loadMdmSearchParameters();
-	}
 
 	@Test
 	public void testSearchPatientByEidExcludesNonGoldenPatients() {

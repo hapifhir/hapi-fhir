@@ -64,8 +64,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() {
-		super.loadMdmSearchParameters();
-
 		myFromGoldenPatient = createGoldenPatient();
 		IdType fromSourcePatientId = myFromGoldenPatient.getIdElement().toUnqualifiedVersionless();
 		myFromGoldenPatientPid = myIdHelperService.getPidOrThrowException(fromSourcePatientId);
@@ -124,8 +122,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void mergeRemovesPossibleDuplicatesLink() {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink()
 			.setGoldenResourcePid(myToGoldenPatientPid)
-			.setTargetPid(myFromGoldenPatientPid)
-			.setMdmTargetType("Patient")
+			.setSourcePid(myFromGoldenPatientPid)
+			.setMdmSourceType("Patient")
 			.setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.setLinkSource(MdmLinkSourceEnum.AUTO);
 

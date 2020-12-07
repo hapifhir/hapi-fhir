@@ -31,7 +31,7 @@ Use the `$mdm-query-links` operation to view MDM links. The results returned are
             <td>String</td>
             <td>0..1</td>
             <td>
-                The id of the target resource (e.g. Patient resource).
+                The id of the source resource (e.g. Patient resource).
             </td>
         </tr>
         <tr>
@@ -82,9 +82,9 @@ This operation returns a `Parameters` resource that looks like the following:
     "name": "link",
     "part": [ {
       "name": "goldenResourceId",
-      "valueString": "Person/123"
+      "valueString": "Patient/123"
     }, {
-      "name": "targetResourceId",
+      "name": "sourceResourceId",
       "valueString": "Patient/456"
     }, {
       "name": "matchResult",
@@ -129,10 +129,10 @@ This operation returns `Parameters` similar to `$mdm-query-links`:
     "name": "link",
     "part": [ {
       "name": "goldenResourceId",
-      "valueString": "Person/123"
+      "valueString": "Patient/123"
     }, {
-      "name": "targetResourceId",
-      "valueString": "Person/456"
+      "name": "sourceResourceId",
+      "valueString": "Patient/456"
     }, {
       "name": "matchResult",
       "valueString": "POSSIBLE_DUPLICATE"
@@ -164,7 +164,7 @@ This operation takes the following parameters:
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Golden resource.
+                The id of the Golden Resource.
             </td>
         </tr>
         <tr>
@@ -172,7 +172,7 @@ This operation takes the following parameters:
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Person that personId has a possible duplicate link to.
+                The id of the source resource that has a possible duplicate link to.
             </td>
         </tr>
     </tbody>
@@ -232,7 +232,7 @@ Use the `$mdm-update-link` operation to change the `matchResult` update of an md
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the Golden resource.
+                The id of the Golden Resource.
             </td>
         </tr>
         <tr>
@@ -240,7 +240,7 @@ Use the `$mdm-update-link` operation to change the `matchResult` update of an md
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the target resource.
+                The id of the source resource.
             </td>
         </tr>
         <tr>
@@ -284,14 +284,9 @@ Any supported MDM type can be used. The following request body shows how to upda
 
 The operation returns the updated Golden Resource. For the query above `Patient` resource will be returned.  Note that this is the only way to modify MDM-managed Golden Resources.
 
-## Merge Persons
+## Merge Golden Resources
 
-<!--- 
-    In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).
-    However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
--->
-The `$mdm-merge-golden-resources` operation can be used to merge one Golden resource with another. When
-doing this, you will need to decide which resource to merge from and which one to merge to. 
+The `$mdm-merge-golden-resources` operation can be used to merge one Golden Resource with another. When doing this, you will need to decide which resource to merge from and which one to merge to. 
 
 After the merge is complete, `fromGoldenResourceId` will be deactivated by assigning a metadata tag `REDIRECTED`. 
 
@@ -451,7 +446,7 @@ MDM will respond with the appropriate resource bundle.
 
 ## Clearing MDM Links
 
-The `$mdm-clear` operation is used to batch-delete MDM links and related persons from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and golden resources.
+The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and golden resources.
 
 After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are deleted and expunged from the server.
 

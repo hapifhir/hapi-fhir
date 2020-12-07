@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class FindCandidateByScoreSvc extends BaseCandidateFinder {
+public class FindCandidateByExampleSvc extends BaseCandidateFinder {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	@Autowired
@@ -75,7 +75,7 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 		// MatchedTargetCandidate -> Golden Resource -> MdmLink -> MatchedGoldenResourceCandidate
 		matchedCandidates = matchedCandidates.stream().filter(mc -> mc.isMatch() || mc.isPossibleMatch()).collect(Collectors.toList());
 		for (MatchedTarget match : matchedCandidates) {
-			Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(match.getTarget()));
+			Optional<MdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(match.getTarget()));
 			if (!optionalMdmLink.isPresent()) {
 				continue;
 			}
@@ -94,7 +94,7 @@ public class FindCandidateByScoreSvc extends BaseCandidateFinder {
 
 	private List<Long> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {
 		Long targetPid = myIdHelperService.getPidOrNull(theBaseResource);
-		return myMdmLinkDaoSvc.getMdmLinksByTargetPidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
+		return myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(targetPid, MdmMatchResultEnum.NO_MATCH)
 			.stream()
 			.map(MdmLink::getGoldenResourcePid)
 			.collect(Collectors.toList());

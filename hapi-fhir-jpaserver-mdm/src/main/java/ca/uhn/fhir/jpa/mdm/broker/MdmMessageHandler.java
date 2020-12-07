@@ -138,7 +138,7 @@ public class MdmMessageHandler implements MessageHandler {
 	}
 
 	private void handleCreatePatientOrPractitioner(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(getResourceFromPayload(theMsg), theMdmTransactionContext);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(getResourceFromPayload(theMsg), theMdmTransactionContext);
 	}
 
 	private IAnyResource getResourceFromPayload(ResourceModifiedMessage theMsg) {
@@ -146,7 +146,7 @@ public class MdmMessageHandler implements MessageHandler {
 	}
 
 	private void handleUpdatePatientOrPractitioner(ResourceModifiedMessage theMsg, MdmTransactionContext theMdmTransactionContext) {
-		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(getResourceFromPayload(theMsg), theMdmTransactionContext);
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(getResourceFromPayload(theMsg), theMdmTransactionContext);
 	}
 
 	private void log(MdmTransactionContext theMdmContext, String theMessage) {

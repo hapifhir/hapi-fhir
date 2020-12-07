@@ -48,11 +48,11 @@ public class MdmControllerUtil {
 		return getGoldenIdDtOrThrowException(theName, theGoldenResourceId);
 	}
 
-	public static IIdType extractTargetIdDtOrNull(String theName, String theTargetId) {
-		if (theTargetId == null) {
+	public static IIdType extractSourceIdDtOrNull(String theName, String theSourceId) {
+		if (theSourceId == null) {
 			return null;
 		}
-		return getTargetIdDtOrThrowException(theName, theTargetId);
+		return getSourceIdDtOrThrowException(theName, theSourceId);
 	}
 
 	static IdDt getGoldenIdDtOrThrowException(String theParamName, String theId) {
@@ -64,11 +64,11 @@ public class MdmControllerUtil {
 		return goldenResourceId;
 	}
 
-	public static IIdType getTargetIdDtOrThrowException(String theParamName, String theId) {
-		IdDt targetId = new IdDt(theId);
-		if (targetId.getIdPart() == null) {
-			throw new InvalidRequestException(theParamName + " is '" + theId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
+	public static IIdType getSourceIdDtOrThrowException(String theParamName, String theSourceId) {
+		IdDt sourceId = new IdDt(theSourceId);
+		if (sourceId.getIdPart() == null) {
+			throw new InvalidRequestException(theParamName + " is '" + theSourceId + "'.  must have form <resourceType>/<id>  where <id> is the id of the resource and <resourceType> is the type of the resource");
 		}
-		return targetId;
+		return sourceId;
 	}
 }

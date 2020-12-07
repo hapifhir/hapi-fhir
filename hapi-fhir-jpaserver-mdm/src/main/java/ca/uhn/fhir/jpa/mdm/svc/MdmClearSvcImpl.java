@@ -51,16 +51,16 @@ public class MdmClearSvcImpl implements IMdmExpungeSvc {
 	}
 
 	@Override
-	public long expungeAllMdmLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails) {
-		throwExceptionIfInvalidTargetType(theResourceType);
-		ourLog.info("Clearing all MDM Links for resource type {}...", theResourceType);
-		List<Long> goldenResourcePids = myMdmLinkDaoSvc.deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(theResourceType);
-		DeleteMethodOutcome deleteOutcome = myMdmGoldenResourceDeletingSvcImpl.expungeGoldenResourcePids(goldenResourcePids, theResourceType, theRequestDetails);
+	public long expungeAllMdmLinksOfSourceType(String theSourceResourceType, ServletRequestDetails theRequestDetails) {
+		throwExceptionIfInvalidSourceResourceType(theSourceResourceType);
+		ourLog.info("Clearing all MDM Links for resource type {}...", theSourceResourceType);
+		List<Long> goldenResourcePids = myMdmLinkDaoSvc.deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(theSourceResourceType);
+		DeleteMethodOutcome deleteOutcome = myMdmGoldenResourceDeletingSvcImpl.expungeGoldenResourcePids(goldenResourcePids, theSourceResourceType, theRequestDetails);
 		ourLog.info("MDM clear operation complete.  Removed {} MDM links and {} Golden Resources.", goldenResourcePids.size(), deleteOutcome.getExpungedResourcesCount());
 		return goldenResourcePids.size();
 	}
 
-	private void throwExceptionIfInvalidTargetType(String theResourceType) {
+	private void throwExceptionIfInvalidSourceResourceType(String theResourceType) {
 		if (!myMdmSettings.isSupportedMdmType(theResourceType)) {
 			throw new InvalidRequestException(ProviderConstants.MDM_CLEAR + " does not support resource type: " + theResourceType);
 		}

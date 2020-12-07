@@ -20,7 +20,6 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -59,11 +58,6 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 	public MdmHelperR4 myMdmHelper;
 	@Autowired
 	private IdHelperService myIdHelperService;
-
-	@BeforeEach
-	public void before() {
-		super.loadMdmSearchParameters();
-	}
 
 	@Test
 	public void testCreatePractitioner() throws InterruptedException {
@@ -196,7 +190,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		patient.setId(patientId);
 
 		// Updating a Golden Resource Patient who was created via MDM should fail.
-		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(patient)).get();
+		MdmLink mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(patient)).get();
 		Long sourcePatientPid = mdmLink.getGoldenResourcePid();
 		Patient goldenResourcePatient = (Patient) myPatientDao.readByPid(new ResourcePersistentId(sourcePatientPid));
 		goldenResourcePatient.setGender(Enumerations.AdministrativeGender.MALE);

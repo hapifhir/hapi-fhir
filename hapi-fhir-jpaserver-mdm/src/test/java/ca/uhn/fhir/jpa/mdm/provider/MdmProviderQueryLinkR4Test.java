@@ -49,7 +49,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		myGoldenResource2Id = new StringType(sourcePatient2.getIdElement().toVersionless().getValue());
 		Long sourcePatient2Pid = myIdHelperService.getPidOrNull(sourcePatient2);
 
-		MdmLink possibleDuplicateMdmLink = myMdmLinkDaoSvc.newMdmLink().setGoldenResourcePid(sourcePatient1Pid).setTargetPid(sourcePatient2Pid).setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
+		MdmLink possibleDuplicateMdmLink = myMdmLinkDaoSvc.newMdmLink().setGoldenResourcePid(sourcePatient1Pid).setSourcePid(sourcePatient2Pid).setMatchResult(MdmMatchResultEnum.POSSIBLE_DUPLICATE).setLinkSource(MdmLinkSourceEnum.AUTO);
 		saveLink(possibleDuplicateMdmLink);
 	}
 

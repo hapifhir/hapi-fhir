@@ -28,6 +28,7 @@ public interface IMdmSubmitSvc {
 
 	/**
 	 * Submit all eligible resources for MDM processing.
+	 *
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 *                    NOTE:
 	 *                    When using this function, the criteria supplied must be valid for all MDM types. e.g. , if you
@@ -36,19 +37,19 @@ public interface IMdmSubmitSvc {
 	 *
 	 * @return
 	 */
-	long submitAllTargetTypesToMdm(@Nullable String theCriteria);
+	long submitAllSourceTypesToMdm(@Nullable String theCriteria);
 
 	/**
 	 * Given a type and a search criteria, submit all found resources for MDM processing.
 	 *
-	 * @param theTargetType the resource type that you wish to execute a search over for submission to MDM.
+	 * @param theSourceResourceType the resource type that you wish to execute a search over for submission to MDM.
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing..
 	 * @return the number of resources submitted for MDM processing.
 	 */
-	long submitTargetTypeToMdm(String theTargetType, String theCriteria);
+	long submitSourceResourceTypeToMdm(String theSourceResourceType, String theCriteria);
 
 	/**
-	 * Convenience method that calls {@link #submitTargetTypeToMdm(String, String)} with the type pre-populated.
+	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
 	 *
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
@@ -56,7 +57,7 @@ public interface IMdmSubmitSvc {
 	long submitPractitionerTypeToMdm(String theCriteria);
 
 	/**
-	 * Convenience method that calls {@link #submitTargetTypeToMdm(String, String)} with the type pre-populated.
+	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
 	 *
 	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
 	 * @return the number of resources submitted for MDM processing.
@@ -64,11 +65,12 @@ public interface IMdmSubmitSvc {
 	long submitPatientTypeToMdm(String theCriteria);
 
 	/**
-	 * Given an ID and a target type valid for MDM, manually submit the given ID for MDM processing.
+	 * Given an ID and a source resource type valid for MDM, manually submit the given ID for MDM processing.
+	 *
 	 * @param theId the ID of the resource to process for MDM.
 	 * @return the constant `1`, as if this function returns successfully, it will have processed one resource for MDM.
 	 */
-	long submitTargetToMdm(IIdType theId);
+	long submitSourceResourceToMdm(IIdType theId);
 
 	/**
 	 * This setter exists to allow imported modules to override settings.

@@ -54,7 +54,7 @@ class MdmBatchSvcImplTest extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllTargetTypesToMdm(null));
+		afterMdmLatch.runWithExpectedCount(30, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null));
 
 		assertLinkCount(30);
 	}
@@ -69,7 +69,7 @@ class MdmBatchSvcImplTest extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitTargetTypeToMdm("Patient", null));
+		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", null));
 
 		assertLinkCount(10);
 	}
@@ -86,7 +86,7 @@ class MdmBatchSvcImplTest extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitTargetTypeToMdm("Medication", null));
+		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Medication", null));
 
 		assertLinkCount(10);
 	}
@@ -101,7 +101,7 @@ class MdmBatchSvcImplTest extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitAllTargetTypesToMdm(null));
+		afterMdmLatch.runWithExpectedCount(10, () -> myMdmSubmitSvc.submitAllSourceTypesToMdm(null));
 
 		assertLinkCount(10);
 	}
@@ -114,7 +114,7 @@ class MdmBatchSvcImplTest extends BaseMdmR4Test {
 		assertLinkCount(0);
 
 		//SUT
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmSubmitSvc.submitTargetTypeToMdm("Patient", "Patient?name=gary"));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmSubmitSvc.submitSourceResourceTypeToMdm("Patient", "Patient?name=gary"));
 
 		assertLinkCount(1);
 	}

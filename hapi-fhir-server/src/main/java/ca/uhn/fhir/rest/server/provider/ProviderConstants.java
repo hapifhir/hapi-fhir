@@ -87,7 +87,7 @@ public class ProviderConstants {
 	public static final String MDM_NOT_DUPLICATE = "$mdm-not-duplicate";
 
 	public static final String MDM_CLEAR = "$mdm-clear";
-	public static final String MDM_CLEAR_TARGET_TYPE = "targetType";
+	public static final String MDM_CLEAR_SOURCE_TYPE = "sourceType";
 	public static final String OPERATION_MDM_SUBMIT = "$mdm-submit";
 	public static final String MDM_BATCH_RUN_CRITERIA = "criteria" ;
 	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;

@@ -26,22 +26,23 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 public interface IMdmLinkSvc {
 
 	/**
-	 * Update a link between a Golden Resource record and its target record. If a link does not exist between
+	 * Update a link between a Golden Resource record and its source resource record. If a link does not exist between
 	 * these two records, create it.
 	 *
-	 * @param theGoldenResource        the Golden Resource to link the target resource to.
-	 * @param theTargetResource        the target resource, which can be of the MDM supported types
+	 * @param theGoldenResource        the Golden Resource to link the source resource to.
+	 * @param theSourceResource        the source resource, which can be of any of the MDM supported types
 	 * @param theMatchResult           the current status of the match to set the link to.
 	 * @param theLinkSource            MANUAL or AUTO: what caused the link.
 	 * @param theMdmTransactionContext
 	 */
-	void updateLink(IAnyResource theGoldenResource, IAnyResource theTargetResource, MdmMatchOutcome theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext);
+	void updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchOutcome theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmTransactionContext);
 
 	/**
-	 * Delete a link between given Golden Resource and the corresponing target
+	 * Delete a link between given Golden Resource and the corresponding source resource
 	 *
 	 * @param theExistingGoldenResource
-	 * @param theResource
+	 * @param theSourceResource
+	 * @param theMdmTransactionContext
 	 */
-	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theResource, MdmTransactionContext theMdmTransactionContext);
+	void deleteLink(IAnyResource theExistingGoldenResource, IAnyResource theSourceResource, MdmTransactionContext theMdmTransactionContext);
 }

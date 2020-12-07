@@ -72,27 +72,27 @@ public class MdmSearchParamSvc implements ISearchParamRetriever {
 	}
 
 	/**
-	 * Given a target type, and a criteria string of the shape name=x&birthDate=y, generate a {@link SearchParameterMap}
+	 * Given a source type, and a criteria string of the shape name=x&birthDate=y, generate a {@link SearchParameterMap}
 	 * that represents this query.
 	 *
-	 * @param theTargetType the resource type to execute the search on
+	 * @param theSourceType the resource type to execute the search on
 	 * @param theCriteria the string search criteria.
 	 *
 	 * @return the generated SearchParameterMap, or an empty one if there is no criteria.
 	 */
-	public SearchParameterMap getSearchParameterMapFromCriteria(String theTargetType, @Nullable String theCriteria) {
+	public SearchParameterMap getSearchParameterMapFromCriteria(String theSourceType, @Nullable String theCriteria) {
 		SearchParameterMap spMap;
 		if (StringUtils.isBlank(theCriteria)) {
 			spMap = new SearchParameterMap();
 		} else {
-			spMap = mapFromCriteria(theTargetType, theCriteria);
+			spMap = mapFromCriteria(theSourceType, theCriteria);
 		}
 		return spMap;
 	}
 
-	public ISearchBuilder generateSearchBuilderForType(String theTargetType) {
-		 IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theTargetType);
-		 return mySearchBuilderFactory.newSearchBuilder(resourceDao, theTargetType, resourceDao.getResourceType());
+	public ISearchBuilder generateSearchBuilderForType(String theSourceType) {
+		 IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theSourceType);
+		 return mySearchBuilderFactory.newSearchBuilder(resourceDao, theSourceType, resourceDao.getResourceType());
 	 }
 
 	/**

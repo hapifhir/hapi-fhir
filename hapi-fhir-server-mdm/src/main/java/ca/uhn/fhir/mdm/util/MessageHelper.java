@@ -72,22 +72,22 @@ public class MessageHelper {
 			+ myMdmSettings.getSupportedMdmTypes() + ".  Was " + theGoldenRecordType;
 	}
 
-	public String getMessageForArgumentTypeMismatchInUpdate(String theGoldenRecordType, String theTargetType) {
+	public String getMessageForArgumentTypeMismatchInUpdate(String theGoldenRecordType, String theSourceResourceType) {
 		return "Arguments to " + ProviderConstants.MDM_UPDATE_LINK + " must be of the same type. Were " +
-			theGoldenRecordType + " and " + theTargetType;
+			theGoldenRecordType + " and " + theSourceResourceType;
 	}
 
-	public String getMessageForUnsupportedTarget() {
-		return "The target is marked with the " + MdmConstants.CODE_NO_MDM_MANAGED
+	public String getMessageForUnsupportedSourceResource() {
+		return "The source resource is marked with the " + MdmConstants.CODE_NO_MDM_MANAGED
 			+ " tag which means it may not be MDM linked.";
 	}
 
-	public String getMessageForNoLink(IAnyResource theGoldenRecord, IAnyResource theTarget) {
+	public String getMessageForNoLink(IAnyResource theGoldenRecord, IAnyResource theSourceResource) {
 		return getMessageForNoLink(theGoldenRecord.getIdElement().toVersionless().toString(),
-			theTarget.getIdElement().toVersionless().toString());
+			theSourceResource.getIdElement().toVersionless().toString());
 	}
 
-	public String getMessageForNoLink(String theGoldenRecord, String theTarget) {
-		return "No link exists between " + theGoldenRecord + " and " + theTarget;
+	public String getMessageForNoLink(String theGoldenRecord, String theSourceResource) {
+		return "No link exists between " + theGoldenRecord + " and " + theSourceResource;
 	}
 }

@@ -1,6 +1,6 @@
 # MDM Enterprise Identifiers
 
-An Enterprise Identifier (EID) is a unique identifier that can be attached to target resources. Each implementation is expected to use exactly one EID system for incoming resources, defined in the MDM Rules file. If a target resource with a valid EID is submitted, that EID will be copied over to the Golden resource that was matched. In the case that the incoming target resource had no EID assigned, an internal EID will be created for it. There are thus two classes of EID:
+An Enterprise Identifier (EID) is a unique identifier that can be attached to source resources. Each implementation is expected to use exactly one EID system for incoming resources, defined in the MDM Rules file. If a source resource with a valid EID is submitted, that EID will be copied over to the Golden Resource that was matched. In the case that the incoming source resource had no EID assigned, an internal EID will be created for it. There are thus two classes of EID:
  * Internal EIDs, created by HAPI-MDM, and 
  * External EIDs, provided by the submitted resources.
 
@@ -15,7 +15,7 @@ contains two EID related settings.  Both are enabled by default.
 
 ## MDM EID Scenarios
 
-MDM EID management follows a complex set of rules to link related target records via their Enterprise Id.  The following diagrams outline how EIDs are replicated from Patient resources to their linked Golden Patient resources under various scenarios according to the values of the EID Settings.
+MDM EID management follows a complex set of rules to link related source records via their Enterprise Id.  The following diagrams outline how EIDs are replicated from Patient resources to their linked Golden Patient resources under various scenarios according to the values of the EID Settings.
 
 ## MDM EID Create Scenarios
 

@@ -40,8 +40,6 @@ public class MdmLoader {
 	MdmProviderLoader myMdmProviderLoader;
 	@Autowired
 	MdmSubscriptionLoader myMdmSubscriptionLoader;
-	@Autowired
-	MdmSearchParameterLoader myMdmSearchParameterLoader;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	// This @Order is here to ensure that MatchingQueueSubscriberLoader has initialized before we initialize this.
@@ -57,9 +55,5 @@ public class MdmLoader {
 
 		myMdmSubscriptionLoader.daoUpdateMdmSubscriptions();
 		ourLog.info("MDM subscriptions updated");
-
-		//TODO GGG MDM: Do we need these search parameters, or equivalent, anymore? Don't think so... ask @fil512
-		myMdmSearchParameterLoader.daoUpdateMdmSearchParameters();
-		ourLog.info("MDM search parameters updated");
 	}
 }

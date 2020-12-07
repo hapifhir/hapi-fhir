@@ -60,24 +60,24 @@ public class MdmLinkDaoSvc {
 	private FhirContext myFhirContext;
 
 	@Transactional
-	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theTargetResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
+	public MdmLink createOrUpdateLinkEntity(IBaseResource theGoldenResource, IBaseResource theSourceResource, MdmMatchOutcome theMatchOutcome, MdmLinkSourceEnum theLinkSource, @Nullable MdmTransactionContext theMdmTransactionContext) {
 		Long goldenResourcePid = myIdHelperService.getPidOrNull(theGoldenResource);
-		Long targetResourcePid = myIdHelperService.getPidOrNull(theTargetResource);
+		Long sourceResourcePid = myIdHelperService.getPidOrNull(theSourceResource);
 
-		MdmLink mdmLink = getOrCreateMdmLinkByGoldenResourcePidAndTargetResourcePid(goldenResourcePid, targetResourcePid);
+		MdmLink mdmLink = getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(goldenResourcePid, sourceResourcePid);
 		mdmLink.setLinkSource(theLinkSource);
 		mdmLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
 		mdmLink.setEidMatch(theMatchOutcome.isEidMatch() | mdmLink.isEidMatch());
-		mdmLink.setHadToCreateNewResource(theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewResource());
-		mdmLink.setMdmTargetType(myFhirContext.getResourceType(theTargetResource));
+		mdmLink.setHadToCreateNewGoldenResource(theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewGoldenResource());
+		mdmLink.setMdmSourceType(myFhirContext.getResourceType(theSourceResource));
 		if (mdmLink.getScore() != null) {
 			mdmLink.setScore(Math.max(theMatchOutcome.score, mdmLink.getScore()));
 		} else {
 			mdmLink.setScore(theMatchOutcome.score);
 		}
 
-		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theTargetResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
+		String message = String.format("Creating MdmLink from %s to %s -> %s", theGoldenResource.getIdElement().toUnqualifiedVersionless(), theSourceResource.getIdElement().toUnqualifiedVersionless(), theMatchOutcome);
 		theMdmTransactionContext.addTransactionLogMessage(message);
 		ourLog.debug(message);
 		save(mdmLink);
@@ -85,54 +85,54 @@ public class MdmLinkDaoSvc {
 	}
 
 	@Nonnull
-	public MdmLink getOrCreateMdmLinkByGoldenResourcePidAndTargetResourcePid(Long theGoldenResourcePid, Long theTargetResourcePid) {
-		Optional<MdmLink> oExisting = getLinkByGoldenResourcePidAndTargetResourcePid(theGoldenResourcePid, theTargetResourcePid);
+	public MdmLink getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
+		Optional<MdmLink> oExisting = getLinkByGoldenResourcePidAndSourceResourcePid(theGoldenResourcePid, theSourceResourcePid);
 		if (oExisting.isPresent()) {
 			return oExisting.get();
 		} else {
 			MdmLink newLink = myMdmLinkFactory.newMdmLink();
 			newLink.setGoldenResourcePid(theGoldenResourcePid);
-			newLink.setTargetPid(theTargetResourcePid);
+			newLink.setSourcePid(theSourceResourcePid);
 			return newLink;
 		}
 	}
 
-	public Optional<MdmLink> getLinkByGoldenResourcePidAndTargetResourcePid(Long theGoldenResourcePid, Long theTargetResourcePid) {
-		if (theTargetResourcePid == null || theGoldenResourcePid == null) {
+	public Optional<MdmLink> getLinkByGoldenResourcePidAndSourceResourcePid(Long theGoldenResourcePid, Long theSourceResourcePid) {
+		if (theSourceResourcePid == null || theGoldenResourcePid == null) {
 			return Optional.empty();
 		}
 		MdmLink link = myMdmLinkFactory.newMdmLink();
-		link.setTargetPid(theTargetResourcePid);
+		link.setSourcePid(theSourceResourcePid);
 		link.setGoldenResourcePid(theGoldenResourcePid);
 		Example<MdmLink> example = Example.of(link);
 		return myMdmLinkDao.findOne(example);
 	}
 
 	/**
-	 * Given a Target Pid, and a match result, return all links that match these criteria.
+	 * Given a source resource Pid, and a match result, return all links that match these criteria.
 	 *
-	 * @param theTargetPid   the target of the relationship.
+	 * @param theSourcePid   the source of the relationship.
 	 * @param theMatchResult the Match Result of the relationship
 	 * @return a list of {@link MdmLink} entities matching these criteria.
 	 */
-	public List<MdmLink> getMdmLinksByTargetPidAndMatchResult(Long theTargetPid, MdmMatchResultEnum theMatchResult) {
+	public List<MdmLink> getMdmLinksBySourcePidAndMatchResult(Long theSourcePid, MdmMatchResultEnum theMatchResult) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setTargetPid(theTargetPid);
+		exampleLink.setSourcePid(theSourcePid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
 	}
 
 	/**
-	 * Given a target Pid, return its Matched {@link MdmLink}. There can only ever be at most one of these, but its possible
-	 * the target has no matches, and may return an empty optional.
+	 * Given a source Pid, return its Matched {@link MdmLink}. There can only ever be at most one of these, but its possible
+	 * the source has no matches, and may return an empty optional.
 	 *
-	 * @param theTargetPid The Pid of the target you wish to find the matching link for.
-	 * @return the {@link MdmLink} that contains the Match information for the target.
+	 * @param theSourcePid The Pid of the source you wish to find the matching link for.
+	 * @return the {@link MdmLink} that contains the Match information for the source.
 	 */
-	public Optional<MdmLink> getMatchedLinkForTargetPid(Long theTargetPid) {
+	public Optional<MdmLink> getMatchedLinkForSourcePid(Long theSourcePid) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setTargetPid(theTargetPid);
+		exampleLink.setSourcePid(theSourcePid);
 		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
@@ -140,36 +140,37 @@ public class MdmLinkDaoSvc {
 
 	/**
 	 * Given an IBaseResource, return its Matched {@link MdmLink}. There can only ever be at most one of these, but its possible
-	 * the target has no matches, and may return an empty optional.
+	 * the source has no matches, and may return an empty optional.
 	 *
-	 * @param theTarget The IBaseResource representing the target you wish to find the matching link for.
-	 * @return the {@link MdmLink} that contains the Match information for the target.
+	 * @param theSourceResource The IBaseResource representing the source you wish to find the matching link for.
+	 * @return the {@link MdmLink} that contains the Match information for the source.
 	 */
-	public Optional<MdmLink> getMatchedLinkForTarget(IBaseResource theTarget) {
-		Long pid = myIdHelperService.getPidOrNull(theTarget);
+	public Optional<MdmLink> getMatchedLinkForSource(IBaseResource theSourceResource) {
+		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
 		}
 
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
-		exampleLink.setTargetPid(pid);
+		exampleLink.setSourcePid(pid);
 		exampleLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
 	}
 
 	/**
-	 * Given a golden resource a target and a match result, return the matching {@link MdmLink}, if it exists.
+	 * Given a golden resource a source and a match result, return the matching {@link MdmLink}, if it exists.
 	 *
 	 * @param theGoldenResourcePid The Pid of the Golden Resource in the relationship
-	 * @param theTargetPid         The Pid of the target in the relationship
+	 * @param theSourcePid         The Pid of the source in the relationship
 	 * @param theMatchResult       The MatchResult you are looking for.
 	 * @return an Optional {@link MdmLink} containing the matched link if it exists.
 	 */
-	public Optional<MdmLink> getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(Long theGoldenResourcePid, Long theTargetPid, MdmMatchResultEnum theMatchResult) {
+	public Optional<MdmLink> getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(Long theGoldenResourcePid,
+																											 Long theSourcePid, MdmMatchResultEnum theMatchResult) {
 		MdmLink exampleLink = myMdmLinkFactory.newMdmLink();
 		exampleLink.setGoldenResourcePid(theGoldenResourcePid);
-		exampleLink.setTargetPid(theTargetPid);
+		exampleLink.setSourcePid(theSourcePid);
 		exampleLink.setMatchResult(theMatchResult);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
@@ -187,12 +188,12 @@ public class MdmLinkDaoSvc {
 		return myMdmLinkDao.findAll(example);
 	}
 
-	public Optional<MdmLink> findMdmLinkByTarget(IBaseResource theTargetResource) {
-		@Nullable Long pid = myIdHelperService.getPidOrNull(theTargetResource);
+	public Optional<MdmLink> findMdmLinkBySource(IBaseResource theSourceResource) {
+		@Nullable Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Optional.empty();
 		}
-		MdmLink exampleLink = myMdmLinkFactory.newMdmLink().setTargetPid(pid);
+		MdmLink exampleLink = myMdmLinkFactory.newMdmLink().setSourcePid(pid);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findOne(example);
 	}
@@ -239,11 +240,10 @@ public class MdmLinkDaoSvc {
 		Set<Long> goldenResources = theLinks.stream().map(MdmLink::getGoldenResourcePid).collect(Collectors.toSet());
 		//TODO GGG this is probably invalid... we are essentially looking for GOLDEN -> GOLDEN links, which are either POSSIBLE_DUPLICATE
 		//and REDIRECT
-		//goldenResources.addAll(theLinks.stream().filter(link -> "Person".equals(link.getEmpiTargetType())).map(EmpiLink::getTargetPid).collect(Collectors.toSet()));
 		goldenResources.addAll(theLinks.stream()
 			.filter(link -> link.getMatchResult().equals(MdmMatchResultEnum.REDIRECT)
 				|| link.getMatchResult().equals(MdmMatchResultEnum.POSSIBLE_DUPLICATE))
-			.map(MdmLink::getTargetPid).collect(Collectors.toSet()));
+			.map(MdmLink::getSourcePid).collect(Collectors.toSet()));
 		ourLog.info("Deleting {} MDM link records...", theLinks.size());
 		myMdmLinkDao.deleteAll(theLinks);
 		ourLog.info("{} MDM link records deleted", theLinks.size());
@@ -254,12 +254,12 @@ public class MdmLinkDaoSvc {
 	 * Given a valid {@link String}, delete all {@link MdmLink} entities for that type, and get the Pids
 	 * for the Golden Resources which were the sources of the links.
 	 *
-	 * @param theTargetType the type of relationship you would like to delete.
+	 * @param theSourceType the type of relationship you would like to delete.
 	 * @return A list of longs representing the Pids of the Golden Resources resources used as the sources of the relationships that were deleted.
 	 */
-	public List<Long> deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(String theTargetType) {
+	public List<Long> deleteAllMdmLinksOfTypeAndReturnGoldenResourcePids(String theSourceType) {
 		MdmLink link = new MdmLink();
-		link.setMdmTargetType(theTargetType);
+		link.setMdmSourceType(theSourceType);
 		Example<MdmLink> exampleLink = Example.of(link);
 		List<MdmLink> allOfType = myMdmLinkDao.findAll(exampleLink);
 		return deleteMdmLinksAndReturnGoldenResourcePids(allOfType);
@@ -291,18 +291,18 @@ public class MdmLinkDaoSvc {
 	}
 
 	/**
-	 * Given a target {@link IBaseResource}, return all {@link MdmLink} entities in which this target is the target
+	 * Given a source {@link IBaseResource}, return all {@link MdmLink} entities in which this source is the source
 	 * of the relationship. This will show you all links for a given Patient/Practitioner.
 	 *
-	 * @param theTargetResource the target resource to find links for.
-	 * @return all links for the target.
+	 * @param theSourceResource the source resource to find links for.
+	 * @return all links for the source.
 	 */
-	public List<MdmLink> findMdmLinksByTarget(IBaseResource theTargetResource) {
-		Long pid = myIdHelperService.getPidOrNull(theTargetResource);
+	public List<MdmLink> findMdmLinksBySourceResource(IBaseResource theSourceResource) {
+		Long pid = myIdHelperService.getPidOrNull(theSourceResource);
 		if (pid == null) {
 			return Collections.emptyList();
 		}
-		MdmLink exampleLink = myMdmLinkFactory.newMdmLink().setTargetPid(pid);
+		MdmLink exampleLink = myMdmLinkFactory.newMdmLink().setSourcePid(pid);
 		Example<MdmLink> example = Example.of(exampleLink);
 		return myMdmLinkDao.findAll(example);
 	}
@@ -314,7 +314,7 @@ public class MdmLinkDaoSvc {
 	 * @param theGoldenResource the source resource to find links for.
 	 * @return all links for the source.
 	 */
-	public List<MdmLink> findMdmMatchLinksBySource(IBaseResource theGoldenResource) {
+	public List<MdmLink> findMdmMatchLinksByGoldenResource(IBaseResource theGoldenResource) {
 		Long pid = myIdHelperService.getPidOrNull(theGoldenResource);
 		if (pid == null) {
 			return Collections.emptyList();

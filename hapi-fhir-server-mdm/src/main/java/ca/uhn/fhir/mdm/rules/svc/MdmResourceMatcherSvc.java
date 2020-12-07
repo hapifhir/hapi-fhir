@@ -120,9 +120,7 @@ public class MdmResourceMatcherSvc {
 		int appliedRuleCount = 0;
 
 		//TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
-
 		String resourceType = myFhirContext.getResourceType(theLeftResource);
-
 
 		for (int i = 0; i < myFieldMatchers.size(); ++i) {
 			//any that are not for the resourceType in question.
@@ -130,15 +128,14 @@ public class MdmResourceMatcherSvc {
 			if (!isValidResourceType(resourceType, fieldComparator.getResourceType())) {
 				ourLog.debug("Matcher {} is not valid for resource type: {}. Skipping it.", fieldComparator.getName(), resourceType);
 				continue;
-			} else {
-				ourLog.debug("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
-				MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
-				if (matchEvaluation.match) {
-					vector |= (1 << i);
-				}
-				score += matchEvaluation.score;
-				appliedRuleCount += 1;
 			}
+			ourLog.debug("Matcher {} is valid for resource type: {}. Evaluating match.", fieldComparator.getName(), resourceType);
+			MdmMatchEvaluation matchEvaluation = fieldComparator.match(theLeftResource, theRightResource);
+			if (matchEvaluation.match) {
+				vector |= (1 << i);
+			}
+			score += matchEvaluation.score;
+			appliedRuleCount += 1;
 		}
 
 		MdmMatchOutcome retVal = new MdmMatchOutcome(vector, score);

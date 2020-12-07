@@ -1,22 +1,14 @@
 package ca.uhn.fhir.jpa.mdm;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
-import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.mdm.util.MdmUtil;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
-import ca.uhn.fhir.jpa.mdm.config.MdmSearchParameterLoader;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
 import ca.uhn.fhir.jpa.mdm.config.TestMdmConfigR4;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -27,11 +19,18 @@ import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleLinkedTo;
 import ca.uhn.fhir.jpa.mdm.matcher.IsPossibleMatchWith;
 import ca.uhn.fhir.jpa.mdm.matcher.IsSameGoldenResourceAs;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
+import ca.uhn.fhir.mdm.util.EIDHelper;
+import ca.uhn.fhir.mdm.util.MdmUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -111,8 +110,6 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	protected MdmMatchLinkSvc myMdmMatchLinkSvc;
 	@Autowired
 	protected EIDHelper myEIDHelper;
-	@Autowired
-	MdmSearchParameterLoader myMdmSearchParameterLoader;
 	@Autowired
 	SearchParamRegistryImpl mySearchParamRegistry;
 	@Autowired
@@ -314,7 +311,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		String resourceType = theBaseResource.getIdElement().getResourceType();
 		IFhirResourceDao relevantDao = myDaoRegistry.getResourceDao(resourceType);
 
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theBaseResource));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theBaseResource));
 		if (matchedLinkForTargetPid.isPresent()) {
 			Long goldenResourcePid = matchedLinkForTargetPid.get().getGoldenResourcePid();
 			return (IAnyResource) relevantDao.readByPid(new ResourcePersistentId(goldenResourcePid));
@@ -340,7 +337,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient createPatientAndUpdateLinks(Patient thePatient) {
 		thePatient = createPatient(thePatient);
-		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(thePatient, createContextForCreate("Patient"));
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForCreate("Patient"));
 		return thePatient;
 	}
 
@@ -359,7 +356,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Medication createMedicationAndUpdateLinks(Medication theMedication) {
 		theMedication = createMedication(theMedication);
-		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(theMedication, createContextForCreate("Medication"));
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(theMedication, createContextForCreate("Medication"));
 		return theMedication;
 	}
 
@@ -381,7 +378,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient updatePatientAndUpdateLinks(Patient thePatient) {
 		thePatient = (Patient) myPatientDao.update(thePatient).getResource();
-		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(thePatient, createContextForUpdate(thePatient.getIdElement().getResourceType()));
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePatient, createContextForUpdate(thePatient.getIdElement().getResourceType()));
 		return thePatient;
 	}
 
@@ -389,7 +386,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		thePractitioner.setActive(true);
 		DaoMethodOutcome daoMethodOutcome = myPractitionerDao.create(thePractitioner);
 		thePractitioner.setId(daoMethodOutcome.getId());
-		myMdmMatchLinkSvc.updateMdmLinksForMdmTarget(thePractitioner, createContextForCreate("Practitioner"));
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(thePractitioner, createContextForCreate("Practitioner"));
 		return thePractitioner;
 	}
 
@@ -454,14 +451,14 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrNull(sourcePatient));
-		mdmLink.setTargetPid(myIdHelperService.getPidOrNull(patient));
+		mdmLink.setSourcePid(myIdHelperService.getPidOrNull(patient));
 		return mdmLink;
 	}
 
-	protected void loadMdmSearchParameters() {
-		myMdmSearchParameterLoader.daoUpdateMdmSearchParameters();
-		mySearchParamRegistry.forceRefresh();
-	}
+//	protected void loadMdmSearchParameters() {
+//		myMdmSearchParameterLoader.daoUpdateMdmSearchParameters();
+//		mySearchParamRegistry.forceRefresh();
+//	}
 
 	protected void logAllLinks() {
 		ourLog.info("Logging all MDM Links:");
@@ -476,7 +473,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	protected void assertLinksCreatedNewResource(Boolean... theExpectedValues) {
-		assertFields(MdmLink::getHadToCreateNewResource, theExpectedValues);
+		assertFields(MdmLink::getHadToCreateNewGoldenResource, theExpectedValues);
 	}
 
 	protected void assertLinksMatchedByEid(Boolean... theExpectedValues) {

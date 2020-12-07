@@ -177,6 +177,6 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 	@Nonnull
 	protected List<MdmLink> getPractitionerLinks() {
-		return myMdmLinkDaoSvc.findMdmLinksByTarget(myPractitioner);
+		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPractitioner);
 	}
 }

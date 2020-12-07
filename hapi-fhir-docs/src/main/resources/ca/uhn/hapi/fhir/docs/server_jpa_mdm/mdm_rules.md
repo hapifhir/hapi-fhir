@@ -2,8 +2,7 @@
 
 HAPI MDM rules are defined in a single json document.
 
-Note that in all the following configuration, valid options for `resourceType` include any supported resource, such as `Organization`, `Patient`, `Practitioner`, and `*`. Use `*` if the 
-criteria is identical across both resource types and you would like to apply it to all resources.
+Note that in all the following configuration, valid options for `resourceType` include any supported resource, such as `Organization`, `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types and you would like to apply it to all resources.
 
 Here is an example of a full HAPI MDM rules json document:
 

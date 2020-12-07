@@ -100,7 +100,7 @@ public abstract class BaseMdmProvider {
 		theMdmLinkStream.forEach(mdmLink -> {
 			IBase resultPart = ParametersUtil.addParameterToParameters(myFhirContext, retval, "link");
 			ParametersUtil.addPartString(myFhirContext, resultPart, "goldenResourceId", mdmLink.getGoldenResourceId());
-			ParametersUtil.addPartString(myFhirContext, resultPart, "targetResourceId", mdmLink.getTargetId());
+			ParametersUtil.addPartString(myFhirContext, resultPart, "sourceResourceId", mdmLink.getSourceId());
 
 			if (includeResultAndSource) {
 				ParametersUtil.addPartString(myFhirContext, resultPart, "matchResult", mdmLink.getMatchResult().name());

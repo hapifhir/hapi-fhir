@@ -90,13 +90,13 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
 		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
 		saveNoMatchLink(goldenPatient1Pid, goldenPatient2Pid);
 
 		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
-		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
@@ -108,20 +108,20 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		Long goldenPatient1Pid = myIdHelperService.getPidOrNull(goldenPatient1);
 		Long goldenPatient2Pid = myIdHelperService.getPidOrNull(goldenPatient2);
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
-		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndTargetResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid, goldenPatient2Pid).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid, goldenPatient1Pid).isPresent());
 
 		saveNoMatchLink(goldenPatient2Pid, goldenPatient1Pid);
 
 		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
-		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
 	private void saveNoMatchLink(Long theGoldenResourcePid, Long theTargetPid) {
 		MdmLink noMatchLink = myMdmLinkDaoSvc.newMdmLink()
 			.setGoldenResourcePid(theGoldenResourcePid)
-			.setTargetPid(theTargetPid)
+			.setSourcePid(theTargetPid)
 			.setLinkSource(MdmLinkSourceEnum.MANUAL)
 			.setMatchResult(MdmMatchResultEnum.NO_MATCH);
 		saveLink(noMatchLink);
@@ -177,7 +177,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());
 		List<String> actual = targets
 			.stream()
-			.map(link -> link.getTargetPid().toString())
+			.map(link -> link.getSourcePid().toString())
 			.collect(Collectors.toList());
 
 		List<String> expected = Arrays.asList(patient1, patient2)

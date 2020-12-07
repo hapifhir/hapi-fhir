@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +35,6 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcMultipleEidModeTest.class);
 	@Autowired
 	private EIDHelper myEidHelper;
-
-	@BeforeEach
-	public void before() {
-		super.loadMdmSearchParameters();
-	}
 
 	@Test
 	public void testIncomingPatientWithEIDThatMatchesGoldenResourceWithHapiEidAddsExternalEidsToGoldenResource() {
@@ -156,7 +150,7 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 		//The two GoldenResources related to the patients should both show up in the only existing POSSIBLE_DUPLICATE MdmLink.
 		MdmLink mdmLink = possibleDuplicates.get(0);
 		assertThat(mdmLink.getGoldenResourcePid(), is(in(duplicatePids)));
-		assertThat(mdmLink.getTargetPid(), is(in(duplicatePids)));
+		assertThat(mdmLink.getSourcePid(), is(in(duplicatePids)));
 	}
 
 	@Test

@@ -27,11 +27,11 @@ public interface IMdmExpungeSvc {
 	/**
 	 * Given a resource type, delete the underlying MDM links, and their related golden resource objects.
 	 *
-	 * @param theResourceType The type of resources
+	 * @param theSourceResourceType The type of resources
 	 * @param theRequestDetails
 	 * @return the count of deleted MDM links
 	 */
-	long expungeAllMdmLinksOfTargetType(String theResourceType, ServletRequestDetails theRequestDetails);
+	long expungeAllMdmLinksOfSourceType(String theSourceResourceType, ServletRequestDetails theRequestDetails);
 
 	/**
 	 * Delete all MDM links, and their related golden resource objects.

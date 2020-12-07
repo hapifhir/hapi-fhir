@@ -37,6 +37,7 @@ import org.springframework.data.domain.Example;
 import java.util.stream.Stream;
 
 public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
+
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmLinkQuerySvcImpl.class);
 
 	@Autowired
@@ -45,8 +46,8 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 	MdmLinkDaoSvc myMdmLinkDaoSvc;
 
 	@Override
-	public Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext) {
-		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theTargetId, theMatchResult, theLinkSource);
+	public Stream<MdmLinkJson> queryLinks(IIdType theGoldenResourceId, IIdType theSourceResourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource, MdmTransactionContext theMdmContext) {
+		Example<MdmLink> exampleLink = exampleLinkFromParameters(theGoldenResourceId, theSourceResourceId, theMatchResult, theLinkSource);
 		return myMdmLinkDaoSvc.findMdmLinkByExample(exampleLink).stream()
 			.filter(mdmLink -> mdmLink.getMatchResult() != MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.map(this::toJson);
@@ -60,15 +61,15 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 
 	private MdmLinkJson toJson(MdmLink theLink) {
 		MdmLinkJson retval = new MdmLinkJson();
-		String targetId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getTargetPid()).toVersionless().getValue();
-		retval.setTargetId(targetId);
+		String sourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getSourcePid()).toVersionless().getValue();
+		retval.setSourceId(sourceId);
 		String goldenResourceId = myIdHelperService.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePid()).toVersionless().getValue();
 		retval.setGoldenResourceId(goldenResourceId);
 		retval.setCreated(theLink.getCreated());
 		retval.setEidMatch(theLink.getEidMatch());
 		retval.setLinkSource(theLink.getLinkSource());
 		retval.setMatchResult(theLink.getMatchResult());
-		retval.setLinkCreatedNewResource(theLink.getHadToCreateNewResource());
+		retval.setLinkCreatedNewResource(theLink.getHadToCreateNewGoldenResource());
 		retval.setScore(theLink.getScore());
 		retval.setUpdated(theLink.getUpdated());
 		retval.setVector(theLink.getVector());
@@ -76,13 +77,13 @@ public class MdmLinkQuerySvcImpl implements IMdmLinkQuerySvc {
 		return retval;
 	}
 
-	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theTargetId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
+	private Example<MdmLink> exampleLinkFromParameters(IIdType theGoldenResourceId, IIdType theSourceId, MdmMatchResultEnum theMatchResult, MdmLinkSourceEnum theLinkSource) {
 		MdmLink mdmLink = myMdmLinkDaoSvc.newMdmLink();
 		if (theGoldenResourceId != null) {
 			mdmLink.setGoldenResourcePid(myIdHelperService.getPidOrThrowException(theGoldenResourceId));
 		}
-		if (theTargetId != null) {
-			mdmLink.setTargetPid(myIdHelperService.getPidOrThrowException(theTargetId));
+		if (theSourceId != null) {
+			mdmLink.setSourcePid(myIdHelperService.getPidOrThrowException(theSourceId));
 		}
 		if (theMatchResult != null) {
 			mdmLink.setMatchResult(theMatchResult);

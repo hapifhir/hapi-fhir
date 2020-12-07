@@ -41,8 +41,8 @@ import java.util.List;
 
 /**
  * MdmMatchLinkSvc is the entrypoint for HAPI's MDM system. An incoming resource can call
- * updateMdmLinksForMdmTarget and the underlying MDM system will take care of matching it to a GoldenResource, or creating a
- * new GoldenResource if a suitable one was not found.
+ * updateMdmLinksForMdmSource and the underlying MDM system will take care of matching it to a GoldenResource,
+ * or creating a new GoldenResource if a suitable one was not found.
  */
 @Service
 public class MdmMatchLinkSvc {
@@ -58,15 +58,15 @@ public class MdmMatchLinkSvc {
 	private MdmEidUpdateService myEidUpdateService;
 
 	/**
-	 * Given an MDM Target (consisting of either a Patient or a Practitioner), find a suitable Golden Resource candidate for them,
+	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
 	 * Does nothing if resource is determined to be not managed by MDM.
 	 *
-	 * @param theResource the incoming MDM target, which can be any supported MDM type.
+	 * @param theResource the incoming MDM source, which can be any supported MDM type.
 	 * @param theMdmTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to MDM processing of this resource.
 	 */
-	public MdmTransactionContext updateMdmLinksForMdmTarget(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+	public MdmTransactionContext updateMdmLinksForMdmSource(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		if (MdmUtil.isMdmAllowed(theResource)) {
 			return doMdmUpdate(theResource, theMdmTransactionContext);
 		} else {
@@ -122,30 +122,29 @@ public class MdmMatchLinkSvc {
 
 	private void handleMdmWithNoCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, String.format("There were no matched candidates for MDM, creating a new %s.", theResource.getIdElement().getResourceType()));
-		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(theResource);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource);
 		// TODO GGG :)
 		// 1. Get the right helper
-		// 2. Create source resoruce for the MDM target
+		// 2. Create source resource for the MDM source
 		// 3. UPDATE MDM LINK TABLE
-
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 	}
 
-	private void handleMdmCreate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
+	private void handleMdmCreate(IAnyResource theSourceResource, MatchedGoldenResourceCandidate theGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
 		log(theMdmTransactionContext, "MDM has narrowed down to one candidate for matching.");
 		IAnyResource golenResource = myMdmGoldenResourceFindingSvc.getGoldenResourceFromMatchedGoldenResourceCandidate(theGoldenResourceCandidate, theMdmTransactionContext.getResourceType());
 
-		if (myGoldenResourceHelper.isPotentialDuplicate(golenResource, theTargetResource)) {
+		if (myGoldenResourceHelper.isPotentialDuplicate(golenResource, theSourceResource)) {
 			log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(theTargetResource);
-			myMdmLinkSvc.updateLink(newGoldenResource, theTargetResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theSourceResource);
+			myMdmLinkSvc.updateLink(newGoldenResource, theSourceResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			myMdmLinkSvc.updateLink(newGoldenResource, golenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		} else {
 			if (theGoldenResourceCandidate.isMatch()) {
-				myGoldenResourceHelper.handleExternalEidAddition(golenResource, theTargetResource, theMdmTransactionContext);
+				myGoldenResourceHelper.handleExternalEidAddition(golenResource, theSourceResource, theMdmTransactionContext);
 				//TODO MDM GGG/NG: eventually we need to add survivorship rules of attributes here. Currently no data is copied over except EIDs.
 			}
-			myMdmLinkSvc.updateLink(golenResource, theTargetResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+			myMdmLinkSvc.updateLink(golenResource, theSourceResource, theGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		}
 	}
 

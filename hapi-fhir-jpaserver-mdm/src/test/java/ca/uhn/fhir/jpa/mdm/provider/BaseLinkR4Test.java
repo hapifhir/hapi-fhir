@@ -61,11 +61,11 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 
 	@Nonnull
 	protected MdmLink getOnlyPatientLink() {
-		return myMdmLinkDaoSvc.findMdmLinkByTarget(myPatient).get();
+		return myMdmLinkDaoSvc.findMdmLinkBySource(myPatient).get();
 	}
 
 	@Nonnull
 	protected List<MdmLink> getPatientLinks() {
-		return myMdmLinkDaoSvc.findMdmLinksByTarget(myPatient);
+		return myMdmLinkDaoSvc.findMdmLinksBySourceResource(myPatient);
 	}
 }

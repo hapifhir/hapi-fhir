@@ -86,31 +86,12 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		return theToGoldenResource;
 	}
 
-	/**
-	 * Removes non-manual links from source to target
-	 *
-	 * @param theFrom                   Target of the link
-	 * @param theTo                     Source resource of the link
-	 * @param theMdmTransactionContext Context to keep track of the deletions
-	 */
-	private void removeTargetLinks(IAnyResource theFrom, IAnyResource theTo, MdmTransactionContext theMdmTransactionContext) {
-		List<MdmLink> allLinksWithTheFromAsTarget = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theFrom);
-		allLinksWithTheFromAsTarget
-			.stream()
-			//TODO GGG NG MDM: Why are we keeping manual links? Haven't we already copied those over in the previous merge step?
-			.filter(MdmLink::isAuto) // only keep manual links
-			.forEach(l -> {
-				theMdmTransactionContext.addTransactionLogMessage(String.format("Deleting link %s", l));
-				myMdmLinkDaoSvc.deleteLink(l);
-			});
-	}
-
 	private void addMergeLink(Long theGoldenResourcePidAkaActive, Long theTargetResourcePidAkaDeactivated, String theResourceType) {
 		MdmLink mdmLink = myMdmLinkDaoSvc
-			.getOrCreateMdmLinkByGoldenResourcePidAndTargetResourcePid(theGoldenResourcePidAkaActive, theTargetResourcePidAkaDeactivated);
+			.getOrCreateMdmLinkByGoldenResourcePidAndSourceResourcePid(theGoldenResourcePidAkaActive, theTargetResourcePidAkaDeactivated);
 
 		mdmLink
-			.setMdmTargetType(theResourceType)
+			.setMdmSourceType(theResourceType)
 			.setMatchResult(MdmMatchResultEnum.REDIRECT)
 			.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(mdmLink);
@@ -137,7 +118,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		List<MdmLink> toDelete = new ArrayList<>();
 
 		for (MdmLink fromLink : fromLinks) {
-			Optional<MdmLink> optionalToLink = findFirstLinkWithMatchingTarget(toLinks, fromLink);
+			Optional<MdmLink> optionalToLink = findFirstLinkWithMatchingSource(toLinks, fromLink);
 			if (optionalToLink.isPresent()) {
 
 				// The original links already contain this target, so move it over to the toResource
@@ -151,7 +132,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 							break;
 						case MANUAL:
 							if (fromLink.getMatchResult() != toLink.getMatchResult()) {
-								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
+								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same source resource");
 							}
 					}
 				} else {
@@ -169,9 +150,9 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		toDelete.forEach(link -> myMdmLinkDaoSvc.deleteLink(link));
 	}
 
-	private Optional<MdmLink> findFirstLinkWithMatchingTarget(List<MdmLink> theMdmLinks, MdmLink theLinkWithTargetToMatch) {
+	private Optional<MdmLink> findFirstLinkWithMatchingSource(List<MdmLink> theMdmLinks, MdmLink theLinkWithSourceToMatch) {
 		return theMdmLinks.stream()
-			.filter(mdmLink -> mdmLink.getTargetPid().equals(theLinkWithTargetToMatch.getTargetPid()))
+			.filter(mdmLink -> mdmLink.getSourcePid().equals(theLinkWithSourceToMatch.getSourcePid()))
 			.findFirst();
 	}
 

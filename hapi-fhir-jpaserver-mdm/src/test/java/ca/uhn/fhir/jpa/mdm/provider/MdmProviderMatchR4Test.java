@@ -30,7 +30,6 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		super.loadMdmSearchParameters();
 	}
 
 	@Test

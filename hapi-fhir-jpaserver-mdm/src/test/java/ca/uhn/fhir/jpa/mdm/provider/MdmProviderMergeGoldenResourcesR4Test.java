@@ -31,7 +31,6 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 	@BeforeEach
 	public void before() {
 		super.before();
-		super.loadMdmSearchParameters();
 
 		myFromGoldenPatient = createGoldenPatient();
 		myFromGoldenPatientId = new StringType(myFromGoldenPatient.getIdElement().getValue());
@@ -58,11 +57,11 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		// Optional<Identifier> redirect = fromSourcePatient.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equals("REDIRECT")).findFirst();
 		// assertThat(redirect.get().getValue(), is(equalTo(myToSourcePatient.getIdElement().toUnqualified().getValue())));
 
-		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksByTarget(myFromGoldenPatient);
+		List<MdmLink> links = myMdmLinkDaoSvc.findMdmLinksBySourceResource(myFromGoldenPatient);
 		assertThat(links, hasSize(1));
 
 		MdmLink link = links.get(0);
-		assertEquals(link.getTargetPid(), myFromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getSourcePid(), myFromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
 		assertEquals(link.getGoldenResourcePid(), myToGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
 		assertEquals(link.getMatchResult(), MdmMatchResultEnum.REDIRECT);
 		assertEquals(link.getLinkSource(), MdmLinkSourceEnum.MANUAL);

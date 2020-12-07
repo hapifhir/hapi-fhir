@@ -61,7 +61,7 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByEidSvc;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByLinkSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByScoreSvc;
+import ca.uhn.fhir.jpa.mdm.svc.candidate.FindCandidateByExampleSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRetriever;
 import ca.uhn.fhir.validation.IResourceLoader;
 import org.slf4j.Logger;
@@ -123,11 +123,6 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	MdmSearchParameterLoader mdmSearchParameterLoader() {
-		return new MdmSearchParameterLoader();
-	}
-
-	@Bean
 	MdmGoldenResourceFindingSvc mdmGoldenResourceFindingSvc() {
 		return new MdmGoldenResourceFindingSvc();
 	}
@@ -143,8 +138,8 @@ public class MdmConsumerConfig {
 	}
 
 	@Bean
-	FindCandidateByScoreSvc findCandidateByScoreSvc() {
-		return new FindCandidateByScoreSvc();
+	FindCandidateByExampleSvc findCandidateByScoreSvc() {
+		return new FindCandidateByExampleSvc();
 	}
 
 	@Bean

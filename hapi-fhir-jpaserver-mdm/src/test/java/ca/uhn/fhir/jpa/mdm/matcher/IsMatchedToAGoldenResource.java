@@ -22,7 +22,7 @@ public class IsMatchedToAGoldenResource extends TypeSafeMatcher<IAnyResource> {
 
 	@Override
 	protected boolean matchesSafely(IAnyResource theIncomingResource) {
-		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForTargetPid(myIdHelperService.getPidOrNull(theIncomingResource));
+		Optional<MdmLink> matchedLinkForTargetPid = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(myIdHelperService.getPidOrNull(theIncomingResource));
 		return matchedLinkForTargetPid.isPresent();
 	}
 

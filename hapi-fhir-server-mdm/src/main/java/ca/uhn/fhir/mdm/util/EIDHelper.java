@@ -97,7 +97,7 @@ public final class EIDHelper {
 	}
 
 	/**
-	 * An incoming resource is a potential duplicate if it matches a target resource that has a golden resource with an
+	 * An incoming resource is a potential duplicate if it matches a source resource that has a golden resource with an
 	 * official EID, but the incoming resource also has an EID that does not match.
 	 */
 	public boolean hasEidOverlap(IAnyResource theExistingGoldenResource, IAnyResource theComparingGoldenResource) {

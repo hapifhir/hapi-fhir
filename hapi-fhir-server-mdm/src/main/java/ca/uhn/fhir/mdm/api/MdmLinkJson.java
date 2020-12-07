@@ -30,8 +30,8 @@ public class MdmLinkJson implements IModelJson {
 	@JsonProperty("goldenResourceId")
 	private String myGoldenResourceId;
 
-	@JsonProperty("targetId")
-	private String myTargetId;
+	@JsonProperty("sourceId")
+	private String mySourceId;
 
 	@JsonProperty("matchResult")
 	private MdmMatchResultEnum myMatchResult;
@@ -71,12 +71,12 @@ public class MdmLinkJson implements IModelJson {
 		return this;
 	}
 
-	public String getTargetId() {
-		return myTargetId;
+	public String getSourceId() {
+		return mySourceId;
 	}
 
-	public MdmLinkJson setTargetId(String theTargetId) {
-		myTargetId = theTargetId;
+	public MdmLinkJson setSourceId(String theSourceId) {
+		mySourceId = theSourceId;
 		return this;
 	}
 

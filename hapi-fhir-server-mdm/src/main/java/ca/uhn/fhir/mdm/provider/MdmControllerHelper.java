@@ -67,9 +67,9 @@ public class MdmControllerHelper {
 	}
 
 
-	public IAnyResource getLatestTargetFromIdOrThrowException(String theParamName, String theId) {
-		IIdType targetId = MdmControllerUtil.getTargetIdDtOrThrowException(theParamName, theId);
-		return loadResource(targetId.toUnqualifiedVersionless());
+	public IAnyResource getLatestSourceFromIdOrThrowException(String theParamName, String theSourceId) {
+		IIdType sourceId = MdmControllerUtil.getSourceIdDtOrThrowException(theParamName, theSourceId);
+		return loadResource(sourceId.toUnqualifiedVersionless());
 	}
 
 	protected IAnyResource loadResource(IIdType theResourceId) {

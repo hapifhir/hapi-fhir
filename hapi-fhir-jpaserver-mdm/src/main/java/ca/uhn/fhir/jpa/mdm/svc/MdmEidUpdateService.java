@@ -85,7 +85,7 @@ public class MdmEidUpdateService {
 		// the user is simply updating their EID. We propagate this change to the GoldenResource.
 		//overwrite. No EIDS in common, but still same GoldenResource.
 		if (myMdmSettings.isPreventMultipleEids()) {
-			if (myMdmLinkDaoSvc.findMdmMatchLinksBySource(theUpdateContext.getMatchedGoldenResource()).size() <= 1) { // If there is only 0/1 link on the GoldenResource, we can safely overwrite the EID.
+			if (myMdmLinkDaoSvc.findMdmMatchLinksByGoldenResource(theUpdateContext.getMatchedGoldenResource()).size() <= 1) { // If there is only 0/1 link on the GoldenResource, we can safely overwrite the EID.
 				handleExternalEidOverwrite(theUpdateContext.getMatchedGoldenResource(), theResource, theMdmTransactionContext);
 			} else { // If the GoldenResource has multiple targets tied to it, we can't just overwrite the EID, so we split the GoldenResource.
 				createNewGoldenResourceAndFlagAsDuplicate(theResource, theMdmTransactionContext, theUpdateContext.getExistingGoldenResource());
@@ -109,7 +109,7 @@ public class MdmEidUpdateService {
 
 	private void createNewGoldenResourceAndFlagAsDuplicate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext, IAnyResource theOldGoldenResource) {
 		log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmTarget(theResource);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource);
 
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		myMdmLinkSvc.updateLink(newGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
@@ -150,7 +150,7 @@ public class MdmEidUpdateService {
 			myHasEidsInCommon = myEIDHelper.hasEidOverlap(myMatchedGoldenResource, theResource);
 			myIncomingResourceHasAnEid = !myEIDHelper.getExternalEid(theResource).isEmpty();
 
-			Optional<MdmLink> theExistingMatchLink = myMdmLinkDaoSvc.getMatchedLinkForTarget(theResource);
+			Optional<MdmLink> theExistingMatchLink = myMdmLinkDaoSvc.getMatchedLinkForSource(theResource);
 			myExistingGoldenResource = null;
 
 			if (theExistingMatchLink.isPresent()) {

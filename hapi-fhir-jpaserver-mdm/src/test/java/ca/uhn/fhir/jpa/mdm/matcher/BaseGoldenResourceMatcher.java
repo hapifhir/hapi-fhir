@@ -46,7 +46,7 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 			return null;
 		} else {
 			retval = matchLink.getGoldenResourcePid();
-			myTargetType = matchLink.getMdmTargetType();
+			myTargetType = matchLink.getMdmSourceType();
 		}
 		return retval;
 	}
@@ -68,7 +68,7 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 
 	protected List<MdmLink> getMdmLinksForTarget(IAnyResource theTargetResource, MdmMatchResultEnum theMatchResult) {
 		Long pidOrNull = myIdHelperService.getPidOrNull(theTargetResource);
-		List<MdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksByTargetPidAndMatchResult(pidOrNull, theMatchResult);
+		List<MdmLink> matchLinkForTarget = myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(pidOrNull, theMatchResult);
 		if (!matchLinkForTarget.isEmpty()) {
 			return matchLinkForTarget;
 		} else {

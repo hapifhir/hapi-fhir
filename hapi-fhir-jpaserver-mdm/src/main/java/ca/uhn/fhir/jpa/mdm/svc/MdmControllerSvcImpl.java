@@ -65,13 +65,13 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public Stream<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theTargetId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext) {
+	public Stream<MdmLinkJson> queryLinks(@Nullable String theGoldenResourceId, @Nullable String theSourceResourceId, @Nullable String theMatchResult, @Nullable String theLinkSource, MdmTransactionContext theMdmTransactionContext) {
 		IIdType goldenResourceId = MdmControllerUtil.extractGoldenResourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IIdType targetId = MdmControllerUtil.extractTargetIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theTargetId);
+		IIdType sourceId = MdmControllerUtil.extractSourceIdDtOrNull(ProviderConstants.MDM_QUERY_LINKS_RESOURCE_ID, theSourceResourceId);
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
 		MdmLinkSourceEnum linkSource = MdmControllerUtil.extractLinkSourceOrNull(theLinkSource);
 
-		return myMdmLinkQuerySvc.queryLinks(goldenResourceId, targetId, matchResult, linkSource, theMdmTransactionContext);
+		return myMdmLinkQuerySvc.queryLinks(goldenResourceId, sourceId, matchResult, linkSource, theMdmTransactionContext);
 	}
 
 	@Override
@@ -80,14 +80,14 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource updateLink(String theGoldenResourceId, String theTargetId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
 		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
-		IAnyResource target = myMdmControllerHelper.getLatestTargetFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theTargetId);
+		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theSourceResourceId);
 		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
-		myMdmControllerHelper.validateSameVersion(target, theTargetId);
+		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
-		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, target, matchResult, theMdmTransactionContext);
+		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, source, matchResult, theMdmTransactionContext);
 	}
 
 	@Override

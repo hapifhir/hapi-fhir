@@ -76,7 +76,7 @@ public class GoldenResourceHelper {
 	 * @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
 	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
 	 */
-	public <T extends IAnyResource> T createGoldenResourceFromMdmTarget(T theIncomingResource) {
+	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
@@ -101,7 +101,7 @@ public class GoldenResourceHelper {
 	 */
 	//TODO GGG ask james if there is any way we can convert this canonical EID into a generic STU-agnostic IBase.
 	private <T extends IAnyResource> void addHapiEidIfNoExternalEidIsPresent(
-		IBaseResource theNewGoldenResource, BaseRuntimeChildDefinition theGoldenResourceIdentifier, IAnyResource theTargetResource) {
+		IBaseResource theNewGoldenResource, BaseRuntimeChildDefinition theGoldenResourceIdentifier, IAnyResource theSourceResource) {
 
 		List<CanonicalEID> eidsToApply = myEIDHelper.getExternalEid(theNewGoldenResource);
 		if (!eidsToApply.isEmpty()) {
@@ -111,8 +111,8 @@ public class GoldenResourceHelper {
 		CanonicalEID hapiEid = myEIDHelper.createHapiEid();
 		theGoldenResourceIdentifier.getMutator().addValue(theNewGoldenResource, toId(hapiEid));
 
-		// set identifier on the target resource
-		cloneEidIntoResource(theTargetResource, hapiEid);
+		// set identifier on the source resource
+		cloneEidIntoResource(theSourceResource, hapiEid);
 	}
 
 	private void cloneEidIntoResource(IBaseResource theResourceToCloneInto, CanonicalEID theEid) {
@@ -204,35 +204,35 @@ public class GoldenResourceHelper {
 	}
 
 	/**
-	 * Updates EID on Golden Resource, based on the incoming target resource. If the incoming resource has an external EID, it is applied
+	 * Updates EID on Golden Resource, based on the incoming source resource. If the incoming resource has an external EID, it is applied
 	 * to the Golden Resource, unless that golden resource already has an external EID which does not match, in which case throw {@link IllegalArgumentException}
 	 * <p>
 	 * If running in multiple EID mode, then incoming EIDs are simply added to the Golden Resource without checking for matches.
 	 *
 	 * @param theGoldenResource The golden resource to update the external EID on.
-	 * @param theTargetResource The target we will retrieve the external EID from.
+	 * @param theSourceResource The source we will retrieve the external EID from.
 	 * @return the modified {@link IBaseResource} representing the Golden Resource.
 	 */
-	public IAnyResource updateGoldenResourceExternalEidFromTargetResource(IAnyResource theGoldenResource, IAnyResource
-		theTargetResource, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource updateGoldenResourceExternalEidFromSourceResource(IAnyResource theGoldenResource, IAnyResource
+		theSourceResource, MdmTransactionContext theMdmTransactionContext) {
 		//This handles overwriting an automatically assigned EID if a patient that links is coming in with an official EID.
-		List<CanonicalEID> incomingTargetEid = myEIDHelper.getExternalEid(theTargetResource);
+		List<CanonicalEID> incomingSourceEid = myEIDHelper.getExternalEid(theSourceResource);
 		List<CanonicalEID> goldenResourceOfficialEid = myEIDHelper.getExternalEid(theGoldenResource);
 
-		if (incomingTargetEid.isEmpty()) {
+		if (incomingSourceEid.isEmpty()) {
 			return theGoldenResource;
 		}
 
 		if (goldenResourceOfficialEid.isEmpty() || !myMdmSettings.isPreventMultipleEids()) {
-			log(theMdmTransactionContext, "Incoming resource:" + theTargetResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
-				+ " is applying this EIDs to its related Target Resource, as this Target Resource does not yet have an external EID");
-			addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingTargetEid);
-		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingTargetEid)) {
-			log(theMdmTransactionContext, "incoming resource:" + theTargetResource.getIdElement().toVersionless() + " with EIDs " + incomingTargetEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite Golden Resource, as this EID is already present");
+			log(theMdmTransactionContext, "Incoming resource:" + theSourceResource.getIdElement().toUnqualifiedVersionless() + " + with EID " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(","))
+				+ " is applying this EIDs to its related Source Resource, as this Source Resource does not yet have an external EID");
+			addCanonicalEidsToGoldenResourceIfAbsent(theGoldenResource, incomingSourceEid);
+		} else if (!goldenResourceOfficialEid.isEmpty() && myEIDHelper.eidMatchExists(goldenResourceOfficialEid, incomingSourceEid)) {
+			log(theMdmTransactionContext, "incoming resource:" + theSourceResource.getIdElement().toVersionless() + " with EIDs " + incomingSourceEid.stream().map(CanonicalEID::toString).collect(Collectors.joining(",")) + " does not need to overwrite Golden Resource, as this EID is already present");
 		} else {
 			throw new IllegalArgumentException(
-				String.format("Target EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
-					incomingTargetEid.toString(), goldenResourceOfficialEid.toString()));
+				String.format("Source EIDs %s would create a duplicate golden resource, as EIDs %s already exist!",
+					incomingSourceEid.toString(), goldenResourceOfficialEid.toString()));
 		}
 		return theGoldenResource;
 	}
@@ -285,10 +285,10 @@ public class GoldenResourceHelper {
 	/**
 	 * Given a list of incoming External EIDs, and a Golden Resource, apply all the EIDs to this resource, which did not already exist on it.
 	 */
-	private void addCanonicalEidsToGoldenResourceIfAbsent(IBaseResource theGoldenResource, List<CanonicalEID> theIncomingTargetExternalEids) {
+	private void addCanonicalEidsToGoldenResourceIfAbsent(IBaseResource theGoldenResource, List<CanonicalEID> theIncomingSourceExternalEids) {
 		List<CanonicalEID> goldenResourceExternalEids = myEIDHelper.getExternalEid(theGoldenResource);
 
-		for (CanonicalEID incomingExternalEid : theIncomingTargetExternalEids) {
+		for (CanonicalEID incomingExternalEid : theIncomingSourceExternalEids) {
 			if (goldenResourceExternalEids.contains(incomingExternalEid)) {
 				continue;
 			} else {
@@ -345,7 +345,7 @@ public class GoldenResourceHelper {
 	}
 
 	/**
-	 * An incoming resource is a potential duplicate if it matches a target that has a golden resource with an official
+	 * An incoming resource is a potential duplicate if it matches a source that has a golden resource with an official
 	 * EID, but the incoming resource also has an EID that does not match.
 	 */
 	public boolean isPotentialDuplicate(IAnyResource theExistingGoldenResource, IAnyResource theComparingGoldenResource) {
@@ -359,11 +359,11 @@ public class GoldenResourceHelper {
 		ourLog.debug(theMessage);
 	}
 
-	public void handleExternalEidAddition(IAnyResource theGoldenResource, IAnyResource theTargetResource, MdmTransactionContext
+	public void handleExternalEidAddition(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmTransactionContext
 		theMdmTransactionContext) {
-		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theTargetResource);
+		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theSourceResource);
 		if (!eidFromResource.isEmpty()) {
-			updateGoldenResourceExternalEidFromTargetResource(theGoldenResource, theTargetResource, theMdmTransactionContext);
+			updateGoldenResourceExternalEidFromSourceResource(theGoldenResource, theSourceResource, theMdmTransactionContext);
 		}
 	}
 

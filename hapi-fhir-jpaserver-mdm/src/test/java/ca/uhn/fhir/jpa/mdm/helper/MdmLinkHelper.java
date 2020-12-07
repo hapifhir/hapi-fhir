@@ -24,7 +24,7 @@ public class MdmLinkHelper {
 		ourLog.info("All MDM Links:");
 		for (MdmLink link : links) {
 			IdDt goldenResourceId = link.getGoldenResource().getIdDt().toVersionless();
-			IdDt targetId = link.getTarget().getIdDt().toVersionless();
+			IdDt targetId = link.getSource().getIdDt().toVersionless();
 			ourLog.info("{}: {}, {}, {}, {}", link.getId(), goldenResourceId, targetId, link.getMatchResult(), link.getLinkSource());
 		}
 	}

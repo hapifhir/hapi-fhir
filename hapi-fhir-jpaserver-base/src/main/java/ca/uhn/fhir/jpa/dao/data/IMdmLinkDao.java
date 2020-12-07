@@ -31,10 +31,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IMdmLinkDao extends JpaRepository<MdmLink, Long> {
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE myPersonPid = :pid OR myTargetPid = :pid")
+	@Query("DELETE FROM MdmLink f WHERE myGoldenResourcePid = :pid OR mySourcePid = :pid")
 	int deleteWithAnyReferenceToPid(@Param("pid") Long thePid);
 
 	@Modifying
-	@Query("DELETE FROM MdmLink f WHERE (myPersonPid = :pid OR myTargetPid = :pid) AND myMatchResult <> :matchResult")
+	@Query("DELETE FROM MdmLink f WHERE (myGoldenResourcePid = :pid OR mySourcePid = :pid) AND myMatchResult <> :matchResult")
 	int deleteWithAnyReferenceToPidAndMatchResultNot(@Param("pid") Long thePid, @Param("matchResult") MdmMatchResultEnum theMatchResult);
 }

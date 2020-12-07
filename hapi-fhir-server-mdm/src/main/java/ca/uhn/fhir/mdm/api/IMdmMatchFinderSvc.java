@@ -26,6 +26,7 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface IMdmMatchFinderSvc {
+	
 	/**
 	 * Retrieve a list of possible target candidates for matching, based on the given {@link IAnyResource}
 	 * Internally, performs all MDM matching rules on the type of the resource.

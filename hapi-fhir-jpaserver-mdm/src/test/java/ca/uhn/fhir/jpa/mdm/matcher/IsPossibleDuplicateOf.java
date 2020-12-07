@@ -36,9 +36,9 @@ public class IsPossibleDuplicateOf extends BaseGoldenResourceMatcher {
 		//Returns true if there is a POSSIBLE_DUPLICATE between the incoming resource, and all of the resources passed in via the constructor.
 		return goldenResourcePidsToMatch.stream()
 			.map(baseResourcePid -> {
-				Optional<MdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+				Optional<MdmLink> duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(baseResourcePid, incomingGoldenResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 				if (!duplicateLink.isPresent()) {
-					duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidTargetPidAndMatchResult(incomingGoldenResourcePid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
+					duplicateLink = myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(incomingGoldenResourcePid, baseResourcePid, MdmMatchResultEnum.POSSIBLE_DUPLICATE);
 				}
 				return duplicateLink;
 			}).allMatch(Optional::isPresent);

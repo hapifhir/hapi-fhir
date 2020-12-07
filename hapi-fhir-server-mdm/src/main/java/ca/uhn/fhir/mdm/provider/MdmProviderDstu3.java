@@ -163,13 +163,13 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.MDM_CLEAR, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= DecimalType.class)
 	})
-	public Parameters clearMdmLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_TARGET_TYPE, min = 0, max = 1) StringType theTargetType,
+	public Parameters clearMdmLinks(@OperationParam(name=ProviderConstants.MDM_CLEAR_SOURCE_TYPE, min = 0, max = 1) StringType theSourceResourceType,
 											  ServletRequestDetails theRequestDetails) {
 		long resetCount;
-		if (theTargetType == null || StringUtils.isBlank(theTargetType.getValue())) {
+		if (theSourceResourceType == null || StringUtils.isBlank(theSourceResourceType.getValue())) {
 			resetCount = myMdmExpungeSvc.expungeAllMdmLinks(theRequestDetails);
 		} else {
-			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfTargetType(theTargetType.getValueNotNull(), theRequestDetails);
+			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfSourceType(theSourceResourceType.getValueNotNull(), theRequestDetails);
 		}
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName(ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT)
@@ -219,7 +219,7 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.OPERATION_MDM_SUBMIT, idempotent = false, returnParameters = {
 		@OperationParam(name = ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, type= IntegerType.class)
 	})
-	public Parameters mdmBatchOnAllTargets(
+	public Parameters mdmBatchOnAllSourceResources(
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_RESOURCE_TYPE, min = 0 , max = 1) StringType theResourceType,
 		@OperationParam(name= ProviderConstants.MDM_BATCH_RUN_CRITERIA,min = 0 , max = 1) StringType theCriteria,
 		ServletRequestDetails theRequestDetails) {
@@ -228,9 +228,9 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 
 		long submittedCount;
 		if (resourceType != null) {
-			submittedCount = myMdmSubmitSvc.submitTargetTypeToMdm(resourceType, criteria);
+			submittedCount = myMdmSubmitSvc.submitSourceResourceTypeToMdm(resourceType, criteria);
 		} else {
-			submittedCount = myMdmSubmitSvc.submitAllTargetTypesToMdm(criteria);
+			submittedCount = myMdmSubmitSvc.submitAllSourceTypesToMdm(criteria);
 		}
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
@@ -245,7 +245,7 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	public Parameters mdmBatchPatientInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
+		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 
@@ -266,7 +266,7 @@ public class MdmProviderDstu3 extends BaseMdmProvider {
 	public Parameters mdmBatchPractitionerInstance(
 		@IdParam IIdType theIdParam,
 		RequestDetails theRequest) {
-		long submittedCount = myMdmSubmitSvc.submitTargetToMdm(theIdParam);
+		long submittedCount = myMdmSubmitSvc.submitSourceResourceToMdm(theIdParam);
 		return buildMdmOutParametersWithCount(submittedCount);
 	}
 

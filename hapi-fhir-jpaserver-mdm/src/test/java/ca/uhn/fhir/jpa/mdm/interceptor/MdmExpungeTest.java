@@ -45,7 +45,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		mdmLink.setMatchResult(MdmMatchResultEnum.MATCH);
 		mdmLink.setGoldenResourcePid(mySourceEntity.getId());
-		mdmLink.setTargetPid(myTargetEntity.getId());
+		mdmLink.setSourcePid(myTargetEntity.getId());
 		saveLink(mdmLink);
 	}
 
@@ -61,7 +61,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 			fail();
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), containsString("ViolationException"));
-			assertThat(e.getMessage(), containsString("FK_EMPI_LINK_TARGET"));
+			assertThat(e.getMessage(), containsString("FK_MDM_LINK_SOURCE"));
 		}
 		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);

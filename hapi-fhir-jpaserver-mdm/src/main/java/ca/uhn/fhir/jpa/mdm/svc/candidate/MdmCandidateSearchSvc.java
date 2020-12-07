@@ -66,11 +66,11 @@ public class MdmCandidateSearchSvc {
 	}
 
 	/**
-	 * Given a target resource, search for all resources that are considered an MDM match based on defined MDM rules.
+	 * Given a source resource, search for all resources that are considered an MDM match based on defined MDM rules.
 	 *
 	 *
 	 * @param theResourceType
-	 * @param theResource the target {@link IBaseResource} we are attempting to match.
+	 * @param theResource the {@link IBaseResource} we are attempting to match.
 	 *
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
@@ -100,6 +100,8 @@ public class MdmCandidateSearchSvc {
 		if (theResource.getIdElement().getIdPart() != null) {
 			matchedPidsToResources.remove(myIdHelperService.getPidOrNull(theResource));
 		}
+
+		ourLog.info("Found {} resources for {}", matchedPidsToResources.size(), theResourceType);
 		return matchedPidsToResources.values();
 	}
 

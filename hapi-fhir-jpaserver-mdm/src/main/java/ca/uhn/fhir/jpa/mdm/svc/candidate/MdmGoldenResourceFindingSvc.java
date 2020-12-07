@@ -44,17 +44,17 @@ public class MdmGoldenResourceFindingSvc {
 	private FindCandidateByLinkSvc myFindCandidateByLinkSvc;
 
 	@Autowired
-	private FindCandidateByScoreSvc myFindCandidateByScoreSvc;
+	private FindCandidateByExampleSvc myFindCandidateByExampleSvc;
 
 	/**
 	 * Given an incoming IBaseResource, limited to the supported MDM type, return a list of {@link MatchedGoldenResourceCandidate}
 	 * indicating possible candidates for a matching Golden Resource. Uses several separate methods for finding candidates:
 	 * <p>
 	 * 0. First, check the incoming Resource for an EID. If it is present, and we can find a Golden Resource with this EID, it automatically matches.
-	 * 1. First, check link table for any entries where this baseresource is the target of a Golden Resource. If found, return.
+	 * 1. First, check link table for any entries where this baseresource is the source of a Golden Resource. If found, return.
 	 * 2. If none are found, attempt to find Golden Resources which link to this theResource.
 	 * 3. If none are found, attempt to find Golden Resources similar to our incoming resource based on the MDM rules and field matchers.
-	 * 4. If none are found, attempt to find Golden Resources that are linked to targets that are similar to our incoming resource based on the MDM rules and
+	 * 4. If none are found, attempt to find Golden Resources that are linked to sources that are similar to our incoming resource based on the MDM rules and
 	 * field matchers.
 	 *
 	 * @param theResource the {@link IBaseResource} we are attempting to find matching candidate Golden Resources for.
@@ -68,9 +68,9 @@ public class MdmGoldenResourceFindingSvc {
 		}
 
 		if (matchedGoldenResourceCandidates.isEmpty()) {
-			//OK, so we have not found any links in the MdmLink table with us as a target. Next, let's find
+			//OK, so we have not found any links in the MdmLink table with us as a source. Next, let's find
 			//possible Golden Resources matches by following MDM rules.
-			matchedGoldenResourceCandidates = myFindCandidateByScoreSvc.findCandidates(theResource);
+			matchedGoldenResourceCandidates = myFindCandidateByExampleSvc.findCandidates(theResource);
 		}
 
 		return matchedGoldenResourceCandidates;

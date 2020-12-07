@@ -73,7 +73,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = null;
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 
-		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchOnAllTargets(new StringType("Medication"), criteria, null));
+		afterMdmLatch.runWithExpectedCount(1, () -> myMdmProviderR4.mdmBatchOnAllSourceResources(new StringType("Medication"), criteria, null));
 		assertLinkCount(1);
 	}
 
@@ -134,7 +134,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		StringType criteria = new StringType("");
 		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
 		afterMdmLatch.runWithExpectedCount(3, () -> {
-			myMdmProviderR4.mdmBatchOnAllTargets(null, criteria, null);
+			myMdmProviderR4.mdmBatchOnAllSourceResources(null, criteria, null);
 		});
 		assertLinkCount(3);
 	}
