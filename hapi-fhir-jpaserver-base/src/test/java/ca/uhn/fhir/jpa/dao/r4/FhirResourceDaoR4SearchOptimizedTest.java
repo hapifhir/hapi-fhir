@@ -174,7 +174,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, hasSize(10));
 		PersistedJpaBundleProvider bundleProvider = (PersistedJpaBundleProvider) myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer bundleSize = bundleProvider.size();
-		assertNotNull(bundleSize, "Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.isCacheHit());
+		assertNotNull(bundleSize, "Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.getCacheStatus());
 		assertEquals(201, bundleSize.intValue());
 
 		// Search with count only

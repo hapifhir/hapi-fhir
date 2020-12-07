@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.search.cache;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
@@ -42,6 +43,7 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -140,10 +142,21 @@ public class DatabaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	@Override
-	public Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter) {
-		int hashCode = theQueryString.hashCode();
-		return mySearchDao.findWithCutoffOrExpiry(theResourceType, hashCode, theCreatedAfter);
+	public Optional<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Instant theCreatedAfter, RequestPartitionId theRequestPartitionId) {
+		String queryString = Search.createSearchQueryStringForStorage(theQueryString, theRequestPartitionId);
 
+		int hashCode = queryString.hashCode();
+		Collection<Search> candidates = mySearchDao.findWithCutoffOrExpiry(theResourceType, hashCode, Date.from(theCreatedAfter));
+
+		for (Search nextCandidateSearch : candidates) {
+			// We should only reuse our search if it was created within the permitted window
+			// Date.after() is unreliable.  Instant.isAfter() always works.
+			if (queryString.equals(nextCandidateSearch.getSearchQueryString()) && nextCandidateSearch.getCreated().toInstant().isAfter(theCreatedAfter)) {
+				return Optional.of(nextCandidateSearch);
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	@Transactional(Transactional.TxType.NEVER)

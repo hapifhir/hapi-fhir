@@ -175,7 +175,7 @@ public class SearchCoordinatorSvcImplTest {
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -219,7 +219,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -296,7 +296,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -337,7 +337,7 @@ public class SearchCoordinatorSvcImplTest {
 		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
 		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
 
 		CountDownLatch completionLatch = new CountDownLatch(1);
@@ -389,7 +389,7 @@ public class SearchCoordinatorSvcImplTest {
 		});
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -436,7 +436,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
 		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 
@@ -544,7 +544,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
 		assertEquals(790, Objects.requireNonNull(result.size()).intValue());
 
@@ -571,7 +571,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
 		assertEquals(20, result.size().intValue());
 
@@ -595,7 +595,7 @@ public class SearchCoordinatorSvcImplTest {
 		pids = createPidSequence(110);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
 		assertEquals(100, Objects.requireNonNull(result.size()).intValue());
 

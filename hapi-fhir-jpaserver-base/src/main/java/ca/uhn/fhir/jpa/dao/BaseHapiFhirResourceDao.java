@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.patch.XmlPatchUtils;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -72,6 +73,8 @@ import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.SimplePreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -162,6 +165,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private IInstanceValidatorModule myInstanceValidator;
 	private String myResourceName;
 	private Class<T> myResourceType;
+	@Autowired
+	private IRequestPartitionHelperSvc myPartitionHelperSvc;
 
 	@Override
 	@Transactional
@@ -777,7 +782,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theRequestDetails == null || theRequestDetails.getServer() == null) {
 			return false;
 		}
-		return theRequestDetails.getServer().getPagingProvider() instanceof DatabaseBackedPagingProvider;
+		IRestfulServerDefaults server = theRequestDetails.getServer();
+		IPagingProvider pagingProvider = server.getPagingProvider();
+		return pagingProvider instanceof DatabaseBackedPagingProvider;
 	}
 
 	protected void markResourcesMatchingExpressionAsNeedingReindexing(Boolean theCurrentlyReindexing, String theExpression) {
@@ -1294,11 +1301,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest);
+		RequestPartitionId requestPartitionId = myPartitionHelperSvc.determineReadPartitionForRequest(theRequest, getResourceName());
+		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 
 		if (retVal instanceof PersistedJpaBundleProvider) {
 			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
-			if (provider.isCacheHit()) {
+			if (provider.getCacheStatus() == SearchCacheStatusEnum.HIT) {
 				if (theServletResponse != null && theRequest != null) {
 					String value = "HIT from " + theRequest.getFhirServerBase();
 					theServletResponse.addHeader(Constants.HEADER_X_CACHE, value);
