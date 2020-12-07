@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2221
+title: "The error message returned by the transaction processor has been improved for the case where a transaction
+  uses an unsupported/disabled resource types."
