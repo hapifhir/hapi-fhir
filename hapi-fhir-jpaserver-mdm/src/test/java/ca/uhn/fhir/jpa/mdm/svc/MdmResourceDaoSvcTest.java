@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 
 		Patient badSourcePatient = addExternalEID(createRedirectedGoldenPatient(new Patient()), TEST_EID);
-		MdmUtil.setGoldenResourceRedirected(badSourcePatient);
+		MdmResourceUtil.setGoldenResourceRedirected(badSourcePatient);
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");

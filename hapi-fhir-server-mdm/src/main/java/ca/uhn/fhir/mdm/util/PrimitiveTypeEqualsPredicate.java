@@ -25,7 +25,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.lang.reflect.Field;
 import java.util.function.BiPredicate;
 
-public class PrimitiveTypeComparingPredicate implements BiPredicate {
+public class PrimitiveTypeEqualsPredicate implements BiPredicate {
 
 	@Override
 	public boolean test(Object theBase1, Object theBase2) {

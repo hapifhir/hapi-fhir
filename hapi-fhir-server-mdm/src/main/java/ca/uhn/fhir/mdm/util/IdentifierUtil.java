@@ -20,10 +20,15 @@ package ca.uhn.fhir.mdm.util;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IBase;
 
-public class IdentifierUtil {
+public final class IdentifierUtil {
+
+	private IdentifierUtil() {
+	}
 
 	public static CanonicalIdentifier identifierDtFromIdentifier(IBase theIdentifier) {
 		CanonicalIdentifier retval = new CanonicalIdentifier();
@@ -42,5 +47,23 @@ public class IdentifierUtil {
 			throw new InternalErrorException("Expected 'Identifier' type but was '" + theIdentifier.getClass().getName() + "'");
 		}
 		return retval;
+	}
+
+	/**
+	 * Retrieves appropriate FHIR Identifier model instance based on the context version
+	 *
+	 * @param theFhirContext FHIR context to use for determining the identifier version
+	 * @param eid EID to get equivalent FHIR Identifier from
+	 * @param <T> Generic Identifier base interface
+	 * @return Returns appropriate R4 or DSTU3 Identifier instance
+	 */
+	public static <T extends IBase> T toId(FhirContext theFhirContext, CanonicalEID eid) {
+		switch (theFhirContext.getVersion().getVersion()) {
+			case R4:
+				return (T) eid.toR4();
+			case DSTU3:
+				return (T) eid.toDSTU3();
+		}
+		throw new IllegalStateException("Unsupported FHIR version " + theFhirContext.getVersion().getVersion());
 	}
 }

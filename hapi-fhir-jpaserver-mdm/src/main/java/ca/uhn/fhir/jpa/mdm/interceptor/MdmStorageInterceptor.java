@@ -25,7 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -84,7 +84,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			forbidIfHasMultipleEids(theUpdatedResource);
 		}
 
-		if (myGoldenResourceHelper.isDeactivated(theUpdatedResource)) {
+		if (MdmResourceUtil.isGoldenRecordRedirected(theUpdatedResource)) {
 			ourLog.debug("Deleting MDM links to deactivated Golden resource {}", theUpdatedResource.getIdElement().toUnqualifiedVersionless());
 			int deleted = myMdmLinkDeleteSvc.deleteNonRedirectWithAnyReferenceTo(theUpdatedResource);
 			if (deleted > 0) {
@@ -131,7 +131,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	 * Will throw a forbidden error if a request attempts to add/remove the MDM tag on a Resource.
 	 */
 	private void forbidModifyingMdmTag(IBaseResource theNewResource, IBaseResource theOldResource) {
-		if (MdmUtil.isMdmManaged(theNewResource) != MdmUtil.isMdmManaged(theOldResource)) {
+		if (MdmResourceUtil.isMdmManaged(theNewResource) != MdmResourceUtil.isMdmManaged(theOldResource)) {
 			throwBlockMdmManagedTagChange();
 		}
 	}
@@ -153,10 +153,10 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void forbidIfMdmManagedTagIsPresent(IBaseResource theResource) {
-		if (MdmUtil.isMdmManaged(theResource)) {
+		if (MdmResourceUtil.isMdmManaged(theResource)) {
 			throwModificationBlockedByMdm();
 		}
-		if (MdmUtil.hasGoldenRecordSystemTag(theResource)) {
+		if (MdmResourceUtil.hasGoldenRecordSystemTag(theResource)) {
 			throwModificationBlockedByMdm();
 		}
 	}

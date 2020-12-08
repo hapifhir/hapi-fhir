@@ -27,9 +27,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import javax.annotation.Nonnull;
 import java.util.Optional;
 
-public final class MdmUtil {
+public final class MdmResourceUtil {
 
-	private MdmUtil() {
+	private MdmResourceUtil() {
 	}
 
 	/**

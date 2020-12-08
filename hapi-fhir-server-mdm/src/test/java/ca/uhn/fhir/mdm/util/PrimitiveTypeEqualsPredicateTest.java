@@ -7,8 +7,8 @@ import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Person;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PrimitiveTypeComparingPredicateTest {
+class PrimitiveTypeEqualsPredicateTest {
 
 	private static FhirContext myFhirContext;
 
@@ -32,7 +32,7 @@ class PrimitiveTypeComparingPredicateTest {
 
 	private IBase myNegativeTest;
 
-	private PrimitiveTypeComparingPredicate cut = new PrimitiveTypeComparingPredicate();
+	private PrimitiveTypeEqualsPredicate cut = new PrimitiveTypeEqualsPredicate();
 
 	@BeforeAll
 	public static void initContext() {
@@ -47,10 +47,10 @@ class PrimitiveTypeComparingPredicateTest {
 		myPositiveTest2 = newPatient();
 		myPositiveTest3 = newPatient();
 
-		Patient patient = newPatient();
-		patient.setActive(false);
-		patient.setMultipleBirth(new BooleanType(false));
-		myNegativeTest = patient;
+		Patient inactivePatientForNegativeTest = newPatient();
+		inactivePatientForNegativeTest.setActive(false);
+		inactivePatientForNegativeTest.setMultipleBirth(new BooleanType(false));
+		myNegativeTest = inactivePatientForNegativeTest;
 	}
 
 	private Patient newPatient() {
@@ -76,29 +76,22 @@ class PrimitiveTypeComparingPredicateTest {
 
 	@Test
 	public void testNegativeMatchOnDifferentTypes() {
-		Patient patient = newPatient();
-		Identifier identifier = patient.addIdentifier();
-		identifier.setValue("TEST_VALUE");
-		assertFalse(cut.test(myNegativeTest, identifier));
+		Person person = new Person();
+		person.addName().addGiven("John");
+		assertFalse(cut.test(myNegativeTest, person));
 	}
 
 	@Test
-	public void testSymmetry() {
+	public void testNulls() {
+		assertTrue(cut.test(null, null));
+		assertFalse(cut.test(myPositiveTest1, null));
+		assertFalse(cut.test(null, myPositiveTest1));
+	}
+
+	@Test
+	public void testPositiveMatchOnTheSameType() {
 		assertTrue(cut.test(myPositiveTest1, myPositiveTest2));
-		assertTrue(cut.test(myPositiveTest2, myPositiveTest1));
-	}
-
-	@Test
-	public void testReflexivity() {
 		assertTrue(cut.test(myPositiveTest1, myPositiveTest1));
 	}
-
-	@Test
-	public void testTransitivity() {
-		assertTrue(cut.test(myPositiveTest1, myPositiveTest2));
-		assertTrue(cut.test(myPositiveTest2, myPositiveTest3));
-		assertTrue(cut.test(myPositiveTest1, myPositiveTest3));
-	}
-
 
 }

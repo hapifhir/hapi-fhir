@@ -29,7 +29,11 @@ import org.hl7.fhir.r4.model.PrimitiveType;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NameUtil {
+public final class NameUtil {
+
+	private NameUtil() {
+	}
+
 	public static List<String> extractGivenNames(FhirContext theFhirContext, IBase theBase) {
 		switch(theFhirContext.getVersion().getVersion()) {
 			case R4:

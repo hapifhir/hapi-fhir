@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.matcher;
 
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -36,7 +36,7 @@ public abstract class BaseGoldenResourceMatcher extends TypeSafeMatcher<IAnyReso
 	protected Long getMatchedResourcePidFromResource(IAnyResource theResource) {
 		Long retval;
 
-		boolean isGoldenRecord = MdmUtil.isMdmManaged(theResource);
+		boolean isGoldenRecord = MdmResourceUtil.isMdmManaged(theResource);
 		if (isGoldenRecord) {
 			return myIdHelperService.getPidOrNull(theResource);
 		}

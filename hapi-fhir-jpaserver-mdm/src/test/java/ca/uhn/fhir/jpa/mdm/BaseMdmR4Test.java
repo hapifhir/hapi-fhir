@@ -30,7 +30,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -160,11 +160,11 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@Nonnull
 	protected Patient createPatient(Patient thePatient, boolean theMdmManaged, boolean isRedirect) {
 		if (theMdmManaged) {
-			MdmUtil.setMdmManaged(thePatient);
+			MdmResourceUtil.setMdmManaged(thePatient);
 			if (isRedirect) {
-				MdmUtil.setGoldenResourceRedirected(thePatient);
+				MdmResourceUtil.setGoldenResourceRedirected(thePatient);
 			} else {
-				MdmUtil.setGoldenResource(thePatient);
+				MdmResourceUtil.setGoldenResource(thePatient);
 			}
 		}
 

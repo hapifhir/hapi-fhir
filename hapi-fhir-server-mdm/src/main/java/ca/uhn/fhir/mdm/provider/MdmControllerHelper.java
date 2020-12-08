@@ -22,7 +22,7 @@ package ca.uhn.fhir.mdm.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -94,7 +94,7 @@ public class MdmControllerHelper {
 			);
 		}
 
-		if (!MdmUtil.isMdmManaged(theResource)) {
+		if (!MdmResourceUtil.isMdmManaged(theResource)) {
 			throw new InvalidRequestException(myMessageHelper.getMessageForUnmanagedResource());
 		}
 	}

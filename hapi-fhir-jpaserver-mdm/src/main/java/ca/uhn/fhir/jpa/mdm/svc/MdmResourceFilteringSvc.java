@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,7 +56,7 @@ public class MdmResourceFilteringSvc {
 	 * @return whether or not MDM processing should proceed
 	 */
 	public boolean shouldBeProcessed(IAnyResource theResource) {
-		if (MdmUtil.isMdmManaged(theResource)) {
+		if (MdmResourceUtil.isMdmManaged(theResource)) {
 			ourLog.debug("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource);
 			return false;
 		}

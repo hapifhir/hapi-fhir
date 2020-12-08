@@ -25,7 +25,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
@@ -67,7 +67,7 @@ public class MdmMatchLinkSvc {
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to MDM processing of this resource.
 	 */
 	public MdmTransactionContext updateMdmLinksForMdmSource(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		if (MdmUtil.isMdmAllowed(theResource)) {
+		if (MdmResourceUtil.isMdmAllowed(theResource)) {
 			return doMdmUpdate(theResource, theMdmTransactionContext);
 		} else {
 			return null;

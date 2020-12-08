@@ -35,7 +35,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,7 +53,7 @@ public class GoldenResourceHelper {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
-	private static final String FIELD_NAME_IDENTIFIER = "identifier";
+	static final String FIELD_NAME_IDENTIFIER = "identifier";
 
 	@Autowired
 	private IMdmSettings myMdmSettings;
@@ -90,8 +89,8 @@ public class GoldenResourceHelper {
 
 		addHapiEidIfNoExternalEidIsPresent(newGoldenResource, goldenResourceIdentifier, theIncomingResource);
 
-		MdmUtil.setMdmManaged(newGoldenResource);
-		MdmUtil.setGoldenResource(newGoldenResource);
+		MdmResourceUtil.setMdmManaged(newGoldenResource);
+		MdmResourceUtil.setGoldenResource(newGoldenResource);
 
 		return (T) newGoldenResource;
 	}
@@ -109,69 +108,10 @@ public class GoldenResourceHelper {
 		}
 
 		CanonicalEID hapiEid = myEIDHelper.createHapiEid();
-		theGoldenResourceIdentifier.getMutator().addValue(theNewGoldenResource, toId(hapiEid));
+		theGoldenResourceIdentifier.getMutator().addValue(theNewGoldenResource, IdentifierUtil.toId(myFhirContext, hapiEid));
 
 		// set identifier on the source resource
-		cloneEidIntoResource(theSourceResource, hapiEid);
-	}
-
-	private void cloneEidIntoResource(IBaseResource theResourceToCloneInto, CanonicalEID theEid) {
-		// get a ref to the actual ID Field
-		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theResourceToCloneInto);
-		// hapi has 2 metamodels: for children and types
-		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		cloneEidIntoResource(resourceIdentifier, toId(theEid), theResourceToCloneInto);
-	}
-
-	/**
-	 * Given an Child Definition of `identifier`, a R4/DSTU3 EID Identifier, and a new resource, clone the EID into that resources' identifier list.
-	 */
-	private void cloneEidIntoResource(BaseRuntimeChildDefinition theIdentifierDefinition, IBase theEid, IBase theResourceToCloneEidInto) {
-		// FHIR choice types - fields within fhir where we have a choice of ids
-		BaseRuntimeElementCompositeDefinition<?> childIdentifier = (BaseRuntimeElementCompositeDefinition<?>) theIdentifierDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
-		IBase resourceNewIdentifier = childIdentifier.newInstance();
-
-		FhirTerser terser = myFhirContext.newTerser();
-		terser.cloneInto(theEid, resourceNewIdentifier, true);
-		theIdentifierDefinition.getMutator().addValue(theResourceToCloneEidInto, resourceNewIdentifier);
-	}
-
-	/**
-	 * Clones specified composite field (collection). Composite field values must confirm to the collections
-	 * contract.
-	 *
-	 * @param theFrom Resource to clone the specified filed from
-	 * @param theTo   Resource to clone the specified filed to
-	 * @param field   Field name to be copied
-	 */
-	private void cloneCompositeField(IBaseResource theFrom, IBaseResource theTo, String field) {
-		FhirTerser terser = myFhirContext.newTerser();
-
-		RuntimeResourceDefinition definition = myFhirContext.getResourceDefinition(theFrom);
-		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(field);
-
-		IFhirPath fhirPath = myFhirContext.newFhirPath();
-		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
-		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
-
-		for (IBase theFromFieldValue : theFromFieldValues) {
-			if (contains(theFromFieldValue, theToFieldValues)) {
-				continue;
-			}
-
-			BaseRuntimeElementCompositeDefinition<?> compositeDefinition = (BaseRuntimeElementCompositeDefinition<?>) childDefinition.getChildByName(field);
-			IBase newFieldValue = compositeDefinition.newInstance();
-			terser.cloneInto(theFromFieldValue, newFieldValue, true);
-
-			theToFieldValues.add(newFieldValue);
-		}
-	}
-
-	private boolean contains(IBase theItem, List<IBase> theItems) {
-		PrimitiveTypeComparingPredicate predicate = new PrimitiveTypeComparingPredicate();
-		return theItems.stream().filter(i -> {
-			return predicate.test(i, theItem);
-		}).findFirst().isPresent();
+		TerserUtil.cloneEidIntoResource(myFhirContext, theSourceResource, hapiEid);
 	}
 
 	private void cloneAllExternalEidsIntoNewGoldenResource(BaseRuntimeChildDefinition theGoldenResourceIdentifier,
@@ -186,7 +126,7 @@ public class GoldenResourceHelper {
 				String mdmSystem = myMdmSettings.getMdmRules().getEnterpriseEIDSystem();
 				String baseSystem = system.get().getValueAsString();
 				if (Objects.equals(baseSystem, mdmSystem)) {
-					cloneEidIntoResource(theGoldenResourceIdentifier, base, theNewGoldenResource);
+					TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResourceIdentifier, base, theNewGoldenResource);
 					ourLog.debug("System {} differs from system in the MDM rules {}", baseSystem, mdmSystem);
 				}
 			} else {
@@ -292,45 +232,14 @@ public class GoldenResourceHelper {
 			if (goldenResourceExternalEids.contains(incomingExternalEid)) {
 				continue;
 			} else {
-				cloneEidIntoResource(theGoldenResource, incomingExternalEid);
+				TerserUtil.cloneEidIntoResource(myFhirContext, theGoldenResource, incomingExternalEid);
 			}
 		}
 	}
 
-	private <T extends IBase> T toId(CanonicalEID eid) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				return (T) eid.toR4();
-			case DSTU3:
-				return (T) eid.toDSTU3();
-		}
-		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
-	}
-
-
-	private <T extends IBase> T toBooleanType(boolean theFlag) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				return (T) new BooleanType(theFlag);
-			case DSTU3:
-				return (T) new org.hl7.fhir.dstu3.model.BooleanType(theFlag);
-		}
-		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
-	}
-
-	private <T extends IBase> boolean fromBooleanType(T theFlag) {
-		switch (myFhirContext.getVersion().getVersion()) {
-			case R4:
-				return ((BooleanType) theFlag).booleanValue();
-			case DSTU3:
-				return ((org.hl7.fhir.dstu3.model.BooleanType) theFlag).booleanValue();
-		}
-		throw new IllegalStateException("Unsupported FHIR version " + myFhirContext.getVersion().getVersion());
-	}
-
 	public void mergeFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource) {
 		//	TODO NG - Revisit when merge rules are defined
-		cloneCompositeField(theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
+		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
 
 //		switch (myFhirContext.getVersion().getVersion()) {
 //			case R4:
@@ -365,13 +274,5 @@ public class GoldenResourceHelper {
 		if (!eidFromResource.isEmpty()) {
 			updateGoldenResourceExternalEidFromSourceResource(theGoldenResource, theSourceResource, theMdmTransactionContext);
 		}
-	}
-
-	public void deactivateResource(IAnyResource theResource) {
-		MdmUtil.setGoldenResourceRedirected(theResource);
-	}
-
-	public boolean isDeactivated(IBaseResource theGoldenResource) {
-		return MdmUtil.isGoldenRecordRedirected(theGoldenResource);
 	}
 }

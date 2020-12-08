@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.mdm.provider;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
@@ -43,7 +43,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		Patient mergedSourcePatient = (Patient) myMdmProviderR4.mergeGoldenResources(myFromGoldenPatientId,
 			myToGoldenPatientId, myRequestDetails);
 
-		assertTrue(MdmUtil.isGoldenRecord(myFromGoldenPatient));
+		assertTrue(MdmResourceUtil.isGoldenRecord(myFromGoldenPatient));
 		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
 		assertThat(mergedSourcePatient, is(sameGoldenResourceAs(myToGoldenPatient)));
 		assertEquals(1, getAllRedirectedGoldenPatients().size());
@@ -51,7 +51,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 		Patient fromSourcePatient = myPatientDao.read(myFromGoldenPatient.getIdElement().toUnqualifiedVersionless());
 		assertThat(fromSourcePatient.getActive(), is(false));
-		assertTrue(MdmUtil.isGoldenRecordRedirected(fromSourcePatient));
+		assertTrue(MdmResourceUtil.isGoldenRecordRedirected(fromSourcePatient));
 
 		//TODO GGG eventually this will need to check a redirect... this is a hack which doesnt work
 		// Optional<Identifier> redirect = fromSourcePatient.getIdentifier().stream().filter(theIdentifier -> theIdentifier.getSystem().equals("REDIRECT")).findFirst();

@@ -10,7 +10,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -446,7 +446,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient);
 
 		// golden record now contains HAPI-generated EID and HAPI tag
-		assertTrue(MdmUtil.isMdmManaged(janeGoldenResourcePatient));
+		assertTrue(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient));
 		assertFalse(myEidHelper.getHapiEid(janeGoldenResourcePatient).isEmpty());
 
 		// original checks - verifies that EIDs are assigned

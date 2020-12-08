@@ -28,7 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
-import ca.uhn.fhir.mdm.util.MdmUtil;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
@@ -117,11 +117,11 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			throw new InvalidRequestException(myMessageHelper.getMessageForArgumentTypeMismatchInUpdate(goldenRecordType, theSourceType));
 		}
 
-		if (!MdmUtil.isMdmManaged(theGoldenRecord)) {
+		if (!MdmResourceUtil.isMdmManaged(theGoldenRecord)) {
 			throw new InvalidRequestException(myMessageHelper.getMessageForUnmanagedResource());
 		}
 
-		if (!MdmUtil.isMdmAllowed(theSourceResource)) {
+		if (!MdmResourceUtil.isMdmAllowed(theSourceResource)) {
 			throw new InvalidRequestException(myMessageHelper.getMessageForUnsupportedSourceResource());
 		}
 	}
@@ -158,7 +158,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 			throw new InvalidRequestException("First argument to " + ProviderConstants.MDM_UPDATE_LINK + " must be the same resource type as the second argument.  Was " + goldenResourceType + "/" + targetType);
 		}
 
-		if (!MdmUtil.isMdmManaged(theGoldenResource) || !MdmUtil.isMdmManaged(theTarget)) {
+		if (!MdmResourceUtil.isMdmManaged(theGoldenResource) || !MdmResourceUtil.isMdmManaged(theTarget)) {
 			throw new InvalidRequestException("Only MDM Managed Golden Resources may be updated via this operation.  The resource provided is not tagged as managed by HAPI-MDM");
 		}
 	}

@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -77,7 +78,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		myMdmResourceDaoSvc.removeGoldenResourceTag(theFromGoldenResource, resourceType);
 
 		//Add the REDIRECT tag to that same deprecated resource.
-		myGoldenResourceHelper.deactivateResource(theFromGoldenResource);
+		MdmResourceUtil.setGoldenResourceRedirected(theFromGoldenResource);
 
 		//Save the deprecated resource.
 		myMdmResourceDaoSvc.upsertGoldenResource(theFromGoldenResource, resourceType);
