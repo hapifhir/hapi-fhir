@@ -36,28 +36,25 @@ jobs:
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dmaven.test.skip'
+          options: '-P ALLMODULES,JACOCO,CI,ERRORPRONE -e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
-      - task: Maven@3
-        env:
-           JAVA_HOME_11_X64: /usr/local/openjdk-11
-        inputs:
-           goals: 'test'
-           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-           options: '-e -B -Dmaven.repo.local=$(MAVEN_CACHE_FOLDER) -Dtest=ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT -pl :hapi-fhir-jpaserver-base'
-           # These are JVM options (and don't show up in the build logs)
-           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
-           jdkVersionOption: 1.11
       - publish: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
-      -  task: PublishPipelineArtifact@1
+      - task: PublishPipelineArtifact@1
+         displayName: 'Publish Full Test Output'
          condition: always()
          inputs:
-           targetPath: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
-           artifactName: 'testlogs'
+           targetPath: '$(System.DefaultWorkingDirectory)/'
+           archiveFilePatterns: '**/*-output.txt'
+           artifactName: 'full_logs.zip'
+
       - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '**/TEST-*.xml'
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
