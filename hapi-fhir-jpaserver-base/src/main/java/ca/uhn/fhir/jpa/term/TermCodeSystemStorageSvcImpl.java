@@ -205,7 +205,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	//TODO GGG HS This is the entrypoint for us.
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
 		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
 
