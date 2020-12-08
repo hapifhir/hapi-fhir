@@ -568,6 +568,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 						}
 
 						doReindex(resourceTable, resource);
+
 						return null;
 
 					} catch (Exception e) {

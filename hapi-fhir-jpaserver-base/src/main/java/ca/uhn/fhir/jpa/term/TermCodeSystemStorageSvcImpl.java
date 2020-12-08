@@ -469,7 +469,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			Supplier<Slice<Long>> loader = () -> myConceptDao.findIdsByCodeSystemVersion(page100, theCodeSystemVersionPid);
 			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
 			doDelete(descriptor, loader, counter, myConceptDao);
-//			myConceptDao.deleteAll();
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
@@ -737,7 +736,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myConceptPropertyDao.deleteAll(theConcept.getProperties());
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
-		myConceptDao.deleteByPid(theConcept.getId());
+		myConceptDao.deleteById(theConcept.getId());
 		theRemoveCounter.incrementAndGet();
 	}
 
@@ -759,16 +758,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 
 			txTemplate.executeWithoutResult(t -> {
-				link.forEach(id -> {
-					theDao.deleteByPid(id);
-					try {
-						ourLog.debug("Deleting pid [{}] from dao, we in transaction? {}", id, TransactionSynchronizationManager.isActualTransactionActive());
-					} catch (Exception theE) {
-						theE.printStackTrace();
-					}
-				});
+				link.forEach(theDao::deleteById);
 				theDao.flush();
-				ourLog.debug("Should be indexing the deletion here!");
 			});
 
 			count += link.getNumberOfElements();
