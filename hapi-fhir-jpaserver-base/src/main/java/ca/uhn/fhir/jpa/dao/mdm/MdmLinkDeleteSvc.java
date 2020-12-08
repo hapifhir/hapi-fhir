@@ -20,10 +20,9 @@ package ca.uhn.fhir.jpa.dao.mdm;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
-import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +52,7 @@ public class MdmLinkDeleteSvc {
 		return removed;
 	}
 
-	public int deleteNonRedirectWithWithAnyReferenceTo(IBaseResource theResource) {
+	public int deleteNonRedirectWithAnyReferenceTo(IBaseResource theResource) {
 		Long pid = myIdHelperService.getPidOrThrowException(theResource.getIdElement());
 		int removed =  myMdmLinkDao.deleteWithAnyReferenceToPidAndMatchResultNot(pid, MdmMatchResultEnum.REDIRECT);
 		if (removed > 0) {

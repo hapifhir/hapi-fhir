@@ -56,11 +56,11 @@ public class MdmResourceFilteringSvc {
 	 * @return whether or not MDM processing should proceed
 	 */
 	public boolean shouldBeProcessed(IAnyResource theResource) {
-		//TODO GGG ask KHS: Skip the infinite loop, whoops. Better way to do this? tighter subscription criteria?
 		if (MdmUtil.isMdmManaged(theResource)) {
 			ourLog.debug("MDM Message handler is dropping [{}] as it is MDM-managed.", theResource);
 			return false;
 		}
+
 		String resourceType = myFhirContext.getResourceType(theResource);
 		List<MdmResourceSearchParamJson> candidateSearchParams = myMdmSettings.getMdmRules().getCandidateSearchParams();
 

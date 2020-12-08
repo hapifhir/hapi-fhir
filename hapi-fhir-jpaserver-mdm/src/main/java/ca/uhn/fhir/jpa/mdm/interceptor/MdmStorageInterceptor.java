@@ -69,7 +69,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			forbidIfHasMultipleEids(theBaseResource);
 		}
 
-		// TODO GGG MDM find a better way to identify i nternal calls?
+		// TODO GGG MDM find a better way to identify internal calls?
 		if (isInternalRequest(theRequestDetails)) {
 			return;
 		}
@@ -84,10 +84,9 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 			forbidIfHasMultipleEids(theUpdatedResource);
 		}
 
-		//TODO GGG MDM: Check if this is actually handled already in mdm update code or not.
 		if (myGoldenResourceHelper.isDeactivated(theUpdatedResource)) {
 			ourLog.debug("Deleting MDM links to deactivated Golden resource {}", theUpdatedResource.getIdElement().toUnqualifiedVersionless());
-			int deleted = myMdmLinkDeleteSvc.deleteNonRedirectWithWithAnyReferenceTo(theUpdatedResource);
+			int deleted = myMdmLinkDeleteSvc.deleteNonRedirectWithAnyReferenceTo(theUpdatedResource);
 			if (deleted > 0) {
 				ourLog.debug("Deleted {} MDM links", deleted);
 			}
@@ -125,7 +124,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockEidChange() {
-		throw new ForbiddenOperationException("While running with EID updates disabled, EIDs may not be updated on Patient/Practitioner resources");
+		throw new ForbiddenOperationException("While running with EID updates disabled, EIDs may not be updated on source resources");
 	}
 
 	/*
@@ -139,7 +138,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 
 	private void forbidIfHasMultipleEids(IBaseResource theResource) {
 		String resourceType = extractResourceType(theResource);
-		if (resourceType.equalsIgnoreCase("Patient") || resourceType.equalsIgnoreCase("Practitioner")) {
+		if (myMdmSettings.isSupportedMdmType(resourceType)) {
 			if (myEIDHelper.getExternalEid(theResource).size() > 1) {
 				throwBlockMultipleEids();
 			}
@@ -171,7 +170,7 @@ public class MdmStorageInterceptor implements IMdmStorageInterceptor {
 	}
 
 	private void throwBlockMultipleEids() {
-		throw new ForbiddenOperationException("While running with multiple EIDs disabled, Patient/Practitioner resources may have at most one EID.");
+		throw new ForbiddenOperationException("While running with multiple EIDs disabled, source resources may have at most one EID.");
 	}
 
 	private String extractResourceType(IBaseResource theResource) {
