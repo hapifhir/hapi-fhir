@@ -2,6 +2,7 @@ package ca.uhn.fhir.cql.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
+import ca.uhn.fhir.cql.provider.dstu3.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
@@ -14,7 +15,6 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.opencds.cqf.dstu3.providers.MeasureOperationsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.provider;
  * #L%
  */
 
+import ca.uhn.fhir.cql.provider.dstu3.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class CqlProviderFactory {
 
 	public Object getMeasureOperationsProvider() {
 		if (myNarrativeProviderDstu3 != null) {
-			return new org.opencds.cqf.dstu3.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderDstu3, myHQMFProviderDstu3, myLibraryOperationsProviderDstu3, myMeasureResourceProviderDstu3);
+			return new MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderDstu3, myHQMFProviderDstu3, myLibraryOperationsProviderDstu3, myMeasureResourceProviderDstu3);
 		}
 		if (myNarrativeProviderR4 != null) {
 			return new org.opencds.cqf.r4.providers.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderR4, myHQMFProviderR4, myLibraryOperationsProviderR4, myMeasureResourceProviderR4);
