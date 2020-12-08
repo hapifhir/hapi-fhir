@@ -21,6 +21,7 @@ package ca.uhn.fhir.cql.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cql.provider.CqlProviderFactory;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.rp.r4.LibraryResourceProvider;
@@ -47,8 +48,8 @@ public class CqlR4Config extends BaseCqlConfig {
 	}
 
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider) {
-		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider);
+	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
+		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider, theValidationSupport);
 	}
 
 	@Bean
