@@ -27,6 +27,7 @@ public abstract class BaseJpaR4SystemTest extends BaseJpaR4Test {
 			patientRp.setDao(myPatientDao);
 			myServer.setResourceProviders(patientRp);
 			myServer.init(mock(ServletConfig.class));
+			myServer.setPagingProvider(myPagingProvider);
 		}
 
 		when(mySrd.getServer()).thenReturn(myServer);
