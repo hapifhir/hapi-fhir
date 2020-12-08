@@ -120,6 +120,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private final RestHighLevelClient myRestHighLevelClient;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
 	@Autowired
 	private PartitionSettings myPartitionSettings;
 
