@@ -51,6 +51,11 @@ jobs:
            mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
            jdkVersionOption: 1.11
       - publish: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
+      -  task: PublishPipelineArtifact@1
+         condition: 'always()'
+         inputs:
+           targetPath: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
+           artifactName: 'testlogs'
       - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
       - task: PublishCodeCoverageResults@1
