@@ -463,11 +463,11 @@ This operation takes a single optional Parameter.
     </thead>
     <tbody>
         <tr>
-            <td>targetType</td>
+            <td>sourceType</td>
             <td>String</td>
             <td>0..1</td>
             <td>
-                The target Resource type you would like to clear. If omitted, will operate over all links.
+                The Source Resource type you would like to clear. If omitted, will operate over all links.
             </td>
         </tr>
     </tbody>
@@ -487,7 +487,7 @@ The following request body could be used:
 {
   "resourceType": "Parameters",
   "parameter": [ {
-    "name": "targetType",
+    "name": "sourceType",
     "valueString": "Patient"
   } ]
 }
