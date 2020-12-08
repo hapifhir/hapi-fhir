@@ -23,7 +23,6 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 	private static final Logger ourLog = LoggerFactory.getLogger(TestR4ConfigWithElasticSearch.class);
 	public static final String ELASTIC_VERSION = "7.10.0";
 	public static final String ELASTIC_IMAGE  = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTIC_VERSION;
-	protected final String elasticsearchHost = "localhost";
 	protected final String elasticsearchUserId = "";
 	protected final String elasticsearchPassword = "";
 
@@ -36,6 +35,8 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 		//Override default lucene settings
 		// Force elasticsearch to start first
 		int httpPort = elasticContainer().getMappedPort(9200);//9200 is the HTTP port
+		String host = elasticContainer().getHost();
+
 		ourLog.info("ElasticSearch started on port: {}", httpPort);
 
 
@@ -45,7 +46,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 			.setIndexSchemaManagementStrategy(SchemaManagementStrategyName.CREATE)
 			.setIndexManagementWaitTimeoutMillis(10000)
 			.setRequiredIndexStatus(IndexStatus.YELLOW)
-			.setRestUrl(elasticsearchHost + ":" + httpPort)
+			.setRestUrl(host+ ":" + httpPort)
 			.setProtocol("http")
 			.setUsername(elasticsearchUserId)
 			.setPassword(elasticsearchPassword)

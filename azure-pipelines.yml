@@ -52,7 +52,7 @@ jobs:
            jdkVersionOption: 1.11
       - publish: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
       -  task: PublishPipelineArtifact@1
-         condition: 'always()'
+         condition: always()
          inputs:
            targetPath: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
            artifactName: 'testlogs'

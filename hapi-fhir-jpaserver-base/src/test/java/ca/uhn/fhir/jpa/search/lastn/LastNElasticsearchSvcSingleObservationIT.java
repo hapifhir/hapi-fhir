@@ -89,7 +89,7 @@ public class LastNElasticsearchSvcSingleObservationIT {
 
 	@BeforeEach
 	public void before() {
-		elasticsearchSvc = new ElasticsearchSvcImpl("localhost", myElasticsearchContainer.getMappedPort(9200), "", "");
+		elasticsearchSvc = new ElasticsearchSvcImpl(myElasticsearchContainer.getHost(), myElasticsearchContainer.getMappedPort(9200), "", "");
 	}
 
 	@AfterEach

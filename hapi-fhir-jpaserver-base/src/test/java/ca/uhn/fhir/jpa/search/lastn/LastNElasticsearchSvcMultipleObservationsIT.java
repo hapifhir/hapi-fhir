@@ -67,7 +67,7 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	@BeforeEach
 	public void before() throws IOException {
-		elasticsearchSvc = new ElasticsearchSvcImpl("localhost", elasticsearchContainer.getMappedPort(9200), "", "");
+		elasticsearchSvc = new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
 
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();
