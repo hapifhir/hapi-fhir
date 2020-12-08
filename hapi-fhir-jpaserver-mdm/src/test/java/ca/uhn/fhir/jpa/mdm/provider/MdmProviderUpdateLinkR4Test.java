@@ -160,7 +160,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProviderR4.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("The target is marked with the " + MdmConstants.CODE_NO_MDM_MANAGED + " tag which means it may not be MDM linked.", e.getMessage());
+			assertEquals(myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}
 	}
 }

@@ -132,7 +132,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 							break;
 						case MANUAL:
 							if (fromLink.getMatchResult() != toLink.getMatchResult()) {
-								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same source resource");
+								throw new InvalidRequestException("A MANUAL " + fromLink.getMatchResult() + " link may not be merged into a MANUAL " + toLink.getMatchResult() + " link for the same target");
 							}
 					}
 				} else {

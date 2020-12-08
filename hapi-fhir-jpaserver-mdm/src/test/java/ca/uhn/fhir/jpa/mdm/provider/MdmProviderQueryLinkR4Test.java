@@ -122,7 +122,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		assertThat(thePart, hasSize(theExpectedSize));
 		assertThat(thePart.get(0).getName(), is("goldenResourceId"));
 		assertThat(thePart.get(0).getValue().toString(), is(removeVersion(theGoldenResourceId)));
-		assertThat(thePart.get(1).getName(), is("targetResourceId"));
+		assertThat(thePart.get(1).getName(), is("sourceResourceId"));
 		assertThat(thePart.get(1).getValue().toString(), is(removeVersion(theTargetId)));
 		if (theExpectedSize > 2) {
 			assertThat(thePart.get(2).getName(), is("matchResult"));
