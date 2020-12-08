@@ -45,7 +45,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "MPI_LINK", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_MDM_GOLDEN_RESOURCE_SRC", columnNames = {"GOLDEN_RESOURCE_PID", "SOURCE_PID"}),
+	@UniqueConstraint(name = "IDX_EMPI_PERSON_TGT", columnNames = {"PERSON_PID", "TARGET_PID"}),
 })
 public class MdmLink {
 	public static final int VERSION_LENGTH = 16;
@@ -60,17 +60,26 @@ public class MdmLink {
 	private Long myId;
 
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "GOLDEN_RESOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_MDM_LINK_GOLDEN_RESOURCE"), insertable=false, updatable=false, nullable=false)
+	@JoinColumn(name = "GOLDEN_RESOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_GOLDEN_RESOURCE"), insertable=false, updatable=false, nullable=false)
 	private ResourceTable myGoldenResource;
 
 	@Column(name = "GOLDEN_RESOURCE_PID", nullable=false)
 	private Long myGoldenResourcePid;
 
+	@Deprecated
 	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
-	@JoinColumn(name = "SOURCE_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_MDM_LINK_SOURCE"), insertable=false, updatable=false, nullable=false)
+	@JoinColumn(name = "PERSON_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_PERSON"), insertable=false, updatable=false, nullable=false)
+	private ResourceTable myPerson;
+
+	@Deprecated
+	@Column(name = "PERSON_PID", nullable=false)
+	private Long myPersonPid;
+
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
+	@JoinColumn(name = "TARGET_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_EMPI_LINK_TARGET"), insertable=false, updatable=false, nullable=false)
 	private ResourceTable mySource;
 
-	@Column(name = "SOURCE_PID", updatable=false, nullable=false)
+	@Column(name = "TARGET_PID", updatable=false, nullable=false)
 	private Long mySourcePid;
 
 	@Column(name = "MATCH_RESULT", nullable = false)
@@ -97,7 +106,7 @@ public class MdmLink {
 	private Boolean myEidMatch;
 
 	/** This link created a new person **/
-	@Column(name = "NEW_GOLDEN_RESOURCE")
+	@Column(name = "NEW_PERSON")
 	private Boolean myHadToCreateNewGoldenResource;
 
 	@Column(name = "VECTOR")
@@ -116,7 +125,7 @@ public class MdmLink {
 		myVersion = theVersion;
 	}
 
-	@Column(name = "SOURCE_TYPE", nullable = true, length = SOURCE_TYPE_LENGTH)
+	@Column(name = "TARGET_TYPE", nullable = true, length = SOURCE_TYPE_LENGTH)
 	private String myMdmSourceType;
 
 	public Long getId() {
@@ -135,6 +144,10 @@ public class MdmLink {
 	public MdmLink setGoldenResource(ResourceTable theGoldenResource) {
 		myGoldenResource = theGoldenResource;
 		myGoldenResourcePid = theGoldenResource.getId();
+
+		myPerson = theGoldenResource;
+		myPersonPid = theGoldenResource.getId();
+
 		return this;
 	}
 
@@ -142,7 +155,18 @@ public class MdmLink {
 		return myGoldenResourcePid;
 	}
 
+	/**
+	 * @deprecated  Use {@link #setGoldenResourcePid(Long)} instead
+	 */
+	@Deprecated
+	public MdmLink setPersonPid(Long thePersonPid) {
+		myPersonPid = thePersonPid;
+		return this;
+	}
+
 	public MdmLink setGoldenResourcePid(Long theGoldenResourcePid) {
+		setPersonPid(theGoldenResourcePid);
+
 		myGoldenResourcePid = theGoldenResourcePid;
 		return this;
 	}

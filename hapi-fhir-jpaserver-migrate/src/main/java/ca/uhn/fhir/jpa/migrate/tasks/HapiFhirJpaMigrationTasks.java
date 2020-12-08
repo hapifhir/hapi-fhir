@@ -80,27 +80,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nonNullable().type(ColumnTypeEnum.LONG);
 		mdmLink.addColumn("20201029.2", "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
 		mdmLink
-			.addForeignKey("20201029.3", "FK_MDM_LINK_GOLDEN_RESOURCE")
+			.addForeignKey("20201029.3", "FK_EMPI_LINK_GOLDEN_RESOURCE")
 			.toColumn("GOLDEN_RESOURCE_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
-
-		mdmLink.dropIndex("20201029.4", "IDX_EMPI_PERSON_TGT");
-		mdmLink.dropForeignKey("20201029.5", "FK_EMPI_LINK_TARGET", "HFJ_RESOURCE");
-		mdmLink.dropForeignKey("20201029.6", "FK_EMPI_LINK_PERSON", "HFJ_RESOURCE");
-
-		mdmLink.renameColumn("20201029.7", "NEW_PERSON", "NEW_GOLDEN_RESOURCE");
-		mdmLink.renameColumn("20201029.8", "TARGET_PID", "SOURCE_PID");
-		mdmLink.renameColumn("20201029.9", "TARGET_TYPE", "SOURCE_TYPE");
-
-		mdmLink
-			.addForeignKey("20201029.10", "FK_MDM_LINK_SOURCE")
-			.toColumn("SOURCE_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
-
-		mdmLink.addIndex("20201029.11", "IDX_MDM_GOLDEN_RESOURCE_SRC")
-			.unique(true).withColumns("GOLDEN_RESOURCE_PID", "SOURCE_PID");
-
-		mdmLink.dropColumn("20201029.12", "PERSON_PID");
 	}
 
 	protected void init510() {
