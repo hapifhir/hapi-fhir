@@ -42,12 +42,12 @@ jobs:
           jdkVersionOption: 1.11
       - publish: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
       - task: PublishPipelineArtifact@1
-         displayName: 'Publish Full Test Output'
-         condition: always()
-         inputs:
-           targetPath: '$(System.DefaultWorkingDirectory)/'
-           archiveFilePatterns: '**/*-output.txt'
-           artifactName: 'full_logs.zip'
+        displayName: 'Publish Full Test Output'
+        condition: always()
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/'
+          archiveFilePatterns: '**/*-output.txt'
+          artifactName: 'full_logs.zip'
 
       - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
