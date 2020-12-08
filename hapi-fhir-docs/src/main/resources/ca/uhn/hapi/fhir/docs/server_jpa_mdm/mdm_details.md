@@ -69,6 +69,6 @@ When a new source resource is compared with all other resources of the same type
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:
 
 1. It enables the MESSAGE subscription type and starts up the internal subscription engine.
-1. It creates MESSAGE subscriptions for each resource type prefixed with 'mdm-'. For example, if MDM supports Patient and Practitioner resource, two subscriptions, called 'mdm-patient' and 'mdm-practitioner' that match all incoming MDM managed resources and send them to an internal queue called "mdm". The JPA Server listens to this queue and links incoming resources to the appropriate golden resources.
+1. It creates MESSAGE subscriptions for each resource type prefixed with 'mdm-'. For example, if MDM supports Patient and Practitioner resource, two subscriptions, called 'mdm-patient' and 'mdm-practitioner' that match all incoming MDM managed resources and send them to an internal queue called "mdm". The JPA Server listens to this queue and links incoming resources to the appropriate Golden Resources.
 1. The [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html) are registered with the server.
 1. It registers a new dao interceptor that restricts access to MDM managed Golden Resource records.

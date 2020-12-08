@@ -108,7 +108,7 @@ This operation returns a `Parameters` resource that looks like the following:
 
 ## Query Duplicate Golden Resources
 
-Use the `$mdm-duplicate-golden-resources` operation to request a list of duplicate golden resources. 
+Use the `$mdm-duplicate-golden-resources` operation to request a list of duplicate Golden Resources. 
 This operation takes no parameters.
 
 ### Example
@@ -146,7 +146,7 @@ This operation returns `Parameters` similar to `$mdm-query-links`:
 
 ## Unduplicate Golden Resources
 
-Use the `$mdm-not-duplicate` operation to mark duplicate golden resources as not duplicates. 
+Use the `$mdm-not-duplicate` operation to mark duplicate Golden Resources as not duplicates.
 This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
@@ -376,7 +376,7 @@ Content-Type: application/fhir+json; charset=UTF-8
 }
 ```
 
-This might result in a response such as the following:
+Sample response for the Patient match is included below:
 
 ```json
 {
@@ -420,7 +420,7 @@ This might result in a response such as the following:
 
 ## Querying the Other Supported MDM Resources via `/$mdm-match`
 
-Query operations on any other supported MDM type is also allowed. This operation will  Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
+Query operations on any other supported MDM type is also allowed. This operation will find resources that match the provided parameters according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included in the response.
 
 The request below may be submitted to search for `Orgaization` in case it defined as a supported MDM type:
 
@@ -446,7 +446,7 @@ MDM will respond with the appropriate resource bundle.
 
 ## Clearing MDM Links
 
-The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and golden resources.
+The `$mdm-clear` operation is used to batch-delete MDM links and related Golden Resources from the database. This operation is meant to be used during the rules-tuning phase of the MDM implementation so that you can quickly test your ruleset. It permits the user to reset the state of their MDM system without manual deletion of all related links and Golden Resources.
 
 After the operation is complete, all targeted MDM links are removed from the system, and their related Golden Resources are deleted and expunged from the server.
 
