@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.index.IndexRequest;
@@ -70,6 +71,7 @@ import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
 import org.elasticsearch.search.aggregations.support.ValueType;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.IOException;
