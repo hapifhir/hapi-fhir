@@ -26,6 +26,10 @@
 	<logger name="org.hibernate.search.query" additivity="true" level="trace">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	j
+	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" additivity="true" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
 
 	<logger name="org.elasticsearch.client" additivity="true" level="trace">
 		<appender-ref ref="STDOUT" />

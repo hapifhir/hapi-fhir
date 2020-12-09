@@ -185,6 +185,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (cs == null) {
 			throw new InvalidRequestException("Unknown code system: " + theSystem);
 		}
+		IIdType target = cs.getResource().getIdDt();
 
 		AtomicInteger removeCounter = new AtomicInteger(0);
 
@@ -211,9 +212,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			.collect(Collectors.toSet());
 
 		//Delete everything about these codes.
-		allFoundTermConcepts.forEach(code -> deleteEverythingRelatedToConcept(code, removeCounter));
+		for(TermConcept code: allFoundTermConcepts) {
+			deleteEverythingRelatedToConcept(code, removeCounter);
+		}
 
-		IIdType target = cs.getResource().getIdDt();
 		return new UploadStatistics(removeCounter.get(), target);
 	}
 
@@ -224,6 +226,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
+		//TODO GGG JA SWAP HERE. (testRemove)
 		myConceptDao.deleteById(theConcept.getId());
 //		myConceptDao.deleteByPid(theConcept.getId());
 
@@ -767,29 +770,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
 	}
 
-	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
-		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
-			deleteConceptChildrenAndConcept(nextChildLink.getChild(), theRemoveCounter);
-		}
-
-		myConceptParentChildLinkDao.deleteByConceptPid(theConcept.getId());
-
-		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
-		myConceptPropertyDao.deleteAll(theConcept.getProperties());
-
-		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
-
-		myConceptDao.deleteById(theConcept.getId());
-//		myConceptDao.deleteByPid(theConcept.getId());
-
-		theRemoveCounter.incrementAndGet();
-	}
-
-
 	@SuppressWarnings("ConstantConditions")
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
@@ -803,7 +787,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			}
 
 			txTemplate.executeWithoutResult(t -> {
+				//TODO GGG JA SWAP HERE (Loinc test)
 				link.forEach(theDao::deleteById);
+//				link.forEach(theDao::deleteByPid);
 				theDao.flush();
 			});
 
