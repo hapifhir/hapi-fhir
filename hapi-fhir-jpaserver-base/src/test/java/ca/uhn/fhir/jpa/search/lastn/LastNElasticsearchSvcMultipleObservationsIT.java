@@ -59,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @Testcontainers
-@ContextConfiguration(classes = {LastNElasticsearchSvcMultipleObservationsIT.config.class})
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	static private final Calendar baseObservationDate = new GregorianCalendar();
@@ -74,28 +73,13 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 	@Container
 	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
 
-	@Autowired
 	private ElasticsearchSvcImpl elasticsearchSvc;
-
-	@Configuration
-	static class config {
-
-		@Bean
-		public PartitionSettings myPartitionSettings() {
-			PartitionSettings partitionSettings = new PartitionSettings();
-			partitionSettings.setPartitioningEnabled(false);
-			return partitionSettings;
-		}
-
-		@Bean
-		public ElasticsearchSvcImpl elasticsearchSvc() {
-			return new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
-		}
-	}
 
 	@BeforeEach
 	public void before() throws IOException {
-//		elasticsearchSvc = new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		PartitionSettings partitionSettings = new PartitionSettings();
+		partitionSettings.setPartitioningEnabled(false);
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
 
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();

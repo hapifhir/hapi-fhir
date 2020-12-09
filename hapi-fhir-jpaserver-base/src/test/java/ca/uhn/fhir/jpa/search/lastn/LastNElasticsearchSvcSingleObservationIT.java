@@ -85,32 +85,17 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
 	final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-	@Autowired
 	ElasticsearchSvcImpl elasticsearchSvc;
 
 	@Container
 	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
 
-	@Configuration
-	static class config {
-
-		@Bean
-		public PartitionSettings myPartitionSettings() {
-			PartitionSettings partitionSettings = new PartitionSettings();
-			partitionSettings.setPartitioningEnabled(false);
-			return partitionSettings;
-		}
-
-		@Bean
-		public ElasticsearchSvcImpl elasticsearchSvc() {
-			return new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
-		}
-	}
-
 
 	@BeforeEach
 	public void before() {
-//		elasticsearchSvc = new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		PartitionSettings partitionSettings = new PartitionSettings();
+		partitionSettings.setPartitioningEnabled(false);
+		elasticsearchSvc = new ElasticsearchSvcImpl(partitionSettings, elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
 	}
 
 	@AfterEach
