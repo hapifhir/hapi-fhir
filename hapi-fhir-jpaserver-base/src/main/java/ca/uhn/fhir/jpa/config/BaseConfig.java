@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
-import ca.uhn.fhir.jpa.dao.expunge.ExpungeServiceSubclass;
 import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
 import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
@@ -633,10 +632,15 @@ public abstract class BaseConfig {
 		return new DeleteConflictFinderService();
 	}
 
-	//FIXME RZ
 	@Bean
 	public ExpungeService expungeService() {
-		return new ExpungeServiceSubclass();
+		return new ExpungeService();
+	}
+
+	@Bean
+	@Scope("prototype")
+	public ExpungeOperation expungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return new ExpungeOperation(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequestDetails);
 	}
 
 	@Bean
