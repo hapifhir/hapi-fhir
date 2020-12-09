@@ -192,7 +192,17 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		//children into a single set of TermConcept objects retrieved from the DB. Note that we have to do this because
 		//deleteById() in JPA doesnt appear to actually commit or flush a transaction until way later, and we end up
 		//iterating multiple times over the same elements, which screws up our counter.
-		Set<TermConcept> allFoundTermConcepts = theValue.getRootConcepts()
+
+
+		//Grab the actual entities
+		List<TermConcept> collect = theValue.getRootConcepts().stream()
+			.map(val -> myTerminologySvc.findCode(theSystem, val.getCode()))
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toList());
+
+		//Iterate over the actual entities and fill out their children
+		Set<TermConcept> allFoundTermConcepts = collect
 			.stream()
 			.flatMap(concept -> flattenChildren(concept).stream())
 			.map(suppliedTermConcept -> myTerminologySvc.findCode(theSystem, suppliedTermConcept.getCode()))
@@ -214,7 +224,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		myConceptDao.deleteById(theConcept.getId());
+		myConceptDao.deleteByPid(theConcept.getId());
 
 		theRemoveCounter.incrementAndGet();
 	}
