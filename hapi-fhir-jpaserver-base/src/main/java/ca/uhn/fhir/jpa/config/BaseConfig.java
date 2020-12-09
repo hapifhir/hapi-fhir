@@ -40,8 +40,8 @@ import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderCoords;
 import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
-import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactorySubclass;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
@@ -119,6 +119,7 @@ import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -694,8 +695,18 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public PredicateBuilderFactory predicateBuilderFactory() {
-		return new PredicateBuilderFactorySubclass();
+	public PredicateBuilderFactory predicateBuilderFactory(ApplicationContext theApplicationContext) {
+		return new PredicateBuilderFactory(theApplicationContext);
+	}
+
+	@Bean
+	public PredicateBuilderCoords predicateBuilderCoords(LegacySearchBuilder theSearchBuilder) {
+		return new PredicateBuilderCoords(theSearchBuilder);
+	}
+
+	@Bean
+	public LegacySearchBuilder legacySearchBuilder(IDao theDao, String theResourceName, Class<? extends IBaseResource> theResourceType) {
+		return new LegacySearchBuilder(theDao, theResourceName, theResourceType);
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
