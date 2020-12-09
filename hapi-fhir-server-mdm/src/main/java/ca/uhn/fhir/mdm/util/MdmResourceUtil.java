@@ -85,7 +85,6 @@ public final class MdmResourceUtil {
 		theResource.getMeta().getTag().removeIf(tag -> tag.getSystem().equalsIgnoreCase(theSystem));
 	}
 
-
 	/**
 	 * Sets the MDM-managed tag, indicating the MDM system has ownership of this
 	 * Resource. No changes are made if resource is already maanged by MDM.

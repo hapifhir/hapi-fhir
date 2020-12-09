@@ -242,7 +242,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(jane, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("While running with EID updates disabled, EIDs may not be updated on Patient/Practitioner resources")));
+			assertThat(e.getMessage(), is(equalTo("While running with EID updates disabled, EIDs may not be updated on source resources")));
 		}
 		setPreventEidUpdates(false);
 	}
@@ -257,7 +257,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail();
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage(), is(equalTo("While running with multiple EIDs disabled, Patient/Practitioner resources may have at most one EID.")));
+			assertThat(e.getMessage(), is(equalTo("While running with multiple EIDs disabled, source resources may have at most one EID.")));
 		}
 
 		setPreventMultipleEids(false);
