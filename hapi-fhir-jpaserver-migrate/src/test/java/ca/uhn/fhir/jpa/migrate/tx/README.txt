@@ -38,7 +38,7 @@ I can write a latched up test
 
 James Agnew  
 my main lingering concern is speed… i wanna keep in mind that the normal case is definitely not 10 threads all trying to
-write the same resource in the middle of a transaction bundle. I’m nervous that if a UPMC bundle is now going to be 30 database transactions
+write the same resource in the middle of a transaction bundle. I’m nervous that if a bundle is now going to be 30 database transactions
 instead of 1 that is going to kill performance
 
 Ken Stevens  
