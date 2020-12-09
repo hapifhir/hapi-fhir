@@ -40,7 +40,6 @@ jobs:
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
-      - publish: '$(System.DefaultWorkingDirectory)/hapi-fhir-jpaserver-base/target/surefire-reports/ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4SearchLastNAsyncIT-output.txt'
       - task: CopyFiles@2
         inputs:
           sourceFolder: '$(System.DefaultWorkingDirectory)/'
