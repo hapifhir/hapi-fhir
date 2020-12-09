@@ -8,6 +8,8 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.batch.BatchJobsConfig;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.batch.config.NonPersistedBatchConfigurer;
@@ -19,13 +21,31 @@ import ca.uhn.fhir.jpa.bulk.provider.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.svc.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
+import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
 import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
+import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
+import ca.uhn.fhir.jpa.dao.expunge.DeleteExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.ExpungeServiceSubclass;
+import ca.uhn.fhir.jpa.dao.expunge.IResourceExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.PartitionRunner;
+import ca.uhn.fhir.jpa.dao.expunge.ResourceExpungeService;
+import ca.uhn.fhir.jpa.dao.expunge.ResourceTableFKProvider;
 import ca.uhn.fhir.jpa.dao.index.DaoResourceLinkResolver;
+import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactory;
+import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderFactorySubclass;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictFinderService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
@@ -81,8 +101,13 @@ import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
+import ca.uhn.fhir.jpa.search.warm.CacheWarmingSvcImpl;
+import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
+import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -96,9 +121,7 @@ import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
@@ -113,7 +136,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 
 import javax.annotation.Nullable;
 import java.util.Date;
@@ -141,18 +163,6 @@ import java.util.Date;
 
 @Configuration
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
-@ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters = {
-	@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = BaseConfig.class),
-	@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = WebSocketConfigurer.class),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*\\.test\\..*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.searchparam.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.empi.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.cache.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.starter.*"),
-	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.batch.*")
-})
 @Import({
 	SearchParamConfig.class, BatchJobsConfig.class
 })
@@ -595,6 +605,93 @@ public abstract class BaseConfig {
 	@Scope("prototype")
 	public HistoryBuilder newPersistedJpaSearchFirstPageBundleProvider(@Nullable String theResourceType, @Nullable Long theResourceId, @Nullable Date theRangeStartInclusive, @Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
+	}
+
+	@Bean
+	@Primary
+	public ISearchParamProvider searchParamProvider() {
+		return new DaoSearchParamProvider();
+	}
+
+	@Bean
+	public IdHelperService idHelperService() {
+		return new IdHelperService();
+	}
+
+	@Bean
+	public ISearchCoordinatorSvc searchCoordinatorSvc(ThreadPoolTaskExecutor searchCoordinatorThreadFactory) {
+		return new SearchCoordinatorSvcImpl(searchCoordinatorThreadFactory);
+	}
+
+	@Bean
+	public DeleteConflictService deleteConflictService() {
+		return new DeleteConflictService();
+	}
+
+	@Bean
+	public DeleteConflictFinderService deleteConflictFinderService() {
+		return new DeleteConflictFinderService();
+	}
+
+	//FIXME RZ
+	@Bean
+	public ExpungeService expungeService() {
+		return new ExpungeServiceSubclass();
+	}
+
+	@Bean
+	public ExpungeEverythingService expungeEverythingService() {
+		return new ExpungeEverythingService();
+	}
+
+	@Bean
+	public IResourceExpungeService resourceExpungeService() {
+		return new ResourceExpungeService();
+	}
+
+	@Bean
+	public ISearchParamPresenceSvc searchParamPresenceService() {
+		return new SearchParamPresenceSvcImpl();
+	}
+
+	@Bean
+	public SearchParamWithInlineReferencesExtractor searchParamWithInlineReferencesExtractor() {
+		return new SearchParamWithInlineReferencesExtractor();
+	}
+
+	@Bean
+	public MatchResourceUrlService matchResourceUrlService() {
+		return new MatchResourceUrlService();
+	}
+
+	@Bean
+	public DaoSearchParamSynchronizer daoSearchParamSynchronizer() {
+		return new DaoSearchParamSynchronizer();
+	}
+
+	@Bean
+	public DeleteExpungeService deleteExpungeService() {
+		return new DeleteExpungeService();
+	}
+
+	@Bean
+	public PartitionRunner partitionRunner(DaoConfig theDaoConfig) {
+		return new PartitionRunner(theDaoConfig);
+	}
+
+	@Bean
+	public ResourceTableFKProvider resourceTableFKProvider() {
+		return new ResourceTableFKProvider();
+	}
+
+	@Bean
+	public ICacheWarmingSvc cacheWarmingSvc() {
+		return new CacheWarmingSvcImpl();
+	}
+
+	@Bean
+	public PredicateBuilderFactory predicateBuilderFactory() {
+		return new PredicateBuilderFactorySubclass();
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
