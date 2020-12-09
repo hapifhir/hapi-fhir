@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import org.springframework.beans.factory.annotation.Lookup;
 
+//FIXME RZ
 public class PredicateBuilderFactorySubclass extends PredicateBuilderFactory {
 	@Lookup
 	public PredicateBuilderCoords newPredicateBuilderCoords(LegacySearchBuilder theSearchBuilder) {
