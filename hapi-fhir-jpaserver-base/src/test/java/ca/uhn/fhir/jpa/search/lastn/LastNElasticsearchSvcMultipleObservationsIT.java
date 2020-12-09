@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
 import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
@@ -26,6 +27,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -49,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @Testcontainers
+@ContextConfiguration(classes = {LastNElasticsearchSvcMultipleObservationsIT.config.class})
 public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	static private final Calendar baseObservationDate = new GregorianCalendar();
@@ -60,14 +71,31 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 
 	private final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-	private ElasticsearchSvcImpl elasticsearchSvc;
-
 	@Container
 	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
 
+	@Autowired
+	private ElasticsearchSvcImpl elasticsearchSvc;
+
+	@Configuration
+	static class config {
+
+		@Bean
+		public PartitionSettings myPartitionSettings() {
+			PartitionSettings partitionSettings = new PartitionSettings();
+			partitionSettings.setPartitioningEnabled(false);
+			return partitionSettings;
+		}
+
+		@Bean
+		public ElasticsearchSvcImpl elasticsearchSvc() {
+			return new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		}
+	}
+
 	@BeforeEach
 	public void before() throws IOException {
-		elasticsearchSvc = new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+//		elasticsearchSvc = new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
 
 		if (!indexLoaded) {
 			createMultiplePatientsAndObservations();

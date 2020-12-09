@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.search.lastn;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import ca.uhn.fhir.jpa.search.lastn.config.TestElasticsearchContainerHelper;
 import ca.uhn.fhir.jpa.search.lastn.json.CodeJson;
@@ -25,6 +26,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
@@ -81,15 +85,32 @@ public class LastNElasticsearchSvcSingleObservationIT {
 	final String CODEFIRSTCODINGDISPLAY = "test-code display";
 	final FhirContext myFhirContext = FhirContext.forCached(FhirVersionEnum.R4);
 
-//	@Autowired
+	@Autowired
 	ElasticsearchSvcImpl elasticsearchSvc;
 
 	@Container
-	public ElasticsearchContainer myElasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+	public static ElasticsearchContainer elasticsearchContainer = TestElasticsearchContainerHelper.getEmbeddedElasticSearch();
+
+	@Configuration
+	static class config {
+
+		@Bean
+		public PartitionSettings myPartitionSettings() {
+			PartitionSettings partitionSettings = new PartitionSettings();
+			partitionSettings.setPartitioningEnabled(false);
+			return partitionSettings;
+		}
+
+		@Bean
+		public ElasticsearchSvcImpl elasticsearchSvc() {
+			return new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
+		}
+	}
+
 
 	@BeforeEach
 	public void before() {
-		elasticsearchSvc = new ElasticsearchSvcImpl(myElasticsearchContainer.getHost(), myElasticsearchContainer.getMappedPort(9200), "", "");
+//		elasticsearchSvc = new ElasticsearchSvcImpl(elasticsearchContainer.getHost(), elasticsearchContainer.getMappedPort(9200), "", "");
 	}
 
 	@AfterEach
