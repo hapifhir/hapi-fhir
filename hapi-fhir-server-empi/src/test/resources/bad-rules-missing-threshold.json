@@ -1,0 +1,16 @@
+{
+	"version": "1",
+	"candidateSearchParams" : [],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [ {
+		"name" : "given-name",
+		"resourceType" : "*",
+		"resourcePath" : "name.given",
+		"similarity" : {
+			"algorithm": "COSINE"
+		}
+	}],
+	"matchResultMap" : {
+		"given-name" : "POSSIBLE_MATCH"
+	}
+}

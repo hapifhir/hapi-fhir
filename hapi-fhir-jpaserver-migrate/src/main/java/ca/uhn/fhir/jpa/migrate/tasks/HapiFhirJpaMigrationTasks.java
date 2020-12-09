@@ -21,6 +21,11 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.entity.EmpiLink;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConceptMap;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -69,20 +74,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
 		init501(); // 20200514 - 20200515
-		init510(); // 20200516 - 20201028
-		init520(); // 20201029 - Present
-	}
-
-	protected void init520() {
-		Builder version = forVersion(VersionEnum.V5_2_0);
-
-		Builder.BuilderWithTableName mdmLink = version.onTable("MPI_LINK");
-		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nonNullable().type(ColumnTypeEnum.LONG);
-		mdmLink.addColumn("20201029.2", "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
-		mdmLink
-			.addForeignKey("20201029.3", "FK_EMPI_LINK_GOLDEN_RESOURCE")
-			.toColumn("GOLDEN_RESOURCE_PID")
-			.references("HFJ_RESOURCE", "RES_ID");
+		init510(); // 20200516 - 20201112
 	}
 
 	protected void init510() {
@@ -149,7 +141,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		empiLink.addColumn("20200715.3", "NEW_PERSON").nullable().type(ColumnTypeEnum.BOOLEAN);
 		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
 		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
-
 
 		init510_20200725();
 

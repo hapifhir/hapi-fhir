@@ -77,7 +77,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-server-mdm</artifactId>
+			<artifactId>hapi-fhir-server-empi</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
