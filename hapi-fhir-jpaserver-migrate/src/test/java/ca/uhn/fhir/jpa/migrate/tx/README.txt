@@ -1,6 +1,5 @@
 Ken Stevens
 I agree with you we should try to find a way to prevent the behaviour we saw in the db when they flood smile servers with large transactions creating the same entity.
-My gut-reaction is that an in-memory mutex is not the best way to do this.
 Can we coordinate the update vs insert via the database?
 e.g. catch an insert failure in a sub-transaction and retry with an update so we only rollback the insert, not the entire transaction
 
