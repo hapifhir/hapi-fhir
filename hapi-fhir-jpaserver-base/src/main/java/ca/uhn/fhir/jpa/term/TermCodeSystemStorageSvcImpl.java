@@ -224,6 +224,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
+		myConceptDao.deleteById(theConcept.getId());
 		myConceptDao.deleteByPid(theConcept.getId());
 
 		theRemoveCounter.incrementAndGet();
@@ -778,6 +779,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
+		myConceptDao.deleteById(theConcept.getId());
 		myConceptDao.deleteByPid(theConcept.getId());
 
 		theRemoveCounter.incrementAndGet();

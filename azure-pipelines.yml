@@ -41,6 +41,7 @@ jobs:
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
       - task: CopyFiles@2
+        condition: always()
         inputs:
           sourceFolder: '$(System.DefaultWorkingDirectory)/'
           contents: '**/target/*output.txt'
