@@ -136,8 +136,8 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	 * Adds a transaction ID to this message. This ID can be used for many purposes. For example, performing tracing
 	 * across asynchronous hooks, tying data together, or downstream logging purposes.
 	 *
-	 * One current internal implementation uses this field to tie back MDM processing results (which are asynchronous)
-	 * to the original transaction log that caused the MDM processing to occur.
+	 * One current internal implementation uses this field to tie back EMPI processing results (which are asynchronous)
+	 * to the original transaction log that caused the EMPI processing to occur.
 	 *
 	 * @param theTransactionId An ID representing a transaction of relevance to this message.
 	 */

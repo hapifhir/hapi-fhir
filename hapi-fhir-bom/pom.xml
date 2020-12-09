@@ -38,7 +38,7 @@
             </dependency>
 			  <dependency>
 				  <groupId>${project.groupId}</groupId>
-				  <artifactId>hapi-fhir-server-mdm</artifactId>
+				  <artifactId>hapi-fhir-server-empi</artifactId>
 				  <version>${project.version}</version>
 			  </dependency>
             <dependency>
@@ -103,7 +103,7 @@
             </dependency>
 			  <dependency>
 				  <groupId>${project.groupId}</groupId>
-				  <artifactId>hapi-fhir-jpaserver-mdm</artifactId>
+				  <artifactId>hapi-fhir-jpaserver-empi</artifactId>
 				  <version>${project.version}</version>
 			  </dependency>
             <dependency>
