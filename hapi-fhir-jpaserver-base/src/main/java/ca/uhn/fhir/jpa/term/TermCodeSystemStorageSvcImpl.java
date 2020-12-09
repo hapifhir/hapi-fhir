@@ -46,7 +46,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.jpa.util.SpringObjectCaster;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -55,10 +55,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
-import com.sun.mail.imap.protocol.SearchSequence;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -72,7 +69,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
@@ -80,6 +76,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -191,16 +188,51 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		AtomicInteger removeCounter = new AtomicInteger(0);
 
-		for (TermConcept nextSuppliedConcept : theValue.getRootConcepts()) {
-			Optional<TermConcept> conceptOpt = myTerminologySvc.findCode(theSystem, nextSuppliedConcept.getCode());
-			if (conceptOpt.isPresent()) {
-				TermConcept concept = conceptOpt.get();
-				deleteConceptChildrenAndConcept(concept, removeCounter);
-			}
-		}
+		//We need to delete all termconcepts, and their children. This stream flattens the TermConcepts and their
+		//children into a single set of TermConcept objects retrieved from the DB. Note that we have to do this because
+		//deleteById() in JPA doesnt appear to actually commit or flush a transaction until way later, and we end up
+		//iterating multiple times over the same elements, which screws up our counter.
+		Set<TermConcept> allFoundTermConcepts = theValue.getRootConcepts()
+			.stream()
+			.flatMap(concept -> flattenChildren(concept).stream())
+			.map(suppliedTermConcept -> myTerminologySvc.findCode(theSystem, suppliedTermConcept.getCode()))
+			.filter(Optional::isPresent)
+			.map(Optional::get)
+			.collect(Collectors.toSet());
+
+		//Delete everything about these codes.
+		allFoundTermConcepts.forEach(code -> deleteEverythingRelatedToConcept(code, removeCounter));
 
 		IIdType target = cs.getResource().getIdDt();
 		return new UploadStatistics(removeCounter.get(), target);
+	}
+
+	private void deleteEverythingRelatedToConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
+		myConceptParentChildLinkDao.deleteByConceptPid(theConcept.getId());
+		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
+		myConceptPropertyDao.deleteAll(theConcept.getProperties());
+
+		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
+
+		myConceptDao.deleteById(theConcept.getId());
+
+		theRemoveCounter.incrementAndGet();
+	}
+
+	private List<TermConcept> flattenChildren(TermConcept theTermConcept) {
+		if (theTermConcept.getChildren().isEmpty()) {
+			return Arrays.asList(theTermConcept);
+		}
+
+		//Recursively flatten children
+		List<TermConcept> childTermConcepts = theTermConcept.getChildren().stream()
+			.map(TermConceptParentChildLink::getChild)
+			.flatMap(childConcept -> flattenChildren(childConcept).stream())
+			.collect(Collectors.toList());
+
+		//Add itself before its list of children
+		childTermConcepts.add(0, theTermConcept);
+		return childTermConcepts;
 	}
 
 	@Override
@@ -222,7 +254,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
 			return codeSystemVersions
 				.stream()
-				.map(v -> v.getPid())
+				.map(TermCodeSystemVersion::getPid)
 				.collect(Collectors.toList());
 		});
 		for (Long next : codeSystemVersionPids) {
@@ -735,7 +767,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myConceptPropertyDao.deleteAll(theConcept.getProperties());
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
-		myConceptDao.deleteById(theConcept.getId());
+
+		myConceptDao.deleteByPid(theConcept.getId());
+
 		theRemoveCounter.incrementAndGet();
 	}
 
