@@ -10,6 +10,7 @@ import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import javax.annotation.Nonnull;
@@ -511,6 +512,18 @@ public class UrlUtil {
 		}
 
 		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
+
+		// One issue that has happened before is people putting a "+" sign into an email address in a match URL
+		// and having that turn into a " ". Since spaces are never appropriate for email addresses, let's just
+		// assume they really meant "+".
+		for (int i = 0; i < parameters.size(); i++) {
+			NameValuePair next = parameters.get(i);
+			if (next.getName().equals("email") && next.getValue().contains(" ")) {
+				BasicNameValuePair newPair = new BasicNameValuePair(next.getName(), next.getValue().replace(' ', '+'));
+				parameters.set(i, newPair);
+			}
+		}
+
 		return parameters;
 	}
 }
