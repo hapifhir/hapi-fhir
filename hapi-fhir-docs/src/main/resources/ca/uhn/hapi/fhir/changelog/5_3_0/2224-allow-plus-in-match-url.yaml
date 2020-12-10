@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2234
+title: "When performing a conditional create/update containing the email search parameter, any `+` characters will now be interpreted
+   as actually being a plus symbol instead of being unescaped into a space character. This is technically a deviation from how URLs should
+   be parsed, but allows for a sensible behaviour in a spot where no spaces are allowed."

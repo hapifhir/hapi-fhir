@@ -42,11 +42,14 @@ import java.util.stream.Collectors;
 public class TransactionProcessor extends BaseTransactionProcessor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessor.class);
-
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
+
+	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+	}
 
 	@Override
 	protected void validateDependencies() {
