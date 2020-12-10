@@ -50,10 +50,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderTag extends BasePredicateBuilder {
+public class PredicateBuilderTag extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderTag.class);
 
-	PredicateBuilderTag(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderTag(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

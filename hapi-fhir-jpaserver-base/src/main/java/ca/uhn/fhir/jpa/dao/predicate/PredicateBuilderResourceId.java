@@ -45,13 +45,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderResourceId extends BasePredicateBuilder {
+public class PredicateBuilderResourceId extends BasePredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderResourceId.class);
 
 	@Autowired
 	IdHelperService myIdHelperService;
 
-	PredicateBuilderResourceId(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderResourceId(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

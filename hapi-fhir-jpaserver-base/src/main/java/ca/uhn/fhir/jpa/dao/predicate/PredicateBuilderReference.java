@@ -100,7 +100,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -126,7 +125,7 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	PredicateBuilderReference(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
+	public PredicateBuilderReference(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
 		super(theSearchBuilder);
 		myPredicateBuilder = thePredicateBuilder;
 	}

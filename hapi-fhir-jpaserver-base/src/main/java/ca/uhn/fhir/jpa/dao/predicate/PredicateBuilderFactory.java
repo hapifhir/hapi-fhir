@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class PredicateBuilderFactory {
 
-	private ApplicationContext myApplicationContext;
+	private final ApplicationContext myApplicationContext;
 
 	@Autowired
 	public PredicateBuilderFactory(ApplicationContext theApplicationContext) {
