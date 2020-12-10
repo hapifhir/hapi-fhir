@@ -19,7 +19,7 @@ modulesToTest=""
 
 if [ $agentNumber -eq 1 ]; then modulesToTest="hapi-fhir-jpaserver-base"; fi
 
-responsibleAgentCounter=1
+responsibleAgentCounter=2
 
 for i in $modules; do
    echo Counter is $responsibleAgentCounter

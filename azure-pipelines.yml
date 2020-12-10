@@ -15,7 +15,7 @@ pool:
 jobs:
   - job: Build
     strategy:
-      parallel: 2
+      parallel: 3
     displayName: Build Hapi
     timeoutInMinutes: 360
     container: maven:3-jdk-11
