@@ -25,10 +25,12 @@ jobs:
           key: 'maven | "$(Agent.OS)" | ./pom.xml'
           path: $(MAVEN_CACHE_FOLDER)
       - task: Bash@3
+        displayName: Create Maven Cache
         inputs:
           targetType: 'inline'
           script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
       - task: Bash@3
+        displayName: Determine Target Modules
         inputs:
            targetType: 'filePath'
            filePath: 'slice_modules.sh'
