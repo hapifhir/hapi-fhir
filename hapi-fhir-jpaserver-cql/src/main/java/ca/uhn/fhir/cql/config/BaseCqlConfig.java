@@ -20,8 +20,8 @@ package ca.uhn.fhir.cql.config;
  * #L%
  */
 
-import ca.uhn.fhir.cql.provider.CqlProviderFactory;
-import ca.uhn.fhir.cql.provider.CqlProviderLoader;
+import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
+import ca.uhn.fhir.cql.common.provider.CqlProviderLoader;
 import org.springframework.context.annotation.Bean;
 
 public abstract class BaseCqlConfig {
