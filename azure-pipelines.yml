@@ -14,6 +14,9 @@ pool:
 
 jobs:
   - job: Build
+    strategy:
+      parallel: 2
+    displayName: Build Hapi
     timeoutInMinutes: 360
     container: maven:3-jdk-11
     steps:
@@ -25,6 +28,11 @@ jobs:
         inputs:
           targetType: 'inline'
           script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
+      - task: Bash@3
+        inputs:
+           targetType: 'filePath'
+           filePath: 'slice_modules.sh'
+           script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
       - task: Maven@3
         env:
           JAVA_HOME_11_X64: /usr/local/openjdk-11
