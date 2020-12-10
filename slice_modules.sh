@@ -13,7 +13,7 @@ echo $totalAgents
 echo $agentNumber
 
 # Find all directories that have hapi- in the name, assuming they are all modules.
-modules=$(ls | grep "hapi-" | grep -v "\." | grep -v "hapi-fhir-jpaserver-base" | grep -v "hapi-fhir-android-realm" | grep -v "hapi-fhir-narrativegenerator")
+modules=$(ls | grep "hapi-" | grep -v "\." | grep -v "hapi-fhir-jpaserver-base" | grep -v "hapi-fhir-android-realm" | grep -v "hapi-fhir-narrativegenerator" | grep -v "hapi-fhir-oauth2" | grep -v "hapi-fhir-testpage-interceptor" | grep -v "hapi-fhir-structures-dstu" | )
 
 modulesToTest=""
 
