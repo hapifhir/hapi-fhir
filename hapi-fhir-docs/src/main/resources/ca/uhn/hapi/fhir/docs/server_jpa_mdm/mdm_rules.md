@@ -9,7 +9,7 @@ Here is an example of a full HAPI MDM rules json document:
 ```json
 {
 	"version": "1",
-    "mdmTypes" : ["Organization", "Patient", "Practitioner"],
+   "mdmTypes" : ["Organization", "Patient", "Practitioner"],
 	"candidateSearchParams": [
 		{
 			"resourceType": "Patient",

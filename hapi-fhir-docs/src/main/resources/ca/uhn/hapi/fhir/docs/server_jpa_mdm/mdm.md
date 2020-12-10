@@ -1,5 +1,9 @@
 # MDM Getting Started 
- 
+
+<div class="helpInfoCalloutBox">
+MDM module replaces the EMPI module. EMPI is now deprecated and can not be used. Please refer to the [Migration Instructions](#migration-instructions) section for more details.
+</div>
+
 ## Introduction 
  
 A Master Data Management (MDM) module allows for links to be created and maintained among FHIR resources. These links indicate the fact that different FHIR resources are known or believed to refer to the same actual (real world) resource. The links are created and updated using different combinations of automatic and manual linking. 
@@ -28,7 +32,10 @@ HAPI MDM keeps track of which links were automatically established vs manually v
 
 Follow these steps to enable MDM on the server:
 
-The [MdmSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html) bean 
-contains configuration settings related to MDM within the server. To enable MDM, the [setEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setEnabled(boolean)) property should be enabled.
+The [MdmSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html) bean contains configuration settings related to MDM within the server. To enable MDM, the [setEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setEnabled(boolean)) property should be enabled.
 
 See [MDM EID Settings](/hapi-fhir/docs/server_jpa_mdm/mdm_eid.html#mdm-eid-settings) for a description of the EID-related settings.
+
+## Migration Instructions
+
+Please note that EMPI is now deprecated and cannot be used. To switch from EMPI to MDM, please copy over EMPI settings to MDM module settings. Also note that MDM now requires "mdmTypes" in the JSON configuration. This entry should include all FHIR resource types that are supported by MDM. For more details on supported MDM types refer to [MDM Rules](/hapi-fhir/docs/server_jpa_mdm/mdm_rules.html)
