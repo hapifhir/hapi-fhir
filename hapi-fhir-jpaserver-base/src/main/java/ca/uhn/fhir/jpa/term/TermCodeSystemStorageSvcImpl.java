@@ -227,8 +227,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
 		//TODO GGG JA SWAP HERE. (testRemove)
-		myConceptDao.deleteById(theConcept.getId());
-//		myConceptDao.deleteByPid(theConcept.getId());
+//		myConceptDao.deleteById(theConcept.getId());
+		myConceptDao.deleteByPid(theConcept.getId());
 
 		theRemoveCounter.incrementAndGet();
 	}
@@ -788,8 +788,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			txTemplate.executeWithoutResult(t -> {
 				//TODO GGG JA SWAP HERE (Loinc test)
-				link.forEach(theDao::deleteById);
-//				link.forEach(theDao::deleteByPid);
+//				link.forEach(theDao::deleteById);
+				link.forEach(theDao::deleteByPid);
 				theDao.flush();
 			});
 
