@@ -21,19 +21,19 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
-import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
+import ca.uhn.fhir.mdm.log.Logs;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 
-import static ca.uhn.fhir.mdm.api.IMdmSettings.MDM_CHANNEL_NAME;
+import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
 
 /**
  * This class is responsible for manual submissions of {@link IAnyResource} resources onto the MDM Channel.
@@ -67,7 +67,7 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 
 	private void init() {
 		ChannelProducerSettings channelSettings = new ChannelProducerSettings();
-		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(MDM_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
+		myMdmChannelProducer = myChannelFactory.getOrCreateProducer(EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, channelSettings);
 	}
 
 	private MessageChannel getMdmChannelProducer() {

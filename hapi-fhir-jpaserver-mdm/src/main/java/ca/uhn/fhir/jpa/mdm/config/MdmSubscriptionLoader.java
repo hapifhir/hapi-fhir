@@ -104,7 +104,7 @@ public class MdmSubscriptionLoader {
 		retval.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
 		org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType.MESSAGE);
-		channel.setEndpoint("channel:" + myChannelNamer.getChannelName(IMdmSettings.MDM_CHANNEL_NAME, new ChannelProducerSettings()));
+		channel.setEndpoint("channel:" + myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
 		channel.setPayload("application/json");
 		return retval;
 	}
@@ -118,7 +118,7 @@ public class MdmSubscriptionLoader {
 		retval.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_HAPI_MDM_MANAGED);
 		Subscription.SubscriptionChannelComponent channel = retval.getChannel();
 		channel.setType(Subscription.SubscriptionChannelType.MESSAGE);
-		channel.setEndpoint("channel:" + myChannelNamer.getChannelName(IMdmSettings.MDM_CHANNEL_NAME, new ChannelProducerSettings()));
+		channel.setEndpoint("channel:" + myChannelNamer.getChannelName(IMdmSettings.EMPI_CHANNEL_NAME, new ChannelProducerSettings()));
 		channel.setPayload("application/json");
 		return retval;
 	}
