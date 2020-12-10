@@ -118,6 +118,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
+import ca.uhn.fhir.jpa.validation.JpaResourceLoader;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
@@ -767,6 +768,11 @@ public abstract class BaseConfig {
 	@Bean
 	public PredicateBuilderFactory predicateBuilderFactory(ApplicationContext theApplicationContext) {
 		return new PredicateBuilderFactory(theApplicationContext);
+	}
+
+	@Bean
+	public JpaResourceLoader jpaResourceLoader() {
+		return new JpaResourceLoader();
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
