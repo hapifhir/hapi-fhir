@@ -38,23 +38,16 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.common.evaluation.EvaluationProviderFactory;
-import org.opencds.cqf.common.providers.LibraryResolutionProvider;
+
 import org.opencds.cqf.cql.engine.data.DataProvider;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.dstu3.evaluation.MeasureEvaluation;
-import org.opencds.cqf.dstu3.evaluation.MeasureEvaluationSeed;
-import org.opencds.cqf.dstu3.helpers.LibraryHelper;
-import org.opencds.cqf.dstu3.providers.DataRequirementsProvider;
-import org.opencds.cqf.dstu3.providers.HQMFProvider;
 import org.opencds.cqf.tooling.library.stu3.NarrativeProvider;
 import org.opencds.cqf.tooling.measure.stu3.CqfMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -77,7 +70,7 @@ public class MeasureOperationsProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
-    @Inject
+    @Autowired
     public MeasureOperationsProvider(DaoRegistry registry, EvaluationProviderFactory factory,
                                      NarrativeProvider narrativeProvider, HQMFProvider hqmfProvider,
                                      LibraryResolutionProvider<Library> libraryResolutionProvider,
@@ -102,7 +95,7 @@ public class MeasureOperationsProvider {
     }
 
     @Operation(name = "$refresh-generated-content", type = Measure.class)
-    public MethodOutcome refreshGeneratedContent(HttpServletRequest theRequest, RequestDetails theRequestDetails,
+    public MethodOutcome refreshGeneratedContent(RequestDetails theRequestDetails,
             @IdParam IdType theId) {
         Measure theResource = this.measureResourceProvider.getDao().read(theId);
 
@@ -138,7 +131,7 @@ public class MeasureOperationsProvider {
         }
 
         // logger.info("Narrative: " + n.getDivAsString());
-        return this.measureResourceProvider.update(theRequest, theResource, theId,
+        return this.measureResourceProvider.search(theResource, theId,
                 theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
     }
 
