@@ -1,0 +1,48 @@
+{
+	"mdmTypes": ["Patient", "Practitioner"],
+	"version": "1",
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [
+		{
+			"resourceType": "*",
+			"searchParam": "active",
+			"fixedValue": "true"
+		}
+	],
+	"matchFields": [
+		{
+			"name": "cosine-given-name",
+			"resourceType": "*",
+			"resourcePath": "name.given",
+			"similarity": {
+				"algorithm": "COSINE",
+				"matchThreshold": 0.8,
+				"exact": true
+			}
+		},
+		{
+			"name": "jaro-last-name",
+			"resourceType": "*",
+			"resourcePath": "name.family",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8,
+				"exact": true
+			}
+		},
+		{
+			"name": "medicare-id",
+			"resourceType": "*",
+			"resourcePath": "identifier",
+			"matcher": {
+				"algorithm": "IDENTIFIER",
+				"identifierSystem": "http://hl7.org/fhir/sid/us-medicare"
+			}
+		}
+	],
+	"matchResultMap": {
+		"cosine-given-name" : "POSSIBLE_MATCH",
+		"cosine-given-name,jaro-last-name" : "MATCH"
+	},
+	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
+}

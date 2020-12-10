@@ -1,0 +1,118 @@
+{
+	"version": "1",
+	"mdmTypes": ["Patient", "Practitioner", "Medication"],
+	"candidateSearchParams": [
+		{
+			"resourceType": "Patient",
+			"searchParams": [
+				"birthdate"
+			]
+		},
+		{
+			"resourceType": "*",
+			"searchParams": [
+				"identifier"
+			]
+		},
+		{
+			"resourceType": "Medication",
+			"searchParams": [
+				"manufacturer"
+			]
+		},
+		{
+			"resourceType": "Patient",
+			"searchParams": [
+				"general-practitioner"
+			]
+		}
+	],
+	"candidateFilterSearchParams": [
+		{
+			"resourceType": "Practitioner",
+			"searchParam": "active",
+			"fixedValue": "true"
+		},
+		{
+			"resourceType": "Patient",
+			"searchParam": "active",
+			"fixedValue": "true"
+		}
+	],
+	"matchFields": [
+		{
+			"name": "matched-medication-code",
+			"resourceType": "Medication",
+			"resourcePath": "code.coding.code",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		},
+		{
+			"name": "cosine-given-name",
+			"resourceType": "Patient",
+			"resourcePath": "name.given",
+			"similarity": {
+				"algorithm": "COSINE",
+				"matchThreshold": 0.8,
+				"exact": true
+			}
+		},
+		{
+			"name": "jaro-last-name",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8,
+				"exact": true
+			}
+		},
+		{
+			"name": "medicare-id",
+			"resourceType": "Patient",
+			"resourcePath": "identifier",
+			"matcher": {
+				"algorithm": "IDENTIFIER",
+				"identifierSystem": "http://hl7.org/fhir/sid/us-medicare"
+			}
+		},
+		{
+			"name": "cosine-given-name-pract",
+			"resourceType": "Practitioner",
+			"resourcePath": "name.given",
+			"similarity": {
+				"algorithm": "COSINE",
+				"matchThreshold": 0.8,
+				"exact": true
+			}
+		},
+		{
+			"name": "jaro-last-name-pract",
+			"resourceType": "Practitioner",
+			"resourcePath": "name.family",
+			"similarity": {
+				"algorithm": "JARO_WINKLER",
+				"matchThreshold": 0.8,
+				"exact": true
+			}
+		},
+		{
+			"name": "medicare-id-pract",
+			"resourceType": "Practitioner",
+			"resourcePath": "identifier",
+			"matcher": {
+				"algorithm": "IDENTIFIER",
+				"identifierSystem": "http://hl7.org/fhir/sid/us-medicare"
+			}
+		}
+	],
+	"matchResultMap": {
+		"cosine-given-name": "POSSIBLE_MATCH",
+		"cosine-given-name,jaro-last-name": "MATCH",
+		"cosine-given-name-pract": "POSSIBLE_MATCH",
+		"cosine-given-name-pract,jaro-last-name-pract": "MATCH",
+		"matched-medication-code": "MATCH"
+	},
+	"eidSystem": "http://company.io/fhir/NamingSystem/custom-eid-system"
+}

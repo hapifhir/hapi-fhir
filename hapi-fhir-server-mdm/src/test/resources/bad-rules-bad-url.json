@@ -1,0 +1,9 @@
+{
+	"version": "1",
+	"mdmTypes": ["Patient", "Practitioner", "Medication"],
+	"candidateSearchParams" : [],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [],
+	"matchResultMap" : {},
+	"eidSystem": "invalid url"
+}
