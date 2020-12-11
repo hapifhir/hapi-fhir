@@ -51,7 +51,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class PredicateBuilderCoords extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderCoords.class);
 
-	PredicateBuilderCoords(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderCoords(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
