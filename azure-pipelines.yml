@@ -65,6 +65,7 @@ jobs:
 
    # Amalgamate the test results, and report them.
   - job: Report
+    dependsOn: Build
     displayName: Report Results
     container: maven:3-jdk-11
     steps:
