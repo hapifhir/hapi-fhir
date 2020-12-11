@@ -1,6 +1,7 @@
-package ca.uhn.fhir.cql.common.provider;
+package ca.uhn.fhir.cql.dstu3;
 
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
+import ca.uhn.fhir.cql.common.provider.CqlProviderLoader;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ class CqlProviderLoaderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderLoaderDstu3Test.class);
 
 	@Autowired
-	CqlProviderLoader myCqlProviderLoader;
+    CqlProviderLoader myCqlProviderLoader;
 
 	@Autowired
 	private ResourceProviderFactory myResourceProviderFactory;

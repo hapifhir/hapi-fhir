@@ -1,9 +1,8 @@
-package ca.uhn.fhir.cql.common.provider;
+package ca.uhn.fhir.cql.dstu3;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
+import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
@@ -31,15 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProviderTestBase {
+public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
 
 	@Autowired
 	CqlProviderFactory myCqlProviderFactory;
-	@Autowired
-	DaoRegistry myDaoRegistry;
-	@Autowired
-	FhirContext myFhirContext;
 	@Autowired
 	IFhirSystemDao mySystemDao;
 	@Autowired
@@ -48,29 +43,21 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test implements CqlProvide
 	private MeasureResourceProvider myMeasureResourceProvider;
 	@Autowired
 	private ValueSetResourceProvider myValueSetResourceProvider;
-
-	MeasureOperationsProvider myProvider;
+	@Autowired
+	private MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@BeforeEach
 	public void before() throws IOException {
-		// FIXME KBD Can we find a way to remove these?
-		myMeasureResourceProvider.setDao(myDaoRegistry.getResourceDao("Measure"));
-		myLibraryResourceProvider.setDao(myDaoRegistry.getResourceDao("Library"));
-		myValueSetResourceProvider.setDao(myDaoRegistry.getResourceDao("ValueSet"));
-
-		myProvider = (MeasureOperationsProvider) myCqlProviderFactory.getMeasureOperationsProvider();
-
 		// Load terminology for measure tests (HEDIS measures)
 		loadBundle("dstu3/hedis-valuesets-bundle.json");
 
 		// Load libraries
-		loadResource("dstu3/library/library-fhir-model-definition.json", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/library/library-fhir-helpers.json", myFhirContext, myDaoRegistry);
-
+		loadResource("dstu3/library/library-fhir-model-definition.json");
+		loadResource("dstu3/library/library-fhir-helpers.json");
 
 		// load test data and conversion library for $apply operation tests
-		loadResource("dstu3/general-practitioner.json", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/general-patient.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/general-practitioner.json");
+		loadResource("dstu3/general-patient.json");
 	}
 
 	/*
@@ -101,9 +88,9 @@ Direct Reference Codes:
 
 	@Test
 	public void evaluatePatientMeasure() throws IOException {
-		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/library/library-asf-logic.json");
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/measure-asf.json");
 		Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -117,7 +104,7 @@ Direct Reference Codes:
 		String periodEnd = "2003-12-31";
 
 		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
 			patient, null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
@@ -133,7 +120,7 @@ Direct Reference Codes:
 		int runCount = 10;
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < runCount; ++i) {
-			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
+			myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
 				patient, null, null, null, null, null, null);
 		}
 
@@ -142,9 +129,9 @@ Direct Reference Codes:
 
 	@Test
 	public void evaluatePopulationMeasure() throws IOException {
-		loadResource("dstu3/library/library-asf-logic.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/library/library-asf-logic.json");
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/measure-asf.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/measure-asf.json");
 		loadBundle("dstu3/test-patient-6529-data.json");
 		// Add a second patient with the same data
 		loadBundle("dstu3/test-patient-9999-x-data.json");
@@ -155,7 +142,7 @@ Direct Reference Codes:
 
 		// TODO KBD Why does this call accept a reportType of "population" ? http://hl7.org/fhir/STU3/valueset-measure-report-type.html
 		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
 			null, null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
@@ -171,7 +158,7 @@ Direct Reference Codes:
 		int runCount = 10;
 		StopWatch sw = new StopWatch();
 		for (int i = 0; i < runCount; ++i) {
-			myProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
+			myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
 				null, null, null, null, null, null, null);
 		}
 
@@ -186,8 +173,8 @@ Direct Reference Codes:
 		result = loadBundle("dstu3/EXM104/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
 		result = loadBundle("dstu3/EXM104/tests-denom-EXM104_FHIR3-bundle.json");
 		result = loadBundle("dstu3/EXM104/tests-numer-EXM104_FHIR3-bundle.json");
-		loadResource("dstu3/EXM104/library-EXM104_FHIR3-8.1.000.json", myFhirContext, myDaoRegistry);
-		loadResource("dstu3/EXM104/measure-EXM104_FHIR3-8.1.000.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/EXM104/library-EXM104_FHIR3-8.1.000.json");
+		loadResource("dstu3/EXM104/measure-EXM104_FHIR3-8.1.000.json");
 		//Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
 		//assertNotNull(result);
 		//List<Bundle.BundleEntryComponent> entries = result.getEntry();
@@ -201,7 +188,7 @@ Direct Reference Codes:
 		//String periodEnd = "2003-12-31";
 
 		// First run to absorb startup costs
-		MeasureReport report = myProvider.evaluateMeasure(measureId, null, null, null, null,
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, null, null,
 			null, null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
@@ -223,12 +210,12 @@ Direct Reference Codes:
 	//	at org.opencds.cqf.dstu3.helpers.LibraryHelper.loadLibraries(LibraryHelper.java:61)
 	//	at org.opencds.cqf.dstu3.evaluation.MeasureEvaluationSeed.setup(MeasureEvaluationSeed.java:57)
 	//	at org.opencds.cqf.dstu3.providers.MeasureOperationsProvider.evaluateMeasure(MeasureOperationsProvider.java:184)
-	//	at ca.uhn.fhir.cql.common.provider.CqlProviderDstu3Test.testConnectathonExample_EXM104(CqlProviderDstu3Test.java:238)
+	//	at ca.uhn.fhir.cql.dstu3.CqlProviderDstu3Test.testConnectathonExample_EXM104(CqlProviderDstu3Test.java:238)
 	//@Test
 	public void testConnectathonExample_EXM104() throws IOException {
 		// git clone git@github.com:DBCG/connectathon.git
 		Bundle bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
-		loadResource("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-EXM104_FHIR3-8.1.000.json", myFhirContext, myDaoRegistry);
+		loadResource("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-EXM104_FHIR3-8.1.000.json");
 		bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-bundle.json");
 		int numFilesLoaded = loadDataFromDirectory("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files");
 		assertEquals(numFilesLoaded, 6);
@@ -242,7 +229,7 @@ Direct Reference Codes:
 		IdType measureId = new IdType("Measure", "measure-EXM104-FHIR3-8.1.000");
 		String patient = "Patient/numer-EXM104-FHIR3";
 
-		MeasureReport report = myProvider.evaluateMeasure(measureId, null, null, null, null,
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, null, null,
 			patient, null, null, null, null, null, null);
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
@@ -264,7 +251,7 @@ Direct Reference Codes:
 				if (filename.contains("bundle")) {
 					loadBundle(filename);
 				} else {
-					loadResource(filename, myFhirContext, myDaoRegistry);
+					loadResource(filename);
 				}
 				count++;
 			} else {

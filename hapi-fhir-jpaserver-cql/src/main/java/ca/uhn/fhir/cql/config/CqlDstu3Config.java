@@ -27,40 +27,51 @@ import ca.uhn.fhir.cql.dstu3.evaluation.ProviderFactory;
 import ca.uhn.fhir.cql.dstu3.provider.HQMFProvider;
 import ca.uhn.fhir.cql.dstu3.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.dstu3.provider.LibraryOperationsProvider;
+import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.tooling.library.stu3.NarrativeProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class CqlDstu3Config extends BaseCqlConfig {
 
+	@Lazy
 	@Bean
 	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
 		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider, theValidationSupport);
 	}
 
+	@Lazy
 	@Bean
 	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider) {
 		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider);
 	}
 
+	@Lazy
 	@Bean
 	NarrativeProvider narrativeProvider() {
 		return new NarrativeProvider();
 	}
 
+	@Lazy
 	@Bean
 	HQMFProvider theHQMFProvider() {
 		return new HQMFProvider();
 	}
 
+	@Lazy
 	@Bean
-	LibraryOperationsProvider LibraryOperationsProvider(LibraryResourceProvider theLibraryResourceProvider, NarrativeProvider theNarrativeProvider) {
-		return new LibraryOperationsProvider(theLibraryResourceProvider, theNarrativeProvider);
+	LibraryOperationsProvider LibraryOperationsProvider() {
+		return new LibraryOperationsProvider();
+	}
+	@Lazy
+	@Bean
+	public MeasureOperationsProvider measureOperationsProvider() {
+		return new MeasureOperationsProvider();
 	}
 }

@@ -30,50 +30,56 @@ import ca.uhn.fhir.cql.r4.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.r4.provider.LibraryOperationsProvider;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.r4.LibraryResourceProvider;
-import ca.uhn.fhir.jpa.rp.r4.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.r4.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.tooling.library.r4.NarrativeProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 
 @Configuration
 public class CqlR4Config extends BaseCqlConfig {
 
+	@Lazy
 	@Bean
 	CqlProviderFactory cqlProviderFactory() {
 		return new CqlProviderFactory();
 	}
 
+	@Lazy
 	@Bean
 	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
 		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider, theValidationSupport);
 	}
 
+	@Lazy
 	@Bean
 	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider) {
 		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider);
 	}
 
+	@Lazy
 	@Bean
 	NarrativeProvider narrativeProvider() {
 		return new NarrativeProvider();
 	}
 
+	@Lazy
 	@Bean
 	HQMFProvider theHQMFProvider() {
 		return new HQMFProvider();
 	}
 
+	@Lazy
 	@Bean
-	LibraryOperationsProvider LibraryOperationsProvider(LibraryResourceProvider theLibraryResourceProvider, NarrativeProvider theNarrativeProvider, DaoRegistry theDaoRegistry, JpaTerminologyProvider theJpaTerminologyProvider) {
-		return new LibraryOperationsProvider(theLibraryResourceProvider, theNarrativeProvider, theDaoRegistry, theJpaTerminologyProvider);
+	LibraryOperationsProvider LibraryOperationsProvider() {
+		return new LibraryOperationsProvider();
 	}
 
+	@Lazy
 	@Bean
-	public MeasureOperationsProvider measureOperationsProvider(DaoRegistry theDaoRegistry, EvaluationProviderFactory theEvaluationProviderFactory, NarrativeProvider theNarrativeProvider, HQMFProvider theHQMFProvider, LibraryOperationsProvider theLibraryOperationsProvider, MeasureResourceProvider theMeasureResourceProvider) {
-		return new MeasureOperationsProvider(theDaoRegistry, theEvaluationProviderFactory, theNarrativeProvider, theHQMFProvider, theLibraryOperationsProvider, theMeasureResourceProvider);
+	public MeasureOperationsProvider measureOperationsProvider() {
+		return new MeasureOperationsProvider();
 	}
 }

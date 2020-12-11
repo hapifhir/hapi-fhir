@@ -1,6 +1,7 @@
-package ca.uhn.fhir.cql.common.provider;
+package ca.uhn.fhir.cql.r4;
 
 import ca.uhn.fhir.cql.BaseCqlR4Test;
+import ca.uhn.fhir.cql.common.provider.CqlProviderLoader;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

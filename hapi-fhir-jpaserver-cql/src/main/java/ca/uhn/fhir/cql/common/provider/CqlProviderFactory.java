@@ -20,45 +20,32 @@ package ca.uhn.fhir.cql.common.provider;
  * #L%
  */
 
-import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CqlProviderFactory {
 	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private EvaluationProviderFactory myEvaluationProviderFactory;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
-
-	// Dstu3 Instances
-	@Autowired(required = false)
-	private org.opencds.cqf.tooling.library.stu3.NarrativeProvider myNarrativeProviderDstu3;
-	@Autowired(required = false)
-	private ca.uhn.fhir.cql.dstu3.provider.HQMFProvider myHQMFProviderDstu3;
-	@Autowired(required = false)
-	private ca.uhn.fhir.cql.dstu3.provider.LibraryOperationsProvider myLibraryOperationsProviderDstu3;
-	@Autowired(required = false)
-	private ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider myMeasureResourceProviderDstu3;
-
-	// R4 Instances
-	@Autowired(required = false)
-	private org.opencds.cqf.tooling.library.r4.NarrativeProvider myNarrativeProviderR4;
-	@Autowired(required = false)
-	private ca.uhn.fhir.cql.r4.provider.HQMFProvider myHQMFProviderR4;
-	@Autowired(required = false)
-	private ca.uhn.fhir.cql.r4.provider.LibraryOperationsProvider myLibraryOperationsProviderR4;
-	@Autowired(required = false)
-	private ca.uhn.fhir.jpa.rp.r4.MeasureResourceProvider myMeasureResourceProviderR4;
+	@Autowired
+	private ApplicationContext myApplicationContext;
 
 	public Object getMeasureOperationsProvider() {
-		if (myNarrativeProviderDstu3 != null) {
-			return new MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderDstu3, myHQMFProviderDstu3, myLibraryOperationsProviderDstu3, myMeasureResourceProviderDstu3);
+		switch (myFhirContext.getVersion().getVersion()) {
+			case DSTU3:
+				return myApplicationContext.getBean(ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider.class);
+			case R4:
+				return myApplicationContext.getBean(ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider.class);
+			default:
+				throw new ConfigurationException("CQL is not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
-		if (myNarrativeProviderR4 != null) {
-			return new ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider(myDaoRegistry, myEvaluationProviderFactory, myNarrativeProviderR4, myHQMFProviderR4, myLibraryOperationsProviderR4, myMeasureResourceProviderR4);
-		}
-		throw new UnsupportedOperationException("No NarrativeProvider in context");
 	}
 }

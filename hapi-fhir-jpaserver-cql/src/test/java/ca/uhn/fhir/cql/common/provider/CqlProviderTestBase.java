@@ -14,12 +14,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+// FIXME KBD convert to Util class with static method
 public interface CqlProviderTestBase {
 
-	default IBaseResource loadResource(String theLocation, FhirContext theFhirContext, DaoRegistry theDaoRegistry) throws IOException {
+	FhirContext getFhirContext();
+
+	DaoRegistry getDaoRegistry();
+
+	default IBaseResource loadResource(String theLocation) throws IOException {
 		String json = stringFromResource(theLocation);
-		IBaseResource resource = theFhirContext.newJsonParser().parseResource(json);
-		IFhirResourceDao<IBaseResource> dao = theDaoRegistry.getResourceDao(resource.getIdElement().getResourceType());
+		IBaseResource resource = getFhirContext().newJsonParser().parseResource(json);
+		IFhirResourceDao<IBaseResource> dao = getDaoRegistry().getResourceDao(resource.getIdElement().getResourceType());
 		if (dao == null) {
 			return null;
 		} else {

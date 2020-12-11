@@ -29,7 +29,7 @@ public class TranslatorHelper {
 		for (CqlTranslatorException error : exceptions) {
 			TrackBack tb = error.getLocator();
 			String lines = tb == null ? "[n/a]"
-				: String.format("%s[%d:%d, %d:%d]",
+				: String.format("%s [%d:%d, %d:%d] ",
 				(tb.getLibrary() != null ? tb.getLibrary().getId()
 					+ (tb.getLibrary().getVersion() != null ? ("-" + tb.getLibrary().getVersion()) : "")
 					: ""),
@@ -37,7 +37,7 @@ public class TranslatorHelper {
 			errors.add(lines + error.getMessage());
 		}
 
-		return errors.toString();
+		return String.join("\n", errors);
 	}
 
 	public static CqlTranslator getTranslator(String cql, LibraryManager libraryManager, ModelManager modelManager) {

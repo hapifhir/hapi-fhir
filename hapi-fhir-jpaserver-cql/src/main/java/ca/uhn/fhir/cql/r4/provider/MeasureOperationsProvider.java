@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cql.r4.provider;
 
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.evaluation.MeasureEvaluation;
@@ -9,7 +10,6 @@ import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.rp.r4.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -63,36 +62,28 @@ import java.util.stream.Collectors;
 
 @Component
 public class MeasureOperationsProvider {
-
+	private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
+	
+	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private NarrativeProvider narrativeProvider;
+	@Autowired
 	private HQMFProvider hqmfProvider;
-	private DataRequirementsProvider dataRequirementsProvider;
-
+	@Autowired
 	private LibraryResolutionProvider<Library> libraryResolutionProvider;
-	private MeasureResourceProvider measureResourceProvider;
+	@Autowired
+	private IFhirResourceDao<Measure> myMeasureDao;
+	@Autowired
 	private DaoRegistry registry;
+	@Autowired
 	private EvaluationProviderFactory factory;
 
-	private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
-
-	@Autowired
-	public MeasureOperationsProvider(DaoRegistry registry, EvaluationProviderFactory factory,
-												NarrativeProvider narrativeProvider, HQMFProvider hqmfProvider,
-												LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResolutionProvider,
-												MeasureResourceProvider measureResourceProvider) {
-		this.registry = registry;
-		this.factory = factory;
-
-		this.libraryResolutionProvider = libraryResolutionProvider;
-		this.narrativeProvider = narrativeProvider;
-		this.hqmfProvider = hqmfProvider;
-		this.dataRequirementsProvider = new DataRequirementsProvider();
-		this.measureResourceProvider = measureResourceProvider;
-	}
+	private final DataRequirementsProvider dataRequirementsProvider = new DataRequirementsProvider();
 
 	@Operation(name = "$hqmf", idempotent = true, type = Measure.class)
 	public Parameters hqmf(@IdParam IdType theId) {
-		Measure theResource = this.measureResourceProvider.getDao().read(theId);
+		Measure theResource = myMeasureDao.read(theId);
 		String hqmf = this.generateHQMF(theResource);
 		Parameters p = new Parameters();
 		p.addParameter().setValue(new StringType(hqmf));
@@ -100,10 +91,9 @@ public class MeasureOperationsProvider {
 	}
 
 	@Operation(name = "$refresh-generated-content", type = Measure.class)
-	public MethodOutcome refreshGeneratedContent(HttpServletRequest theRequest,
-																RequestDetails theRequestDetails,
+	public MethodOutcome refreshGeneratedContent(RequestDetails theRequestDetails,
 																@IdParam IdType theId) {
-		Measure theResource = this.measureResourceProvider.getDao().read(theId);
+		Measure theResource = myMeasureDao.read(theId);
 
 		theResource.getRelatedArtifact().removeIf(
 			relatedArtifact -> relatedArtifact.getType().equals(RelatedArtifact.RelatedArtifactType.DEPENDSON));
@@ -130,22 +120,20 @@ public class MeasureOperationsProvider {
 		}
 
 		try {
-			Narrative n = this.narrativeProvider.getNarrative(this.measureResourceProvider.getContext(), cqfMeasure);
+			Narrative n = this.narrativeProvider.getNarrative(myFhirContext, cqfMeasure);
 			theResource.setText(n.copy());
 		} catch (Exception e) {
 			logger.info("Error generating narrative", e);
 		}
-
-		return this.measureResourceProvider.update(theRequest, theResource, theId,
-			theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
+		return myMeasureDao.update(theResource, theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
 	}
 
 	@Operation(name = "$get-narrative", idempotent = true, type = Measure.class)
 	public Parameters getNarrative(@IdParam IdType theId) {
-		Measure theResource = this.measureResourceProvider.getDao().read(theId);
+		Measure theResource = myMeasureDao.read(theId);
 		CqfMeasure cqfMeasure = this.dataRequirementsProvider.createCqfMeasure(theResource,
 			this.libraryResolutionProvider);
-		Narrative n = this.narrativeProvider.getNarrative(this.measureResourceProvider.getContext(), cqfMeasure);
+		Narrative n = this.narrativeProvider.getNarrative(myFhirContext, cqfMeasure);
 		Parameters p = new Parameters();
 		p.addParameter().setValue(new StringType(n.getDivAsString()));
 		return p;
@@ -176,7 +164,7 @@ public class MeasureOperationsProvider {
 		LibraryLoader libraryLoader = LibraryHelper.createLibraryLoader(this.libraryResolutionProvider);
 		MeasureEvaluationSeed seed = new MeasureEvaluationSeed(this.factory, libraryLoader,
 			this.libraryResolutionProvider);
-		Measure measure = this.measureResourceProvider.getDao().read(theId);
+		Measure measure = myMeasureDao.read(theId);
 
 		if (measure == null) {
 			throw new RuntimeException("Could not find Measure/" + theId.getIdPart());
@@ -496,8 +484,7 @@ public class MeasureOperationsProvider {
 	private List<IBaseResource> getMeasureList(SearchParameterMap theParams, String measure) {
 		if (measure != null && measure.length() > 0) {
 			List<IBaseResource> finalMeasureList = new ArrayList<>();
-			List<IBaseResource> allMeasures = this.measureResourceProvider
-				.getDao()
+			List<IBaseResource> allMeasures = myMeasureDao
 				.search(theParams)
 				.getResources(0, 1000);
 			for (String singleName : measure.split(",")) {
@@ -516,7 +503,7 @@ public class MeasureOperationsProvider {
 		} else {
 			return
 				//TODO: this needs to be restricted to only the current measure.  It seems to be returning all versions in history.
-				this.measureResourceProvider.getDao().search(theParams).getResources(0, 1000)
+				myMeasureDao.search(theParams).getResources(0, 1000)
 					.stream()
 					.filter(resource -> ((Measure) resource).getUrl() != null && !((Measure) resource).getUrl().equals(""))
 					.collect(Collectors.toList());
@@ -575,7 +562,7 @@ public class MeasureOperationsProvider {
 
 	private void resolveReferences(Resource resource, Parameters parameters, Map<String, Resource> resourceMap) {
 		List<IBase> values;
-		for (BaseRuntimeChildDefinition child : this.measureResourceProvider.getContext()
+		for (BaseRuntimeChildDefinition child : myFhirContext
 			.getResourceDefinition(resource).getChildren()) {
 			values = child.getAccessor().getValues(resource);
 			if (values == null || values.isEmpty()) {
@@ -603,7 +590,7 @@ public class MeasureOperationsProvider {
 																			@OperationParam(name = "startPeriod") String startPeriod,
 																			@OperationParam(name = "endPeriod") String endPeriod) throws InternalErrorException, FHIRException {
 
-		Measure measure = this.measureResourceProvider.getDao().read(theId);
+		Measure measure = myMeasureDao.read(theId);
 		return this.dataRequirementsProvider.getDataRequirements(measure, this.libraryResolutionProvider);
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cql.r4.provider;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.evaluation.LibraryLoader;
 import ca.uhn.fhir.cql.common.helper.ClientHelperDos;
 import ca.uhn.fhir.cql.common.helper.DateHelper;
@@ -10,7 +11,7 @@ import ca.uhn.fhir.cql.common.retrieve.JpaFhirRetrieveProvider;
 import ca.uhn.fhir.cql.r4.helper.FhirMeasureBundler;
 import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.r4.LibraryResourceProvider;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -57,7 +58,6 @@ import org.opencds.cqf.tooling.library.r4.NarrativeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,21 +70,18 @@ import java.util.Objects;
 @Component
 public class LibraryOperationsProvider implements LibraryResolutionProvider<Library> {
 
+	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
 	private NarrativeProvider narrativeProvider;
-	private DataRequirementsProvider dataRequirementsProvider;
-	private LibraryResourceProvider libraryResourceProvider;
+	@Autowired
+	private IFhirResourceDao<Library> myLibraryDao;
+	@Autowired
 	DaoRegistry registry;
+	@Autowired
 	TerminologyProvider defaultTerminologyProvider;
 
-	@Autowired
-	public LibraryOperationsProvider(LibraryResourceProvider libraryResourceProvider,
-												NarrativeProvider narrativeProvider, DaoRegistry registry, TerminologyProvider defaultTerminologyProvider) {
-		this.narrativeProvider = narrativeProvider;
-		this.dataRequirementsProvider = new DataRequirementsProvider();
-		this.libraryResourceProvider = libraryResourceProvider;
-		this.registry = registry;
-		this.defaultTerminologyProvider = defaultTerminologyProvider;
-	}
+	private final DataRequirementsProvider dataRequirementsProvider = new DataRequirementsProvider();
 
 	private ModelManager getModelManager() {
 		return new ModelManager();
@@ -113,10 +110,9 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 	}
 
 	@Operation(name = "$refresh-generated-content", type = Library.class)
-	public MethodOutcome refreshGeneratedContent(HttpServletRequest theRequest,
-																RequestDetails theRequestDetails,
+	public MethodOutcome refreshGeneratedContent(RequestDetails theRequestDetails,
 																@IdParam IdType theId) {
-		Library theResource = this.libraryResourceProvider.getDao().read(theId);
+		Library theResource = myLibraryDao.read(theId);
 		// this.formatCql(theResource);
 
 		ModelManager modelManager = this.getModelManager();
@@ -133,19 +129,18 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 		this.dataRequirementsProvider.ensureDataRequirements(theResource, translator);
 
 		try {
-			Narrative n = this.narrativeProvider.getNarrative(this.libraryResourceProvider.getContext(), theResource);
+			Narrative n = this.narrativeProvider.getNarrative(myFhirContext, theResource);
 			theResource.setText(n);
 		} catch (Exception e) {
 			// Ignore the exception so the resource still gets updated
 		}
 
-		return this.libraryResourceProvider.update(theRequest, theResource, theId,
-			theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
+		return myLibraryDao.update(theResource, theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
 	}
 
 	@Operation(name = "$get-elm", idempotent = true, type = Library.class)
 	public Parameters getElm(@IdParam IdType theId, @OperationParam(name = "format") String format) {
-		Library theResource = this.libraryResourceProvider.getDao().read(theId);
+		Library theResource = myLibraryDao.read(theId);
 		// this.formatCql(theResource);
 
 		ModelManager modelManager = this.getModelManager();
@@ -168,8 +163,8 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 
 	@Operation(name = "$get-narrative", idempotent = true, type = Library.class)
 	public Parameters getNarrative(@IdParam IdType theId) {
-		Library theResource = this.libraryResourceProvider.getDao().read(theId);
-		Narrative n = this.narrativeProvider.getNarrative(this.libraryResourceProvider.getContext(), theResource);
+		Library theResource = myLibraryDao.read(theId);
+		Narrative n = this.narrativeProvider.getNarrative(myFhirContext, theResource);
 		Parameters p = new Parameters();
 		p.addParameter().setValue(new StringType(n.getDivAsString()));
 		return p;
@@ -208,7 +203,7 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 		}
 
 		if (theResource == null) {
-			theResource = this.libraryResourceProvider.getDao().read(theId);
+			theResource = myLibraryDao.read(theId);
 		}
 
 		VersionedIdentifier libraryIdentifier = new VersionedIdentifier().withId(theResource.getName())
@@ -367,13 +362,13 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 	// TODO: Figure out if we should throw an exception or something here.
 	@Override
 	public void update(Library library) {
-		this.libraryResourceProvider.getDao().update(library);
+		myLibraryDao.update(library);
 	}
 
 	@Override
 	public Library resolveLibraryById(String libraryId) {
 		try {
-			return this.libraryResourceProvider.getDao().read(new IdType(libraryId));
+			return myLibraryDao.read(new IdType(libraryId));
 		} catch (Exception e) {
 			throw new IllegalArgumentException(String.format("Could not resolve library id %s", libraryId));
 		}
@@ -409,7 +404,7 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 			map.add("version", new TokenParam(version));
 		}
 
-		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = this.libraryResourceProvider.getDao().search(map);
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
 
 		if (bundleProvider.size() == 0) {
 			return null;
@@ -422,7 +417,7 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 		// Search for libraries by name
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("name", new StringParam(name, true));
-		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = this.libraryResourceProvider.getDao().search(map);
+		ca.uhn.fhir.rest.api.server.IBundleProvider bundleProvider = myLibraryDao.search(map);
 
 		if (bundleProvider.size() == 0) {
 			return new ArrayList<>();
