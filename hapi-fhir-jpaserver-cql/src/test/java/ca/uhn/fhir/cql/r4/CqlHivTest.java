@@ -29,5 +29,6 @@ public class CqlHivTest extends BaseCqlR4Test {
 
 		myMeasureOperationsProvider.refreshGeneratedContent(null, hivMeasureId);
 		Measure measure = myMeasureDao.read(hivMeasureId);
+		// FIXME KBD Add asserts--e.g. on generated elm
 	}
 }
