@@ -1,0 +1,4 @@
+---
+type: remove
+issue: 2229
+title: "Remove support for the `upload-igpack` command."
