@@ -30,6 +30,8 @@ import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
+
 @Service
 public class MdmProviderLoader {
 	@Autowired
@@ -45,17 +47,30 @@ public class MdmProviderLoader {
 	@Autowired
 	private IMdmSubmitSvc myMdmSubmitSvc;
 
+	private BaseMdmProvider myMdmProvider;
+
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> new MdmProviderDstu3(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc));
+				myResourceProviderFactory.addSupplier(() -> {
+					myMdmProvider = new MdmProviderDstu3(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+					return myMdmProvider;
+				});
 				break;
 			case R4:
-				myResourceProviderFactory.addSupplier(() -> new MdmProviderR4(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc));
+				myResourceProviderFactory.addSupplier(() -> {
+					myMdmProvider = new MdmProviderR4(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+					return myMdmProvider;
+				});
 				break;
 			default:
 				throw new ConfigurationException("MDM not supported for FHIR version " + myFhirContext.getVersion().getVersion());
 		}
+	}
+
+	@PreDestroy
+	public void unloadProvider() {
+		myResourceProviderFactory.removeSupplier(() -> myMdmProvider);
 	}
 }
 
