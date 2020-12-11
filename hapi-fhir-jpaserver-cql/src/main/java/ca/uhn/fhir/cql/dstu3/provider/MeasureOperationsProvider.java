@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -135,11 +136,9 @@ public class MeasureOperationsProvider {
             logger.info("Error generating narrative", e);
         }
 
-        // logger.info("Narrative: " + n.getDivAsString());
-		 return null;
-		 // FIXME KHS
-//        return this.measureResourceProvider.search(theRequest, theResource, theId,
-//                theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
+		 // logger.info("Narrative: " + n.getDivAsString());
+		 return this.measureResourceProvider.update(theRequest, theResource, theId,
+			 theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
     }
 
     @Operation(name = "$get-narrative", idempotent = true, type = Measure.class)
