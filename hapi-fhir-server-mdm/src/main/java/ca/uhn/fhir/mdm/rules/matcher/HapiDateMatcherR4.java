@@ -37,13 +37,15 @@ public class HapiDateMatcherR4 {
 			}
 			BaseDateTimeType leftPDate;
 			BaseDateTimeType rightPDate;
-			if (comparison > 0) {
+			//Left date is coarser
+			if (comparison < 0) {
 				leftPDate = leftDate;
 				if (rightDate instanceof DateType) {
 					rightPDate = new DateType(rightDate.getValue(), leftDate.getPrecision());
 				} else {
 					rightPDate = new DateTimeType(rightDate.getValue(), leftDate.getPrecision());
 				}
+			//Right date is coarser
 			} else {
 				rightPDate = rightDate;
 				if (leftDate instanceof DateType) {

@@ -49,14 +49,16 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 	@Test
 	public void testExactDateTimePrecision() {
 		Calendar cal = new GregorianCalendar(2020, 6, 15, 11, 12, 13);
+		Date date = cal.getTime();
+
 		Calendar sameSecondCal = new GregorianCalendar(2020, 6, 15, 11, 12, 13);
 		sameSecondCal.add(Calendar.MILLISECOND, 123);
+		Date sameSecond = sameSecondCal.getTime();
+
 
 		Calendar sameDayCal = new GregorianCalendar(2020, 6, 15, 12, 34, 56);
-
-		Date date = cal.getTime();
-		Date sameSecond = sameSecondCal.getTime();
 		Date sameDay = sameDayCal.getTime();
+
 
 		// Same precision
 
@@ -75,14 +77,22 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 		// Different precision matches by coarser precision
 		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
 		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
-		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
+		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
 
 		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
 		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
-		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
+		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
+
+
 	}
 
-	private boolean dateTimeMatch(Date theDate, Date theSameSecond, TemporalPrecisionEnum theTheDay, TemporalPrecisionEnum theTheDay2) {
-		return MdmMatcherEnum.DATE.match(ourFhirContext, new DateTimeType(theDate, theTheDay), new DateTimeType(theSameSecond, theTheDay2), true, null);
+	private boolean dateTimeMatch(Date theDate, Date theSecondDate, TemporalPrecisionEnum thePrecision, TemporalPrecisionEnum theSecondPrecision) {
+		return MdmMatcherEnum.DATE.match(
+			ourFhirContext,
+			new DateTimeType(theDate, thePrecision),
+			new DateTimeType(theSecondDate, theSecondPrecision),
+			true,
+			null
+		);
 	}
 }
