@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -44,10 +43,10 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateBuilder {
+public class PredicateBuilderNumber extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderNumber.class);
 
-	PredicateBuilderNumber(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderNumber(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
