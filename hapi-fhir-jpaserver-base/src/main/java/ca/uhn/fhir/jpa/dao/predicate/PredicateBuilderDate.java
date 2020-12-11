@@ -40,7 +40,6 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderDate.class);
 
 
-	PredicateBuilderDate(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderDate(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 
