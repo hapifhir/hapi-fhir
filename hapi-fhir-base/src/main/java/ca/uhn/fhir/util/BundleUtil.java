@@ -130,6 +130,16 @@ public class BundleUtil {
 		return null;
 	}
 
+	public static void setBundleType(FhirContext theContext, IBaseBundle theBundle, String theType) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("type");
+		BaseRuntimeElementDefinition<?> element = entryChild.getChildByName("type");
+		IPrimitiveType<?> typeInstance = (IPrimitiveType<?>) element.newInstance(entryChild.getInstanceConstructorArguments());
+		typeInstance.setValueAsString(theType);
+
+		entryChild.getMutator().setValue(theBundle, typeInstance);
+	}
+
 	public static Integer getTotal(FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
