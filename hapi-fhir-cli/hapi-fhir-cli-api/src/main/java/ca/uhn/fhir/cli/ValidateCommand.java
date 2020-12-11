@@ -23,7 +23,10 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.igpacks.parser.IgPackParserDstu2;
+import ca.uhn.fhir.igpacks.parser.IgPackParserDstu3;
 import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -36,9 +39,9 @@ import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.fusesource.jansi.Ansi.Color;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.File;
@@ -80,6 +83,7 @@ public class ValidateCommand extends BaseCommand {
 		retVal.addOption("r", "fetch-remote", false,
 			"Allow fetching remote resources (in other words, if a resource being validated refers to an external StructureDefinition, Questionnaire, etc. this flag allows the validator to access the internet to try and fetch this resource)");
 		addOptionalOption(retVal, "l", "fetch-local", "filename", "Fetch a profile locally and use it if referenced");
+		addOptionalOption(retVal, null, "igpack", true, "If specified, provides the filename of an IGPack file to include in validation");
 		addOptionalOption(retVal, "x", "xsd", false, "Validate using Schemas");
 		addOptionalOption(retVal, "s", "sch", false, "Validate using Schematrons");
 		addOptionalOption(retVal, "e", "encoding","encoding", "File encoding (default is UTF-8)");
@@ -143,11 +147,26 @@ public class ValidateCommand extends BaseCommand {
 			localProfileResource = ca.uhn.fhir.rest.api.EncodingEnum.detectEncodingNoDefault(input).newParser(ctx).parseResource(input);
 		}
 
+		byte[] igPack = null;
+		String igpackFilename = null;
+		if (theCommandLine.hasOption("igpack")) {
+			igpackFilename = theCommandLine.getOptionValue("igpack");
+			igPack = loadFileAsByteArray(igpackFilename);
+		}
+
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
 					ValidationSupportChain validationSupport = new ValidationSupportChain(
 						new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
+					if (igPack != null) {
+						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
+						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
+						IgPackParserDstu2 parser = new IgPackParserDstu2(hl7orgCtx);
+						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						validationSupport.addValidationSupport(igValidationSupport);
+					}
+
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu2());
 					}
@@ -161,6 +180,11 @@ public class ValidateCommand extends BaseCommand {
 					FhirInstanceValidator instanceValidator = new FhirInstanceValidator(ctx);
 					val.registerValidatorModule(instanceValidator);
 					ValidationSupportChain validationSupport = new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), new InMemoryTerminologyServerValidationSupport(ctx));
+					if (igPack != null) {
+						IgPackParserDstu3 parser = new IgPackParserDstu3(getFhirContext());
+						IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						validationSupport.addValidationSupport(igValidationSupport);
+					}
 
 					if (theCommandLine.hasOption("r")) {
 						validationSupport.addValidationSupport((IValidationSupport) new LoadingValidationSupportDstu3());
