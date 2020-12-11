@@ -46,6 +46,7 @@ jobs:
           jdkVersionOption: 1.11
 #      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
 #        displayName: 'codecov'
+      -task:
   - job: Report
     displayName: Report Results
     container: maven:3-jdk-11
