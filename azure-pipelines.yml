@@ -46,21 +46,42 @@ jobs:
           jdkVersionOption: 1.11
 #      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
 #        displayName: 'codecov'
-      -task:
+
+      # Copy test results into a sane location
+      - task: CopyFiles@2
+        condition: always()
+        inputs:
+           sourceFolder: '$(System.DefaultWorkingDirectory)/'
+           contents: '**/*output.txt'
+           targetFolder: '$(Build.ArtifactStagingDirectory)'
+
+      # Publish artifact containing test results.
+      - task: PublishPipelineArtifact@1
+        displayName: 'Store Test Output'
+        condition: always()
+        inputs:
+           targetPath: '$(Build.ArtifactStagingDirectory)/'
+           artifactName: 'logs'
+
+   # Amalgamate the test results, and report them.
   - job: Report
     displayName: Report Results
     container: maven:3-jdk-11
+    steps:
       - task: DownloadPipelineArtifact@2
         inputs:
-           patterns: "**"
+          artifact: 'logs'
+      - task: Bash@3
+        displayName: PWD
+        inputs:
+           targetType: 'inline'
+           script: pwd; ls -al $(Pipeline.Workspace)
       - task: PublishCodeCoverageResults@1
       inputs:
          codeCoverageTool: 'JaCoCo'
          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
          failIfCoverageEmpty: false
-    steps:
-       - task:
 
 # Potential Additional Maven3 Options:
 #publishJUnitResults: true
