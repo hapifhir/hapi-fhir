@@ -28,7 +28,6 @@ responsibleAgentCounter=2
 for i in $modules; do
    echo Counter is $responsibleAgentCounter
    if [[ $responsibleAgentCounter -eq $agentNumber ]]; then
-      echo "adding $i to modules to test!";
       modulesToTest=$modulesToTest,$i;
    fi
 
