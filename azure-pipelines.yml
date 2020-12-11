@@ -46,7 +46,7 @@ jobs:
     dependsOn: Build
     strategy:
       parallel: 3
-    displayName: Build Hapi
+    displayName: Run Tests
     timeoutInMinutes: 360
     container: maven:3-jdk-11
     steps:
