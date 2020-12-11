@@ -44,14 +44,22 @@ jobs:
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
-      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
-        displayName: 'codecov'
-      - task: PublishCodeCoverageResults@1
+#      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+#        displayName: 'codecov'
+  - job: Report
+    displayName: Report Results
+    container: maven:3-jdk-11
+      - task: DownloadPipelineArtifact@2
         inputs:
-          codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
-          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
-          failIfCoverageEmpty: false
+           patterns: "**"
+      - task: PublishCodeCoverageResults@1
+      inputs:
+         codeCoverageTool: 'JaCoCo'
+         summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
+         reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
+         failIfCoverageEmpty: false
+    steps:
+       - task:
 
 # Potential Additional Maven3 Options:
 #publishJUnitResults: true

@@ -13,11 +13,14 @@ echo $totalAgents
 echo $agentNumber
 
 # Find all directories that have hapi- in the name, assuming they are all modules.
-modules=$(ls | grep "hapi-" | grep -v "\." | grep -v "hapi-fhir-jpaserver-base" | grep -v "hapi-fhir-android-realm" | grep -v "hapi-fhir-narrativegenerator" | grep -v "hapi-fhir-oauth2" | grep -v "hapi-fhir-testpage-interceptor" | grep -v "hapi-fhir-structures-dstu")
+modules=$(ls | grep "hapi-" | grep -v "\." | grep -v "hapi-fhir-jpaserver-base" | grep -v "hapi-fhir-android-realm" | grep -v "hapi-fhir-narrativegenerator" | grep -v "hapi-fhir-oauth2" | grep -v "hapi-fhir-testpage-interceptor" | grep -v "hapi-fhir-structures-dstu" | grep -v "hapi-fhir-jacoco")
 
-modulesToTest=""
 
-if [ $agentNumber -eq 1 ]; then modulesToTest="hapi-fhir-jpaserver-base"; fi
+# Every slice needs jacoco
+modulesToTest="hapi-fhir-jacoco"
+
+# Assign the
+if [ $agentNumber -eq 1 ]; then modulesToTest="$modulesToTest,hapi-fhir-jpaserver-base"; fi
 
 responsibleAgentCounter=2
 
@@ -25,11 +28,7 @@ for i in $modules; do
    echo Counter is $responsibleAgentCounter
    if [[ $responsibleAgentCounter -eq $agentNumber ]]; then
       echo "adding $i to modules to test!";
-      if [[ $modulesToTest == "" ]]; then
-         modulesToTest=$i
-      else
-         modulesToTest=$modulesToTest,$i;
-      fi;
+      modulesToTest=$modulesToTest,$i;
    fi
 
    responsibleAgentCounter=$((responsibleAgentCounter+1))
