@@ -52,7 +52,9 @@ jobs:
         condition: always()
         inputs:
            sourceFolder: '$(System.DefaultWorkingDirectory)/'
-           contents: '**/*output.txt'
+           contents: |
+              **/surefire-reports/**
+              **/failsafe-reports/**
            targetFolder: '$(Build.ArtifactStagingDirectory)'
 
       # Publish artifact containing test results.
@@ -61,7 +63,7 @@ jobs:
         condition: always()
         inputs:
            targetPath: '$(Build.ArtifactStagingDirectory)/'
-           artifactName: 'logs'
+           artifactName: 'logs-$(system.jobpositioninphase)'
 
    # Amalgamate the test results, and report them.
   - job: Report
