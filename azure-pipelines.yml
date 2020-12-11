@@ -72,8 +72,7 @@ jobs:
     container: maven:3-jdk-11
     steps:
       - task: DownloadPipelineArtifact@2
-        inputs:
-          artifact: 'logs'
+        displayName: Download logs
       - task: Bash@3
         displayName: PWD
         inputs:

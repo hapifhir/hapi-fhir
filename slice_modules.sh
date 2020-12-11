@@ -24,6 +24,7 @@ if [ $agentNumber -eq 1 ]; then modulesToTest="$modulesToTest,hapi-fhir-jpaserve
 
 responsibleAgentCounter=2
 
+# For each parallel agent that _isnt_ the first, evenly split the remaining modules between them
 for i in $modules; do
    echo Counter is $responsibleAgentCounter
    if [[ $responsibleAgentCounter -eq $agentNumber ]]; then
@@ -32,8 +33,11 @@ for i in $modules; do
    fi
 
    responsibleAgentCounter=$((responsibleAgentCounter+1))
-   if [[ $responsibleAgentCounter -gt $totalAgents ]]; then responsibleAgentCounter=1; fi
+   if [[ $responsibleAgentCounter -gt $totalAgents ]]; then responsibleAgentCounter=2; fi
 done
 
 echo This agent \[\#$agentNumber\] is responsible for these modules: $modulesToTest
+
+# Set an Azure environment variable via this janky vso echo.
+# This variable represents which projects this particular agent is responsible for testing.
 echo "##vso[task.setvariable variable=slicedModules]$modulesToTest"
