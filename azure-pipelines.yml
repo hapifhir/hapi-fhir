@@ -14,6 +14,7 @@ pool:
 
 jobs:
   - job: Build
+    container: maven:3-jdk-11
     steps:
       # Grab the previous cache
       - task: Cache@2
