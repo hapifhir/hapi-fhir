@@ -1,0 +1,70 @@
+{
+	"version":"1",
+	"mdmTypes": ["Patient", "Practitioner"],
+	"candidateSearchParams":[],
+	"candidateFilterSearchParams":[],
+	"matchFields":[
+		{
+			"name":"gender",
+			"resourceType":"Patient",
+			"resourcePath":"gender",
+			"matcher":{
+				"algorithm":"STRING"
+			}
+		},
+		{
+			"name":"date-of-birth-precise",
+			"resourceType":"Patient",
+			"resourcePath":"birthDate",
+			"matcher":{
+				"algorithm":"STRING"
+			}
+		},
+		{
+			"name":"date-of-birth-imprecise",
+			"resourceType":"Patient",
+			"resourcePath":"birthDate",
+			"matcher":{
+				"algorithm":"DATE"
+			}
+		},
+		{
+			"name":"state",
+			"resourceType":"Patient",
+			"resourcePath":"address.state",
+			"matcher":{
+				"algorithm":"STRING"
+			}
+		},
+		{
+			"name":"postal-code",
+			"resourceType":"Patient",
+			"resourcePath":"address.postalCode",
+			"matcher":{
+				"algorithm":"STRING"
+			}
+		},
+		{
+			"name":"firstname-meta",
+			"resourceType":"Patient",
+			"resourcePath":"name.given",
+			"matcher":{
+				"algorithm":"DOUBLE_METAPHONE"
+			}
+		},
+		{
+			"name":"lastname-meta",
+			"resourceType":"Patient",
+			"resourcePath":"name.family",
+			"matcher":{
+				"algorithm":"DOUBLE_METAPHONE"
+			}
+		}
+	],
+	"matchResultMap":{
+		"date-of-birth-precise": "MATCH",
+		"lastname-meta,firstname-meta,date-of-birth-precise,gender": "MATCH",
+		"lastname-meta,firstname-meta,date-of-birth-imprecise,postal-code": "MATCH"
+	},
+	"eidSystem":"http://example.com/system"
+}
