@@ -66,6 +66,7 @@ public class MdmResourceMatcherSvc {
 		if (myMdmRulesJson == null) {
 			throw new ConfigurationException("Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
+		myFieldMatchers.clear();
 		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
 			myFieldMatchers.add(new MdmResourceFieldMatcher( myFhirContext, matchFieldJson, myMdmRulesJson));
 		}
