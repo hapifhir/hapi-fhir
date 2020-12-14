@@ -93,11 +93,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>hapi-fhir-igpacks</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-jpaserver-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
