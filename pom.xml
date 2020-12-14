@@ -689,6 +689,10 @@
 			<name>Steven Wagers</name>
 			<organization>Regenstrief Institute</organization>
 		</developer>
+		<developer>
+			<id>vladonemo</id>
+			<name>Vladimir Nemergut</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -760,7 +764,7 @@
 		<plexus_compiler_api_version>2.8.5</plexus_compiler_api_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<slf4j_version>1.7.28</slf4j_version>
+		<slf4j_version>1.7.30</slf4j_version>
 		<spring_version>5.2.9.RELEASE</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.2.0.RELEASE</spring_data_version>
@@ -1462,6 +1466,11 @@
 				<artifactId>junit-jupiter-params</artifactId>
 				<version>${junit_version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit-pioneer</groupId>
+				<artifactId>junit-pioneer</artifactId>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
@@ -2521,7 +2530,6 @@
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
-				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-elasticsearch-6</module>
 				<module>hapi-fhir-jpaserver-api</module>
 				<module>hapi-fhir-jpaserver-model</module>

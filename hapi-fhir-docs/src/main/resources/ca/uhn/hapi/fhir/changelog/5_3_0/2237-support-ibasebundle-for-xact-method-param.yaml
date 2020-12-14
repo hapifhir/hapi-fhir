@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2237
+title: "It is now possible to use a parameter of type `IBaseResource` or `IBaseBundle` as the parameter
+   on a @Transaction method in a plain server."
