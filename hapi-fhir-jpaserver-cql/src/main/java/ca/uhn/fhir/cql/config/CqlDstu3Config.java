@@ -21,7 +21,6 @@ package ca.uhn.fhir.cql.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.dstu3.evaluation.ProviderFactory;
 import ca.uhn.fhir.cql.dstu3.provider.HQMFProvider;
@@ -29,8 +28,6 @@ import ca.uhn.fhir.cql.dstu3.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.dstu3.provider.LibraryOperationsProvider;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.tooling.library.stu3.NarrativeProvider;
 import org.springframework.context.annotation.Bean;
@@ -42,8 +39,8 @@ public class CqlDstu3Config extends BaseCqlConfig {
 
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
-		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider, theValidationSupport);
+	TerminologyProvider terminologyProvider() {
+		return new JpaTerminologyProvider();
 	}
 
 	@Lazy

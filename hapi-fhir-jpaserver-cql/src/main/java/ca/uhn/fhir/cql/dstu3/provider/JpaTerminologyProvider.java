@@ -1,11 +1,10 @@
 package ca.uhn.fhir.cql.dstu3.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -31,101 +30,96 @@ import java.util.List;
 @Component
 public class JpaTerminologyProvider implements TerminologyProvider {
 
-    private ITermReadSvcDstu3 terminologySvcDstu3;
-    private ValueSetResourceProvider valueSetResourceProvider;
-    private final IValidationSupport validationSupport;
+	@Autowired
+	private ITermReadSvcDstu3 terminologySvcDstu3;
+	@Autowired
+	private IFhirResourceDao<ValueSet> myValueSetDao;
+	@Autowired
+	private IValidationSupport validationSupport;
 
-    @Autowired
-    public JpaTerminologyProvider(ITermReadSvcDstu3 terminologySvcDstu3, FhirContext context,
-            ValueSetResourceProvider valueSetResourceProvider, IValidationSupport validationSupport) {
-        this.terminologySvcDstu3 = terminologySvcDstu3;
-        this.valueSetResourceProvider = valueSetResourceProvider;
-        this.validationSupport = validationSupport;
-    }
+	@Override
+	public synchronized boolean in(Code code, ValueSetInfo valueSet) throws ResourceNotFoundException {
+		for (Code c : expand(valueSet)) {
+			if (c == null)
+				continue;
+			if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    @Override
-    public synchronized boolean in(Code code, ValueSetInfo valueSet) throws ResourceNotFoundException {
-        for (Code c : expand(valueSet)) {
-            if (c == null)
-                continue;
-            if (c.getCode().equals(code.getCode()) && c.getSystem().equals(code.getSystem())) {
-                return true;
-            }
-        }
-        return false;
-    }
+	@Override
+	public synchronized Iterable<Code> expand(ValueSetInfo valueSet) throws ResourceNotFoundException {
+		List<Code> codes = new ArrayList<>();
+		boolean needsExpand = false;
+		ValueSet vs = null;
+		if (valueSet.getId().startsWith("http://") || valueSet.getId().startsWith("https://")) {
+			if (valueSet.getVersion() != null
+				|| (valueSet.getCodeSystems() != null && valueSet.getCodeSystems().size() > 0)) {
+				if (!(valueSet.getCodeSystems().size() == 1 && valueSet.getCodeSystems().get(0).getVersion() == null)) {
+					throw new UnsupportedOperationException(String.format(
+						"Could not expand value set %s; version and code system bindings are not supported at this time.",
+						valueSet.getId()));
+				}
+			}
+			IBundleProvider bundleProvider = myValueSetDao
+				.search(new SearchParameterMap().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
+			List<IBaseResource> valueSets = bundleProvider.getResources(0, bundleProvider.size());
+			if (valueSets.isEmpty()) {
+				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
+			} else if (valueSets.size() == 1) {
+				vs = (ValueSet) valueSets.get(0);
+			} else if (valueSets.size() > 1) {
+				throw new IllegalArgumentException("Found more than 1 ValueSet with url: " + valueSet.getId());
+			}
+		} else {
+			vs = myValueSetDao.read(new IdType(valueSet.getId()));
+		}
+		if (vs != null) {
+			if (vs.hasCompose()) {
+				if (vs.getCompose().hasInclude()) {
+					for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+						if (include.hasValueSet() || include.hasFilter()) {
+							needsExpand = true;
+							break;
+						}
+						for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
+							if (concept.hasCode()) {
+								codes.add(new Code().withCode(concept.getCode()).withSystem(include.getSystem()));
+							}
+						}
+					}
+					if (!needsExpand) {
+						return codes;
+					}
+				}
+			}
 
-    @Override
-    public synchronized Iterable<Code> expand(ValueSetInfo valueSet) throws ResourceNotFoundException {
-        List<Code> codes = new ArrayList<>();
-        boolean needsExpand = false;
-        ValueSet vs = null;
-        if (valueSet.getId().startsWith("http://") || valueSet.getId().startsWith("https://")) {
-            if (valueSet.getVersion() != null
-                    || (valueSet.getCodeSystems() != null && valueSet.getCodeSystems().size() > 0)) {
-                if (!(valueSet.getCodeSystems().size() == 1 && valueSet.getCodeSystems().get(0).getVersion() == null)) {
-                    throw new UnsupportedOperationException(String.format(
-                            "Could not expand value set %s; version and code system bindings are not supported at this time.",
-                            valueSet.getId()));
-                }
-            }
-            IBundleProvider bundleProvider = valueSetResourceProvider.getDao()
-                    .search(new SearchParameterMap().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
-            List<IBaseResource> valueSets = bundleProvider.getResources(0, bundleProvider.size());
-            if (valueSets.isEmpty()) {
-                throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
-            } else if (valueSets.size() == 1) {
-                vs = (ValueSet) valueSets.get(0);
-            } else if (valueSets.size() > 1) {
-                throw new IllegalArgumentException("Found more than 1 ValueSet with url: " + valueSet.getId());
-            }
-        } else {
-            vs = valueSetResourceProvider.getDao().read(new IdType(valueSet.getId()));
-        }
-        if (vs != null) {
-            if (vs.hasCompose()) {
-                if (vs.getCompose().hasInclude()) {
-                    for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-                        if (include.hasValueSet() || include.hasFilter()) {
-                            needsExpand = true;
-                            break;
-                        }
-                        for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
-                            if (concept.hasCode()) {
-                                codes.add(new Code().withCode(concept.getCode()).withSystem(include.getSystem()));
-                            }
-                        }
-                    }
-                    if (!needsExpand) {
-                        return codes;
-                    }
-                }
-            }
+			if (vs.hasExpansion() && vs.getExpansion().hasContains()) {
+				for (ValueSetExpansionContainsComponent vsecc : vs.getExpansion().getContains()) {
+					codes.add(new Code().withCode(vsecc.getCode()).withSystem(vsecc.getSystem()));
+				}
 
-            if (vs.hasExpansion() && vs.getExpansion().hasContains()) {
-                for (ValueSetExpansionContainsComponent vsecc : vs.getExpansion().getContains()) {
-                    codes.add(new Code().withCode(vsecc.getCode()).withSystem(vsecc.getSystem()));
-                }
+				return codes;
+			}
+		}
 
-                return codes;
-            }
-        }
+		org.hl7.fhir.r4.model.ValueSet expansion = terminologySvcDstu3
+			.expandValueSet(new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE), valueSet.getId(), null);
+		expansion.getExpansion().getContains()
+			.forEach(concept -> codes.add(new Code().withCode(concept.getCode()).withSystem(concept.getSystem())));
 
-        org.hl7.fhir.r4.model.ValueSet expansion = terminologySvcDstu3
-                .expandValueSet(new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE), valueSet.getId(), null);
-        expansion.getExpansion().getContains()
-                .forEach(concept -> codes.add(new Code().withCode(concept.getCode()).withSystem(concept.getSystem())));
+		return codes;
+	}
 
-        return codes;
-    }
+	@Override
+	public synchronized Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
+		LookupCodeResult cs = terminologySvcDstu3.lookupCode(new ValidationSupportContext(validationSupport), codeSystem.getId(), code.getCode());
 
-    @Override
-    public synchronized Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
-        LookupCodeResult cs = terminologySvcDstu3.lookupCode(new ValidationSupportContext(validationSupport), codeSystem.getId(), code.getCode());
+		code.setDisplay(cs.getCodeDisplay());
+		code.setSystem(codeSystem.getId());
 
-        code.setDisplay(cs.getCodeDisplay());
-        code.setSystem(codeSystem.getId());
-
-        return code;
-    }
+		return code;
+	}
 }
