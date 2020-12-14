@@ -244,7 +244,16 @@ public class ParametersUtil {
 		IPrimitiveType<Integer> count = (IPrimitiveType<Integer>) theCtx.getElementDefinition("integer").newInstance();
 		count.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, count);
+	}
 
+	public static void addParameterToParametersLong(FhirContext theCtx, IBaseParameters theParameters, String theName, long theValue) {
+		addParameterToParametersDecimal(theCtx, theParameters, theName, BigDecimal.valueOf(theValue));
+	}
+
+	public static void addParameterToParametersDecimal(FhirContext theCtx, IBaseParameters theParameters, String theName, BigDecimal theValue) {
+		IPrimitiveType<BigDecimal> count = (IPrimitiveType<BigDecimal>) theCtx.getElementDefinition("decimal").newInstance();
+		count.setValue(theValue);
+		addParameterToParameters(theCtx, theParameters, theName, count);
 	}
 
 	public static void addParameterToParametersReference(FhirContext theCtx, IBaseParameters theParameters, String theName, String theReference) {

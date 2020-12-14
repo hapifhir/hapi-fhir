@@ -22,7 +22,7 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.util.TransactionBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,7 +36,7 @@ public class TransactionBuilderExamples {
 	public void update() throws FHIRException {
 		//START SNIPPET: update
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to update
 		Patient patient = new Patient();
@@ -54,7 +54,7 @@ public class TransactionBuilderExamples {
 	public void updateConditional() throws FHIRException {
 		//START SNIPPET: updateConditional
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to update
 		Patient patient = new Patient();
@@ -72,7 +72,7 @@ public class TransactionBuilderExamples {
 	public void create() throws FHIRException {
 		//START SNIPPET: create
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to create
 		Patient patient = new Patient();
@@ -89,7 +89,7 @@ public class TransactionBuilderExamples {
 	public void createConditional() throws FHIRException {
 		//START SNIPPET: createConditional
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to create
 		Patient patient = new Patient();

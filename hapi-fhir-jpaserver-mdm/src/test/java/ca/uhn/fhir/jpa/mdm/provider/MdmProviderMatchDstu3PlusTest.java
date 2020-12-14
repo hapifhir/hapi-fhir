@@ -58,7 +58,6 @@ public class MdmProviderMatchDstu3PlusTest extends BaseProviderDstu3PlusTest {
 	public void testMedicationMatch() throws Exception {
 		createDummyOrganization();
 
-
 		Medication medication = buildMedication("Organization/mfr");
 		Medication createdMedication = createMedication(medication);
 		Medication newMedication = buildMedication("Organization/mfr");

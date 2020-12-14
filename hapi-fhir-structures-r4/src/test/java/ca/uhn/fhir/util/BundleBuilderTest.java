@@ -1,23 +1,38 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
-public class TransactionBuilderTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(TransactionBuilderTest.class);
+public class BundleBuilderTest {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(BundleBuilderTest.class);
 	private FhirContext myFhirContext = FhirContext.forR4();
+	private Date myCheckDate;
+
+	@BeforeEach
+	public void initDate() {
+		Calendar cal = GregorianCalendar.getInstance();
+		cal.set(2021, 0, 0);
+		myCheckDate = cal.getTime();
+	}
 
 	@Test
 	public void testAddEntryUpdate() {
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId("http://foo/Patient/123");
@@ -33,14 +48,38 @@ public class TransactionBuilderTest {
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+	}
 
+	@Test
+	public void testNewPrimitive() {
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		IPrimitiveType<Date> datePrimitive = builder.newPrimitive("instant", myCheckDate);
+		assertNotNull(datePrimitive);
+		assertEquals(myCheckDate, datePrimitive.getValue());
+	}
 
+	@Test
+	public void testSettingBundleFields() {
+		String uuid = UUID.randomUUID().toString();
+
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder
+			.setBundleField("type", "searchset")
+			.setBundleField("id", uuid)
+			.setMetaField("lastUpdated", builder.newPrimitive("instant", myCheckDate));
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
+		assertEquals(uuid, bundle.getId());
+		assertEquals(myCheckDate, bundle.getMeta().getLastUpdated());
 	}
 
 
 	@Test
 	public void testAddEntryUpdateConditional() {
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setId("http://foo/Patient/123");
@@ -56,14 +95,11 @@ public class TransactionBuilderTest {
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
-
-
 	}
-
 
 	@Test
 	public void testAddEntryCreate() {
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
@@ -78,14 +114,11 @@ public class TransactionBuilderTest {
 		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
-
-
 	}
-
 
 	@Test
 	public void testAddEntryCreateConditional() {
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		Patient patient = new Patient();
 		patient.setActive(true);
@@ -101,9 +134,6 @@ public class TransactionBuilderTest {
 		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
 		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
-
-
 	}
-
 
 }

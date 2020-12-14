@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -38,13 +39,17 @@ import org.thymeleaf.util.Validate;
  *
  * @since 5.1.0
  */
-public class TransactionBuilder {
+public class BundleBuilder {
 
 	private final FhirContext myContext;
 	private final IBaseBundle myBundle;
 	private final RuntimeResourceDefinition myBundleDef;
 	private final BaseRuntimeChildDefinition myEntryChild;
+	private final BaseRuntimeChildDefinition myMetaChild;
+	private final BaseRuntimeChildDefinition mySearchChild;
 	private final BaseRuntimeElementDefinition<?> myEntryDef;
+	private final BaseRuntimeElementDefinition<?> myMetaDef;
+	private final BaseRuntimeElementDefinition mySearchDef;
 	private final BaseRuntimeChildDefinition myEntryResourceChild;
 	private final BaseRuntimeChildDefinition myEntryFullUrlChild;
 	private final BaseRuntimeChildDefinition myEntryRequestChild;
@@ -57,19 +62,22 @@ public class TransactionBuilder {
 	/**
 	 * Constructor
 	 */
-	public TransactionBuilder(FhirContext theContext) {
+	public BundleBuilder(FhirContext theContext) {
 		myContext = theContext;
 
 		myBundleDef = myContext.getResourceDefinition("Bundle");
 		myBundle = (IBaseBundle) myBundleDef.newInstance();
 
-		BaseRuntimeChildDefinition typeChild = myBundleDef.getChildByName("type");
-		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName("type").newInstance(typeChild.getInstanceConstructorArguments());
-		type.setValueAsString("transaction");
-		typeChild.getMutator().setValue(myBundle, type);
+		setBundleField("type", "transaction");
 
 		myEntryChild = myBundleDef.getChildByName("entry");
 		myEntryDef = myEntryChild.getChildByName("entry");
+
+		mySearchChild = myEntryDef.getChildByName("search");
+		mySearchDef = mySearchChild.getChildByName("search");
+
+		myMetaChild = myBundleDef.getChildByName("meta");
+		myMetaDef = myMetaChild.getChildByName("meta");
 
 		myEntryResourceChild = myEntryDef.getChildByName("resource");
 		myEntryFullUrlChild = myEntryDef.getChildByName("fullUrl");
@@ -83,7 +91,45 @@ public class TransactionBuilder {
 		myEntryRequestMethodDef = myEntryRequestMethodChild.getChildByName("method");
 
 		myEntryRequestIfNoneExistChild = myEntryRequestDef.getChildByName("ifNoneExist");
+	}
 
+	/**
+	 * Sets the specified primitive field on the bundle with the value provided.
+	 *
+	 * @param theFieldName
+	 * 		Name of the primitive field.
+	 * @param theFieldValue
+	 * 		Value of the field to be set.
+	 */
+	public BundleBuilder setBundleField(String theFieldName, String theFieldValue) {
+		BaseRuntimeChildDefinition typeChild = myBundleDef.getChildByName(theFieldName);
+		if (typeChild == null) {
+			throw new IllegalArgumentException(String.format("Unable to find field %s", theFieldName));
+		}
+		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
+		type.setValueAsString(theFieldValue);
+		typeChild.getMutator().setValue(myBundle, type);
+		return this;
+	}
+
+	public BundleBuilder setSearchField(IBase theSearch, String theFieldName, String theFieldValue) {
+		BaseRuntimeChildDefinition typeChild = mySearchDef.getChildByName(theFieldName);
+		if (typeChild == null) {
+			throw new IllegalArgumentException(String.format("Unable to find field %s", theFieldName));
+		}
+		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
+		type.setValueAsString(theFieldValue);
+		typeChild.getMutator().setValue(theSearch, type);
+		return this;
+	}
+
+	public BundleBuilder setSearchField(IBase theSearch, String theFieldName, IPrimitiveType<?> theFieldValue) {
+		BaseRuntimeChildDefinition typeChild = mySearchDef.getChildByName(theFieldName);
+		if (typeChild == null) {
+			throw new IllegalArgumentException(String.format("Unable to find field %s", theFieldName));
+		}
+		typeChild.getMutator().setValue(theSearch, theFieldValue);
+		return this;
 	}
 
 	/**
@@ -130,11 +176,29 @@ public class TransactionBuilder {
 		return new CreateBuilder(request);
 	}
 
+	public IBase addEntry() {
+		IBase entry = myEntryDef.newInstance();
+		myEntryChild.getMutator().addValue(myBundle, entry);
+		return entry;
+	}
+
+	/**
+	 * Creates new search instance for the specified entry
+	 *
+	 * @param entry Entry to create search instance for
+	 * @return
+	 * 		Returns the search instance
+	 */
+	public IBaseBackboneElement addSearch(IBase entry) {
+		IBase searchInstance = mySearchDef.newInstance();
+		mySearchChild.getMutator().setValue(entry, searchInstance);
+		return (IBaseBackboneElement) searchInstance;
+	}
+
 	public IBase addEntryAndReturnRequest(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
 
-		IBase entry = myEntryDef.newInstance();
-		myEntryChild.getMutator().addValue(myBundle, entry);
+		IBase entry = addEntry();
 
 		// Bundle.entry.fullUrl
 		IPrimitiveType<?> fullUrl = (IPrimitiveType<?>) myContext.getElementDefinition("uri").newInstance();
@@ -153,6 +217,57 @@ public class TransactionBuilder {
 
 	public IBaseBundle getBundle() {
 		return myBundle;
+	}
+
+	public BundleBuilder setMetaField(String theFieldName, IBase theFieldValue) {
+		BaseRuntimeChildDefinition.IMutator mutator = myMetaDef.getChildByName(theFieldName).getMutator();
+		mutator.setValue(myBundle.getMeta(), theFieldValue);
+		return this;
+	}
+
+	public void addToEntry(IBase theEntry, String theEntryChildName, IBase theValue) {
+		addToBase(theEntry, theEntryChildName, theValue, myEntryDef);
+	}
+
+	public void addToSearch(IBase theSearch, String theSearchChildName, IBase theValue) {
+		addToBase(theSearch, theSearchChildName, theValue, mySearchDef);
+	}
+
+	private void addToBase(IBase theBase, String theSearchChildName, IBase theValue, BaseRuntimeElementDefinition mySearchDef) {
+		BaseRuntimeChildDefinition defn = mySearchDef.getChildByName(theSearchChildName);
+		if (defn == null) {
+			throw new IllegalArgumentException(String.format("Unable to get child definition %s from $s", theSearchChildName, theBase));
+		}
+		defn.getMutator().setValue(theBase, theValue);
+	}
+
+
+	/**
+	 * Creates a new primitive instance of the specified element type.
+	 *
+	 * @param theTypeName
+	 * 		Element type to create
+	 * @param theInitialValue
+	 * 		Optional initial value to be set on the new instance, in case of multiple values, only the first one will be
+	 * 	set.
+	 * @param <T>
+	 *    	Actual type of the parameterized primitive type interface
+	 * @return
+	 * 		Returns the newly created instance
+	 */
+	public <T> IPrimitiveType<T> newPrimitive(String theTypeName, T... theInitialValue) {
+		BaseRuntimeElementDefinition primitiveDefinition = myContext.getElementDefinition(theTypeName);
+		if (primitiveDefinition == null) {
+			throw new IllegalArgumentException(String.format("Unable to find definition for %s", theTypeName));
+		}
+
+		IPrimitiveType<T> newInstance = (IPrimitiveType<T>) primitiveDefinition.newInstance();
+
+		if (theInitialValue != null && theInitialValue.length > 0) {
+			newInstance.setValue(theInitialValue[0]);
+		}
+
+		return newInstance;
 	}
 
 	public class UpdateBuilder {

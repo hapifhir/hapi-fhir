@@ -20,9 +20,7 @@ package ca.uhn.fhir.mdm.provider;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
@@ -38,11 +36,15 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -51,11 +53,13 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nonnull;
 import java.math.BigDecimal;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class MdmProviderDstu3Plus extends BaseMdmProvider {
+
 	private final IMdmControllerSvc myMdmControllerSvc;
 	private final IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	private final IMdmExpungeSvc myMdmExpungeSvc;
@@ -100,40 +104,41 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource);
 		matches.sort(Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore()).reversed());
 
-		IBaseBundle retVal = (IBaseBundle) myFhirContext.getResourceDefinition("Bundle").newInstance();
-		InvocationUtils.invoke(retVal, "setType", InvocationUtils.getInnerEnumLiteral(retVal, "BundleType", "SEARCHSET"));
-		InvocationUtils.invoke(retVal, "setId", UUID.randomUUID().toString());
-		Object meta = InvocationUtils.invoke(retVal, "getMeta", null);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.setBundleField("type", "searchset");
+		builder.setBundleField("id", UUID.randomUUID().toString());
+		builder.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
 
-		Object now = myFhirContext.getElementDefinition("instant").newInstance();
-		InvocationUtils.invoke(meta, "setLastUpdatedElement", now);
-
+		IBaseBundle retVal = builder.getBundle();
 		for (MatchedTarget next : matches) {
 			boolean shouldKeepThisEntry = next.isMatch() || next.isPossibleMatch();
 			if (!shouldKeepThisEntry) {
 				continue;
 			}
 
-			Object entry = InvocationUtils.newInnerClassInstance(retVal, "BundleEntryComponent");
-			InvocationUtils.invoke(entry, "setResource", next.getTarget());
-			InvocationUtils.invoke(entry, "setSearch", toBundleEntrySearchComponent(retVal, next));
-			InvocationUtils.invoke(retVal, "addEntry", entry);
+			IBase entry = builder.addEntry();
+			builder.addToEntry(entry, "resource", next.getTarget());
+
+			IBaseBackboneElement search = builder.addSearch(entry);
+			toBundleEntrySearchComponent(builder, search, next);
 		}
 		return retVal;
 	}
 
 
-	public Object toBundleEntrySearchComponent(IBaseBundle theBundle, MatchedTarget theMatchedTarget) {
-		Object searchComponent = InvocationUtils.newInnerClassInstance(theBundle, "BundleEntrySearchComponent");
-		Object match = InvocationUtils.getInnerEnumLiteral(theBundle, "SearchEntryMode", "MATCH");
-		InvocationUtils.invoke(searchComponent, "setMode", match);
-		InvocationUtils.invoke(searchComponent, "setScore", BigDecimal.valueOf(theMatchedTarget.getMatchResult().getNormalizedScore()));
+	public IBaseBackboneElement toBundleEntrySearchComponent(BundleBuilder theBuilder, IBaseBackboneElement theSearch, MatchedTarget theMatchedTarget) {
+		theBuilder.setSearchField(theSearch, "mode", "match");
+		double score = theMatchedTarget.getMatchResult().getNormalizedScore();
+		theBuilder.setSearchField(theSearch, "score",
+			theBuilder.newPrimitive("decimal", BigDecimal.valueOf(score)));
 
-		String matchGrade = getMatchGrade(theBundle, theMatchedTarget);
-		Object codeType = myFhirContext.getElementDefinition("code").newInstance(matchGrade);
+		String matchGrade = getMatchGrade(theMatchedTarget);
+		IBaseDatatype codeType = (IBaseDatatype) myFhirContext.getElementDefinition("code").newInstance(matchGrade);
+		IBaseExtension searchExtension = theSearch.addExtension();
+		searchExtension.setUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+		searchExtension.setValue(codeType);
 
-		InvocationUtils.invoke(searchComponent, "addExtension", MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE, codeType);
-		return searchComponent;
+		return theSearch;
 	}
 
 	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
@@ -172,9 +177,9 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 			resetCount = myMdmExpungeSvc.expungeAllMdmLinksOfSourceType(theSourceType.getValueAsString(), theRequestDetails);
 		}
 
-		IBaseParameters parameters = newParameters();
-		setValue(parameters, ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT, "decimal", "" + resetCount);
-		return parameters;
+		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT, resetCount);
+		return retval;
 	}
 
 
@@ -287,42 +292,20 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	 * Helper function to build the out-parameters for all batch MDM operations.
 	 */
 	public IBaseParameters buildMdmOutParametersWithCount(long theCount) {
-		IBaseParameters retVal = newParameters();
-		setValue(retVal, ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, "decimal", "" + theCount);
-		return retVal;
-	}
-
-	public IBaseParameters newParameters() {
-		RuntimeResourceDefinition paramsResDefn = myFhirContext.getResourceDefinition("Parameters");
-		IBaseParameters parameters = (IBaseParameters) paramsResDefn.newInstance();
-		return parameters;
-	}
-
-	public <T extends IBaseBackboneElement> T setValue(IBaseParameters theParameters, String theName, String theValueType, Object theValue) {
-		Object parameter = InvocationUtils.invoke(theParameters, "addParameter");
-		InvocationUtils
-			.invoke(parameter, "setName", theName);
-
-		BaseRuntimeElementDefinition bred = myFhirContext.getElementDefinition(theValueType);
-		InvocationUtils
-			.invoke(parameter, "setValue", bred.newInstance(theValue));
-		return (T) parameter;
+		IBaseParameters retval = ParametersUtil.newInstance(myFhirContext);
+		ParametersUtil.addParameterToParametersLong(myFhirContext, retval, ProviderConstants.OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT, theCount);
+		return retval;
 	}
 
 	@Nonnull
-	protected String getMatchGrade(IBaseBundle theBundle, MatchedTarget theTheMatchedTarget) {
-		String modelPackageName = theBundle.getClass().getPackage().getName();
-
-		String enumLiteral = "PROBABLE";
+	protected String getMatchGrade(MatchedTarget theTheMatchedTarget) {
+		String retVal = "probable";
 		if (theTheMatchedTarget.isMatch()) {
-			enumLiteral = "CERTAIN";
+			retVal = "certain";
 		} else if (theTheMatchedTarget.isPossibleMatch()) {
-			enumLiteral = "POSSIBLE";
+			retVal = "possible";
 		}
-
-		Enum gradeValue = InvocationUtils.getEnumValue(modelPackageName + ".codesystems.MatchGrade", enumLiteral);
-		String gradeCode = InvocationUtils.invoke(gradeValue, "toCode");
-		return gradeCode;
+		return retVal;
 	}
 
 	private String getResourceType(String theParamName, IPrimitiveType<String> theResourceId) {
