@@ -44,7 +44,6 @@ public abstract class BaseMdmProvider {
 	}
 
 	protected void validateMergeParameters(IPrimitiveType<String> theFromGoldenResourceId, IPrimitiveType<String> theToGoldenResourceId) {
-		// TODO NG - Add validation to check that types are the same?
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
