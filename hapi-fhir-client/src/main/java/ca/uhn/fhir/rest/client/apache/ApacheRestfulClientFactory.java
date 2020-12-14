@@ -100,8 +100,11 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 					.setProxy(myProxy)
 					.build();
 
-			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();
+			HttpClientBuilder builder = getHttpClientBuilder()
+					.useSystemProperties()
+					.setConnectionManager(connectionManager)
+					.setDefaultRequestConfig(defaultRequestConfig)
+					.disableCookieManagement();
 
 			if (myProxy != null && StringUtils.isNotBlank(getProxyUsername()) && StringUtils.isNotBlank(getProxyPassword())) {
 				CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -116,6 +119,10 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 		}
 
 		return myHttpClient;
+	}
+
+	protected HttpClientBuilder getHttpClientBuilder() {
+		return HttpClients.custom();
 	}
 
 	@Override

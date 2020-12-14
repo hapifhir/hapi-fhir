@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2192
+title: "ApacheRestfulClientFactory now uses system properties for proxy configuration"
