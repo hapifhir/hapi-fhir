@@ -284,7 +284,7 @@ public class RequestPartitionId {
 	 * Returns the partition IDs (numeric) as a joined string with a space between, using the string "null" for any null values
 	 */
 	public static String stringifyForKey(@Nonnull RequestPartitionId theRequestPartitionId) {
-		String retVal = "(all partitions)";
+		String retVal = "(all)";
 		if (!theRequestPartitionId.isAllPartitions()) {
 			assert theRequestPartitionId.hasPartitionIds();
 			retVal = theRequestPartitionId

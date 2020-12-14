@@ -254,7 +254,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				ResourcePersistentId match;
 				if (matches.isEmpty()) {
 
-					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null);
+					Optional<ResourceTable> placeholderOpt = myDaoResourceLinkResolver.createPlaceholderTargetIfConfiguredToDoSo(matchResourceType, nextRef, null, theRequest);
 					if (placeholderOpt.isPresent()) {
 						match = new ResourcePersistentId(placeholderOpt.get().getResourceId());
 					} else {

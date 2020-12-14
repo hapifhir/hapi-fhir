@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2215
+title: "When using a partitioned JPA server, auto-create placeholder targets did not work if the partition interceptor was
+   registered against the server (e.g. for a multitenancy configuration). This has been corrected. Thanks to Rob Whelan for
+   reporting!"

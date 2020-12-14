@@ -689,6 +689,10 @@
 			<name>Steven Wagers</name>
 			<organization>Regenstrief Institute</organization>
 		</developer>
+		<developer>
+			<id>vladonemo</id>
+			<name>Vladimir Nemergut</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1469,6 +1473,11 @@
 				<artifactId>junit-jupiter-params</artifactId>
 				<version>${junit_version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit-pioneer</groupId>
+				<artifactId>junit-pioneer</artifactId>
+				<version>1.1.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>

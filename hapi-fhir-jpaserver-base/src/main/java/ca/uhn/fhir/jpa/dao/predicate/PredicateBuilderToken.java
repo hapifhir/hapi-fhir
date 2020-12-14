@@ -73,7 +73,7 @@ class PredicateBuilderToken extends BasePredicateBuilder implements IPredicateBu
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	PredicateBuilderToken(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
+	public PredicateBuilderToken(LegacySearchBuilder theSearchBuilder, PredicateBuilder thePredicateBuilder) {
 		super(theSearchBuilder);
 		myPredicateBuilder = thePredicateBuilder;
 	}

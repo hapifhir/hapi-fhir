@@ -1,13 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
@@ -21,7 +18,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
@@ -42,14 +38,10 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.HapiExtensions;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -59,19 +51,13 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
@@ -89,78 +75,10 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-@SuppressWarnings("unchecked")
-public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
-
-	static final String PARTITION_1 = "PART-1";
-	static final String PARTITION_2 = "PART-2";
-	static final String PARTITION_3 = "PART-3";
-	static final String PARTITION_4 = "PART-4";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PartitioningSqlR4Test.class);
-	private MyReadWriteInterceptor myPartitionInterceptor;
-	private LocalDate myPartitionDate;
-	private LocalDate myPartitionDate2;
-	private int myPartitionId;
-	private int myPartitionId2;
-	private boolean myHaveDroppedForcedIdUniqueConstraint;
-	@Autowired
-	private IPartitionLookupSvc myPartitionConfigSvc;
-
-	@AfterEach
-	public void after() {
-		myPartitionInterceptor.assertNoRemainingIds();
-
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
-		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
-		myPartitionSettings.setAllowReferencesAcrossPartitions(new PartitionSettings().getAllowReferencesAcrossPartitions());
-
-		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
-		myInterceptor = null;
-
-		if (myHaveDroppedForcedIdUniqueConstraint) {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("delete from HFJ_FORCED_ID").executeUpdate();
-				myEntityManager.createNativeQuery("alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
-			});
-		}
-
-		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-	}
-
-	@Override
-	@BeforeEach
-	public void before() throws ServletException {
-		super.before();
-
-		myPartitionSettings.setPartitioningEnabled(true);
-		myPartitionSettings.setIncludePartitionInSearchHashes(new PartitionSettings().isIncludePartitionInSearchHashes());
-
-		myDaoConfig.setUniqueIndexesEnabled(true);
-
-		myModelConfig.setDefaultSearchParamsCanBeOverridden(true);
-
-		myPartitionDate = LocalDate.of(2020, Month.JANUARY, 14);
-		myPartitionDate2 = LocalDate.of(2020, Month.JANUARY, 15);
-		myPartitionId = 1;
-		myPartitionId2 = 2;
-
-		myPartitionInterceptor = new MyReadWriteInterceptor();
-		myInterceptorRegistry.registerInterceptor(myPartitionInterceptor);
-
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(3).setName(PARTITION_3));
-		myPartitionConfigSvc.createPartition(new PartitionEntity().setId(4).setName(PARTITION_4));
-
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
-
-		// Ensure the partition names are resolved
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(JpaConstants.DEFAULT_PARTITION_NAME, PARTITION_1, PARTITION_2, PARTITION_3, PARTITION_4));
-		myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true));
-
-	}
+@SuppressWarnings({"unchecked", "ConstantConditions"})
+public class PartitioningSqlR4Test extends BasePartitioningR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(PartitioningSqlR4Test.class);
 
 	@Test
 	public void testCreateSearchParameter_DefaultPartition() {
@@ -175,7 +93,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(id).orElseThrow(IllegalArgumentException::new);
-			assertEquals(null, resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId());
 		});
 	}
 
@@ -188,7 +106,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
 		addCreatePartition(myPartitionId2, myPartitionDate2);
@@ -196,7 +114,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 
 		myCaptureQueriesListener.clear();
-		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(2, selectQueries.size());
@@ -222,7 +140,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
 		addCreatePartition(myPartitionId2, myPartitionDate2);
@@ -230,7 +148,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 
 		try {
-			myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), startsWith("Resource Patient/" + patientId.getIdPart() + " not found, specified in path: Observation.subject"));
@@ -248,13 +166,13 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
-		IIdType patientId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
 		addCreatePartition(myPartitionId2, myPartitionDate2);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
-		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -274,7 +192,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
-		IIdType patientId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition 2
 		addCreatePartition(myPartitionId2, myPartitionDate2);
@@ -282,7 +200,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		obs.getSubject().setReference(patientId.getValue());
 
 		try {
-			myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+			myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), startsWith("Resource Patient/ONE not found, specified in path: Observation.subject"));
@@ -296,13 +214,13 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		addCreateDefaultPartition(myPartitionDate);
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition NULL
 		addCreateDefaultPartition(myPartitionDate);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
-		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -321,13 +239,13 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Patient patient = new Patient();
 		patient.setId("ONE");
 		patient.setActive(true);
-		IIdType patientId = myPatientDao.update(patient).getId().toUnqualifiedVersionless();
+		IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// Create observation in partition NULL
 		addCreateDefaultPartition(myPartitionDate);
 		Observation obs = new Observation();
 		obs.getSubject().setReference(patientId.getValue());
-		IIdType obsId = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
 			List<ResourceLink> resLinks = myResourceLinkDao.findAll();
@@ -382,14 +300,32 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
+	public void testCreate_AutoCreatePlaceholderTargets() {
+		myDaoConfig.setAutoCreatePlaceholderReferenceTargets(true);
+
+		addCreatePartition(1, null);
+		addCreatePartition(1, null);
+		addReadPartition(1);
+		IIdType patientId1 = createPatient(withOrganization(new IdType("Organization/FOO")));
+
+		addReadPartition(1);
+		IdType gotId1 = myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
+		assertEquals(patientId1, gotId1);
+
+		addReadPartition(1);
+		IdType gotIdOrg = myOrganizationDao.read(new IdType("Organization/FOO"), mySrd).getIdElement().toUnqualifiedVersionless();
+		assertEquals("Organization/FOO", gotIdOrg.toUnqualifiedVersionless().getValue());
+	}
+
+	@Test
 	public void testCreate_UnknownPartition() {
 		addCreatePartition(99, null);
 
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDate(new Date());
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("system").setValue("value");
+		patient.setBirthDate(new Date());
 		try {
-			myPatientDao.create(p);
+			myPatientDao.create(patient, mySrd);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("No partition exists with ID 99", e.getMessage());
@@ -401,14 +337,14 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 	public void testCreate_ServerId_NoPartition() {
 		addCreateDefaultPartition();
 
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("system").setValue("value");
-		p.setBirthDate(new Date());
-		Long patientId = myPatientDao.create(p).getId().getIdPartAsLong();
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("system").setValue("value");
+		patient.setBirthDate(new Date());
+		Long patientId = myPatientDao.create(patient, mySrd).getId().getIdPartAsLong();
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
-			assertEquals(null, resourceTable.getPartitionId());
+			assertNull(resourceTable.getPartitionId());
 		});
 	}
 
@@ -421,7 +357,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Organization org = new Organization();
 		org.setName("org");
-		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		addCreatePartition(myPartitionId, myPartitionDate);
 		Patient p = new Patient();
@@ -505,7 +441,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		addCreateDefaultPartition(myPartitionDate);
 		Organization org = new Organization();
 		org.setName("org");
-		IIdType orgId = myOrganizationDao.create(org).getId().toUnqualifiedVersionless();
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
 
 		addCreateDefaultPartition(myPartitionDate);
 		Patient p = new Patient();
@@ -589,7 +525,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
-		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
+		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
 		addReadPartition(myPartitionId);
 		addCreatePartition(myPartitionId, myPartitionDate);
@@ -617,7 +553,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
-		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
+		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
 		addReadDefaultPartition();
 		addCreateDefaultPartition();
@@ -643,7 +579,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Organization org = new Organization();
 		org.setId("org");
 		org.setName("org");
-		IIdType orgId = myOrganizationDao.update(org).getId().toUnqualifiedVersionless();
+		IIdType orgId = myOrganizationDao.update(org, mySrd).getId().toUnqualifiedVersionless();
 
 		addReadDefaultPartition();
 		addCreateDefaultPartition(myPartitionDate);
@@ -685,7 +621,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			.getRequest().setUrl("Organization").setMethod(Bundle.HTTPVerb.POST);
 
 		Patient p = new Patient();
-		p.getMeta().addTag("http://system", "code", "diisplay");
+		p.getMeta().addTag("http://system", "code", "display");
 		p.addName().setFamily("FAM");
 		p.addIdentifier().setSystem("system").setValue("value");
 		p.setBirthDate(new Date());
@@ -713,10 +649,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		// Create a resource
 		addCreatePartition(myPartitionId, myPartitionDate);
-		Patient p = new Patient();
-		p.getMeta().addTag("http://system", "code", "diisplay");
-		p.setActive(true);
-		Long patientId = myPatientDao.create(p).getId().getIdPartAsLong();
+		Patient patient = new Patient();
+		patient.getMeta().addTag("http://system", "code", "display");
+		patient.setActive(true);
+		Long patientId = myPatientDao.create(patient, mySrd).getId().getIdPartAsLong();
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
 			ResourceTable resourceTable = myResourceTableDao.findById(patientId).orElseThrow(IllegalArgumentException::new);
@@ -726,10 +662,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		// Update that resource
 		addReadPartition(myPartitionId);
-		p = new Patient();
-		p.setId("Patient/" + patientId);
-		p.setActive(false);
-		myPatientDao.update(p, mySrd);
+		patient = new Patient();
+		patient.setId("Patient/" + patientId);
+		patient.setActive(false);
+		myPatientDao.update(patient, mySrd);
 
 		runInTransaction(() -> {
 			// HFJ_RESOURCE
@@ -1067,6 +1003,21 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage(), matchesPattern("Resource Patient/TWO is not known"));
 		}
+
+		// Read in wrong Partition
+		addReadPartition(2);
+		try {
+			myPatientDao.read(patientId1, mySrd).getIdElement().toUnqualifiedVersionless();
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage(), matchesPattern("Resource Patient/ONE is not known"));
+		}
+
+		// Read in correct Partition
+		addReadPartition(2);
+		IdType gotId2 = myPatientDao.read(patientId2, mySrd).getIdElement().toUnqualifiedVersionless();
+		assertEquals(patientId2, gotId2);
+
 	}
 
 	@Test
@@ -1151,10 +1102,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			myCaptureQueriesListener.clear();
 			addReadPartition(1);
 
-			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(1, searchOutcome.size());
-			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			IIdType gotId1 = searchOutcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -1169,8 +1120,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		{
 			addReadPartition(1);
 
-			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1178,8 +1129,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		{
 			addReadPartition(1);
 
-			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1203,10 +1154,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
-				.add(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+				.add(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(1, searchOutcome.size());
-			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			IIdType gotId1 = searchOutcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
@@ -1223,8 +1174,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
-				.add(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+				.add(IAnyResource.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1234,8 +1185,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
-				.add(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+				.add(IAnyResource.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1260,10 +1211,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			myCaptureQueriesListener.clear();
 			addReadPartition(1);
 
-			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(1, searchOutcome.size());
-			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			IIdType gotId1 = searchOutcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
@@ -1278,8 +1229,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		{
 			addReadPartition(1);
 
-			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1287,8 +1238,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		{
 			addReadPartition(1);
 
-			SearchParameterMap map = SearchParameterMap.newSynchronous(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+			SearchParameterMap map = SearchParameterMap.newSynchronous(IAnyResource.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1315,10 +1266,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
-				.add(Patient.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+				.add(IAnyResource.SP_RES_ID, new TokenParam(patientId1.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(1, searchOutcome.size());
-			IIdType gotId1 = searchOutcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless();
+			IIdType gotId1 = searchOutcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless();
 			assertEquals(patientId1, gotId1);
 
 			// First SQL resolves the forced ID
@@ -1340,8 +1291,8 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
-				.add(Patient.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+				.add(IAnyResource.SP_RES_ID, new TokenParam(patientIdNull.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
@@ -1351,14 +1302,12 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 			SearchParameterMap map = SearchParameterMap.newSynchronous()
 				.add(Patient.SP_ACTIVE, new TokenParam("true"))
-				.add(Patient.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
-			IBundleProvider searchOutcome = myPatientDao.search(map);
+				.add(IAnyResource.SP_RES_ID, new TokenParam(patientId2.toUnqualifiedVersionless().getValue()));
+			IBundleProvider searchOutcome = myPatientDao.search(map, mySrd);
 			assertEquals(0, searchOutcome.size());
 		}
 
 	}
-
-
 
 
 	@Test
@@ -1376,7 +1325,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1393,7 +1342,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1418,7 +1367,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientId1));
 
@@ -1435,7 +1384,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientId1));
 
@@ -1459,7 +1408,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_ACTIVE, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientIdNull));
 
@@ -1476,7 +1425,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_FAMILY, new StringParam().setMissing(false));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientIdNull));
 
@@ -1502,7 +1451,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1529,7 +1478,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientId1));
 
@@ -1557,7 +1506,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientId1));
 
@@ -1583,7 +1532,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_GENERAL_PRACTITIONER, new StringParam().setMissing(true));
 			map.setLoadSynchronous(true);
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids, contains(patientIdDefault));
 
@@ -1608,7 +1557,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1628,7 +1577,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
 
@@ -1649,7 +1598,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, Matchers.contains(patientId1, patientId2));
 
@@ -1670,7 +1619,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientIdNull, patientId2));
 
@@ -1698,7 +1647,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1714,7 +1663,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateOrListParam().addOr(new DateParam("2020-04-20")).addOr(new DateParam("2020-04-22")));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1730,7 +1679,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateAndListParam().addAnd(new DateOrListParam().addOr(new DateParam("2020"))).addAnd(new DateOrListParam().addOr(new DateParam("2020-04-20"))));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1746,7 +1695,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateRangeParam(new DateParam("2020-01-01"), new DateParam("2020-04-25")));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1778,7 +1727,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
 		map.setLoadSynchronous(true);
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
@@ -1795,7 +1744,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateOrListParam().addOr(new DateParam("2020-04-20")).addOr(new DateParam("2020-04-22")));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
 
@@ -1811,7 +1760,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateAndListParam().addAnd(new DateOrListParam().addOr(new DateParam("2020"))).addAnd(new DateOrListParam().addOr(new DateParam("2020-04-20"))));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
 
@@ -1827,7 +1776,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateRangeParam(new DateParam("2020-01-01"), new DateParam("2020-04-25")));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
 
@@ -1857,7 +1806,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-04-20"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull));
 
@@ -1873,7 +1822,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateOrListParam().addOr(new DateParam("2020-04-20")).addOr(new DateParam("2020-04-22")));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull));
 
@@ -1889,7 +1838,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateAndListParam().addAnd(new DateOrListParam().addOr(new DateParam("2020"))).addAnd(new DateOrListParam().addOr(new DateParam("2020-04-20"))));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull));
 
@@ -1905,7 +1854,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateRangeParam(new DateParam("2020-01-01"), new DateParam("2020-04-25")));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull));
 
@@ -1923,14 +1872,14 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Organization org = new Organization();
 		org.setId("ORG");
 		org.setName("ORG");
-		myOrganizationDao.update(org);
+		myOrganizationDao.update(org, mySrd);
 
 		addReadPartition(1);
 		addCreatePartition(1, null);
 		Practitioner practitioner = new Practitioner();
 		practitioner.setId("PRACT");
 		practitioner.addName().setFamily("PRACT");
-		myPractitionerDao.update(practitioner);
+		myPractitionerDao.update(practitioner, mySrd);
 
 		addReadPartition(1);
 		addCreatePartition(1, null);
@@ -1938,7 +1887,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		role.setId("ROLE");
 		role.getPractitioner().setReference("Practitioner/PRACT");
 		role.getOrganization().setReference("Organization/ORG");
-		myPractitionerRoleDao.update(role);
+		myPractitionerRoleDao.update(role, mySrd);
 
 		addReadPartition(1);
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
@@ -1946,7 +1895,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "_id", "ROLE")));
 		params.add("_has", value);
 		myCaptureQueriesListener.clear();
-		IBundleProvider outcome = myPractitionerDao.search(params);
+		IBundleProvider outcome = myPractitionerDao.search(params, mySrd);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
 		assertEquals(1, outcome.getResources(0, 1).size());
 
@@ -1970,7 +1919,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -1992,7 +1941,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull));
 
@@ -2016,7 +1965,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(patientId1));
@@ -2049,7 +1998,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			addReadPartition(1, 2);
 
 			myCaptureQueriesListener.clear();
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientId1, patientId2));
 
@@ -2064,7 +2013,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 			addReadPartition(1, null);
 
 			myCaptureQueriesListener.clear();
-			IBundleProvider results = myPatientDao.search(map);
+			IBundleProvider results = myPatientDao.search(map, mySrd);
 			List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			assertThat(ids.toString(), ids, Matchers.containsInAnyOrder(patientId1, patientIdNull));
@@ -2087,7 +2036,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		addReadPartition(1, 2);
 		try {
-			myPatientDao.search(map);
+			myPatientDao.search(map, mySrd);
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("Can not search multiple partitions when partitions are included in search hashes", e.getMessage());
@@ -2105,7 +2054,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
 		try {
-			IBundleProvider value = myPatientDao.search(map);
+			IBundleProvider value = myPatientDao.search(map, mySrd);
 			value.size();
 			fail();
 		} catch (PreconditionFailedException e) {
@@ -2127,7 +2076,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull));
 
@@ -2153,7 +2102,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(patientId1));
@@ -2178,7 +2127,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -2195,7 +2144,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.add(Patient.SP_IDENTIFIER, new TokenParam("http://foo", "bar"));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1));
 
@@ -2220,7 +2169,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
@@ -2247,7 +2196,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
 
@@ -2269,7 +2218,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -2292,7 +2241,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code"));
 		map.setLoadSynchronous(true);
 		myCaptureQueriesListener.clear();
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(ids, contains(patientId1));
@@ -2320,7 +2269,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientIdNull, patientId1, patientId2));
 
@@ -2345,7 +2294,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Constants.PARAM_TAG, new TokenParam("http://system", "code2").setModifier(TokenParamModifier.NOT));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(patientId1));
 
@@ -2367,7 +2316,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(id));
@@ -2390,7 +2339,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myPatientDao.search(map);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(id));
@@ -2406,7 +2355,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Patient.SP_BIRTHDATE, new DateParam("2020-01-01"));
 		map.setLoadSynchronous(true);
-		results = myPatientDao.search(map);
+		results = myPatientDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.empty());
@@ -2425,7 +2374,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myObservationDao.search(map);
+		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(observationId));
@@ -2443,7 +2392,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		results = myObservationDao.search(map);
+		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.empty());
@@ -2463,7 +2412,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myObservationDao.search(map);
+		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids, contains(observationId));
 
@@ -2480,7 +2429,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		results = myObservationDao.search(map);
+		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.empty());
@@ -2499,7 +2448,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myObservationDao.search(map);
+		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, contains(observationId));
@@ -2516,7 +2465,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		results = myObservationDao.search(map);
+		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.empty());
@@ -2536,12 +2485,12 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		IBundleProvider results = myObservationDao.search(map);
+		IBundleProvider results = myObservationDao.search(map, mySrd);
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		assertThat(ids, contains(observationId));
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(ids, contains(observationId)); // FIXME: move up
 		assertEquals(1, StringUtils.countMatches(searchSql, "forcedid0_.PARTITION_ID is null"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "forcedid0_.RESOURCE_TYPE='Patient'"), searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"), searchSql);
@@ -2552,7 +2501,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam(patientId));
 		map.setLoadSynchronous(true);
-		results = myObservationDao.search(map);
+		results = myObservationDao.search(map, mySrd);
 		ids = toUnqualifiedVersionlessIds(results);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(ids, Matchers.empty());
@@ -2565,10 +2514,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		addReadAllPartitions();
 
-		Patient p = new Patient();
-		p.setId(patientId.toUnqualifiedVersionless());
-		p.setGender(Enumerations.AdministrativeGender.MALE);
-		myPatientDao.update(p);
+		Patient patient = new Patient();
+		patient.setId(patientId.toUnqualifiedVersionless());
+		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		myPatientDao.update(patient, mySrd);
 	}
 
 	@Test
@@ -2577,10 +2526,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		// Update the patient
 		addReadPartition(myPartitionId);
-		Patient p = new Patient();
-		p.setActive(false);
-		p.setId(id);
-		myPatientDao.update(p);
+		Patient patient = new Patient();
+		patient.setActive(false);
+		patient.setId(id);
+		myPatientDao.update(patient, mySrd);
 
 		addReadPartition(1);
 		myCaptureQueriesListener.clear();
@@ -2623,7 +2572,7 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		Patient p = new Patient();
 		p.setActive(false);
 		p.setId(id);
-		myPatientDao.update(p);
+		myPatientDao.update(p, mySrd);
 
 		addReadPartition(2);
 		try {
@@ -2640,10 +2589,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		// Update the patient
 		addReadDefaultPartition();
-		Patient p = new Patient();
-		p.setActive(false);
-		p.setId(id);
-		myPatientDao.update(p);
+		Patient patient = new Patient();
+		patient.setActive(false);
+		patient.setId(id);
+		myPatientDao.update(patient, mySrd);
 
 		addReadDefaultPartition();
 		myCaptureQueriesListener.clear();
@@ -2681,10 +2630,10 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 
 		// Update the patient
 		addReadPartition(myPartitionId);
-		Patient p = new Patient();
-		p.setActive(false);
-		p.setId(id);
-		myPatientDao.update(p);
+		Patient patient = new Patient();
+		patient.setActive(false);
+		patient.setId(id);
+		myPatientDao.update(patient, mySrd);
 
 		addReadAllPartitions();
 		myCaptureQueriesListener.clear();
@@ -2917,147 +2866,5 @@ public class PartitioningSqlR4Test extends BaseJpaR4SystemTest {
 		}
 	}
 
-	private void createUniqueCompositeSp() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate");
-		sp.setType(Enumerations.SearchParamType.DATE);
-		sp.setCode("birthdate");
-		sp.setExpression("Patient.birthDate");
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-birthdate-unique");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-birthdate");
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(true));
-		mySearchParameterDao.update(sp);
-
-		mySearchParamRegistry.forceRefresh();
-	}
-
-
-	private void dropForcedIdUniqueConstraint() {
-		runInTransaction(() -> {
-			myEntityManager.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint " + ForcedId.IDX_FORCEDID_TYPE_FID).executeUpdate();
-		});
-		myHaveDroppedForcedIdUniqueConstraint = true;
-	}
-
-	private void addCreatePartition(Integer thePartitionId, LocalDate thePartitionDate) {
-		Validate.notNull(thePartitionId);
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(thePartitionId, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(requestPartitionId);
-	}
-
-	private void addCreateDefaultPartition() {
-		myPartitionInterceptor.addCreatePartition(RequestPartitionId.defaultPartition());
-	}
-
-	private void addCreateDefaultPartition(LocalDate thePartitionDate) {
-		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(null, thePartitionDate);
-		myPartitionInterceptor.addCreatePartition(requestPartitionId);
-	}
-
-	private void addReadPartition(Integer... thePartitionId) {
-		Validate.notNull(thePartitionId);
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionIds(thePartitionId));
-	}
-
-	private void addReadPartitions(String... thePartitionNames) {
-		Validate.notNull(thePartitionNames);
-		Validate.isTrue(thePartitionNames.length > 0);
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.fromPartitionNames(thePartitionNames));
-	}
-
-	private void addReadDefaultPartition() {
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.defaultPartition());
-	}
-
-	private void addReadAllPartitions() {
-		myPartitionInterceptor.addReadPartition(RequestPartitionId.allPartitions());
-	}
-
-	public void createRequestId() {
-		when(mySrd.getRequestId()).thenReturn("REQUEST_ID");
-	}
-
-	private Consumer<IBaseResource> withPartition(Integer thePartitionId) {
-		return t -> {
-			if (thePartitionId != null) {
-				addCreatePartition(thePartitionId, null);
-			} else {
-				addCreateDefaultPartition();
-			}
-		};
-	}
-
-	private Consumer<IBaseResource> withPutPartition(Integer thePartitionId) {
-		return t -> {
-			if (thePartitionId != null) {
-				addReadPartition(thePartitionId);
-				addCreatePartition(thePartitionId, null);
-			} else {
-				addReadDefaultPartition();
-				addCreateDefaultPartition();
-			}
-		};
-	}
-
-	@Interceptor
-	public static class MyReadWriteInterceptor extends MyWriteInterceptor {
-
-
-		private final List<RequestPartitionId> myReadRequestPartitionIds = new ArrayList<>();
-
-		public void addReadPartition(RequestPartitionId theRequestPartitionId) {
-			myReadRequestPartitionIds.add(theRequestPartitionId);
-		}
-
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-		public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
-			RequestPartitionId retVal = myReadRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for read: {}", retVal);
-			return retVal;
-		}
-
-		@Override
-		public void assertNoRemainingIds() {
-			super.assertNoRemainingIds();
-			assertEquals(0, myReadRequestPartitionIds.size());
-		}
-
-	}
-
-	@Interceptor
-	public static class MyWriteInterceptor {
-
-
-		private final List<RequestPartitionId> myCreateRequestPartitionIds = new ArrayList<>();
-
-		public void addCreatePartition(RequestPartitionId theRequestPartitionId) {
-			myCreateRequestPartitionIds.add(theRequestPartitionId);
-		}
-
-		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-			assertNotNull(theResource);
-			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
-			ourLog.info("Returning partition for create: {}", retVal);
-			return retVal;
-		}
-
-		public void assertNoRemainingIds() {
-			assertEquals(0, myCreateRequestPartitionIds.size());
-		}
-
-	}
 
 }
