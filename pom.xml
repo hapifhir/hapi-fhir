@@ -742,7 +742,7 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.6.2</junit_version>
 		<flyway_version>6.5.4</flyway_version>
-		<hibernate_version>5.4.24.Final</hibernate_version>
+		<hibernate_version>5.4.25.Final</hibernate_version>
 		<hibernate_search_version>6.0.0.CR2</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.7.0</lucene_version>

@@ -26,7 +26,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testLoadLoincMultipleVersions() throws IOException {
 
 		// Load LOINC marked as version 2.67
