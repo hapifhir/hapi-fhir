@@ -255,7 +255,7 @@ When the operation is successful, it returns the following `Parameters`:
 
 ## Update Link
 
-Use the `$empi-update-link` operation to change the `matchResult` update of an empi link. This operation takes the following parameters:
+Use the `$empi-update-link` operation to change the `matchResult` update of an empi link. This operation is for the Person resource type. This operation takes the following parameters:
 
 <table class="table table-striped table-condensed">
     <thead>
@@ -301,7 +301,7 @@ Empi links updated in this way will automatically have their `linkSource` set to
 Use an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-update-link
+http://example.com/Person/$empi-update-link
 ```
 
 The following request body could be used:
@@ -326,7 +326,7 @@ The operation returns the updated `Person` resource.  Note that this is the only
 
 ## Merge Persons
 
-The `$empi-merge-persons` operation can be used to merge one Person resource with another.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
+The `$empi-merge-persons` operation can be used to merge one Person resource with another. This operation is for the Person resource type.  When doing this, you will need to decide which resource to merge from and which one to merge to.  In most cases, fields will be merged (e.g. names, identifiers, and links will be the union of two).  However when there is a conflict (e.g. birthday), fields in the toPerson will take precedence over fields in the fromPerson
 
 After the merge is complete, `fromPerson.active` is set to `false`.  Also, a new link with assurance level 4 (MANUAL MATCH) will be added pointing from the fromPerson to the toPerson.
 
@@ -366,7 +366,7 @@ This operation takes the following parameters:
 Use an HTTP POST to the following URL to invoke this operation:
 
 ```url
-http://example.com/$empi-merge-persons
+http://example.com/Person/$empi-merge-persons
 ```
 
 The following request body could be used:
