@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -52,7 +51,6 @@ import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -62,14 +60,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
@@ -85,13 +79,16 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
@@ -226,9 +223,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		//TODO GGG JA SWAP HERE. (testRemove)
 		myConceptDao.deleteById(theConcept.getId());
-//		myConceptDao.deleteByPid(theConcept.getId());
 
 		theRemoveCounter.incrementAndGet();
 	}
@@ -250,38 +245,30 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
+	@Transactional
 	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		txTemplate.executeWithoutResult(t -> {
-			myEntityManager.flush();
-			TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-			cs.setCurrentVersion(null);
-			myCodeSystemDao.save(cs);
-			myCodeSystemDao.flush();
-		});
+		myEntityManager.flush();
+		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
+		cs.setCurrentVersion(null);
+		myCodeSystemDao.save(cs);
+		myCodeSystemDao.flush();
 
-		List<Long> codeSystemVersionPids = txTemplate.execute(t -> {
-			List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-			return codeSystemVersions
-				.stream()
-				.map(TermCodeSystemVersion::getPid)
-				.collect(Collectors.toList());
-		});
+		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+		List<Long> codeSystemVersionPids = codeSystemVersions
+			.stream()
+			.map(TermCodeSystemVersion::getPid)
+			.collect(Collectors.toList());
 		for (Long next : codeSystemVersionPids) {
 			deleteCodeSystemVersion(next);
 		}
 
-		txTemplate.executeWithoutResult(t -> {
-			myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-			myCodeSystemDao.delete(theCodeSystem);
-			myEntityManager.flush();
-		});
+		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
+		myCodeSystemDao.delete(theCodeSystem);
+		myEntityManager.flush();
 	}
 
 	@Override
@@ -377,13 +364,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
+	@Transactional
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
+		// Note that this creates the TermCodeSystem and TermCodeSystemVersion entities if needed
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
+
 		ResourcePersistentId codeSystemResourcePid = myIdHelperService.resolveResourcePersistentIds(RequestPartitionId.allPartitions(), csId.getResourceType(), csId.getIdPart());
 		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid.getIdAsLong());
 
@@ -400,86 +389,90 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.NEVER)
+	@Transactional
 	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
+		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
 
-		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
+		TermCodeSystemVersion codeSystemToStore = theCodeSystemVersion;
+		ValidateUtil.isTrueOrThrowInvalidRequest(codeSystemToStore.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		List<Long> existingVersionPids = txTemplate.execute(t -> {
-			// Grab the existing version so we can delete it
-			List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
-			return existing.stream().map(v -> v.getPid()).collect(Collectors.toList());
-		});
+		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
 
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
+		for (TermCodeSystemVersion next : existing) {
+			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersion.getCodeSystemVersionId())) {
 
-		/*
-		 * Delete version being replaced.
-		 */
+				/*
+				 * If we already have a CodeSystemVersion that matches the version we're storing, we
+				 * can reuse it.
+				 */
+				codeSystemToStore = next;
+				codeSystemToStore.setCodeSystemDisplayName(theCodeSystemVersion.getCodeSystemDisplayName());
 
-		for (Long next : existingVersionPids) {
-			ourLog.info("Deleting old code system version {}", next);
-			deleteCodeSystemVersion(next);
+			} else if (isBlank(next.getCodeSystemVersionId()) || defaultString(next.getCodeSystemVersionId()).equals(theSystemVersionId)) {
+
+				/*
+				 * Delete any existing CodeSystemVersions that are either unversioned or match the
+				 * current version.
+				 */
+				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
+				myCodeSystemVersionDao.save(next);
+				myDeferredStorageSvc.deleteCodeSystemVersion(next);
+
+			}
 		}
 
 		/*
 		 * Do the upload
 		 */
 
-		txTemplate.executeWithoutResult(t -> {
+		codeSystemToStore.setCodeSystem(codeSystem);
+		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
+		codeSystemToStore.setCodeSystemVersionId(theSystemVersionId);
 
-			TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
-			theCodeSystemVersion.setCodeSystem(codeSystem);
+		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
-			theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
-			theCodeSystemVersion.setCodeSystemVersionId(theSystemVersionId);
+		// Validate the code system
+		ArrayList<String> conceptsStack = new ArrayList<>();
+		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
+		int totalCodeCount = 0;
+		for (TermConcept next : codeSystemToStore.getConcepts()) {
+			totalCodeCount += validateConceptForStorage(next, codeSystemToStore, conceptsStack, allConcepts);
+		}
 
-			ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
+		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
 
-			// Validate the code system
-			ArrayList<String> conceptsStack = new ArrayList<>();
-			IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
-			int totalCodeCount = 0;
-			for (TermConcept next : theCodeSystemVersion.getConcepts()) {
-				totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
-			}
+		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
 
-			ourLog.debug("Saving version containing {} concepts", totalCodeCount);
+		ourLog.debug("Saving code system");
 
-			TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
+		codeSystem.setCurrentVersion(codeSystemToStore);
+		codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
 
-			ourLog.debug("Saving code system");
+		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 
-			codeSystem.setCurrentVersion(theCodeSystemVersion);
-			codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
+		for (TermConcept next : codeSystemToStore.getConcepts()) {
+			populateVersion(next, codeSystemVersion);
+		}
 
-			ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
+		ourLog.debug("Saving {} concepts...", totalCodeCount);
 
-			for (TermConcept next : theCodeSystemVersion.getConcepts()) {
-				populateVersion(next, codeSystemVersion);
-			}
+		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
+		for (TermConcept next : codeSystemToStore.getConcepts()) {
+			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
+		}
 
-			ourLog.debug("Saving {} concepts...", totalCodeCount);
+		ourLog.debug("Done saving concepts, flushing to database");
 
-			IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
-			for (TermConcept next : theCodeSystemVersion.getConcepts()) {
-				persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
-			}
+		myConceptDao.flush();
+		myConceptParentChildLinkDao.flush();
 
-			ourLog.debug("Done saving concepts, flushing to database");
-
-			myConceptDao.flush();
-			myConceptParentChildLinkDao.flush();
-
-			if (myDeferredStorageSvc.isStorageQueueEmpty() == false) {
-				ourLog.info("Note that some concept saving has been deferred");
-			}
-
-		});
+		if (myDeferredStorageSvc.isStorageQueueEmpty() == false) {
+			ourLog.info("Note that some concept saving has been deferred");
+		}
 
 	}
 
@@ -495,60 +488,24 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
-		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
+		assert TransactionSynchronizationManager.isActualTransactionActive();
+		ourLog.info(" * Marking code system version {} for deletion", theCodeSystemVersionPid);
 
-		PageRequest page1000 = PageRequest.of(0, 1000);
-
-		// Parent/Child links
-		{
-			String descriptor = "parent/child links";
-			Supplier<Slice<Long>> loader = () -> myConceptParentChildLinkDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
-			Supplier<Integer> counter = () -> myConceptParentChildLinkDao.countByCodeSystemVersion(theCodeSystemVersionPid);
-			doDelete(descriptor, loader, counter, myConceptParentChildLinkDao);
-		}
-
-		// Properties
-		{
-			String descriptor = "concept properties";
-			Supplier<Slice<Long>> loader = () -> myConceptPropertyDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
-			Supplier<Integer> counter = () -> myConceptPropertyDao.countByCodeSystemVersion(theCodeSystemVersionPid);
-			doDelete(descriptor, loader, counter, myConceptPropertyDao);
-		}
-
-		// Designations
-		{
-			String descriptor = "concept designations";
-			Supplier<Slice<Long>> loader = () -> myConceptDesignationDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
-			Supplier<Integer> counter = () -> myConceptDesignationDao.countByCodeSystemVersion(theCodeSystemVersionPid);
-			doDelete(descriptor, loader, counter, myConceptDesignationDao);
-		}
-
-		// Concepts
-		{
-			String descriptor = "concepts";
-			// For some reason, concepts are much slower to delete, so use a smaller batch size
-			PageRequest page100 = PageRequest.of(0, 100);
-			Supplier<Slice<Long>> loader = () -> myConceptDao.findIdsByCodeSystemVersion(page100, theCodeSystemVersionPid);
-			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
-			doDelete(descriptor, loader, counter, myConceptDao);
-		}
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.executeWithoutResult(tx -> {
-			Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
-			if (codeSystemOpt.isPresent()) {
-				TermCodeSystem codeSystem = codeSystemOpt.get();
+		Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+		if (codeSystemOpt.isPresent()) {
+			TermCodeSystem codeSystem = codeSystemOpt.get();
+			if (codeSystem.getCurrentVersion() != null && codeSystem.getCurrentVersion().getPid().equals(theCodeSystemVersionPid)) {
 				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
 				codeSystem.setCurrentVersion(null);
 				myCodeSystemDao.save(codeSystem);
-				myCodeSystemDao.flush();
 			}
+		}
 
-			ourLog.info(" * Deleting code system version");
-			myCodeSystemVersionDao.delete(theCodeSystemVersionPid);
-			myCodeSystemVersionDao.flush();
-		});
+		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.findById(theCodeSystemVersionPid).orElseThrow(() -> new IllegalStateException());
+		codeSystemVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
+		myCodeSystemVersionDao.save(codeSystemVersion);
 
+		myDeferredStorageSvc.deleteCodeSystemVersion(codeSystemVersion);
 	}
 
 	private void validateDstu3OrNewer() {
@@ -785,36 +742,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theCodeSystemVersion.setResource(theResourceTable);
 		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
 		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
-	}
-
-	@SuppressWarnings("ConstantConditions")
-	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
-		assert !TransactionSynchronizationManager.isActualTransactionActive();
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-
-		int count;
-		ourLog.info(" * Deleting {}", theDescriptor);
-		int totalCount = txTemplate.execute(t -> theCounter.get());
-		StopWatch sw = new StopWatch();
-		count = 0;
-		while (true) {
-			Slice<Long> link = txTemplate.execute(t -> theLoader.get());
-			if (!link.hasContent()) {
-				break;
-			}
-
-			txTemplate.executeWithoutResult(t -> {
-				//TODO GGG JA SWAP HERE (Loinc test)
-				link.forEach(theDao::deleteById);
-//				link.forEach(theDao::deleteByPid);
-				theDao.flush();
-			});
-
-			count += link.getNumberOfElements();
-			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
-		}
 	}
 
 

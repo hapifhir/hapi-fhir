@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 	private TermLoaderSvcImpl mySvc;
@@ -30,7 +31,10 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 		// Load LOINC marked as version 2.67
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
+
+		// FIXME: maybe add a count queries test?
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {
@@ -55,7 +59,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		myFiles = new ZipCollectionBuilder();
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
-		mySvc.loadLoinc(myFiles.getFiles(), mySrd);//TODO GGG JA this will infinite loop, as the internal loader from the dao keeps returning the same 100 elements in the first page.
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {

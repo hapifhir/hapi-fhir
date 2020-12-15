@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -49,10 +48,5 @@ public interface ITermConceptDao extends IHapiJpaRepository<TermConcept> {
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
-
-	@Override
-	@Modifying
-	@Query("DELETE FROM TermConcept t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
 
 }

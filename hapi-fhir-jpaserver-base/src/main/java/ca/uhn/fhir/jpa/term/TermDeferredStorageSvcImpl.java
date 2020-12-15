@@ -20,10 +20,13 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptPropertyDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -44,37 +47,45 @@ import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TermDeferredStorageSvcImpl.class);
-	@Autowired
-	protected ITermConceptDao myConceptDao;
-	@Autowired
-	protected ITermCodeSystemDao myCodeSystemDao;
-	@Autowired
-   protected ITermCodeSystemVersionDao myCodeSystemVersionDao;
-   @Autowired
-	protected PlatformTransactionManager myTransactionMgr;
-	private boolean myProcessDeferred = true;
 	final private List<TermCodeSystem> myDeferredCodeSystemsDeletions = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermCodeSystemVersion> myDeferredCodeSystemVersionsDeletions = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	final private List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	final private List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
 	final private List<TermConceptParentChildLink> myConceptLinksToSaveLater = Collections.synchronizedList(new ArrayList<>());
+	@Autowired
+	protected ITermConceptDao myConceptDao;
+	@Autowired
+	protected ITermCodeSystemDao myCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemVersionDao myCodeSystemVersionDao;
+	@Autowired
+	protected PlatformTransactionManager myTransactionMgr;
+	@Autowired
+	protected ITermConceptPropertyDao myConceptPropertyDao;
+	@Autowired
+	protected ITermConceptDesignationDao myConceptDesignationDao;
+	private boolean myProcessDeferred = true;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
 	@Autowired
@@ -120,7 +131,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	@Transactional
 	public void deleteCodeSystemForResource(ResourceTable theCodeSystemToDelete) {
 		List<TermCodeSystemVersion> codeSystemVersionsToDelete = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemToDelete.getResourceId());
-		for (TermCodeSystemVersion codeSystemVersionToDelete : codeSystemVersionsToDelete){
+		for (TermCodeSystemVersion codeSystemVersionToDelete : codeSystemVersionsToDelete) {
 			if (codeSystemVersionToDelete != null) {
 				myDeferredCodeSystemVersionsDeletions.add(codeSystemVersionToDelete);
 			}
@@ -161,7 +172,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		ourLog.debug("Saving {} deferred concepts...", count);
 		while (codeCount < count && myDeferredConcepts.size() > 0) {
 			TermConcept next = myDeferredConcepts.remove(0);
-			if(myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
+			if (myCodeSystemVersionDao.findById(next.getCodeSystemVersion().getPid()).isPresent()) {
 				try {
 					codeCount += myCodeSystemStorageSvc.saveConcept(next);
 				} catch (Exception theE) {
@@ -232,6 +243,18 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		myDeferredCodeSystemVersionsDeletions.clear();
 	}
 
+	private void runInTransaction(Runnable theRunnable) {
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+
+		new TransactionTemplate(myTransactionMgr).executeWithoutResult(tx -> theRunnable.run());
+	}
+
+	private <T> T runInTransaction(Supplier<T> theRunnable) {
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+
+		return new TransactionTemplate(myTransactionMgr).execute(tx -> theRunnable.get());
+	}
+
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void saveDeferred() {
@@ -249,10 +272,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 				return;
 			}
 
-			TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-			tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 			if (isDeferredConceptsOrConceptLinksToSaveLater()) {
-				tt.execute(t -> {
+				runInTransaction(() -> {
 					processDeferredConcepts();
 					return null;
 				});
@@ -261,7 +282,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			}
 
 			if (isDeferredValueSets()) {
-				tt.execute(t -> {
+				runInTransaction(() -> {
 					processDeferredValueSets();
 					return null;
 				});
@@ -270,12 +291,16 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			}
 
 			if (isDeferredConceptMaps()) {
-				tt.execute(t -> {
+				runInTransaction(() -> {
 					processDeferredConceptMaps();
 					return null;
 				});
 
 				continue;
+			}
+
+			if (isDeferredCodeSystemVersionDeletions()) {
+				processDeferredCodeSystemVersionDeletions();
 			}
 
 			if (isDeferredCodeSystemDeletions()) {
@@ -284,18 +309,106 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		}
 	}
 
+	private boolean isDeferredCodeSystemVersionDeletions() {
+		return !myDeferredCodeSystemVersionsDeletions.isEmpty();
+	}
+
 	private void processDeferredCodeSystemDeletions() {
-
-		for (TermCodeSystemVersion next : myDeferredCodeSystemVersionsDeletions) {
-			myCodeSystemStorageSvc.deleteCodeSystemVersion(next);
-		}
-
-		myDeferredCodeSystemVersionsDeletions.clear();
 		for (TermCodeSystem next : myDeferredCodeSystemsDeletions) {
 			myCodeSystemStorageSvc.deleteCodeSystem(next);
 		}
 		myDeferredCodeSystemsDeletions.clear();
 	}
+
+	private void processDeferredCodeSystemVersionDeletions() {
+		for (TermCodeSystemVersion next : myDeferredCodeSystemVersionsDeletions) {
+			processDeferredCodeSystemVersionDeletions(next.getPid());
+
+			runInTransaction(() -> myCodeSystemVersionDao.deleteById(next.getPid()));
+		}
+
+		myDeferredCodeSystemVersionsDeletions.clear();
+	}
+
+	private void processDeferredCodeSystemVersionDeletions(long theCodeSystemVersionPid) {
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
+
+		PageRequest page1000 = PageRequest.of(0, 1000);
+
+		// Parent/Child links
+		{
+			String descriptor = "parent/child links";
+			Supplier<Slice<Long>> loader = () -> myConceptParentChildLinkDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptParentChildLinkDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptParentChildLinkDao);
+		}
+
+		// Properties
+		{
+			String descriptor = "concept properties";
+			Supplier<Slice<Long>> loader = () -> myConceptPropertyDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptPropertyDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptPropertyDao);
+		}
+
+		// Designations
+		{
+			String descriptor = "concept designations";
+			Supplier<Slice<Long>> loader = () -> myConceptDesignationDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptDesignationDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptDesignationDao);
+		}
+
+		// Concepts
+		{
+			String descriptor = "concepts";
+			// For some reason, concepts are much slower to delete, so use a smaller batch size
+			PageRequest page100 = PageRequest.of(0, 100);
+			Supplier<Slice<Long>> loader = () -> myConceptDao.findIdsByCodeSystemVersion(page100, theCodeSystemVersionPid);
+			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
+			doDelete(descriptor, loader, counter, myConceptDao);
+		}
+
+		runInTransaction(() -> {
+			Optional<TermCodeSystem> codeSystemOpt = myCodeSystemDao.findWithCodeSystemVersionAsCurrentVersion(theCodeSystemVersionPid);
+			if (codeSystemOpt.isPresent()) {
+				TermCodeSystem codeSystem = codeSystemOpt.get();
+				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
+				codeSystem.setCurrentVersion(null);
+				myCodeSystemDao.save(codeSystem);
+				myCodeSystemDao.flush();
+			}
+
+			ourLog.info(" * Deleting code system version");
+			myCodeSystemVersionDao.delete(theCodeSystemVersionPid);
+			myCodeSystemVersionDao.flush();
+		});
+
+
+	}
+
+	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, IHapiJpaRepository<T> theDao) {
+		assert !TransactionSynchronizationManager.isActualTransactionActive();
+
+		int count;
+		ourLog.info(" * Deleting {}", theDescriptor);
+		int totalCount = runInTransaction(() -> theCounter.get());
+		StopWatch sw = new StopWatch();
+		count = 0;
+		while (true) {
+			Slice<Long> link = runInTransaction(() -> theLoader.get());
+			if (!link.hasContent()) {
+				break;
+			}
+
+			runInTransaction(() -> link.forEach(theDao::deleteById));
+
+			count += link.getNumberOfElements();
+			ourLog.info(" * {} {} deleted ({}/{}) remaining - {}/sec - ETA: {}", count, theDescriptor, count, totalCount, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
+		}
+	}
+
 
 	@Override
 	public boolean isStorageQueueEmpty() {
@@ -354,16 +467,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		mySchedulerService.scheduleLocalJob(5000, jobDefinition);
 	}
 
-	public static class Job implements HapiJob {
-		@Autowired
-		private ITermDeferredStorageSvc myTerminologySvc;
-
-		@Override
-		public void execute(JobExecutionContext theContext) {
-			myTerminologySvc.saveDeferred();
-		}
-	}
-
 	@VisibleForTesting
 	void setTransactionManagerForUnitTest(PlatformTransactionManager theTxManager) {
 		myTransactionMgr = theTxManager;
@@ -393,6 +496,21 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		ourLog.info("isDeferredValueSets: {}", isDeferredValueSets());
 		ourLog.info("isDeferredConceptMaps: {}", isDeferredConceptMaps());
 		ourLog.info("isDeferredCodeSystemDeletions: {}", isDeferredCodeSystemDeletions());
+	}
+
+	@Override
+	public synchronized void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+		myDeferredCodeSystemVersionsDeletions.add(theCodeSystemVersion);
+	}
+
+	public static class Job implements HapiJob {
+		@Autowired
+		private ITermDeferredStorageSvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.saveDeferred();
+		}
 	}
 
 

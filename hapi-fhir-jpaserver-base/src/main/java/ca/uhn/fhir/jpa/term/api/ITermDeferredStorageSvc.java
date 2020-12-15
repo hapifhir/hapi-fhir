@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term.api;
  */
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -57,10 +58,13 @@ public interface ITermDeferredStorageSvc {
 
 	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
 
+	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
+
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
 	 */
 	void saveAllDeferred();
 
 	void logQueueForUnitTest();
+
 }

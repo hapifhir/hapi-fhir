@@ -24,6 +24,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IHapiJpaRepository<T> extends JpaRepository<T, Long> {
 
-	void deleteByPid(Long theId);
+	// FIXME: remove this
+	default void deleteByPid(Long theId) { throw new UnsupportedOperationException(); }
 
 }
