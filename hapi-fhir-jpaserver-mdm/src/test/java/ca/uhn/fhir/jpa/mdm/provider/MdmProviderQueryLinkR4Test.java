@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -55,8 +55,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryLinkOneMatch() {
-
-		Parameters result = myMdmProviderR4.queryLinks(mySourcePatientId, myPatientId, null, null, myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(mySourcePatientId, myPatientId, null, null, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
@@ -72,7 +71,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patient);
 		IIdType goldenResourceId = goldenResource.getIdElement().toVersionless();
 
-		Parameters result = myMdmProviderR4.queryLinks(null, null, null, myLinkSource, myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.queryLinks(null, null, null, myLinkSource, myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(3));
@@ -82,7 +81,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 	@Test
 	public void testQueryPossibleDuplicates() {
-		Parameters result = myMdmProviderR4.getDuplicateGoldenResources(myRequestDetails);
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(myRequestDetails);
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(1));
@@ -93,17 +92,18 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testNotDuplicate() {
 		{
-			Parameters result = myMdmProviderR4.getDuplicateGoldenResources(myRequestDetails);
+			Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(myRequestDetails);
 			List<Parameters.ParametersParameterComponent> list = result.getParameter();
 			assertThat(list, hasSize(1));
 		}
 		{
-			Parameters result = myMdmProviderR4.notDuplicate(myGoldenResource1Id, myGoldenResource2Id, myRequestDetails);
+			Parameters result = (Parameters) myMdmProvider.notDuplicate(myGoldenResource1Id, myGoldenResource2Id, myRequestDetails);
 			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 			assertEquals("success", result.getParameterFirstRep().getName());
 			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 		}
-		Parameters result = myMdmProviderR4.getDuplicateGoldenResources(myRequestDetails);
+
+		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(myRequestDetails);
 		List<Parameters.ParametersParameterComponent> list = result.getParameter();
 		assertThat(list, hasSize(0));
 	}
@@ -111,7 +111,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testNotDuplicateBadId() {
 		try {
-			myMdmProviderR4.notDuplicate(myGoldenResource1Id, new StringType("Patient/notAnId123"), myRequestDetails);
+			myMdmProvider.notDuplicate(myGoldenResource1Id, new StringType("Patient/notAnId123"), myRequestDetails);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Resource Patient/notAnId123 is not known", e.getMessage());

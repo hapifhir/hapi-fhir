@@ -39,7 +39,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result = myMdmProviderR4.match(newJane);
+		Bundle result = (Bundle) myMdmProvider.match(newJane);
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -63,7 +63,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Medication createdMedication = createMedication(medication);
 		Medication newMedication = buildMedication("Organization/mfr");
 
-		Bundle result = myMdmProviderR4.serverMatch(newMedication, new StringType("Medication"));
+		Bundle result = (Bundle) myMdmProvider.serverMatch(newMedication, new StringType("Medication"));
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -88,7 +88,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result = myMdmProviderR4.serverMatch(newJane, new StringType("Patient"));
+		Bundle result = (Bundle) myMdmProvider.serverMatch(newJane, new StringType("Patient"));
 		assertEquals(1, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -114,7 +114,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		Patient newJane = buildJanePatient();
 
-		Bundle result = myMdmProviderR4.match(newJane);
+		Bundle result = (Bundle) myMdmProvider.match(newJane);
 		assertEquals(2, result.getEntry().size());
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
@@ -138,7 +138,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient paul = buildPaulPatient();
 		paul.setActive(true);
 
-		Bundle result = myMdmProviderR4.match(paul);
+		Bundle result = (Bundle) myMdmProvider.match(paul);
 		assertEquals(0, result.getEntry().size());
 	}
 
@@ -150,7 +150,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Patient createdJane = createPatient(jane);
 		Patient newJane = buildJanePatient();
 
-		Bundle result = myMdmProviderR4.match(newJane);
+		Bundle result = (Bundle) myMdmProvider.match(newJane);
 		assertEquals(1, result.getEntry().size());
 		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}

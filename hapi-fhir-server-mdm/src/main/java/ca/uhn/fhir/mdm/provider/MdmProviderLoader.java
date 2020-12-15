@@ -52,14 +52,9 @@ public class MdmProviderLoader {
 	public void loadProvider() {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU3:
-				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderDstu3(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
-					return myMdmProvider;
-				});
-				break;
 			case R4:
 				myResourceProviderFactory.addSupplier(() -> {
-					myMdmProvider = new MdmProviderR4(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+					myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
 					return myMdmProvider;
 				});
 				break;
