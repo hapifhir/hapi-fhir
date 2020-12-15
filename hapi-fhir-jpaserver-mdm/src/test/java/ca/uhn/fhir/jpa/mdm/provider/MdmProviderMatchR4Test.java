@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -222,7 +221,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 			"}";
 
 		IBaseResource coarseResource = myFhirContext.newJsonParser().parseResource(coarsePatient);
-		Bundle result = myMdmProviderR4.match((Patient) coarseResource);
+		Bundle result = (Bundle) myMdmProvider.match((Patient) coarseResource);
 		assertEquals(1, result.getEntry().size());
 	}
 }
