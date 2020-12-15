@@ -439,7 +439,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ArrayList<String> conceptsStack = new ArrayList<>();
 		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
 		int totalCodeCount = 0;
-		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
+		Collection<TermConcept> conceptsToSave = theCodeSystemVersion.getConcepts();
+		for (TermConcept next : conceptsToSave) {
 			totalCodeCount += validateConceptForStorage(next, codeSystemToStore, conceptsStack, allConcepts);
 		}
 
@@ -454,21 +455,18 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 
-		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
+		for (TermConcept next : conceptsToSave) {
 			populateVersion(next, codeSystemVersion);
 		}
 
 		ourLog.debug("Saving {} concepts...", totalCodeCount);
 
 		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
-		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
+		for (TermConcept next : conceptsToSave) {
 			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
-
-		myConceptDao.flush();
-		myConceptParentChildLinkDao.flush();
 
 		if (myDeferredStorageSvc.isStorageQueueEmpty() == false) {
 			ourLog.info("Note that some concept saving has been deferred");
@@ -660,13 +658,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
-		if (theNext.getCodeSystemVersion() != null) {
-			return;
-		}
 		theNext.setCodeSystemVersion(theCodeSystemVersion);
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
 		}
+		theNext.getProperties().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getDesignations().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
 	}
 
 	private void saveConceptLink(TermConceptParentChildLink next) {
