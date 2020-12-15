@@ -27,9 +27,9 @@ valueset "Delivery Procedures": 'urn:oid:2.16.840.1.113762.1.4.1045.59' // Used 
 valueset "Human Immunodeficiency Virus (HIV) Laboratory Test Codes (Ab and Ag)": 'urn:oid:2.16.840.1.113762.1.4.1056.50' // Used by CMS349
 
 //. HIV Test Results
-code "HIV Negative": code '165815009' from "SNOMED-CT" display 'HIV Negative'
-code "HIV Positive": code '165816005' from "SNOMED-CT" display 'HIV Positive'
-code "HIV 1 and 2 tests - Meaningful Use set": '75622-1' from "LOINC" display 'HIV 1 and 2 tests - Meaningful Use set' // Used by CMS349
+//code "HIV Negative": code '165815009' from "SNOMED-CT" display 'HIV Negative'
+//code "HIV Positive": code '165816005' from "SNOMED-CT" display 'HIV Positive'
+//code "HIV 1 and 2 tests - Meaningful Use set": '75622-1' from "LOINC" display 'HIV 1 and 2 tests - Meaningful Use set' // Used by CMS349
 
 // History of ART Therapy
 code "History of antiretroviral therapy (situation)": '432101000124108' from "SNOMED-CT" display 'History of antiretroviral therapy (situation)'

@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 
 public class CqlHivTest extends BaseCqlR4Test {
-	public static final String HIV_INDICATORS_ID = "hiv-indicators";
+	public static final String HIV_INDICATORS_ID = "measure-EXM349-2.9.000"; // hiv-indicators
 	public static final IdType hivMeasureId = new IdType("Measure", HIV_INDICATORS_ID);
 
 	@Autowired
@@ -24,8 +24,8 @@ public class CqlHivTest extends BaseCqlR4Test {
 
 	@Test
 	public void testGeneratedContent() throws IOException {
-		loadResource("r4/hiv/library-hiv-indicators.json");
-		loadResource("r4/hiv/measure-hiv-indicators.json");
+		//loadResource("r4/EXM349/library-EXM349_FHIR3-2.9.000.json");
+		loadBundle("r4/EXM349/EXM349_FHIR4-2.9.000-bundle.json");
 
 		myMeasureOperationsProvider.refreshGeneratedContent(null, hivMeasureId);
 		Measure measure = myMeasureDao.read(hivMeasureId);

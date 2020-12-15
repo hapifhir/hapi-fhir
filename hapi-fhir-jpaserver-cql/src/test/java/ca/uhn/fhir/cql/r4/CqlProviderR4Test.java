@@ -154,11 +154,4 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
 		assertEquals(entries.get(39).getResponse().getStatus(), "201 Created");
 	}
-
-	private Bundle loadBundle(String theLocation) throws IOException {
-		String json = stringFromResource(theLocation);
-		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
-		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
-		return result;
-	}
 }

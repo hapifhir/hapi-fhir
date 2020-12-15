@@ -26,8 +26,8 @@
 			}
 		]
 	},
-	"date": "2018-08-03",
 	"description": "HIV Indicators Reporting Example",
+	"date": "2018-08-03",
 	"relatedArtifact": [
 		{
 			"type": "derived-from",
