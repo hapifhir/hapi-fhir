@@ -36,8 +36,6 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	@Autowired
 	CqlProviderFactory myCqlProviderFactory;
 	@Autowired
-	IFhirSystemDao mySystemDao;
-	@Autowired
 	private LibraryResourceProvider myLibraryResourceProvider;
 	@Autowired
 	private MeasureResourceProvider myMeasureResourceProvider;
@@ -233,38 +231,5 @@ Direct Reference Codes:
 			patient, null, null, null, null, null, null);
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-	}
-
-	private int loadDataFromDirectory(String theDirectoryName) throws IOException {
-		int count = 0;
-		ourLog.info("Reading files in directory: {}", theDirectoryName);
-		ClassPathResource dir = new ClassPathResource(theDirectoryName);
-		Collection<File> files = FileUtils.listFiles(dir.getFile(), null, false);
-		ourLog.info("{} files found.", files.size());
-		for (File file : files) {
-			String filename = file.getAbsolutePath();
-			ourLog.info("Processing filename '{}'", filename);
-			if (filename.endsWith(".cql") || filename.contains("expectedresults")) {
-				// Ignore .cql and expectedresults files
-				ourLog.info("Ignoring file: '{}'", filename);
-			} else if (filename.endsWith(".json")) {
-				if (filename.contains("bundle")) {
-					loadBundle(filename);
-				} else {
-					loadResource(filename);
-				}
-				count++;
-			} else {
-				ourLog.info("Ignoring file: '{}'", filename);
-			}
-		}
-		return count;
-	}
-
-	private Bundle loadBundle(String theLocation) throws IOException {
-		String json = stringFromResource(theLocation);
-		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
-		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
-		return result;
 	}
 }
