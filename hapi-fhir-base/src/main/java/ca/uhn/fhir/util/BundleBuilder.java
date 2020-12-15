@@ -24,16 +24,20 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.thymeleaf.util.Validate;
 
 /**
- * This class can be used to build a Bundle resource to be used as a FHIR transaction.
+ * This class can be used to build a Bundle resource to be used as a FHIR transaction. Convenience methods provide
+ * support for setting various bundle fields and working with bundle parts such as metadata and entry
+ * (method and search).
+ *
  * <p>
+ *
  * This is not yet complete, and doesn't support all FHIR features. <b>USE WITH CAUTION</b> as the API
  * may change.
  *
@@ -103,20 +107,28 @@ public class BundleBuilder {
 	 */
 	public BundleBuilder setBundleField(String theFieldName, String theFieldValue) {
 		BaseRuntimeChildDefinition typeChild = myBundleDef.getChildByName(theFieldName);
-		if (typeChild == null) {
-			throw new IllegalArgumentException(String.format("Unable to find field %s", theFieldName));
-		}
+		Validate.notNull(typeChild, "Unable to find field %s", theFieldName);
+
 		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
 		type.setValueAsString(theFieldValue);
 		typeChild.getMutator().setValue(myBundle, type);
 		return this;
 	}
 
+	/**
+	 * Sets the specified primitive field on the search entry with the value provided.
+	 *
+	 * @param theSearch
+	 * 		Search part of the entry
+	 * @param theFieldName
+	 * 		Name of the primitive field.
+	 * @param theFieldValue
+	 * 		Value of the field to be set.
+	 */
 	public BundleBuilder setSearchField(IBase theSearch, String theFieldName, String theFieldValue) {
 		BaseRuntimeChildDefinition typeChild = mySearchDef.getChildByName(theFieldName);
-		if (typeChild == null) {
-			throw new IllegalArgumentException(String.format("Unable to find field %s", theFieldName));
-		}
+		Validate.notNull(typeChild, "Unable to find field %s", theFieldName);
+
 		IPrimitiveType<?> type = (IPrimitiveType<?>) typeChild.getChildByName(theFieldName).newInstance(typeChild.getInstanceConstructorArguments());
 		type.setValueAsString(theFieldValue);
 		typeChild.getMutator().setValue(theSearch, type);
@@ -125,9 +137,8 @@ public class BundleBuilder {
 
 	public BundleBuilder setSearchField(IBase theSearch, String theFieldName, IPrimitiveType<?> theFieldValue) {
 		BaseRuntimeChildDefinition typeChild = mySearchDef.getChildByName(theFieldName);
-		if (typeChild == null) {
-			throw new IllegalArgumentException(String.format("Unable to find field %s", theFieldName));
-		}
+		Validate.notNull(typeChild, "Unable to find field %s", theFieldName);
+
 		typeChild.getMutator().setValue(theSearch, theFieldValue);
 		return this;
 	}
@@ -176,6 +187,12 @@ public class BundleBuilder {
 		return new CreateBuilder(request);
 	}
 
+	/**
+	 * Creates new entry and adds it to the bundle
+	 *
+	 * @return
+	 * 		Returns the new entry.
+	 */
 	public IBase addEntry() {
 		IBase entry = myEntryDef.newInstance();
 		myEntryChild.getMutator().addValue(myBundle, entry);
@@ -225,22 +242,55 @@ public class BundleBuilder {
 		return this;
 	}
 
+	/**
+	 * Sets the specified entry field.
+	 *
+	 * @param theEntry
+	 * 		The entry instance to set values on
+	 * @param theEntryChildName
+	 * 		The child field name of the entry instance to be set
+	 * @param theValue
+	 * 		The field value to set
+	 */
 	public void addToEntry(IBase theEntry, String theEntryChildName, IBase theValue) {
 		addToBase(theEntry, theEntryChildName, theValue, myEntryDef);
 	}
 
-	public void addToSearch(IBase theSearch, String theSearchChildName, IBase theValue) {
-		addToBase(theSearch, theSearchChildName, theValue, mySearchDef);
+	/**
+	 * Sets the specified search field.
+	 *
+	 * @param theSearch
+	 * 		The search instance to set values on
+	 * @param theSearchFieldName
+	 * 		The child field name of the search instance to be set
+	 * @param theSearchFieldValue
+	 * 		The field value to set
+	 */
+	public void addToSearch(IBase theSearch, String theSearchFieldName, IBase theSearchFieldValue) {
+		addToBase(theSearch, theSearchFieldName, theSearchFieldValue, mySearchDef);
 	}
 
 	private void addToBase(IBase theBase, String theSearchChildName, IBase theValue, BaseRuntimeElementDefinition mySearchDef) {
 		BaseRuntimeChildDefinition defn = mySearchDef.getChildByName(theSearchChildName);
-		if (defn == null) {
-			throw new IllegalArgumentException(String.format("Unable to get child definition %s from $s", theSearchChildName, theBase));
-		}
-		defn.getMutator().setValue(theBase, theValue);
+		Validate.notNull(defn, "Unable to get child definition %s from %s", theSearchChildName, theBase);
+		defn.getMutator().addValue(theBase, theValue);
 	}
 
+	/**
+	 * Creates a new primitive.
+	 *
+	 * @param theTypeName
+	 * 		The element type for the primitive
+	 * @param <T>
+	 *    	Actual type of the parameterized primitive type interface
+	 * @return
+	 * 		Returns the new empty instance of the element definition.
+	 */
+	public <T> IPrimitiveType<T> newPrimitive(String theTypeName) {
+		BaseRuntimeElementDefinition primitiveDefinition = myContext.getElementDefinition(theTypeName);
+		Validate.notNull(primitiveDefinition, "Unable to find definition for %s", theTypeName);
+		return (IPrimitiveType<T>) primitiveDefinition.newInstance();
+	}
 
 	/**
 	 * Creates a new primitive instance of the specified element type.
@@ -248,26 +298,16 @@ public class BundleBuilder {
 	 * @param theTypeName
 	 * 		Element type to create
 	 * @param theInitialValue
-	 * 		Optional initial value to be set on the new instance, in case of multiple values, only the first one will be
-	 * 	set.
+	 * 		Initial value to be set on the new instance
 	 * @param <T>
 	 *    	Actual type of the parameterized primitive type interface
 	 * @return
 	 * 		Returns the newly created instance
 	 */
-	public <T> IPrimitiveType<T> newPrimitive(String theTypeName, T... theInitialValue) {
-		BaseRuntimeElementDefinition primitiveDefinition = myContext.getElementDefinition(theTypeName);
-		if (primitiveDefinition == null) {
-			throw new IllegalArgumentException(String.format("Unable to find definition for %s", theTypeName));
-		}
-
-		IPrimitiveType<T> newInstance = (IPrimitiveType<T>) primitiveDefinition.newInstance();
-
-		if (theInitialValue != null && theInitialValue.length > 0) {
-			newInstance.setValue(theInitialValue[0]);
-		}
-
-		return newInstance;
+	public <T> IPrimitiveType<T> newPrimitive(String theTypeName, T theInitialValue) {
+		IPrimitiveType<T> retVal = newPrimitive(theTypeName);
+		retVal.setValue(theInitialValue);
+		return retVal;
 	}
 
 	public class UpdateBuilder {

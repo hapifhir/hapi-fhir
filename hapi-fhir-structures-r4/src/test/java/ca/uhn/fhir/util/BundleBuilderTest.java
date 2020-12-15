@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -9,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class BundleBuilderTest {
@@ -95,6 +98,43 @@ public class BundleBuilderTest {
 		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
 		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
 		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+	}
+
+	@Test
+	public void testSearchHandling() {
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		IBase entry = builder.addEntry();
+		assertNotNull(entry);
+
+		IBase search = builder.addSearch(entry);
+		assertNotNull(entry);
+
+		builder.setSearchField(search, "mode", "match");
+		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(1, bundle.getEntry().size());
+		assertNotNull(bundle.getEntry().get(0).getSearch());
+		assertEquals(Bundle.SearchEntryMode.MATCH, bundle.getEntry().get(0).getSearch().getMode());
+		assertEquals(BigDecimal.ONE, bundle.getEntry().get(0).getSearch().getScore());
+	}
+
+	@Test
+	public void testAddToEntry() {
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+
+		IBase entry = builder.addEntry();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		builder.addToEntry(entry, "resource", patient);
+
+		Bundle bundle = (Bundle) builder.getBundle();
+		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		assertEquals(1, bundle.getEntry().size());
 	}
 
 	@Test
