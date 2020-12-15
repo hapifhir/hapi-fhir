@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.provider.MdmProviderR4;
+import ca.uhn.fhir.mdm.provider.MdmProviderDstu3Plus;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
-import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -18,7 +18,7 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 
 public abstract class BaseProviderR4Test extends BaseMdmR4Test {
-	MdmProviderR4 myMdmProviderR4;
+	MdmProviderDstu3Plus myMdmProvider;
 	@Autowired
 	private IMdmMatchFinderSvc myMdmMatchFinderSvc;
 	@Autowired
@@ -42,7 +42,7 @@ public abstract class BaseProviderR4Test extends BaseMdmR4Test {
 
 	@BeforeEach
 	public void before() {
-		myMdmProviderR4 = new MdmProviderR4(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
+		myMdmProvider = new MdmProviderDstu3Plus(myFhirContext, myMdmControllerSvc, myMdmMatchFinderSvc, myMdmExpungeSvc, myMdmSubmitSvc);
 		defaultScript = myMdmSettings.getScriptText();
 	}
 	@AfterEach

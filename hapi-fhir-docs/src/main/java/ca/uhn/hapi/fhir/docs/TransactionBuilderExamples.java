@@ -22,10 +22,15 @@ package ca.uhn.hapi.fhir.docs;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.util.TransactionBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.Patient;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public class TransactionBuilderExamples {
@@ -36,7 +41,7 @@ public class TransactionBuilderExamples {
 	public void update() throws FHIRException {
 		//START SNIPPET: update
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to update
 		Patient patient = new Patient();
@@ -54,7 +59,7 @@ public class TransactionBuilderExamples {
 	public void updateConditional() throws FHIRException {
 		//START SNIPPET: updateConditional
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to update
 		Patient patient = new Patient();
@@ -72,7 +77,7 @@ public class TransactionBuilderExamples {
 	public void create() throws FHIRException {
 		//START SNIPPET: create
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to create
 		Patient patient = new Patient();
@@ -89,7 +94,7 @@ public class TransactionBuilderExamples {
 	public void createConditional() throws FHIRException {
 		//START SNIPPET: createConditional
 		// Create a TransactionBuilder
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 
 		// Create a Patient to create
 		Patient patient = new Patient();
@@ -102,6 +107,32 @@ public class TransactionBuilderExamples {
 		// Execute the transaction
 		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
 		//END SNIPPET: createConditional
+	}
+
+	public void customizeBundle() throws FHIRException {
+		//START SNIPPET: customizeBundle
+		// Create a TransactionBuilder
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		// Set bundle type to be searchset
+		builder
+			.setBundleField("type", "searchset")
+			.setBundleField("id", UUID.randomUUID().toString())
+			.setMetaField("lastUpdated", builder.newPrimitive("instant", new Date()));
+
+		// Create bundle entry
+		IBase entry = builder.addEntry();
+
+		// Create a Patient to create
+		Patient patient = new Patient();
+		patient.setActive(true);
+		patient.addIdentifier().setSystem("http://foo").setValue("bar");
+		builder.addToEntry(entry, "resource", patient);
+
+		// Add search results
+		IBase search = builder.addSearch(entry);
+		builder.setSearchField(search, "mode", "match");
+		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
+		//END SNIPPET: customizeBundle
 	}
 
 }

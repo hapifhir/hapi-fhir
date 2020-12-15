@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
-import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
@@ -48,7 +48,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearAllLinks() {
 		assertLinkCount(2);
-		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
+		myMdmProvider.clearMdmLinks(null, myRequestDetails);
 		assertNoLinksExist();
 	}
 
@@ -70,7 +70,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myMdmProviderR4.clearMdmLinks(new StringType("Patient"), myRequestDetails);
+		myMdmProvider.clearMdmLinks(new StringType("Patient"), myRequestDetails);
 		assertNoPatientLinksExist();
 		try {
 			myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
@@ -87,7 +87,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(goldenResource, is(notNullValue()));
-		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
+		myMdmProvider.clearMdmLinks(null, myRequestDetails);
 		assertNoPatientLinksExist();
 		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
 		assertThat(goldenResource, is(nullValue()));
@@ -104,7 +104,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget, goldenResourceFromTarget2);
 
 		//SUT
-		myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
+		myMdmProvider.clearMdmLinks(null, myRequestDetails);
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
@@ -135,7 +135,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		linkGoldenResources(goldenResourceFromTarget2, goldenResourceFromTarget);
 
 		//SUT
-		Parameters parameters = myMdmProviderR4.clearMdmLinks(null, myRequestDetails);
+		IBaseParameters parameters = myMdmProvider.clearMdmLinks(null, myRequestDetails);
 
 		printLinks();
 
@@ -157,7 +157,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
 		assertThat(read, is(notNullValue()));
-		myMdmProviderR4.clearMdmLinks(new StringType("Practitioner"), myRequestDetails);
+		myMdmProvider.clearMdmLinks(new StringType("Practitioner"), myRequestDetails);
 		assertNoPractitionerLinksExist();
 		try {
 			myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
@@ -168,7 +168,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testClearInvalidTargetType() {
 		try {
-			myMdmProviderR4.clearMdmLinks(new StringType("Observation"), myRequestDetails);
+			myMdmProvider.clearMdmLinks(new StringType("Observation"), myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), is(equalTo("$mdm-clear does not support resource type: Observation")));
