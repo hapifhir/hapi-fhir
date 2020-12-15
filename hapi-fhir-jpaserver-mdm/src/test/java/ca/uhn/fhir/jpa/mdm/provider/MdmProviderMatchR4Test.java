@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import com.google.common.collect.Ordering;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -153,5 +155,74 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		Bundle result = (Bundle) myMdmProvider.match(newJane);
 		assertEquals(1, result.getEntry().size());
 		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
+	}
+
+	@Test
+	public void testMatchWithCoarseDateGranularity() throws Exception {
+		setMdmRuleJson("mdm/coarse-birthdate-mdm-rules.json");
+
+		String granularPatient = "{\n" +
+			"    \"resourceType\": \"Patient\",\n" +
+			"    \"active\": true,\n" +
+			"    \"name\": [\n" +
+			"        {\n" +
+			"            \"family\": \"PETERSON\",\n" +
+			"            \"given\": [\n" +
+			"                \"GARY\",\n" +
+			"                \"D\"\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ],\n" +
+			"    \"telecom\": [\n" +
+			"        {\n" +
+			"            \"system\": \"phone\",\n" +
+			"            \"value\": \"100100100\",\n" +
+			"            \"use\": \"home\"\n" +
+			"        }\n" +
+			"    ],\n" +
+			"    \"gender\": \"male\",\n" +
+			"    \"birthDate\": \"1991-10-10\",\n" +
+			"    \"address\": [\n" +
+			"        {\n" +
+			"            \"state\": \"NY\",\n" +
+			"            \"postalCode\": \"12313\"\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}";
+		IBaseResource iBaseResource = myFhirContext.newJsonParser().parseResource(granularPatient);
+		createPatient((Patient) iBaseResource);
+
+		String coarsePatient = "{\n" +
+			"    \"resourceType\": \"Patient\",\n" +
+			"    \"active\": true,\n" +
+			"    \"name\": [\n" +
+			"        {\n" +
+			"            \"family\": \"PETERSON\",\n" +
+			"            \"given\": [\n" +
+			"                \"GARY\",\n" +
+			"                \"D\"\n" +
+			"            ]\n" +
+			"        }\n" +
+			"    ],\n" +
+			"    \"telecom\": [\n" +
+			"        {\n" +
+			"            \"system\": \"phone\",\n" +
+			"            \"value\": \"100100100\",\n" +
+			"            \"use\": \"home\"\n" +
+			"        }\n" +
+			"    ],\n" +
+			"    \"gender\": \"male\",\n" +
+			"    \"birthDate\": \"1991-10\",\n" +
+			"    \"address\": [\n" +
+			"        {\n" +
+			"            \"state\": \"NY\",\n" +
+			"            \"postalCode\": \"12313\"\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}";
+
+		IBaseResource coarseResource = myFhirContext.newJsonParser().parseResource(coarsePatient);
+		Bundle result = myMdmProviderR4.match((Patient) coarseResource);
+		assertEquals(1, result.getEntry().size());
 	}
 }
