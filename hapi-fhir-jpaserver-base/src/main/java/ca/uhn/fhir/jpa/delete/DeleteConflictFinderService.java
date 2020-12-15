@@ -31,7 +31,7 @@ import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Service
-class DeleteConflictFinderService {
+public class DeleteConflictFinderService {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
