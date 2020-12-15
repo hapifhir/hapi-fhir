@@ -390,7 +390,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	@Transactional
-	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
+	public void storeNewCodeSystemVersion(ResourcePersistentId theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theCodeSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
 
 		ourLog.debug("Storing code system");
@@ -399,11 +399,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ValidateUtil.isTrueOrThrowInvalidRequest(codeSystemToStore.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
-		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theSystemVersionId, theCodeSystemResourceTable);
+		TermCodeSystem codeSystem = getOrCreateDistinctTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemVersionId, theCodeSystemResourceTable);
 
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
 		for (TermCodeSystemVersion next : existing) {
-			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersion.getCodeSystemVersionId()) && next.getConcepts().isEmpty()) {
+			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId) && next.getConcepts().isEmpty()) { // FIXME: replace isEmpty() with something more efficient
 
 				/*
 				 * If we already have a CodeSystemVersion that matches the version we're storing, we
@@ -412,7 +412,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				codeSystemToStore = next;
 				codeSystemToStore.setCodeSystemDisplayName(theCodeSystemVersion.getCodeSystemDisplayName());
 
-			} else if (isBlank(next.getCodeSystemVersionId()) || defaultString(next.getCodeSystemVersionId()).equals(theSystemVersionId)) {
+			} else if (isBlank(next.getCodeSystemVersionId()) || defaultString(next.getCodeSystemVersionId()).equals(theCodeSystemVersionId)) {
 
 				/*
 				 * Delete any existing CodeSystemVersions that are either unversioned or match the
@@ -431,7 +431,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		codeSystemToStore.setCodeSystem(codeSystem);
 		codeSystemToStore.setCodeSystemDisplayName(theSystemName);
-		codeSystemToStore.setCodeSystemVersionId(theSystemVersionId);
+		codeSystemToStore.setCodeSystemVersionId(theCodeSystemVersionId);
 
 		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
