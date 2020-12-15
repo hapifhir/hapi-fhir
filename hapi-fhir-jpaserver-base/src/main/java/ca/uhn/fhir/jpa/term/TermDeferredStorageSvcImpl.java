@@ -323,8 +323,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	private void processDeferredCodeSystemVersionDeletions() {
 		for (TermCodeSystemVersion next : myDeferredCodeSystemVersionsDeletions) {
 			processDeferredCodeSystemVersionDeletions(next.getPid());
-
-			runInTransaction(() -> myCodeSystemVersionDao.deleteById(next.getPid()));
 		}
 
 		myDeferredCodeSystemVersionsDeletions.clear();
@@ -332,7 +330,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 	private void processDeferredCodeSystemVersionDeletions(long theCodeSystemVersionPid) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
-		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
+		ourLog.info(" * Deleting CodeSystemVersion[id={}]", theCodeSystemVersionPid);
 
 		PageRequest page1000 = PageRequest.of(0, 1000);
 
@@ -377,12 +375,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 				ourLog.info(" * Removing code system version {} as current version of code system {}", theCodeSystemVersionPid, codeSystem.getPid());
 				codeSystem.setCurrentVersion(null);
 				myCodeSystemDao.save(codeSystem);
-				myCodeSystemDao.flush();
 			}
 
 			ourLog.info(" * Deleting code system version");
-			myCodeSystemVersionDao.delete(theCodeSystemVersionPid);
-			myCodeSystemVersionDao.flush();
+			Optional<TermCodeSystemVersion> csv = myCodeSystemVersionDao.findById(theCodeSystemVersionPid);
+			if (csv.isPresent()) {
+				myCodeSystemVersionDao.delete(csv.get());
+			}
 		});
 
 
@@ -393,11 +392,11 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
-		int totalCount = runInTransaction(() -> theCounter.get());
+		int totalCount = runInTransaction(theCounter);
 		StopWatch sw = new StopWatch();
 		count = 0;
 		while (true) {
-			Slice<Long> link = runInTransaction(() -> theLoader.get());
+			Slice<Long> link = runInTransaction(theLoader);
 			if (!link.hasContent()) {
 				break;
 			}

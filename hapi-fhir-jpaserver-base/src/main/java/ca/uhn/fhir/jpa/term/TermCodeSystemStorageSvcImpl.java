@@ -403,7 +403,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
 		for (TermCodeSystemVersion next : existing) {
-			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersion.getCodeSystemVersionId())) {
+			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersion.getCodeSystemVersionId()) && next.getConcepts().isEmpty()) {
 
 				/*
 				 * If we already have a CodeSystemVersion that matches the version we're storing, we
@@ -439,7 +439,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ArrayList<String> conceptsStack = new ArrayList<>();
 		IdentityHashMap<TermConcept, Object> allConcepts = new IdentityHashMap<>();
 		int totalCodeCount = 0;
-		for (TermConcept next : codeSystemToStore.getConcepts()) {
+		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			totalCodeCount += validateConceptForStorage(next, codeSystemToStore, conceptsStack, allConcepts);
 		}
 
@@ -454,14 +454,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 
-		for (TermConcept next : codeSystemToStore.getConcepts()) {
+		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			populateVersion(next, codeSystemVersion);
 		}
 
 		ourLog.debug("Saving {} concepts...", totalCodeCount);
 
 		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
-		for (TermConcept next : codeSystemToStore.getConcepts()) {
+		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
 		}
 
@@ -745,12 +745,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 
-	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
+	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystemVersion, ArrayList<String> theConceptsStack,
 													  IdentityHashMap<TermConcept, Object> theAllConcepts) {
 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodeSystemVersion is null");
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, "CodeSystems are not equal");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "CodeSystem contains a code with no code value");
 
+		theConcept.setCodeSystemVersion(theCodeSystemVersion);
 		if (theConceptsStack.contains(theConcept.getCode())) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
 		}
@@ -765,8 +765,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			next.setCodeSystem(theCodeSystem);
-			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack, theAllConcepts);
+			next.setCodeSystem(theCodeSystemVersion);
+			retVal += validateConceptForStorage(next.getChild(), theCodeSystemVersion, theConceptsStack, theAllConcepts);
 		}
 
 		theConceptsStack.remove(theConceptsStack.size() - 1);
