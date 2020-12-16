@@ -410,7 +410,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				 * can reuse it.
 				 */
 				codeSystemToStore = next;
-				codeSystemToStore.setCodeSystemDisplayName(theCodeSystemVersion.getCodeSystemDisplayName());
+				codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 
 			} else if (isBlank(next.getCodeSystemVersionId()) || defaultString(next.getCodeSystemVersionId()).equals(theCodeSystemVersionId)) {
 
@@ -446,7 +446,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
 
-		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
+		codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
 
 		ourLog.debug("Saving code system");
 
@@ -456,14 +456,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 
 		for (TermConcept next : conceptsToSave) {
-			populateVersion(next, codeSystemVersion);
+			populateVersion(next, codeSystemToStore);
 		}
 
 		ourLog.debug("Saving {} concepts...", totalCodeCount);
 
 		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
 		for (TermConcept next : conceptsToSave) {
-			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
+			persistChildren(next, codeSystemToStore, conceptsStack2, totalCodeCount);
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
