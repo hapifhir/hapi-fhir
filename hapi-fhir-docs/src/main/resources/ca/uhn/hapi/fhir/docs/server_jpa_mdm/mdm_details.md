@@ -2,17 +2,6 @@
 
 This section describes details of how MDM functionality is implemented in HAPI FHIR.
 
-## Resource linking in FHIR
-
-Because HAPI MDM is implemented on the HAPI JPA Server, it uses the FHIR model to represent links. The following illustration shows an example of how these links work.
-
-<a href="/hapi-fhir/docs/images/empi-links.svg"><img src="/hapi-fhir/docs/images/empi-links.svg" alt="MDM links" style="margin-left: 15px; margin-bottom: 15px; width: 500px;" /></a>
-
-There are several resources that are used:
-
-* Source resource - Represents the record in being matched. For example, it can be a Patient resource who receives healthcare services and that should be mapped to a master record.
-* Golden Resource - Represents a master record that the source record should point to. For example, it can be a real-world Patient resource that multiple duplicate Patient resources point to. 
-
 # Automatic Linking
 
 With MDM enabled, the default behavior of the MDM is to create a new Golden Record for every source record that is created such that there is a 1:1 relationship between them. Any relinking is then expected to be done manually via the [MDM Operations](/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html).
