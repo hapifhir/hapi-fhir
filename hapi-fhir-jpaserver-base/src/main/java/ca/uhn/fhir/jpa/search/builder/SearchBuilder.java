@@ -530,17 +530,17 @@ public class SearchBuilder implements ISearchBuilder {
 					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
 					break;	
 				case COMPOSITE:
-					List<RuntimeSearchParam> theCompositList = param.getCompositeOf();
-					if (theCompositList == null) {
+					List<RuntimeSearchParam> compositList = param.getCompositeOf();
+					if (compositList == null) {
 						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
 					}
-					if (theCompositList.size() != 2) {
+					if (compositList.size() != 2) {
 						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() 
 								+ " must have 2 composite types declared in parameter annotation, found "
-								+ theCompositList.size());
+								+ compositList.size());
 					}
-					RuntimeSearchParam left = theCompositList.get(0);
-					RuntimeSearchParam right = theCompositList.get(1);
+					RuntimeSearchParam left = compositList.get(0);
+					RuntimeSearchParam right = compositList.get(1);
 					
 					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
 					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
@@ -568,24 +568,14 @@ public class SearchBuilder implements ISearchBuilder {
 		case DATE:
 			theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending);
 			break;
-		case REFERENCE:
-			theQueryStack.addSortOnResourceLink(myResourceName, theParamName, theAscending);
-			break;
 		case TOKEN:
 			theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending);
-			break;
-		case NUMBER:
-			theQueryStack.addSortOnNumber(myResourceName, theParamName, theAscending);
-			break;
-		case URI:
-			theQueryStack.addSortOnUri(myResourceName, theParamName, theAscending);
 			break;
 		case QUANTITY:
 			theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending);
 			break;
 		default:
-			throw new InvalidRequestException("This server does not support _sort specifications of type "
-					+ theParamType + " - Can't serve _sort=" + theParamName);
+			throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParamType + " on _sort="+ theParamName);
 		}
 
 	}
