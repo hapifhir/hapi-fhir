@@ -30,8 +30,11 @@ import org.hl7.fhir.instance.model.api.IBase;
 
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDeclaredChildDefinition {
+	Logger ourLog = LoggerFactory.getLogger(BaseRuntimeChildDatatypeDefinition.class);
 
 	private Class<? extends IBase> myDatatype;
 
@@ -41,7 +44,11 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 		// should use RuntimeChildAny
 		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
-		assert Modifier.isAbstract(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
+		// FIXME KBD Ask James if we can permanently remove this assert
+		//assert Modifier.isAbstract(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
+		if (Modifier.isAbstract(theDatatype.getModifiers())) {
+			ourLog.warn("Abstract type '{}' found where theField = '{}' and theElementName = '{}'", theDatatype, theField, theElementName);
+		}
 		myDatatype = theDatatype;
 	}
 
@@ -100,7 +107,11 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		if (myElementDefinition == null) {
 			myElementDefinition = theContext.getElementDefinition(getDatatype());
 		}
-		assert myElementDefinition != null : "Unknown type: " + getDatatype();
+		// FIXME KBD Ask James if we can permanently remove this assert
+		//assert myElementDefinition != null : "Unknown type: " + getDatatype();
+		if (myElementDefinition == null) {
+			ourLog.warn("Unknown type: {}", getDatatype());
+		}
 	}
 
 	@Override

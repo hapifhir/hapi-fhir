@@ -125,7 +125,7 @@ public class MeasureOperationsProvider {
 		} catch (Exception e) {
 			logger.info("Error generating narrative", e);
 		}
-		return myMeasureDao.update(theResource, theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
+		return myMeasureDao.update(theResource, ((theRequestDetails == null)?null:theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE)), theRequestDetails);
 	}
 
 	@Operation(name = "$get-narrative", idempotent = true, type = Measure.class)
