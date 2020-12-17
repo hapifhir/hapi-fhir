@@ -113,8 +113,10 @@ jobs:
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
-          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
+          summaryFileLocation: $(Pipeline.Workspace)
+          reportDirectory: $(Pipeline.Workspace)
+            #          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
+           #          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
           failIfCoverageEmpty: false
 
 # Potential Additional Maven3 Options:
