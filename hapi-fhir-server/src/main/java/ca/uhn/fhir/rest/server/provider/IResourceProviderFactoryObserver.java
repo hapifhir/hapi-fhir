@@ -25,4 +25,5 @@ import java.util.function.Supplier;
 
 public interface IResourceProviderFactoryObserver {
 	void update(@Nonnull Supplier<Object> theSupplier);
+	void remove(@Nonnull Supplier<Object> theSupplier);
 }

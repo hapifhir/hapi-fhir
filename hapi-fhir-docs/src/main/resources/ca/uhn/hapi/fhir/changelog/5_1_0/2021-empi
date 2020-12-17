@@ -1,9 +1,9 @@
 ---
 type: add
 issue: 2021
-title: "Added [EMPI](https://hapifhir.io/hapi-fhir/docs/server_jpa_empi/empi.html) functionality, including phonetic
+title: "Added [EMPI](https://hapifhir.io/hapi-fhir/docs/server_jpa_mdm/mdm.html) functionality, including phonetic
 indexing, asynchronous rules-based patient and practitioner matching when resources are created and updated.  A number of
-[EMPI Operations](https://hapifhir.io/hapi-fhir/docs/server_jpa_empi/empi_operations.html) are provided to
+[EMPI Operations](https://hapifhir.io/hapi-fhir/docs/server_jpa_mdm/mdm_operations.html) are provided to
 maintain EMPI links (e.g. resolving possible matches and possible duplicates).  Also batch operations
 are provided to identify links in existing patients and practitioners, and to 'wipe clean' all EMPI data and re-run
 the batch as the empi matching rules are refined."

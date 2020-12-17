@@ -1,0 +1,17 @@
+{
+	"version": "1",
+	"mdmTypes": ["Organization"],
+	"candidateSearchParams": [],
+	"candidateFilterSearchParams": [],
+	"matchFields": [
+		{
+			"name": "name-prefix",
+			"resourceType": "Organization",
+			"resourcePath": "name.prefix",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		}
+	],
+	"matchResultMap": {}
+}

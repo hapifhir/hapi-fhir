@@ -1,0 +1,11 @@
+{
+	"version": "1",
+	"mdmTypes": ["Patient", "Practitioner", "Medication"],
+	"candidateSearchParams" : [{
+		"resourceType" : "Patient",
+		"searchParams" : ["foo"]
+	}],
+	"candidateFilterSearchParams" : [],
+	"matchFields" : [],
+	"matchResultMap" : {}
+}
