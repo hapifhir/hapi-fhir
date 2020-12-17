@@ -129,7 +129,15 @@ jobs:
         inputs:
            targetType: 'inline'
            script: pwd; ls -al $(Pipeline.Workspace)
-      - script: mkdir jacoco-combined; cp jacoco-*/* jacoco-combined
+      - script: mkdir jacoco-combined
+      - task: CopyFiles@2
+        condition: always()
+        displayName: Move JaCoCo Outputs
+        inputs:
+           sourceFolder: '$(Pipeline.Workspace)'
+           contents: |
+              jacoco-*/**
+           targetFolder: '$(Pipeline.Workspace)/jacoco-combined'
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
