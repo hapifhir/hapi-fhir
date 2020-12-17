@@ -95,7 +95,7 @@ jobs:
         inputs:
            targetPath: '$(Build.ArtifactStagingDirectory)/'
 #           artifactName: 'logs-$(system.jobpositioninphase)'
-            artifactName: 'logs-$(Agent.id)'
+           artifactName: 'logs-$(Agent.id)'
 
    # Amalgamate the test results, and report them.
   - job: Report
