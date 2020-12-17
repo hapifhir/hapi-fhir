@@ -38,7 +38,7 @@
             </dependency>
 			  <dependency>
 				  <groupId>${project.groupId}</groupId>
-				  <artifactId>hapi-fhir-server-empi</artifactId>
+				  <artifactId>hapi-fhir-server-mdm</artifactId>
 				  <version>${project.version}</version>
 			  </dependency>
             <dependency>
@@ -93,17 +93,12 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>hapi-fhir-igpacks</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
                 <artifactId>hapi-fhir-jpaserver-model</artifactId>
                 <version>${project.version}</version>
             </dependency>
 			  <dependency>
 				  <groupId>${project.groupId}</groupId>
-				  <artifactId>hapi-fhir-jpaserver-empi</artifactId>
+				  <artifactId>hapi-fhir-jpaserver-mdm</artifactId>
 				  <version>${project.version}</version>
 			  </dependency>
             <dependency>

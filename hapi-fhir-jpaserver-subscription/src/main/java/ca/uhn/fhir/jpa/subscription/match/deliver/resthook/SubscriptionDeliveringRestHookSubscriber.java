@@ -43,7 +43,7 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.TransactionBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -154,7 +154,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		IBundleProvider searchResults = dao.search(payloadSearchMap);
 
-		TransactionBuilder builder = new TransactionBuilder(myFhirContext);
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (IBaseResource next : searchResults.getResources(0, searchResults.size())) {
 			builder.addUpdateEntry(next);
 		}

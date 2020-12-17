@@ -43,12 +43,12 @@ import java.util.List;
 
 @Component
 @Scope("prototype")
-class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuilder {
+public class PredicateBuilderUri extends BasePredicateBuilder implements IPredicateBuilder {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderUri.class);
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 
-	PredicateBuilderUri(LegacySearchBuilder theSearchBuilder) {
+	public PredicateBuilderUri(LegacySearchBuilder theSearchBuilder) {
 		super(theSearchBuilder);
 	}
 

@@ -689,6 +689,10 @@
 			<name>Steven Wagers</name>
 			<organization>Regenstrief Institute</organization>
 		</developer>
+		<developer>
+			<id>vladonemo</id>
+			<name>Vladimir Nemergut</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -760,7 +764,7 @@
 		<plexus_compiler_api_version>2.8.5</plexus_compiler_api_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<slf4j_version>1.7.28</slf4j_version>
+		<slf4j_version>1.7.30</slf4j_version>
 		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
 		<spring_version>5.3.2</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
@@ -1481,6 +1485,11 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.junit-pioneer</groupId>
+				<artifactId>junit-pioneer</artifactId>
+				<version>1.1.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
 				<version>2.5.1</version>
@@ -2122,8 +2131,8 @@
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-jpaserver-empi">
-									<fileset dir="hapi-fhir-jpaserver-empi/target/site/apidocs"/>
+								<copy todir="target/site/apidocs-jpaserver-mdm">
+									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
 									<fileset dir="hapi-fhir-jpaserver-batch/target/site/apidocs"/>
@@ -2134,8 +2143,8 @@
 								<copy todir="target/site/apidocs-server">
 									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-server-empi">
-									<fileset dir="hapi-fhir-server-empi/target/site/apidocs"/>
+								<copy todir="target/site/apidocs-server-mdm">
+									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
@@ -2541,7 +2550,7 @@
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
-				<module>hapi-fhir-server-empi</module>
+				<module>hapi-fhir-server-mdm</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->
@@ -2556,7 +2565,6 @@
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
-				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-jpaserver-api</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
@@ -2565,7 +2573,7 @@
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-empi</module>
+				<module>hapi-fhir-jpaserver-mdm</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>

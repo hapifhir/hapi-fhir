@@ -54,7 +54,7 @@ public class MatchUrlService {
 
 	public SearchParameterMap translateMatchUrl(String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
-		List<NameValuePair> parameters = translateMatchUrl(theMatchUrl);
+		List<NameValuePair> parameters = UrlUtil.translateMatchUrl(theMatchUrl);
 
 		ArrayListMultimap<String, QualifiedParamList> nameToParamLists = ArrayListMultimap.create();
 		for (NameValuePair next : parameters) {
@@ -145,10 +145,6 @@ public class MatchUrlService {
 			}
 		}
 		return paramMap;
-	}
-
-	public List<NameValuePair> translateMatchUrl(String theMatchUrl) {
-		return UrlUtil.translateMatchUrl(theMatchUrl);
 	}
 
 	private IQueryParameterAnd<?> newInstanceAnd(String theParamType) {

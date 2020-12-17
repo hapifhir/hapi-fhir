@@ -19,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Meta;
@@ -111,6 +112,59 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 
 	}
+
+	@Test
+	public void testUpdateConditionalOnEmailParameterWithPlusSymbol() {
+		IBundleProvider outcome;
+
+		myCaptureQueriesListener.clear();
+		Patient p = new Patient();
+		p.addTelecom()
+			.setSystem(ContactPoint.ContactPointSystem.EMAIL)
+			.setValue("help-im+a@bug.com");
+		myPatientDao.update(p, "Patient?email=help-im+a@bug.com");
+		myCaptureQueriesListener.logSelectQueries();
+
+		outcome = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(1, outcome.sizeOrThrowNpe());
+
+		p = new Patient();
+		p.addTelecom()
+			.setSystem(ContactPoint.ContactPointSystem.EMAIL)
+			.setValue("help-im+a@bug.com");
+		myPatientDao.update(p, "Patient?email=help-im+a@bug.com");
+
+		outcome = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(1, outcome.sizeOrThrowNpe());
+
+	}
+
+	@Test
+	public void testUpdateConditionalOnEmailParameterWithPlusSymbolCorrectlyEscaped() {
+		IBundleProvider outcome;
+
+		myCaptureQueriesListener.clear();
+		Patient p = new Patient();
+		p.addTelecom()
+			.setSystem(ContactPoint.ContactPointSystem.EMAIL)
+			.setValue("help-im+a@bug.com");
+		myPatientDao.update(p, "Patient?email=help-im%2Ba@bug.com");
+		myCaptureQueriesListener.logSelectQueries();
+
+		outcome = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(1, outcome.sizeOrThrowNpe());
+
+		p = new Patient();
+		p.addTelecom()
+			.setSystem(ContactPoint.ContactPointSystem.EMAIL)
+			.setValue("help-im+a@bug.com");
+		myPatientDao.update(p, "Patient?email=help-im%2Ba@bug.com");
+
+		outcome = myPatientDao.search(SearchParameterMap.newSynchronous());
+		assertEquals(1, outcome.sizeOrThrowNpe());
+
+	}
+
 
 	/**
 	 * Just in case any hash values are missing

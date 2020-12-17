@@ -444,7 +444,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (generatedSql.isMatchNothing()) {
 			return Optional.empty();
 		}
-
+		
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 		return Optional.of(executor);
 	}
@@ -528,9 +528,25 @@ public class SearchBuilder implements ISearchBuilder {
 					break;
 				case QUANTITY:
 					theQueryStack.addSortOnQuantity(myResourceName, theSort.getParamName(), ascending);
+					break;	
+				case COMPOSITE:
+					List<RuntimeSearchParam> compositList = param.getCompositeOf();
+					if (compositList == null) {
+						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() + " is not defined by the resource " + myResourceName);
+					}
+					if (compositList.size() != 2) {
+						throw new InvalidRequestException("The composite _sort parameter " + theSort.getParamName() 
+								+ " must have 2 composite types declared in parameter annotation, found "
+								+ compositList.size());
+					}
+					RuntimeSearchParam left = compositList.get(0);
+					RuntimeSearchParam right = compositList.get(1);
+					
+					createCompositeSort(theQueryStack, myResourceName, left.getParamType(), left.getName(), ascending);
+					createCompositeSort(theQueryStack, myResourceName, right.getParamType(), right.getName(), ascending);
+					
 					break;
 				case SPECIAL:
-				case COMPOSITE:
 				case HAS:
 				default:
 					throw new InvalidRequestException("This server does not support _sort specifications of type " + param.getParamType() + " - Can't serve _sort=" + theSort.getParamName());
@@ -540,6 +556,27 @@ public class SearchBuilder implements ISearchBuilder {
 
 		// Recurse
 		createSort(theQueryStack, theSort.getChain());
+
+	}
+	
+	private void createCompositeSort(QueryStack theQueryStack, String theResourceName, RestSearchParameterTypeEnum theParamType, String theParamName, boolean theAscending) {
+
+		switch (theParamType) {
+		case STRING:
+			theQueryStack.addSortOnString(myResourceName, theParamName, theAscending);
+			break;
+		case DATE:
+			theQueryStack.addSortOnDate(myResourceName, theParamName, theAscending);
+			break;
+		case TOKEN:
+			theQueryStack.addSortOnToken(myResourceName, theParamName, theAscending);
+			break;
+		case QUANTITY:
+			theQueryStack.addSortOnQuantity(myResourceName, theParamName, theAscending);
+			break;
+		default:
+			throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParamType + " on _sort="+ theParamName);
+		}
 
 	}
 

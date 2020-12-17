@@ -46,6 +46,15 @@ public class BundleUtilTest {
 	}
 
 	@Test
+	public void testSetType() {
+		Bundle b = new Bundle();
+		BundleUtil.setBundleType(ourCtx, b, "transaction");
+		assertEquals(Bundle.BundleType.TRANSACTION, b.getType());
+		assertEquals("transaction", b.getTypeElement().getValueAsString());
+	}
+
+
+	@Test
 	public void toListOfResourcesOfTypeTest() {
 		Bundle bundle = new Bundle();
 		for (int i = 0; i < 5; i++) {
