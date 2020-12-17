@@ -17,7 +17,7 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CqlHivTest extends BaseCqlR4Test {
+public class CqlR4Test extends BaseCqlR4Test {
 	public static final String HIV_INDICATORS_ID = "measure-EXM349-2.10.000"; // hiv-indicators
 	public static final IdType hivMeasureId = new IdType("Measure", HIV_INDICATORS_ID);
 
@@ -42,8 +42,12 @@ public class CqlHivTest extends BaseCqlR4Test {
 	public void testGeneratedContentEXM130() throws IOException {
 		IdType measureId = new IdType("Measure", "measure-EXM130-7.3.000");
 		IdType libraryId = new IdType("Library", "library-EXM130-7.3.000");
+
 		loadResource("r4/EXM130/library-MATGlobalCommonFunctions-FHIR4-4.0.000.json");
 		loadBundle("r4/EXM130/EXM130-7.3.000-bundle.json");
+		// FIXME KBD At this point, the loading of the library without CQL or ELM triggered the loading mechanism
+		// to look for, find and parse the raw CQL on teh disk, and then fill in the missing parts in the Library
+		// Therefore, we can Assert that it contains CQL and ELm now since we know the disk file did not.
 
 		Measure measure = myMeasureDao.read(measureId);
 		int originalMeasureRelatedArtifactsSize = measure.getRelatedArtifact().size();
