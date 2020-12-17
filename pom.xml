@@ -2573,8 +2573,8 @@
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-mdm</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
+				<module>hapi-fhir-jpaserver-mdm</module>
 				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>

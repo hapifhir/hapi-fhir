@@ -285,8 +285,12 @@ public class MdmLink {
 		return myEidMatch;
 	}
 
-	// TODO: JA I renamed this to work around a hibernate search 6 issue. Is this method needed? It causes Hibernate to freak out
-	public boolean isEidMatch_() {
+	/**
+	 * Note that this method can not be called <code>getEidMatch</code> or
+	 * <code>isEidMatch</code> because Hibernate Search complains about having
+	 * 2 accessors for this property
+	 */
+	public boolean isEidMatchPresent() {
 		return myEidMatch != null && myEidMatch;
 	}
 
