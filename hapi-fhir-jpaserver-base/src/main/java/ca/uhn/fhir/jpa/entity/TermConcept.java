@@ -399,6 +399,8 @@ public class TermConcept implements Serializable {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("pid", myId);
+		b.append("csvPid", myCodeSystemVersionPid);
 		b.append("code", myCode);
 		b.append("display", myDisplay);
 		if (mySequence != null) {

@@ -251,4 +251,8 @@ public class TermConceptProperty implements Serializable {
 			.append(myDisplay)
 			.toHashCode();
 	}
+
+	public Long getPid() {
+		return myId;
+	}
 }

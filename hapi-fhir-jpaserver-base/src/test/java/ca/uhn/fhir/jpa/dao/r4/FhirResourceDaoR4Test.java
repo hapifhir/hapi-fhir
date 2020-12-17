@@ -307,18 +307,23 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id1 = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
 
 		runInTransaction(() -> {
+			assertEquals(3L, myTermConceptDao.count());
+
 			SearchSession session = Search.session(myEntityManager);
 			List<TermConcept> termConcepts = session.search(TermConcept.class).where(f -> f.matchAll()).fetchAllHits();
-			assertThat(termConcepts.size(), is(equalTo(3)));
+			assertEquals(3, termConcepts.size());
 		});
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {
+			assertEquals(3L, myTermConceptDao.count());
+
 			SearchSession session = Search.session(myEntityManager);
 			List<TermConcept> termConcepts = session.search(TermConcept.class).where(f -> f.matchAll()).fetchAllHits();
-			assertThat(termConcepts.size(), is(equalTo(3)));
+			assertEquals(3, termConcepts.size());
 		});
 	}
 

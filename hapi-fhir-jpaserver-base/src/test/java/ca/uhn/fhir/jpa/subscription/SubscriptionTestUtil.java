@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -29,6 +30,8 @@ public class SubscriptionTestUtil {
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+	@Autowired
+	private IResourceChangeListenerCacheRefresher myResourceChangeListenerCacheRefresher;
 
 	public int getExecutorQueueSize() {
 		LinkedBlockingChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
@@ -46,6 +49,8 @@ public class SubscriptionTestUtil {
 			ourLog.info("Executor work queue has {} items", getExecutorQueueSize());
 		}
 		Thread.sleep(100);
+
+		myResourceChangeListenerCacheRefresher.refreshExpiredCachesAndNotifyListeners();
 	}
 
 	public void registerEmailInterceptor() {

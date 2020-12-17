@@ -143,13 +143,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	}
 
 	@Override
-	public void saveAllDeferred() {
-		while (!isStorageQueueEmpty()) {
-			saveDeferred();
-		}
-	}
-
-	@Override
 	public void setProcessDeferred(boolean theProcessDeferred) {
 		myProcessDeferred = theProcessDeferred;
 	}
@@ -253,6 +246,13 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
 		return new TransactionTemplate(myTransactionMgr).execute(tx -> theRunnable.get());
+	}
+
+	@Override
+	public void saveAllDeferred() {
+		while (!isStorageQueueEmpty()) {
+			saveDeferred();
+		}
 	}
 
 	@Transactional(propagation = Propagation.NEVER)

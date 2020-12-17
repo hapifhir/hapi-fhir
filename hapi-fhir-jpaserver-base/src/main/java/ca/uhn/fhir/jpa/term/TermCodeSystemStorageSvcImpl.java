@@ -217,13 +217,28 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private void deleteEverythingRelatedToConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
-		myConceptParentChildLinkDao.deleteByConceptPid(theConcept.getId());
-		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
-		myConceptPropertyDao.deleteAll(theConcept.getProperties());
+
+		for (TermConceptParentChildLink nextParent : theConcept.getParents()) {
+			nextParent.getParent().getChildren().remove(nextParent);
+			myConceptParentChildLinkDao.deleteById(nextParent.getId());
+		}
+		for (TermConceptParentChildLink nextChild : theConcept.getChildren()) {
+			nextChild.getChild().getParents().remove(nextChild);
+			myConceptParentChildLinkDao.deleteById(nextChild.getId());
+		}
+
+		for (TermConceptDesignation next : theConcept.getDesignations()) {
+			myConceptDesignationDao.deleteById(next.getPid());
+		}
+		theConcept.getDesignations().clear();
+		for (TermConceptProperty next : theConcept.getProperties()) {
+			myConceptPropertyDao.deleteById(next.getPid());
+		}
+		theConcept.getProperties().clear();
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		myConceptDao.deleteById(theConcept.getId());
+		myEntityManager.remove(theConcept);
 
 		theRemoveCounter.incrementAndGet();
 	}
@@ -403,23 +418,26 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid.getIdAsLong());
 		for (TermCodeSystemVersion next : existing) {
-			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId) && next.getConcepts().isEmpty()) { // FIXME: replace isEmpty() with something more efficient
+			if (Objects.equals(next.getCodeSystemVersionId(), theCodeSystemVersionId) && myConceptDao.countByCodeSystemVersion(next.getPid()) == 0) {
 
 				/*
 				 * If we already have a CodeSystemVersion that matches the version we're storing, we
 				 * can reuse it.
 				 */
+				next.setCodeSystemDisplayName(theSystemName);
 				codeSystemToStore = next;
-				codeSystemToStore.setCodeSystemDisplayName(theSystemName);
 
-			} else if (isBlank(next.getCodeSystemVersionId()) || defaultString(next.getCodeSystemVersionId()).equals(theCodeSystemVersionId)) {
+			} else {
 
 				/*
-				 * Delete any existing CodeSystemVersions that are either unversioned or match the
-				 * current version.
+				 * If we already have a TermCodeSystemVersion that corresponds to the FHIR Resource ID we're
+				 * adding a version to, we will mark it for deletion. For any one resource there can only
+				 * be one TermCodeSystemVersion entity in the DB. Multiple versions of a codesystem uses
+				 * multiple CodeSystem resources with CodeSystem.version set differently (as opposed to
+				 * multiple versions of the same CodeSystem, where CodeSystem.meta.versionId is different)
 				 */
 				next.setCodeSystemVersionId("DELETED_" + UUID.randomUUID().toString());
-				myCodeSystemVersionDao.save(next);
+				myCodeSystemVersionDao.saveAndFlush(next);
 				myDeferredStorageSvc.deleteCodeSystemVersion(next);
 
 			}
@@ -445,13 +463,16 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
-
-		codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
+		if (codeSystemToStore.getPid() == null) {
+			codeSystemToStore = myCodeSystemVersionDao.saveAndFlush(codeSystemToStore);
+		}
 
 		ourLog.debug("Saving code system");
 
 		codeSystem.setCurrentVersion(codeSystemToStore);
-		codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
+		if (codeSystem.getPid() == null) {
+			codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
+		}
 
 		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 

@@ -131,4 +131,7 @@ public class TermConceptDesignation implements Serializable {
 	}
 
 
+	public Long getPid() {
+		return myId;
+	}
 }

@@ -12,7 +12,7 @@
 	<appender name="UNSCHEDULE_LISTENER" class="ca.uhn.fhir.jpa.testutil.UnScheduleEventLogListener">
 	</appender>
 
-	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" additivity="false" level="trace">
+	<logger name="org.hibernate.event.internal.DefaultPersistEventListener" additivity="true" level="trace">
 		<appender-ref ref="UNSCHEDULE_LISTENER"/>
 	</logger>
 
