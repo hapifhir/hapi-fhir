@@ -56,10 +56,10 @@ jobs:
           key: 'maven | "$(Agent.OS)" | ./pom.xml | "4"'
           path: $(MAVEN_CACHE_FOLDER)
       - task: Bash@3
-        displayName: Create Maven Cache
+        displayName: Create Directories
         inputs:
           targetType: 'inline'
-          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER)
+          script: mkdir -p $(MAVEN_CACHE_FOLDER); pwd; ls -al $(MAVEN_CACHE_FOLDER); mkdir $(Build.ArtifactStagingDirectory)/jacoco-output; mkdir $(Build.ArtifactStagingDirectory)/test-output;
       - task: Bash@3
         displayName: Determine Target Modules
         inputs:
@@ -81,21 +81,39 @@ jobs:
       # Copy test results into a sane location
       - task: CopyFiles@2
         condition: always()
+        displayName: Move Test Outputs
         inputs:
            sourceFolder: '$(System.DefaultWorkingDirectory)/'
            contents: |
               **/surefire-reports/**
               **/failsafe-reports/**
-           targetFolder: '$(Build.ArtifactStagingDirectory)'
+           targetFolder: '$(Build.ArtifactStagingDirectory)/test-output'
+
+       # Copy Jacoco results into a sane location
+      - task: CopyFiles@2
+        condition: always()
+        displayName: Move JaCoCo Outputs
+        inputs:
+           sourceFolder: '$(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/'
+           contents: |
+              **
+           targetFolder: '$(Build.ArtifactStagingDirectory)/jacoco-output'
 
       # Publish artifact containing test results.
       - task: PublishPipelineArtifact@1
         displayName: 'Store Test Output'
         condition: always()
         inputs:
-           targetPath: '$(Build.ArtifactStagingDirectory)/'
-#           artifactName: 'logs-$(system.jobpositioninphase)'
+           targetPath: '$(Build.ArtifactStagingDirectory)/test-output'
            artifactName: 'logs-$(Agent.id)'
+
+       # Publish artifact containing test results.
+      - task: PublishPipelineArtifact@1
+        displayName: 'Store Jacoco Output'
+        condition: always()
+        inputs:
+           targetPath: '$(Build.ArtifactStagingDirectory)/jacoco-output'
+           artifactName: 'jacoco-$(Agent.id)'
 
    # Amalgamate the test results, and report them.
   - job: Report
@@ -105,17 +123,18 @@ jobs:
     container: maven:3-jdk-11
     steps:
       - task: DownloadPipelineArtifact@2
-        displayName: Download logs
+        displayName: Download Artifacts
       - task: Bash@3
         displayName: PWD
         inputs:
            targetType: 'inline'
            script: pwd; ls -al $(Pipeline.Workspace)
+      - script: mkdir jacoco-combined; cp jacoco-*/* jacoco-combined
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'
-          summaryFileLocation: $(Pipeline.Workspace)
-          reportDirectory: $(Pipeline.Workspace)
+          summaryFileLocation: $(Pipeline.Workspace)/jacoco-combined/jacoco.xml
+          reportDirectory: $(Pipeline.Workspace)/jacoco-combined
             #          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
            #          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
           failIfCoverageEmpty: false
