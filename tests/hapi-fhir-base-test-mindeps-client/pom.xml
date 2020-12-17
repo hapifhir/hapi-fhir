@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.0</version><!--$NO-MVN-MAN-VER$ -->
+			<version>1.7.30</version><!--$NO-MVN-MAN-VER$ -->
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

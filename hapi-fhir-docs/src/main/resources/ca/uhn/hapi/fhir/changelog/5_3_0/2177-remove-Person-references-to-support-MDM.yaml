@@ -1,0 +1,19 @@
+---
+type: add
+issue: 2177
+title: "Redesigning the Enterprise Master Patient Index solution to a Master Data Management solution. The new MDM solution supports other FHIR resources where EMPI only allowed Person resource to be used. For example, if MDM is occurring on a patient, we will create a new Patient, and tag that patient as a Golden Record. This means that several things have changed:
+   <ul>
+   <li>Provider methods that pointed to type of Person are now server-level operations in which you specify a resource type.</li>
+   <li>Link updating and querying no longer rely on Person IDs, but instead on arbitrary resource ids, depending on the resource type you are referring to in MDM.</li>
+   <li>Change to the EMPI config to require a list of mdmTypes.</li>
+   </ul>
+   <br/>
+ Code-level changes include the following changes:
+   <ul>
+   <li>hapi-fhir-server-empi and hapi-fhir-jpaserver-empi Maven projects were renamed to hapi-fhir-server-mdm and hapi-fhir-jpaserver-mdm</li>
+   <li>All classes were refactored to use correct terms, e.g. Golden Resource in place of Person</li>
+   <li>Message channel was renamed from `empi` to `mdm`</li>
+   <li>Subscriptions were renamed to `mdm-RESOURCE_TYPE`, where RESOURCE_TYPE is an MDM type configured in mdmTypes section of the configuration file</li>
+   <li>Configuration file was renamed from empi-rules.json to mdm-rules.json</li>
+   <li>Log file was changed from empi-troubleshooting.log to mdm-troubleshooting.log</li>
+   </ul>"

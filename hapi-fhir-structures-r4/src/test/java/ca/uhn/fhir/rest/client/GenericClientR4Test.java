@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
-import ca.uhn.fhir.util.TransactionBuilder;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.helger.commons.io.stream.StringInputStream;
@@ -2123,7 +2123,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			}
 		});
 
-		TransactionBuilder builder = new TransactionBuilder(ourCtx);
+		BundleBuilder builder = new BundleBuilder(ourCtx);
 		builder.addCreateEntry(new Patient().setActive(true));
 
 		IBaseBundle outcome = client.transaction().withBundle(builder.getBundle()).execute();
