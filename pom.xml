@@ -742,8 +742,8 @@
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>5.6.2</junit_version>
 		<flyway_version>6.5.4</flyway_version>
-		<hibernate_version>5.4.25.Final</hibernate_version>
-		<hibernate_search_version>6.0.0.CR2</hibernate_search_version>
+		<hibernate_version>5.4.26.Final</hibernate_version>
+		<hibernate_search_version>6.0.0.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<lucene_version>8.7.0</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
@@ -762,9 +762,9 @@
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.28</slf4j_version>
 		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
-		<spring_version>5.2.9.RELEASE</spring_version>
+		<spring_version>5.3.2</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
-		<spring_data_version>2.2.0.RELEASE</spring_data_version>
+		<spring_data_version>2.4.2</spring_data_version>
 		<spring_batch_version>4.2.3.RELEASE</spring_batch_version>
 		<spring_boot_version>2.2.6.RELEASE</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
@@ -1679,19 +1679,19 @@
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>testcontainers</artifactId>
-				<version>1.15.0</version>
+				<version>1.15.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>1.15.0</version>
+				<version>1.15.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.testcontainers</groupId>
 				<artifactId>junit-jupiter</artifactId>
-				<version>1.15.0</version>
+				<version>1.15.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>

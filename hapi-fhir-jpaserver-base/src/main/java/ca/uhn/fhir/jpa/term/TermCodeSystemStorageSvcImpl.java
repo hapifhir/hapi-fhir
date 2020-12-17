@@ -238,7 +238,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 		ourLog.info("Deleting concept {} - Code {}", theConcept.getId(), theConcept.getCode());
 
-		myEntityManager.remove(theConcept);
+		myConceptDao.deleteById(theConcept.getId());
+//		myEntityManager.remove(theConcept);
 
 		theRemoveCounter.incrementAndGet();
 	}
