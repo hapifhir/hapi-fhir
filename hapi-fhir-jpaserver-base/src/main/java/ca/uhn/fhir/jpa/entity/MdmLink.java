@@ -285,7 +285,8 @@ public class MdmLink {
 		return myEidMatch;
 	}
 
-	public boolean isEidMatch() {
+	// TODO: JA I renamed this to work around a hibernate search 6 issue. Is this method needed? It causes Hibernate to freak out
+	public boolean isEidMatch_() {
 		return myEidMatch != null && myEidMatch;
 	}
 
