@@ -621,7 +621,25 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
-	public void testParseExtensionWithUriValue() {
+	public void testParseExtensionWithUriValue_BuiltInStructure() {
+		String input = "{\n" +
+			"\"resourceType\": \"Basic\",\n" +
+			"\"meta\": {\n" +
+			"\"profile\": [ \"http://mycustom.url\" ]\n" +
+			"},\n" +
+			"\"extension\": [ {\n" +
+			"\"url\": \"http://myValue.url\",\n" +
+			"\"valueUuid\": \"ae644c07-1d4b-4ca4-bbf3-bd2023e294e5\"\n" +
+			"} ]\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		Basic parsed = jsonParser.parseResource(Basic.class, input);
+		assertEquals("ae644c07-1d4b-4ca4-bbf3-bd2023e294e5", parsed.getExtensionByUrl("http://myValue.url").getValueAsPrimitive().getValueAsString());
+	}
+
+	@Test
+	public void testParseExtensionWithUriValue_CustomStructure() {
 		String input = "{\n" +
 			"\"resourceType\": \"Basic\",\n" +
 			"\"meta\": {\n" +
