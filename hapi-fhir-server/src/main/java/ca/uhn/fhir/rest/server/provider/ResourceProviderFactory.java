@@ -37,6 +37,11 @@ public class ResourceProviderFactory {
 		myObservers.forEach(observer -> observer.update(theSupplier));
 	}
 
+	public void removeSupplier(@Nonnull Supplier<Object> theSupplier) {
+		mySuppliers.remove(theSupplier);
+		myObservers.forEach(observer -> observer.remove(theSupplier));
+	}
+
 	public List<Object> createProviders() {
 		List<Object> retVal = new ArrayList<>();
 		for (Supplier<Object> next : mySuppliers) {

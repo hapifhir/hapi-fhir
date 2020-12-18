@@ -58,7 +58,7 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 		IBaseResource instance;
 		try {
-			instance = theClass.newInstance();
+			instance = theClass.getConstructor().newInstance();
 		} catch (Exception e) {
 			throw new ConfigurationException(myContext.getLocalizer().getMessage(getClass(), "nonInstantiableType", theClass.getName(), e.toString()), e);
 		}

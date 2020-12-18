@@ -172,6 +172,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -530,9 +531,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		Collection<TermValueSetConceptView> conceptViews;
 		boolean wasFilteredResult = false;
+		String filterDisplayValue = null;
 		if (!theFilter.getFilters().isEmpty() && JpaConstants.VALUESET_FILTER_DISPLAY.equals(theFilter.getFilters().get(0).getProperty()) && theFilter.getFilters().get(0).getOp() == ValueSet.FilterOperator.EQUAL) {
-			String displayValue = theFilter.getFilters().get(0).getValue().replace("%", "[%]") + "%";
-			displayValue = lowerCase(displayValue);
+			filterDisplayValue = lowerCase(theFilter.getFilters().get(0).getValue().replace("%", "[%]"));
+			String displayValue = "%" + lowerCase(filterDisplayValue) + "%";
 			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			wasFilteredResult = true;
 		} else {
@@ -553,11 +555,16 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		for (TermValueSetConceptView conceptView : conceptViews) {
 
+			String system = conceptView.getConceptSystemUrl();
+			String code = conceptView.getConceptCode();
+			String display = conceptView.getConceptDisplay();
+
+			//-- this is quick solution, may need to revisit
+			if (!applyFilter(display, filterDisplayValue))
+				continue;
+				
 			Long conceptPid = conceptView.getConceptPid();
 			if (!pidToConcept.containsKey(conceptPid)) {
-				String system = conceptView.getConceptSystemUrl();
-				String code = conceptView.getConceptCode();
-				String display = conceptView.getConceptDisplay();
 				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display);
 				pidToConcept.put(conceptPid, concept);
 			}
@@ -625,6 +632,27 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
+	public boolean applyFilter(final String theInput, final String thePrefixToken) {
+		
+		//-- safety check only, no need to apply filter
+		if (theInput == null || thePrefixToken == null)
+			return true;
+
+		// -- sentence case
+		if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(theInput, thePrefixToken))
+			return true;
+		
+		//-- token case
+		// return true only e.g. the input is 'Body height', thePrefixToken is "he", or 'bo'
+		StringTokenizer tok = new StringTokenizer(theInput);		
+		while (tok.hasMoreTokens()) {
+			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), thePrefixToken))
+				return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {

@@ -52,7 +52,7 @@ public class LuceneSearchMappingFactory {
 			    .filter(LowerCaseFilterFactory.class)
 			    .filter(StopFilterFactory.class)
 			    .filter(EdgeNGramFilterFactory.class)
-			    .param("minGramSize", "2")
+			    .param("minGramSize", "3")
 			    .param("maxGramSize", "20")				
 			.analyzerDef("autocompletePhoneticAnalyzer", StandardTokenizerFactory.class)
 				.filter(StandardFilterFactory.class)
