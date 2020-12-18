@@ -6,12 +6,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import java.util.Collection;
 import java.util.Optional;
 
-class RequireProfileTypedRule implements IRule {
+class RuleRequireProfileDeclaration implements IRepositoryValidatingRule {
 	private final String myType;
 	private final Collection<String> myProfileOptions;
 	private final FhirContext myFhirContext;
 
-	RequireProfileTypedRule(FhirContext theFhirContext, String theType, Collection<String> theProfileOptions) {
+	RuleRequireProfileDeclaration(FhirContext theFhirContext, String theType, Collection<String> theProfileOptions) {
 		myFhirContext = theFhirContext;
 		myType = theType;
 		myProfileOptions = theProfileOptions;
@@ -35,7 +35,7 @@ class RequireProfileTypedRule implements IRule {
 		if (matchingProfile.isPresent()) {
 			return RuleEvaluation.forSuccess();
 		}
-		String msg = myFhirContext.getLocalizer().getMessage(RequireProfileTypedRule.class, "noMatchingProfile", getResourceType(), myProfileOptions);
+		String msg = myFhirContext.getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
 		return RuleEvaluation.forFailure(msg);
 	}
 }

@@ -5,7 +5,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 /**
  * This is an internal API for HAPI FHIR. It is subject to change without warning.
  */
-public interface IRule {
+public interface IRepositoryValidatingRule {
 
 	String getResourceType();
 
@@ -19,6 +19,14 @@ public interface IRule {
 		private RuleEvaluation(boolean thePasses, String theFailureDescription) {
 			myPasses = thePasses;
 			myFailureDescription = theFailureDescription;
+		}
+
+		public boolean isPasses() {
+			return myPasses;
+		}
+
+		public String getFailureDescription() {
+			return myFailureDescription;
 		}
 
 		static RuleEvaluation forSuccess() {

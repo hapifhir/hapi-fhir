@@ -8,25 +8,25 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public class RuleBuilder {
+public final class RepositoryValidatingRuleBuilder {
 
 	private final FhirContext myFhirContext;
-	private final List<IRule> myRules = new ArrayList<>();
+	private final List<IRepositoryValidatingRule> myRules = new ArrayList<>();
 
-	public RuleBuilder(FhirContext theFhirContext) {
+	private RepositoryValidatingRuleBuilder(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
 	}
 
-	public RuleBuilderTyped forResourcesOfType(String theType) {
-		return new RuleBuilderTyped(theType);
+	public RepositoryValidatingRuleBuilderTyped forResourcesOfType(String theType) {
+		return new RepositoryValidatingRuleBuilderTyped(theType);
 	}
 
 
-	public class RuleBuilderTyped {
+	public final class RepositoryValidatingRuleBuilderTyped {
 
 		private final String myType;
 
-		public RuleBuilderTyped(String theType) {
+		public RepositoryValidatingRuleBuilderTyped(String theType) {
 			myType = myFhirContext.getResourceType(theType);
 		}
 
@@ -34,7 +34,7 @@ public class RuleBuilder {
 		 * Require any resource being persisted to declare conformance to at least one of the given profiles
 		 * in <code>Resource.meta.profile</code>
 		 */
-		public RuleBuilderTyped requireAtLeastOneProfileOf(String... theProfileOptions) {
+		public RepositoryValidatingRuleBuilderTyped requireAtLeastOneProfileOf(String... theProfileOptions) {
 			Validate.notNull(theProfileOptions, "theProfileOptions must not be null");
 			return requireAtLeastOneProfileOf(Arrays.asList(theProfileOptions));
 		}
@@ -43,14 +43,22 @@ public class RuleBuilder {
 		 * Require any resource being persisted to declare conformance to at least one of the given profiles
 		 * in <code>Resource.meta.profile</code>
 		 */
-		private RuleBuilderTyped requireAtLeastOneProfileOf(Collection<String> theProfileOptions) {
+		private RepositoryValidatingRuleBuilderTyped requireAtLeastOneProfileOf(Collection<String> theProfileOptions) {
 			Validate.notNull(theProfileOptions, "theProfileOptions must not be null");
 			Validate.notEmpty(theProfileOptions, "theProfileOptions must not be null or empty");
-			myRules.add(new RequireProfileTypedRule(myFhirContext, myType, theProfileOptions));
+			myRules.add(new RuleRequireProfileDeclaration(myFhirContext, myType, theProfileOptions));
 			return this;
 		}
 
-
+		/**
+		 * Create the repository validation rules
+		 */
+		public List<IRepositoryValidatingRule> build() {
+			return myRules;
+		}
 	}
 
+	public static RepositoryValidatingRuleBuilder newInstance(FhirContext theFhirCtx) {
+		return new RepositoryValidatingRuleBuilder(theFhirCtx);
+	}
 }
