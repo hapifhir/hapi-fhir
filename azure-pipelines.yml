@@ -41,7 +41,7 @@ jobs:
         displayName: 'Store Test Output'
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)/'
-          artifactName: 'logs-$(system.jobpositioninphase)'
+#          artifactName: 'logs-$(system.jobpositioninphase)'
 
   - job: Test
     dependsOn: Build
