@@ -33,9 +33,9 @@ class RuleRequireProfileDeclaration implements IRepositoryValidatingRule {
 			.filter(t -> myProfileOptions.contains(t))
 			.findFirst();
 		if (matchingProfile.isPresent()) {
-			return RuleEvaluation.forSuccess();
+			return RuleEvaluation.forSuccess(this);
 		}
 		String msg = myFhirContext.getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
-		return RuleEvaluation.forFailure(msg);
+		return RuleEvaluation.forFailure(this, msg);
 	}
 }

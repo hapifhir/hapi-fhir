@@ -13,10 +13,12 @@ public interface IRepositoryValidatingRule {
 
 	class RuleEvaluation {
 
+		private IRepositoryValidatingRule myRule;
 		private boolean myPasses;
 		private String myFailureDescription;
 
-		private RuleEvaluation(boolean thePasses, String theFailureDescription) {
+		private RuleEvaluation(IRepositoryValidatingRule theRule, boolean thePasses, String theFailureDescription) {
+			myRule = theRule;
 			myPasses = thePasses;
 			myFailureDescription = theFailureDescription;
 		}
@@ -29,12 +31,12 @@ public interface IRepositoryValidatingRule {
 			return myFailureDescription;
 		}
 
-		static RuleEvaluation forSuccess() {
-			return new RuleEvaluation(true, null);
+		static RuleEvaluation forSuccess(IRepositoryValidatingRule theRule) {
+			return new RuleEvaluation(theRule, true, null);
 		}
 
-		static RuleEvaluation forFailure(String theFailureDescription) {
-			return new RuleEvaluation(false, theFailureDescription);
+		static RuleEvaluation forFailure(IRepositoryValidatingRule theRule, String theFailureDescription) {
+			return new RuleEvaluation(theRule, false, theFailureDescription);
 		}
 
 	}

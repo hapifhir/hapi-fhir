@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @Interceptor
 public class RepositoryValidatingInterceptor {
 
-	private List<IRepositoryValidatingRule> myRules= Collections.emptyList();
+	private List<IRepositoryValidatingRule> myRules = Collections.emptyList();
 
 	/**
 	 * Provide the rules to use for validation.
@@ -35,8 +36,14 @@ public class RepositoryValidatingInterceptor {
 	private void handle(IBaseResource theNewResource) {
 		for (IRepositoryValidatingRule nextRule : myRules) {
 			IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theNewResource);
-			if (outcome.)
+			if (!outcome.isPasses()) {
+				handleFailure(outcome);
+			}
 		}
+	}
+
+	protected void handleFailure(IRepositoryValidatingRule.RuleEvaluation theOutcome) {
+		throw new PreconditionFailedException(theOutcome.getFailureDescription());
 	}
 
 }
