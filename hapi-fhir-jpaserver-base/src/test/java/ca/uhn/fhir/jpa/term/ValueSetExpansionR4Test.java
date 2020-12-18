@@ -189,7 +189,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
+		assertThat(lastSelectQuery, containsString(" like '%display value 9%'"));
 
 	}
 
@@ -220,7 +220,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
 			ourLog.info("SQL: {}", lastSelectQuery);
-			assertThat(lastSelectQuery, containsString(" like 'display value 100%'"));
+			assertThat(lastSelectQuery, containsString(" like '%display value 100%'"));
 		}
 
 		// ValueSet by ID
@@ -234,7 +234,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
 			ourLog.info("SQL: {}", lastSelectQuery);
-			assertThat(lastSelectQuery, containsString(" like 'display value 100%'"));
+			assertThat(lastSelectQuery, containsString(" like '%display value 100%'"));
 		}
 
 	}
@@ -269,7 +269,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
+		assertThat(lastSelectQuery, containsString(" like '%display value 9%'"));
 
 	}
 
@@ -297,7 +297,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString("like 'display value 99%'"));
+		assertThat(lastSelectQuery, containsString("like '%display value 99%'"));
 
 	}
 
@@ -335,7 +335,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString(" like 'display value 90%'"));
+		assertThat(lastSelectQuery, containsString(" like '%display value 90%'"));
 
 	}
 
@@ -434,7 +434,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 		String lastSelectQuery = selectQueries.get(selectQueries.size() - 1).getSql(true, true).toLowerCase();
-		assertThat(lastSelectQuery, containsString(" like 'display value 9%'"));
+		assertThat(lastSelectQuery, containsString(" like '%display value 9%'"));
 	}
 
 	@Nonnull
