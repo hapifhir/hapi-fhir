@@ -137,6 +137,7 @@ jobs:
            sourceFolder: '$(Pipeline.Workspace)'
            contents: |
               jacoco-*/**
+           flattenFolders: true
            targetFolder: '$(Pipeline.Workspace)/jacoco-combined'
       - task: PublishCodeCoverageResults@1
         inputs:
