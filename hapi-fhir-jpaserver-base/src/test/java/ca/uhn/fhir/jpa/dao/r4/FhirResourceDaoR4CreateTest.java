@@ -1,33 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.api.config.DaoConfig;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.SampledData;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-
-import java.io.IOException;
-import java.util.Date;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -35,6 +7,41 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.SampledData;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.QuantityParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.UcumServiceUtil;
 
 public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CreateTest.class);
@@ -71,7 +78,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add(Patient.SP_GIVEN, new StringParam("수")); // rightmost character only
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)), empty());
-
 	}
 
 	@Test
@@ -329,6 +335,155 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testCreateWithUcumSearchSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		Quantity q = new Quantity();
+		q.setValueElement(new DecimalType(1.2));
+		q.setUnit("CM");
+		q.setSystem("http://unitsofmeasure.org");
+		q.setCode("cm");
+		obs.setValue(q);
+		
+		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		
+		assertTrue(myObservationDao.create(obs).getCreated());
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		QuantityParam qp = new QuantityParam();
+		qp.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL);
+		qp.setValue(new BigDecimal("0.012"));
+		qp.setUnits("m");
+		
+		map.add(Observation.SP_VALUE_QUANTITY, qp);
+		
+		IBundleProvider found = myObservationDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(found);
+		
+		List<IBaseResource> resources = found.getResources(0, found.size());
+		
+		assertEquals(1, ids.size());
+		
+		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
+		
+		myModelConfig.setUcumNotSupported();
+	}
 
+	@Test
+	public void testCreateWithUcumSearchSupportWithVerySmallNumber() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		Quantity q = new Quantity();
+		q.setValueElement(new DecimalType(0.0000012));
+		q.setUnit("MM");
+		q.setSystem("http://unitsofmeasure.org");
+		q.setCode("mm");
+		obs.setValue(q);
+		
+		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		
+		assertTrue(myObservationDao.create(obs).getCreated());
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		QuantityParam qp = new QuantityParam();
+		qp.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL);
+		qp.setValue(new BigDecimal("0.0000000012"));
+		qp.setUnits("m");
+		
+		map.add(Observation.SP_VALUE_QUANTITY, qp);
+		
+		IBundleProvider found = myObservationDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(found);
+		
+		List<IBaseResource> resources = found.getResources(0, found.size());
+		
+		assertEquals(1, ids.size());
+		
+		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
+		
+		myModelConfig.setUcumNotSupported();
+	}
 
+	@Test
+	public void testCreateWithUcumSearchSupportWithVerySmallNumber2() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		Quantity q = new Quantity();
+		q.setValueElement(new DecimalType(149597.870691));
+		q.setUnit("MM");
+		q.setSystem("http://unitsofmeasure.org");
+		q.setCode("mm");
+		obs.setValue(q);
+		
+		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		
+		assertTrue(myObservationDao.create(obs).getCreated());
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		QuantityParam qp = new QuantityParam();
+		qp.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL);
+		qp.setValue(new BigDecimal("149.597870691"));
+		qp.setUnits("m");
+		
+		map.add(Observation.SP_VALUE_QUANTITY, qp);
+		
+		IBundleProvider found = myObservationDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(found);
+		
+		List<IBaseResource> resources = found.getResources(0, found.size());
+		
+		assertEquals(1, ids.size());
+		
+		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
+		
+		myModelConfig.setUcumNotSupported();
+	}
+
+	@Test
+	public void testCreateWithUcumSearchSupportWithLargeNumber() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		Quantity q = new Quantity();
+		q.setValueElement(new DecimalType(95.7412345));
+		q.setUnit("kg/dL");
+		q.setSystem("http://unitsofmeasure.org");
+		q.setCode("kg/dL");
+		obs.setValue(q);
+		
+		ourLog.info("Observation1: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		
+		assertTrue(myObservationDao.create(obs).getCreated());
+		
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		QuantityParam qp = new QuantityParam();
+		qp.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL);
+		qp.setValue(new BigDecimal("957412345"));
+		qp.setUnits("g.m-3");
+		
+		map.add(Observation.SP_VALUE_QUANTITY, qp);
+		
+		IBundleProvider found = myObservationDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(found);
+		
+		List<IBaseResource> resources = found.getResources(0, found.size());
+		
+		assertEquals(1, ids.size());
+		
+		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
+		
+		myModelConfig.setUcumNotSupported();
+	}
 }

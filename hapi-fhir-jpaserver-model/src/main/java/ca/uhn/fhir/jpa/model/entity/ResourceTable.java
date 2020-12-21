@@ -140,6 +140,22 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SP_QUANTITY_PRESENT")
 	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
+	
+	/**
+	 * Added to support UCUM conversion
+	 * since 5.3.0
+	 */
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamQuantityNormalized> myParamsQuantityNormalized;
+	
+	/**
+	 * Added to support UCUM conversion
+	 * since 5.3.0
+	 */
+	@Column(name = "SP_QUANTITY_NRML_PRESENT")
+	@OptimisticLock(excluded = true)
+	private boolean myParamsQuantityNormalizedPopulated;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -351,6 +367,21 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		getParamsQuantity().addAll(theQuantityParams);
 	}
 
+	public Collection<ResourceIndexedSearchParamQuantityNormalized> getParamsQuantityNormalized() {
+		if (myParamsQuantityNormalized == null) {
+			myParamsQuantityNormalized = new ArrayList<>();
+		}
+		return myParamsQuantityNormalized;
+	}
+
+	public void setParamsQuantityNormalized(Collection<ResourceIndexedSearchParamQuantityNormalized> theQuantityNormalizedParams) {
+		if (!isParamsQuantityNormalizedPopulated() && theQuantityNormalizedParams.isEmpty()) {
+			return;
+		}
+		getParamsQuantityNormalized().clear();
+		getParamsQuantityNormalized().addAll(theQuantityNormalizedParams);
+	}
+
 	public Collection<ResourceIndexedSearchParamString> getParamsString() {
 		if (myParamsString == null) {
 			myParamsString = new ArrayList<>();
@@ -492,6 +523,14 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setParamsQuantityPopulated(boolean theParamsQuantityPopulated) {
 		myParamsQuantityPopulated = theParamsQuantityPopulated;
+	}
+	
+	public boolean isParamsQuantityNormalizedPopulated() {
+		return myParamsQuantityNormalizedPopulated;
+	}
+
+	public void setParamsQuantityNormalizedPopulated(boolean theParamsQuantityNormalizedPopulated) {
+		myParamsQuantityNormalizedPopulated = theParamsQuantityNormalizedPopulated;
 	}
 
 	public boolean isParamsStringPopulated() {

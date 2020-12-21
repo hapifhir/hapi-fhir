@@ -20,6 +20,26 @@ package ca.uhn.fhir.jpa.search.builder;
  * #L%
  */
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -38,7 +58,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityBasePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -185,7 +205,14 @@ public class QueryStack {
 
 	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		QuantityPredicateBuilder sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		
+		QuantityBasePredicateBuilder sortPredicateBuilder = null;
+		if (myModelConfig.isUcumSearchSupported()) {
+			sortPredicateBuilder = mySqlBuilder.addQuantityNormalizedPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+		} else {
+			sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+
+		}
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -635,9 +662,14 @@ public class QueryStack {
 														  List<? extends IQueryParameterType> theList,
 														  SearchFilterParser.CompareOperation theOperation,
 														  RequestPartitionId theRequestPartitionId) {
-
-		QuantityPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();
-
+		
+		QuantityBasePredicateBuilder join = null;
+		 
+		if (myModelConfig.isUcumSearchSupported()) {
+			join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityNormalizedPredicateBuilder(theSourceJoinColumn)).getResult();
+		} else {
+			join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();			
+		}
 		if (theList.get(0).getMissing() != null) {
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
 		}
@@ -911,7 +943,7 @@ public class QueryStack {
 
 	@Nullable
 	public Condition searchForIdsWithAndOr(@Nullable DbColumn theSourceJoinColumn, String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
-
+		
 		if (theAndOrParams.isEmpty()) {
 			return null;
 		}
@@ -1042,6 +1074,7 @@ public class QueryStack {
 				return toAndPredicate(andPredicates);
 
 		}
+		
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {

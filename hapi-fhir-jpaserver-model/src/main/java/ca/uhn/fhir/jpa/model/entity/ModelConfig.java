@@ -89,12 +89,15 @@ public class ModelConfig {
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
 
+	private UcumSupportLevelEnum myUcumSupportLevel;
+	
 	/**
 	 * Constructor
 	 */
 	public ModelConfig() {
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));
+		setUcumSupportLevel(UcumSupportLevelEnum.UCUM_NOT_SUPPORTED);
 	}
 
 	/**
@@ -584,5 +587,45 @@ public class ModelConfig {
 			}
 		}
 
+	}
+
+	/**
+	 * Set the UCUM service support level
+     * 
+	 * <p>
+	 * The default value is {@link UcumSupportLevelEnum#UCUM_NOT_SUPPORTED} which is current behavior.
+	 * </p>
+	 * <p>
+	 * Here is the UCUM service support level
+	 *    <ul>
+	 *       <li>{@link UcumSupportLevelEnum#UCUM_NOT_SUPPORTED}, default, Quantity is stored in {@link ResourceIndexedSearchParamQuantity} only and it is used by searching.</li>
+	 *       <li>{@link UcumSupportLevelEnum#UCUM_STORAGE_SUPPORTED}, Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link ResourceIndexedSearchParamQuantityNormalized}, but {@link ResourceIndexedSearchParamQuantity} is used by searching.</li>
+	 *       <li>{@link UcumSupportLevelEnum#UCUM_SEARCH_SUPPORTED}, Quantity is stored in both {@link ResourceIndexedSearchParamQuantity} and {@link ResourceIndexedSearchParamQuantityNormalized}, {@link ResourceIndexedSearchParamQuantityNormalized} is used by searching.</li>
+	 *       <li>{@link UcumSupportLevelEnum#UCUM_FULL_SUPPORTED}, Quantity is stored in only in {@link ResourceIndexedSearchParamQuantityNormalized}, {@link ResourceIndexedSearchParamQuantityNormalized} is used by searching. NOTE： this option is not supported yet.</li>
+	 *     </ul>
+	 * </p>
+	 *
+	 * @since 5.3.0
+	 */
+	public UcumSupportLevelEnum getUcumSupportLevel() {
+		return myUcumSupportLevel;
+	}
+	public void setUcumSupportLevel(UcumSupportLevelEnum theUcumSupportLevel) {
+		myUcumSupportLevel = theUcumSupportLevel;
+	}
+	public boolean isUcumSearchSupported() {
+		return myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_SEARCH_SUPPORTED);
+	}
+	public boolean isUcumStorageSupported() {
+		return myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_STORAGE_SUPPORTED) || myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_SEARCH_SUPPORTED);
+	}
+	public void setUcumNotSupported() {
+		myUcumSupportLevel = UcumSupportLevelEnum.UCUM_NOT_SUPPORTED;
+	}
+	public void setUcumStorageSupported() {
+		myUcumSupportLevel = UcumSupportLevelEnum.UCUM_STORAGE_SUPPORTED;
+	}
+	public void setUcumSearchSupported() {
+		myUcumSupportLevel = UcumSupportLevelEnum.UCUM_SEARCH_SUPPORTED;
 	}
 }

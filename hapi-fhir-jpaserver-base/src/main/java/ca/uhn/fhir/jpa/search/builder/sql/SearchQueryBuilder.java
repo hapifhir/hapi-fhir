@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -191,11 +192,21 @@ public class SearchQueryBuilder {
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a QUANTITY search parameter
 	 */
 	public QuantityPredicateBuilder addQuantityPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+		
 		QuantityPredicateBuilder retVal = mySqlBuilderFactory.quantityIndexTable(this);
 		addTable(retVal, theSourceJoinColumn);
+		
 		return retVal;
 	}
 
+	public QuantityNormalizedPredicateBuilder addQuantityNormalizedPredicateBuilder(@Nullable DbColumn theSourceJoinColumn) {
+		
+		QuantityNormalizedPredicateBuilder retVal = mySqlBuilderFactory.quantityNormalizedIndexTable(this);
+		addTable(retVal, theSourceJoinColumn);
+		
+		return retVal;
+	}
+	
 	/**
 	 * Add and return a predicate builder (or a root query if no root query exists yet) for selecting on a <code>_source</code> search parameter
 	 */

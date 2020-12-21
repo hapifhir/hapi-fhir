@@ -1,5 +1,25 @@
 package ca.uhn.fhir.util;
 
+/*
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 
@@ -31,7 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * It's a wraper of UcumEssenceService
+ * It's a wrapper of UcumEssenceService
  *
  */
 public class UcumServiceUtil {
@@ -65,37 +85,34 @@ public class UcumServiceUtil {
 		}
 	}
 
+	/**
+	 * Get the canonical form of a code, it's define at
+	 * <link>http://unitsofmeasure.org</link>
+	 * 
+	 * e.g. 12cm -> 0.12m where m is the canonical form of the length.
+	 * 
+	 * @param theSystem must be http://unitsofmeasure.org
+	 * @param theValue  the value in the original form e.g. 0.12
+	 * @param theCode   the code in the original form e.g. 'cm'
+	 * @return the CanonicalForm if no error, otherwise return null
+	 */
 	public static Pair getCanonicalForm(String theSystem, BigDecimal theValue, String theCode) {
 
-		//-- only for http://unitsofmeasure.org
+		// -- only for http://unitsofmeasure.org
 		if (!UCUM_CODESYSTEM_URL.equals(theSystem) || theValue == null || theCode == null)
 			return null;
-		
+
 		init();
 		Pair theCanonicalPair = null;
 
 		try {
-			Decimal theDecimal = new Decimal(theValue.toPlainString());
+			Decimal theDecimal = new Decimal(theValue.toPlainString(), theValue.precision());
 			theCanonicalPair = myUcumEssenceService.getCanonicalForm(new Pair(theDecimal, theCode));
 		} catch (UcumException e) {
 			return null;
 		}
+
 		return theCanonicalPair;
 	}
 
-	public static Decimal convert(Decimal theValue, String theSourceUnit, String theDestUnit) {
-
-		if (theValue == null || theSourceUnit == null || theDestUnit == null)
-			return null;
-
-		init();
-		Decimal theDest = null;
-
-		try {
-			theDest = myUcumEssenceService.convert(theValue, theSourceUnit, theDestUnit);
-		} catch (UcumException e) {
-			return null;
-		}
-		return theDest;
-	}
 }

@@ -268,6 +268,91 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchWithMissingQuantityWithUcumSearchSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("002");
+			obs.setValue(new Quantity(123));
+			notMissing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		// Quantity Param
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(false);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(true);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+		
+		myModelConfig.setUcumNotSupported();
+	}
+	
+	@Test
+	public void testSearchWithMissingQuantityWithUcumStorageSupported() {
+		
+		myModelConfig.setUcumStorageSupported();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("002");
+			obs.setValue(new Quantity(123));
+			notMissing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		// Quantity Param
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(false);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(true);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+		
+		myModelConfig.setUcumNotSupported();
+	}
+	
+	
+	@Test
 	public void testSearchWithMissingReference() {
 		IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId().toUnqualifiedVersionless();
 		IIdType notMissing;

@@ -22,18 +22,17 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 
-public class QuantityPredicateBuilder extends QuantityBasePredicateBuilder {
-
+public class QuantityNormalizedPredicateBuilder extends QuantityBasePredicateBuilder {
 
 	/**
 	 * Constructor
 	 */
-	public QuantityPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY"));
+	public QuantityNormalizedPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
+		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY_NRML"));
 		
 		myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
 		myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
 		myColumnValue = getTable().addColumn("SP_VALUE");
 	}
-	
+
 }

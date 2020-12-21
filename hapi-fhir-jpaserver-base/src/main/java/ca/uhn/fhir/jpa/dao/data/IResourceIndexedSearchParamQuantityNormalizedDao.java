@@ -1,6 +1,6 @@
-package ca.uhn.fhir.jpa.search.builder.predicate;
+package ca.uhn.fhir.jpa.dao.data;
 
-/*-
+/*
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -20,20 +20,15 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public class QuantityPredicateBuilder extends QuantityBasePredicateBuilder {
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-
-	/**
-	 * Constructor
-	 */
-	public QuantityPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
-		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_SPIDX_QUANTITY"));
-		
-		myColumnHashIdentitySystemUnits = getTable().addColumn("HASH_IDENTITY_SYS_UNITS");
-		myColumnHashIdentityUnits = getTable().addColumn("HASH_IDENTITY_AND_UNITS");
-		myColumnValue = getTable().addColumn("SP_VALUE");
-	}
-	
+public interface IResourceIndexedSearchParamQuantityNormalizedDao extends JpaRepository<ResourceIndexedSearchParamQuantity, Long> {
+	@Modifying
+	@Query("delete from ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

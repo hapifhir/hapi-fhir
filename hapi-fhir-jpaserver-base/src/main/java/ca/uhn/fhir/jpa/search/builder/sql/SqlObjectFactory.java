@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -68,6 +69,10 @@ public class SqlObjectFactory {
 		return myApplicationContext.getBean(QuantityPredicateBuilder.class, theSearchSqlBuilder);
 	}
 
+	public QuantityNormalizedPredicateBuilder quantityNormalizedIndexTable(SearchQueryBuilder theSearchSqlBuilder) {
+		return myApplicationContext.getBean(QuantityNormalizedPredicateBuilder.class, theSearchSqlBuilder);
+	}
+	
 	public ResourceLinkPredicateBuilder referenceIndexTable(QueryStack theQueryStack, SearchQueryBuilder theSearchSqlBuilder, boolean theReversed) {
 		return myApplicationContext.getBean(ResourceLinkPredicateBuilder.class, theQueryStack, theSearchSqlBuilder, theReversed);
 	}
