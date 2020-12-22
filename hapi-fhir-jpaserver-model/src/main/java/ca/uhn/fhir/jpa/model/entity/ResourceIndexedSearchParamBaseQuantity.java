@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.search.annotations.Field;
 
@@ -74,28 +73,6 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 		setHashIdentityAndUnits(calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
 		setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
-	}
-
-	@Override
-	public boolean equals(Object theObj) {
-		if (this == theObj) {
-			return true;
-		}
-		if (theObj == null) {
-			return false;
-		}
-		if (!(theObj instanceof ResourceIndexedSearchParamBaseQuantity)) {
-			return false;
-		}
-		ResourceIndexedSearchParamBaseQuantity obj = (ResourceIndexedSearchParamBaseQuantity) theObj;
-		EqualsBuilder b = new EqualsBuilder();
-		b.append(getResourceType(), obj.getResourceType());
-		b.append(getParamName(), obj.getParamName());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
-		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
-		b.append(isMissing(), obj.isMissing());
-		return b.isEquals();
 	}
 
 	public Long getHashIdentity() {

@@ -72,6 +72,42 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testIndexMissingFieldsDisabledDontCreateIndexesWithUcumSearchSupported() {
+		
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myModelConfig.setUcumSearchSupported();
+		Organization org = new Organization();
+		org.setActive(true);
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		assertThat(mySearchParamPresentDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+
+		myModelConfig.setUcumNotSupported();
+	}
+	
+	@Test
+	public void testIndexMissingFieldsDisabledDontCreateIndexesWithUcumStorageSupported() {
+		
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myModelConfig.setUcumStorageSupported();
+		Organization org = new Organization();
+		org.setActive(true);
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		assertThat(mySearchParamPresentDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+
+		myModelConfig.setUcumNotSupported();
+	}
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchResourceReferenceMissingChain() {

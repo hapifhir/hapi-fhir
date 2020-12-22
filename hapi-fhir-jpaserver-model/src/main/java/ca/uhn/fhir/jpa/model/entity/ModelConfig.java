@@ -617,7 +617,7 @@ public class ModelConfig {
 		return myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_SEARCH_SUPPORTED);
 	}
 	public boolean isUcumStorageSupported() {
-		return myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_STORAGE_SUPPORTED) || myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_SEARCH_SUPPORTED);
+		return myUcumSupportLevel.equals(UcumSupportLevelEnum.UCUM_STORAGE_SUPPORTED);
 	}
 	public void setUcumNotSupported() {
 		myUcumSupportLevel = UcumSupportLevelEnum.UCUM_NOT_SUPPORTED;

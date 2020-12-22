@@ -42,6 +42,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.UcumServiceUtil;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -540,44 +542,149 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testChoiceParamQuantityWithUcumSearchSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation o3 = new Observation();
+		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
+		o3.setValue(new Quantity(QuantityComparator.GREATER_THAN, 123.0, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.0123m
+		IIdType id3 = myObservationDao.create(o3, mySrd).getId();
+
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(1, found.size().intValue());
+			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			assertEquals(0, found.size().intValue());
+		}
+		
+		myModelConfig.setUcumNotSupported();
+	}
+	
+	@Test
 	public void testChoiceParamQuantityPrecision() {
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
-		o3.setValue(new Quantity(null, 123.01, "foo", "bar", "bar"));
+		o3.setValue(new Quantity(null, 123.01, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.012301 m
 		IIdType id3 = myObservationDao.create(o3, mySrd).getId().toUnqualifiedVersionless();
 
 		{
-			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123", "foo", "bar")).setLoadSynchronous(true));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, Matchers.empty());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0", "foo", "bar")).setLoadSynchronous(true));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, Matchers.empty());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.01", "foo", "bar")).setLoadSynchronous(true));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.01", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id3));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.010", "foo", "bar")).setLoadSynchronous(true));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.010", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, containsInAnyOrder(id3));
 		}
 		{
-			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.02", "foo", "bar")).setLoadSynchronous(true));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.02", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, Matchers.empty());
 		}
 		{
-			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.001", "foo", "bar")).setLoadSynchronous(true));
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.001", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			assertThat(list, Matchers.empty());
 		}
 	}
 
+	@Test
+	public void testChoiceParamQuantityPrecisionWithUcumSearchSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation o3 = new Observation();
+		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
+		o3.setValue(new Quantity(null, 123.01, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.012301 m
+		IIdType id3 = myObservationDao.create(o3, mySrd).getId().toUnqualifiedVersionless();
+
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, Matchers.empty());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, Matchers.empty());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.01", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id3));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.010", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, containsInAnyOrder(id3));
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.02", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, Matchers.empty());
+		}
+		{
+			IBundleProvider found = myObservationDao.search(new SearchParameterMap(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.001", UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm")).setLoadSynchronous(true));
+			List<IIdType> list = toUnqualifiedVersionlessIds(found);
+			assertThat(list, Matchers.empty());
+		}
+		
+		myModelConfig.setUcumNotSupported();
+	}
 	@Test
 	public void testChoiceParamString() {
 
@@ -1380,7 +1487,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myObservationDao.read(obs1id);
 		myObservationDao.read(obs2id);
 	}
-
+	
 	@Test
 	public void testDeleteWithMatchUrl() {
 		String methodName = "testDeleteWithMatchUrl";
@@ -3292,6 +3399,49 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1));
 
+	}
+	
+	@Test
+	public void testSortByQuantityWithUcumSearchSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation res;
+
+		res = new Observation();
+		res.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(2)); // 0.02m
+		IIdType id2 = myObservationDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+
+		res = new Observation();
+		res.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm").setValue(0.1)); // 0.01m
+		IIdType id1 = myObservationDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+
+		res = new Observation();
+		res.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(0.03)); // 0.03m
+		IIdType id3 = myObservationDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+
+		res = new Observation();
+		res.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(4)); // 0.04m
+		IIdType id4 = myObservationDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY));
+		List<IIdType> actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.ASC));
+		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id1, id2, id3, id4));
+
+		pm = new SearchParameterMap();
+		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.DESC));
+		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
+		assertEquals(4, actual.size());
+		assertThat(actual, contains(id4, id3, id2, id1));
+
+		myModelConfig.setUcumNotSupported();
 	}
 
 	@Test

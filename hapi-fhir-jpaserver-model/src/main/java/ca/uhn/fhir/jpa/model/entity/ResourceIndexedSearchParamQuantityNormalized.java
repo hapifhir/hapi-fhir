@@ -36,6 +36,7 @@ import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
@@ -162,6 +163,29 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 	}
 
 	@Override
+	public boolean equals(Object theObj) {
+		if (this == theObj) {
+			return true;
+		}
+		if (theObj == null) {
+			return false;
+		}
+		if (!(theObj instanceof ResourceIndexedSearchParamBaseQuantity)) {
+			return false;
+		}
+		ResourceIndexedSearchParamQuantityNormalized obj = (ResourceIndexedSearchParamQuantityNormalized) theObj;
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
+		b.append(getParamName(), obj.getParamName());
+		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
+		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
+		b.append(isMissing(), obj.isMissing());
+		b.append(getValue(), obj.getValue());
+		return b.isEquals();
+	}
+	
+	@Override
 	public boolean matches(IQueryParameterType theParam) {
 		
 		if (!(theParam instanceof QuantityParam)) {
@@ -199,5 +223,6 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		
 		return retval;
 	}
+
 
 }

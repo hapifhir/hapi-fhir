@@ -42,6 +42,8 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.util.UcumServiceUtil;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -1189,6 +1191,54 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testComponentQuantityWithUcumSearchSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(1.2));
+		o1.addComponent()
+		.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m")))
+		.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("mm").setValue(2));
+		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+
+		String param = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		{
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 0.012, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m");
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
+			IBundleProvider result = myObservationDao.search(map);
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+		}
+		myModelConfig.setUcumNotSupported();
+	}
+	
+	@Test
+	public void testComponentQuantityWithUcumStorageSupported() {
+		
+		myModelConfig.setUcumStorageSupported();
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(1.2));
+		o1.addComponent()
+		.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m")))
+		.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("mm").setValue(2));
+		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+
+		String param = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		{
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 1.2, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm");
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
+			IBundleProvider result = myObservationDao.search(map);
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+		}
+		myModelConfig.setUcumNotSupported();
+	}
+	
+	@Test
 	public void testSearchCompositeParamQuantity() {
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -1241,6 +1291,62 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testSearchCompositeParamQuantityWithUcumSearthSupport() {
+		
+		myModelConfig.setUcumSearchSupported();
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm").setValue(10)); // 0.1m
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code2")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(12));// 0.012m
+		IIdType id1 = myObservationDao.create(o1, mySrd).getId().toUnqualifiedVersionless();
+
+		Observation o2 = new Observation();
+		o2.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm").setValue(20)); //0.2m
+		o2.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code3")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm").setValue(22)); //0.022m
+		IIdType id2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless();
+
+		String param = Observation.SP_COMPONENT_CODE_VALUE_QUANTITY;
+
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code1");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 15, UcumServiceUtil.UCUM_CODESYSTEM_URL, "dm"); // 0.15m
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, val);
+			IBundleProvider result = myObservationDao.search(map);
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
+		}
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code1");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 5, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm"); //0.05m
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+			IBundleProvider result = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(param, val));
+			assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue(), id2.getValue()));
+		}
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code4");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 5, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm"); //0.05m
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+			IBundleProvider result = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(param, val));
+			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+		}
+		{
+			TokenParam v0 = new TokenParam("http://foo", "code1");
+			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 5, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m"); //5m
+			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
+			IBundleProvider result = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(param, val));
+			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
+		}
+		
+		myModelConfig.setUcumNotSupported();
+	}
 	@Test
 	public void testSearchDateWrongParam() {
 		Patient p1 = new Patient();

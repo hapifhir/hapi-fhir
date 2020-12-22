@@ -154,7 +154,6 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.entity.UcumSupportLevelEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -187,6 +186,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UcumServiceUtil;
 import ca.uhn.fhir.util.UrlUtil;
 
 @SuppressWarnings("Duplicates")
@@ -4104,13 +4104,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-					
-			Quantity q = new Quantity();
-			q.setValueElement(new DecimalType(125.12));
-			q.setUnit("CM");
-			q.setSystem("http://unitsofmeasure.org");
-			q.setCode("cm");
-			obs.setValue(q);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
 			
 			myObservationDao.create(obs, mySrd);
 			
@@ -4123,13 +4117,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-					
-			Quantity q = new Quantity();
-			q.setValueElement(new DecimalType(13.45));
-			q.setUnit("DM");
-			q.setSystem("http://unitsofmeasure.org");
-			q.setCode("dm");
-			obs.setValue(q);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
 			
 			myObservationDao.create(obs, mySrd);
 			
@@ -4142,14 +4130,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-					
-			Quantity q = new Quantity();
-			q.setValueElement(new DecimalType(1.45));
-			q.setUnit("M");
-			q.setSystem("http://unitsofmeasure.org");
-			q.setCode("m");
-			obs.setValue(q);
-			
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+
 			myObservationDao.create(obs, mySrd);
 			
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
@@ -4161,14 +4143,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			obs.getSubject().setReferenceElement(pid0);
 			CodeableConcept cc = obs.getCode();
 			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
-					
-			Quantity q = new Quantity();
-			q.setValueElement(new DecimalType(25));
-			q.setUnit("CM");
-			q.setSystem("http://unitsofmeasure.org");
-			q.setCode("cm");
-			obs.setValue(q);
-			
+			obs.setValue(new Quantity().setValueElement(new DecimalType(25)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+								
 			myObservationDao.create(obs, mySrd);
 			
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
@@ -4194,6 +4170,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		myDaoConfig.getModelConfig().setUcumNotSupported();
 	}
+	
+
 	
 	@Test
 	public void testSearchReusesNoParams() {
@@ -5847,6 +5825,111 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testUpdateWithUcumSearchSupport() throws Exception {
+		
+		myDaoConfig.getModelConfig().setUcumSearchSupported();
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			IIdType opid1 = myObservationDao.create(obs, mySrd).getId();			
+			
+			//-- update quantity
+			obs = new Observation();
+			obs.setId(opid1);
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(24.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			
+			myObservationDao.update(obs, mySrd);
+		}
+
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(25)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		// > 1m
+		String uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
+		ourLog.info("uri = " + uri);
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+		
+		
+		//>= 100cm
+		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
+		ourLog.info("uri = " + uri);
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+
+		//>= 10dm
+		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt10|http://unitsofmeasure.org|dm");
+		ourLog.info("uri = " + uri);
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+		
+		myDaoConfig.getModelConfig().setUcumNotSupported();
+	}
 
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();

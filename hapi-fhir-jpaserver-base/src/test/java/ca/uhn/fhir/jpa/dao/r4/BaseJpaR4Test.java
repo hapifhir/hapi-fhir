@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityNormalizedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -213,6 +214,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
 	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
+	@Autowired
+	protected IResourceIndexedSearchParamQuantityNormalizedDao myResourceIndexedSearchParamQuantityNormalizedDao;
 	@Autowired
 	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
