@@ -1,0 +1,4 @@
+---
+type: remove
+issue: 2229
+title: "Remove support for the `upload-igpack` command. This command is no longer supported, as the IGPack format has been withdrawn and replaced with the FHIR NPM Package specification, which is also supported by HAPI FHIR"

@@ -160,6 +160,9 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+                        <_nouses>true</_nouses>
+                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+                        <DynamicImport-Package>*</DynamicImport-Package>
 						<Import-Package>
 							<!--required when using servers-->
 							ca.uhn.fhir.rest.api.server;resolution:=optional,

@@ -55,8 +55,9 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", "RES_ID"));
-		retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));
+		retval.add(new ResourceForeignKey("MPI_LINK", "GOLDEN_RESOURCE_PID"));
 		retval.add(new ResourceForeignKey("MPI_LINK", "TARGET_PID"));
+		retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));
 		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER", "BINARY_RES_ID"));
 		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER_RES", "BINARY_RES_ID"));
 		retval.add(new ResourceForeignKey("TRM_CODESYSTEM", "RES_ID"));
