@@ -170,7 +170,7 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		if (theObj == null) {
 			return false;
 		}
-		if (!(theObj instanceof ResourceIndexedSearchParamBaseQuantity)) {
+		if (!(theObj instanceof ResourceIndexedSearchParamQuantityNormalized)) {
 			return false;
 		}
 		ResourceIndexedSearchParamQuantityNormalized obj = (ResourceIndexedSearchParamQuantityNormalized) theObj;

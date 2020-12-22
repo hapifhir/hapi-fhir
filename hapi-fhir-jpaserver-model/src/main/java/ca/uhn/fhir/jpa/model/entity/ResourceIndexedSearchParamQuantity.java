@@ -149,7 +149,7 @@ public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchPar
 		if (theObj == null) {
 			return false;
 		}
-		if (!(theObj instanceof ResourceIndexedSearchParamBaseQuantity)) {
+		if (!(theObj instanceof ResourceIndexedSearchParamQuantity)) {
 			return false;
 		}
 		ResourceIndexedSearchParamQuantity obj = (ResourceIndexedSearchParamQuantity) theObj;
