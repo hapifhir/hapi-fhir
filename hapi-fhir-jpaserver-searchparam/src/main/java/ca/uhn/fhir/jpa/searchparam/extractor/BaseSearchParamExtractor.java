@@ -198,7 +198,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				break;
 			case REFERENCE:
 				extractor = createReferenceExtractor();
-				break;
+				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
 			case QUANTITY:
 				if (myModelConfig.isUcumSearchSupported())
 					extractor = createQuantityNormalizedExtractor(theResource);
