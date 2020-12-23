@@ -92,10 +92,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.LONG);	
 		pkg.addColumn("SP_UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);	
 		pkg.addColumn("SP_MISSING").nonNullable().type(ColumnTypeEnum.BOOLEAN);	
-		pkg.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING);
+		pkg.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
 		pkg.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);		
-		pkg.addColumn("SP_SYSTEM").nullable().type(ColumnTypeEnum.STRING);
-		pkg.addColumn("SP_UNITS").nullable().type(ColumnTypeEnum.STRING);
+		pkg.addColumn("SP_SYSTEM").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("SP_UNITS").nullable().type(ColumnTypeEnum.STRING, 200);
 		pkg.addColumn("HASH_IDENTITY_AND_UNITS").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("HASH_IDENTITY_SYS_UNITS").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
@@ -109,10 +109,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//-- Link to the resourceTable
 		version.onTable("HFJ_RESOURCE").addColumn("20201222.9", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
-		// Should this to be added too?
-		// @OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
-		// @OptimisticLock(excluded = true)
-		//private Collection<ResourceIndexedSearchParamQuantityNormalized> myParamsQuantityNormalized;
 	}
 
 	protected void init510() {
