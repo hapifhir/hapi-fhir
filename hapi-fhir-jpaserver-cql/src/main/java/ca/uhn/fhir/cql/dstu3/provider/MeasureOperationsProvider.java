@@ -127,7 +127,7 @@ public class MeasureOperationsProvider {
 		}
 
 		// logger.info("Narrative: " + n.getDivAsString());
-		return myMeasureDao.update(theResource, theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE), theRequestDetails);
+		return myMeasureDao.update(theResource, ((theRequestDetails == null)?null:theRequestDetails.getConditionalUrl(RestOperationTypeEnum.UPDATE)), theRequestDetails);
 	}
 
 	@Operation(name = "$get-narrative", idempotent = true, type = Measure.class)

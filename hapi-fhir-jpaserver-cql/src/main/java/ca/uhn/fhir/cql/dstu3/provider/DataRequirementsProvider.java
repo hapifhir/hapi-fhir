@@ -259,13 +259,15 @@ public class DataRequirementsProvider {
 						int start = Integer.parseInt(location[0].split(":")[0]);
 						int end = Integer.parseInt(location[1].split(":")[0]);
 						for (int i = start - 1; i < end; i++) {
-							if (cqlLines[i].contains("define function \"" + statement.getName() + "\"(")) {
-								signature = cqlLines[i].substring(cqlLines[i].indexOf("("), cqlLines[i].indexOf(")") + 1);
-							}
-							if (!cqlLines[i].contains("define \"" + statement.getName() + "\":")
-								&& !cqlLines[i].contains("define function \"" + statement.getName() + "\"(")) {
-								statementText = statementText
-									.concat((statementText.length() > 0 ? "\r\n" : "") + cqlLines[i]);
+							if (cqlLines.length >= i) {
+								if (cqlLines[i].contains("define function \"" + statement.getName() + "\"(")) {
+									signature = cqlLines[i].substring(cqlLines[i].indexOf("("), cqlLines[i].indexOf(")") + 1);
+								}
+								if (!cqlLines[i].contains("define \"" + statement.getName() + "\":")
+									&& !cqlLines[i].contains("define function \"" + statement.getName() + "\"(")) {
+									statementText = statementText
+										.concat((statementText.length() > 0 ? "\r\n" : "") + cqlLines[i]);
+								}
 							}
 						}
 						if (statementText.startsWith("context")) {

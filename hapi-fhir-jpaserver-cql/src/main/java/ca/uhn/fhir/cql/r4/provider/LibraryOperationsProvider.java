@@ -120,7 +120,7 @@ public class LibraryOperationsProvider implements LibraryResolutionProvider<Libr
 
 		CqlTranslator translator = this.dataRequirementsProvider.getTranslator(theResource, libraryManager,
 			modelManager);
-		if (translator.getErrors().size() > 0) {
+		if (translator != null && translator.getErrors() != null && translator.getErrors().size() > 0) {
 			throw new RuntimeException("Errors during library compilation.");
 		}
 

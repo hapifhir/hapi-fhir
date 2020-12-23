@@ -92,7 +92,7 @@ public class MeasureEvaluationSeed {
 
         // resolve the measurement period
         measurementPeriod = new Interval(DateHelper.resolveRequestDate(periodStart, true), true,
-                DateHelper.resolveRequestDate(periodEnd, false), true);
+			  DateHelper.resolveRequestDate(periodEnd, false), true);
 
         context.setParameter(null, "Measurement Period",
                 new Interval(DateTime.fromJavaDate((Date) measurementPeriod.getStart()), true,

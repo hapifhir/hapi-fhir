@@ -14,7 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-// FIXME KBD convert to Util class with static method
 public interface CqlProviderTestBase {
 
 	FhirContext getFhirContext();

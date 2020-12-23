@@ -3,25 +3,25 @@ package ca.uhn.fhir.cql.dstu3;
 import ca.uhn.fhir.cql.BaseCqlDstu3Test;
 import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
-import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.StopWatch;
-import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Library;
+import org.hl7.fhir.dstu3.model.Measure;
 import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.Assert;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,6 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
 
+	@Autowired
+	IFhirResourceDao<Measure> myMeasureDao;
+	@Autowired
+	IFhirResourceDao<Library> myLibraryDao;
 	@Autowired
 	CqlProviderFactory myCqlProviderFactory;
 	@Autowired
@@ -47,15 +51,15 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	@BeforeEach
 	public void before() throws IOException {
 		// Load terminology for measure tests (HEDIS measures)
-		loadBundle("dstu3/hedis-valuesets-bundle.json");
+		loadBundle("dstu3/hedis-ig/hedis-valuesets-bundle.json");
 
 		// Load libraries
-		loadResource("dstu3/library/library-fhir-model-definition.json");
-		loadResource("dstu3/library/library-fhir-helpers.json");
+		loadResource("dstu3/hedis-ig/library/library-fhir-model-definition.json");
+		loadResource("dstu3/hedis-ig/library/library-fhir-helpers.json");
 
 		// load test data and conversion library for $apply operation tests
-		loadResource("dstu3/general-practitioner.json");
-		loadResource("dstu3/general-patient.json");
+		loadResource("dstu3/hedis-ig/general-practitioner.json");
+		loadResource("dstu3/hedis-ig/general-patient.json");
 	}
 
 	/*
@@ -86,10 +90,10 @@ Direct Reference Codes:
 
 	@Test
 	public void evaluatePatientMeasure() throws IOException {
-		loadResource("dstu3/library/library-asf-logic.json");
+		loadResource("dstu3/hedis-ig/library/library-asf-logic.json");
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/measure-asf.json");
-		Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
+		loadResource("dstu3/hedis-ig/measure-asf.json");
+		Bundle result = loadBundle("dstu3/hedis-ig/test-patient-6529-data.json");
 		assertNotNull(result);
 		List<Bundle.BundleEntryComponent> entries = result.getEntry();
 		assertThat(entries, hasSize(22));
@@ -127,12 +131,12 @@ Direct Reference Codes:
 
 	@Test
 	public void evaluatePopulationMeasure() throws IOException {
-		loadResource("dstu3/library/library-asf-logic.json");
+		loadResource("dstu3/hedis-ig/library/library-asf-logic.json");
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
-		loadResource("dstu3/measure-asf.json");
-		loadBundle("dstu3/test-patient-6529-data.json");
+		loadResource("dstu3/hedis-ig/measure-asf.json");
+		loadBundle("dstu3/hedis-ig/test-patient-6529-data.json");
 		// Add a second patient with the same data
-		loadBundle("dstu3/test-patient-9999-x-data.json");
+		loadBundle("dstu3/hedis-ig/test-patient-9999-x-data.json");
 
 		IdType measureId = new IdType("Measure", "measure-asf");
 		String periodStart = "2003-01-01";
@@ -163,73 +167,21 @@ Direct Reference Codes:
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
 	}
 
-	// Fails with:
-	// java.lang.IllegalArgumentException: Could not load library source for libraries referenced in Measure/Measure/measure-EXM104-FHIR3-8.1.000/_history/1.
-	//@Test
-	public void testEXM104() throws IOException {
-		Bundle result = loadBundle("dstu3/EXM104/valuesets-EXM104_FHIR3-8.1.000-bundle.json");
-		result = loadBundle("dstu3/EXM104/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
-		result = loadBundle("dstu3/EXM104/tests-denom-EXM104_FHIR3-bundle.json");
-		result = loadBundle("dstu3/EXM104/tests-numer-EXM104_FHIR3-bundle.json");
-		loadResource("dstu3/EXM104/library-EXM104_FHIR3-8.1.000.json");
-		loadResource("dstu3/EXM104/measure-EXM104_FHIR3-8.1.000.json");
-		//Bundle result = loadBundle("dstu3/test-patient-6529-data.json");
-		//assertNotNull(result);
-		//List<Bundle.BundleEntryComponent> entries = result.getEntry();
-		//assertThat(entries, hasSize(22));
-		//assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-		//assertEquals(entries.get(21).getResponse().getStatus(), "201 Created");
+	@Test
+	public void testGeneratedContentEXM349WorksWithManuallyEditedInputFiles() throws IOException {
+		IdType measureId = new IdType("Measure", "measure-EXM349-FHIR3-2.9.000");
+		IdType libraryId = new IdType("Library", "library-EXM349-FHIR3-2.9.000");
 
-		IdType measureId = new IdType("Measure", "measure-EXM104-FHIR3-8.1.000");
-		//String patient = "Patient/Patient-6529";
-		//String periodStart = "2003-01-01";
-		//String periodEnd = "2003-12-31";
+		loadBundle("dstu3/EXM349/library-deps-EXM349_FHIR3-2.9.000-bundle.json.manuallyeditedtochangelogiclibrarysystem");
+		loadBundle("dstu3/EXM349/EXM349_FHIR3-2.9.000-bundle.json.manuallyeditedtoremovecqlandelm");
 
-		// First run to absorb startup costs
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, null, null,
-			null, null, null, null, null, null, null);
-		// Assert it worked
-		assertThat(report.getGroup(), hasSize(1));
-		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+		MethodOutcome methodOutcome = myMeasureOperationsProvider.refreshGeneratedContent(null, measureId);
+		Assert.notNull(methodOutcome, "NULL methodOutcome returned from call to myMeasureOperationsProvider.refreshGeneratedContent(null, '" + measureId +"')!");
 
-	}
+		Measure measure = myMeasureDao.read(measureId);
+		Assert.notNull(measure, "NULL measure returned from call to myMeasureDao.read('" + measureId +"')!");
 
-	// Fails with:
-	//	java.lang.IllegalArgumentException: [MATGlobalCommonFunctions_FHIR3-4.0.000[40:74, 40:92]Timezone keyword is only valid in 1.3 or lower,
-	//	MATGlobalCommonFunctions_FHIR3-4.0.000[223:19, 223:53]Could not resolve membership operator for terminology target of the retrieve.,
-	//	MATGlobalCommonFunctions_FHIR3-4.0.000[229:21, 229:90]Could not resolve membership operator for terminology target of the retrieve.,
-	//	MATGlobalCommonFunctions_FHIR3-4.0.000[40:74, 40:92]Timezone keyword is only valid in 1.3 or lower,
-	//	MATGlobalCommonFunctions_FHIR3-4.0.000[223:19, 223:53]Could not resolve membership operator for terminology target of the retrieve.,
-	//	MATGlobalCommonFunctions_FHIR3-4.0.000[229:21, 229:90]Could not resolve membership operator for terminology target of the retrieve.,
-	//	TJCOverall_FHIR3-3.6.000[74:18, 74:37]Could not resolve call to operator ToDate with signature (System.DateTime).]
-	//	at org.opencds.cqf.common.evaluation.LibraryLoader.loadLibrary(LibraryLoader.java:86)
-	//	at org.opencds.cqf.common.evaluation.LibraryLoader.resolveLibrary(LibraryLoader.java:63)
-	//	at org.opencds.cqf.common.evaluation.LibraryLoader.load(LibraryLoader.java:105)
-	//	at org.opencds.cqf.dstu3.helpers.LibraryHelper.loadLibraries(LibraryHelper.java:61)
-	//	at org.opencds.cqf.dstu3.evaluation.MeasureEvaluationSeed.setup(MeasureEvaluationSeed.java:57)
-	//	at org.opencds.cqf.dstu3.providers.MeasureOperationsProvider.evaluateMeasure(MeasureOperationsProvider.java:184)
-	//	at ca.uhn.fhir.cql.dstu3.CqlProviderDstu3Test.testConnectathonExample_EXM104(CqlProviderDstu3Test.java:238)
-	//@Test
-	public void testConnectathonExample_EXM104() throws IOException {
-		// git clone git@github.com:DBCG/connectathon.git
-		Bundle bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-deps-EXM104_FHIR3-8.1.000-bundle.json");
-		loadResource("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files/library-EXM104_FHIR3-8.1.000.json");
-		bundle = loadBundle("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-bundle.json");
-		int numFilesLoaded = loadDataFromDirectory("dstu3/Connectathon/EXM104_FHIR3-8.1.000/EXM104_FHIR3-8.1.000-files");
-		assertEquals(numFilesLoaded, 6);
-		ourLog.info("Data imported successfully!");
-		assertNotNull(bundle);
-		List<Bundle.BundleEntryComponent> entries = bundle.getEntry();
-		assertThat(entries, hasSize(35));
-		assertEquals(entries.get(0).getResponse().getStatus(), "201 Created");
-		assertEquals(entries.get(34).getResponse().getStatus(), "201 Created");
-
-		IdType measureId = new IdType("Measure", "measure-EXM104-FHIR3-8.1.000");
-		String patient = "Patient/numer-EXM104-FHIR3";
-
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, null, null,
-			patient, null, null, null, null, null, null);
-		assertThat(report.getGroup(), hasSize(1));
-		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+		Library library = myLibraryDao.read(libraryId);
+		assertNotNull(library, "NULL library returned from call to myLibraryDao.read('" + libraryId +"')!");
 	}
 }

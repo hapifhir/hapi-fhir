@@ -19,9 +19,8 @@ public class CqlProviderLoaderR4Test extends BaseCqlR4Test {
 
 	@Test
 	public void contextLoads() {
-		ourLog.info("YAY THE R4 CONTEXT LOADED!");
 		myCqlProviderLoader.loadProvider();
 		myResourceProviderFactory.createProviders();
-		ourLog.info("Holy I can't believe we made it here.");
+		ourLog.info("The CqlProviderLoader loaded and was able to create Providers.");
 	}
 }

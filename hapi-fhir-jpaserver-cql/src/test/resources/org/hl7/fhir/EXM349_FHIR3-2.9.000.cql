@@ -6,9 +6,8 @@ Based on CMS349v2 - HIV Screening
 
 using FHIR version '3.0.0'
 
-/*
-include MATGlobalCommonFunctions_FHIR3 version '2.0.000' called Global
-*/
+// NOTE: There are problems parsing the CQL that comes with the MATGlobal Library so it has been commented out
+//include MATGlobalCommonFunctions_FHIR3 version '2.0.000' called Global
 include FHIRHelpers version '3.0.0' called FHIRHelpers
 include SupplementalDataElements_FHIR3 version '1.0.0' called SDE
 
@@ -67,28 +66,23 @@ define "Numerator":
 exists ( "HIV Test Performed" )
 
 define "HIV Test Performed":
-( [Observation: "Human Immunodeficiency Virus (HIV) Laboratory Test Codes (Ab and Ag)"]
-union [Observation: "HIV 1 and 2 tests - Meaningful Use set"] ) HIVTest
-where
-/*
-(
-( Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), HIVTest.effective as dateTime)>= 15
-or Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of HIVTest.effective)>= 15)
-and  ( Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), HIVTest.effective as dateTime)< 66 )
-or Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of HIVTest.effective)< 66)
-
-and
-*/
-HIVTest.status in {'final', 'amended', 'corrected', 'preliminary'}
-and (
-HIVTest.effective starts before end of "Measurement Period"
-or HIVTest.effective as dateTime before end of "Measurement Period"
-)
+//(
+[Observation: "Human Immunodeficiency Virus (HIV) Laboratory Test Codes (Ab and Ag)"]
+//union [Observation: "HIV 1 and 2 tests - Meaningful Use set"] ) HIVTest
+//where (
+//( Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), HIVTest.effective as dateTime)>= 15
+//or Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of HIVTest.effective)>= 15)
+//and  ( Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), HIVTest.effective as dateTime)< 66 )
+//or Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of HIVTest.effective)< 66)
+//and HIVTest.status in {'final', 'amended', 'corrected', 'preliminary'}
+//and
+//where (
+//HIVTest.effective starts before end of "Measurement Period"
+//or HIVTest.effective as dateTime before end of "Measurement Period"
+//)
 
 define "Initial Population":
-/*
-Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of "Measurement Period")>= 15
-and Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of "Measurement Period")< 66
-and
-*/
+//Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of "Measurement Period")>= 15
+//and Global."CalendarAgeInYearsAt"(FHIRHelpers.ToDate(Patient.birthDate), start of "Measurement Period")< 66
+//and
 exists "Qualifying Encounters"

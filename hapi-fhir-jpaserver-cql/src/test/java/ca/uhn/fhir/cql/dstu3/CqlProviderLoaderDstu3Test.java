@@ -18,10 +18,9 @@ class CqlProviderLoaderDstu3Test extends BaseCqlDstu3Test {
 	private ResourceProviderFactory myResourceProviderFactory;
 
 	@Test
-	public void contextLoads() {
-		ourLog.info("YAY THE Dstu3 CONTEXT LOADED!");
+	public void testContextLoads() {
 		myCqlProviderLoader.loadProvider();
 		myResourceProviderFactory.createProviders();
-		ourLog.info("Holy I can't believe we made it here.");
+		ourLog.info("The CqlProviderLoader loaded and was able to create Providers.");
 	}
 }
