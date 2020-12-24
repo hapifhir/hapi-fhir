@@ -68,15 +68,16 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	//	at ca.uhn.fhir.cql.r4.evaluation.MeasureEvaluation.evaluatePatientMeasure(MeasureEvaluation.java:65)
 	//	at ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider.evaluateMeasure(MeasureOperationsProvider.java:192)
 	//	at ca.uhn.fhir.cql.r4.CqlProviderR4Test.testEXM104EvaluateMeasure(CqlProviderR4Test.java:55)
-	//@Test
+	@Test
 	public void testEXM104EvaluateMeasure() throws IOException {
 		IdType measureId = new IdType("Measure", "measure-EXM104-8.2.000");
 		loadBundle("r4/EXM104/EXM104-8.2.000-bundle.json");
+		String measure = "Measure/measure-EXM104-8.2.000";
 		String patient = "Patient/numer-EXM104";
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
-		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, null,
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "patient",
 			patient, null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
