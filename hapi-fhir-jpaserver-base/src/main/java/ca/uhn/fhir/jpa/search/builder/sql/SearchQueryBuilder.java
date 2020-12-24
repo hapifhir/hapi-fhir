@@ -67,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -94,6 +95,9 @@ public class SearchQueryBuilder {
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
+	private boolean dialectIsMsSql;
+	private boolean dialectIsMySql;
+	private boolean dialectIsMariaDb;
 
 	/**
 	 * Constructor
@@ -114,6 +118,16 @@ public class SearchQueryBuilder {
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
+		if (myDialect instanceof org.hibernate.dialect.MySQL57Dialect){
+			dialectIsMySql = true;
+		}
+		if (myDialect instanceof org.hibernate.dialect.MariaDB53Dialect){
+			dialectIsMariaDb = true;
+		}
+		if (myDialect instanceof org.hibernate.dialect.SQLServer2012Dialect){
+			dialectIsMsSql = true;
+		}
+
 
 		mySpec = new DbSpec();
 		mySchema = mySpec.addDefaultSchema();
@@ -495,12 +509,87 @@ public class SearchQueryBuilder {
 		return myHaveAtLeastOnePredicate;
 	}
 
-	public void addSort(DbColumn theColumnValueNormalized, boolean theAscending) {
+	public void addSortString(DbColumn theColumnValueNormalized, boolean theAscending) {
 		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
-		addSort(theColumnValueNormalized, theAscending, nullOrder);
+		addSortString(theColumnValueNormalized, theAscending, nullOrder);
 	}
 
-	public void addSort(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+	public void addSortNumeric(DbColumn theColumnValueNormalized, boolean theAscending) {
+		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
+		addSortNumeric(theColumnValueNormalized, theAscending, nullOrder);
+	}
+
+	public void addSortDate(DbColumn theColumnValueNormalized, boolean theAscending) {
+		OrderObject.NullOrder nullOrder = OrderObject.NullOrder.LAST;
+		addSortDate(theColumnValueNormalized, theAscending, nullOrder);
+	}
+
+	public void addSortString(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+		if ((dialectIsMariaDb || dialectIsMySql || dialectIsMsSql)) {
+			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+			// Null values are always treated as less than non-null values.
+			// As such special handling is required here.
+			String direction = theTheAscending ? " ASC" : " DESC";
+			String sortColumnName = theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
+			if ((theTheAscending && theNullOrder == OrderObject.NullOrder.LAST)
+				|| (!theTheAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
+				// Coalescing the value with a String consisting of 200 'z' characters will ensure that the rows appear
+				// in the correct order with nulls being treated as the highest String values.
+				char[] chars = new char[200];
+				Arrays.fill(chars, 'z');
+				String lastString = new String(chars);
+				sortColumnName = "COALESCE(" + sortColumnName + ", '" + lastString + "')";
+			}
+			mySelect.addCustomOrderings(sortColumnName + direction);
+		} else {
+			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
+		}
+	}
+
+	public void addSortNumeric(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+		if ((dialectIsMariaDb || dialectIsMySql || dialectIsMsSql)) {
+			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+			// Null values are always treated as less than non-null values.
+			// As such special handling is required here.
+			String direction;
+			String sortColumnName = theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
+			if ((theTheAscending && theNullOrder == OrderObject.NullOrder.LAST)
+				|| (!theTheAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
+				// Negating the numeric column value and reversing the sort order will ensure that the rows appear
+				// in the correct order with nulls appearing first or last as needed.
+				direction = theTheAscending ? " DESC" : " ASC";
+				sortColumnName = "-" + sortColumnName;
+			} else {
+				direction = theTheAscending ? " ASC" : " DESC";
+			}
+			mySelect.addCustomOrderings(sortColumnName + direction);
+		} else {
+			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
+		}
+	}
+
+	public void addSortDate(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
+		if ((dialectIsMariaDb || dialectIsMySql || dialectIsMsSql)) {
+			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+			// Null values are always treated as less than non-null values.
+			// As such special handling is required here.
+			String direction = theTheAscending ? " ASC" : " DESC";
+			String sortColumnName = theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
+			if ((theTheAscending && theNullOrder == OrderObject.NullOrder.LAST)
+				|| (!theTheAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
+				// Coalescing the value with a date well into the future will ensure that the rows appear
+				// in the correct order with nulls being treated as the highest Date values.
+				sortColumnName = "COALESCE(" + sortColumnName + ", '9000-01-01')";
+			} else {
+				direction = theTheAscending ? " ASC" : " DESC";
+			}
+			mySelect.addCustomOrderings(sortColumnName + direction);
+		} else {
+			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
+		}
+	}
+
+	private void addSort(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
 		OrderObject.Dir direction = theTheAscending ? OrderObject.Dir.ASCENDING : OrderObject.Dir.DESCENDING;
 		OrderObject orderObject = new OrderObject(direction, theTheColumnValueNormalized);
 		orderObject.setNullOrder(theNullOrder);
