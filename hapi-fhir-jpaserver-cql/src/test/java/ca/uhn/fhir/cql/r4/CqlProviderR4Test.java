@@ -33,7 +33,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	MeasureOperationsProvider myMeasureOperationsProvider;
 
 	@Test
-	public void testEXM349() throws IOException {
+	public void testEXM349RefreshGeneratedContent() throws IOException {
 		IdType measureId = new IdType("Measure", "measure-EXM349-2.10.000");
 		loadBundle("r4/EXM349/EXM349-2.10.000-bundle.json");
 
@@ -48,7 +48,7 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	}
 
 	@Test
-	public void testGeneratedContentEXM130() throws IOException {
+	public void testEXM130RefreshGeneratedContent() throws IOException {
 		IdType measureId = new IdType("Measure", "measure-EXM130-7.3.000");
 		IdType libraryId = new IdType("Library", "library-EXM130-7.3.000");
 

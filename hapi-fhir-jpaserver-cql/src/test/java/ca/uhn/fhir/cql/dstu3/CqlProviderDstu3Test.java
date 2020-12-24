@@ -63,33 +63,30 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	}
 
 	/*
-	See dstu3/library-asf-cql.txt to see the cql encoded within library-asf-logic.json
-	See dstu3/library-asf-elm.xml to see the elm encoded within library-asf-logic.json
-
-	To help explain what's being measured here.  Specifically how to interpret the contents of library-asf-logic.json.
-	From https://www.ncqa.org/wp-content/uploads/2020/02/20200212_17_ASF.pdf
-
-• ValueSet: "Alcohol Counseling and Treatment": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437'
-• ValueSet: "Alcohol Screening": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337'
-• ValueSet: "Alcohol use disorder": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339'
-• ValueSet: "Dementia": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074'
-• Diagnosis: Alcohol Use Disorder (2.16.840.1.113883.3.464.1004.1339)
-• Diagnosis: Dementia (2.16.840.1.113883.3.464.1004.1074)
-• Encounter, Performed: Hospice Encounter (2.16.840.1.113883.3.464.1004.1761)
-• Intervention, Order: Hospice Intervention (2.16.840.1.113883.3.464.1004.1762)
-• Intervention, Performed: Alcohol Counseling or Other Follow Up Care
-(2.16.840.1.113883.3.464.1004.1437)
-• Intervention, Performed: Hospice Intervention (2.16.840.1.113883.3.464.1004.1762)
-Direct Reference Codes:
-• Assessment, Performed: How often have you had five or more drinks in one day during the past year
-[Reported] (LOINC version 2.63 Code 88037-7)
-• Assessment, Performed: How often have you had four or more drinks in one day during the past year
-[Reported] (LOINC version 2.63 Code 75889-6)
-• Assessment, Performed: Total score [AUDIT-C] (LOINC version 2.63 Code 75626-2)
+		See dstu3/library-asf-cql.txt to see the cql encoded within library-asf-logic.json
+		See dstu3/library-asf-elm.xml to see the elm encoded within library-asf-logic.json
+		To help explain what's being measured here.  Specifically how to interpret the contents of library-asf-logic.json.
+		From https://www.ncqa.org/wp-content/uploads/2020/02/20200212_17_ASF.pdf
+		• ValueSet: "Alcohol Counseling and Treatment": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1437'
+		• ValueSet: "Alcohol Screening": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1337'
+		• ValueSet: "Alcohol use disorder": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1339'
+		• ValueSet: "Dementia": 'http://ncqa.org/hedis/ValueSet/2.16.840.1.113883.3.464.1004.1074'
+		• Diagnosis: Alcohol Use Disorder (2.16.840.1.113883.3.464.1004.1339)
+		• Diagnosis: Dementia (2.16.840.1.113883.3.464.1004.1074)
+		• Encounter, Performed: Hospice Encounter (2.16.840.1.113883.3.464.1004.1761)
+		• Intervention, Order: Hospice Intervention (2.16.840.1.113883.3.464.1004.1762)
+		• Intervention, Performed: Alcohol Counseling or Other Follow Up Care
+		(2.16.840.1.113883.3.464.1004.1437)
+		• Intervention, Performed: Hospice Intervention (2.16.840.1.113883.3.464.1004.1762)
+		Direct Reference Codes:
+		• Assessment, Performed: How often have you had five or more drinks in one day during the past year
+		[Reported] (LOINC version 2.63 Code 88037-7)
+		• Assessment, Performed: How often have you had four or more drinks in one day during the past year
+		[Reported] (LOINC version 2.63 Code 75889-6)
+		• Assessment, Performed: Total score [AUDIT-C] (LOINC version 2.63 Code 75626-2)
 	 */
-
 	@Test
-	public void evaluatePatientMeasure() throws IOException {
+	public void testHedisIGEvaluatePatientMeasure() throws IOException {
 		loadResource("dstu3/hedis-ig/library/library-asf-logic.json");
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource("dstu3/hedis-ig/measure-asf.json");
@@ -130,7 +127,7 @@ Direct Reference Codes:
 	}
 
 	@Test
-	public void evaluatePopulationMeasure() throws IOException {
+	public void testHedisIGEvaluatePopulationMeasure() throws IOException {
 		loadResource("dstu3/hedis-ig/library/library-asf-logic.json");
 		// Load the measure for ASF: Unhealthy Alcohol Use Screening and Follow-up (ASF)
 		loadResource("dstu3/hedis-ig/measure-asf.json");
@@ -142,7 +139,6 @@ Direct Reference Codes:
 		String periodStart = "2003-01-01";
 		String periodEnd = "2003-12-31";
 
-		// TODO KBD Why does this call accept a reportType of "population" ? http://hl7.org/fhir/STU3/valueset-measure-report-type.html
 		// First run to absorb startup costs
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, null, "population",
 			null, null, null, null, null, null, null);
@@ -168,7 +164,7 @@ Direct Reference Codes:
 	}
 
 	@Test
-	public void testGeneratedContentEXM349WorksWithManuallyEditedInputFiles() throws IOException {
+	public void testEXM349RefreshGeneratedContentWorksWithManuallyEditedInputFiles() throws IOException {
 		IdType measureId = new IdType("Measure", "measure-EXM349-FHIR3-2.9.000");
 		IdType libraryId = new IdType("Library", "library-EXM349-FHIR3-2.9.000");
 
