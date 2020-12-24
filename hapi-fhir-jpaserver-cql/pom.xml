@@ -200,7 +200,9 @@
 				<groupId>org.basepom.maven</groupId>
 				<artifactId>duplicate-finder-maven-plugin</artifactId>
 				<configuration>
-					<!-- <checkCompileClasspath>false</checkCompileClasspath> -->
+					<failBuildInCaseOfDifferentContentConflict>false</failBuildInCaseOfDifferentContentConflict>
+					<failBuildInCaseOfEqualContentConflict>false</failBuildInCaseOfEqualContentConflict>
+					<failBuildInCaseOfConflict>false</failBuildInCaseOfConflict>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -28,8 +28,10 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 	Logger ourLog = LoggerFactory.getLogger(BaseCqlR4Test.class);
 
 	@Autowired
+	protected
 	DaoRegistry myDaoRegistry;
 	@Autowired
+	protected
 	FhirContext myFhirContext;
 	@Autowired
 	IFhirSystemDao mySystemDao;
