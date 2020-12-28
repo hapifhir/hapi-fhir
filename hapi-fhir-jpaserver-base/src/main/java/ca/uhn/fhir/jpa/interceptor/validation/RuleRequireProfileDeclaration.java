@@ -3,28 +3,21 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Optional;
 
-class RuleRequireProfileDeclaration implements IRepositoryValidatingRule {
-	private final String myType;
+class RuleRequireProfileDeclaration extends BaseTypedRule {
 	private final Collection<String> myProfileOptions;
-	private final FhirContext myFhirContext;
 
 	RuleRequireProfileDeclaration(FhirContext theFhirContext, String theType, Collection<String> theProfileOptions) {
-		myFhirContext = theFhirContext;
-		myType = theType;
+		super(theFhirContext, theType);
 		myProfileOptions = theProfileOptions;
 	}
 
-
+	@Nonnull
 	@Override
-	public String getResourceType() {
-		return myType;
-	}
-
-	@Override
-	public RuleEvaluation evaluate(IBaseResource theResource) {
+	public RuleEvaluation evaluate(@Nonnull IBaseResource theResource) {
 		Optional<String> matchingProfile = theResource
 			.getMeta()
 			.getProfile()
@@ -35,7 +28,9 @@ class RuleRequireProfileDeclaration implements IRepositoryValidatingRule {
 		if (matchingProfile.isPresent()) {
 			return RuleEvaluation.forSuccess(this);
 		}
-		String msg = myFhirContext.getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
+		String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
 		return RuleEvaluation.forFailure(this, msg);
 	}
+
+
 }
