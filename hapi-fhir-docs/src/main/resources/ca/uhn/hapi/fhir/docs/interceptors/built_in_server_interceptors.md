@@ -131,7 +131,7 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|validatingInterceptor}}
 ```
 
-**See Also:** The [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) provides a different and potentially more powerful way of validating data when using a HAPI FHIR JPA Server.
+**See Also:** The [Repository Validating Interceptor](/docs/validation/repository_validating_interceptor.html) provides a different and potentially more powerful way of validating data when paired with a HAPI FHIR JPA Server.
 
 
 # Security: CORS

@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2020 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
@@ -16,11 +36,15 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-
+/**
+ * This class is used to construct rules to populate the {@link RepositoryValidatingInterceptor}.
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/repository_validating_interceptor.html">Repository Validating Interceptor</a>
+ * in the HAPI FHIR documentation for more information on how to use this.
+ */
 public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 
-
 	private final List<IRepositoryValidatingRule> myRules = new ArrayList<>();
+
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
@@ -28,6 +52,11 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 	@Autowired
 	private ValidatorResourceFetcher myValidatorResourceFetcher;
 
+	/**
+	 * Begin a new rule for a specific resource type.
+	 *
+	 * @param theType The resource type e.g. "Patient" (must not be null)
+	 */
 	@Override
 	public RepositoryValidatingRuleBuilderTyped forResourcesOfType(String theType) {
 		return new RepositoryValidatingRuleBuilderTyped(theType);
@@ -41,8 +70,13 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		return myRules;
 	}
 
-	public class FinalizedRule implements IRuleRoot {
+	public class FinalizedTypedRule implements IRuleRoot {
 
+		private final String myType;
+
+		FinalizedTypedRule(String theType) {
+			myType = theType;
+		}
 
 		@Override
 		public RepositoryValidatingRuleBuilderTyped forResourcesOfType(String theType) {
@@ -52,6 +86,10 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		@Override
 		public List<IRepositoryValidatingRule> build() {
 			return RepositoryValidatingRuleBuilder.this.build();
+		}
+
+		public RepositoryValidatingRuleBuilderTyped and() {
+			return new RepositoryValidatingRuleBuilderTyped(myType);
 		}
 	}
 
@@ -64,45 +102,77 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		}
 
 		/**
-		 * Require any resource being persisted to declare conformance to at least one of the given profiles
-		 * in <code>Resource.meta.profile</code>
+		 * Require any resource being persisted to declare conformance to the given profile, meaning that the specified
+		 * profile URL must be found within the resource in <code>Resource.meta.profile</code>.
+		 * <p>
+		 * This rule is non-exclusive, meaning that a resource will pass as long as one of its profile declarations
+		 * in <code>Resource.meta.profile</code> matches. If the resource declares conformance to multiple profiles, any
+		 * other profile declarations found in that field will be ignored.
+		 * </p>
 		 */
-		public FinalizedRule requireAtLeastOneProfileOf(String... theProfileOptions) {
-			Validate.notNull(theProfileOptions, "theProfileOptions must not be null");
-			requireAtLeastOneProfileOf(Arrays.asList(theProfileOptions));
-			return new FinalizedRule();
+		public FinalizedTypedRule requireAtLeastProfile(String theProfileUrl) {
+			return requireAtLeastOneProfileOf(theProfileUrl);
 		}
 
 		/**
-		 * Require any resource being persisted to declare conformance to at least one of the given profiles
-		 * in <code>Resource.meta.profile</code>
+		 * Require any resource being persisted to declare conformance to at least one of the given profiles, meaning that the specified
+		 * profile URL must be found within the resource in <code>Resource.meta.profile</code>.
+		 * <p>
+		 * This rule is non-exclusive, meaning that a resource will pass as long as one of its profile declarations
+		 * in <code>Resource.meta.profile</code> matches. If the resource declares conformance to multiple profiles, any
+		 * other profile declarations found in that field will be ignored.
+		 * </p>
 		 */
-		private FinalizedRule requireAtLeastOneProfileOf(Collection<String> theProfileOptions) {
-			Validate.notNull(theProfileOptions, "theProfileOptions must not be null");
-			Validate.notEmpty(theProfileOptions, "theProfileOptions must not be null or empty");
-			myRules.add(new RuleRequireProfileDeclaration(myFhirContext, myType, theProfileOptions));
-			return new FinalizedRule();
+		public FinalizedTypedRule requireAtLeastOneProfileOf(String... theProfileUrls) {
+			Validate.notNull(theProfileUrls, "theProfileUrls must not be null");
+			requireAtLeastOneProfileOf(Arrays.asList(theProfileUrls));
+			return new FinalizedTypedRule(myType);
 		}
 
-
-		public FinalizedRule disallowProfile(String theProfileUrl) {
-			Validate.notBlank(theProfileUrl, "theProfileUrl must not be null or empty");
-			myRules.add(new RuleDisallowProfile(myFhirContext, myType, theProfileUrl));
-			return new FinalizedRule();
+		/**
+		 * Require any resource being persisted to declare conformance to at least one of the given profiles, meaning that the specified
+		 * profile URL must be found within the resource in <code>Resource.meta.profile</code>.
+		 * <p>
+		 * This rule is non-exclusive, meaning that a resource will pass as long as one of its profile declarations
+		 * in <code>Resource.meta.profile</code> matches. If the resource declares conformance to multiple profiles, any
+		 * other profile declarations found in that field will be ignored.
+		 * </p>
+		 */
+		private FinalizedTypedRule requireAtLeastOneProfileOf(Collection<String> theProfileUrls) {
+			Validate.notNull(theProfileUrls, "theProfileUrls must not be null");
+			Validate.notEmpty(theProfileUrls, "theProfileUrls must not be null or empty");
+			myRules.add(new RuleRequireProfileDeclaration(myFhirContext, myType, theProfileUrls));
+			return new FinalizedTypedRule(myType);
 		}
 
-		public FinalizedRequireValidationRule requireValidation() {
+		/**
+		 * @param theProfileUrl
+		 * @return
+		 */
+		public FinalizedTypedRule disallowProfile(String theProfileUrl) {
+			return disallowProfiles(theProfileUrl);
+		}
+
+		public FinalizedRequireValidationRule requireValidationToDeclaredProfiles() {
 			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport, myValidatorResourceFetcher);
 			myRules.add(rule);
 			return new FinalizedRequireValidationRule(rule);
 		}
 
+		public FinalizedTypedRule disallowProfiles(String... theProfileUrls) {
+			Validate.notNull(theProfileUrls, "theProfileUrl must not be null or empty");
+			Validate.notEmpty(theProfileUrls, "theProfileUrl must not be null or empty");
+			myRules.add(new RuleDisallowProfile(myFhirContext, myType, theProfileUrls));
+			return new FinalizedTypedRule(myType);
+		}
 
-		public class FinalizedRequireValidationRule extends FinalizedRule {
+
+		public class FinalizedRequireValidationRule extends FinalizedTypedRule {
 
 			private final RequireValidationRule myRule;
 
 			public FinalizedRequireValidationRule(RequireValidationRule theRule) {
+				super(myType);
 				myRule = theRule;
 			}
 
@@ -130,7 +200,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * to not include any best practice notifications.
 			 */
 			@Nonnull
-			private FinalizedRequireValidationRule withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel bestPracticeWarningLevel) {
+			public FinalizedRequireValidationRule withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel bestPracticeWarningLevel) {
 				myRule.setBestPracticeWarningLevel(bestPracticeWarningLevel);
 				return this;
 			}

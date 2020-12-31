@@ -78,7 +78,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theStatusCode The HTTP status code corresponding to this problem
 	 * @param theMessage    The message
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage) {
+	public 	/**
+	 * Interceptor hook method. This method should not be called directly.
+	 */
+	BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;

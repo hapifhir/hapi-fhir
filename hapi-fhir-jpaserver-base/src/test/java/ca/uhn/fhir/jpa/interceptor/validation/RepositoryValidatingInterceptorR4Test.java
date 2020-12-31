@@ -2,12 +2,20 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UrlType;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -38,6 +47,22 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof RepositoryValidatingInterceptor);
+	}
+
+	@Test
+	public void testRequireAtLeastProfile_Allowed() {
+
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Patient")
+			.requireAtLeastProfile("http://foo/Profile1")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		// Create with correct profile allowed
+		Patient patient = new Patient();
+		patient.getMeta().addProfile("http://foo/Profile1");
+		IIdType id = myPatientDao.create(patient).getId();
+		assertEquals("1", id.getVersionIdPart());
 	}
 
 	@Test
@@ -161,7 +186,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Patient")
-			.disallowProfile("http://profile-bad")
+			.disallowProfiles("http://profile-bad", "http://profile-bad2")
 			.build();
 		myValInterceptor.setRules(rules);
 
@@ -170,7 +195,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		patient.getMeta().addProfile("http://foo/Profile1");
 		IIdType id = myPatientDao.create(patient).getId();
 
-		// Explicitly adding the profile is blocked
+		// Explicitly adding the profile is blocked using $meta-add
 		try {
 			Meta metaDel = new Meta();
 			metaDel.addProfile("http://profile-bad");
@@ -178,6 +203,37 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals("Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
+		}
+
+		// Explicitly adding the profile is blocked using patch
+		try {
+			Parameters patch = new Parameters();
+			Parameters.ParametersParameterComponent operation = patch.addParameter();
+			operation.setName("operation");
+			operation
+				.addPart()
+				.setName("type")
+				.setValue(new CodeType("insert"));
+			operation
+				.addPart()
+				.setName("path")
+				.setValue(new StringType("Patient.meta.profile"));
+			operation
+				.addPart()
+				.setName("index")
+				.setValue(new IntegerType(0));
+			operation
+				.addPart()
+				.setName("value")
+				.setValue(new CanonicalType("http://profile-bad2"));
+			myCaptureQueriesListener.clear();
+			myPatientDao.patch(id, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertEquals("Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2", e.getMessage());
+		} catch (Exception e) {
+			myCaptureQueriesListener.logAllQueriesForCurrentThread();
+			fail(e.toString());
 		}
 
 		patient = myPatientDao.read(id);
@@ -189,7 +245,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireValidation_Allowed() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
-			.requireValidation()
+			.requireValidationToDeclaredProfiles()
 			.withBestPracticeWarningLevel("IGNORE")
 			.build();
 		myValInterceptor.setRules(rules);
@@ -210,7 +266,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	public void testRequireValidation_Blocked() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
-			.requireValidation()
+			.requireValidationToDeclaredProfiles()
 			.withBestPracticeWarningLevel("IGNORE")
 			.build();
 		myValInterceptor.setRules(rules);
@@ -227,6 +283,31 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		}
 
 	}
+
+
+	@Test
+	public void testMultipleTypedRules() {
+
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Observation")
+			.requireAtLeastProfile("http://hl7.org/fhir/StructureDefinition/Observation")
+			.and()
+			.requireValidationToDeclaredProfiles()
+			.withBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore)
+			.build();
+		myValInterceptor.setRules(rules);
+
+		// Create with correct profile allowed
+		Observation Observation = new Observation();
+		Observation.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/Observation");
+		try {
+			myObservationDao.create(Observation);
+			fail();
+		} catch (PreconditionFailedException e) {
+			assertThat(e.getMessage(), containsString("Observation.status: minimum required = 1, but only found 0"));
+		}
+	}
+
 
 	private RepositoryValidatingRuleBuilder newRuleBuilder() {
 		return myApplicationContext.getBean(BaseConfig.REPOSITORY_VALIDATING_RULE_BUILDER, RepositoryValidatingRuleBuilder.class);
