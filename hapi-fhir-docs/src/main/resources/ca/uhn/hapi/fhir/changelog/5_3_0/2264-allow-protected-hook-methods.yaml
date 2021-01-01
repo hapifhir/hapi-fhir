@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2264
+title: "The interceptor framework will now recognize and invoke `@Hook` methods that have an access level
+  of public, protected, or default. Previously only public methods were recognized."

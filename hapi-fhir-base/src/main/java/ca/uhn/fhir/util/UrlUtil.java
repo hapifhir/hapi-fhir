@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
@@ -16,6 +17,8 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.endsWith;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /*
@@ -298,6 +302,27 @@ public class UrlUtil {
 			parseQueryString(next, map);
 		}
 		return toQueryStringMap(map);
+	}
+
+	/**
+	 * Normalizes canonical URLs for comparison. Trailing "/" is stripped,
+	 * and any version identifiers or fragment hash is removed
+	 */
+	public static String normalizeCanonicalUrlForComparison(String theUrl) {
+		String retVal;
+		try {
+			retVal = new URI(theUrl).normalize().toString();
+		} catch (URISyntaxException e) {
+			retVal = theUrl;
+		}
+		while (endsWith(retVal, "/")) {
+			retVal = retVal.substring(0, retVal.length() - 1);
+		}
+		int hashOrPipeIndex = StringUtils.indexOfAny(retVal, '#', '|');
+		if (hashOrPipeIndex != -1) {
+			retVal = retVal.substring(0, hashOrPipeIndex);
+		}
+		return retVal;
 	}
 
 	/**

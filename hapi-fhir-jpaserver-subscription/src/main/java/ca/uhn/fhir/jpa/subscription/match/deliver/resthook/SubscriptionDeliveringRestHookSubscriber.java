@@ -156,7 +156,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (IBaseResource next : searchResults.getResources(0, searchResults.size())) {
-			builder.addUpdateEntry(next);
+			builder.addTransactionUpdateEntry(next);
 		}
 
 		operation = theClient.transaction().withBundle(builder.getBundle());
