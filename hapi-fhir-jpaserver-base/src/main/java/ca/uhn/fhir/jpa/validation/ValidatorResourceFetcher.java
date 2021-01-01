@@ -21,19 +21,23 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import org.hl7.fhir.common.hapi.validation.validator.VersionSpecificWorkerContextWrapper;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r5.elementmodel.Element;
+import org.hl7.fhir.r5.elementmodel.JsonParser;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Locale;
 
@@ -47,6 +51,14 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 	private ValidationSettings myValidationSettings;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	private IValidationSupport myValidationSupport;
+	private VersionSpecificWorkerContextWrapper myVersionSpecificCOntextWrapper;
+
+	@PostConstruct
+	public void start() {
+		myVersionSpecificCOntextWrapper = VersionSpecificWorkerContextWrapper.newVersionSpecificWorkerContextWrapper(myValidationSupport);
+	}
 
 
 	@SuppressWarnings("ConstantConditions")
@@ -64,10 +76,8 @@ public class ValidatorResourceFetcher implements IResourceValidator.IValidatorRe
 			return null;
 		}
 
-		// FIXME: resolve this
 		try {
-			throw new Exception("AA");
-//			return new JsonParser(provideWorkerContext()).parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
+			return new JsonParser(myVersionSpecificCOntextWrapper).parse(myFhirContext.newJsonParser().encodeResourceToString(target), resourceType);
 		} catch (Exception e) {
 			throw new FHIRException(e);
 		}
