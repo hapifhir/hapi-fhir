@@ -8,4 +8,5 @@
         <li>Woodstox (XML FHIR Parser): 4.4.1 -&gt; 6.2.3 (Note that the Maven groupId has changed from <code>org.codehaus.woodstox</code> to <code>com.fasterxml.woodstox</code> and the Maven artifactId has changed from <code>woodstox-core-asl</code> to <code>woodstox-core</code> for this library)</li>
         <li>Spring (JPA): 5.2.3.RELEASE -&gt; 5.2.9.RELEASE</li>
         <li>Jetty (JPA Starter): 9.4.30.v20200611 -&gt; 9.4.35.v20201120</li>
+        <li>Spring Boot (JPA Starter): 2.2.6.RELEASE -&gt; 2.4.1</li>
     </ul>"
