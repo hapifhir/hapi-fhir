@@ -41,9 +41,21 @@
 				<extensions>true</extensions>
 				<configuration>
 					<instructions>
+                        <_nouses>true</_nouses>
+                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+                        <!-- No need to disable normal OSGi class loading
 						<Fragment-Host>
 							ca.uhn.hapi.fhir.hapi-fhir-base
 						</Fragment-Host>
+						-->
+                        <!-- maven-bundle-plugin does not generate
+                             exports for resource packages -->
+                        <Export-Package>
+                            org.hl7.fhir.r4.model.extension;version="${project.version}",
+                            org.hl7.fhir.r4.model.profile;version="${project.version}",
+                            org.hl7.fhir.r4.model.schema;version="${project.version}",
+                            org.hl7.fhir.r4.model.valueset;version="${project.version}"
+                        </Export-Package>
 					</instructions>
 				</configuration>
 			</plugin>
