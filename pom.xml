@@ -744,7 +744,7 @@
 		<!-- 9.4.17 seems to have issues -->
 		<jetty_version>9.4.35.v20201120</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.6.2</junit_version>
+		<junit_version>5.7.0</junit_version>
 		<flyway_version>6.5.4</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.4.22.Final</hibernate_version>
@@ -769,7 +769,7 @@
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
 		<spring_data_version>2.2.0.RELEASE</spring_data_version>
 		<spring_batch_version>4.2.3.RELEASE</spring_batch_version>
-		<spring_boot_version>2.2.6.RELEASE</spring_boot_version>
+		<spring_boot_version>2.4.1</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
@@ -1813,7 +1813,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M4</version>
+					<version>3.0.0-M5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1840,7 +1840,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M5</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
