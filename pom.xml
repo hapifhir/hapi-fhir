@@ -12,15 +12,15 @@
 	<url>https://hapifhir.io</url>
 
 	<organization>
-		<name>University Health Network</name>
-		<url>http://www.uhn.ca</url>
+		<name>Smile CDR, Inc.</name>
+		<url>https://smilecdr.com</url>
 	</organization>
 
 	<inceptionYear>2014</inceptionYear>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
+		<url>https://github.com/hapifhir/hapi-fhir/issues/</url>
 	</issueManagement>
 
 	<distributionManagement>
@@ -34,14 +34,14 @@
 		</repository>
 		<site>
 			<id>git.server</id>
-			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+			<url>scm:git:git@github.com:hapifhir/hapi-fhir.git</url>
 		</site>
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
-		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
-		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
+		<connection>scm:git:git@github.com:hapifhir/hapi-fhir.git</connection>
+		<url>scm:git:git@github.com:hapifhir/hapi-fhir.git</url>
+		<developerConnection>scm:git:git@github.com:hapifhir/hapi-fhir.git</developerConnection>
 	</scm>
 
 	<repositories>
@@ -1731,7 +1731,7 @@
 					<artifactId>gemnasium-maven-plugin</artifactId>
 					<version>0.2.0</version>
 					<configuration>
-						<projectSlug>github.com/jamesagnew/hapi-fhir</projectSlug>
+						<projectSlug>github.com/hapifhir/hapi-fhir</projectSlug>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -2195,9 +2195,9 @@
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken>
-										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
+										<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
 									<replacevalue>
-										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
+										<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
@@ -2327,7 +2327,7 @@
 					<content>\${siteMainDirectory}</content>
 					<tryUpdate>true</tryUpdate>
 					<scmBranch>gh-pages</scmBranch>
-					<pubScmUrl>scm:git:git@github.com:jamesagnew/hapi-fhir.git</pubScmUrl>
+					<pubScmUrl>scm:git:git@github.com:hapifhir/hapi-fhir.git</pubScmUrl>
 				</configuration>
 				<executions>
 					<execution>
@@ -2374,7 +2374,7 @@
 				<configuration>
 					<feedType>atom_1.0</feedType>
 					<issueLinkTemplatePerSystem>
-						<default>https://github.com/jamesagnew/hapi-fhir/issues/%ISSUE%</default>
+						<default>https://github.com/hapifhir/hapi-fhir/issues/%ISSUE%</default>
 					</issueLinkTemplatePerSystem>
 					<escapeHTML>false</escapeHTML>
 				</configuration>
