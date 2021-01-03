@@ -747,7 +747,7 @@
 		<junit_version>5.7.0</junit_version>
 		<flyway_version>6.5.4</flyway_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.22.Final</hibernate_version>
+		<hibernate_version>5.4.26.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
@@ -2668,28 +2668,6 @@
 								</path>
 							</annotationProcessorPaths>
 						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>OWASP</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.owasp</groupId>
-						<artifactId>dependency-check-maven</artifactId>
-						<version>6.0.2</version>
-						<configuration>
-							<failBuildOnCVSS>7</failBuildOnCVSS>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 				</plugins>
 			</build>
