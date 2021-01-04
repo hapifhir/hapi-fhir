@@ -761,7 +761,7 @@
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
 		<ph_schematron_version>5.2.0</ph_schematron_version>
 		<ph_commons_version>9.3.8</ph_commons_version>
-		<plexus_compiler_api_version>2.8.5</plexus_compiler_api_version>
+		<plexus_compiler_api_version>2.8.8</plexus_compiler_api_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<slf4j_version>1.7.30</slf4j_version>
@@ -1783,7 +1783,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
