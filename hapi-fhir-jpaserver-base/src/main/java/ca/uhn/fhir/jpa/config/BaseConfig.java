@@ -473,7 +473,7 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public HibernatePropertiesProvider hibernateDialectProvider() {
+	public HibernatePropertiesProvider HibernatePropertiesProvider() {
 		return new HibernatePropertiesProvider();
 	}
 
