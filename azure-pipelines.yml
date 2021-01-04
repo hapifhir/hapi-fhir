@@ -5,6 +5,7 @@ variables:
   #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
   MAVEN_OPTS: ''
+  disable.coverage.autogenerate: 'true'
 
 trigger:
 - master
@@ -149,14 +150,16 @@ jobs:
          inputs:
             reports: "$(Pipeline.Workspace)/**/jacoco.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
             targetdir: '$(Pipeline.Workspace)/coveragereport' # REQUIRED # The directory where the generated report should be saved.
-            reporttypes: 'HtmlInline_AzurePipelines;Xml;XmlSummary' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
+            reporttypes: 'HtmlInline_AzurePipelines;Xml;Cobertura' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
             verbosity: 'Verbose' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
             title: 'jacoco.xml' # Optional title.
 
       - script: ls -al $(Pipeline.Workspace)/coveragereport
+      -  script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+         displayName: 'codecov'
       - task: PublishCodeCoverageResults@1
         inputs:
-          codeCoverageTool: 'JaCoCo'
+          codeCoverageTool: 'Cobertura'
           summaryFileLocation: $(Pipeline.Workspace)/coveragereport/Summary.xml
           reportDirectory: $(Pipeline.Workspace)/coveragereport
           failIfCoverageEmpty: false
