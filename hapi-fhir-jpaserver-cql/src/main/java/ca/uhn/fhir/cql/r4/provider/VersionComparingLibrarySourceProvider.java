@@ -2,6 +2,8 @@ package ca.uhn.fhir.cql.r4.provider;
 
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 
+// Expected to be obsolete by mid-2021
+@Deprecated
 public abstract class VersionComparingLibrarySourceProvider implements LibrarySourceProvider {
     public static int compareVersions(String version1, String version2)
     {

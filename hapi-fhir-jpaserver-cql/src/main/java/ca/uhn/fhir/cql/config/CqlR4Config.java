@@ -25,9 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.r4.evaluation.ProviderFactory;
-import ca.uhn.fhir.cql.r4.provider.HQMFProvider;
 import ca.uhn.fhir.cql.r4.provider.JpaTerminologyProvider;
-import ca.uhn.fhir.cql.r4.provider.LibraryOperationsProvider;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.rp.r4.ValueSetResourceProvider;
@@ -63,18 +61,6 @@ public class CqlR4Config extends BaseCqlConfig {
 	@Bean
 	NarrativeProvider narrativeProvider() {
 		return new NarrativeProvider();
-	}
-
-	@Lazy
-	@Bean
-	HQMFProvider theHQMFProvider() {
-		return new HQMFProvider();
-	}
-
-	@Lazy
-	@Bean
-	LibraryOperationsProvider LibraryOperationsProvider() {
-		return new LibraryOperationsProvider();
 	}
 
 	@Lazy

@@ -23,9 +23,7 @@ package ca.uhn.fhir.cql.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.dstu3.evaluation.ProviderFactory;
-import ca.uhn.fhir.cql.dstu3.provider.HQMFProvider;
 import ca.uhn.fhir.cql.dstu3.provider.JpaTerminologyProvider;
-import ca.uhn.fhir.cql.dstu3.provider.LibraryOperationsProvider;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
@@ -55,17 +53,6 @@ public class CqlDstu3Config extends BaseCqlConfig {
 		return new NarrativeProvider();
 	}
 
-	@Lazy
-	@Bean
-	HQMFProvider theHQMFProvider() {
-		return new HQMFProvider();
-	}
-
-	@Lazy
-	@Bean
-	LibraryOperationsProvider LibraryOperationsProvider() {
-		return new LibraryOperationsProvider();
-	}
 	@Lazy
 	@Bean
 	public MeasureOperationsProvider measureOperationsProvider() {

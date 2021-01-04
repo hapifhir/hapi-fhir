@@ -10,6 +10,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Objects;
 
+// Expected to be obsolete by mid-2021
+@Deprecated
 public class R4BundleLibrarySourceProvider extends VersionComparingLibrarySourceProvider {
 
     Bundle bundle;

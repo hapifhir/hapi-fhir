@@ -59,6 +59,7 @@ public class ProviderFactory implements EvaluationProviderFactory {
                 String.format("Can't construct a data provider for model %s version %s", model, version));
     }
 
+    // FIXME KBD remove url, user & pass ?
     public TerminologyProvider createTerminologyProvider(String model, String version, String url, String user,
             String pass) {
         if (url != null && !url.isEmpty()) {
