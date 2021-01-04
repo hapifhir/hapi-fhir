@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.fhirpath.IFhirPath;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -59,7 +60,8 @@ public class GoldenResourceHelper {
 	private IMdmSettings myMdmSettings;
 	@Autowired
 	private EIDHelper myEIDHelper;
-
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	private final FhirContext myFhirContext;
 
@@ -237,20 +239,9 @@ public class GoldenResourceHelper {
 		}
 	}
 
-	public void mergeFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource) {
-		//	TODO NG - Revisit when merge rules are defined
+	public void mergeFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
-
-//		switch (myFhirContext.getVersion().getVersion()) {
-//			case R4:
-//				mergeR4PersonFields(theFromGoldenResource, theToGoldenResource);
-//				break;
-//			case DSTU3:
-//				mergeDstu3PersonFields(theFromGoldenResource, theToGoldenResource);
-//				break;
-//			default:
-//				throw new UnsupportedOperationException("Version not supported: " + myFhirContext.getVersion().getVersion());
-//		}
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 	}
 
 	/**

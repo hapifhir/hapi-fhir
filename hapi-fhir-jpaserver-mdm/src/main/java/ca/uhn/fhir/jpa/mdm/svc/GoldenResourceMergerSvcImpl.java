@@ -66,7 +66,7 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		String resourceType = theMdmTransactionContext.getResourceType();
 
 		//Merge attributes, to be determined when survivorship is solved.
-		myGoldenResourceHelper.mergeFields(theFromGoldenResource, theToGoldenResource);
+		myGoldenResourceHelper.mergeFields(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);

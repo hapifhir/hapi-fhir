@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -61,13 +62,14 @@ public class MdmEidUpdateService {
 	private MdmLinkDaoSvc myMdmLinkDaoSvc;
 	@Autowired
 	private IMdmSettings myMdmSettings;
+	@Autowired
+	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	void handleMdmUpdate(IAnyResource theResource, MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
 		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theResource);
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
 			// Copy over any new external EIDs which don't already exist.
-			// TODO NG - Eventually this call will use terser to clone data in, once the surviorship rules for copying data will be confirmed
-			// myPersonHelper.updatePersonFromUpdatedEmpiTarget(updateContext.getMatchedPerson(), theResource, theEmpiTransactionContext);
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
 				myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
