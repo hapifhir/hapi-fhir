@@ -147,12 +147,11 @@ jobs:
       -  task: reportgenerator@4
          displayName: Generate Reports
          inputs:
-            reports: 'jacoco-*/jacoco.xml' # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
+            reports: "$(Pipeline.Workspace)/**/jacoco.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
             targetdir: '$(Pipeline.Workspace)/coveragereport' # REQUIRED # The directory where the generated report should be saved.
             reporttypes: 'HtmlInline_AzurePipelines;Xml;XmlSummary' # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, Xml, XmlSummary
             verbosity: 'Verbose' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
             title: 'jacoco.xml' # Optional title.
-            tag: '$(build.buildnumber)_#$(build.buildid)' # Optional tag or build version.
 
       - script: ls -al coveragereport
       - task: PublishCodeCoverageResults@1
