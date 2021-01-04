@@ -120,7 +120,6 @@ jobs:
     dependsOn: Test
     condition: always()
     displayName: Report Results
-    container: maven:3-jdk-11
     steps:
       - task: UseDotNet@2
         displayName: Setup Dotnet Core
