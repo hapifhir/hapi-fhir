@@ -70,7 +70,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init500(); // 20200218 - 20200513
 		init501(); // 20200514 - 20200515
 		init510(); // 20200516 - 20201028
-		init520(); // 20201029 - Present
+		init520(); // 20201029 -
+		init530();
+	}
+
+	private void init530() {
+		Builder version = forVersion(VersionEnum.V5_3_0);
+		version
+			.onTable("TRM_VALUESET_CONCEPT")
+			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
+		version
+			.onTable("TRM_VALUESET_CONCEPT")
+			.addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL").doNothing();
+
 	}
 
 	protected void init520() {
@@ -174,7 +186,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
 		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, 200);
 		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
-		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL");
+		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL").doNothing();
 	}
 
 	protected void init510_20200725() {
