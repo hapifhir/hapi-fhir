@@ -122,6 +122,11 @@ jobs:
     displayName: Report Results
     container: maven:3-jdk-11
     steps:
+      - task: UseDotNet@2
+        displayName: Setup Dotnet Core
+        inputs:
+          packageType: 'sdk'
+          version: '2.X'
       - task: DownloadPipelineArtifact@2
         displayName: Download Artifacts
       - script: mkdir jacoco-combined
@@ -140,7 +145,7 @@ jobs:
 #              jacoco-*/**
 #           flattenFolders: true
 #           targetFolder: '$(Pipeline.Workspace)/jacoco-combined'
-      -  task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+      -  task: reportgenerator@4
          displayName: Generate Reports
          inputs:
             reports: 'jacoco-*/jacoco.xml' # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
