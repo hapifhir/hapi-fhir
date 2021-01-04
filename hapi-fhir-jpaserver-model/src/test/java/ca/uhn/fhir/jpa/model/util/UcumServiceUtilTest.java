@@ -1,4 +1,4 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.jpa.model.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

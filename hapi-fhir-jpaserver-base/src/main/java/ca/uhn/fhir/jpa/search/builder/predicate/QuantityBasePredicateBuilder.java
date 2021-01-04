@@ -48,7 +48,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 
 
 public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredicateBuilder {

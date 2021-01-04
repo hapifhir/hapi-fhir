@@ -1,4 +1,4 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.jpa.model.util;
 
 /*
  * #%L
@@ -49,6 +49,8 @@ import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ca.uhn.fhir.util.ClasspathUtil;
 
 /**
  * It's a wrapper of UcumEssenceService
