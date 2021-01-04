@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,24 +48,63 @@ public class ReflectionUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReflectionUtil.class);
 
 	/**
+	 * Non instantiable
+	 */
+	private ReflectionUtil() {
+		super();
+	}
+
+	/**
+	 * Returns all methods declared against {@literal theClazz}. This method returns a predictable order, which is
+	 * sorted by method name and then by parameters.
+	 * <p>
+	 * This method does not include superclass methods (see {@link #getDeclaredMethods(Class, boolean)} if you
+	 * want to include those.
+	 * </p>
+	 */
+	public static List<Method> getDeclaredMethods(Class<?> theClazz) {
+		return getDeclaredMethods(theClazz, false);
+	}
+
+	/**
 	 * Returns all methods declared against {@literal theClazz}. This method returns a predictable order, which is
 	 * sorted by method name and then by parameters.
 	 */
-	public static List<Method> getDeclaredMethods(Class<?> theClazz) {
-		HashSet<Method> foundMethods = new LinkedHashSet<>();
+	public static List<Method> getDeclaredMethods(Class<?> theClazz, boolean theIncludeMethodsFromSuperclasses) {
+		HashMap<String, Method> foundMethods = new HashMap<>();
+
+		populateDeclaredMethodsMap(theClazz, foundMethods, theIncludeMethodsFromSuperclasses);
+
+		List<Method> retVal = new ArrayList<>(foundMethods.values());
+		retVal.sort((Comparator.comparing(ReflectionUtil::describeMethodInSortFriendlyWay)));
+		return retVal;
+	}
+
+	private static void populateDeclaredMethodsMap(Class<?> theClazz, HashMap<String, Method> foundMethods, boolean theIncludeMethodsFromSuperclasses) {
 		Method[] declaredMethods = theClazz.getDeclaredMethods();
 		for (Method next : declaredMethods) {
-			try {
-				Method method = theClazz.getMethod(next.getName(), next.getParameterTypes());
-				foundMethods.add(method);
-			} catch (NoSuchMethodException | SecurityException e) {
-				foundMethods.add(next);
+
+			if (Modifier.isAbstract(next.getModifiers()) ||
+				Modifier.isStatic(next.getModifiers()) ||
+				Modifier.isPrivate(next.getModifiers())) {
+				continue;
+			}
+
+			String description = next.getName() + Arrays.asList(next.getParameterTypes());
+
+			if (!foundMethods.containsKey(description)) {
+				try {
+					Method method = theClazz.getMethod(next.getName(), next.getParameterTypes());
+					foundMethods.put(description, method);
+				} catch (NoSuchMethodException | SecurityException e) {
+					foundMethods.put(description, next);
+				}
 			}
 		}
 
-		List<Method> retVal = new ArrayList<>(foundMethods);
-		retVal.sort((Comparator.comparing(ReflectionUtil::describeMethodInSortFriendlyWay)));
-		return retVal;
+		if (theIncludeMethodsFromSuperclasses && !theClazz.getSuperclass().equals(Object.class)) {
+			populateDeclaredMethodsMap(theClazz.getSuperclass(), foundMethods, theIncludeMethodsFromSuperclasses);
+		}
 	}
 
 	/**

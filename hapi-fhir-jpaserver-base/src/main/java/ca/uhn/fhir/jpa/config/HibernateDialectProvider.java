@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.config;
  */
 
 import ca.uhn.fhir.util.ReflectionUtil;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.dialect.Dialect;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,11 @@ public class HibernateDialectProvider {
 	@Autowired
 	private LocalContainerEntityManagerFactoryBean myEntityManagerFactory;
 	private Dialect myDialect;
+
+	@VisibleForTesting
+	public void setDialectForUnitTest(Dialect theDialect) {
+		myDialect = theDialect;
+	}
 
 	public Dialect getDialect() {
 		Dialect dialect = myDialect;

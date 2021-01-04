@@ -4,12 +4,12 @@ The BundleBuilder ([JavaDoc](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/util/
 
 Note that this class is a work in progress! It does not yet support all transaction features. We will add more features over time, and document them here. Pull requests are welcomed.
 
-# Resource Create
+# Transaction Resource Create
 
 To add an update (aka PUT) operation to a transaction bundle
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/TransactionBuilderExamples.java|create}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|create}}
 ``` 
 
 ## Conditional Create
@@ -17,15 +17,15 @@ To add an update (aka PUT) operation to a transaction bundle
 If you want to perform a conditional create:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/TransactionBuilderExamples.java|createConditional}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|createConditional}}
 ``` 
 
-# Resource Updates
+# Transaction Resource Updates
 
 To add an update (aka PUT) operation to a transaction bundle:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/TransactionBuilderExamples.java|update}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|update}}
 ``` 
 
 ## Conditional Update
@@ -33,7 +33,7 @@ To add an update (aka PUT) operation to a transaction bundle:
 If you want to perform a conditional update:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/TransactionBuilderExamples.java|updateConditional}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|updateConditional}}
 ``` 
 
 # Customizing bundle
@@ -41,6 +41,6 @@ If you want to perform a conditional update:
 If you want to manipulate a bundle:
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/TransactionBuilderExamples.java|customizeBundle}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/BundleBuilderExamples.java|customizeBundle}}
 ```
 

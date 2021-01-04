@@ -4,7 +4,7 @@ package ca.uhn.hapi.fhir.docs;
  * #%L
  * HAPI FHIR - Docs
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @SuppressWarnings("unused")
-public class TransactionBuilderExamples {
+public class BundleBuilderExamples {
 
 	private FhirContext myFhirContext;
 	private IGenericClient myFhirClient;
@@ -49,7 +49,7 @@ public class TransactionBuilderExamples {
 		patient.setActive(true);
 
 		// Add the patient as an update (aka PUT) to the Bundle
-		builder.addUpdateEntry(patient);
+		builder.addTransactionUpdateEntry(patient);
 
 		// Execute the transaction
 		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
@@ -67,7 +67,7 @@ public class TransactionBuilderExamples {
 		patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
 		// Add the patient as an update (aka PUT) to the Bundle
-		builder.addUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+		builder.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 
 		// Execute the transaction
 		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();

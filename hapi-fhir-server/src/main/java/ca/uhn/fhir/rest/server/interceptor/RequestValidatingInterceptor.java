@@ -1,18 +1,16 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-/*
+/*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,16 +20,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #L%
  */
 
-import java.nio.charset.Charset;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -41,6 +31,14 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.Charset;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * This interceptor intercepts each incoming request and if it contains a FHIR resource, validates that resource. The
@@ -53,15 +51,12 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	 * X-HAPI-Request-Validation
 	 */
 	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Request-Validation";
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
-
 	/**
 	 * A {@link RequestDetails#getUserData() user data} entry will be created with this
 	 * key which contains the {@link ValidationResult} from validating the request.
 	 */
 	public static final String REQUEST_VALIDATION_RESULT = RequestValidatingInterceptor.class.getName() + "_REQUEST_VALIDATION_RESULT";
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
 	private boolean myAddValidationResultsToResponseOperationOutcome = true;
 
 	@Override
@@ -97,11 +92,22 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	 * If set to {@literal true} (default is true), the validation results
 	 * will be added to the OperationOutcome being returned to the client,
 	 * unless the response being returned is not an OperationOutcome
-	 * to begin with (e.g. if the client has requested 
+	 * to begin with (e.g. if the client has requested
 	 * <code>Return: prefer=representation</code>)
 	 */
 	public boolean isAddValidationResultsToResponseOperationOutcome() {
 		return myAddValidationResultsToResponseOperationOutcome;
+	}
+
+	/**
+	 * If set to {@literal true} (default is true), the validation results
+	 * will be added to the OperationOutcome being returned to the client,
+	 * unless the response being returned is not an OperationOutcome
+	 * to begin with (e.g. if the client has requested
+	 * <code>Return: prefer=representation</code>)
+	 */
+	public void setAddValidationResultsToResponseOperationOutcome(boolean theAddValidationResultsToResponseOperationOutcome) {
+		myAddValidationResultsToResponseOperationOutcome = theAddValidationResultsToResponseOperationOutcome;
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
@@ -129,19 +135,8 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	}
 
 	/**
-	 * If set to {@literal true} (default is true), the validation results
-	 * will be added to the OperationOutcome being returned to the client,
-	 * unless the response being returned is not an OperationOutcome
-	 * to begin with (e.g. if the client has requested 
-	 * <code>Return: prefer=representation</code>)
-	 */
-	public void setAddValidationResultsToResponseOperationOutcome(boolean theAddValidationResultsToResponseOperationOutcome) {
-		myAddValidationResultsToResponseOperationOutcome = theAddValidationResultsToResponseOperationOutcome;
-	}
-
-	/**
 	 * Sets the name of the response header to add validation failures to
-	 * 
+	 *
 	 * @see #DEFAULT_RESPONSE_HEADER_NAME
 	 * @see #setAddResponseHeaderOnSeverity(ResultSeverityEnum)
 	 */
