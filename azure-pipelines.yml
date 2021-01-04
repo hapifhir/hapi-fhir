@@ -126,7 +126,7 @@ jobs:
         displayName: Setup Dotnet Core
         inputs:
           packageType: 'sdk'
-          version: '2.X'
+          version: '2.x'
       - task: DownloadPipelineArtifact@2
         displayName: Download Artifacts
       - script: mkdir jacoco-combined
