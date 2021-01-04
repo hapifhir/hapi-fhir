@@ -94,7 +94,7 @@ public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredic
 			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
 		}
 
-		if (myModelConfig.isUcumSearchSupported()) {
+		if (myModelConfig.isNormalizedQuantitySearchSupported()) {
 			//-- convert the value/unit to the canonical form if any to use by the search
 			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(systemValue, valueValue, unitsValue);
 			if (canonicalForm != null) {

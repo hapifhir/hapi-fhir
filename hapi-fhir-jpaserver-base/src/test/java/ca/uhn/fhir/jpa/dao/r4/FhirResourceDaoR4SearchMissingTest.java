@@ -76,7 +76,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	public void testIndexMissingFieldsDisabledDontCreateIndexesWithUcumSearchSupported() {
 		
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Organization org = new Organization();
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
@@ -87,14 +87,14 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
 		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
 	public void testIndexMissingFieldsDisabledDontCreateIndexesWithUcumStorageSupported() {
 		
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myModelConfig.setUcumStorageSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Organization org = new Organization();
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
@@ -105,7 +105,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
 		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@SuppressWarnings("unused")
@@ -306,7 +306,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchWithMissingQuantityWithUcumSearchSupport() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		IIdType notMissing;
 		IIdType missing;
 		{
@@ -342,13 +342,13 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
 	public void testSearchWithMissingQuantityWithUcumStorageSupported() {
 		
-		myModelConfig.setUcumStorageSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		IIdType notMissing;
 		IIdType missing;
 		{
@@ -384,7 +384,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	

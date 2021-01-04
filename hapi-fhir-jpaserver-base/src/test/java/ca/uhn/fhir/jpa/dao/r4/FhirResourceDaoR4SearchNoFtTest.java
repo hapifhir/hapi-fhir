@@ -1236,7 +1236,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testIndexNoDuplicatesQuantityWithUcumSearchSupported() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -1263,13 +1263,13 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 12300, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm"))));
 		assertThat(actual, contains(id));
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
 	public void testIndexNoDuplicatesQuantityWithUcumStorageSupported() {
 		
-		myModelConfig.setUcumStorageSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -1296,7 +1296,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m"))));
 		assertThat(actual, contains(id));
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -2698,7 +2698,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchByMoneyParamWithUcumSearchSupported() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		ChargeItem ci = new ChargeItem();
 		ci.getPriceOverride().setValue(123).setCurrency("$");
 
@@ -2719,7 +2719,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(ChargeItem.SP_PRICE_OVERRIDE, new QuantityParam().setValue(123).setUnits("$").setSystem("urn:iso:std:iso:4217"));
 		assertEquals(1, myChargeItemDao.search(map).size().intValue());
 
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -3065,7 +3065,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testSearchQuantityWithUcumSearchSupported() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Condition c1 = new Condition();
 		c1.setAbatement(new Range().setLow(new SimpleQuantity().setValue(1L)).setHigh(new SimpleQuantity().setValue(1L)));
 		String id1 = myConditionDao.create(c1).getId().toUnqualifiedVersionless().getValue();
@@ -3085,7 +3085,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(1, found.size().intValue());
 		}
 
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test

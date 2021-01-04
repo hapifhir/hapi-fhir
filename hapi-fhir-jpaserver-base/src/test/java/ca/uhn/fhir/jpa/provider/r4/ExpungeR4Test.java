@@ -401,7 +401,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeSystemEverythingWithUcumSearchSupported() {
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -419,12 +419,12 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
 	public void testExpungeSystemEverythingWithUcumStorageSupported() {
-		myModelConfig.setUcumStorageSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -442,7 +442,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test

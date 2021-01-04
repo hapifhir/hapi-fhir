@@ -544,7 +544,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testChoiceParamQuantityWithUcumSearchSupport() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
 		o3.setValue(new Quantity(QuantityComparator.GREATER_THAN, 123.0, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.0123m
@@ -601,7 +601,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertEquals(0, found.size().intValue());
 		}
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -646,7 +646,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testChoiceParamQuantityPrecisionWithUcumSearchSupport() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
 		o3.setValue(new Quantity(null, 123.01, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.012301 m
@@ -683,7 +683,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(list, Matchers.empty());
 		}
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	@Test
 	public void testChoiceParamString() {
@@ -3465,7 +3465,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testSortByQuantityWithUcumSearchSupport() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation res;
 
 		res = new Observation();
@@ -3502,7 +3502,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1));
 
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test

@@ -338,7 +338,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	@Test
 	public void testCreateWithUcumSearchSupport() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -370,13 +370,13 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
 	public void testCreateWithUcumSearchSupportWithVerySmallNumber() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -408,13 +408,13 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
 	public void testCreateWithUcumSearchSupportWithVerySmallNumber2() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -446,13 +446,13 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
 	public void testCreateWithUcumSearchSupportWithLargeNumber() {
 		
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
 		Quantity q = new Quantity();
@@ -484,6 +484,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 }

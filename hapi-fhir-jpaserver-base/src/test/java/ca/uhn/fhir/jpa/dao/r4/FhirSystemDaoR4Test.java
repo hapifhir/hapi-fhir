@@ -3130,7 +3130,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	@Test
 	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChangeWithUcumSearchSupport() {
 
-		myModelConfig.setUcumSearchSupported();
+		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
 		obs.addIdentifier()
 			.setSystem("http://acme.org")
@@ -3199,7 +3199,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals(id.getValue(), id2.getValue());
 		
-		myModelConfig.setUcumNotSupported();
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	@Test
 	public void testTransactionWithIfMatch() {

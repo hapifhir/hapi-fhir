@@ -207,7 +207,7 @@ public class QueryStack {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		
 		QuantityBasePredicateBuilder sortPredicateBuilder = null;
-		if (myModelConfig.isUcumSearchSupported()) {
+		if (myModelConfig.isNormalizedQuantitySearchSupported()) {
 			sortPredicateBuilder = mySqlBuilder.addQuantityNormalizedPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		} else {
 			sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
@@ -665,7 +665,7 @@ public class QueryStack {
 		
 		QuantityBasePredicateBuilder join = null;
 		 
-		if (myModelConfig.isUcumSearchSupported()) {
+		if (myModelConfig.isNormalizedQuantitySearchSupported()) {
 			join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityNormalizedPredicateBuilder(theSourceJoinColumn)).getResult();
 		} else {
 			join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();			

@@ -200,7 +200,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createReferenceExtractor();
 				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
 			case QUANTITY:
-				if (myModelConfig.isUcumSearchSupported())
+				if (myModelConfig.isNormalizedQuantitySearchSupported())
 					extractor = createQuantityNormalizedExtractor(theResource);
 				else
 					extractor = createQuantityExtractor(theResource);

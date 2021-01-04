@@ -346,7 +346,7 @@ public class SearchParamExtractorR4Test {
 		
 		ModelConfig modelConfig = new ModelConfig();
 		
-		modelConfig.setUcumSearchSupported();
+		modelConfig.setNormalizedQuantitySearchSupported();
 		
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -357,6 +357,7 @@ public class SearchParamExtractorR4Test {
 		Set<ResourceIndexedSearchParamQuantityNormalized> links = extractor.extractSearchParamQuantityNormalized(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(2, links.size());
+	
 	}
 	
 	@Test
@@ -364,7 +365,7 @@ public class SearchParamExtractorR4Test {
 		
 		ModelConfig modelConfig = new ModelConfig();
 		
-		modelConfig.setUcumSearchSupported();
+		modelConfig.setNormalizedQuantitySearchSupported();
 		
 		Observation o1 = new Observation();
 		

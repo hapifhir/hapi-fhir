@@ -4085,7 +4085,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testSearchWithUcumSupported() throws Exception {
 		
-		myDaoConfig.getModelConfig().setUcumSearchSupported();
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -4169,7 +4169,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(3, ids.size());
 
-		myDaoConfig.getModelConfig().setUcumNotSupported();
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
 	}
 	
 
@@ -5988,7 +5988,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testUpdateWithUcumSearchSupport() throws Exception {
 		
-		myDaoConfig.getModelConfig().setUcumSearchSupported();
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -6088,7 +6088,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
 		
-		myDaoConfig.getModelConfig().setUcumNotSupported();
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
 	}
 
 	private String toStr(Date theDate) {

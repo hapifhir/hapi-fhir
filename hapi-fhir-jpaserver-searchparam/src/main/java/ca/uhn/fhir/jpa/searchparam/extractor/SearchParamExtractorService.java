@@ -120,7 +120,7 @@ public class SearchParamExtractorService {
 		handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantities);
 		theParams.myQuantityParams.addAll(quantities);
 		
-		if (myModelConfig.isUcumStorageSupported()|| myModelConfig.isUcumSearchSupported()) {
+		if (myModelConfig.isNormalizedQuantityStorageSupported()|| myModelConfig.isNormalizedQuantitySearchSupported()) {
 			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> quantitiesNormalized = extractSearchParamQuantityNormalized(theResource);
 			handleWarnings(theRequestDetails, myInterceptorBroadcaster, quantitiesNormalized);
 			theParams.myQuantityNormalizedParams.addAll(quantitiesNormalized);

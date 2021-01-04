@@ -169,7 +169,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myTokenParams;
 				break;
 			case QUANTITY:
-				if (theModelConfig.isUcumSearchSupported())
+				if (theModelConfig.isNormalizedQuantitySearchSupported())
 					resourceParams = myQuantityNormalizedParams;
 				else
 					resourceParams = myQuantityParams;					
@@ -275,7 +275,7 @@ public final class ResourceIndexedSearchParams {
 	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
-		if (theModelConfig.isUcumSearchSupported()) 
+		if (theModelConfig.isNormalizedQuantitySearchSupported()) 
 			findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityNormalizedParams);
 		else
 			findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
@@ -309,7 +309,7 @@ public final class ResourceIndexedSearchParams {
 							param = new ResourceIndexedSearchParamNumber();
 							break;
 						case QUANTITY:
-							if (theModelConfig.isUcumSearchSupported())
+							if (theModelConfig.isNormalizedQuantitySearchSupported())
 								param = new ResourceIndexedSearchParamQuantityNormalized();
 							else
 								param = new ResourceIndexedSearchParamQuantity();
