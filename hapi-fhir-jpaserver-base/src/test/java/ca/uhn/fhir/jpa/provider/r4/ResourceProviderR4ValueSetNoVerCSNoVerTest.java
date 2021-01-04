@@ -313,17 +313,69 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.operation()
 			.onInstance(myExtensionalVsId)
 			.named("expand")
-			.withParameter(Parameters.class, "filter", new StringType("systolic"))
+			.withParameter(Parameters.class, "filter", new StringType("blood"))
 			.execute();
+				
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
 		assertThat(resp, not(containsString("\"Foo Code\"")));
-
 	}
 
+
+	@Test
+	public void testExpandByIdWithFilterWithPreExpansionWithPrefixValue() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		assertEquals(1, page.getContent().size());
+
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("blo"))
+			.execute();
+				
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, containsString("<display value=\"Systolic blood pressure at First encounter\"/>"));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
+	}
+	
+	@Test
+	public void testExpandByIdWithFilterWithPreExpansionWithoutPrefixValue() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSet();
+		await().until(() -> clearDeferredStorageQueue());
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		Slice<TermValueSet> page = myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED);
+		assertEquals(1, page.getContent().size());
+
+		Parameters respParam = myClient
+			.operation()
+			.onInstance(myExtensionalVsId)
+			.named("expand")
+			.withParameter(Parameters.class, "filter", new StringType("lood"))
+			.execute();
+				
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+		assertThat(resp, not(containsString("<display value=\"Systolic blood pressure at First encounter\"/>")));
+		assertThat(resp, not(containsString("\"Foo Code\"")));
+	}
+	
+	
 	@Test
 	public void testExpandByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();

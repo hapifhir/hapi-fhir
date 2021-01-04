@@ -11,7 +11,7 @@ import java.util.*;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	 * @param theStatusCode The HTTP status code corresponding to this problem
 	 * @param theMessage    The message
 	 */
-	public BaseServerResponseException(int theStatusCode, String theMessage) {
+	public 	/**
+	 * Interceptor hook method. This method should not be called directly.
+	 */
+	BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;

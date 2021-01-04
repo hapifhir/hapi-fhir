@@ -1,16 +1,40 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.NullWriter;
 import org.apache.commons.lang.StringUtils;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Basic;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MessageHeader;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UuidType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
@@ -18,9 +42,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -169,7 +191,7 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	private String getPatientIdValue(Bundle input, int entry) {
-		final DocumentReference documentReference = (DocumentReference)input.getEntry().get(entry).getResource();
+		final DocumentReference documentReference = (DocumentReference) input.getEntry().get(entry).getResource();
 		final Patient patient = (Patient) documentReference.getSubject().getResource();
 		return patient.getIdentifier().get(0).getValue();
 	}
@@ -282,7 +304,7 @@ public class JsonParserR4Test extends BaseTest {
 	@Test
 	public void testEncodeBinary() {
 		Binary b = new Binary();
-		b.setContent(new byte[]{0,1,2,3,4});
+		b.setContent(new byte[]{0, 1, 2, 3, 4});
 		b.setContentType("application/octet-stream");
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
@@ -599,6 +621,42 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testParseExtensionWithUriValue_BuiltInStructure() {
+		String input = "{\n" +
+			"\"resourceType\": \"Basic\",\n" +
+			"\"meta\": {\n" +
+			"\"profile\": [ \"http://mycustom.url\" ]\n" +
+			"},\n" +
+			"\"extension\": [ {\n" +
+			"\"url\": \"http://myValue.url\",\n" +
+			"\"valueUuid\": \"ae644c07-1d4b-4ca4-bbf3-bd2023e294e5\"\n" +
+			"} ]\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		Basic parsed = jsonParser.parseResource(Basic.class, input);
+		assertEquals("ae644c07-1d4b-4ca4-bbf3-bd2023e294e5", parsed.getExtensionByUrl("http://myValue.url").getValueAsPrimitive().getValueAsString());
+	}
+
+	@Test
+	public void testParseExtensionWithUriValue_CustomStructure() {
+		String input = "{\n" +
+			"\"resourceType\": \"Basic\",\n" +
+			"\"meta\": {\n" +
+			"\"profile\": [ \"http://mycustom.url\" ]\n" +
+			"},\n" +
+			"\"extension\": [ {\n" +
+			"\"url\": \"http://myValue.url\",\n" +
+			"\"valueUuid\": \"ae644c07-1d4b-4ca4-bbf3-bd2023e294e5\"\n" +
+			"} ]\n" +
+			"}";
+
+		IParser jsonParser = ourCtx.newJsonParser();
+		MyCustom parsed = jsonParser.parseResource(MyCustom.class, input);
+		assertEquals("ae644c07-1d4b-4ca4-bbf3-bd2023e294e5", parsed.getValue().getValue());
+	}
+
+	@Test
 	public void testParseExtensionOnPrimitive() throws IOException {
 		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"), Constants.CHARSET_UTF8);
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
@@ -610,13 +668,13 @@ public class JsonParserR4Test extends BaseTest {
 		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
 
 	}
-	
+
 	private Composition createComposition(String sectionText) {
 		Composition c = new Composition();
 		Narrative compositionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
-		compositionText.setDivAsString("Composition");		
+		compositionText.setDivAsString("Composition");
 		Narrative compositionSectionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
-		compositionSectionText.setDivAsString(sectionText);		
+		compositionSectionText.setDivAsString(sectionText);
 		c.setText(compositionText);
 		c.addSection().setText(compositionSectionText);
 		return c;
@@ -645,7 +703,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 18:24:52.472 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 300 passes - 47ms / pass - 21.3 / second
 	 * 18:24:56.428 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 400 passes - 45ms / pass - 22.2 / second
 	 * 18:25:00.463 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 500 passes - 44ms / pass - 22.6 / second
-	 *
+	 * <p>
 	 * 2019-09-19 - Post #1489
 	 * 15:20:30.134 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 800 passes - 28ms / pass - 34.5 / second
 	 * 15:20:32.986 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 900 passes - 28ms / pass - 34.6 / second
@@ -654,7 +712,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 15:20:41.708 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1200 passes - 28ms / pass - 34.5 / second
 	 * 15:20:44.722 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1300 passes - 29ms / pass - 34.4 / second
 	 * 15:20:47.716 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:574] - Encoded 1400 passes - 29ms / pass - 34.4 / second
-	 *
+	 * <p>
 	 * 2020-02-27 - Post #1673
 	 * 21:27:25.817 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1100 passes - 28ms / pass - 35.5 / second
 	 * 21:27:28.598 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:609] - Encoded 1200 passes - 28ms / pass - 35.5 / second
@@ -694,7 +752,7 @@ public class JsonParserR4Test extends BaseTest {
 	 * 18:33:12.453 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 300 passes - 43ms / pass - 22.7 / second
 	 * 18:33:16.195 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 400 passes - 42ms / pass - 23.6 / second
 	 * 18:33:19.912 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 500 passes - 41ms / pass - 24.2 / second
-	 *
+	 * <p>
 	 * 2019-09-19 - Post #1489
 	 * 20:44:38.557 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 200 passes - 37ms / pass - 27.0 / second
 	 * 20:44:41.459 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 300 passes - 34ms / pass - 29.1 / second
@@ -730,14 +788,13 @@ public class JsonParserR4Test extends BaseTest {
 	 * 15:22:39.456 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2400 passes - 12ms / pass - 79.7 / second
 	 * 15:22:40.699 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2500 passes - 12ms / pass - 79.7 / second
 	 * 15:22:42.135 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:638] - Parsed 2600 passes - 12ms / pass - 79.3 / second
-	 *
+	 * <p>
 	 * 2020-02-27 - Post #1673
 	 * 21:29:38.157 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2200 passes - 11ms / pass - 83.4 / second
 	 * 21:29:39.374 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2300 passes - 12ms / pass - 83.3 / second
 	 * 21:29:40.576 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2400 passes - 12ms / pass - 83.3 / second
 	 * 21:29:41.778 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2500 passes - 12ms / pass - 83.3 / second
 	 * 21:29:42.999 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:687] - Parsed 2600 passes - 12ms / pass - 83.3 / second
-	 * 
 	 */
 	@Test
 	@Disabled

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,10 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReindexingSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
-import ca.uhn.fhir.jpa.validation.JpaFhirInstanceValidator;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
-import ca.uhn.fhir.jpa.validation.ValidationSettings;
+import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.context.annotation.Bean;
@@ -82,7 +80,7 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	}
 
 	@Primary
-	@Bean()
+	@Bean
 	public IValidationSupport validationSupportChain() {
 		return new CachingValidationSupport(jpaValidationSupportChain());
 	}
@@ -90,10 +88,17 @@ public abstract class BaseConfigDstu3Plus extends BaseConfig {
 	@Bean(name = "myInstanceValidator")
 	@Lazy
 	public IInstanceValidatorModule instanceValidator() {
-		FhirInstanceValidator val = new JpaFhirInstanceValidator(fhirContext());
+		FhirInstanceValidator val = new FhirInstanceValidator(validationSupportChain());
+		val.setValidatorResourceFetcher(jpaValidatorResourceFetcher());
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		val.setValidationSupport(validationSupportChain());
 		return val;
+	}
+
+	@Bean
+	@Lazy
+	public ValidatorResourceFetcher jpaValidatorResourceFetcher() {
+		return new ValidatorResourceFetcher();
 	}
 
 	@Bean

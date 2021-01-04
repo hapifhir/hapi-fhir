@@ -1,0 +1,7 @@
+---
+type: add
+issue: 2264
+title: "A new interceptor called the
+   [Repository Validating Interceptor](/hapi-fhir/docs/validation/repository_validating_interceptor.html)
+   has been added. This new interceptor allows a HAPI FHIR JPA Server to declare rules about mandatory profiles
+   that all resources stored to the server must declare conformance and/or correctly validate against."

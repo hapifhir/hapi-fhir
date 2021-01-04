@@ -4,7 +4,7 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.Objects;
 
 /**
  * This class can be used to build a Bundle resource to be used as a FHIR transaction. Convenience methods provide
@@ -71,8 +73,6 @@ public class BundleBuilder {
 
 		myBundleDef = myContext.getResourceDefinition("Bundle");
 		myBundle = (IBaseBundle) myBundleDef.newInstance();
-
-		setBundleField("type", "transaction");
 
 		myEntryChild = myBundleDef.getChildByName("entry");
 		myEntryDef = myEntryChild.getChildByName("entry");
@@ -144,11 +144,14 @@ public class BundleBuilder {
 	}
 
 	/**
-	 * Adds an entry containing an update (PUT) request
+	 * Adds an entry containing an update (PUT) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
 	 *
 	 * @param theResource The resource to update
 	 */
-	public UpdateBuilder addUpdateEntry(IBaseResource theResource) {
+	public UpdateBuilder addTransactionUpdateEntry(IBaseResource theResource) {
+		setBundleField("type", "transaction");
+
 		IBase request = addEntryAndReturnRequest(theResource);
 
 		// Bundle.entry.request.url
@@ -165,11 +168,14 @@ public class BundleBuilder {
 	}
 
 	/**
-	 * Adds an entry containing an create (POST) request
+	 * Adds an entry containing an create (POST) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
 	 *
 	 * @param theResource The resource to create
 	 */
 	public CreateBuilder addCreateEntry(IBaseResource theResource) {
+		setBundleField("type", "transaction");
+
 		IBase request = addEntryAndReturnRequest(theResource);
 
 		String resourceType = myContext.getResourceType(theResource);
@@ -212,6 +218,11 @@ public class BundleBuilder {
 		return (IBaseBackboneElement) searchInstance;
 	}
 
+	/**
+	 *
+	 * @param theResource
+	 * @return
+	 */
 	public IBase addEntryAndReturnRequest(IBaseResource theResource) {
 		Validate.notNull(theResource, "theResource must not be null");
 
@@ -310,7 +321,7 @@ public class BundleBuilder {
 		return retVal;
 	}
 
-	public class UpdateBuilder {
+	public static class UpdateBuilder {
 
 		private final IPrimitiveType<?> myUrl;
 
@@ -338,7 +349,8 @@ public class BundleBuilder {
 		 * Make this create a Conditional Create
 		 */
 		public void conditional(String theConditionalUrl) {
-			IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
+			BaseRuntimeElementDefinition<?> stringDefinition = Objects.requireNonNull(myContext.getElementDefinition("string"));
+			IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) stringDefinition.newInstance();
 			ifNoneExist.setValueAsString(theConditionalUrl);
 
 			myEntryRequestIfNoneExistChild.getMutator().setValue(myRequest, ifNoneExist);

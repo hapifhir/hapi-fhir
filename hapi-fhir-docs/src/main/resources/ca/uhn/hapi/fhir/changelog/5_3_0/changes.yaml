@@ -13,4 +13,5 @@
         <li>Spring Data (JPA Server): 2.2.0.RELEASE -&gt; 2.4.2</li>
         <li>Hibernate Search (JPA Server): 5.11.5.FINAL -&gt; 6.0.0.Final</li>
         <li>Lucene(HAPI FHIR JPA Server): 5.5.5 -&gt; 8.7.0</li>
+        <li>Spring Boot (JPA Starter): 2.2.6.RELEASE -&gt; 2.4.1</li>
     </ul>"

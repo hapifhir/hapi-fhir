@@ -60,6 +60,7 @@ import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
+import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
@@ -155,7 +156,7 @@ import java.util.Date;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -190,6 +191,7 @@ public abstract class BaseConfig {
 	public static final String SEARCH_BUILDER = "SearchBuilder";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	private static final String HAPI_DEFAULT_SCHEDULER_GROUP = "HAPI";
+	public static final String REPOSITORY_VALIDATING_RULE_BUILDER = "repositoryValidatingRuleBuilder";
 
 	@Autowired
 	protected Environment myEnv;
@@ -505,6 +507,12 @@ public abstract class BaseConfig {
 	@Scope("prototype")
 	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(RequestDetails theRequest, Search theSearch, SearchCoordinatorSvcImpl.SearchTask theSearchTask, ISearchBuilder theSearchBuilder) {
 		return new PersistedJpaSearchFirstPageBundleProvider(theSearch, theSearchTask, theSearchBuilder, theRequest);
+	}
+
+	@Bean(name = REPOSITORY_VALIDATING_RULE_BUILDER)
+	@Scope("prototype")
+	public RepositoryValidatingRuleBuilder repositoryValidatingRuleBuilder() {
+		return new RepositoryValidatingRuleBuilder();
 	}
 
 	@Bean
