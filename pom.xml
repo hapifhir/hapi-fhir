@@ -1160,12 +1160,16 @@
 				<artifactId>apache-jena-libs</artifactId>
 				<version>${jena_version}</version>
 				<type>pom</type>
-		      <exclusions>
+				<exclusions>
 					<exclusion>
-				      <groupId>com.github.jsonld-java</groupId>
-			         <artifactId>jsonld-java</artifactId>
-		         </exclusion>
-	         </exclusions>
+						<groupId>com.github.jsonld-java</groupId>
+						<artifactId>jsonld-java</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jcl-over-slf4j</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
@@ -1508,11 +1512,6 @@
 				<version>${slf4j_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${slf4j_version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-beans</artifactId>
 				<version>${spring_version}</version>
@@ -1530,6 +1529,11 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
+				<version>${spring_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jcl</artifactId>
 				<version>${spring_version}</version>
 			</dependency>
 			<dependency>
