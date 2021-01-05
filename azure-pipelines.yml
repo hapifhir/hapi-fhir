@@ -158,7 +158,7 @@ jobs:
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'Cobertura'
-          summaryFileLocation: $(Pipeline.Workspace)/coveragereport/Summary.xml
+          summaryFileLocation: $(Pipeline.Workspace)/coveragereport/Cobertura.xml
           reportDirectory: $(Pipeline.Workspace)/coveragereport
           failIfCoverageEmpty: false
 
