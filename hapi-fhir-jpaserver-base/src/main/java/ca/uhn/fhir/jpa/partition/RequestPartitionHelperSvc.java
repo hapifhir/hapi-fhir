@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.packages.PackageBinaryRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -68,14 +69,20 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myPartitioningBlacklist.add("Subscription");
 		myPartitioningBlacklist.add("SearchParameter");
 
-		// Validation
+		// Validation and Conformance
 		myPartitioningBlacklist.add("StructureDefinition");
 		myPartitioningBlacklist.add("Questionnaire");
+		myPartitioningBlacklist.add("CapabilityStatement");
+		myPartitioningBlacklist.add("CompartmentDefinition");
+		myPartitioningBlacklist.add("OperationDefinition");
 
 		// Terminology
 		myPartitioningBlacklist.add("ConceptMap");
 		myPartitioningBlacklist.add("CodeSystem");
 		myPartitioningBlacklist.add("ValueSet");
+		myPartitioningBlacklist.add("NamingSystem");
+		myPartitioningBlacklist.add("StructureMap");
+
 	}
 
 	/**
@@ -91,7 +98,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType)) || theRequest instanceof SystemRequestDetails) {
 				return RequestPartitionId.defaultPartition();
 			}
 
@@ -123,7 +130,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType)) || theRequest instanceof SystemRequestDetails) {
 				return RequestPartitionId.defaultPartition();
 			}
 
