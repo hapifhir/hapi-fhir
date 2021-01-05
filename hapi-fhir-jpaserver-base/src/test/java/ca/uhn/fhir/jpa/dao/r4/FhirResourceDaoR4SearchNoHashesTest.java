@@ -143,6 +143,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setDisableHashBasedSearches(false);
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@BeforeEach
@@ -1211,7 +1212,6 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			IBundleProvider result = myObservationDao.search(map);
 			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
 		}
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -1235,7 +1235,6 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			IBundleProvider result = myObservationDao.search(map);
 			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
 		}
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -1345,8 +1344,8 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			assertThat(toUnqualifiedVersionlessIdValues(result), empty());
 		}
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
+	
 	@Test
 	public void testSearchDateWrongParam() {
 		Patient p1 = new Patient();

@@ -158,6 +158,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@BeforeEach
@@ -601,7 +602,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertEquals(0, found.size().intValue());
 		}
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -683,8 +683,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertThat(list, Matchers.empty());
 		}
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
+	
 	@Test
 	public void testChoiceParamString() {
 
@@ -3501,8 +3501,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
 		assertEquals(4, actual.size());
 		assertThat(actual, contains(id4, id3, id2, id1));
-
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test

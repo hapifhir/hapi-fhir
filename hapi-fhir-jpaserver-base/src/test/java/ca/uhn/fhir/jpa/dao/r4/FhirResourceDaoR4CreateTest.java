@@ -51,6 +51,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setDefaultSearchParamsCanBeOverridden(new DaoConfig().isDefaultSearchParamsCanBeOverridden());
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
@@ -369,8 +370,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertEquals(1, ids.size());
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
-		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
@@ -408,7 +407,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
@@ -446,7 +444,6 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
@@ -484,6 +481,5 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		
 		ourLog.info("Observation2: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 }

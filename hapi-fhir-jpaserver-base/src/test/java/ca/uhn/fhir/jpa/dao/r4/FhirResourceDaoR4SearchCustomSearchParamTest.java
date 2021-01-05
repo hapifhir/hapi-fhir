@@ -86,6 +86,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	@AfterEach
 	public void after() {
 		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@BeforeEach
@@ -132,7 +133,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		// Ensure that no exceptions are thrown
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
+
 	}
 	
 	@Test
@@ -153,7 +154,6 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		// Ensure that no exceptions are thrown
 		mySearchParameterDao.create(fooSp, mySrd);
 		mySearchParamRegistry.forceRefresh();
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	/**

@@ -62,6 +62,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@BeforeEach
@@ -419,7 +420,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -442,7 +442,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertExpunged(myTwoVersionObservationId.withVersion("1"));
 		assertExpunged(myTwoVersionObservationId.withVersion("2"));
 		assertExpunged(myDeletedObservationId);
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test

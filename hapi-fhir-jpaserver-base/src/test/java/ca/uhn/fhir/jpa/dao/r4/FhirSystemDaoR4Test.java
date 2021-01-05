@@ -110,6 +110,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@BeforeEach
@@ -3199,8 +3200,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals(id.getValue(), id2.getValue());
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
+	
 	@Test
 	public void testTransactionWithIfMatch() {
 		Patient p = new Patient();

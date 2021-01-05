@@ -185,6 +185,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@BeforeEach
@@ -1263,7 +1264,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 12300, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm"))));
 		assertThat(actual, contains(id));
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -1294,9 +1294,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m"))));
-		assertThat(actual, contains(id));
-		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
+		assertThat(actual, contains(id));		
 	}
 	
 	@Test
@@ -2719,7 +2717,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(ChargeItem.SP_PRICE_OVERRIDE, new QuantityParam().setValue(123).setUnits("$").setSystem("urn:iso:std:iso:4217"));
 		assertEquals(1, myChargeItemDao.search(map).size().intValue());
 
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -3084,8 +3081,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id2));
 			assertEquals(1, found.size().intValue());
 		}
-
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test

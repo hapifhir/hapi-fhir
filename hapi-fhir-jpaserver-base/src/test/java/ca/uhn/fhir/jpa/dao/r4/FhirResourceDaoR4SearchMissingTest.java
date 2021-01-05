@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -29,6 +30,11 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeResetMissing() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+	}
+	
+	@AfterEach
+	public void afterResetSearch() {
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
@@ -87,7 +93,6 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
 		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -105,7 +110,6 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
 		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@SuppressWarnings("unused")
@@ -342,7 +346,6 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	@Test
@@ -384,7 +387,6 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
 		
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 	
 	
