@@ -148,10 +148,12 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
 			.patterns(Arrays.asList("resourcetable-*", "termconcept-*"))
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
+
 		int colonIndex = theHostAndPort.indexOf(":");
 		String host = theHostAndPort.substring(0, colonIndex);
 		Integer port = Integer.valueOf(theHostAndPort.substring(colonIndex + 1));
 		String qualifiedHost = theProtocol + "://" + host;
+
 		try {
 			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(qualifiedHost, port, theUsername, thePassword);
 			ourLog.info("Adding starter template for large ngram diffs");
