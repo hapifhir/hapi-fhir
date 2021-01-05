@@ -93,7 +93,7 @@ public class RepositoryValidatingInterceptor {
 	/**
 	 * Interceptor hook method. This method should not be called directly.
 	 */
-	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	void create(IBaseResource theResource) {
 		handle(theResource);
 	}
@@ -101,7 +101,7 @@ public class RepositoryValidatingInterceptor {
 	/**
 	 * Interceptor hook method. This method should not be called directly.
 	 */
-	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 	void update(IBaseResource theOldResource, IBaseResource theNewResource) {
 		handle(theNewResource);
 	}
