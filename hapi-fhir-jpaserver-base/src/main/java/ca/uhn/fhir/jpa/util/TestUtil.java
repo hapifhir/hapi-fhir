@@ -194,13 +194,20 @@ public class TestUtil {
 						hasEmbeddedId ||
 						isField, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
 
+				int columnLength = 16;
+				String columnName = null;
 				if (hasColumn) {
-					String columnName = nextField.getAnnotation(Column.class).name();
-					int columnLength = nextField.getAnnotation(Column.class).length();
+					columnName = nextField.getAnnotation(Column.class).name();
+					columnLength = nextField.getAnnotation(Column.class).length();
+				}
+				if (hasJoinColumn) {
+					columnName = nextField.getAnnotation(JoinColumn.class).name();
+				}
+
+				if (columnName != null) {
 					if (nextField.getType().isAssignableFrom(String.class)) {
+						// MySQL treats each char as the max possible byte count in UTF-8 for its calculations
 						columnLength = columnLength * 4;
-					} else {
-						columnLength = 16;
 					}
 
 					columnNameToLength.put(columnName, columnLength);
