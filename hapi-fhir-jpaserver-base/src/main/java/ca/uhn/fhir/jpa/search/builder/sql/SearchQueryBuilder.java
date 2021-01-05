@@ -98,7 +98,6 @@ public class SearchQueryBuilder {
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
 	private boolean dialectIsMsSql;
 	private boolean dialectIsMySql;
-	private boolean dialectIsMariaDb;
 
 	/**
 	 * Constructor
@@ -119,13 +118,10 @@ public class SearchQueryBuilder {
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
-		if (myDialect instanceof org.hibernate.dialect.MySQL57Dialect){
+		if (myDialect instanceof org.hibernate.dialect.MySQLDialect){
 			dialectIsMySql = true;
 		}
-		if (myDialect instanceof org.hibernate.dialect.MariaDB53Dialect){
-			dialectIsMariaDb = true;
-		}
-		if (myDialect instanceof org.hibernate.dialect.SQLServer2012Dialect){
+		if (myDialect instanceof org.hibernate.dialect.SQLServerDialect){
 			dialectIsMsSql = true;
 		}
 
@@ -580,29 +576,31 @@ public class SearchQueryBuilder {
 	}
 
 	public void addSortString(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
-		if ((dialectIsMariaDb || dialectIsMySql || dialectIsMsSql)) {
+		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
-			// Null values are always treated as less than non-null values.
-			// As such special handling is required here.
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName = theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
+			final StringBuilder sortColumnNameBuilder = new StringBuilder();
+			// The following block has been commented out for performance.
+			// Uncomment if NullOrder is needed for MariaDB, MySQL or MSSQL
+			/*
+			// Null values are always treated as less than non-null values.
 			if ((theTheAscending && theNullOrder == OrderObject.NullOrder.LAST)
 				|| (!theTheAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
-				// Coalescing the value with a String consisting of 200 'z' characters will ensure that the rows appear
-				// in the correct order with nulls being treated as the highest String values.
-				char[] chars = new char[200];
-				Arrays.fill(chars, 'z');
-				String lastString = new String(chars);
-				sortColumnName = "COALESCE(" + sortColumnName + ", '" + lastString + "')";
+				// In this case, precede the "order by" column with a case statement that returns
+				// 1 for null and 0 non-null so that nulls will be sorted as greater than non-nulls.
+				sortColumnNameBuilder.append( "CASE WHEN " ).append( sortColumnName ).append( " IS NULL THEN 1 ELSE 0 END" ).append(direction).append(", ");
 			}
-			mySelect.addCustomOrderings(sortColumnName + direction);
+		   */
+			sortColumnNameBuilder.append(sortColumnName).append(direction);
+			mySelect.addCustomOrderings(sortColumnNameBuilder.toString());
 		} else {
 			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
 		}
 	}
 
 	public void addSortNumeric(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
-		if ((dialectIsMariaDb || dialectIsMySql || dialectIsMsSql)) {
+		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			// Null values are always treated as less than non-null values.
 			// As such special handling is required here.
@@ -624,21 +622,24 @@ public class SearchQueryBuilder {
 	}
 
 	public void addSortDate(DbColumn theTheColumnValueNormalized, boolean theTheAscending, OrderObject.NullOrder theNullOrder) {
-		if ((dialectIsMariaDb || dialectIsMySql || dialectIsMsSql)) {
+		if ((dialectIsMySql || dialectIsMsSql)) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
-			// Null values are always treated as less than non-null values.
-			// As such special handling is required here.
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName = theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
+			final StringBuilder sortColumnNameBuilder = new StringBuilder();
+			// The following block has been commented out for performance.
+			// Uncomment if NullOrder is needed for MariaDB, MySQL or MSSQL
+			/*
+			// Null values are always treated as less than non-null values.
 			if ((theTheAscending && theNullOrder == OrderObject.NullOrder.LAST)
 				|| (!theTheAscending && theNullOrder == OrderObject.NullOrder.FIRST)) {
-				// Coalescing the value with a date well into the future will ensure that the rows appear
-				// in the correct order with nulls being treated as the highest Date values.
-				sortColumnName = "COALESCE(" + sortColumnName + ", '9000-01-01')";
-			} else {
-				direction = theTheAscending ? " ASC" : " DESC";
+				// In this case, precede the "order by" column with a case statement that returns
+				// 1 for null and 0 non-null so that nulls will be sorted as greater than non-nulls.
+				sortColumnNameBuilder.append( "CASE WHEN " ).append( sortColumnName ).append( " IS NULL THEN 1 ELSE 0 END" ).append(direction).append(", ");
 			}
-			mySelect.addCustomOrderings(sortColumnName + direction);
+ 		   */
+			sortColumnNameBuilder.append(sortColumnName).append(direction);
+			mySelect.addCustomOrderings(sortColumnNameBuilder.toString());
 		} else {
 			addSort(theTheColumnValueNormalized, theTheAscending, theNullOrder);
 		}

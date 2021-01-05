@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.OrderObject;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -88,7 +89,8 @@ public class SearchQueryBuilderMySqlTest {
 	@Test
 	public void testAddSortStringNoNullOrder() {
 		GeneratedSql generatedSql = buildSqlWithStringSort(true,null);
-		assertTrue(generatedSql.getSql().endsWith("ORDER BY COALESCE(t1.SP_VALUE_NORMALIZED, \'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz\') ASC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
+		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(false,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED DESC limit ?"));
@@ -121,10 +123,12 @@ public class SearchQueryBuilderMySqlTest {
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(false, OrderObject.NullOrder.FIRST);
-		assertTrue(generatedSql.getSql().endsWith("ORDER BY COALESCE(t1.SP_VALUE_NORMALIZED, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz') DESC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END DESC, t1.SP_VALUE_NORMALIZED DESC limit ?"));
+		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED DESC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(true, OrderObject.NullOrder.LAST);
-		assertTrue(generatedSql.getSql().endsWith("ORDER BY COALESCE(t1.SP_VALUE_NORMALIZED, 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz') ASC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_NORMALIZED IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_NORMALIZED ASC limit ?"));
+		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED ASC limit ?"));
 
 		generatedSql = buildSqlWithStringSort(false, OrderObject.NullOrder.LAST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_NORMALIZED DESC limit ?"));
@@ -134,7 +138,8 @@ public class SearchQueryBuilderMySqlTest {
 	@Test
 	public void testAddSortDateNoNullOrder() {
 		GeneratedSql generatedSql = buildSqlWithDateSort(true,null);
-		assertTrue(generatedSql.getSql().endsWith("ORDER BY COALESCE(t1.SP_VALUE_LOW, '9000-01-01') ASC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_LOW ASC limit ?"));
+		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(false,null);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
@@ -167,10 +172,12 @@ public class SearchQueryBuilderMySqlTest {
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(false, OrderObject.NullOrder.FIRST);
-		assertTrue(generatedSql.getSql().endsWith("ORDER BY COALESCE(t1.SP_VALUE_LOW, '9000-01-01') DESC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END DESC, t1.SP_VALUE_LOW DESC limit ?"));
+		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(true, OrderObject.NullOrder.LAST);
-		assertTrue(generatedSql.getSql().endsWith("ORDER BY COALESCE(t1.SP_VALUE_LOW, '9000-01-01') ASC limit ?"));
+//		assertTrue(generatedSql.getSql().endsWith("ORDER BY CASE WHEN t1.SP_VALUE_LOW IS NULL THEN 1 ELSE 0 END ASC, t1.SP_VALUE_LOW ASC limit ?"));
+		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW ASC limit ?"));
 
 		generatedSql = buildSqlWithDateSort(false, OrderObject.NullOrder.LAST);
 		assertTrue(generatedSql.getSql().endsWith("ORDER BY t1.SP_VALUE_LOW DESC limit ?"));
