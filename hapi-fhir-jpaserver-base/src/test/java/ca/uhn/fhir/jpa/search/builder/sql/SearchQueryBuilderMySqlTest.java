@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
@@ -25,18 +25,18 @@ public class SearchQueryBuilderMySqlTest {
 	@Mock
 	private SqlObjectFactory mySqlObjectFactory;
 	@Mock
-	private HibernateDialectProvider myHibernateDialectProvider;
+	private HibernatePropertiesProvider myHibernatePropertiesProvider;
 
 	private final FhirContext myFhirContext = FhirContext.forR4();
 
 	@BeforeEach
 	public void beforeInitMocks() {
 		MockitoAnnotations.initMocks(this);
-		when(myHibernateDialectProvider.getDialect()).thenReturn(new org.hibernate.dialect.MySQL57Dialect());
+		when(myHibernatePropertiesProvider.getDialect()).thenReturn(new org.hibernate.dialect.MySQL57Dialect());
 	}
 
 	private SearchQueryBuilder createSearchQueryBuilder() {
-		return new SearchQueryBuilder(myFhirContext, new ModelConfig(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernateDialectProvider, false);
+		return new SearchQueryBuilder(myFhirContext, new ModelConfig(), new PartitionSettings(), RequestPartitionId.allPartitions(), "Patient", mySqlObjectFactory, myHibernatePropertiesProvider, false);
 	}
 
 	@Test
