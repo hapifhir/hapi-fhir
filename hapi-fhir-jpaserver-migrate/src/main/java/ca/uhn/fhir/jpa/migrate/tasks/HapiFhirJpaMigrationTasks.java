@@ -70,11 +70,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init500(); // 20200218 - 20200513
 		init501(); // 20200514 - 20200515
 		init510(); // 20200516 - 20201028
-		init520(); // 20201029 - Present
+		init530(); // 20201029 - Present
 	}
 
-	protected void init520() {
-		Builder version = forVersion(VersionEnum.V5_2_0);
+	protected void init530() {
+		Builder version = forVersion(VersionEnum.V5_3_0);
 
 		Builder.BuilderWithTableName mdmLink = version.onTable("MPI_LINK");
 		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nonNullable().type(ColumnTypeEnum.LONG);
