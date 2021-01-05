@@ -65,21 +65,23 @@ public class MdmEidUpdateService {
 	@Autowired
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
-	void handleMdmUpdate(IAnyResource theResource, MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
-		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theResource);
+	void handleMdmUpdate(IAnyResource theTargetResource, MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate, MdmTransactionContext theMdmTransactionContext) {
+		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theTargetResource);
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+
 		if (updateContext.isRemainsMatchedToSameGoldenResource()) {
 			// Copy over any new external EIDs which don't already exist.
-			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 			if (!updateContext.isIncomingResourceHasAnEid() || updateContext.isHasEidsInCommon()) {
 				//update to patient that uses internal EIDs only.
-				myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
+				myMdmLinkSvc.updateLink(updateContext.getMatchedGoldenResource(), theTargetResource, theMatchedGoldenResourceCandidate.getMatchResult(), MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 			} else if (!updateContext.isHasEidsInCommon()) {
-				handleNoEidsInCommon(theResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
+				handleNoEidsInCommon(theTargetResource, theMatchedGoldenResourceCandidate, theMdmTransactionContext, updateContext);
 			}
 		} else {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
-			linkToNewGoldenResourceAndFlagAsDuplicate(theResource, updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			// TODO NG - Do we need to merge fields from the old golden resource to the new golden resource?
 		}
 	}
 
@@ -111,7 +113,7 @@ public class MdmEidUpdateService {
 
 	private void createNewGoldenResourceAndFlagAsDuplicate(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext, IAnyResource theOldGoldenResource) {
 		log(theMdmTransactionContext, "Duplicate detected based on the fact that both resources have different external EIDs.");
-		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource);
+		IAnyResource newGoldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(theResource, theMdmTransactionContext);
 
 		myMdmLinkSvc.updateLink(newGoldenResource, theResource, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);
 		myMdmLinkSvc.updateLink(newGoldenResource, theOldGoldenResource, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, theMdmTransactionContext);

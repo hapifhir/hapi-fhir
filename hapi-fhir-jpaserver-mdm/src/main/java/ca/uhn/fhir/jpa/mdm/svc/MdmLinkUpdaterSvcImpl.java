@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -63,6 +64,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	IMdmSettings myMdmSettings;
 	@Autowired
 	MessageHelper myMessageHelper;
+	@Autowired
+	IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	@Transactional
 	@Override

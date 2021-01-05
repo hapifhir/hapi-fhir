@@ -8,6 +8,7 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -352,7 +353,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		//In a normal situation, janePatient2 would just match to jane patient, but here we need to hack it so they are their
 		//own individual GoldenResource for the purpose of this test.
-		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2);
+		IAnyResource goldenResource = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient2, new MdmTransactionContext());
 		myMdmLinkSvc.updateLink(goldenResource, janePatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 		assertThat(janePatient, is(not(sameGoldenResourceAs(janePatient2))));
 
@@ -443,7 +444,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	public void testCreateGoldenResourceFromMdmTarget() {
 		// Create Use Case #2 - adding patient with no EID
 		Patient janePatient = buildJanePatient();
-		Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient);
+		Patient janeGoldenResourcePatient = myGoldenResourceHelper.createGoldenResourceFromMdmSourceResource(janePatient, new MdmTransactionContext());
 
 		// golden record now contains HAPI-generated EID and HAPI tag
 		assertTrue(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient));

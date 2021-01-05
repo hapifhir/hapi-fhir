@@ -73,16 +73,18 @@ public class GoldenResourceHelper {
 	/**
 	 * Creates a copy of the specified resource. This method will carry over resource EID if it exists. If it does not exist,
 	 * a randomly generated UUID EID will be created.
-	 *
-	 * @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
+	 *  @param <T>                 Supported MDM resource type (e.g. Patient, Practitioner)
 	 * @param theIncomingResource The resource that will be used as the starting point for the MDM linking.
+	 * @param theMdmTransactionContext
 	 */
-	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource) {
+	public <T extends IAnyResource> T createGoldenResourceFromMdmSourceResource(T theIncomingResource, MdmTransactionContext theMdmTransactionContext) {
 		validateContextSupported();
 
 		// get a ref to the actual ID Field
 		RuntimeResourceDefinition resourceDefinition = myFhirContext.getResourceDefinition(theIncomingResource);
 		IBaseResource newGoldenResource = resourceDefinition.newInstance();
+
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theIncomingResource, newGoldenResource, theMdmTransactionContext);
 
 		// hapi has 2 metamodels: for children and types
 		BaseRuntimeChildDefinition goldenResourceIdentifier = resourceDefinition.getChildByName(FIELD_NAME_IDENTIFIER);
