@@ -58,7 +58,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
@@ -561,8 +560,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		assertEquals(1, response.getEntry().size());
 		assertNull(response.getTotalElement().getValue());
 
-		runInTransaction(()->{
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(()->new IllegalStateException());
+		runInTransaction(() -> {
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(1, search.getNumBlocked());
 			assertEquals(2, search.getTotalCount());
@@ -577,7 +576,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	 */
 	@Test
 	public void testDefaultInterceptorAllowsAll() {
-		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
+		});
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
@@ -598,8 +598,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
 		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirCtx, response, "next"));
 
-		runInTransaction(()->{
-			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(()->new IllegalStateException());
+		runInTransaction(() -> {
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
 			assertEquals(3, search.getNumFound());
 			assertEquals(0, search.getNumBlocked());
 			assertEquals(3, search.getTotalCount());
@@ -611,7 +611,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	 */
 	@Test
 	public void testDefaultInterceptorAllowsFailure() {
-		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {});
+		myConsentInterceptor = new ConsentInterceptor(new IConsentService() {
+		});
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();

@@ -6,7 +6,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
-import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -50,6 +50,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.StringContains;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -125,6 +127,7 @@ import java.util.concurrent.Future;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -286,8 +289,42 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
 			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
 		});
+	}
+
+	@Test
+	public void testTermConceptReindexingDoesntDuplicateData() {
+		myDaoConfig.setSchedulingDisabled(true);
 
 
+		CodeSystem cs = new CodeSystem();
+		cs.setId("nhin-use");
+		cs.setUrl("http://zoop.com");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("zoop1").setDisplay("zoop_disp1").setDefinition("zoop_defi1");
+		cs.addConcept().setCode("zoop2").setDisplay("zoop_disp2").setDefinition("zoop_defi2");
+		cs.addConcept().setCode("zoop3").setDisplay("zoop_disp3").setDefinition("zoop_defi3");
+
+		IIdType id1 = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
+
+		runInTransaction(() -> {
+			assertEquals(3L, myTermConceptDao.count());
+
+			SearchSession session = Search.session(myEntityManager);
+			List<TermConcept> termConcepts = session.search(TermConcept.class).where(f -> f.matchAll()).fetchAllHits();
+			assertEquals(3, termConcepts.size());
+		});
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		runInTransaction(() -> {
+			assertEquals(3L, myTermConceptDao.count());
+
+			SearchSession session = Search.session(myEntityManager);
+			List<TermConcept> termConcepts = session.search(TermConcept.class).where(f -> f.matchAll()).fetchAllHits();
+			assertEquals(3, termConcepts.size());
+		});
 	}
 
 	@Test
@@ -3948,7 +3985,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		String uuid = UUID.randomUUID().toString();
 
 		runInTransaction(() -> {
-			Search search = new Search();
+			ca.uhn.fhir.jpa.entity.Search search = new ca.uhn.fhir.jpa.entity.Search();
 			SearchCoordinatorSvcImpl.populateSearchEntity(map, "Encounter", uuid, normalized, search, RequestPartitionId.allPartitions());
 			search.setStatus(SearchStatusEnum.FAILED);
 			search.setFailureCode(500);

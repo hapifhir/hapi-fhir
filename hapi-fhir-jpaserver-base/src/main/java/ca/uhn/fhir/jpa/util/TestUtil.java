@@ -182,7 +182,9 @@ public class TestUtil {
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
 				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
-				boolean isField = nextField.getAnnotation(org.hibernate.search.annotations.Field.class) != null;
+				boolean isField = nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField.class) != null;
+				isField |= nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField.class) != null;
+				isField |= nextField.getAnnotation(org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField.class) != null;
 				Validate.isTrue(
 					hasEmbedded ||
 						hasColumn ||

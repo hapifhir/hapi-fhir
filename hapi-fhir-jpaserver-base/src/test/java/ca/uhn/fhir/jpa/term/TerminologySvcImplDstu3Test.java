@@ -145,10 +145,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			TermCodeSystemVersion cs = new TermCodeSystemVersion();
 			cs.setResource(table);
 
-			TermConcept code1 = new TermConcept(cs, "50015-7");
-			TermConcept code2 = new TermConcept(cs, "43343-3");
-			TermConcept code3 = new TermConcept(cs, "43343-4");
-			TermConcept code4 = new TermConcept(cs, "47239-9");
+			TermConcept code1 = new TermConcept(cs, "50015-7"); // has -3 as a child
+			TermConcept code2 = new TermConcept(cs, "43343-3"); // has -4 as a child
+			TermConcept code3 = new TermConcept(cs, "43343-4"); //has no children
+			TermConcept code4 = new TermConcept(cs, "47239-9"); //has no children
 
 			code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
 			code1.addPropertyCoding(
@@ -1147,7 +1147,8 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("50015-7,43343-3,43343-4,47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+
+		assertThat(codes.toString(), codes, containsInAnyOrder("43343-4", "47239-9"));
 	}
 
 	@Test

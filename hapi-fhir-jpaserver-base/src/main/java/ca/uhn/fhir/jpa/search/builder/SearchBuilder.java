@@ -31,7 +31,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.config.HapiFhirLocalContainerEntityManagerFactoryBean;
-import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
@@ -173,7 +173,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
-	private HibernateDialectProvider myDialectProvider;
+	private HibernatePropertiesProvider myDialectProvider;
 
 	/**
 	 * Constructor

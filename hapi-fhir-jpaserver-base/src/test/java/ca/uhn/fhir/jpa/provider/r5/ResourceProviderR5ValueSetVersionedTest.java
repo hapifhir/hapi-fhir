@@ -1097,64 +1097,18 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
-
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("8491-3", concept.getCode());
-			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("8492-1", concept.getCode());
-			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 		});
 	}
 
@@ -1174,64 +1128,18 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration v2", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
-
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter v2", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("8491-3", concept.getCode());
-			assertEquals("Systolic blood pressure 1 hour minimum v2", concept.getDisplay());
-			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("8492-1", concept.getCode());
-			assertEquals("Systolic blood pressure 8 hour minimum v2", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
 		});
 	}
 
