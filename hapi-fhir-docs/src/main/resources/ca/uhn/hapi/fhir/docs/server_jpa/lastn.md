@@ -16,7 +16,7 @@ As described in the [FHIR specification](http://hl7.org/fhir/observation-operati
 
 # Limitations
 
-Currently only Elasticsearch versions up to 6.5.4 are supported.
+Currently only Elasticsearch version 7.10.0 is officially supported.
 
 Search parameters other than those listed above are currently not supported.
 
