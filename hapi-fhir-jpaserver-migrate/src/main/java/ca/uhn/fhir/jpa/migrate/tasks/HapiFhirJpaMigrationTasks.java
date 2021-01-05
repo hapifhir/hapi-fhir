@@ -84,7 +84,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.toColumn("GOLDEN_RESOURCE_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
 		
-		// Version 520 or 530?
 		//-- Add new Table, HFJ_SPIDX_QUANTITY_NRML
 		version.addIdGenerator("20201222.1", "SEQ_SPIDX_QUANTITY_NRML");
 		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20201222.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
