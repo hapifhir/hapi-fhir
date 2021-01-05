@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
@@ -86,9 +87,6 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
@@ -333,6 +331,24 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 			for (TermConceptDesignation next : theConcept.getDesignations()) {
 				myConceptDesignationDao.save(next);
+			}
+		}
+
+		String codeSystemUri = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
+		for (TermConceptParentChildLink nextParentLink : theConcept.getParents()) {
+			String parentCode = nextParentLink.getParent().getCode();
+			if (!theConcept.hasPropertyCoding("parent", codeSystemUri, parentCode)) {
+				String parentDisplay = nextParentLink.getParent().getDisplay();
+				TermConceptProperty property = theConcept.addPropertyCoding("parent", codeSystemUri, parentCode, parentDisplay);
+				myConceptPropertyDao.save(property);
+			}
+		}
+		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
+			String childCode = nextChildLink.getChild().getCode();
+			if (!theConcept.hasPropertyCoding("child", codeSystemUri, childCode)) {
+				String childDisplay = nextChildLink.getChild().getDisplay();
+				TermConceptProperty property = theConcept.addPropertyCoding("child", codeSystemUri, childCode, childDisplay);
+				myConceptPropertyDao.save(property);
 			}
 		}
 
@@ -684,8 +700,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		for (TermConceptParentChildLink next : theNext.getChildren()) {
 			populateVersion(next.getChild(), theCodeSystemVersion);
 		}
-		theNext.getProperties().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
-		theNext.getDesignations().forEach(t->t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getProperties().forEach(t -> t.setCodeSystemVersion(theCodeSystemVersion));
+		theNext.getDesignations().forEach(t -> t.setCodeSystemVersion(theCodeSystemVersion));
 	}
 
 	private void saveConceptLink(TermConceptParentChildLink next) {

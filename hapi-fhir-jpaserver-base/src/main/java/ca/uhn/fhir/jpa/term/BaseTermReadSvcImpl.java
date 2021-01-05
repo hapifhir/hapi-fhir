@@ -989,7 +989,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		SearchQuery<TermConcept> termConceptsQuery = searchSession.search(TermConcept.class)
 			.where(f -> finishedQuery).toQuery();
 
-		System.out.println("About to query:" +  termConceptsQuery.queryString());
+		// FIXME: make this a debug
+		ourLog.info("About to query:" +  termConceptsQuery.queryString());
 		List<TermConcept> termConcepts = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
 
 
@@ -1094,8 +1095,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				break;
 			case "parent":
 			case "child":
-				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincParentChild(theF, theB, theFilter);
+				handleFilterParentChild(theF, theB, theFilter);
 				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
@@ -1220,10 +1220,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 	}
 
-	private void handleFilterLoincParentChild(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilterParentChild(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
-				addLoincFilterParentChildEqual(f, b, theFilter.getProperty(), theFilter.getValue());
+				addFilterParentChildEqual(f, b, theFilter.getProperty(), theFilter.getValue());
 				break;
 			case IN:
 				addLoincFilterParentChildIn(f, b, theFilter);
@@ -1247,7 +1247,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
 	}
 
-	private void addLoincFilterParentChildEqual(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
+	private void addFilterParentChildEqual(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
 		logFilteringValueOnProperty(theValue, theProperty);
 		//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
 		//b.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));

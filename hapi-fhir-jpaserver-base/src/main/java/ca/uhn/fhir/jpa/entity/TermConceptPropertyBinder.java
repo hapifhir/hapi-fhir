@@ -26,6 +26,8 @@ import org.hibernate.search.mapper.pojo.bridge.PropertyBridge;
 import org.hibernate.search.mapper.pojo.bridge.binding.PropertyBindingContext;
 import org.hibernate.search.mapper.pojo.bridge.mapping.programmatic.PropertyBinder;
 import org.hibernate.search.mapper.pojo.bridge.runtime.PropertyBridgeWriteContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -36,8 +38,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class TermConceptPropertyBinder implements PropertyBinder {
 
-
 	public static final String CONCEPT_FIELD_PROPERTY_PREFIX = "PROP";
+	private static final Logger ourLog = LoggerFactory.getLogger(TermConceptPropertyBinder.class);
 
 	@Override
 	public void bind(PropertyBindingContext thePropertyBindingContext) {
@@ -65,10 +67,10 @@ public class TermConceptPropertyBinder implements PropertyBinder {
 			if (properties != null) {
 				for (TermConceptProperty next : properties) {
 					theDocument.addValue(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getValue());
-					System.out.println("Adding Prop: " + CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey() + " -- " + next.getValue());
+					ourLog.debug("Adding Prop: {}{} -- {}", CONCEPT_FIELD_PROPERTY_PREFIX, next.getKey(), next.getValue());
 					if (next.getType() == TermConceptPropertyTypeEnum.CODING && isNotBlank(next.getDisplay())) {
-							theDocument.addValue(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getDisplay());
-							System.out.println("Adding multivalue Prop: " + CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey() + " -- " + next.getDisplay());
+						theDocument.addValue(CONCEPT_FIELD_PROPERTY_PREFIX + next.getKey(), next.getDisplay());
+						ourLog.debug("Adding multivalue Prop: {}{} -- {}", CONCEPT_FIELD_PROPERTY_PREFIX, next.getKey(), next.getDisplay());
 					}
 				}
 			}

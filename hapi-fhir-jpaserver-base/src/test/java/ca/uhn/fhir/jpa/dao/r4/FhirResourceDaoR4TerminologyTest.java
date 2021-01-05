@@ -229,7 +229,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
 
-		assertEquals(0, result.getMessages().size());
+		assertEquals(0, result.getMessages().size(), result.getMessages().toString());
 
 	}
 
@@ -491,6 +491,27 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentA", "ParentB", "childAB", "childAAB", "ParentC", "childBA", "childCA"));
 	}
+
+
+	@Test
+	public void testExpandCodeSystemWithParentFilter() {
+		createExternalCsAndLocalVs();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addFilter()
+			.setOp(FilterOperator.EQUAL)
+			.setProperty("parent")
+			.setValue("ParentC");
+
+		ValueSet result = myValueSetDao.expand(vs, null);
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childCA"));
+	}
+
 
 	@Test
 	public void testExpandWithIncludeContainingDashesInInclude() {

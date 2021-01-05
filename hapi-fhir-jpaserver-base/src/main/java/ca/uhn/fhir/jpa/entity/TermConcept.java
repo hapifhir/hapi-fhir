@@ -433,4 +433,18 @@ public class TermConcept implements Serializable {
 		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
 	}
 
+	public boolean hasPropertyCoding(String theKey, String theValueSystem, String theValueCode) {
+		for (TermConceptProperty next : getProperties()) {
+			if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
+				if (theKey.equals(next.getKey())) {
+					if (theValueSystem.equals(next.getCodeSystem())) {
+						if (theValueCode.equals(next.getValue())) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
 }

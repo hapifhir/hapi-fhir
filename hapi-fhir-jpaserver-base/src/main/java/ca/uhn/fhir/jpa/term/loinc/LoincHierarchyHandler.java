@@ -53,18 +53,6 @@ public class LoincHierarchyHandler implements IRecordHandler {
          TermConcept child = getOrCreate(childCode, childCodeText);
 
          parent.addChild(child, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-
-         parent.addPropertyCoding(
-         	"child",
-				ITermLoaderSvc.LOINC_URI,
-				child.getCode(),
-				child.getDisplay());
-
-         child.addPropertyCoding(
-         	"parent",
-				ITermLoaderSvc.LOINC_URI,
-				parent.getCode(),
-				parent.getDisplay());
       }
    }
 
