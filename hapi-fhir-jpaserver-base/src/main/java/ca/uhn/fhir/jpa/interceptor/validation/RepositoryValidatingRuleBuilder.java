@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -34,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Ascii.toLowerCase;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -204,6 +206,77 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 				myRule.setBestPracticeWarningLevel(bestPracticeWarningLevel);
 				return this;
 			}
+
+			/**
+			 * Specifies that the resource should not be rejected from storage even if it does not pass validation.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule dontReject() {
+				myRule.dontReject();
+				return this;
+			}
+
+			/**
+			 * Specifies the minimum validation result severity that should cause a rejection. For example, if
+			 * this is set to <code>ERROR</code> (which is the default), any validation results with a severity
+			 * of <code>ERROR</code> or <code>FATAL</code> will cause the create/update operation to be rejected and
+			 * rolled back, and no data will be saved.
+			 * <p>
+			 * Valid values must be drawn from {@link ResultSeverityEnum}
+			 * </p>
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule rejectOnSeverity(@Nonnull String theSeverity) {
+				ResultSeverityEnum severity = ResultSeverityEnum.fromCode(toLowerCase(theSeverity));
+				Validate.notNull(severity, "Invalid severity code: %s", theSeverity);
+				return rejectOnSeverity(severity);
+			}
+
+			/**
+			 * Specifies the minimum validation result severity that should cause a rejection. For example, if
+			 * this is set to <code>ERROR</code> (which is the default), any validation results with a severity
+			 * of <code>ERROR</code> or <code>FATAL</code> will cause the create/update operation to be rejected and
+			 * rolled back, and no data will be saved.
+			 * <p>
+			 * Valid values must be drawn from {@link ResultSeverityEnum}
+			 * </p>
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule rejectOnSeverity(@Nonnull ResultSeverityEnum theSeverity) {
+				myRule.rejectOnSeverity(theSeverity);
+				return this;
+			}
+
+			/**
+			 * Specifies that if the validation results in any results with a severity of <code>theSeverity</code> or
+			 * greater, the resource will be tagged with the given tag when it is saved.
+			 *
+			 * @param theSeverity The minimum severity. Must be drawn from values in {@link ResultSeverityEnum} and must not be <code>null</code>
+			 * @param theTagSystem The system for the tag to add. Must not be <code>null</code>
+			 * @param theTagCode The code for the tag to add. Must not be <code>null</code>
+			 * @return
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull String theSeverity,@Nonnull  String theTagSystem,@Nonnull  String theTagCode) {
+				ResultSeverityEnum severity = ResultSeverityEnum.fromCode(toLowerCase(theSeverity));
+				return tagOnSeverity(severity, theTagSystem, theTagCode);
+			}
+
+			/**
+			 * Specifies that if the validation results in any results with a severity of <code>theSeverity</code> or
+			 * greater, the resource will be tagged with the given tag when it is saved.
+			 *
+			 * @param theSeverity The minimum severity. Must be drawn from values in {@link ResultSeverityEnum} and must not be <code>null</code>
+			 * @param theTagSystem The system for the tag to add. Must not be <code>null</code>
+			 * @param theTagCode The code for the tag to add. Must not be <code>null</code>
+			 * @return
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull ResultSeverityEnum theSeverity,@Nonnull  String theTagSystem,@Nonnull  String theTagCode) {
+				myRule.tagOnSeverity(theSeverity, theTagSystem, theTagCode);
+				return this;
+			}
+
 		}
 
 	}

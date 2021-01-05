@@ -27,18 +27,24 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 class RequireValidationRule extends BaseTypedRule {
 	private final IValidationSupport myValidationSupport;
 	private final ValidatorResourceFetcher myValidatorResourceFetcher;
 	private final FhirInstanceValidator myValidator;
+	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
+	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
 
-	RequireValidationRule(FhirContext theFhirContext, String theType, IValidationSupport theValidationSupport, ValidatorResourceFetcher theValidatorResourceFetcher) {
+	public RequireValidationRule(FhirContext theFhirContext, String theType, IValidationSupport theValidationSupport, ValidatorResourceFetcher theValidatorResourceFetcher) {
 		super(theFhirContext, theType);
 		myValidationSupport = theValidationSupport;
 		myValidatorResourceFetcher = theValidatorResourceFetcher;
@@ -62,10 +68,67 @@ class RequireValidationRule extends BaseTypedRule {
 
 		for (SingleValidationMessage next : outcome.getMessages()) {
 			if (next.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()) {
-				return RuleEvaluation.forFailure(this, outcome.toOperationOutcome());
+				if (myRejectOnSeverity != null && myRejectOnSeverity.ordinal() <= next.getSeverity().ordinal()) {
+					return RuleEvaluation.forFailure(this, outcome.toOperationOutcome());
+				}
 			}
+
+			for (TagOnSeverity nextTagOnSeverity : myTagOnSeverity) {
+				if (next.getSeverity().ordinal() >= nextTagOnSeverity.getSeverity()) {
+					theResource
+						.getMeta()
+						.addTag()
+						.setSystem(nextTagOnSeverity.getTagSystem())
+						.setCode(nextTagOnSeverity.getTagCode());
+				}
+			}
+
 		}
 
 		return RuleEvaluation.forSuccess(this);
 	}
+
+	public void rejectOnSeverity(ResultSeverityEnum theSeverity) {
+		myRejectOnSeverity = theSeverity;
+	}
+
+	public void tagOnSeverity(ResultSeverityEnum theSeverity, String theTagSystem, String theTagCode) {
+		Validate.notNull(theSeverity, "theSeverity must not be null");
+		Validate.notEmpty(theTagSystem, "theTagSystem must not be null or empty");
+		Validate.notEmpty(theTagCode, "theTagCode must not be null or empty");
+		if (myTagOnSeverity.isEmpty()) {
+			myTagOnSeverity = new ArrayList<>();
+		}
+		myTagOnSeverity.add(new TagOnSeverity(theSeverity.ordinal(), theTagSystem, theTagCode));
+	}
+
+	public void dontReject() {
+		myRejectOnSeverity = null;
+	}
+
+
+	private static class TagOnSeverity {
+		private final int mySeverity;
+		private final String myTagSystem;
+		private final String myTagCode;
+
+		private TagOnSeverity(int theSeverity, String theTagSystem, String theTagCode) {
+			mySeverity = theSeverity;
+			myTagSystem = theTagSystem;
+			myTagCode = theTagCode;
+		}
+
+		public int getSeverity() {
+			return mySeverity;
+		}
+
+		public String getTagSystem() {
+			return myTagSystem;
+		}
+
+		public String getTagCode() {
+			return myTagCode;
+		}
+	}
+
 }
