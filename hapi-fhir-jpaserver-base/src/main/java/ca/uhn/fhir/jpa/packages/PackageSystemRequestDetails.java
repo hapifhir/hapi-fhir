@@ -5,12 +5,12 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 
-public class PackageBinaryRequestDetails extends SystemRequestDetails {
-	/**
-	 * Constructor
-	 *
-	 */
-	public PackageBinaryRequestDetails() {
+/**
+ * A RequestDetails implementation to be used when processing resources defined in a package to ensure
+ * that they are always queried or updated in the DEFAULT partition if partitioning is enabled.
+ */
+public class PackageSystemRequestDetails extends SystemRequestDetails {
+	public PackageSystemRequestDetails() {
 		super(new MyInterceptorBroadcaster());
 	}
 

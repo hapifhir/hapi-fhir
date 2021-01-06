@@ -326,7 +326,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private ResourceTable createResourceBinary(IBaseBinary theResourceBinary) {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			PackageBinaryRequestDetails myRequestDetails = new PackageBinaryRequestDetails();
+			PackageSystemRequestDetails myRequestDetails = new PackageSystemRequestDetails();
 			return (ResourceTable) getBinaryDao().create(theResourceBinary, myRequestDetails).getEntity();
  		} else {
 			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();
@@ -637,7 +637,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			PackageBinaryRequestDetails myRequestDetails = new PackageBinaryRequestDetails();
+			PackageSystemRequestDetails myRequestDetails = new PackageSystemRequestDetails();
 			getBinaryDao().delete(theResourceBinaryId, myRequestDetails).getEntity();
 			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, myRequestDetails);
 		} else {
