@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.rp.dstu3.LibraryResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.MeasureResourceProvider;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
-import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +26,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderDstu3Test.class);
@@ -56,10 +53,6 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		// Load libraries
 		loadResource("dstu3/hedis-ig/library/library-fhir-model-definition.json");
 		loadResource("dstu3/hedis-ig/library/library-fhir-helpers.json");
-
-		// load test data and conversion library for $apply operation tests
-		loadResource("dstu3/hedis-ig/general-practitioner.json");
-		loadResource("dstu3/hedis-ig/general-patient.json");
 	}
 
 	/*
@@ -108,11 +101,6 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
-			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
-				assertTrue(population.getCount() > 0);
-			}
-		}
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		// Now timed runs
@@ -145,11 +133,6 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
 		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
-		for (MeasureReport.MeasureReportGroupComponent group : report.getGroup()) {
-			for (MeasureReport.MeasureReportGroupPopulationComponent population : group.getPopulation()) {
-				assertTrue(population.getCount() > 0);
-			}
-		}
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
 
 		// Now timed runs
