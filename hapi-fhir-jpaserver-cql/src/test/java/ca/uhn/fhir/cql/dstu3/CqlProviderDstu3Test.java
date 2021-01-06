@@ -162,22 +162,4 @@ public class CqlProviderDstu3Test extends BaseCqlDstu3Test {
 
 		ourLog.info("Called evaluateMeasure() {} times: average time per call: {}", runCount, sw.formatMillisPerOperation(runCount));
 	}
-
-	@Test
-	public void testEXM349RefreshGeneratedContentWorksWithManuallyEditedInputFiles() throws IOException {
-		IdType measureId = new IdType("Measure", "measure-EXM349-FHIR3-2.9.000");
-		IdType libraryId = new IdType("Library", "library-EXM349-FHIR3-2.9.000");
-
-		loadBundle("dstu3/EXM349/library-deps-EXM349_FHIR3-2.9.000-bundle.json.manuallyeditedtochangelogiclibrarysystem");
-		loadBundle("dstu3/EXM349/EXM349_FHIR3-2.9.000-bundle.json.manuallyeditedtoremovecqlandelm");
-
-		MethodOutcome methodOutcome = myMeasureOperationsProvider.refreshGeneratedContent(null, measureId);
-		Assert.notNull(methodOutcome, "NULL methodOutcome returned from call to myMeasureOperationsProvider.refreshGeneratedContent(null, '" + measureId +"')!");
-
-		Measure measure = myMeasureDao.read(measureId);
-		Assert.notNull(measure, "NULL measure returned from call to myMeasureDao.read('" + measureId +"')!");
-
-		Library library = myLibraryDao.read(libraryId);
-		assertNotNull(library, "NULL library returned from call to myLibraryDao.read('" + libraryId +"')!");
-	}
 }

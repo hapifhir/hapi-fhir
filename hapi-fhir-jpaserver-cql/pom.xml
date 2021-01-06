@@ -90,6 +90,7 @@
 					<groupId>jakarta.xml.bind</groupId>
 					<artifactId>jakarta.xml.bind-api</artifactId>
 				</exclusion>
+				<!-- EXCLUDE all HAPI-FHIR DEPs here and see if it works without Upgrading the Engine code ! -->
 			</exclusions>
 		</dependency>
 		<dependency>

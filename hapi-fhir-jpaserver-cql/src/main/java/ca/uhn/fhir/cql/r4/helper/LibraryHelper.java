@@ -94,7 +94,7 @@ public class LibraryHelper {
 
         if (libraries.isEmpty()) {
             throw new IllegalArgumentException(String
-                    .format("Could not load library source for libraries referenced in Measure/%s.", measure.getId()));
+                    .format("Could not load library source for libraries referenced in %s.", measure.getId()));
         }
 
         //VersionedIdentifier primaryLibraryId = libraries.get(0).getIdentifier();

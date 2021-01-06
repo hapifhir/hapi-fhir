@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
+import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
+import ca.uhn.fhir.cql.r4.provider.LibraryResolutionProviderImpl;
 import ca.uhn.fhir.cql.r4.evaluation.ProviderFactory;
 import ca.uhn.fhir.cql.r4.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
@@ -55,6 +57,12 @@ public class CqlR4Config extends BaseCqlConfig {
 	@Bean
 	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider) {
 		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider);
+	}
+
+	@Lazy
+	@Bean
+	LibraryResolutionProvider libraryResolutionProvider() {
+		return new LibraryResolutionProviderImpl();
 	}
 
 	@Lazy

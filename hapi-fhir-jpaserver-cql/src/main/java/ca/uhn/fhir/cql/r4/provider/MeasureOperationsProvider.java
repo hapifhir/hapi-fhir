@@ -52,12 +52,15 @@ public class MeasureOperationsProvider {
 	@Operation(name = "$evaluate-measure", idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(@IdParam IdType theId,
 													 @OperationParam(name = "periodStart") String periodStart,
-													 @OperationParam(name = "periodEnd") String periodEnd, @OperationParam(name = "measure") String measureRef,
-													 @OperationParam(name = "reportType") String reportType, @OperationParam(name = "patient") String patientRef,
+													 @OperationParam(name = "periodEnd") String periodEnd,
+													 @OperationParam(name = "measure") String measureRef,
+													 @OperationParam(name = "reportType") String reportType,
+													 @OperationParam(name = "patient") String patientRef,
 													 @OperationParam(name = "productLine") String productLine,
 													 @OperationParam(name = "practitioner") String practitionerRef,
 													 @OperationParam(name = "lastReceivedOn") String lastReceivedOn,
-													 @OperationParam(name = "source") String source, @OperationParam(name = "user") String user,
+													 @OperationParam(name = "source") String source,
+													 @OperationParam(name = "user") String user,
 													 @OperationParam(name = "pass") String pass) throws InternalErrorException, FHIRException {
 		LibraryLoader libraryLoader = LibraryHelper.createLibraryLoader(this.libraryResolutionProvider);
 		MeasureEvaluationSeed seed = new MeasureEvaluationSeed(this.factory, libraryLoader,
