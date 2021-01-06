@@ -81,7 +81,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
 		version
 			.onTable("TRM_VALUESET_CONCEPT")
-			.addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL").doNothing();
+			.addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
 
 	}
 
