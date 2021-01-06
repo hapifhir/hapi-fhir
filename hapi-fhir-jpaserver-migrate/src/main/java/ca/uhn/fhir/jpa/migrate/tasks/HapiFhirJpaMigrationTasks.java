@@ -76,13 +76,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private void init530() {
 		Builder version = forVersion(VersionEnum.V5_3_0);
-		version
-			.onTable("TRM_VALUESET_CONCEPT")
-			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
-		version
-			.onTable("TRM_VALUESET_CONCEPT")
-			.addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
-		
+	
 		//-- Add new Table, HFJ_SPIDX_QUANTITY_NRML
 		version.addIdGenerator("20201222.1", "SEQ_SPIDX_QUANTITY_NRML");
 		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20201222.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
@@ -107,6 +101,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		//-- Link to the resourceTable
 		version.onTable("HFJ_RESOURCE").addColumn("20201222.9", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
+		
+		//-- TRM
+		version
+			.onTable("TRM_VALUESET_CONCEPT")
+			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
+		
+	    version
+		    .onTable("TRM_VALUESET_CONCEPT")
+		    .addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
+
 	}
 
 	protected void init520() {
