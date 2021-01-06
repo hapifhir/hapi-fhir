@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.demo;
  * #%L
  * HAPI FHIR - Command Line Client - Server WAR
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,14 @@ package ca.uhn.fhir.jpa.demo;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
+import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -81,6 +85,8 @@ public class CommonConfig {
 	@Bean
 	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
+
+		//Regular Hibernate Settings
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
@@ -90,14 +96,13 @@ public class CommonConfig {
 		extraProperties.put("hibernate.cache.use_second_level_cache", "false");
 		extraProperties.put("hibernate.cache.use_structured_entries", "false");
 		extraProperties.put("hibernate.cache.use_minimal_puts", "false");
-		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "filesystem");
-		extraProperties.put("hibernate.search.default.indexBase", "target/lucenefiles");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		extraProperties.put("hibernate.search.default.worker.execution", "async");
 
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-filesystem");
+		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_ROOT), "target/lucenefiles");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
 		if (System.getProperty("lowmem") != null) {
-			extraProperties.put("hibernate.search.autoregister_listeners", "false");
+			extraProperties.put(HibernateOrmMapperSettings.ENABLED, "false");
 		}
 
 		return extraProperties;

@@ -3,14 +3,14 @@ package ca.uhn.fhir.jpa.config;
 import java.util.Properties;
 
 import org.hibernate.dialect.H2Dialect;
-import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.beans.factory.annotation.Autowire;
+import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 
 @Configuration
@@ -41,7 +41,7 @@ public class TestR4WithLuceneDisabledConfig extends TestR4Config {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
-		extraProperties.put("hibernate.search.autoregister_listeners", "false");
+		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "false");
 		return extraProperties;
 	}
 

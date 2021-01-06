@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -35,7 +36,11 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
+		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd, myCaptureQueriesListener);
+
+		runInTransaction(()->{
+			ourLog.info("Code system versions:\n * " + myTermCodeSystemVersionDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		});
 
 		Parameters respParam = ourClient
 			.operation()

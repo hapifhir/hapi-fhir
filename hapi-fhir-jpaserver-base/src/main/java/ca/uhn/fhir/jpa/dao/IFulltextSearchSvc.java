@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,13 @@ package ca.uhn.fhir.jpa.dao;
 
 import java.util.List;
 
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface IFulltextSearchSvc {
 
-	List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest);
-	
+
 	List<ResourcePersistentId> search(String theResourceName, SearchParameterMap theParams);
 
 	List<ResourcePersistentId> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);

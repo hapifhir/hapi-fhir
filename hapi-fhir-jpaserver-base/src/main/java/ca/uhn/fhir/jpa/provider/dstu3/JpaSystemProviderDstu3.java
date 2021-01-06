@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProviderDstu2Plus;
@@ -44,7 +43,7 @@ import static org.hl7.fhir.convertors.conv30_40.Parameters30_40.convertParameter
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,36 +221,6 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theRequestDetails));
 		return parameters;
-	}
-
-	@Operation(name = JpaConstants.OPERATION_SUGGEST_KEYWORDS, idempotent = true)
-	public Parameters suggestKeywords(
-		@OperationParam(name = "context", min = 1, max = 1) String theContext,
-		@OperationParam(name = "searchParam", min = 1, max = 1) String theSearchParam,
-		@OperationParam(name = "text", min = 1, max = 1) String theText,
-		RequestDetails theRequest) {
-
-
-		if (isBlank(theContext)) {
-			throw new InvalidRequestException("Parameter 'context' must be provided");
-		}
-		if (isBlank(theSearchParam)) {
-			throw new InvalidRequestException("Parameter 'searchParam' must be provided");
-		}
-		if (isBlank(theText)) {
-			throw new InvalidRequestException("Parameter 'text' must be provided");
-		}
-
-		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText, theRequest);
-
-		Parameters retVal = new Parameters();
-		for (Suggestion next : keywords) {
-			retVal.addParameter()
-				.addPart(new ParametersParameterComponent().setName("keyword").setValue(new StringType(next.getTerm())))
-				.addPart(new ParametersParameterComponent().setName("score").setValue(new DecimalType(next.getScore())));
-		}
-
-		return retVal;
 	}
 
 	@Transaction

@@ -1165,7 +1165,6 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 			assertEquals("204 No Content", resp.getEntry().get(3).getResponse().getStatus());
 		}
 
-
 		Bundle respGetBundle = (Bundle) resp.getEntry().get(0).getResource();
 		assertEquals(1, respGetBundle.getEntry().size());
 		assertEquals("testTransactionOrdering" + pass, ((Patient) respGetBundle.getEntry().get(0).getResource()).getNameFirstRep().getFamilyFirstRep().getValue());

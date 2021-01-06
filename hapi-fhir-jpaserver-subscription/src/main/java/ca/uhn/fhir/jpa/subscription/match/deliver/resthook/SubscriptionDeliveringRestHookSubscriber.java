@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.subscription.match.deliver.resthook;
  * #%L
  * HAPI FHIR Subscription Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		for (IBaseResource next : searchResults.getResources(0, searchResults.size())) {
-			builder.addUpdateEntry(next);
+			builder.addTransactionUpdateEntry(next);
 		}
 
 		operation = theClient.transaction().withBundle(builder.getBundle());

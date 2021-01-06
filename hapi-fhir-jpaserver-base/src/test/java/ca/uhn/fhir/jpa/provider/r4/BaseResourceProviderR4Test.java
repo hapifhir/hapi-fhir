@@ -38,6 +38,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
@@ -53,8 +54,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
+	private static final Logger ourLog = getLogger(BaseResourceProviderR4Test.class);
+
 
 	protected static IValidationSupport myValidationSupport;
 	protected static CloseableHttpClient ourHttpClient;

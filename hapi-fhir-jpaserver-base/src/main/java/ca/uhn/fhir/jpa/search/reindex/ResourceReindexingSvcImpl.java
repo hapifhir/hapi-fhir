@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.reindex;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.search.util.impl.Executors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.JobExecutionContext;
@@ -165,7 +164,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	public void initExecutor() {
 		// Create the threadpool executor used for reindex jobs
 		int reindexThreadCount = myDaoConfig.getReindexThreadCount();
-		RejectedExecutionHandler rejectHandler = new Executors.BlockPolicy();
+		RejectedExecutionHandler rejectHandler = new BlockPolicy();
 		myTaskExecutor = new ThreadPoolExecutor(0, reindexThreadCount,
 			0L, TimeUnit.MILLISECONDS,
 			new LinkedBlockingQueue<>(100),
@@ -173,6 +172,30 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			rejectHandler
 		);
 	}
+	/**
+	 * A handler for rejected tasks that will have the caller block until space is available.
+	 * This was stolen from old hibernate search(5.X.X), as it has been removed in HS6. We can probably come up with a better solution though.
+	 */
+	public static class BlockPolicy implements RejectedExecutionHandler {
+
+		/**
+		 * Puts the Runnable to the blocking queue, effectively blocking the delegating thread until space is available.
+		 *
+		 * @param r the runnable task requested to be executed
+		 * @param e the executor attempting to execute this task
+		 */
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+			try {
+				e.getQueue().put( r );
+			}
+			catch (InterruptedException e1) {
+				ourLog.error("Interrupted Execption for task: {}",r, e1 );
+				Thread.currentThread().interrupt();
+			}
+		}
+	}
+
 
 	public void scheduleJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
@@ -545,6 +568,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 						}
 
 						doReindex(resourceTable, resource);
+
 						return null;
 
 					} catch (Exception e) {

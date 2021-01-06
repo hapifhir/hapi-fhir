@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.cross;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,8 @@ public interface IBasePersistedResource {
 
 	IIdType getIdDt();
 
-	boolean isDeleted();
-
 	/**
-	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwie, returns <code>null</code>
+	 * If the resource is deleted, returns the date/time that the resource was deleted at. Otherwise, returns <code>null</code>
 	 */
 	Date getDeleted();
 

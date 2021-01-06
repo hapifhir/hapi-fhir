@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 /*
- * DM 2019-08-01 - Do not use IDX_VALUESET_CONCEPT_CS_CD; this was previously used as an index so reusing the name will
+ * DM 2019-08-01 - Do not use IDX_VALUESET_CONCEPT_CS_CD or IDX_VALUESET_CONCEPT_CS_CODE; this was previously used as an index so reusing the name will
  * bork up migration tasks.
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CODE", columnNames = {"VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL"}),
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_CSCD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
 	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 })
 @Entity()

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Field;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -71,12 +71,14 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	private static final long serialVersionUID = 1L;
 
-	@Field()
+	@FullTextField
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
 	public String mySystem;
-	@Field()
+
+	@FullTextField
 	@Column(name = "SP_VALUE", nullable = true, length = MAX_LENGTH)
 	private String myValue;
+
 	@SuppressWarnings("unused")
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_TOKEN", sequenceName = "SEQ_SPIDX_TOKEN")

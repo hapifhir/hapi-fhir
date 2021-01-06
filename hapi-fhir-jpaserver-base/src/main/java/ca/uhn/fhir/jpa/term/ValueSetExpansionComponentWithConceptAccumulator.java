@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		myContext = theContext;
 	}
 
-    @Nonnull
+	@Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
 		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,20 +22,26 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
+import ca.uhn.fhir.jpa.model.search.ResourceTableRoutingBinder;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
-import ca.uhn.fhir.jpa.model.search.IndexNonDeletedInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.Analyzer;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Fields;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
+import org.hibernate.search.engine.backend.types.Projectable;
+import org.hibernate.search.engine.backend.types.Searchable;
+import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
+import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -48,7 +54,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-@Indexed(interceptor = IndexNonDeletedInterceptor.class)
+@Indexed(routingBinder= @RoutingBinderRef(type = ResourceTableRoutingBinder.class))
 @Entity
 @Table(name = "HFJ_RESOURCE", uniqueConstraints = {}, indexes = {
 	@Index(name = "IDX_RES_DATE", columnList = "RES_UPDATED"),
@@ -63,15 +69,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	/**
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
+	 * Note the extra config needed in HS6 for indexing transient props:
+	 * https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#indexed-transient-requires-configuration
+	 *
+	 * Note that we depend on `myVersion` updated for this field to be indexed.
 	 */
-	@Transient()
-	@Fields({
-		@Field(name = "myContentText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
-		@Field(name = "myContentTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
-		@Field(name = "myContentTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
-		@Field(name = "myContentTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
-	})
+	@Transient
+	@FullTextField(name = "myContentText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+	@FullTextField(name = "myContentTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myContentTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myContentTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myContentText;
 
 	@Column(name = "HASH_SHA256", length = 64, nullable = true)
@@ -86,6 +95,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@SequenceGenerator(name = "SEQ_RESOURCE_ID", sequenceName = "SEQ_RESOURCE_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_ID")
 	@Column(name = "RES_ID")
+	@GenericField(projectable = Projectable.YES)
 	private Long myId;
 
 	@Column(name = "SP_INDEX_STATUS", nullable = true)
@@ -100,13 +110,12 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * Holds the narrative text only - Used for Fulltext searching but not directly stored in the DB
 	 */
 	@Transient()
-	@Fields({
-		@Field(name = "myNarrativeText", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
-		@Field(name = "myNarrativeTextEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
-		@Field(name = "myNarrativeTextNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteNGramAnalyzer")),
-		@Field(name = "myNarrativeTextPhonetic", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompletePhoneticAnalyzer"))
-	})
+	@FullTextField(name = "myNarrativeText", searchable = Searchable.YES, projectable = Projectable.YES, analyzer = "standardAnalyzer")
+	@FullTextField(name = "myNarrativeTextEdgeNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteEdgeAnalyzer")
+	@FullTextField(name = "myNarrativeTextNGram", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompleteNGramAnalyzer")
+	@FullTextField(name = "myNarrativeTextPhonetic", searchable= Searchable.YES, projectable= Projectable.NO, analyzer =  "autocompletePhoneticAnalyzer")
 	@OptimisticLock(excluded = true)
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myVersion")))
 	private String myNarrativeText;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -191,8 +200,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * You can test that any changes don't cause extra queries by running
 	 * FhirResourceDaoR4QueryCountTest
 	 */
-	@Field
+	@FullTextField
 	@Transient
+	@IndexingDependency(derivedFrom = @ObjectPath(@PropertyValue(propertyName = "myResourceLinks")))
 	private String myResourceLinksField;
 
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
@@ -200,7 +210,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private Collection<ResourceLink> myResourceLinksAsTarget;
 
 	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
-	@Field
+	@FullTextField
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
 
@@ -531,14 +541,19 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	 * and was not re-saved in the database
 	 */
 	public void setUnchangedInCurrentOperation(boolean theUnchangedInCurrentOperation) {
+
 		myUnchangedInCurrentOperation = theUnchangedInCurrentOperation;
 	}
 
-	public void setContentTextParsedIntoWords(String theContentText) {
+	public void setContentText(String theContentText) {
 		myContentText = theContentText;
 	}
 
-	public void setNarrativeTextParsedIntoWords(String theNarrativeText) {
+	public String getContentText() {
+		return myContentText;
+	}
+
+	public void setNarrativeText(String theNarrativeText) {
 		myNarrativeText = theNarrativeText;
 	}
 

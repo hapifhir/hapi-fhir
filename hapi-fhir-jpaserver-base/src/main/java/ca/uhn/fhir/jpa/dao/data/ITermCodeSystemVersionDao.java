@@ -13,7 +13,7 @@ import java.util.List;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,6 @@ public interface ITermCodeSystemVersionDao extends JpaRepository<TermCodeSystemV
 	@Modifying
 	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myCodeSystem = :cs")
 	void deleteForCodeSystem(@Param("cs") TermCodeSystem theCodeSystem);
-
-	@Modifying
-	@Query("DELETE FROM TermCodeSystemVersion csv WHERE csv.myId = :pid")
-	void delete(@Param("pid") Long codesystemversion_pid);
 
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myCodeSystemPid = :codesystem_pid")
 	List<TermCodeSystemVersion> findByCodeSystemPid(@Param("codesystem_pid") Long theCodeSystemPid);

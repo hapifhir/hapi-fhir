@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.lastn;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,40 +37,40 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
-import org.shadehapi.elasticsearch.action.DocWriteResponse;
-import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexRequest;
-import org.shadehapi.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.shadehapi.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.shadehapi.elasticsearch.action.admin.indices.refresh.RefreshRequest;
-import org.shadehapi.elasticsearch.action.index.IndexRequest;
-import org.shadehapi.elasticsearch.action.index.IndexResponse;
-import org.shadehapi.elasticsearch.action.search.SearchRequest;
-import org.shadehapi.elasticsearch.action.search.SearchResponse;
-import org.shadehapi.elasticsearch.client.RequestOptions;
-import org.shadehapi.elasticsearch.client.RestHighLevelClient;
-import org.shadehapi.elasticsearch.common.xcontent.XContentType;
-import org.shadehapi.elasticsearch.index.query.BoolQueryBuilder;
-import org.shadehapi.elasticsearch.index.query.MatchQueryBuilder;
-import org.shadehapi.elasticsearch.index.query.QueryBuilders;
-import org.shadehapi.elasticsearch.index.query.RangeQueryBuilder;
-import org.shadehapi.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.shadehapi.elasticsearch.search.SearchHit;
-import org.shadehapi.elasticsearch.search.SearchHits;
-import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.AggregationBuilders;
-import org.shadehapi.elasticsearch.search.aggregations.Aggregations;
-import org.shadehapi.elasticsearch.search.aggregations.BucketOrder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.shadehapi.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.shadehapi.elasticsearch.search.aggregations.metrics.tophits.ParsedTopHits;
-import org.shadehapi.elasticsearch.search.aggregations.support.ValueType;
-import org.shadehapi.elasticsearch.search.builder.SearchSourceBuilder;
-import org.shadehapi.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.composite.CompositeAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.composite.CompositeValuesSourceBuilder;
+import org.elasticsearch.search.aggregations.bucket.composite.ParsedComposite;
+import org.elasticsearch.search.aggregations.bucket.composite.TermsValuesSourceBuilder;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ParsedTopHits;
+import org.elasticsearch.search.aggregations.support.ValueType;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
@@ -120,8 +120,15 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private final RestHighLevelClient myRestHighLevelClient;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
+
 	@Autowired
 	private PartitionSettings myPartitionSettings;
+
+	//This constructor used to inject a dummy partitionsettings in test.
+	public ElasticsearchSvcImpl(PartitionSettings thePartitionSetings, String theHostname, int thePort, String theUsername, String thePassword) {
+		this(theHostname, thePort, theUsername, thePassword);
+		this.myPartitionSettings = thePartitionSetings;
+	}
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
@@ -176,8 +183,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private boolean indexExists(String theIndexName) throws IOException {
-		GetIndexRequest request = new GetIndexRequest();
-		request.indices(theIndexName);
+		GetIndexRequest request = new GetIndexRequest(theIndexName);
 		return myRestHighLevelClient.indices().exists(request, RequestOptions.DEFAULT);
 	}
 
@@ -278,14 +284,14 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	}
 
 	private TermsAggregationBuilder createObservationCodeAggregationBuilder(int theMaxNumberObservationsPerCode, String[] theTopHitsInclude) {
-		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE, ValueType.STRING).field(OBSERVATION_CODEVALUE_FIELD_NAME);
+		TermsAggregationBuilder observationCodeCodeAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_CODE).field(OBSERVATION_CODEVALUE_FIELD_NAME);
 		observationCodeCodeAggregationBuilder.order(BucketOrder.key(true));
 		// Top Hits Aggregation
 		observationCodeCodeAggregationBuilder.subAggregation(AggregationBuilders.topHits(MOST_RECENT_EFFECTIVE)
 			.sort(OBSERVATION_EFFECTIVEDTM_FIELD_NAME, SortOrder.DESC)
 			.fetchSource(theTopHitsInclude, null).size(theMaxNumberObservationsPerCode));
 		observationCodeCodeAggregationBuilder.size(10000);
-		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM, ValueType.STRING).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
+		TermsAggregationBuilder observationCodeSystemAggregationBuilder = new TermsAggregationBuilder(GROUP_BY_SYSTEM).field(OBSERVATION_CODESYSTEM_FIELD_NAME);
 		observationCodeSystemAggregationBuilder.order(BucketOrder.key(true));
 		observationCodeSystemAggregationBuilder.subAggregation(observationCodeCodeAggregationBuilder);
 		return observationCodeSystemAggregationBuilder;
@@ -728,8 +734,6 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 	private IndexRequest createIndexRequest(String theIndexName, String theDocumentId, String theObservationDocument, String theDocumentType) {
 		IndexRequest request = new IndexRequest(theIndexName);
 		request.id(theDocumentId);
-		request.type(theDocumentType);
-
 		request.source(theObservationDocument, XContentType.JSON);
 		return request;
 	}

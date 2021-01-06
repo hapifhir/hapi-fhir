@@ -7,6 +7,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class UrlUtilTest {
 
 	@Test
+	public void testNormalizeCanonicalUrl() {
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo/"));
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo"));
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo|1.23"));
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo|1.23#333"));
+		assertEquals("abc", UrlUtil.normalizeCanonicalUrlForComparison("abc"));
+		assertEquals("abc", UrlUtil.normalizeCanonicalUrlForComparison("abc/"));
+	}
+
+	@Test
 	public void testConstructAbsoluteUrl() {
 		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl(null, "http://foo/bar/baz"));
 		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz"));

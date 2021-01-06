@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Field;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.r4.model.DateTimeType;
 
 import javax.persistence.Column;
@@ -63,13 +63,15 @@ import java.util.Date;
 public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchParam {
 
 	private static final long serialVersionUID = 1L;
+
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	@Field
+	@FullTextField
 	public Date myValueHigh;
+
 	@Column(name = "SP_VALUE_LOW", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	@Field
+	@FullTextField
 	public Date myValueLow;
 
 	/**

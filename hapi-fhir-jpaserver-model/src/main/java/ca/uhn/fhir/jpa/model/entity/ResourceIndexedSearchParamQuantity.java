@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,14 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.NumericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -65,16 +63,17 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
-	@Field
+	@FullTextField
 	public String mySystem;
+
 	@Column(name = "SP_UNITS", nullable = true, length = MAX_LENGTH)
-	@Field
+	@FullTextField
 	public String myUnits;
 	@Column(name = "SP_VALUE", nullable = true)
-	@Field
-	@NumericField
-	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
+
+	@ScaledNumberField
 	public BigDecimal myValue;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY", sequenceName = "SEQ_SPIDX_QUANTITY")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.search.annotations.Field;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -61,7 +61,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
-	@Field()
+	@FullTextField
 	public String myUri;
 
 	@Id

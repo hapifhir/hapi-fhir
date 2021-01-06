@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.mdm.dao;
  * #%L
  * HAPI FHIR JPA Server - Master Data Management
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class MdmLinkDaoSvc {
 		mdmLink.setLinkSource(theLinkSource);
 		mdmLink.setMatchResult(theMatchOutcome.getMatchResultEnum());
 		// Preserve these flags for link updates
-		mdmLink.setEidMatch(theMatchOutcome.isEidMatch() | mdmLink.isEidMatch());
+		mdmLink.setEidMatch(theMatchOutcome.isEidMatch() | mdmLink.isEidMatchPresent());
 		mdmLink.setHadToCreateNewGoldenResource(theMatchOutcome.isCreatedNewResource() | mdmLink.getHadToCreateNewGoldenResource());
 		mdmLink.setMdmSourceType(myFhirContext.getResourceType(theSourceResource));
 		if (mdmLink.getScore() != null) {
