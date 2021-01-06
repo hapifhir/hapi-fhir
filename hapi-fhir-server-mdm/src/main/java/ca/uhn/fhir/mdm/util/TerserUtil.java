@@ -88,8 +88,7 @@ final class TerserUtil {
 				continue;
 			}
 
-			BaseRuntimeElementCompositeDefinition<?> compositeDefinition = (BaseRuntimeElementCompositeDefinition<?>) childDefinition.getChildByName(field);
-			IBase newFieldValue = compositeDefinition.newInstance();
+			IBase newFieldValue = childDefinition.getChildByName(field).newInstance();
 			terser.cloneInto(theFromFieldValue, newFieldValue, true);
 
 			theToFieldValues.add(newFieldValue);

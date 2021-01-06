@@ -92,6 +92,10 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setMatchResult(theMatchResult);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(mdmLink);
+
+		// TODO NG MDM Since it's a manual link update, we need to allow the caller to optionally override this behavior with what they thing should go into the golden resource
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theSourceResource, theGoldenResource, theMdmContext);
+
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
 			// Need to find a new Golden Resource to link this target to

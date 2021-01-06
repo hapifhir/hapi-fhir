@@ -60,10 +60,8 @@ public class PrimitiveTypeEqualsPredicate implements BiPredicate {
 			if (val1 == null && val2 == null) {
 				continue;
 			}
-			if (val1 == null && val2 != null) {
-				return false;
-			}
-			if (val1 != null && val2 == null) {
+
+			if (val1 == null || val2 == null) {
 				return false;
 			}
 
@@ -73,13 +71,12 @@ public class PrimitiveTypeEqualsPredicate implements BiPredicate {
 			if (actualVal1 == null && actualVal2 == null) {
 				continue;
 			}
-			if (actualVal1 == null && actualVal2 != null) {
+			if (actualVal1 == null) {
 				return false;
 			}
 			if (!actualVal1.equals(actualVal2)) {
 				return false;
 			}
-
 		}
 
 		return true;
