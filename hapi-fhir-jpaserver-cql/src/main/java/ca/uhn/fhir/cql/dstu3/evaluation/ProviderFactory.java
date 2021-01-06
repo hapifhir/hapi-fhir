@@ -2,9 +2,9 @@ package ca.uhn.fhir.cql.dstu3.evaluation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.helper.ClientHelper;
-import ca.uhn.fhir.cql.common.provider.Dstu3ApelonFhirTerminologyProvider;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.retrieve.JpaFhirRetrieveProvider;
+import ca.uhn.fhir.cql.dstu3.provider.Dstu3ApelonFhirTerminologyProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.client.api.IGenericClient;

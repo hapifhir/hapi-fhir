@@ -22,7 +22,6 @@ package ca.uhn.fhir.cql.common.provider;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -31,10 +30,7 @@ import org.springframework.stereotype.Service;
 public class CqlProviderFactory {
 	@Autowired
 	private FhirContext myFhirContext;
-	@Autowired
-	private EvaluationProviderFactory myEvaluationProviderFactory;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+
 	@Autowired
 	private ApplicationContext myApplicationContext;
 

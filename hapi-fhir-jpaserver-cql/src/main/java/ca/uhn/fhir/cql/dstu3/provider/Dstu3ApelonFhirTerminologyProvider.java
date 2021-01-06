@@ -1,4 +1,4 @@
-package ca.uhn.fhir.cql.common.provider;
+package ca.uhn.fhir.cql.dstu3.provider;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;

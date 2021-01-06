@@ -1,9 +1,11 @@
 package ca.uhn.fhir.cql.dstu3.provider;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
@@ -30,13 +32,17 @@ import java.util.List;
 @Component
 public class JpaTerminologyProvider implements TerminologyProvider {
 
-	@Autowired
-	private ITermReadSvcDstu3 terminologySvcDstu3;
-	@Autowired
-	private IFhirResourceDao<ValueSet> myValueSetDao;
-	@Autowired
-	private IValidationSupport validationSupport;
+	private ITermReadSvcDstu3 terminologySvc;
+	private ValueSetResourceProvider valueSetResourceProvider;
+	private final IValidationSupport validationSupport;
 
+	@Autowired
+	public JpaTerminologyProvider(ITermReadSvcDstu3 terminologySvcR4,
+											ValueSetResourceProvider valueSetResourceProvider, IValidationSupport validationSupport) {
+		 this.terminologySvc = terminologySvc;
+		 this.valueSetResourceProvider = valueSetResourceProvider;
+		 this.validationSupport = validationSupport;
+	}
 	@Override
 	public synchronized boolean in(Code code, ValueSetInfo valueSet) throws ResourceNotFoundException {
 		for (Code c : expand(valueSet)) {
@@ -63,18 +69,18 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 						valueSet.getId()));
 				}
 			}
-			IBundleProvider bundleProvider = myValueSetDao
+			IBundleProvider bundleProvider = valueSetResourceProvider.getDao()
 				.search(new SearchParameterMap().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
 			List<IBaseResource> valueSets = bundleProvider.getResources(0, bundleProvider.size());
 			if (valueSets.isEmpty()) {
 				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
 			} else if (valueSets.size() == 1) {
 				vs = (ValueSet) valueSets.get(0);
-			} else if (valueSets.size() > 1) {
+			} else {
 				throw new IllegalArgumentException("Found more than 1 ValueSet with url: " + valueSet.getId());
 			}
 		} else {
-			vs = myValueSetDao.read(new IdType(valueSet.getId()));
+			vs = valueSetResourceProvider.getDao().read(new IdType(valueSet.getId()));
 		}
 		if (vs != null) {
 			if (vs.hasCompose()) {
@@ -105,7 +111,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 			}
 		}
 
-		org.hl7.fhir.r4.model.ValueSet expansion = terminologySvcDstu3
+		org.hl7.fhir.r4.model.ValueSet expansion = terminologySvc
 			.expandValueSet(new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE), valueSet.getId(), null);
 		expansion.getExpansion().getContains()
 			.forEach(concept -> codes.add(new Code().withCode(concept.getCode()).withSystem(concept.getSystem())));
@@ -115,7 +121,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
 	@Override
 	public synchronized Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
-		LookupCodeResult cs = terminologySvcDstu3.lookupCode(new ValidationSupportContext(validationSupport), codeSystem.getId(), code.getCode());
+		LookupCodeResult cs = terminologySvc.lookupCode(new ValidationSupportContext(validationSupport), codeSystem.getId(), code.getCode());
 
 		code.setDisplay(cs.getCodeDisplay());
 		code.setSystem(codeSystem.getId());

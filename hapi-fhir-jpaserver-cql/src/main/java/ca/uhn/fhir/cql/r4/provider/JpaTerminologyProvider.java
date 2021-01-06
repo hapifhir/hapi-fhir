@@ -28,14 +28,14 @@ import java.util.List;
 @Component
 public class JpaTerminologyProvider implements TerminologyProvider {
 
-    private ITermReadSvcR4 terminologySvcR4;
+    private ITermReadSvcR4 terminologySvc;
     private ValueSetResourceProvider valueSetResourceProvider;
     private final IValidationSupport validationSupport;
 
     @Autowired
-    public JpaTerminologyProvider(ITermReadSvcR4 terminologySvcR4, FhirContext context,
+    public JpaTerminologyProvider(ITermReadSvcR4 terminologySvc,
                                   ValueSetResourceProvider valueSetResourceProvider, IValidationSupport validationSupport) {
-        this.terminologySvcR4 = terminologySvcR4;
+        this.terminologySvc = terminologySvc;
         this.valueSetResourceProvider = valueSetResourceProvider;
         this.validationSupport = validationSupport;
     }
@@ -109,7 +109,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
         }
 
-        ValueSet expansion = terminologySvcR4
+        ValueSet expansion = terminologySvc
                 .expandValueSet(new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE), valueSet.getId(), null);
         expansion.getExpansion().getContains()
                 .forEach(concept -> codes.add(new Code().withCode(concept.getCode()).withSystem(concept.getSystem())));
@@ -119,7 +119,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
     @Override
     public synchronized Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
-        LookupCodeResult cs = terminologySvcR4.lookupCode(new ValidationSupportContext(validationSupport), codeSystem.getId(), code.getCode());
+        LookupCodeResult cs = terminologySvc.lookupCode(new ValidationSupportContext(validationSupport), codeSystem.getId(), code.getCode());
 
         code.setDisplay(cs.getCodeDisplay());
         code.setSystem(codeSystem.getId());
