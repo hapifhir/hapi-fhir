@@ -103,10 +103,7 @@ public abstract class BaseHasResource extends BasePartitionable implements IBase
 	@Override
 	public abstract Long getId();
 
-	@Override
-	public boolean isDeleted() {
-		return myDeleted != null;
-	}
+
 
 	public void setDeleted(Date theDate) {
 		myDeleted = theDate;

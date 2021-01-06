@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeType;
@@ -29,6 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
@@ -263,11 +265,33 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testRequireValidation_FailNoRejectAndTag() {
+		List<IRepositoryValidatingRule> rules = newRuleBuilder()
+			.forResourcesOfType("Observation")
+			.requireValidationToDeclaredProfiles()
+			.withBestPracticeWarningLevel("IGNORE")
+			.dontReject()
+			.tagOnSeverity(ResultSeverityEnum.ERROR, "http://foo", "validation-error")
+			.build();
+		myValInterceptor.setRules(rules);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		IIdType id = myObservationDao.create(obs).getId();
+		assertEquals("1", id.getVersionIdPart());
+
+		obs = myObservationDao.read(id);
+		assertTrue(obs.getMeta().hasTag());
+		assertTrue(obs.getMeta().getTag("http://foo", "validation-error") != null);
+	}
+
+	@Test
 	public void testRequireValidation_Blocked() {
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
 			.requireValidationToDeclaredProfiles()
 			.withBestPracticeWarningLevel("IGNORE")
+			.rejectOnSeverity("error")
 			.build();
 		myValInterceptor.setRules(rules);
 

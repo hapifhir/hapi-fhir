@@ -25,7 +25,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
-import ca.uhn.fhir.jpa.util.SearchBox;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -35,6 +34,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import org.hibernate.search.engine.spatial.GeoBoundingBox;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -115,7 +115,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			double latitudeDegrees = Double.parseDouble(latitudeValue);
 			double longitudeDegrees = Double.parseDouble(longitudeValue);
 
-			SearchBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
+			GeoBoundingBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
 			latitudePredicate = theFrom.createLatitudePredicateFromBox(box);
 			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}
@@ -132,23 +132,23 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return BinaryCondition.equalTo(myColumnLongitude, generatePlaceholder(theLongitudeValue));
 	}
 
-	public Condition createLatitudePredicateFromBox(SearchBox theBox) {
+	public Condition createLatitudePredicateFromBox(GeoBoundingBox theBox) {
 		return ComboCondition.and(
-			BinaryCondition.greaterThanOrEq(myColumnLatitude, generatePlaceholder(theBox.getSouthWest().getLatitude())),
-			BinaryCondition.lessThanOrEq(myColumnLatitude, generatePlaceholder(theBox.getNorthEast().getLatitude()))
+			BinaryCondition.greaterThanOrEq(myColumnLatitude, generatePlaceholder(theBox.bottomRight().latitude())),
+			BinaryCondition.lessThanOrEq(myColumnLatitude, generatePlaceholder(theBox.topLeft().latitude()))
 		);
 	}
 
-	public Condition createLongitudePredicateFromBox(SearchBox theBox) {
-		if (theBox.crossesAntiMeridian()) {
+	public Condition createLongitudePredicateFromBox(GeoBoundingBox theBox) {
+		if (theBox.bottomRight().longitude() < theBox.topLeft().longitude()) {
 			return ComboCondition.or(
-				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getNorthEast().getLongitude())),
-				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getSouthWest().getLongitude()))
+				BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude())),
+				BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude()))
 			);
 		}
 		return ComboCondition.and(
-			BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getSouthWest().getLongitude())),
-			BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.getNorthEast().getLongitude()))
+			BinaryCondition.greaterThanOrEq(myColumnLongitude, generatePlaceholder(theBox.topLeft().longitude())),
+			BinaryCondition.lessThanOrEq(myColumnLongitude, generatePlaceholder(theBox.bottomRight().longitude()))
 		);
 	}
 }

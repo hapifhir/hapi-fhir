@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2269
+title: "A database index in the JPA server was added in HAPI FHIR 5.2.0 and Smile CDR 2020.11 that
+   exceeded the maximum index length in MySQL, preventing server upgrades on that database platform.
+   This has been corrected."

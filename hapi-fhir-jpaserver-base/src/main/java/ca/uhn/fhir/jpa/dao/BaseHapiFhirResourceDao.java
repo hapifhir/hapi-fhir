@@ -635,7 +635,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBaseResource oldVersion = toResource(theEntity, false);
 
 		List<TagDefinition> tags = toTagList(theMetaAdd);
-
 		for (TagDefinition nextDef : tags) {
 
 			boolean hasTag = false;
@@ -663,9 +662,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		validateMetaCount(theEntity.getTags().size());
 
-		theEntity = myEntityManager.merge(theEntity);
+		myEntityManager.merge(theEntity);
 
 		// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
 		IBaseResource newVersion = toResource(theEntity, false);
 		HookParams params = new HookParams()
 			.add(IBaseResource.class, oldVersion)
@@ -673,6 +673,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 
 	}
@@ -680,6 +681,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private <MT extends IBaseMetaType> void doMetaDelete(MT theMetaDel, BaseHasResource theEntity, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails) {
 
 		IBaseResource oldVersion = toResource(theEntity, false);
+
 
 		List<TagDefinition> tags = toTagList(theMetaDel);
 
@@ -708,6 +710,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 			.add(TransactionDetails.class, theTransactionDetails);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 
 	}

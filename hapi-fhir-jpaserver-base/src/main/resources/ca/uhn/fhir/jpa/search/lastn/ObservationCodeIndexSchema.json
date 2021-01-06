@@ -1,26 +1,24 @@
 {
-  "mappings" : {
-    "ca.uhn.fhir.jpa.model.entity.ObservationIndexedCodeCodeableConceptEntity" : {
-      "properties" : {
-        "codeable_concept_id" : {
-          "type" : "keyword"
-        },
-        "codingcode" : {
-          "type" : "keyword"
-        },
-        "codingcode_system_hash" : {
-          "type" : "keyword"
-        },
-        "codingdisplay" : {
-          "type" : "keyword"
-        },
-        "codingsystem" : {
-          "type" : "keyword"
-        },
-        "text" : {
-          "type" : "keyword"
-        }
-      }
-    }
-  }
+	"mappings": {
+		"properties": {
+			"codeable_concept_id": {
+				"type": "keyword"
+			},
+			"codingcode": {
+				"type": "keyword"
+			},
+			"codingcode_system_hash": {
+				"type": "keyword"
+			},
+			"codingdisplay": {
+				"type": "keyword"
+			},
+			"codingsystem": {
+				"type": "keyword"
+			},
+			"text": {
+				"type": "keyword"
+			}
+		}
+	}
 }

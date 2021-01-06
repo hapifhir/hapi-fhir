@@ -25,6 +25,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.interceptor.validation.IRepositoryValidatingRule;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.springframework.context.ApplicationContext;
 
 import java.util.List;
@@ -88,6 +89,28 @@ public class RepositoryValidatingInterceptorExamples {
 		//END SNIPPET: requireValidationToDeclaredProfiles
 	}
 
+	public void requireValidationToDeclaredProfilesAdjustThreshold() {
+		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);
+
+		//START SNIPPET: requireValidationToDeclaredProfilesAdjustThreshold
+		ruleBuilder
+			.forResourcesOfType("Patient")
+			.requireValidationToDeclaredProfiles()
+			.rejectOnSeverity(ResultSeverityEnum.WARNING);
+		//END SNIPPET: requireValidationToDeclaredProfilesAdjustThreshold
+	}
+
+	public void requireValidationToDeclaredProfilesTagOnFailure() {
+		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);
+
+		//START SNIPPET: requireValidationToDeclaredProfilesTagOnFailure
+		ruleBuilder
+			.forResourcesOfType("Patient")
+			.requireValidationToDeclaredProfiles()
+			.dontReject()
+			.tagOnSeverity(ResultSeverityEnum.ERROR, "http://example.com", "validation-failure");
+		//END SNIPPET: requireValidationToDeclaredProfilesTagOnFailure
+	}
 
 	public void disallowProfiles() {
 		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);

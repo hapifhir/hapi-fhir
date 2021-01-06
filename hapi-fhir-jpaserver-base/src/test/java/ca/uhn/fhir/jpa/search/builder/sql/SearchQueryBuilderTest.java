@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.config.HibernateDialectProvider;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import org.hibernate.dialect.DerbyTenSevenDialect;
 import org.hibernate.dialect.MariaDB103Dialect;
 import org.hibernate.dialect.MySQL8Dialect;
-import org.hibernate.dialect.MySQLDialect;
 import org.hibernate.dialect.Oracle12cDialect;
 import org.hibernate.dialect.PostgreSQL95Dialect;
 import org.hibernate.dialect.SQLServer2005Dialect;
@@ -53,7 +52,7 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeSqlServer2005_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new SQLServer2005Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -79,26 +78,29 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeSqlServer2005_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new SQLServer2005Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range
 		generated = builder.generate(null, null);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L));
 
 		// Max only
 		generated = builder.generate(null, 10);
-		assertEquals("SELECT TOP(?) t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST", generated.getSql());
+//		assertEquals("SELECT TOP(?) t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC", generated.getSql());
+		assertEquals("SELECT TOP(?) t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains(10, "Patient", 500L, 501L));
 
 		// Range
 		generated = builder.generate(10, 5);
-		assertEquals("WITH query AS (SELECT inner_query.*, ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) as __hibernate_row_nr__ FROM ( SELECT TOP(?) t0.RES_ID as page0_ FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST ) inner_query ) SELECT page0_ FROM query WHERE __hibernate_row_nr__ >= ? AND __hibernate_row_nr__ < ?", generated.getSql());
+//		assertEquals("WITH query AS (SELECT inner_query.*, ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) as __hibernate_row_nr__ FROM ( SELECT TOP(?) t0.RES_ID as page0_ FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC ) inner_query ) SELECT page0_ FROM query WHERE __hibernate_row_nr__ >= ? AND __hibernate_row_nr__ < ?", generated.getSql());
+		assertEquals("WITH query AS (SELECT inner_query.*, ROW_NUMBER() OVER (ORDER BY CURRENT_TIMESTAMP) as __hibernate_row_nr__ FROM ( SELECT TOP(?) t0.RES_ID as page0_ FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC ) inner_query ) SELECT page0_ FROM query WHERE __hibernate_row_nr__ >= ? AND __hibernate_row_nr__ < ?", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains(5, "Patient", 500L, 501L, 11, 16));
 
 	}
@@ -107,7 +109,7 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeSqlServer2012_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new SQLServer2012Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -133,26 +135,29 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeSqlServer2012_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new SQLServer2012Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range
 		generated = builder.generate(null, null);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L));
 
 		// Max only
 		generated = builder.generate(null, 10);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST offset 0 rows fetch next ? rows only", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC offset 0 rows fetch next ? rows only", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC offset 0 rows fetch next ? rows only", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L, 10));
 
 		// Range
 		generated = builder.generate(10, 5);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST offset ? rows fetch next ? rows only", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC offset ? rows fetch next ? rows only", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC offset ? rows fetch next ? rows only", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L, 10, 5));
 
 	}
@@ -160,7 +165,7 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangePostgreSQL95_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new PostgreSQL95Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -186,11 +191,11 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangePostgreSQL95_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new PostgreSQL95Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range
@@ -213,7 +218,7 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeOracle12c_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new Oracle12cDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -239,11 +244,11 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeOracle12c_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new Oracle12cDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range
@@ -263,11 +268,10 @@ public class SearchQueryBuilderTest {
 
 	}
 
-
 	@Test
 	public void testRangeMySQL8_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new MySQL8Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -293,26 +297,29 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeMySQL8_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new MySQL8Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range
 		generated = builder.generate(null, null);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L));
 
 		// Max only
 		generated = builder.generate(null, 10);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST limit ?", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC limit ?", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC limit ?", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L, 10));
 
 		// Range
 		generated = builder.generate(10, 5);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST limit ?, ?", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC limit ?, ?", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC limit ?, ?", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L, 10, 5));
 
 	}
@@ -321,7 +328,7 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeMariaDB103_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new MariaDB103Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -347,26 +354,29 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeMariaDB103_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new MariaDB103Dialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range
 		generated = builder.generate(null, null);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L));
 
 		// Max only
 		generated = builder.generate(null, 10);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST limit ?", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC limit ?", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC limit ?", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L, 10));
 
 		// Range
 		generated = builder.generate(10, 5);
-		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC NULLS LAST limit ?, ?", generated.getSql());
+//		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY CASE WHEN t0.RES_UPDATED IS NULL THEN 1 ELSE 0 END ASC, t0.RES_UPDATED ASC limit ?, ?", generated.getSql());
+		assertEquals("SELECT t0.RES_ID FROM HFJ_RESOURCE t0 WHERE (((t0.RES_TYPE = ?) AND (t0.RES_DELETED_AT IS NULL)) AND (t0.RES_ID IN (?,?) )) ORDER BY t0.RES_UPDATED ASC limit ?, ?", generated.getSql());
 		assertThat(generated.getBindVariables().toString(), generated.getBindVariables(), contains("Patient", 500L, 501L, 10, 5));
 
 	}
@@ -375,7 +385,7 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeDerbyTenSeven_NoSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new DerbyTenSevenDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
@@ -401,11 +411,11 @@ public class SearchQueryBuilderTest {
 	@Test
 	public void testRangeDerbyTenSeven_WithSort() {
 
-		HibernateDialectProvider dialectProvider = new HibernateDialectProvider();
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
 		dialectProvider.setDialectForUnitTest(new DerbyTenSevenDialect());
 		SearchQueryBuilder builder = new SearchQueryBuilder(myFhirContext, myModelConfig, myPartitionSettings, myRequestPartitionId, "Patient", mySqlBuilderFactory, dialectProvider, false);
 		builder.addResourceIdsPredicate(Lists.newArrayList(500L, 501L));
-		builder.addSort(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
+		builder.addSortDate(builder.getOrCreateResourceTablePredicateBuilder().getColumnLastUpdated(), true);
 		GeneratedSql generated;
 
 		// No range

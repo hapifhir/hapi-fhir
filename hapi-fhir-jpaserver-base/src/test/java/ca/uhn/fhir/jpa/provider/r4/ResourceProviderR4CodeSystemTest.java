@@ -55,7 +55,9 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOnExternalCode() {
+		myCaptureQueriesListener.clear();
 		ResourceProviderR4ValueSetNoVerCSNoVerTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Parameters respParam = myClient
 			.operation()

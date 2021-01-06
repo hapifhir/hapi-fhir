@@ -17,6 +17,11 @@ jobs:
     timeoutInMinutes: 360
     container: maven:3-jdk-11
     steps:
+      - task: DockerInstaller@0
+        displayName: Docker Installer
+        inputs:
+           dockerVersion: 17.09.0-ce
+           releaseType: stable
       - task: Cache@2
         inputs:
           key: 'maven | "$(Agent.OS)" | ./pom.xml'
@@ -35,8 +40,24 @@ jobs:
           # These are JVM options (and don't show up in the build logs)
           mavenOptions: '-Xmx1024m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
           jdkVersionOption: 1.11
+      - task: CopyFiles@2
+        condition: always()
+        inputs:
+          sourceFolder: '$(System.DefaultWorkingDirectory)/'
+          contents: '**/target/*output.txt'
+          targetFolder: '$(Build.ArtifactStagingDirectory)'
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Full Test Output'
+        condition: always()
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)/'
+          artifactName: 'full_logs.zip'
       - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
+      - task: PublishTestResults@2
+        inputs:
+          testResultsFormat: 'JUnit'
+          testResultsFiles: '**/TEST-*.xml'
       - task: PublishCodeCoverageResults@1
         inputs:
           codeCoverageTool: 'JaCoCo'

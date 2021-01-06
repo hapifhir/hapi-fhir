@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -10,6 +11,10 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
+import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +28,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.dao.BaseJpaTest.buildHeapLuceneHibernateSearchProperties;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @Configuration
@@ -146,10 +152,8 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
-		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		extraProperties.put("hibernate.search.autoregister_listeners", "true");
+
+		extraProperties.putAll(buildHeapLuceneHibernateSearchProperties());
 
 		return extraProperties;
 	}
