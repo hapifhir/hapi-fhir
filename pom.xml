@@ -733,7 +733,7 @@
 		<error_prone_annotations_version>2.3.4</error_prone_annotations_version>
 		<error_prone_core_version>2.3.4</error_prone_core_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>29.0-jre</guava_version>
+		<guava_version>30.1-jre</guava_version>
 		<gson_version>2.8.5</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -1139,6 +1139,11 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
+				<version>${httpclient_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient-cache</artifactId>
 				<version>${httpclient_version}</version>
 			</dependency>
 			<dependency>
