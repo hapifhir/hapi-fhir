@@ -22,7 +22,7 @@ import java.util.List;
  * A default RequestDetails implementation that can be used for system calls to
  * Resource DAO methods when partitioning is enabled. Using a SystemRequestDetails
  * instance for system calls will ensure that any resource queries or updates will
- * use the DEFAULT partition when partitioninbg is enabled.
+ * use the DEFAULT partition when partitioning is enabled.
  */
 public class SystemRequestDetails extends RequestDetails {
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
