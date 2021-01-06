@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -57,6 +58,7 @@ public class TermCodeSystemVersion implements Serializable {
 	public static final String IDX_CODESYSTEM_AND_VER = "IDX_CODESYSTEM_AND_VER";
 	public static final int MAX_VERSION_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
 
@@ -73,7 +75,7 @@ public class TermCodeSystemVersion implements Serializable {
 	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	@Column(name = "CS_VERSION_ID", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
 
 	/**
@@ -91,7 +93,7 @@ public class TermCodeSystemVersion implements Serializable {
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true, fetch = FetchType.LAZY)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
-	@Column(name = "CS_DISPLAY", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	@Column(name = "CS_DISPLAY", nullable = true, updatable = true, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemDisplayName;
 
 	/**
@@ -196,6 +198,7 @@ public class TermCodeSystemVersion implements Serializable {
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
+		b.append("displayName", myCodeSystemDisplayName);
 		b.append("codeSystemResourcePid", myResourcePid);
 		b.append("codeSystemPid", myCodeSystemPid);
 		b.append("codeSystemVersionId", myCodeSystemVersionId);

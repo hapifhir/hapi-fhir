@@ -63,8 +63,22 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		cs.addConcept().setCode("A");
 		cs.addConcept().setCode("B");
 		myCodeSystemDao.update(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		runInTransaction(()->{
 			assertEquals(2, myConceptDao.count());
+		});
+
+		// Update the code system to reduce the count again
+		cs = new CodeSystem();
+		cs.setId(id);
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("C");
+		myCodeSystemDao.update(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		runInTransaction(()->{
+			assertEquals(1, myConceptDao.count());
 		});
 
 		// Delete the code system

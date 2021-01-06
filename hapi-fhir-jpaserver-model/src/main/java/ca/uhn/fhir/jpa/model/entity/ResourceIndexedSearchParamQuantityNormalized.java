@@ -40,8 +40,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.NumericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
+
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -76,8 +77,7 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 	// Changed to double here for storing the value after converted to the CanonicalForm due to BigDecimal maps NUMBER(19,2) 
 	// The precision may lost even to store 1.2cm which is 0.012m in the CanonicalForm
 	@Column(name = "SP_VALUE", nullable = true)
-	@Field
-	@NumericField
+	@ScaledNumberField
 	public Double myValue;
 
 	public ResourceIndexedSearchParamQuantityNormalized() {

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,29 +20,48 @@ package ca.uhn.fhir.jpa.search.elastic;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.jpa.search.lastn.ElasticsearchRestClientFactory;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.search.cfg.Environment;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchEnvironment;
-import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
-import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.indices.PutIndexTemplateRequest;
+import org.elasticsearch.common.settings.Settings;
+import org.hibernate.search.backend.elasticsearch.index.IndexStatus;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.automaticindexing.session.AutomaticIndexingSynchronizationStrategyNames;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
+import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
+import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchIndexSettings;
+import org.hibernate.search.mapper.orm.schema.management.SchemaManagementStrategyName;
+import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * This class is used to inject appropriate properties into a hibernate
  * Properties object being used to create an entitymanager for a HAPI
- * FHIR JPA server.
+ * FHIR JPA server. This class also injects a starter template into the ES cluster.
  */
 public class ElasticsearchHibernatePropertiesBuilder {
+   private static final Logger ourLog = getLogger(ElasticsearchHibernatePropertiesBuilder.class);
 
-	private ElasticsearchIndexStatus myRequiredIndexStatus = ElasticsearchIndexStatus.YELLOW;
+
+	private IndexStatus myRequiredIndexStatus = IndexStatus.YELLOW.YELLOW;
+	private SchemaManagementStrategyName myIndexSchemaManagementStrategy = SchemaManagementStrategyName.CREATE;
+
 	private String myRestUrl;
 	private String myUsername;
 	private String myPassword;
-	private IndexSchemaManagementStrategy myIndexSchemaManagementStrategy = IndexSchemaManagementStrategy.CREATE;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
-	private boolean myDebugRefreshAfterWrite = false;
+	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;
 	private boolean myDebugPrettyPrintJsonLog = false;
+	private String myProtocol;
 
 	public ElasticsearchHibernatePropertiesBuilder setUsername(String theUsername) {
 		myUsername = theUsername;
@@ -56,36 +75,35 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 	public void apply(Properties theProperties) {
 
-		// Don't use the Lucene properties as they conflict
-		theProperties.remove("hibernate.search.model_mapping");
-
 		// the below properties are used for ElasticSearch integration
-		theProperties.put("hibernate.search.default." + Environment.INDEX_MANAGER_IMPL_NAME, "elasticsearch");
-		theProperties.put("hibernate.search." + ElasticsearchEnvironment.ANALYSIS_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
+		theProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "elasticsearch");
 
-		theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
+
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.ANALYSIS_CONFIGURER), HapiElasticsearchAnalysisConfigurer.class.getName());
+
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS), myRestUrl);
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PROTOCOL), myProtocol);
+
 		if (StringUtils.isNotBlank(myUsername)) {
-			theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
+			theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.USERNAME), myUsername);
 		}
 		if (StringUtils.isNotBlank(myPassword)) {
-			theProperties.put("hibernate.search.default.elasticsearch.password", myPassword);
+			theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.PASSWORD), myPassword);
 		}
-
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.getExternalName());
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_MANAGEMENT_WAIT_TIMEOUT, Long.toString(myIndexManagementWaitTimeoutMillis));
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REQUIRED_INDEX_STATUS, myRequiredIndexStatus.getElasticsearchString());
-
+		theProperties.put(HibernateOrmMapperSettings.SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.externalRepresentation());
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.SCHEMA_MANAGEMENT_MINIMAL_REQUIRED_STATUS_WAIT_TIMEOUT), Long.toString(myIndexManagementWaitTimeoutMillis));
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.SCHEMA_MANAGEMENT_MINIMAL_REQUIRED_STATUS), myRequiredIndexStatus.externalRepresentation());
 		// Need the mapping to be dynamic because of terminology indexes.
-		theProperties.put("hibernate.search.default.elasticsearch.dynamic_mapping", "true");
-
-
+		theProperties.put(BackendSettings.backendKey(ElasticsearchIndexSettings.DYNAMIC_MAPPING), "true");
 		// Only for unit tests
-		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REFRESH_AFTER_WRITE, Boolean.toString(myDebugRefreshAfterWrite));
-		theProperties.put("hibernate.search." + ElasticsearchEnvironment.LOG_JSON_PRETTY_PRINTING, Boolean.toString(myDebugPrettyPrintJsonLog));
+		theProperties.put(HibernateOrmMapperSettings.AUTOMATIC_INDEXING_SYNCHRONIZATION_STRATEGY, myDebugSyncStrategy);
+		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LOG_JSON_PRETTY_PRINTING), Boolean.toString(myDebugPrettyPrintJsonLog));
+
+		injectStartupTemplate(myProtocol, myRestUrl, myUsername, myPassword);
 
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(ElasticsearchIndexStatus theRequiredIndexStatus) {
+	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(IndexStatus theRequiredIndexStatus) {
 		myRequiredIndexStatus = theRequiredIndexStatus;
 		return this;
 	}
@@ -95,7 +113,12 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy theIndexSchemaManagementStrategy) {
+	public ElasticsearchHibernatePropertiesBuilder setProtocol(String theProtocol) {
+		myProtocol = theProtocol;
+		return this;
+	}
+
+	public ElasticsearchHibernatePropertiesBuilder setIndexSchemaManagementStrategy(SchemaManagementStrategyName theIndexSchemaManagementStrategy) {
 		myIndexSchemaManagementStrategy = theIndexSchemaManagementStrategy;
 		return this;
 	}
@@ -105,15 +128,40 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		return this;
 	}
 
-	public ElasticsearchHibernatePropertiesBuilder setDebugRefreshAfterWrite(boolean theDebugRefreshAfterWrite) {
-		myDebugRefreshAfterWrite = theDebugRefreshAfterWrite;
+	public ElasticsearchHibernatePropertiesBuilder setDebugIndexSyncStrategy(String theSyncStrategy) {
+		myDebugSyncStrategy = theSyncStrategy;
 		return this;
 	}
+
 
 	public ElasticsearchHibernatePropertiesBuilder setDebugPrettyPrintJsonLog(boolean theDebugPrettyPrintJsonLog) {
 		myDebugPrettyPrintJsonLog = theDebugPrettyPrintJsonLog;
 		return this;
 	}
 
+	/**
+	 * At startup time, injects a template into the elasticsearch cluster, which is needed for handling large ngram diffs.
+	 * TODO GGG HS: In HS6.1, we should have a native way of performing index settings manipulation at bootstrap time, so this should
+	 * eventually be removed in favour of whatever solution they come up with.
+	 */
+	private void injectStartupTemplate(String theProtocol, String theHostAndPort, String theUsername, String thePassword) {
+		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
+			.patterns(Arrays.asList("resourcetable-*", "termconcept-*"))
+			.settings(Settings.builder().put("index.max_ngram_diff", 50));
 
+		int colonIndex = theHostAndPort.indexOf(":");
+		String host = theHostAndPort.substring(0, colonIndex);
+		Integer port = Integer.valueOf(theHostAndPort.substring(colonIndex + 1));
+		String qualifiedHost = theProtocol + "://" + host;
+
+		try {
+			RestHighLevelClient elasticsearchHighLevelRestClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(qualifiedHost, port, theUsername, thePassword);
+			ourLog.info("Adding starter template for large ngram diffs");
+			AcknowledgedResponse acknowledgedResponse = elasticsearchHighLevelRestClient.indices().putTemplate(ngramTemplate, RequestOptions.DEFAULT);
+			assert acknowledgedResponse.isAcknowledged();
+		} catch (IOException theE) {
+			theE.printStackTrace();
+			throw new ConfigurationException("Couldn't connect to the elasticsearch server to create necessary templates. Ensure the Elasticsearch user has permissions to create templates.");
+		}
+	}
 }

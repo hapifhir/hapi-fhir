@@ -24,7 +24,7 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.search.annotations.Field;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -37,11 +37,11 @@ public abstract class ResourceIndexedSearchParamBaseQuantity extends BaseResourc
 	private static final long serialVersionUID = 1L;
 	
 	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
-	@Field
+	@FullTextField
 	public String mySystem;
 	
 	@Column(name = "SP_UNITS", nullable = true, length = MAX_LENGTH)
-	@Field
+	@FullTextField
 	public String myUnits;
 
 	/**

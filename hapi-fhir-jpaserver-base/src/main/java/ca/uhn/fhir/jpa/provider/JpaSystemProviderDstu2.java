@@ -1,17 +1,14 @@
 package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
 import ca.uhn.fhir.model.dstu2.resource.Parameters.Parameter;
 import ca.uhn.fhir.model.primitive.BooleanDt;
-import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.IntegerDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -20,7 +17,6 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -42,7 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,36 +210,6 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		Parameters parameters = new Parameters();
 		parameters.addParameter().setName("return").setValue(getDao().metaGetOperation(theRequestDetails));
 		return parameters;
-	}
-
-	@Operation(name = JpaConstants.OPERATION_SUGGEST_KEYWORDS, idempotent = true)
-	public Parameters suggestKeywords(
-		@OperationParam(name = "context", min = 1, max = 1) String theContext,
-		@OperationParam(name = "searchParam", min = 1, max = 1) String theSearchParam,
-		@OperationParam(name = "text", min = 1, max = 1) String theText,
-		RequestDetails theRequest) {
-		JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
-
-		if (isBlank(theContext)) {
-			throw new InvalidRequestException("Parameter 'context' must be provided");
-		}
-		if (isBlank(theSearchParam)) {
-			throw new InvalidRequestException("Parameter 'searchParam' must be provided");
-		}
-		if (isBlank(theText)) {
-			throw new InvalidRequestException("Parameter 'text' must be provided");
-		}
-
-		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText, theRequest);
-
-		Parameters retVal = new Parameters();
-		for (Suggestion next : keywords) {
-			retVal.addParameter()
-				.addPart(new Parameter().setName("keyword").setValue(new StringDt(next.getTerm())))
-				.addPart(new Parameter().setName("score").setValue(new DecimalDt(next.getScore())));
-		}
-
-		return retVal;
 	}
 
 	@Transaction

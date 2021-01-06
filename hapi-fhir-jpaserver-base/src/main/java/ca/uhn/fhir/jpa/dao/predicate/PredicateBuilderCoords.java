@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.predicate;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,14 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.LegacySearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.util.CoordCalculator;
-import ca.uhn.fhir.jpa.util.SearchBox;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.SpecialParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import com.google.common.annotations.VisibleForTesting;
+import org.hibernate.search.engine.spatial.GeoBoundingBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -116,7 +115,7 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 			double latitudeDegrees = Double.parseDouble(latitudeValue);
 			double longitudeDegrees = Double.parseDouble(longitudeValue);
 
-			SearchBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
+			GeoBoundingBox box = CoordCalculator.getBox(latitudeDegrees, longitudeDegrees, distanceKm);
 			latitudePredicate = latitudePredicateFromBox(theBuilder, theFrom, box);
 			longitudePredicate = longitudePredicateFromBox(theBuilder, theFrom, box);
 		}
@@ -124,24 +123,24 @@ public class PredicateBuilderCoords extends BasePredicateBuilder implements IPre
 		return combineParamIndexPredicateWithParamNamePredicate(theResourceName, theSearchParam.getName(), theFrom, singleCode, theRequestPartitionId);
 	}
 
-	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
+	private Predicate latitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, GeoBoundingBox theBox) {
 		return theBuilder.and(
-			theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), theBox.getSouthWest().getLatitude()),
-			theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), theBox.getNorthEast().getLatitude())
+			theBuilder.greaterThanOrEqualTo(theFrom.get("myLatitude"), theBox.bottomRight().latitude()),
+			theBuilder.lessThanOrEqualTo(theFrom.get("myLatitude"), theBox.topLeft().latitude())
 		);
 	}
 
 	@VisibleForTesting
-	Predicate longitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, SearchBox theBox) {
-		if (theBox.crossesAntiMeridian()) {
+	Predicate longitudePredicateFromBox(CriteriaBuilder theBuilder, From<?, ResourceIndexedSearchParamCoords> theFrom, GeoBoundingBox theBox) {
+		if (theBox.bottomRight().longitude() < theBox.topLeft().longitude()) {
 			return theBuilder.or(
-				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.getNorthEast().getLongitude()),
-				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.getSouthWest().getLongitude())
+				theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.bottomRight().longitude()),
+				theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.topLeft().longitude())
 			);
 		}
 		return theBuilder.and(
-			theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.getSouthWest().getLongitude()),
-			theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.getNorthEast().getLongitude())
+			theBuilder.greaterThanOrEqualTo(theFrom.get("myLongitude"), theBox.topLeft().longitude()),
+			theBuilder.lessThanOrEqualTo(theFrom.get("myLongitude"), theBox.bottomRight().longitude())
 		);
 	}
 

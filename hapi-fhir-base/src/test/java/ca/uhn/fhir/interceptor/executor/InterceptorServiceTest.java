@@ -97,6 +97,75 @@ public class InterceptorServiceTest {
 		assertEquals("1", ((InvalidRequestException) response).getMessage());
 	}
 
+
+	/**
+	 * Hook methods with private access are ignored
+	 */
+	@Test
+	public void testInterceptorWithPrivateAccessHookMethod() {
+
+		class InterceptorThrowingException {
+			@Hook(Pointcut.TEST_RB)
+			private void test(String theValue) {
+				throw new AuthenticationException(theValue);
+			}
+		}
+
+		InterceptorService svc = new InterceptorService();
+		svc.registerInterceptor(new InterceptorThrowingException());
+
+		// Should not fail
+		svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
+	}
+
+	@Test
+	public void testInterceptorWithDefaultAccessHookMethod() {
+
+		class InterceptorThrowingException {
+			@Hook(Pointcut.TEST_RB)
+			void test(String theValue) {
+				throw new AuthenticationException(theValue);
+			}
+		}
+
+		InterceptorService svc = new InterceptorService();
+		svc.registerInterceptor(new InterceptorThrowingException());
+
+		try {
+			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
+			fail();
+		} catch (AuthenticationException e) {
+			assertEquals("A MESSAGE", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testInterceptorWithInheritedHookMethod() {
+
+		class InterceptorThrowingException {
+			@Hook(Pointcut.TEST_RB)
+			void test(String theValue) {
+				throw new AuthenticationException(theValue);
+			}
+		}
+
+		class InterceptorThrowingException2 extends InterceptorThrowingException {
+			// nothing
+		}
+
+		InterceptorService svc = new InterceptorService();
+		svc.registerInterceptor(new InterceptorThrowingException2());
+
+		try {
+			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
+			fail();
+		} catch (AuthenticationException e) {
+			assertEquals("A MESSAGE", e.getMessage());
+		}
+
+	}
+
 	@Test
 	public void testRegisterHookFails() {
 		InterceptorService svc = new InterceptorService();

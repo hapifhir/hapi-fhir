@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.model.TranslationQuery;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -56,7 +57,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
-import ca.uhn.fhir.jpa.entity.TermConceptPropertyFieldBridge;
+import ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder;
 import ca.uhn.fhir.jpa.entity.TermConceptPropertyTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
@@ -98,18 +99,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.queries.TermsQuery;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
-import org.apache.lucene.search.TermQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.FullTextQuery;
-import org.hibernate.search.query.dsl.BooleanJunction;
-import org.hibernate.search.query.dsl.QueryBuilder;
+import org.hibernate.search.backend.elasticsearch.ElasticsearchExtension;
+import org.hibernate.search.backend.lucene.LuceneExtension;
+import org.hibernate.search.engine.search.predicate.dsl.BooleanPredicateClausesStep;
+import org.hibernate.search.engine.search.predicate.dsl.PredicateFinalStep;
+import org.hibernate.search.engine.search.predicate.dsl.SearchPredicateFactory;
+import org.hibernate.search.engine.search.query.SearchQuery;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -251,6 +251,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	private ApplicationContext myApplicationContext;
 	private volatile IValidationSupport myJpaValidationSupport;
 	private volatile IValidationSupport myValidationSupport;
+
+	//We need this bean so we can tell which mode hibernate search is running in.
+	@Autowired
+	private HibernatePropertiesProvider myHibernatePropertiesProvider;
+
+	private boolean isFullTextSetToUseElastic() {
+		return "elasticsearch".equalsIgnoreCase(myHibernatePropertiesProvider.getHibernateSearchBackend());
+	}
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
@@ -538,6 +546,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			wasFilteredResult = true;
 		} else {
+			// TODO JA HS: I'm pretty sure we are overfetching here.  test says offset 3, count 4, but we are fetching index 3 -> 10 here, grabbing 7 concepts.
+			//Specifically this test testExpandInline_IncludePreExpandedValueSetByUri_FilterOnDisplay_LeftMatch_SelectRange
 			conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());
 			theAccumulator.consumeSkipCount(offset);
 			if (theAdd) {
@@ -899,8 +909,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			csv = myCodeSystemVersionDao.findByCodeSystemPidAndVersion(theCs.getPid(), includeOrExcludeVersion);
 		}
-		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
+		SearchSession searchSession = Search.session(myEntityManager);
 		/*
 		 * If FullText searching is not enabled, we can handle only basic expansions
 		 * since we're going to do it without the database.
@@ -913,68 +923,41 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * Ok, let's use hibernate search to build the expansion
 		 */
-		QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
-		BooleanJunction<?> bool = qb.bool();
+		//Manually building a predicate since we need to throw it around.
+		SearchPredicateFactory predicate = searchSession.scope(TermConcept.class).predicate();
 
-		bool.must(qb.keyword().onField("myCodeSystemVersionPid").matching(csv.getPid()).createQuery());
+		//Build the top-level expansion on filters.
+		PredicateFinalStep step = predicate.bool(b -> {
+			b.must(predicate.match().field("myCodeSystemVersionPid").matching(csv.getPid()));
 
-		if (theExpansionFilter.hasCode()) {
-			bool.must(qb.keyword().onField("myCode").matching(theExpansionFilter.getCode()).createQuery());
-		}
-
-		/*
-		 * Filters
-		 */
-		String codeSystemUrlAndVersion;
-		if (includeOrExcludeVersion != null) {
-			codeSystemUrlAndVersion = theSystem + "|" + includeOrExcludeVersion;
-		} else {
-			codeSystemUrlAndVersion = theSystem;
-		}
-		for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
-			handleFilter(codeSystemUrlAndVersion, qb, bool, nextFilter);
-		}
-		for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
-			handleFilter(codeSystemUrlAndVersion, qb, bool, nextFilter);
-		}
-
-		Query luceneQuery = bool.createQuery();
-
-		/*
-		 * Include/Exclude Concepts
-		 */
-		List<Term> codes = theIncludeOrExclude
-			.getConcept()
-			.stream()
-			.filter(Objects::nonNull)
-			.map(ValueSet.ConceptReferenceComponent::getCode)
-			.filter(StringUtils::isNotBlank)
-			.map(t -> new Term("myCode", t))
-			.collect(Collectors.toList());
-		if (codes.size() > 0) {
-
-			BooleanQuery.Builder builder = new BooleanQuery.Builder();
-			builder.setMinimumNumberShouldMatch(1);
-			for (Term nextCode : codes) {
-				builder.add(new TermQuery(nextCode), BooleanClause.Occur.SHOULD);
+			if (theExpansionFilter.hasCode()) {
+				b.must(predicate.match().field("myCode").matching(theExpansionFilter.getCode()));
 			}
 
-			luceneQuery = new BooleanQuery.Builder()
-				.add(luceneQuery, BooleanClause.Occur.MUST)
-				.add(builder.build(), BooleanClause.Occur.MUST)
-				.build();
-		}
+			String codeSystemUrlAndVersion = buildCodeSystemUrlAndVersion(theSystem, includeOrExcludeVersion);
+			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
+				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+			}
+			for (ValueSet.ConceptSetFilterComponent nextFilter : theExpansionFilter.getFilters()) {
+				handleFilter(codeSystemUrlAndVersion, predicate, b, nextFilter);
+			}
+		});
 
-		/*
-		 * Execute the query
-		 */
-		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
+		PredicateFinalStep expansionStep = buildExpansionPredicate(theIncludeOrExclude, predicate);
+		final PredicateFinalStep finishedQuery;
+		if (expansionStep == null) {
+			finishedQuery = step;
+		} else {
+			finishedQuery = predicate.bool().must(step).must(expansionStep);
+		}
 
 		/*
 		 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
 		 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
 		 */
-		BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
+		//BooleanQuery.setMaxClauseCount(SearchBuilder.getMaximumPageSize());
+		//TODO GGG HS looks like we can't set max clause count, but it can be set server side.
+		//BooleanQuery.setMaxClauseCount(10000);
 
 		StopWatch sw = new StopWatch();
 		AtomicInteger count = new AtomicInteger(0);
@@ -995,22 +978,27 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
-		jpaQuery.setMaxResults(maxResultsPerBatch);
-		jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
+//		jpaQuery.setMaxResults(maxResultsPerBatch);
+//		jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
 
 		ourLog.debug("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
 
 		StopWatch swForBatch = new StopWatch();
 		AtomicInteger countForBatch = new AtomicInteger(0);
 
-		List<?> resultList = jpaQuery.getResultList();
-		int resultsInBatch = resultList.size();
-		int firstResult = jpaQuery.getFirstResult();
+		SearchQuery<TermConcept> termConceptsQuery = searchSession.search(TermConcept.class)
+			.where(f -> finishedQuery).toQuery();
+
+		System.out.println("About to query:" +  termConceptsQuery.queryString());
+		List<TermConcept> termConcepts = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
+
+
+		int resultsInBatch = termConcepts.size();
+		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
 		int delta = 0;
-		for (Object next : resultList) {
+		for (TermConcept concept: termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
-			TermConcept concept = (TermConcept) next;
 			boolean added = addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
 			if (added) {
 				delta++;
@@ -1026,6 +1014,46 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * Helper method which builds a predicate for the expansion
+	 */
+	private PredicateFinalStep buildExpansionPredicate(ValueSet.ConceptSetComponent theTheIncludeOrExclude, SearchPredicateFactory thePredicate) {
+		PredicateFinalStep expansionStep;
+		/*
+		 * Include/Exclude Concepts
+		 */
+		List<Term> codes = theTheIncludeOrExclude
+			.getConcept()
+			.stream()
+			.filter(Objects::nonNull)
+			.map(ValueSet.ConceptReferenceComponent::getCode)
+			.filter(StringUtils::isNotBlank)
+			.map(t -> new Term("myCode", t))
+			.collect(Collectors.toList());
+
+		if (codes.size() > 0) {
+			expansionStep = thePredicate.bool(b -> {
+				b.minimumShouldMatchNumber(1);
+				for (Term code : codes) {
+					b.should(thePredicate.match().field(code.field()).matching(code.text()));
+				}
+			});
+			return expansionStep;
+		} else {
+			return null;
+		}
+	}
+
+	private String buildCodeSystemUrlAndVersion(String theSystem, String theIncludeOrExcludeVersion) {
+		String codeSystemUrlAndVersion;
+		if (theIncludeOrExcludeVersion != null) {
+			codeSystemUrlAndVersion = theSystem + "|" + theIncludeOrExcludeVersion;
+		} else {
+			codeSystemUrlAndVersion = theSystem;
+		}
+		return codeSystemUrlAndVersion;
 	}
 
 	private @Nonnull
@@ -1046,7 +1074,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	private void handleFilter(String theCodeSystemIdentifier, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilter(String theCodeSystemIdentifier, SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
 			return;
 		}
@@ -1058,258 +1086,36 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		switch (theFilter.getProperty()) {
 			case "display:exact":
 			case "display":
-				handleFilterDisplay(theQb, theBool, theFilter);
+				handleFilterDisplay(theF, theB, theFilter);
 				break;
 			case "concept":
 			case "code":
-				handleFilterConceptAndCode(theCodeSystemIdentifier, theQb, theBool, theFilter);
+				handleFilterConceptAndCode(theCodeSystemIdentifier, theF, theB, theFilter);
 				break;
 			case "parent":
 			case "child":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincParentChild(theBool, theFilter);
+				handleFilterLoincParentChild(theF, theB, theFilter);
 				break;
 			case "ancestor":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincAncestor(theCodeSystemIdentifier, theBool, theFilter);
+				handleFilterLoincAncestor2(theCodeSystemIdentifier, theF, theB, theFilter);
 				break;
 			case "descendant":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincDescendant(theCodeSystemIdentifier, theBool, theFilter);
+				handleFilterLoincDescendant(theCodeSystemIdentifier, theF, theB, theFilter);
 				break;
 			case "copyright":
 				isCodeSystemLoincOrThrowInvalidRequestException(theCodeSystemIdentifier, theFilter.getProperty());
-				handleFilterLoincCopyright(theBool, theFilter);
+				handleFilterLoincCopyright(theF, theB, theFilter);
 				break;
 			default:
-				handleFilterRegex(theBool, theFilter);
+				handleFilterRegex(theF, theB, theFilter);
 				break;
 		}
 	}
 
-	private void isCodeSystemLoincOrThrowInvalidRequestException(String theSystemIdentifier, String theProperty) {
-		String systemUrl = getUrlFromIdentifier(theSystemIdentifier);
-		if (!isCodeSystemLoinc(systemUrl)) {
-			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + systemUrl);
-		}
-	}
-
-	private boolean isCodeSystemLoinc(String theSystem) {
-		return ITermLoaderSvc.LOINC_URI.equals(theSystem);
-	}
-
-	private void handleFilterDisplay(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (theFilter.getProperty().equals("display:exact") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-			addDisplayFilterExact(theQb, theBool, theFilter);
-		} else if (theFilter.getProperty().equals("display") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-			if (theFilter.getValue().trim().contains(" ")) {
-				addDisplayFilterExact(theQb, theBool, theFilter);
-			} else {
-				addDisplayFilterInexact(theQb, theBool, theFilter);
-			}
-		}
-	}
-
-	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
-	}
-
-	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		Query textQuery = qb
-			.phrase()
-			.withSlop(2)
-			.onField("myDisplay").boostedTo(4.0f)
-			//.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			.andField("myDisplayWordEdgeNGram").boostedTo(1.0f)
-			// .andField("myDisplayPhonetic").boostedTo(0.5f)
-			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
-		bool.must(textQuery);
-	}
-
-	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		TermConcept code = findCode(theSystem, theFilter.getValue())
-			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theFilter.getValue()));
-
-		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
-			ourLog.debug(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-			theBool.must(theQb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
-		} else {
-			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
-		}
-	}
-
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincParentChild(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		switch (theFilter.getOp()) {
-			case EQUAL:
-				addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
-				break;
-			case IN:
-				addLoincFilterParentChildIn(theBool, theFilter);
-				break;
-			default:
-				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
-		}
-	}
-
-	private void addLoincFilterParentChildEqual(BooleanJunction<?> theBool, String theProperty, String theValue) {
-		logFilteringValueOnProperty(theValue, theProperty);
-		theBool.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));
-	}
-
-	private void addLoincFilterParentChildIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		String[] values = theFilter.getValue().split(",");
-		List<Term> terms = new ArrayList<>();
-		for (String value : values) {
-			logFilteringValueOnProperty(value, theFilter.getProperty());
-			terms.add(getPropertyTerm(theFilter.getProperty(), value));
-		}
-		theBool.must(new TermsQuery(terms));
-	}
-
-	private Term getPropertyTerm(String theProperty, String theValue) {
-		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
-	}
-
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincAncestor(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		switch (theFilter.getOp()) {
-			case EQUAL:
-				addLoincFilterAncestorEqual(theSystem, theBool, theFilter);
-				break;
-			case IN:
-				addLoincFilterAncestorIn(theSystem, theBool, theFilter);
-				break;
-			default:
-				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
-		}
-	}
-
-	private void addLoincFilterAncestorEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		addLoincFilterAncestorEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
-	}
-
-	private void addLoincFilterAncestorEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
-		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
-		theBool.must(new TermsQuery(terms));
-	}
-
-	private void addLoincFilterAncestorIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		String[] values = theFilter.getValue().split(",");
-		List<Term> terms = new ArrayList<>();
-		for (String value : values) {
-			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
-		}
-		theBool.must(new TermsQuery(terms));
-	}
-
-	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
-		List<Term> retVal = new ArrayList<>();
-
-		TermConcept code = findCode(theSystem, theValue)
-			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
-
-		retVal.add(new Term("myParentPids", "" + code.getId()));
-		logFilteringValueOnProperty(theValue, theProperty);
-
-		return retVal;
-	}
-
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
-	private void handleFilterLoincDescendant(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		switch (theFilter.getOp()) {
-			case EQUAL:
-				addLoincFilterDescendantEqual(theSystem, theBool, theFilter);
-				break;
-			case IN:
-				addLoincFilterDescendantIn(theSystem, theBool, theFilter);
-				break;
-			default:
-				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
-		}
-	}
-
-	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
-	}
-
-	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
-		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
-		theBool.must(new TermsQuery(terms));
-	}
-
-	private void addLoincFilterDescendantIn(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		String[] values = theFilter.getValue().split(",");
-		List<Term> terms = new ArrayList<>();
-		for (String value : values) {
-			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
-		}
-		theBool.must(new TermsQuery(terms));
-	}
-
-	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
-		List<Term> retVal = new ArrayList<>();
-
-		TermConcept code = findCode(theSystem, theValue)
-			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
-
-		String[] parentPids = code.getParentPidsAsString().split(" ");
-		for (String parentPid : parentPids) {
-			retVal.add(new Term("myId", parentPid));
-		}
-		logFilteringValueOnProperty(theValue, theProperty);
-
-		return retVal;
-	}
-
-	private void handleFilterLoincCopyright(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-
-			String copyrightFilterValue = defaultString(theFilter.getValue()).toLowerCase();
-			switch (copyrightFilterValue) {
-				case "3rdparty":
-					logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
-					addFilterLoincCopyright3rdParty(theBool);
-					break;
-				case "loinc":
-					logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
-					addFilterLoincCopyrightLoinc(theBool);
-					break;
-				default:
-					throwInvalidRequestForValueOnProperty(theFilter.getValue(), theFilter.getProperty());
-			}
-
-		} else {
-			throwInvalidRequestForOpOnProperty(theFilter.getOp(), theFilter.getProperty());
-		}
-	}
-
-	private void addFilterLoincCopyright3rdParty(BooleanJunction<?> theBool) {
-		theBool.must(getRegexQueryForFilterLoincCopyright());
-	}
-
-	private void addFilterLoincCopyrightLoinc(BooleanJunction<?> theBool) {
-		theBool.must(getRegexQueryForFilterLoincCopyright()).not();
-	}
-
-	private RegexpQuery getRegexQueryForFilterLoincCopyright() {
-		Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE", ".*");
-		return new RegexpQuery(term);
-	}
-
-	private void logFilteringValueOnProperty(String theValue, String theProperty) {
-		ourLog.debug(" * Filtering with value={} on property {}", theValue, theProperty);
-	}
-
-	private void throwInvalidRequestForOpOnProperty(ValueSet.FilterOperator theOp, String theProperty) {
-		throw new InvalidRequestException("Don't know how to handle op=" + theOp + " on property " + theProperty);
-	}
-
-	private void throwInvalidRequestForValueOnProperty(String theValue, String theProperty) {
-		throw new InvalidRequestException("Don't know how to handle value=" + theValue + " on property " + theProperty);
-	}
-
-	private void handleFilterRegex(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void handleFilterRegex(SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (theFilter.getOp() == ValueSet.FilterOperator.REGEX) {
 
 			/*
@@ -1330,17 +1136,272 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				value = value.substring(1);
 			}
 
-			Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
-			RegexpQuery query = new RegexpQuery(term);
-			theBool.must(query);
+			Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
 
+			if (isFullTextSetToUseElastic()) {
+				String regexpQuery = "{'regexp':{'" + term.field() + "':{'value':'" + term.text() + "'}}}";
+				ourLog.debug("Build Elasticsearch Regexp Query: {}", regexpQuery);
+				theB.must(theF.extension(ElasticsearchExtension.get()).fromJson(regexpQuery));
+			} else {
+				RegexpQuery query = new RegexpQuery(term);
+				theB.must(theF.extension(LuceneExtension.get()).fromLuceneQuery(query));
+			}
 		} else {
-
 			String value = theFilter.getValue();
-			Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
-			theBool.must(new TermsQuery(term));
+			Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
+			theB.must(theF.match().field(term.field()).matching(term.text()));
 
 		}
+	}
+
+	private void handleFilterLoincCopyright(SearchPredicateFactory theF, BooleanPredicateClausesStep<?> theB, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+
+			String copyrightFilterValue = defaultString(theFilter.getValue()).toLowerCase();
+			switch (copyrightFilterValue) {
+				case "3rdparty":
+					logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+					addFilterLoincCopyright3rdParty(theF, theB);
+					break;
+				case "loinc":
+					logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+					addFilterLoincCopyrightLoinc(theF, theB);
+					break;
+				default:
+					throwInvalidRequestForValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+			}
+
+		} else {
+			throwInvalidRequestForOpOnProperty(theFilter.getOp(), theFilter.getProperty());
+		}
+	}
+
+	private void addFilterLoincCopyrightLoinc(SearchPredicateFactory thePredicateFactory, BooleanPredicateClausesStep<?> theBooleanClause) {
+		theBooleanClause.mustNot(thePredicateFactory.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
+	}
+
+	private void addFilterLoincCopyright3rdParty(SearchPredicateFactory thePredicateFactory, BooleanPredicateClausesStep<?> theBooleanClause) {
+		//TODO GGG HS These used to be Term term = new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE", ".*");, which was lucene-specific.
+		//TODO GGG HS ask diederik if this is equivalent.
+		//This old .* regex is the same as an existence check on a field, which I've implemented here.
+		theBooleanClause.must(thePredicateFactory.exists().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE"));
+	}
+
+	private void handleFilterLoincAncestor2(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterAncestorEqual(theSystem, f, b, theFilter);
+				break;
+			case IN:
+				addLoincFilterAncestorIn(theSystem, f, b, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+
+	}
+
+	private void addLoincFilterAncestorEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterAncestorEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterAncestorEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
+		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+	}
+
+	private void addLoincFilterAncestorIn(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
+		}
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+
+	}
+
+	private void handleFilterLoincParentChild(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterParentChildEqual(f, b, theFilter.getProperty(), theFilter.getValue());
+				break;
+			case IN:
+				addLoincFilterParentChildIn(f, b, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterParentChildIn(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			logFilteringValueOnProperty(value, theFilter.getProperty());
+			terms.add(getPropertyTerm(theFilter.getProperty(), value));
+		}
+
+		//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
+		//Far as I'm aware, this is a single element of a MUST portion of a bool, which itself should contain a list of OR'ed options, e.g.
+		// shape == round && color == (green || blue)
+		b.must(f.bool(innerB -> terms.forEach(term -> innerB.should(f.match().field(term.field()).matching(term.text())))));
+	}
+
+	private void addLoincFilterParentChildEqual(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
+		logFilteringValueOnProperty(theValue, theProperty);
+		//TODO GGG HS: Not sure if this is the right equivalent...seems to be no equivalent to `TermsQuery` in HS6.
+		//b.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));
+		//According to the DSL migration reference (https://docs.jboss.org/hibernate/search/6.0/migration/html_single/#queries-reference),
+		//Since this property is handled with a specific analyzer, I'm not sure a terms match here is actually correct. The analyzer is literally just a whitespace tokenizer here.
+
+		b.must(f.match().field(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty).matching(theValue));
+	}
+
+	private void handleFilterConceptAndCode(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+
+
+		TermConcept code = findCode(theSystem, theFilter.getValue())
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theFilter.getValue()));
+
+		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
+			ourLog.debug(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+
+			b.must(f.match().field("myParentPids").matching("" + code.getId()));
+		} else {
+			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+
+	private void isCodeSystemLoincOrThrowInvalidRequestException(String theSystemIdentifier, String theProperty) {
+		String systemUrl = getUrlFromIdentifier(theSystemIdentifier);
+		if (!isCodeSystemLoinc(systemUrl)) {
+			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + systemUrl);
+		}
+	}
+
+	private boolean isCodeSystemLoinc(String theSystem) {
+		return ITermLoaderSvc.LOINC_URI.equals(theSystem);
+	}
+
+	private void handleFilterDisplay(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getProperty().equals("display:exact") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			addDisplayFilterExact(f, b, theFilter);
+		} else if (theFilter.getProperty().equals("display") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			if (theFilter.getValue().trim().contains(" ")) {
+				addDisplayFilterExact(f, b, theFilter);
+			} else {
+				addDisplayFilterInexact(f, b, theFilter);
+			}
+		}
+	}
+
+	private void addDisplayFilterExact(SearchPredicateFactory f, BooleanPredicateClausesStep<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		bool.must(f.phrase().field("myDisplay").matching(nextFilter.getValue()));
+	}
+
+
+
+	private void addDisplayFilterInexact(SearchPredicateFactory f, BooleanPredicateClausesStep<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		bool.must(f.phrase()
+			.field("myDisplay").boost(4.0f)
+			.field("myDisplayWordEdgeNGram").boost(1.0f)
+			.field("myDisplayEdgeNGram").boost(1.0f)
+			.matching(nextFilter.getValue().toLowerCase())
+			.slop(2)
+		);
+	}
+
+	private Term getPropertyTerm(String theProperty, String theValue) {
+		return new Term(TermConceptPropertyBinder.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
+	}
+
+	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
+
+		retVal.add(new Term("myParentPids", "" + code.getId()));
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
+	}
+
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	private void handleFilterLoincDescendant(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterDescendantEqual(theSystem, f, b, theFilter);
+				break;
+			case IN:
+				addLoincFilterDescendantIn(theSystem, f,b , theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+
+	private void addLoincFilterDescendantEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterDescendantEqual(theSystem, f, b, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterDescendantIn(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
+		}
+		searchByParentPids(f, b, terms);
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, String theProperty, String theValue) {
+		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
+		searchByParentPids(f, b, terms);
+	}
+
+	private void searchByParentPids(SearchPredicateFactory f, BooleanPredicateClausesStep<?> b, List<Term> theTerms) {
+		List<Long> parentPids = convertTermsToParentPids(theTerms);
+		b.must(f.bool(innerB -> {
+			parentPids.forEach(pid -> innerB.should(f.match().field(theTerms.get(0).field()).matching(pid)));
+		}));
+	}
+
+	private List<Long> convertTermsToParentPids(List<Term> theTerms) {
+		return theTerms.stream().map(Term::text).map(Long::valueOf).collect(Collectors.toList());
+	}
+
+
+	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
+
+		String[] parentPids = code.getParentPidsAsString().split(" ");
+		for (String parentPid : parentPids) {
+			if (!StringUtils.equals(parentPid, "NONE")) {
+				retVal.add(new Term("myId", parentPid));
+			}
+		}
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
+	}
+
+
+
+	private void logFilteringValueOnProperty(String theValue, String theProperty) {
+		ourLog.debug(" * Filtering with value={} on property {}", theValue, theProperty);
+	}
+
+	private void throwInvalidRequestForOpOnProperty(ValueSet.FilterOperator theOp, String theProperty) {
+		throw new InvalidRequestException("Don't know how to handle op=" + theOp + " on property " + theProperty);
+	}
+
+	private void throwInvalidRequestForValueOnProperty(String theValue, String theProperty) {
+		throw new InvalidRequestException("Don't know how to handle value=" + theValue + " on property " + theProperty);
 	}
 
 	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, TermCodeSystemVersion theVersion, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd) {
@@ -1665,7 +1726,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	public void scheduleJob() {
-		// TODO KHS what does this mean?
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
@@ -2054,12 +2114,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		TermConcept codeB = findCode(codeBSystemIdentifier, conceptB.getCode())
 			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptB));
 
-		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
+		SearchSession searchSession = Search.session(myEntityManager);
 
 		ConceptSubsumptionOutcome subsumes;
-		subsumes = testForSubsumption(em, codeA, codeB, ConceptSubsumptionOutcome.SUBSUMES);
+		subsumes = testForSubsumption(searchSession, codeA, codeB, ConceptSubsumptionOutcome.SUBSUMES);
 		if (subsumes == null) {
-			subsumes = testForSubsumption(em, codeB, codeA, ConceptSubsumptionOutcome.SUBSUMEDBY);
+			subsumes = testForSubsumption(searchSession, codeB, codeA, ConceptSubsumptionOutcome.SUBSUMEDBY);
 		}
 		if (subsumes == null) {
 			subsumes = ConceptSubsumptionOutcome.NOTSUBSUMED;
@@ -2116,19 +2176,20 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nullable
-	private ConceptSubsumptionOutcome testForSubsumption(FullTextEntityManager theEntityManager, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
-		QueryBuilder qb = theEntityManager.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
-		BooleanJunction<?> bool = qb.bool();
-		bool.must(qb.keyword().onField("myId").matching(Long.toString(theRight.getId())).createQuery());
-		bool.must(qb.keyword().onField("myParentPids").matching(Long.toString(theLeft.getId())).createQuery());
-		Query luceneQuery = bool.createQuery();
-		FullTextQuery jpaQuery = theEntityManager.createFullTextQuery(luceneQuery, TermConcept.class);
-		jpaQuery.setMaxResults(1);
-		if (jpaQuery.getResultList().size() > 0) {
+	private ConceptSubsumptionOutcome testForSubsumption(SearchSession theSearchSession, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
+		List<TermConcept> fetch = theSearchSession.search(TermConcept.class)
+			.where(f -> f.bool()
+				.must(f.match().field("myId").matching(theRight.getId()))
+				.must(f.match().field("myParentPids").matching(Long.toString(theLeft.getId())))
+			).fetchHits(1);
+
+		if (fetch.size() > 0) {
 			return theOutput;
+		} else {
+			return null;
 		}
-		return null;
 	}
+
 
 	private ArrayList<FhirVersionIndependentConcept> toVersionIndependentConcepts(String theSystem, Set<TermConcept> codes) {
 		ArrayList<FhirVersionIndependentConcept> retVal = new ArrayList<>(codes.size());

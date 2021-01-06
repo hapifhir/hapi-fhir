@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -14,8 +15,8 @@ public class JpaClasspathTest {
 	public void testNoLog4jOnClasspath() {
 
 		try {
-			Class.forName("org.apache.logging.log4j.status.StatusLogger");
-			fail("org.apache.logging.log4j.status.StatusLogger" + " found on classpath - Make sure log4j isn't being introduced");
+			Class.forName("org.apache.logging.log4j.core.appender");
+			fail("org.apache.logging.log4j.core.appender" + " found on classpath - Make sure log4j isn't being introduced");
 		} catch (ClassNotFoundException e) {
 			// good
 		}

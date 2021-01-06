@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.entity;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,7 +285,12 @@ public class MdmLink {
 		return myEidMatch;
 	}
 
-	public boolean isEidMatch() {
+	/**
+	 * Note that this method can not be called <code>getEidMatch</code> or
+	 * <code>isEidMatch</code> because Hibernate Search complains about having
+	 * 2 accessors for this property
+	 */
+	public boolean isEidMatchPresent() {
 		return myEidMatch != null && myEidMatch;
 	}
 

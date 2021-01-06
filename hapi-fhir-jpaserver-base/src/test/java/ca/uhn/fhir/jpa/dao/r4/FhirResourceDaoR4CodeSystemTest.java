@@ -59,7 +59,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		// Now the background scheduler will do its thing
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		runInTransaction(() -> {
-			assertEquals(1, myTermCodeSystemDao.count());
+			assertEquals(0, myTermCodeSystemDao.count());
 			assertEquals(0, myTermCodeSystemVersionDao.count());
 			assertEquals(0, myTermConceptDao.count());
 		});
@@ -153,7 +153,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		// The remaining versions and Code System entities should be gone now.
 		runInTransaction(() -> {
-			assertEquals(1, myTermCodeSystemDao.count());
+			assertEquals(0, myTermCodeSystemDao.count());
 			assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
 			assertEquals(0, myTermCodeSystemVersionDao.count());
 			List<ResourceTable> resourceList = myResourceTableDao.findAll();
