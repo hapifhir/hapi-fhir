@@ -76,6 +76,24 @@ This rule is generally combined with the *Require Profile Declarations* above.
 
 Any resource creates or updates that do not conform to the given profile will be rejected.
 
+## Adjusting Failure Threshold
+
+By default, any validation messages with a severity value of *ERROR* or *FATAL* will result in resource creates or updates being rejected. This threshold can be adjusted however:
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|requireValidationToDeclaredProfilesAdjustThreshold}}
+```
+
+
+## Tagging Validation Failures
+
+By default, resource updates/changes resulting in failing validation will cause the operation to be rolled back. You can alternately configure the rule to allow the change to proceed but add an arbitrary tag to the resource when it is saved. 
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|requireValidationToDeclaredProfilesTagOnFailure}}
+```
+
+
 # Rules: Disallow Specific Profiles
 
 Rules can declare that a specific profile is not allowed.

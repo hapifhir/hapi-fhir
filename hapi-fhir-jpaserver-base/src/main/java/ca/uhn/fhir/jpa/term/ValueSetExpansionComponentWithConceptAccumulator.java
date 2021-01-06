@@ -66,7 +66,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		myContext = theContext;
 	}
 
-    @Nonnull
+	@Nonnull
 	@Override
 	public Integer getCapacityRemaining() {
 		return (myMaxCapacity - myAddedConcepts) + mySkipCountRemaining;

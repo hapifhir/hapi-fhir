@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -9,14 +8,10 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.search.builder.SearchBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -41,7 +36,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -49,9 +43,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
@@ -59,6 +51,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,7 +111,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		theCodeSystem.setId("CodeSystem/cs2");
 		theCodeSystem.setVersion("2");
-		for(CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
+		for (CodeSystem.ConceptDefinitionComponent conceptDefinitionComponent : theCodeSystem.getConcept()) {
 			conceptDefinitionComponent.setDisplay(conceptDefinitionComponent.getDisplay() + " v2");
 		}
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
@@ -940,7 +934,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v1));
 
 		String updatedValueSetName_v1 = valueSet_v1.getName();
-		validateTermValueSetNotExpanded(updatedValueSetName_v1,"1", myExtensionalVsIdOnResourceTable_v1);
+		validateTermValueSetNotExpanded(updatedValueSetName_v1, "1", myExtensionalVsIdOnResourceTable_v1);
 
 		ValueSet updatedValueSet_v2 = valueSet_v2;
 		updatedValueSet_v2.setName(valueSet_v2.getName().concat(" - MODIFIED"));
@@ -949,7 +943,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet_v2));
 
 		String updatedValueSetName_v2 = valueSet_v2.getName();
-		validateTermValueSetNotExpanded(updatedValueSetName_v2,"2", myExtensionalVsIdOnResourceTable_v2);
+		validateTermValueSetNotExpanded(updatedValueSetName_v2, "2", myExtensionalVsIdOnResourceTable_v2);
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		validateTermValueSetExpandedAndChildrenV1(updatedValueSetName_v1, codeSystem_v1);
@@ -1066,64 +1060,19 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
-
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter", 0);
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("8491-3", concept.getCode());
-			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum", 1);
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+			assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum", 0);
 
-			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("1", concept.getSystemVersion());
-			assertEquals("8492-1", concept.getCode());
-			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
 		});
 	}
 
@@ -1143,64 +1092,22 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("8450-9", concept.getCode());
-			assertEquals("Systolic blood pressure--expiration v2", concept.getDisplay());
-			assertEquals(2, concept.getDesignations().size());
-			assertEquals(0, concept.getOrder());
+			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
+			assertThat(concept.getSystemVersion(), is(equalTo("2")));
+			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
+			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
-			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
-
-			designation = concept.getDesignations().get(1);
-			assertEquals("sv", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("11378-7", concept.getCode());
-			assertEquals("Systolic blood pressure at First encounter v2", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(1, concept.getOrder());
+			TermValueSetConcept termValueSetConcept1 = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
+			assertThat(termValueSetConcept1.getSystemVersion(), is(equalTo("2")));
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("8491-3", concept.getCode());
-			assertEquals("Systolic blood pressure 1 hour minimum v2", concept.getDisplay());
-			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
+			assertThat(otherConcept.getSystemVersion(), is(equalTo("2")));
+			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
-			designation = concept.getDesignations().get(0);
-			assertEquals("nl", designation.getLanguage());
-			assertEquals("http://snomed.info/sct", designation.getUseSystem());
-			assertEquals("900000000000013009", designation.getUseCode());
-			assertEquals("Synonym", designation.getUseDisplay());
-			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
-
-			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Concept:\n" + concept.toString());
-			assertEquals("http://acme.org", concept.getSystem());
-			assertEquals("2", concept.getSystemVersion());
-			assertEquals("8492-1", concept.getCode());
-			assertEquals("Systolic blood pressure 8 hour minimum v2", concept.getDisplay());
-			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
+			TermValueSetConcept termValueSetConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
+			assertThat(termValueSetConcept.getSystemVersion(), is(equalTo("2")));
 		});
 	}
 
@@ -1747,7 +1654,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 	private boolean clearDeferredStorageQueue() {
 
-		if(!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
+		if (!myTerminologyDeferredStorageSvc.isStorageQueueEmpty()) {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return false;
 		} else {
@@ -1762,8 +1669,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		try {
 			persistLocalVs(createLocalVs(URL_MY_CODE_SYSTEM, "1"));
 			fail();
-		} catch (UnprocessableEntityException theE) {
-			assertThat(theE.getMessage(), containsString("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET + "\" and ValueSet.version \"1\", already have one with resource ID: "));
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Can not create multiple ValueSet resources with ValueSet.url \"" + URL_MY_VALUE_SET + "\" and ValueSet.version \"1\", already have one with resource ID: "));
 		}
 
 	}

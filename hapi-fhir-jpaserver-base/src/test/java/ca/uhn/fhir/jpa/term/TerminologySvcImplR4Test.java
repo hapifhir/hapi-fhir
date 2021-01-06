@@ -2003,10 +2003,11 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		codeSystem.setUrl(CS_URL_2);
 
 		IIdType id_v2 = myCodeSystemDao.update(codeSystem, mySrd).getId().toUnqualified();
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		runInTransaction(() -> {
 			List<TermCodeSystemVersion> termCodeSystemVersions_updated = myTermCodeSystemVersionDao.findAll();
-			assertEquals(termCodeSystemVersions_updated.size(), 1);
+			assertEquals(1, termCodeSystemVersions_updated.size());
 			TermCodeSystemVersion termCodeSystemVersion_2 = termCodeSystemVersions_updated.get(0);
 			assertEquals(termCodeSystemVersion_2.getConcepts().size(), 2);
 			Set<TermConcept> termConcepts_updated = new HashSet<>(termCodeSystemVersion_2.getConcepts());

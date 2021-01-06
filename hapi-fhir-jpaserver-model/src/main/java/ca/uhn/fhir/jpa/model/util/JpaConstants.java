@@ -102,10 +102,6 @@ public class JpaConstants {
 	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from Constants.java
 	public static final String OPERATION_VALIDATE = Constants.EXTOP_VALIDATE;
 	/**
-	 * Operation name for the $suggest-keywords operation
-	 */
-	public static final String OPERATION_SUGGEST_KEYWORDS = "$suggest-keywords";
-	/**
 	 * Operation name for the $everything operation
 	 */
 	public static final String OPERATION_EVERYTHING = "$everything";

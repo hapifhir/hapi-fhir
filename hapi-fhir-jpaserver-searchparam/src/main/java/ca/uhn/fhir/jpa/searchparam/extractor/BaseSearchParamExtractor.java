@@ -48,7 +48,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.search.spatial.impl.Point;
+import org.hibernate.search.engine.spatial.GeoPoint;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -77,6 +77,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.searchparam.extractor.GeopointNormalizer.normalizeLongitude;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -775,12 +776,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 		// We only accept coordinates when both are present
 		if (latitude != null && longitude != null) {
-			double normalizedLatitude = Point.normalizeLatitude(latitude.doubleValue());
-			double normalizedLongitude = Point.normalizeLongitude(longitude.doubleValue());
+			double normalizedLatitude = GeopointNormalizer.normalizeLatitude(latitude.doubleValue());
+			double normalizedLongitude = GeopointNormalizer.normalizeLongitude(longitude.doubleValue());
 			ResourceIndexedSearchParamCoords nextEntity = new ResourceIndexedSearchParamCoords(myPartitionSettings, theResourceType, theSearchParam.getName(), normalizedLatitude, normalizedLongitude);
 			theParams.add(nextEntity);
 		}
 	}
+
 
 	private void addString_HumanName(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		List<String> families = extractValuesAsStrings(myHumanNameFamilyValueChild, theValue);
