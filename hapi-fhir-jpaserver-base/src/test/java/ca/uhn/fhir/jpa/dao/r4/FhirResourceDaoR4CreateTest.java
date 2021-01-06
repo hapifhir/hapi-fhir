@@ -337,7 +337,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUcumSearchSupport() {
+	public void testCreateWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
@@ -373,7 +373,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUcumSearchSupportWithVerySmallNumber() {
+	public void testCreateWithNormalizedQuantitySearchSupportedWithVerySmallNumber() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
@@ -410,7 +410,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUcumSearchSupportWithVerySmallNumber2() {
+	public void testCreateWithNormalizedQuantitySearchSupportedWithVerySmallNumber2() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();
@@ -447,7 +447,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateWithUcumSearchSupportWithLargeNumber() {
+	public void testCreateWithNormalizedQuantitySearchSupportedWithLargeNumber() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();

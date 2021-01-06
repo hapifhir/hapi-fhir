@@ -79,7 +79,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testIndexMissingFieldsDisabledDontCreateIndexesWithUcumSearchSupported() {
+	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantitySearchSupported() {
 		
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 		myModelConfig.setNormalizedQuantitySearchSupported();
@@ -96,10 +96,10 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testIndexMissingFieldsDisabledDontCreateIndexesWithUcumStorageSupported() {
+	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantityStorageSupported() {
 		
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myModelConfig.setNormalizedQuantitySearchSupported();
+		myModelConfig.setNormalizedQuantityStorageSupported();
 		Organization org = new Organization();
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
@@ -308,7 +308,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchWithMissingQuantityWithUcumSearchSupport() {
+	public void testSearchWithMissingQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		IIdType notMissing;
@@ -349,9 +349,9 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testSearchWithMissingQuantityWithUcumStorageSupported() {
+	public void testSearchWithMissingQuantityWithNormalizedQuantityStorageSupported() {
 		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+		myModelConfig.setNormalizedQuantityStorageSupported();
 		IIdType notMissing;
 		IIdType missing;
 		{

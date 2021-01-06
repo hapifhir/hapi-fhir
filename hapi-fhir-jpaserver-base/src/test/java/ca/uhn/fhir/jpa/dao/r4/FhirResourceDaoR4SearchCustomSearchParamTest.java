@@ -116,7 +116,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
-	public void testStoreSearchParamWithBracketsInExpressionUcumSearchSupported() {
+	public void testStoreSearchParamWithBracketsInExpressionNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(true);
@@ -137,9 +137,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 	
 	@Test
-	public void testStoreSearchParamWithBracketsInExpressionUcumStorageSupported() {
+	public void testStoreSearchParamWithBracketsInExpressionNormalizedQuantityStorageSupported() {
 		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+		myModelConfig.setNormalizedQuantityStorageSupported();
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(true);
 
 		SearchParameter fooSp = new SearchParameter();

@@ -123,7 +123,7 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 	public ResourceIndexedSearchParamQuantityNormalized setValue(Double theValue) {
 		myValue = theValue;
 		return this;
-	}
+	}	
 	public void setValue(BigDecimal theValue) {
 		if (theValue != null)
 			myValue = theValue.doubleValue();
@@ -194,28 +194,41 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		QuantityParam quantity = (QuantityParam) theParam;
 		boolean retval = false;
 
+		String quantitySystem = quantity.getSystem();
+		BigDecimal quantityValue = quantity.getValue();
+		Double quantityDoubleValue = null;
+		if (quantityValue != null)
+			quantityDoubleValue = quantityValue.doubleValue();
+		String quantityUnits = defaultString(quantity.getUnits());
+		
+		//-- convert the value/unit to the canonical form if any, otherwise store the original value/units pair
+		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(quantitySystem, quantityValue, quantityUnits);
+		if (canonicalForm != null) {
+			quantityDoubleValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
+			quantityUnits = canonicalForm.getCode();
+		}  
+		
 		// Only match on system if it wasn't specified
-		String quantityUnitsString = defaultString(quantity.getUnits());
-		if (quantity.getSystem() == null && isBlank(quantityUnitsString)) {
-			if (Objects.equals(getValueBigDecimal(), quantity.getValue())) {
+		if (quantitySystem == null && isBlank(quantityUnits)) {
+			if (Objects.equals(getValue(), quantityDoubleValue)) {
 				retval = true;
 			}
 		} else {
 			String unitsString = defaultString(getUnits());
-			if (quantity.getSystem() == null) {
-				if (unitsString.equalsIgnoreCase(quantityUnitsString) &&
-					Objects.equals(getValueBigDecimal(), quantity.getValue())) {
+			if (quantitySystem == null) {
+				if (unitsString.equalsIgnoreCase(quantityUnits) &&
+					Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
-			} else if (isBlank(quantityUnitsString)) {
-				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-					Objects.equals(getValueBigDecimal(), quantity.getValue())) {
+			} else if (isBlank(quantityUnits)) {
+				if (getSystem().equalsIgnoreCase(quantitySystem) &&
+					Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			} else {
-				if (getSystem().equalsIgnoreCase(quantity.getSystem()) &&
-					unitsString.equalsIgnoreCase(quantityUnitsString) &&
-					Objects.equals(getValueBigDecimal(), quantity.getValue())) {
+				if (getSystem().equalsIgnoreCase(quantitySystem) &&
+					unitsString.equalsIgnoreCase(quantityUnits) &&
+					Objects.equals(getValue(), quantityDoubleValue)) {
 					retval = true;
 				}
 			}
@@ -223,6 +236,4 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		
 		return retval;
 	}
-
-
 }

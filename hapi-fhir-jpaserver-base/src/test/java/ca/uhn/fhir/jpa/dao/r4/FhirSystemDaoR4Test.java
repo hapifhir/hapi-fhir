@@ -3129,7 +3129,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChangeWithUcumSearchSupport() {
+	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChangeWithNormalizedQuantitySearchSupported() {
 
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation obs = new Observation();

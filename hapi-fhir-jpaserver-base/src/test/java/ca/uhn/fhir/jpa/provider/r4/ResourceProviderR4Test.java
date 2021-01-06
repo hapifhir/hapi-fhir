@@ -217,6 +217,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
@@ -4083,7 +4084,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testSearchWithUcumSupported() throws Exception {
+	public void testSearchWithNormalizedQuantitySearchSupported() throws Exception {
 		
 		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
 		IIdType pid0;
@@ -4168,11 +4169,81 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(3, ids.size());
-
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
 	}
 	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
+		
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
 
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setValueElement(new DecimalType(100)).setUnit("CM").setSystem("http://foo").setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		// > 1m
+		String uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
+			
+		ourLog.info("uri = " + uri);
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+	}
+	
 	
 	@Test
 	public void testSearchReusesNoParams() {
@@ -5986,7 +6057,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testUpdateWithUcumSearchSupport() throws Exception {
+	public void testUpdateWithNormalizedQuantitySearchSupported() throws Exception {
 		
 		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
 		IIdType pid0;
@@ -6087,8 +6158,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
 	}
 
 	private String toStr(Date theDate) {

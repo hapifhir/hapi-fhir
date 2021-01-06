@@ -1192,7 +1192,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testComponentQuantityWithUcumSearchSupport() {
+	public void testComponentQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation o1 = new Observation();
@@ -1215,9 +1215,9 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testComponentQuantityWithUcumStorageSupported() {
+	public void testComponentQuantityWithNormalizedQuantityStorageSupported() {
 		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+		myModelConfig.setNormalizedQuantityStorageSupported();
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm")))
@@ -1291,7 +1291,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchCompositeParamQuantityWithUcumSearthSupport() {
+	public void testSearchCompositeParamQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation o1 = new Observation();

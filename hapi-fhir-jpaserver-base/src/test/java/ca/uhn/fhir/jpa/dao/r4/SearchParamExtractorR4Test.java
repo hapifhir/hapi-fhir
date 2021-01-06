@@ -342,7 +342,7 @@ public class SearchParamExtractorR4Test {
 	}
 
 	@Test
-	public void testExtractComponentQuantityWithUcumSearchSupport() {
+	public void testExtractComponentQuantityWithNormalizedQuantitySearchSupported() {
 		
 		ModelConfig modelConfig = new ModelConfig();
 		
@@ -361,7 +361,7 @@ public class SearchParamExtractorR4Test {
 	}
 	
 	@Test
-	public void testExtractComponentQuantityValueWithUcumSearchSupport() {
+	public void testExtractComponentQuantityValueWithNormalizedQuantitySearchSupported() {
 		
 		ModelConfig modelConfig = new ModelConfig();
 		

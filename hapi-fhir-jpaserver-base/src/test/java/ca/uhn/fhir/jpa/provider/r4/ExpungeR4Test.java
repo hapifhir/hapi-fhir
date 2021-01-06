@@ -401,7 +401,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpungeSystemEverythingWithUcumSearchSupported() {
+	public void testExpungeSystemEverythingWithNormalizedQuantitySearchSupported() {
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		createStandardPatients();
 
@@ -423,8 +423,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 	
 	@Test
-	public void testExpungeSystemEverythingWithUcumStorageSupported() {
-		myModelConfig.setNormalizedQuantitySearchSupported();
+	public void testExpungeSystemEverythingWithNormalizedQuantityStorageSupported() {
+		myModelConfig.setNormalizedQuantityStorageSupported();
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()

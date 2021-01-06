@@ -1235,7 +1235,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testIndexNoDuplicatesQuantityWithUcumSearchSupported() {
+	public void testIndexNoDuplicatesQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Substance res = new Substance();
@@ -1267,9 +1267,67 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testIndexNoDuplicatesQuantityWithUcumStorageSupported() {
+	public void testQuantityWithNormalizedQuantitySearchSupported_InvalidUCUMCode() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
+		Substance res = new Substance();
+		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("FOO").setValue(123);
+		
+		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+
+		runInTransaction(() -> {
+			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
+			assertEquals(1, results.size());
+		});
+		
+		runInTransaction(() -> {
+			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
+			assertEquals(1, results.size());
+		});
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(
+			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "FOO"))));
+		assertThat(actual, contains(id));
+		
+	}
+	
+	@Test
+	public void testQuantityWithNormalizedQuantitySearchSupported_NotUCUM() {
+		
+		myModelConfig.setNormalizedQuantitySearchSupported();
+		Substance res = new Substance();
+		res.addInstance().getQuantity().setSystem("http://bar").setCode("FOO").setValue(123);
+		
+		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
+
+		runInTransaction(() -> {
+			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
+			assertEquals(1, results.size());
+		});
+		
+		runInTransaction(() -> {
+			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
+			assertEquals(1, results.size());
+		});
+		
+		List<IIdType> actual = toUnqualifiedVersionlessIds(
+			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://bar", "FOO"))));
+		assertThat(actual, contains(id));
+		
+	}
+	
+	@Test
+	public void testIndexNoDuplicatesQuantityWithNormalizedQuantityStorageSupported() {
+		
+		myModelConfig.setNormalizedQuantityStorageSupported();
 		Substance res = new Substance();
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m").setValue(123);
@@ -2694,7 +2752,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchByMoneyParamWithUcumSearchSupported() {
+	public void testSearchByMoneyParamWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		ChargeItem ci = new ChargeItem();
@@ -3060,7 +3118,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSearchQuantityWithUcumSearchSupported() {
+	public void testSearchQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Condition c1 = new Condition();

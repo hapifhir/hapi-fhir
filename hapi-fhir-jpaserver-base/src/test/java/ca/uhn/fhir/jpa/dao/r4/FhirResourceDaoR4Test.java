@@ -543,7 +543,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testChoiceParamQuantityWithUcumSearchSupport() {
+	public void testChoiceParamQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation o3 = new Observation();
@@ -644,7 +644,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testChoiceParamQuantityPrecisionWithUcumSearchSupport() {
+	public void testChoiceParamQuantityPrecisionWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation o3 = new Observation();
@@ -3463,7 +3463,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testSortByQuantityWithUcumSearchSupport() {
+	public void testSortByQuantityWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
 		Observation res;
