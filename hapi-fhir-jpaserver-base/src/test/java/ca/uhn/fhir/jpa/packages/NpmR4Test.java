@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
@@ -10,13 +12,18 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.JsonUtil;
@@ -63,6 +70,8 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NpmR4Test extends BaseJpaR4Test {
 
@@ -81,6 +90,10 @@ public class NpmR4Test extends BaseJpaR4Test {
 	@Autowired
 	private INpmPackageVersionResourceDao myPackageVersionResourceDao;
 	private FakeNpmServlet myFakeNpmServlet;
+	@Autowired
+	private IInterceptorService myInterceptorService;
+	@Autowired
+	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
 
 	@BeforeEach
 	public void before() throws Exception {
@@ -105,6 +118,8 @@ public class NpmR4Test extends BaseJpaR4Test {
 	public void after() throws Exception {
 		JettyUtil.closeServer(myServer);
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myPartitionSettings.setPartitioningEnabled(false);
+		myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 	}
 
 
@@ -268,6 +283,47 @@ public class NpmR4Test extends BaseJpaR4Test {
 			map = SearchParameterMap.newSynchronous();
 			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization3"));
 			result = myOrganizationDao.search(map);
+			assertEquals(1, result.sizeOrThrowNpe());
+		});
+
+	}
+
+	@Test
+	public void testInstallR4Package_NonConformanceResources_Partitioned() throws Exception {
+		myPartitionSettings.setPartitioningEnabled(true);
+		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
+		myDaoConfig.setAllowExternalReferences(true);
+
+		byte[] bytes = loadClasspathBytes("/packages/test-organizations-package.tgz");
+		myFakeNpmServlet.myResponses.put("/test-organizations/1.0.0", bytes);
+
+		List<String> resourceList = new ArrayList<>();
+		resourceList.add("Organization");
+		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
+		spec.setInstallResourceTypes(resourceList);
+		PackageInstallOutcomeJson outcome = igInstaller.install(spec);
+		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
+
+		// Be sure no further communication with the server
+		JettyUtil.closeServer(myServer);
+
+		// Search for the installed resources
+		mySrd = mock(ServletRequestDetails.class);
+		when(mySrd.getTenantId()).thenReturn(JpaConstants.DEFAULT_PARTITION_NAME);
+		when(mySrd.getServer()).thenReturn(mock(RestfulServer.class));
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));
+		runInTransaction(() -> {
+			SearchParameterMap map = SearchParameterMap.newSynchronous();
+			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization1"));
+			IBundleProvider result = myOrganizationDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+			map = SearchParameterMap.newSynchronous();
+			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization2"));
+			result = myOrganizationDao.search(map, mySrd);
+			assertEquals(1, result.sizeOrThrowNpe());
+			map = SearchParameterMap.newSynchronous();
+			map.add(Organization.SP_IDENTIFIER, new TokenParam("https://github.com/synthetichealth/synthea", "organization3"));
+			result = myOrganizationDao.search(map, mySrd);
 			assertEquals(1, result.sizeOrThrowNpe());
 		});
 

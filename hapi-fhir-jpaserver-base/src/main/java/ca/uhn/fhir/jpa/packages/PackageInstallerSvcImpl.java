@@ -31,7 +31,9 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -50,12 +52,12 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
 import javax.annotation.PostConstruct;
@@ -102,7 +104,8 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private INpmPackageVersionDao myPackageVersionDao;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
-
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 	/**
 	 * Constructor
 	 */
@@ -316,24 +319,51 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 	private void create(IBaseResource theResource, PackageInstallOutcomeJson theOutcome) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theResource.getClass());
 		SearchParameterMap map = createSearchParameterMapFor(theResource);
-		IBundleProvider searchResult = dao.search(map);
+		IBundleProvider searchResult = searchResource(dao, map);
 		if (validForUpload(theResource)) {
 			if (searchResult.isEmpty()) {
 
 				ourLog.info("Creating new resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
-				dao.create(theResource);
+				createResource(dao, theResource);
 
 			} else {
 
 				ourLog.info("Updating existing resource matching {}", map.toNormalizedQueryString(myFhirContext));
 				theResource.setId(searchResult.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
-				DaoMethodOutcome outcome = dao.update(theResource);
+				DaoMethodOutcome outcome = updateResource(dao, theResource);
 				if (!outcome.isNop()) {
 					theOutcome.incrementResourcesInstalled(myFhirContext.getResourceType(theResource));
 				}
 			}
 
+		}
+	}
+
+	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+			return theDao.search(theMap, myRequestDetails);
+		} else {
+			return theDao.search(theMap);
+		}
+	}
+
+	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+			theDao.create(theResource, myRequestDetails);
+		} else {
+			theDao.create(theResource);
+		}
+	}
+
+	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+			return theDao.update(theResource, myRequestDetails);
+		} else {
+			return theDao.update(theResource);
 		}
 	}
 
