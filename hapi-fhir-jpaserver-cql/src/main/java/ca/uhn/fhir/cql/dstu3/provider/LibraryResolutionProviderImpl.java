@@ -1,20 +1,14 @@
 package ca.uhn.fhir.cql.dstu3.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
-import ca.uhn.fhir.cql.common.provider.LibrarySourceProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.ModelManager;
-import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Library;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.opencds.cqf.tooling.library.stu3.NarrativeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,25 +19,7 @@ import java.util.Objects;
 @Component
 public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<Library> {
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
 	private IFhirResourceDao<Library> myLibraryDao;
-	@Autowired
-	private NarrativeProvider narrativeProvider;
-
-	private LibrarySourceProvider<Library, Attachment> librarySourceProvider;
-
-	private LibrarySourceProvider<Library, Attachment> getLibrarySourceProvider() {
-		if (librarySourceProvider == null) {
-			librarySourceProvider = new LibrarySourceProvider<Library, Attachment>(this.getLibraryResolutionProvider(),
-				x -> x.getContent(), x -> x.getContentType(), x -> x.getData());
-		}
-		return librarySourceProvider;
-	}
-
-	private LibraryResolutionProvider<Library> getLibraryResolutionProvider() {
-		return this;
-	}
 
 	// TODO: Figure out if we should throw an exception or something here.
 	@Override

@@ -1,8 +1,6 @@
 package ca.uhn.fhir.cql.r4.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
-import ca.uhn.fhir.cql.common.provider.LibrarySourceProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -10,11 +8,9 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Library;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.tooling.library.r4.NarrativeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,29 +21,11 @@ import java.util.Objects;
 @Component
 public class LibraryResolutionProviderImpl implements LibraryResolutionProvider<Library> {
 	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private NarrativeProvider narrativeProvider;
-	@Autowired
 	private IFhirResourceDao<Library> myLibraryDao;
 	@Autowired
 	DaoRegistry registry;
 	@Autowired
 	TerminologyProvider defaultTerminologyProvider;
-
-	private LibrarySourceProvider<Library, Attachment> librarySourceProvider;
-
-	private LibrarySourceProvider<org.hl7.fhir.r4.model.Library, org.hl7.fhir.r4.model.Attachment> getLibrarySourceProvider() {
-		if (librarySourceProvider == null) {
-			librarySourceProvider = new LibrarySourceProvider<org.hl7.fhir.r4.model.Library, org.hl7.fhir.r4.model.Attachment>(
-				getLibraryResourceProvider(), x -> x.getContent(), x -> x.getContentType(), x -> x.getData());
-		}
-		return librarySourceProvider;
-	}
-
-	private LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> getLibraryResourceProvider() {
-		return this;
-	}
 
 	// TODO: Figure out if we should throw an exception or something here.
 	@Override

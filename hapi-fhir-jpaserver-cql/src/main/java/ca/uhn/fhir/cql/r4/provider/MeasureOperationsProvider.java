@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cql.r4.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.evaluation.MeasureEvaluation;
@@ -20,20 +19,11 @@ import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.StringType;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.tooling.library.r4.NarrativeProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MeasureOperationsProvider {
-	private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
-	
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private NarrativeProvider narrativeProvider;
 	@Autowired
 	private LibraryResolutionProvider<Library> libraryResolutionProvider;
 	@Autowired
@@ -64,7 +54,7 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "pass") String pass) throws InternalErrorException, FHIRException {
 		LibraryLoader libraryLoader = LibraryHelper.createLibraryLoader(this.libraryResolutionProvider);
 		MeasureEvaluationSeed seed = new MeasureEvaluationSeed(this.factory, libraryLoader,
-			this.libraryResolutionProvider);
+				this.libraryResolutionProvider);
 		Measure measure = myMeasureDao.read(theId);
 
 		if (measure == null) {
@@ -75,7 +65,7 @@ public class MeasureOperationsProvider {
 
 		// resolve report type
 		MeasureEvaluation evaluator = new MeasureEvaluation(seed.getDataProvider(), this.registry,
-			seed.getMeasurementPeriod());
+				seed.getMeasurementPeriod());
 		if (reportType != null) {
 			switch (reportType) {
 				case "patient":

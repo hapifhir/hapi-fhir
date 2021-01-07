@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cql.dstu3.provider;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.dstu3.evaluation.MeasureEvaluation;
@@ -20,7 +19,6 @@ import org.hl7.fhir.dstu3.model.MeasureReport;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.opencds.cqf.cql.engine.execution.LibraryLoader;
-import org.opencds.cqf.tooling.library.stu3.NarrativeProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +28,6 @@ import org.springframework.stereotype.Component;
 public class MeasureOperationsProvider {
 	private static final Logger logger = LoggerFactory.getLogger(MeasureOperationsProvider.class);
 
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private NarrativeProvider narrativeProvider;
 	@Autowired
 	private LibraryResolutionProvider<Library> libraryResolutionProvider;
 	@Autowired

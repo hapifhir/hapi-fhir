@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.rp.r4.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
-import org.opencds.cqf.tooling.library.r4.NarrativeProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -49,8 +48,8 @@ public class CqlR4Config extends BaseCqlConfig {
 
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, FhirContext theFhirContext, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
-		return new JpaTerminologyProvider(theITermReadSvc, theFhirContext, theValueSetResourceProvider, theValidationSupport);
+	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
+		return new JpaTerminologyProvider(theITermReadSvc,theValueSetResourceProvider, theValidationSupport);
 	}
 
 	@Lazy
@@ -63,12 +62,6 @@ public class CqlR4Config extends BaseCqlConfig {
 	@Bean
 	LibraryResolutionProvider libraryResolutionProvider() {
 		return new LibraryResolutionProviderImpl();
-	}
-
-	@Lazy
-	@Bean
-	NarrativeProvider narrativeProvider() {
-		return new NarrativeProvider();
 	}
 
 	@Lazy
