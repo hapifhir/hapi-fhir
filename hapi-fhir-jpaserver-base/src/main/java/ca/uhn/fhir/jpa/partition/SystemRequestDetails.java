@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.partition;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
@@ -25,6 +27,10 @@ import java.util.List;
  * use the DEFAULT partition when partitioning is enabled.
  */
 public class SystemRequestDetails extends RequestDetails {
+	public SystemRequestDetails() {
+		super(new MyInterceptorBroadcaster());
+	}
+
 	public SystemRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		super(theInterceptorBroadcaster);
 	}
@@ -131,4 +137,23 @@ public class SystemRequestDetails extends RequestDetails {
 			return null;
 		}
 	}
+
+	private static class MyInterceptorBroadcaster implements IInterceptorBroadcaster {
+
+		@Override
+		public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
+			return true;
+		}
+
+		@Override
+		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
+			return null;
+		}
+
+		@Override
+		public boolean hasHooks(Pointcut thePointcut) {
+			return false;
+		}
+	}
+
 }

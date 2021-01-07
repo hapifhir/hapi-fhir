@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -341,7 +342,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private IBundleProvider searchResource(IFhirResourceDao theDao, SearchParameterMap theMap) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			PackageSystemRequestDetails myRequestDetails = new PackageSystemRequestDetails();
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 			return theDao.search(theMap, myRequestDetails);
 		} else {
 			return theDao.search(theMap);
@@ -350,7 +351,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private void createResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			PackageSystemRequestDetails myRequestDetails = new PackageSystemRequestDetails();
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 			theDao.create(theResource, myRequestDetails);
 		} else {
 			theDao.create(theResource);
@@ -359,7 +360,7 @@ public class PackageInstallerSvcImpl implements IPackageInstallerSvc {
 
 	private DaoMethodOutcome updateResource(IFhirResourceDao theDao, IBaseResource theResource) {
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			PackageSystemRequestDetails myRequestDetails = new PackageSystemRequestDetails();
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 			return theDao.update(theResource, myRequestDetails);
 		} else {
 			return theDao.update(theResource);
