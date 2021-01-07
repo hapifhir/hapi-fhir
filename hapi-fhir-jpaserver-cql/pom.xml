@@ -22,7 +22,6 @@
 		<cql-engine.version>1.5.1-SNAPSHOT</cql-engine.version>
 		<cql-evaluator.version>1.1.0-SNAPSHOT</cql-evaluator.version>
 		<cqframework.version>1.5.1-SNAPSHOT</cqframework.version>
-		<cds-hooks.version>1.3.1-SNAPSHOT</cds-hooks.version>
 	</properties>
 
 	<!-- FIXME KHS move versions up to toplevel pom dependencyManagement -->
@@ -118,11 +117,6 @@
 					<artifactId>jakarta.xml.bind-api</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.opencds.cqf</groupId>
-			<artifactId>cds</artifactId>
-			<version>${cds-hooks.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jamesmurty.utils</groupId>
