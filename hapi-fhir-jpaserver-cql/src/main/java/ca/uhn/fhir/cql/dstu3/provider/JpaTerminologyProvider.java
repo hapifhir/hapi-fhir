@@ -37,7 +37,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 	private final IValidationSupport validationSupport;
 
 	@Autowired
-	public JpaTerminologyProvider(ITermReadSvcDstu3 terminologySvcR4,
+	public JpaTerminologyProvider(ITermReadSvcDstu3 terminologySvc,
 											ValueSetResourceProvider valueSetResourceProvider, IValidationSupport validationSupport) {
 		 this.terminologySvc = terminologySvc;
 		 this.valueSetResourceProvider = valueSetResourceProvider;
