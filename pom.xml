@@ -693,6 +693,10 @@
 			<id>vladonemo</id>
 			<name>Vladimir Nemergut</name>
 		</developer>
+		<developer>
+			<id>janol77</id>
+			<name>Alejandro Medina</name>
+		</developer>
 	</developers>
 
 	<licenses>
