@@ -29,11 +29,34 @@ import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.mdm.util.GoldenResourceHelper.FIELD_NAME_IDENTIFIER;
 
-final class TerserUtil {
+public final class TerserUtil {
+
+	public static final Collection<String> IDS_AND_META_EXCLUDES =
+		Collections.unmodifiableSet(Stream.of("id", "meta", "identifier").collect(Collectors.toSet()));
+
+	public static final Predicate<String> EXCLUDE_IDS_AND_META = new Predicate<String>() {
+		@Override
+		public boolean test(String s) {
+			return !IDS_AND_META_EXCLUDES.contains(s);
+		}
+	};
+
+	public static final Predicate<String> INCLUDE_ALL = new Predicate<String>() {
+		@Override
+		public boolean test(String s) {
+			return true;
+		}
+	};
 
 	private TerserUtil() {
 	}
@@ -41,9 +64,9 @@ final class TerserUtil {
 	/**
 	 * Clones the specified canonical EID into the identifier field on the resource
 	 *
-	 * @param theFhirContext Context to pull resource definitions from
+	 * @param theFhirContext         Context to pull resource definitions from
 	 * @param theResourceToCloneInto Resource to set the EID on
-	 * @param theEid EID to be set
+	 * @param theEid                 EID to be set
 	 */
 	public static void cloneEidIntoResource(FhirContext theFhirContext, IBaseResource theResourceToCloneInto, CanonicalEID theEid) {
 		// get a ref to the actual ID Field
@@ -84,7 +107,7 @@ final class TerserUtil {
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
 
 		for (IBase theFromFieldValue : theFromFieldValues) {
-			if (contains(theFromFieldValue, theToFieldValues)) {
+			if (containsPrimitiveValue(theFromFieldValue, theToFieldValues)) {
 				continue;
 			}
 
@@ -95,11 +118,87 @@ final class TerserUtil {
 		}
 	}
 
-	private static boolean contains(IBase theItem, List<IBase> theItems) {
+	private static boolean containsPrimitiveValue(IBase theItem, List<IBase> theItems) {
 		PrimitiveTypeEqualsPredicate predicate = new PrimitiveTypeEqualsPredicate();
 		return theItems.stream().anyMatch(i -> {
 			return predicate.test(i, theItem);
 		});
+	}
+
+	private static boolean contains(IBase theItem, List<IBase> theItems) {
+		Method method = null;
+		for (Method m : theItem.getClass().getDeclaredMethods()) {
+			if (m.getName().equals("equalsDeep")) {
+				method = m;
+				break;
+			}
+		}
+
+		final Method m = method;
+		return theItems.stream().anyMatch(i -> {
+			if (m != null) {
+				try {
+					return (Boolean) m.invoke(theItem, i);
+				} catch (Exception e) {
+					throw new RuntimeException("Unable to compare equality via equalsDeep", e);
+				}
+			}
+			return theItem.equals(i);
+		});
+	}
+
+	public static void mergeAllFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
+		mergeFields(theFhirContext, theFrom, theTo, INCLUDE_ALL);
+	}
+
+	public static void overwriteFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
+		FhirTerser terser = theFhirContext.newTerser();
+
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
+		for (BaseRuntimeChildDefinition childDefinition : definition.getChildrenAndExtension()) {
+			if (!inclusionStrategy.test(childDefinition.getElementName())) {
+				continue;
+			}
+
+			childDefinition.getAccessor().getFirstValueOrNull(theFrom).ifPresent( v -> {
+					childDefinition.getMutator().setValue(theTo, v);
+				}
+			);
+		}
+	}
+
+	public static void mergeFieldsExceptIdAndMeta(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
+		mergeFields(theFhirContext, theFrom, theTo, EXCLUDE_IDS_AND_META);
+	}
+
+	public static void mergeFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
+		FhirTerser terser = theFhirContext.newTerser();
+
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
+		for (BaseRuntimeChildDefinition childDefinition : definition.getChildrenAndExtension()) {
+			if (!inclusionStrategy.test(childDefinition.getElementName())) {
+				continue;
+			}
+
+			List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
+			List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
+			
+			for (IBase theFromFieldValue : theFromFieldValues) {
+				if (contains(theFromFieldValue, theToFieldValues)) {
+					continue;
+				}
+
+				IBase newFieldValue = childDefinition.getChildByName(childDefinition.getElementName()).newInstance();
+				terser.cloneInto(theFromFieldValue, newFieldValue, true);
+
+				try {
+					theToFieldValues.add(newFieldValue);
+				} catch (UnsupportedOperationException e) {
+					childDefinition.getMutator().setValue(theTo, newFieldValue);
+					break;
+				}
+			}
+		}
 	}
 
 }

@@ -23,7 +23,9 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.TerserUtil;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
@@ -31,8 +33,42 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	@Autowired
 	private FhirContext myFhirContext;
 
+	/**
+	 * Survivorship rules may include the following data consolidation methods:
+	 *
+	 * <ul>
+	 *  <li>
+	 *  Length of field - apply the field value containing most or least number of characters - e.g. longest name
+	 *  </li>
+	 *  <li>
+	 *  Date time - all the field value from the oldest or the newest recrod - e.g. use the most recent phone number
+	 *  </li>
+	 *  <li>
+	 *  Frequency - use the most or least frequent number of occurrence - e.g. most common phone number
+	 *  </li>
+	 *  <li>
+	 *  Integer - number functions (largest, sum, avg) - e.g. number of patient encounters
+	 *  </li>
+	 *  <li>
+	 *  Quality of data - best quality data - e.g. data coming from a certain system is considered trusted and overrides all other values
+	 *  </li>
+	 *  <li>
+	 *  A hybrid approach combining all methods listed above as best fits
+	 *  </li>
+	 * </ul>
+	 *
+	 * @param theTargetResource        Target resource to merge fields from
+	 * @param theGoldenResource        Golden resource to merge fields into
+	 * @param theMdmTransactionContext Current transaction context
+	 * @param <T>
+	 */
 	@Override
 	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
-//		TerserUtil.cloneFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource);
+		// TerserUtil.mergeFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.DEFAULT_EXCLUDED_FIELDS);
+		if (MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES == theMdmTransactionContext.getRestOperation()) {
+			TerserUtil.mergeFieldsExceptIdAndMeta(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource);
+		} else {
+			TerserUtil.overwriteFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
+		}
 	}
 }

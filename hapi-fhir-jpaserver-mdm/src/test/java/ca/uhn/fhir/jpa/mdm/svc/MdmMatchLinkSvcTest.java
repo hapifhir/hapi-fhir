@@ -35,12 +35,7 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.in;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -184,13 +179,13 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Optional<MdmLink> mdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(patient.getIdElement().getIdPartAsLong());
 		Patient read = getTargetResourceFromMdmLink(mdmLink.get(), "Patient");
 
-		// TODO NG - rules haven't been determined yet revisit once implemented...
-//		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
-//		assertThat(read.getNameFirstRep().getGivenAsSingleString(), is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
-//		assertThat(read.getBirthDateElement().toHumanDisplay(), is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
-//		assertThat(read.getTelecomFirstRep().getValue(), is(equalTo(patient.getTelecomFirstRep().getValue())));
-//		assertThat(read.getPhoto().getData(), is(equalTo(patient.getPhotoFirstRep().getData())));
-//		assertThat(read.getGender(), is(equalTo(patient.getGender())));
+		assertThat(read.getNameFirstRep().getFamily(), is(equalTo(patient.getNameFirstRep().getFamily())));
+		assertThat(read.getNameFirstRep().getGivenAsSingleString(), is(equalTo(patient.getNameFirstRep().getGivenAsSingleString())));
+		assertThat(read.getBirthDateElement().toHumanDisplay(), is(equalTo(patient.getBirthDateElement().toHumanDisplay())));
+		assertThat(read.getTelecomFirstRep().getValue(), is(equalTo(patient.getTelecomFirstRep().getValue())));
+		assertThat(read.getPhoto().size(), is(equalTo(patient.getPhoto().size())));
+		assertThat(read.getPhotoFirstRep().getData(), is(equalTo(patient.getPhotoFirstRep().getData())));
+		assertThat(read.getGender(), is(equalTo(patient.getGender())));
 	}
 
 	@Test
@@ -246,7 +241,6 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testHavingMultipleEIDsOnIncomingPatientMatchesCorrectly() {
-
 		Patient patient1 = buildJanePatient();
 		addExternalEID(patient1, "id_1");
 		addExternalEID(patient1, "id_2");
@@ -273,7 +267,6 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
-
 
 		List<Long> duplicatePids = Stream.of(patient1, patient2)
 			.map(this::getGoldenResourceFromTargetResource)
@@ -480,8 +473,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(janePaulPatient);
 		HumanName nameFirstRep = sourcePatientFromTarget.getNameFirstRep();
 
-		// TODO NG  attribute propagation has been removed - revisit once source survivorship rules are defined
-		// assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
+		assertThat(nameFirstRep.getGivenAsSingleString(), is(equalToIgnoringCase("paul")));
 	}
 
 	@Test
@@ -492,8 +484,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 
 		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
 
-		// TODO NG - rules haven't been determined yet revisit once implemented...
-//		assertThat(sourcePatientFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
+		assertThat(sourcePatientFromTarget.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
 
 		Patient paul2 = buildPaulPatient();
 		paul2.setGender(Enumerations.AdministrativeGender.FEMALE);
@@ -504,7 +495,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		//Newly matched patients aren't allowed to overwrite GoldenResource Attributes unless they are empty,
 		// so gender should still be set to male.
 		Patient paul2GoldenResource = (Patient) getGoldenResourceFromTargetResource(paul2);
-//		assertThat(paul2GoldenResource.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
+		assertThat(paul2GoldenResource.getGender(), is(equalTo(Enumerations.AdministrativeGender.MALE)));
 	}
 
 	@Test
@@ -516,8 +507,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		paul = createPatientAndUpdateLinks(paul);
 
 		Patient sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
-		// TODO NG - rules haven't been determined yet revisit once implemented...
-//		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
+		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(incorrectBirthdate));
 
 		String correctBirthdate = "1990-06-28";
 		paul.getBirthDateElement().setValueAsString(correctBirthdate);
@@ -525,8 +515,7 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		paul = updatePatientAndUpdateLinks(paul);
 
 		sourcePatientFromTarget = (Patient) getGoldenResourceFromTargetResource(paul);
-		// TODO NG - rules haven't been determined yet revisit once implemented...
-//		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
+		assertThat(sourcePatientFromTarget.getBirthDateElement().getValueAsString(), is(equalTo(correctBirthdate)));
 		assertLinkCount(1);
 	}
 
@@ -613,6 +602,5 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 		List<MdmLink> possibleDuplicates = myMdmLinkDaoSvc.getPossibleDuplicates();
 		assertThat(possibleDuplicates, hasSize(1));
 		assertThat(patient3, is(possibleDuplicateOf(patient1)));
-
 	}
 }

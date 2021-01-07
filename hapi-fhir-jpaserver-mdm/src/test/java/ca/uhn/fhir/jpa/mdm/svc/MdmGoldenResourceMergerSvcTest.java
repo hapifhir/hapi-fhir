@@ -161,8 +161,10 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	public void emptyFromFullTo() {
 		myFromGoldenPatient.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
 		populatePatient(myToGoldenPatient);
+		print(myFromGoldenPatient);
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
+		print(mergedSourcePatient);
 		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
@@ -393,20 +395,19 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testMergeNamesAllSame() {
-		// TODO NG - Revisit when rules are available
-//		myFromSourcePatient.addName().addGiven("Jim");
-//		myFromSourcePatient.getNameFirstRep().addGiven("George");
-//		assertThat(myFromSourcePatient.getName(), hasSize(1));
-//		assertThat(myFromSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//
-//		myToSourcePatient.addName().addGiven("Jim");
-//		myToSourcePatient.getNameFirstRep().addGiven("George");
-//		assertThat(myToSourcePatient.getName(), hasSize(1));
-//		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//
-//		mergeSourcePatients();
-//		assertThat(myToSourcePatient.getName(), hasSize(1));
-//		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
+		myFromGoldenPatient.addName().addGiven("Jim");
+		myFromGoldenPatient.getNameFirstRep().addGiven("George");
+		assertThat(myFromGoldenPatient.getName(), hasSize(1));
+		assertThat(myFromGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		myToGoldenPatient.addName().addGiven("Jim");
+		myToGoldenPatient.getNameFirstRep().addGiven("George");
+		assertThat(myToGoldenPatient.getName(), hasSize(1));
+		assertThat(myToGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		mergeGoldenPatients();
+		assertThat(myToGoldenPatient.getName(), hasSize(1));
+		assertThat(myToGoldenPatient.getName().get(0).getGiven(), hasSize(2));
 	}
 
 	@Test
@@ -426,8 +427,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	}
 
 	private MdmLink createMdmLink(Patient theSourcePatient, Patient theTargetPatient) {
-		//TODO GGG Ensure theis comment can be safely removed
-		//theSourcePatient.addLink().setTarget(new Reference(theTargetPatient));
 		return myMdmLinkDaoSvc.createOrUpdateLinkEntity(theSourcePatient, theTargetPatient, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 	}
 

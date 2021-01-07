@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TerserUtilTest extends BaseR4Test {
 
@@ -28,12 +30,12 @@ class TerserUtilTest extends BaseR4Test {
 		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
 	}
 
-//	@Test
+	@Test
 	void testCloneFields() {
 		Patient p1 = buildJohny();
 		Patient p2 = new Patient();
 
-		// TerserUtil.cloneFields(ourFhirContext, p1, p2);
+		TerserUtil.mergeFieldsExceptIdAndMeta(ourFhirContext, p1, p2);
 
 		assertTrue(p2.getIdentifier().isEmpty());
 
@@ -42,8 +44,8 @@ class TerserUtilTest extends BaseR4Test {
 		assertEquals(p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
 	}
 
-//	@Test
-	void testAnotherCloneFields() {
+	@Test
+	void testCloneWithNonPrimitves() {
 		Patient p1 = new Patient();
 		Patient p2 = new Patient();
 
@@ -57,9 +59,32 @@ class TerserUtilTest extends BaseR4Test {
 		assertThat(p2.getName(), hasSize(1));
 		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
 
-		// TerserUtil.cloneFields(ourFhirContext, p1, p2);
+		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
 		assertThat(p2.getName(), hasSize(2));
 		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
 		assertThat(p2.getName().get(1).getGiven(), hasSize(2));
+	}
+
+	@Test
+	void testCloneWithDuplicateNonPrimitives() {
+		Patient p1 = new Patient();
+		Patient p2 = new Patient();
+
+		p1.addName().addGiven("Jim");
+		p1.getNameFirstRep().addGiven("George");
+
+		assertThat(p1.getName(), hasSize(1));
+		assertThat(p1.getName().get(0).getGiven(), hasSize(2));
+
+		p2.addName().addGiven("Jim");
+		p2.getNameFirstRep().addGiven("George");
+
+		assertThat(p2.getName(), hasSize(1));
+		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
+
+		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
+
+		assertThat(p2.getName(), hasSize(1));
+		assertThat(p2.getName().get(0).getGiven(), hasSize(2));
 	}
 }
