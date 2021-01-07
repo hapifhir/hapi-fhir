@@ -120,11 +120,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>info.cqframework</groupId>
-			<artifactId>cql-formatter</artifactId>
-			<version>${cqframework.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.opencds.cqf</groupId>
 			<artifactId>cds</artifactId>
 			<version>${cds-hooks.version}</version>
