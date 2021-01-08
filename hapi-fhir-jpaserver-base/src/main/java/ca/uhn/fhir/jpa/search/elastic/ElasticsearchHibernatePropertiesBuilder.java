@@ -61,7 +61,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
 	private String myDebugSyncStrategy = AutomaticIndexingSynchronizationStrategyNames.ASYNC;
 	private boolean myDebugPrettyPrintJsonLog = false;
-	private String myProtocol;
+	private String myProtocol = "http";
 
 	public ElasticsearchHibernatePropertiesBuilder setUsername(String theUsername) {
 		myUsername = theUsername;
@@ -100,7 +100,6 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.put(BackendSettings.backendKey(ElasticsearchBackendSettings.LOG_JSON_PRETTY_PRINTING), Boolean.toString(myDebugPrettyPrintJsonLog));
 
 		injectStartupTemplate(myProtocol, myRestUrl, myUsername, myPassword);
-
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setRequiredIndexStatus(IndexStatus theRequiredIndexStatus) {
@@ -109,6 +108,12 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setRestUrl(String theRestUrl) {
+
+		//If the user includes protocol here, strip it and apply it in the correct spot.
+		if (theRestUrl.startsWith("http")) {
+			myProtocol = theRestUrl.substring(0, theRestUrl.indexOf("://"));
+			theRestUrl = theRestUrl.substring(theRestUrl.indexOf("://") + 3);
+		}
 		myRestUrl = theRestUrl;
 		return this;
 	}
