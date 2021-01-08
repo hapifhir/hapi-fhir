@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.dstu3.evaluation.ProviderFactory;
+import ca.uhn.fhir.cql.dstu3.helper.LibraryHelper;
 import ca.uhn.fhir.cql.dstu3.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.dstu3.provider.LibraryResolutionProviderImpl;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
@@ -32,7 +33,15 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 
+import org.opencds.cqf.cql.engine.model.ModelResolver;
+
+import java.util.Map;
+
+import org.cqframework.cql.cql2elm.model.Model;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
+import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -48,8 +57,8 @@ public class CqlDstu3Config extends BaseCqlConfig {
 
 	@Lazy
 	@Bean
-	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider) {
-		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider);
+	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
+		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider, modelResolver);
 	}
 
 	@Lazy
@@ -62,5 +71,15 @@ public class CqlDstu3Config extends BaseCqlConfig {
 	@Bean
 	public MeasureOperationsProvider measureOperationsProvider() {
 		return new MeasureOperationsProvider();
+	}
+
+	@Bean
+	public ModelResolver fhirModelResolver () {
+		return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
+	}
+
+	@Bean
+	public LibraryHelper libraryHelper(Map<VersionedIdentifier, Model> globalModelCache) {
+		return new LibraryHelper(globalModelCache);
 	}
 }

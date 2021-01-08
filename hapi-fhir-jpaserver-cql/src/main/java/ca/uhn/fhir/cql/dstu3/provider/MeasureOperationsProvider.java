@@ -36,6 +36,8 @@ public class MeasureOperationsProvider {
 	private IFhirResourceDao<Measure> myMeasureDao;
 	@Autowired
 	private EvaluationProviderFactory factory;
+	@Autowired
+	private LibraryHelper libraryHelper;
 
 	/*
 	 *
@@ -56,9 +58,9 @@ public class MeasureOperationsProvider {
 													 @OperationParam(name = "source") String source,
 													 @OperationParam(name = "user") String user,
 													 @OperationParam(name = "pass") String pass) throws InternalErrorException, FHIRException {
-		LibraryLoader libraryLoader = LibraryHelper.createLibraryLoader(this.libraryResolutionProvider);
+		LibraryLoader libraryLoader = this.libraryHelper.createLibraryLoader(this.libraryResolutionProvider);
 		MeasureEvaluationSeed seed = new MeasureEvaluationSeed(this.factory, libraryLoader,
-			this.libraryResolutionProvider);
+			this.libraryResolutionProvider, this.libraryHelper);
 		Measure measure = myMeasureDao.read(theId);
 
 		if (measure == null) {

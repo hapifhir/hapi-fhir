@@ -22,6 +22,12 @@ package ca.uhn.fhir.cql.config;
 
 import ca.uhn.fhir.cql.common.provider.CqlProviderFactory;
 import ca.uhn.fhir.cql.common.provider.CqlProviderLoader;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.cqframework.cql.cql2elm.model.Model;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.context.annotation.Bean;
 
 public abstract class BaseCqlConfig {
@@ -34,5 +40,10 @@ public abstract class BaseCqlConfig {
 	@Bean
 	CqlProviderLoader cqlProviderLoader() {
 		return new CqlProviderLoader();
+	}
+
+	@Bean(name="globalModelCache")
+	Map<VersionedIdentifier, Model> globalModelCache() {
+		return new ConcurrentHashMap<VersionedIdentifier, Model>();
 	}
 }

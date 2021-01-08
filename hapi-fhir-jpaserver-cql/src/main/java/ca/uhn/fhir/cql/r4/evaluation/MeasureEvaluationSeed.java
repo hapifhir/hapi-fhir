@@ -27,12 +27,14 @@ public class MeasureEvaluationSeed {
 	private LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider;
 	private EvaluationProviderFactory providerFactory;
 	private DataProvider dataProvider;
+	private LibraryHelper libraryHelper;
 
 	public MeasureEvaluationSeed(EvaluationProviderFactory providerFactory, LibraryLoader libraryLoader,
-			LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider) {
+			LibraryResolutionProvider<org.hl7.fhir.r4.model.Library> libraryResourceProvider, LibraryHelper libraryHelper) {
 		this.providerFactory = providerFactory;
 		this.libraryLoader = libraryLoader;
 		this.libraryResourceProvider = libraryResourceProvider;
+		this.libraryHelper = libraryHelper;
 	}
 
 	public Measure getMeasure() {
@@ -55,10 +57,11 @@ public class MeasureEvaluationSeed {
 			String user, String pass) {
 		this.measure = measure;
 
-		LibraryHelper.loadLibraries(measure, this.libraryLoader, this.libraryResourceProvider);
+		this.libraryHelper.loadLibraries(measure, this.libraryLoader, this.libraryResourceProvider);
 
 		// resolve primary library
-		Library library = LibraryHelper.resolvePrimaryLibrary(measure, libraryLoader, this.libraryResourceProvider);
+		Library library = this.libraryHelper.resolvePrimaryLibrary(measure, libraryLoader, this.libraryResourceProvider);
+
 
 		// resolve execution context
 		context = new Context(library);
