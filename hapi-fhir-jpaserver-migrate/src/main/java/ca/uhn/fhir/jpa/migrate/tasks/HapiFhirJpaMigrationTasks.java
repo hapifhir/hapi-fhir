@@ -77,9 +77,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private void init530() {
 		Builder version = forVersion(VersionEnum.V5_3_0);
 	
+		//-- TRM
+		version
+			.onTable("TRM_VALUESET_CONCEPT")
+			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
+		
+	    version
+		    .onTable("TRM_VALUESET_CONCEPT")
+		    .addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
+	    
 		//-- Add new Table, HFJ_SPIDX_QUANTITY_NRML
-		version.addIdGenerator("20201222.1", "SEQ_SPIDX_QUANTITY_NRML");
-		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20201222.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
+		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML");
+		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20210109.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
 		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);	
 		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.LONG);	
 		pkg.addColumn("SP_UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);	
@@ -91,25 +100,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkg.addColumn("HASH_IDENTITY_AND_UNITS").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("HASH_IDENTITY_SYS_UNITS").nullable().type(ColumnTypeEnum.LONG);
 		pkg.addColumn("HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
-		pkg.addColumn("SP_VALUE").nullable().type(ColumnTypeEnum.LONG);
-		pkg.addIndex("20201222.3", "IDX_SP_QNTY_NRML_HASH").unique(false).withColumns("HASH_IDENTITY","SP_VALUE");
-		pkg.addIndex("20201222.4", "IDX_SP_QNTY_NRML_HASH_UN").unique(false).withColumns("HASH_IDENTITY_AND_UNITS","SP_VALUE");
-		pkg.addIndex("20201222.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS","SP_VALUE");
-		pkg.addIndex("20201222.6", "IDX_SP_QNTY_NRML_UPDATED").unique(false).withColumns("SP_UPDATED");
-		pkg.addIndex("20201222.7", "IDX_SP_QNTY_NRML_RESID").unique(false).withColumns("RES_ID");
-		pkg.addForeignKey("20201222.8", "FK_QNTY_NRML_RESID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+		pkg.addColumn("SP_VALUE").nullable().type(ColumnTypeEnum.FLOAT);
+		pkg.addIndex("20210109.3", "IDX_SP_QNTY_NRML_HASH").unique(false).withColumns("HASH_IDENTITY","SP_VALUE");
+		pkg.addIndex("20210109.4", "IDX_SP_QNTY_NRML_HASH_UN").unique(false).withColumns("HASH_IDENTITY_AND_UNITS","SP_VALUE");
+		pkg.addIndex("20210109.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS","SP_VALUE");
+		pkg.addIndex("20210109.6", "IDX_SP_QNTY_NRML_UPDATED").unique(false).withColumns("SP_UPDATED");
+		pkg.addIndex("20210109.7", "IDX_SP_QNTY_NRML_RESID").unique(false).withColumns("RES_ID");
+		//pkg.addForeignKey("20210109.9", "FK_QNTY_NRML_RESID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 
 		//-- Link to the resourceTable
-		version.onTable("HFJ_RESOURCE").addColumn("20201222.9", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
-		
-		//-- TRM
-		version
-			.onTable("TRM_VALUESET_CONCEPT")
-			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
-		
-	    version
-		    .onTable("TRM_VALUESET_CONCEPT")
-		    .addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
+		version.onTable("HFJ_RESOURCE").addColumn("20210109.10", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
 
 	}
 
