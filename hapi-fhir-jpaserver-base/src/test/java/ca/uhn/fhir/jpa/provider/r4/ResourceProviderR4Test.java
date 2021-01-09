@@ -4095,12 +4095,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().setFamily("Tester").addGiven("Joe");
-			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
@@ -4182,17 +4176,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			patient.addName().setFamily("Tester").addGiven("Joe");
 			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		{
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("urn:system").setValue("001");
-			patient.addName().setFamily("Tester").addGiven("Joe");
-			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			CodeableConcept cc = obs.getCode();
 			obs.setValue(new Quantity().setValueElement(new DecimalType(1)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
 			
 			myObservationDao.create(obs, mySrd);
@@ -4204,7 +4192,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			CodeableConcept cc = obs.getCode();
 			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
 			
 			myObservationDao.create(obs, mySrd);
@@ -4216,7 +4203,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			CodeableConcept cc = obs.getCode();
 			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
 
 			myObservationDao.create(obs, mySrd);

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -63,6 +64,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +75,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,6 +101,11 @@ public class InMemorySubscriptionMatcherR4Test {
 	@Autowired
 	ModelConfig myModelConfig;
 	
+	@AfterEach
+	public void after() throws Exception {
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
+	}
+
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
 		assertTrue(result.supported(), result.getUnsupportedReason());
@@ -245,8 +251,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	public void testSearchWithNormalizedQuantitySearchSupported() {
 		
 		myModelConfig.setNormalizedQuantitySearchSupported();
-		
-		
+
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
