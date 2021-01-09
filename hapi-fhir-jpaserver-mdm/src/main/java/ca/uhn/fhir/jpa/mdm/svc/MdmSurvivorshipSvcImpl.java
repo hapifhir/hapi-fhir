@@ -64,11 +64,17 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	 */
 	@Override
 	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
-		// TerserUtil.mergeFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.DEFAULT_EXCLUDED_FIELDS);
-		if (MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES == theMdmTransactionContext.getRestOperation()) {
-			TerserUtil.mergeFieldsExceptIdAndMeta(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource);
-		} else {
-			TerserUtil.overwriteFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
+		switch (theMdmTransactionContext.getRestOperation()) {
+			case MERGE_GOLDEN_RESOURCES:
+				if (theMdmTransactionContext.isForceResourceUpdate()) {
+					TerserUtil.overwriteFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
+					break;
+				}
+				TerserUtil.mergeFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
+				break;
+			default:
+				TerserUtil.overwriteFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
+				break;
 		}
 	}
 }

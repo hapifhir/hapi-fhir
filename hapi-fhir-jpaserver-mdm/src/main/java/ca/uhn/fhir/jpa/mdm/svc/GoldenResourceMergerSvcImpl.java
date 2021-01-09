@@ -83,7 +83,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		//Save the deprecated resource.
 		myMdmResourceDaoSvc.upsertGoldenResource(theFromGoldenResource, resourceType);
 
-		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless() + " into " + theToGoldenResource.getIdElement().toVersionless());
+		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless()
+			+ " into " + theToGoldenResource.getIdElement().toVersionless());
 		return theToGoldenResource;
 	}
 

@@ -44,6 +44,8 @@ public class MdmTransactionContext {
 
 	private String myResourceType;
 
+	private boolean myForceResourceUpdate;
+
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
 	}
@@ -88,4 +90,11 @@ public class MdmTransactionContext {
 		this.myResourceType = myResourceType;
 	}
 
+	public boolean isForceResourceUpdate() {
+		return myForceResourceUpdate;
+	}
+
+	public void setForceResourceUpdate(boolean theForceResourceUpdate) {
+		myForceResourceUpdate = theForceResourceUpdate;
+	}
 }

@@ -34,7 +34,7 @@ public interface IMdmControllerSvc {
 
 	void notDuplicateGoldenResource(String theGoldenResourceId, String theTargetGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theFromGoldenResource, MdmTransactionContext theMdmTransactionContext);
 
 	IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
 }

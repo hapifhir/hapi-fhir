@@ -42,7 +42,7 @@ import static ca.uhn.fhir.mdm.util.GoldenResourceHelper.FIELD_NAME_IDENTIFIER;
 public final class TerserUtil {
 
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
-		Collections.unmodifiableSet(Stream.of("id", "meta", "identifier").collect(Collectors.toSet()));
+		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta", "active").collect(Collectors.toSet()));
 
 	public static final Predicate<String> EXCLUDE_IDS_AND_META = new Predicate<String>() {
 		@Override

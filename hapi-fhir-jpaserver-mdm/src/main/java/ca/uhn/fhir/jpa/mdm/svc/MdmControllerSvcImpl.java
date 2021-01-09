@@ -54,8 +54,16 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	IMdmLinkUpdaterSvc myIMdmLinkUpdaterSvc;
 
 	@Override
-	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, MdmTransactionContext theMdmTransactionContext) {
-		IAnyResource fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
+	public IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theFromGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		boolean isOverwritingGoldenResource = (theFromGoldenResource != null);
+
+		IAnyResource fromGoldenResource;
+		if (theFromGoldenResource == null) {
+			fromGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId);
+		} else {
+			fromGoldenResource = theFromGoldenResource;
+		}
+
 		IAnyResource toGoldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, theToGoldenResourceId);
 		myMdmControllerHelper.validateMergeResources(fromGoldenResource, toGoldenResource);
 		myMdmControllerHelper.validateSameVersion(fromGoldenResource, theFromGoldenResourceId);

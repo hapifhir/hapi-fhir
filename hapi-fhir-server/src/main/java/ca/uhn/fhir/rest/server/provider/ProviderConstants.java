@@ -62,15 +62,15 @@ public class ProviderConstants {
 	 * EMPI Operations
 	 */
 	public static final String EMPI_MATCH = "$match";
-	//TODO GGG MDM: implement a server-level MDM match to complement the FHIR-spec $match for /Patient
 	public static final String MDM_MATCH = "$mdm-match";
 	public static final String MDM_MATCH_RESOURCE = "resource";
 	public static final String MDM_RESOURCE_TYPE = "resourceType";
 
-	//TODO GGG MDM: rename all these vars
 	public static final String MDM_MERGE_GOLDEN_RESOURCES = "$mdm-merge-golden-resources";
 	public static final String MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID = "fromGoldenResourceId";
 	public static final String MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID = "toGoldenResourceId";
+	public static final String MDM_MERGE_RESOURCE = "resource";
+	public static final String MDM_MERGE_RESOURCE_ID = "resource.id";
 
 	public static final String MDM_UPDATE_LINK = "$mdm-update-link";
 	public static final String MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID = "goldenResourceId";

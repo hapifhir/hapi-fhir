@@ -29,6 +29,7 @@ import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -49,6 +50,16 @@ public abstract class BaseMdmProvider {
 		if (theFromGoldenResourceId.getValue().equals(theToGoldenResourceId.getValue())) {
 			throw new InvalidRequestException("fromGoldenResourceId must be different from toGoldenResourceId");
 		}
+	}
+	protected void validateOptionalMergeResource(IAnyResource theFromGoldenResource, IPrimitiveType<String> theToGoldenResourceId) {
+		if (theFromGoldenResource == null) {
+			return;
+		}
+		validateNotNull(ProviderConstants.MDM_MERGE_RESOURCE_ID, theFromGoldenResource.getIdElement());
+		if (theFromGoldenResource.getIdElement().getValue().equals(theToGoldenResourceId.getValue())) {
+			throw new InvalidRequestException("resource must be different from the one with toGoldenResourceId");
+		}
+		validateMergeParameters(theFromGoldenResource.getIdElement(), theToGoldenResourceId);
 	}
 
 	private void validateNotNull(String theName, IPrimitiveType<String> theString) {
