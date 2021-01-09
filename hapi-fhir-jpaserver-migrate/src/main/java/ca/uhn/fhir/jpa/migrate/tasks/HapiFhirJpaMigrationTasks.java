@@ -90,7 +90,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML");
 		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20210109.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
 		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);	
-		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.LONG);	
+		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);	
 		pkg.addColumn("SP_UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);	
 		pkg.addColumn("SP_MISSING").nonNullable().type(ColumnTypeEnum.BOOLEAN);	
 		pkg.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
