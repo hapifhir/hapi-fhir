@@ -8,6 +8,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
@@ -212,11 +213,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 		}
 
-		String serverBase = theRequest.getFhirServerBase();
-		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
-
-		String linkPrev = null;
-		String linkNext = null;
+		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
+		links.setSelf(theLinkSelf);
 
 		if (!theServer.canStoreSearchResults() || requestOffset != null) {
 			int offset = requestOffset != null ? requestOffset : 0;
@@ -228,20 +226,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				requestedToReturn += offset;
 			}
 			if (numTotalResults == null || requestedToReturn < numTotalResults) {
-				linkNext = (RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
+				links.setNext(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
 			}
 			if (offset > 0) {
 				int start = Math.max(0, offset - numToReturn);
-				linkPrev = RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters());
+				links.setPrev(RestfulServerUtils.createOffsetPagingLink(links, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters()));
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
 			// We're doing named pages
 			searchId = theResult.getUuid();
 			if (isNotBlank(theResult.getNextPageId())) {
-				linkNext = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				links.setNext(RestfulServerUtils.createPagingLink(links, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters()));
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters()));
 			}
 		} else if (searchId != null) {
 			/*
@@ -252,24 +250,17 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			 */
 			if (resourceList.size() > 0) {
 				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-					linkNext = (RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
+					links.setNext((RestfulServerUtils.createPagingLink(links, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters())));
 				}
 				if (theOffset > 0) {
 				int start = Math.max(0, theOffset - numToReturn);
-					linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, start, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType);
+					links.setPrev(RestfulServerUtils.createPagingLink(links, theRequest, searchId, start, numToReturn, theRequest.getParameters()));
 				}
 			}
 		}
 
-		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
-		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
-
-		if (theServer.canStoreSearchResults()) {
-			int limit;
-			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
-			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());
-
-		}
+		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), links, theResult.size(), theResult.getPublished());
+		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, links.serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
 		return bundleFactory.getResourceBundle();
 
@@ -293,8 +284,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				/*
 				 * Figure out the self-link for this request
 				 */
-				String serverBase = theRequest.getServerBaseForRequest();
 				String linkSelf = RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest);
+
+				BundleLinks bundleLinks = new BundleLinks(theRequest.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), getResponseBundleType());
 
 				if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 					IBaseResource resource;
@@ -313,7 +305,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					 */
 					IVersionSpecificBundleFactory bundleFactory = theServer.getFhirContext().newBundleFactory();
 					bundleFactory.initializeWithBundleResource(resource);
-					bundleFactory.addRootPropertiesToBundle(null, theRequest.getFhirServerBase(), linkSelf, null, null, count, getResponseBundleType(), lastUpdated);
+					bundleFactory.addRootPropertiesToBundle(null, bundleLinks, count, lastUpdated);
 
 					responseObject = resource;
 				} else {
@@ -463,4 +455,5 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
 	}
+
 }

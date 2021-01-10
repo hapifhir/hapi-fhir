@@ -40,9 +40,11 @@ public interface IPagingProvider {
 
 
 	/**
-	 * @return true if this paging provider can store search results.
+	 * @return true if the underlying data store supports searching by offset.
 	 */
-	boolean canStoreSearchResults();
+	default boolean canSearchByOffset() {
+		return false;
+	}
 
 	/**
 	 * Retrieve a result list by Search ID

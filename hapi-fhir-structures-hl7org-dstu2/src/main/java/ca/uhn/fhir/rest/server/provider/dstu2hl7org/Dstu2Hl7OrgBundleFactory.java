@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.BundleLinks;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -183,8 +184,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
   }
 
   @Override
-  public void addRootPropertiesToBundle(String theId, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext,
-                                        Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated) {
+  public void addRootPropertiesToBundle(String theId, BundleLinks theBundleLinks,
+                                        Integer theTotalResults, IPrimitiveType<Date> theLastUpdated) {
     ensureBundle();
 
     if (myBundle.getIdElement().isEmpty()) {
@@ -200,20 +201,20 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getMeta().setLastUpdatedElement(instantType);
     }
 
-    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkSelf)) {
-      myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theLinkSelf);
+    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getSelf())) {
+      myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theBundleLinks.getSelf());
     }
-    if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theLinkNext)) {
-      myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theLinkNext);
+    if (!hasLink(Constants.LINK_NEXT, myBundle) && isNotBlank(theBundleLinks.getNext())) {
+      myBundle.addLink().setRelation(Constants.LINK_NEXT).setUrl(theBundleLinks.getNext());
     }
-    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theLinkPrev)) {
-      myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theLinkPrev);
+    if (!hasLink(Constants.LINK_SELF, myBundle) && isNotBlank(theBundleLinks.getPrev())) {
+      myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theBundleLinks.getPrev());
     }
 
-    myBase = theServerBase;
+    myBase = theBundleLinks.serverBase;
 
-    if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
-      myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
+    if (myBundle.getTypeElement().isEmpty() && theBundleLinks.bundleType != null) {
+      myBundle.getTypeElement().setValueAsString(theBundleLinks.bundleType.getCode());
     }
 
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {

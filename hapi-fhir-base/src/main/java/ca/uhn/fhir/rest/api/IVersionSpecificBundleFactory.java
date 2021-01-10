@@ -38,7 +38,7 @@ public interface IVersionSpecificBundleFactory {
 
 	void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);
 
-	void addRootPropertiesToBundle(String theId, String theServerBase, String theLinkSelf, String theLinkPrev, String theLinkNext, Integer theTotalResults, BundleTypeEnum theBundleType, IPrimitiveType<Date> theLastUpdated);
+	void addRootPropertiesToBundle(String theId, BundleLinks theBundleLinks, Integer theTotalResults, IPrimitiveType<Date> theLastUpdated);
 
 	IBaseResource getResourceBundle();
 
@@ -48,7 +48,7 @@ public interface IVersionSpecificBundleFactory {
 	 */
 	@Deprecated
 	default void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
-		addRootPropertiesToBundle(null, null, null, null, null, theResult.size(), theBundleType, null);
+		addRootPropertiesToBundle(null, null, theResult.size(), null);
 		addResourcesToBundle(new ArrayList<>(theResult), theBundleType, null, null, null);
 	}
 

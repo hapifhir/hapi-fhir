@@ -45,7 +45,7 @@ public abstract class BasePagingProvider implements IPagingProvider {
 	}
 
 	@Override
-	public boolean canStoreSearchResults() {
+	public boolean canSearchByOffset() {
 		return true;
 	}
 
