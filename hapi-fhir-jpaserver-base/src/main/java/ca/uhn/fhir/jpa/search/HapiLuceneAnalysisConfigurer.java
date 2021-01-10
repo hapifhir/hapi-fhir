@@ -72,7 +72,7 @@ public class HapiLuceneAnalysisConfigurer implements LuceneAnalysisConfigurer {
 			.tokenFilter(LowerCaseFilterFactory.class)
 			.tokenFilter(StopFilterFactory.class)
 			.tokenFilter(EdgeNGramFilterFactory.class)
-			.param("minGramSize", "2")
+			.param("minGramSize", "3")
 			.param("maxGramSize", "20");
 
 		theLuceneCtx.analyzer("standardAnalyzer").custom()
