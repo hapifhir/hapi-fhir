@@ -26,6 +26,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,7 +39,7 @@ public interface IVersionSpecificBundleFactory {
 
 	void addResourcesToBundle(List<IBaseResource> theResult, BundleTypeEnum theBundleType, String theServerBase, BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes);
 
-	void addRootPropertiesToBundle(String theId, BundleLinks theBundleLinks, Integer theTotalResults, IPrimitiveType<Date> theLastUpdated);
+	void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults, IPrimitiveType<Date> theLastUpdated);
 
 	IBaseResource getResourceBundle();
 
@@ -48,7 +49,7 @@ public interface IVersionSpecificBundleFactory {
 	 */
 	@Deprecated
 	default void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
-		addRootPropertiesToBundle(null, null, theResult.size(), null);
+		addTotalResultsToBundle(theResult.size());
 		addResourcesToBundle(new ArrayList<>(theResult), theBundleType, null, null, null);
 	}
 
@@ -56,4 +57,5 @@ public interface IVersionSpecificBundleFactory {
 
 	List<IBaseResource> toListOfResources();
 
+	void addTotalResultsToBundle(Integer theTotalResults);
 }

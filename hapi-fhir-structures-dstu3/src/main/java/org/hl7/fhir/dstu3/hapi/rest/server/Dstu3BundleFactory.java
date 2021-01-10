@@ -42,6 +42,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -179,7 +180,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
   }
 
   @Override
-  public void addRootPropertiesToBundle(String theId, BundleLinks theBundleLinks, Integer theTotalResults,
+  public void addRootPropertiesToBundle(String theId, @Nonnull BundleLinks theBundleLinks, Integer theTotalResults,
                                         IPrimitiveType<Date> theLastUpdated) {
     ensureBundle();
 
@@ -210,6 +211,11 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getTypeElement().setValueAsString(theBundleLinks.bundleType.getCode());
     }
 
+    addTotalResultsToBundle(theTotalResults);
+  }
+
+  @Override
+  public void addTotalResultsToBundle(Integer theTotalResults) {
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
       myBundle.getTotalElement().setValue(theTotalResults);
     }
