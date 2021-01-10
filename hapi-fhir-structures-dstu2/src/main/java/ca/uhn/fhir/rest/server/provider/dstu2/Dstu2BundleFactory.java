@@ -159,9 +159,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 		if (myBundle.getIdElement().isEmpty()) {
 			myBundle.setId(theId);
 		}
-		if (myBundle.getId().isEmpty()) {
-			myBundle.setId(UUID.randomUUID().toString());
-		}
 
 		if (ResourceMetadataKeyEnum.UPDATED.get(myBundle) == null) {
 			ResourceMetadataKeyEnum.UPDATED.put(myBundle, (InstantDt) theLastUpdated);
@@ -187,6 +184,10 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	@Override
 	public void addTotalResultsToBundle(Integer theTotalResults) {
 		ensureBundle();
+
+		if (myBundle.getId().isEmpty()) {
+			myBundle.setId(UUID.randomUUID().toString());
+		}
 
 		if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
 			myBundle.getTotalElement().setValue(theTotalResults);

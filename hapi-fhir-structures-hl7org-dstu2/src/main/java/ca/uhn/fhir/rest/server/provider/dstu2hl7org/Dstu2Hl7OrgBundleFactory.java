@@ -192,9 +192,6 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
     if (myBundle.getIdElement().isEmpty()) {
       myBundle.setId(theId);
     }
-    if (isBlank(myBundle.getId())) {
-      myBundle.setId(UUID.randomUUID().toString());
-    }
 
     if (myBundle.getMeta().getLastUpdated() == null && theLastUpdated != null) {
       InstantType instantType = new InstantType();
@@ -224,6 +221,10 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
   @Override
   public void addTotalResultsToBundle(Integer theTotalResults) {
     ensureBundle();
+
+    if (isBlank(myBundle.getId())) {
+      myBundle.setId(UUID.randomUUID().toString());
+    }
 
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
       myBundle.getTotalElement().setValue(theTotalResults);

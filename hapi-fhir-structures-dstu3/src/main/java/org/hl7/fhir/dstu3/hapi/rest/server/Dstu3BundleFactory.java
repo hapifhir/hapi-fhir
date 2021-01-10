@@ -189,9 +189,6 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
     if (myBundle.getIdElement().isEmpty()) {
       myBundle.setId(theId);
     }
-    if (myBundle.getIdElement().isEmpty()) {
-      myBundle.setId(UUID.randomUUID().toString());
-    }
 
     if (myBundle.getMeta().getLastUpdated() == null && theLastUpdated != null) {
       myBundle.getMeta().getLastUpdatedElement().setValueAsString(theLastUpdated.getValueAsString());
@@ -217,6 +214,15 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
   @Override
   public void addTotalResultsToBundle(Integer theTotalResults) {
     ensureBundle();
+
+    if (myBundle.getIdElement().isEmpty()) {
+      myBundle.setId(UUID.randomUUID().toString());
+    }
+
+    // FIXME KHS move in other methods
+    if (myBundle.getIdElement().isEmpty()) {
+      myBundle.setId(UUID.randomUUID().toString());
+    }
 
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
       myBundle.getTotalElement().setValue(theTotalResults);

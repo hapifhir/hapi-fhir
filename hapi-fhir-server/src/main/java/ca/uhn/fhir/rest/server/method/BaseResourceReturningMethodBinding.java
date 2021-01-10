@@ -284,9 +284,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				/*
 				 * Figure out the self-link for this request
 				 */
-				String linkSelf = RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest);
 
 				BundleLinks bundleLinks = new BundleLinks(theRequest.getServerBaseForRequest(), null, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), getResponseBundleType());
+				bundleLinks.setSelf(RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest));
 
 				if (getMethodReturnType() == MethodReturnTypeEnum.BUNDLE_RESOURCE) {
 					IBaseResource resource;
@@ -332,7 +332,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 					ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(theRequest, theServer.getDefaultResponseEncoding());
 					EncodingEnum linkEncoding = theRequest.getParameters().containsKey(Constants.PARAM_FORMAT) && responseEncoding != null ? responseEncoding.getEncoding() : null;
 
-					responseObject = createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, result, start, getResponseBundleType(), linkEncoding, null);
+					responseObject = createBundleFromBundleProvider(theServer, theRequest, count, RestfulServerUtils.createLinkSelf(theRequest.getFhirServerBase(), theRequest), includes, result, start, getResponseBundleType(), linkEncoding, null);
 				}
 				break;
 			}
