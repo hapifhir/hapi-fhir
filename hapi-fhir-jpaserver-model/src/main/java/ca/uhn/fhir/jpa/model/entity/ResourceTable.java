@@ -156,12 +156,13 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	private Collection<ResourceIndexedSearchParamQuantityNormalized> myParamsQuantityNormalized;
 	
 	/**
-	 * Added to support UCUM conversion
+	 * Added to support UCUM conversion, 
+	 * NOTE : use Boolean class instead of boolean primitive, in order to set the existing rows to null
 	 * since 5.3.0
 	 */
 	@Column(name = "SP_QUANTITY_NRML_PRESENT")
 	@OptimisticLock(excluded = true)
-	private boolean myParamsQuantityNormalizedPopulated;
+	private Boolean myParamsQuantityNormalizedPopulated = Boolean.FALSE;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -532,12 +533,18 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		myParamsQuantityPopulated = theParamsQuantityPopulated;
 	}
 	
-	public boolean isParamsQuantityNormalizedPopulated() {
-		return myParamsQuantityNormalizedPopulated;
+	public Boolean isParamsQuantityNormalizedPopulated() {
+		if (myParamsQuantityNormalizedPopulated == null)
+			return Boolean.FALSE;
+		else
+			return myParamsQuantityNormalizedPopulated;
 	}
 
-	public void setParamsQuantityNormalizedPopulated(boolean theParamsQuantityNormalizedPopulated) {
-		myParamsQuantityNormalizedPopulated = theParamsQuantityNormalizedPopulated;
+	public void setParamsQuantityNormalizedPopulated(Boolean theParamsQuantityNormalizedPopulated) {
+		if (theParamsQuantityNormalizedPopulated == null)
+			myParamsQuantityNormalizedPopulated = Boolean.FALSE;
+		else
+			myParamsQuantityNormalizedPopulated = theParamsQuantityNormalizedPopulated;
 	}
 
 	public boolean isParamsStringPopulated() {
