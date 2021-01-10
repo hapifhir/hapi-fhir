@@ -455,5 +455,4 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
 		}
 	}
-
 }

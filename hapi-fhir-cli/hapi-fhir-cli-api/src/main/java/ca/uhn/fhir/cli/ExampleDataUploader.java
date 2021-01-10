@@ -720,7 +720,7 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("About to upload {} examples in a transaction, {} remaining", subResourceList.size(), resources.size());
 
 			IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
-			bundleFactory.addTotalResultsToBundle(subResourceList.size());
+			bundleFactory.addTotalResultsToBundle(subResourceList.size(), BundleTypeEnum.TRANSACTION);
 			bundleFactory.addResourcesToBundle(new ArrayList<>(subResourceList), BundleTypeEnum.TRANSACTION, null, null, null);
 			IBaseResource subBundle = bundleFactory.getResourceBundle();
 

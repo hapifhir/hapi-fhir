@@ -44,12 +44,12 @@ public interface IVersionSpecificBundleFactory {
 	IBaseResource getResourceBundle();
 
 	/**
-	 * @deprecated This was deprecated in HAPI FHIR 4.1.0 as it provides duplicate functionality to the {@link #addRootPropertiesToBundle(String, String, String, String, String, Integer, BundleTypeEnum, IPrimitiveType)}
+	 * @deprecated This was deprecated in HAPI FHIR 4.1.0 as it provides duplicate functionality to the {@link #addRootPropertiesToBundle(String, BundleLinks, Integer, IPrimitiveType<Date>)}
 	 * and {@link #addResourcesToBundle(List, BundleTypeEnum, String, BundleInclusionRule, Set)} methods
 	 */
 	@Deprecated
 	default void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
-		addTotalResultsToBundle(theResult.size());
+		addTotalResultsToBundle(theResult.size(), theBundleType);
 		addResourcesToBundle(new ArrayList<>(theResult), theBundleType, null, null, null);
 	}
 
@@ -57,5 +57,5 @@ public interface IVersionSpecificBundleFactory {
 
 	List<IBaseResource> toListOfResources();
 
-	void addTotalResultsToBundle(Integer theTotalResults);
+	void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType);
 }

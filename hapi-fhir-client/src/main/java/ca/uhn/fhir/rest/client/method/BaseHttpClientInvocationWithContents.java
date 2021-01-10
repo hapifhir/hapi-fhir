@@ -156,7 +156,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		parser.setOmitResourceId(myOmitResourceId);
 		if (myResources != null) {
 			IVersionSpecificBundleFactory bundleFactory = getContext().newBundleFactory();
-			bundleFactory.addTotalResultsToBundle(myResources.size());
+			bundleFactory.addTotalResultsToBundle(myResources.size(), myBundleType);
 			bundleFactory.addResourcesToBundle(myResources, myBundleType, null, null, null);
 			IBaseResource bundleRes = bundleFactory.getResourceBundle();
 			return parser.encodeResourceToString(bundleRes);

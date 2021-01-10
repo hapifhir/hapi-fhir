@@ -211,19 +211,19 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
     myBase = theBundleLinks.serverBase;
 
-    if (myBundle.getTypeElement().isEmpty() && theBundleLinks.bundleType != null) {
-      myBundle.getTypeElement().setValueAsString(theBundleLinks.bundleType.getCode());
-    }
-
-    addTotalResultsToBundle(theTotalResults);
+    addTotalResultsToBundle(theTotalResults, theBundleLinks.bundleType);
   }
 
   @Override
-  public void addTotalResultsToBundle(Integer theTotalResults) {
+  public void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType) {
     ensureBundle();
 
     if (isBlank(myBundle.getId())) {
       myBundle.setId(UUID.randomUUID().toString());
+    }
+
+    if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
+      myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
     }
 
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {

@@ -204,22 +204,21 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
       myBundle.addLink().setRelation(Constants.LINK_PREVIOUS).setUrl(theBundleLinks.getPrev());
     }
 
-    if (myBundle.getTypeElement().isEmpty() && theBundleLinks.bundleType != null) {
-      myBundle.getTypeElement().setValueAsString(theBundleLinks.bundleType.getCode());
-    }
-
-    addTotalResultsToBundle(theTotalResults);
+    addTotalResultsToBundle(theTotalResults, theBundleLinks.bundleType);
   }
 
   @Override
-  public void addTotalResultsToBundle(Integer theTotalResults) {
+  public void addTotalResultsToBundle(Integer theTotalResults, BundleTypeEnum theBundleType) {
     ensureBundle();
 
     if (myBundle.getIdElement().isEmpty()) {
       myBundle.setId(UUID.randomUUID().toString());
     }
 
-    // FIXME KHS move in other methods
+    if (myBundle.getTypeElement().isEmpty() && theBundleType != null) {
+      myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
+    }
+
     if (myBundle.getIdElement().isEmpty()) {
       myBundle.setId(UUID.randomUUID().toString());
     }

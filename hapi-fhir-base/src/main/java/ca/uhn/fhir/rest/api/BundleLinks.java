@@ -3,14 +3,17 @@ package ca.uhn.fhir.rest.api;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 public class BundleLinks {
 	public final String serverBase;
 	public final boolean prettyPrint;
 	public final BundleTypeEnum bundleType;
-	private final Set<Include> includes;
+	private final List<Include> includes;
 
 	private String self;
 	private String next;
@@ -18,7 +21,7 @@ public class BundleLinks {
 
 	public BundleLinks(String theServerBase, Set<Include> theIncludes, boolean thePrettyPrint, BundleTypeEnum theBundleType) {
 		serverBase = theServerBase;
-		includes = theIncludes;
+		includes = theIncludes == null ? null : new ArrayList<>(theIncludes);
 		prettyPrint = thePrettyPrint;
 		bundleType = theBundleType;
 	}
@@ -50,10 +53,10 @@ public class BundleLinks {
 		return this;
 	}
 
-	public Set<Include> getIncludes() {
+	public Collection<Include> getIncludes() {
 		if (includes == null) {
 			return null;
 		}
-		return Collections.unmodifiableSet(includes);
+		return Collections.unmodifiableList(includes);
 	}
 }
