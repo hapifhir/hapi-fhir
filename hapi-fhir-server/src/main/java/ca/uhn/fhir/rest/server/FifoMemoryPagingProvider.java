@@ -29,8 +29,8 @@ import java.util.UUID;
 
 public class FifoMemoryPagingProvider extends BasePagingProvider {
 
-	private LinkedHashMap<String, IBundleProvider> myBundleProviders;
-	private int mySize;
+	private final LinkedHashMap<String, IBundleProvider> myBundleProviders;
+	private final int mySize;
 
 	public FifoMemoryPagingProvider(int theSize) {
 		Validate.isTrue(theSize > 0, "theSize must be greater than 0");

@@ -219,10 +219,6 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
       myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
     }
 
-    if (myBundle.getIdElement().isEmpty()) {
-      myBundle.setId(UUID.randomUUID().toString());
-    }
-
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
       myBundle.getTotalElement().setValue(theTotalResults);
     }
