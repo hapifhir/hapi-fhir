@@ -223,6 +223,8 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
 
   @Override
   public void addTotalResultsToBundle(Integer theTotalResults) {
+    ensureBundle();
+
     if (myBundle.getTotalElement().isEmpty() && theTotalResults != null) {
       myBundle.getTotalElement().setValue(theTotalResults);
     }
