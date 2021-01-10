@@ -51,6 +51,9 @@ public class BundleLinks {
 	}
 
 	public Set<Include> getIncludes() {
+		if (includes == null) {
+			return null;
+		}
 		return Collections.unmodifiableSet(includes);
 	}
 }
