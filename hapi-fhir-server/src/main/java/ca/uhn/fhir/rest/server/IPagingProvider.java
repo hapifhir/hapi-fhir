@@ -28,9 +28,21 @@ import javax.annotation.Nullable;
 
 public interface IPagingProvider {
 
+	/**
+	 * if no _count parameter is provided, use this for the page size
+	 */
 	int getDefaultPageSize();
 
+	/**
+	 * if the _count parameter is larger than this value, reduce it to this value
+	 */
 	int getMaximumPageSize();
+
+
+	/**
+	 * @return true if this paging provider can store search results.
+	 */
+	boolean canStoreSearchResults();
 
 	/**
 	 * Retrieve a result list by Search ID

@@ -25,13 +25,12 @@ import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 
 // Note: this class is not annotated with @Service because we want to
 // explicitly define it in BaseConfig.java. This is done so that
 // implementors can override if they want to.
-public class DatabaseBackedPagingProvider extends BasePagingProvider implements IPagingProvider {
+public class DatabaseBackedPagingProvider extends BasePagingProvider {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;

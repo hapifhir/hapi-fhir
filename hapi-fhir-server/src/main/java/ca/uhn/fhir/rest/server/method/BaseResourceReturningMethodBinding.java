@@ -7,9 +7,12 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -23,7 +26,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,7 +36,13 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -124,7 +132,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		List<IBaseResource> resourceList;
 		Integer numTotalResults = theResult.size();
 
-		if (requestOffset != null || theServer.getPagingProvider() == null) {
+		if (requestOffset != null || !theServer.canStoreSearchResults()) {
 			if (theLimit != null) {
 				numToReturn = theLimit;
 			} else {
@@ -210,15 +218,20 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		String linkPrev = null;
 		String linkNext = null;
 
-		if (theServer.getPagingProvider() == null || requestOffset != null) {
-			int myOffset = requestOffset != null ? requestOffset : 0;
+		if (!theServer.canStoreSearchResults() || requestOffset != null) {
+			int offset = requestOffset != null ? requestOffset : 0;
 			// Paging without caching
 			// We're doing requestOffset pages
-			if (numTotalResults == null || myOffset + numToReturn < numTotalResults) {
-				linkNext = (RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), myOffset + numToReturn, numToReturn, theRequest.getParameters()));
+			int requestedToReturn = numToReturn;
+			if (theServer.getPagingProvider() == null) {
+				// There is no paging provider at all, so assume we're querying up to all the results we need every time
+				requestedToReturn += offset;
 			}
-			if (myOffset > 0) {
-				int start = Math.max(0, myOffset - numToReturn);
+			if (numTotalResults == null || requestedToReturn < numTotalResults) {
+				linkNext = (RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), offset + numToReturn, numToReturn, theRequest.getParameters()));
+			}
+			if (offset > 0) {
+				int start = Math.max(0, offset - numToReturn);
 				linkPrev = RestfulServerUtils.createOffsetPagingLink(serverBase, theRequest.getRequestPath(), theRequest.getTenantId(), start, numToReturn, theRequest.getParameters());
 			}
 		} else if (isNotBlank(theResult.getCurrentPageId())) {
@@ -251,7 +264,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		bundleFactory.addRootPropertiesToBundle(theResult.getUuid(), serverBase, theLinkSelf, linkPrev, linkNext, theResult.size(), theBundleType, theResult.getPublished());
 		bundleFactory.addResourcesToBundle(new ArrayList<>(resourceList), theBundleType, serverBase, theServer.getBundleInclusionRule(), theIncludes);
 
-		if (theServer.getPagingProvider() != null) {
+		if (theServer.canStoreSearchResults()) {
 			int limit;
 			limit = theLimit != null ? theLimit : theServer.getPagingProvider().getDefaultPageSize();
 			limit = Math.min(limit, theServer.getPagingProvider().getMaximumPageSize());

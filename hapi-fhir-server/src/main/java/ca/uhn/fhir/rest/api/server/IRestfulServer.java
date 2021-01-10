@@ -33,4 +33,7 @@ public interface IRestfulServer<T extends RequestDetails> extends IRestfulServer
 
 	PreferReturnEnum getDefaultPreferReturn();
 
+	default boolean canStoreSearchResults() {
+		return getPagingProvider() != null && getPagingProvider().canStoreSearchResults();
+	}
 }

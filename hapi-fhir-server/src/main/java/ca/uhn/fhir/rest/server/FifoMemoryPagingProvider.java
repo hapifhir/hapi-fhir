@@ -27,7 +27,7 @@ import org.apache.commons.lang3.Validate;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-public class FifoMemoryPagingProvider extends BasePagingProvider implements IPagingProvider {
+public class FifoMemoryPagingProvider extends BasePagingProvider {
 
 	private LinkedHashMap<String, IBundleProvider> myBundleProviders;
 	private int mySize;

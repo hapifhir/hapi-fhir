@@ -44,6 +44,11 @@ public abstract class BasePagingProvider implements IPagingProvider {
 		return myMaximumPageSize;
 	}
 
+	@Override
+	public boolean canStoreSearchResults() {
+		return true;
+	}
+
 	public BasePagingProvider setDefaultPageSize(int theDefaultPageSize) {
 		Validate.isTrue(theDefaultPageSize > 0, "size must be greater than 0");
 		myDefaultPageSize = theDefaultPageSize;
