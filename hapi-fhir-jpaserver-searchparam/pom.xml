@@ -109,8 +109,8 @@
 			<artifactId>spring-context</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-search-engine</artifactId>
+			<groupId>org.hibernate.search</groupId>
+			<artifactId>hibernate-search-mapper-orm</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jscience</groupId>

@@ -62,8 +62,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.Search;
+import org.hibernate.search.mapper.orm.Search;
+import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -226,10 +226,10 @@ public abstract class BaseJpaDstu2Test extends BaseJpaTest {
 	@BeforeEach
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
-			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
-			ftem.purgeAll(ResourceTable.class);
-			ftem.purgeAll(ResourceIndexedSearchParamString.class);
-			ftem.flushToIndexes();
+			SearchSession searchSession  = Search.session(myEntityManager);
+			searchSession.workspace(ResourceTable.class).purge();
+//			searchSession.workspace(ResourceIndexedSearchParamString.class).purge();
+			searchSession.indexingPlan().execute();
 		});
 
 		myDaoConfig.setSchedulingDisabled(true);

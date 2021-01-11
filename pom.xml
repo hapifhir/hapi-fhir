@@ -12,15 +12,15 @@
 	<url>https://hapifhir.io</url>
 
 	<organization>
-		<name>University Health Network</name>
-		<url>http://www.uhn.ca</url>
+		<name>Smile CDR, Inc.</name>
+		<url>https://smilecdr.com</url>
 	</organization>
 
 	<inceptionYear>2014</inceptionYear>
 
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/jamesagnew/hapi-fhir/issues/</url>
+		<url>https://github.com/hapifhir/hapi-fhir/issues/</url>
 	</issueManagement>
 
 	<distributionManagement>
@@ -34,14 +34,14 @@
 		</repository>
 		<site>
 			<id>git.server</id>
-			<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
+			<url>scm:git:git@github.com:hapifhir/hapi-fhir.git</url>
 		</site>
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</connection>
-		<url>scm:git:git@github.com:jamesagnew/hapi-fhir.git</url>
-		<developerConnection>scm:git:git@github.com:jamesagnew/hapi-fhir.git</developerConnection>
+		<connection>scm:git:git@github.com:hapifhir/hapi-fhir.git</connection>
+		<url>scm:git:git@github.com:hapifhir/hapi-fhir.git</url>
+		<developerConnection>scm:git:git@github.com:hapifhir/hapi-fhir.git</developerConnection>
 	</scm>
 
 	<repositories>
@@ -689,6 +689,14 @@
 			<name>Steven Wagers</name>
 			<organization>Regenstrief Institute</organization>
 		</developer>
+		<developer>
+			<id>vladonemo</id>
+			<name>Vladimir Nemergut</name>
+		</developer>
+		<developer>
+			<id>janol77</id>
+			<name>Alejandro Medina</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -729,7 +737,7 @@
 		<error_prone_annotations_version>2.3.4</error_prone_annotations_version>
 		<error_prone_core_version>2.3.4</error_prone_core_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>29.0-jre</guava_version>
+		<guava_version>30.1-jre</guava_version>
 		<gson_version>2.8.5</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -740,13 +748,13 @@
 		<!-- 9.4.17 seems to have issues -->
 		<jetty_version>9.4.35.v20201120</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
-		<junit_version>5.6.2</junit_version>
+		<junit_version>5.7.0</junit_version>
 		<flyway_version>6.5.4</flyway_version>
-		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.22.Final</hibernate_version>
+		<hibernate_version>5.4.26.Final</hibernate_version>
+		<hibernate_search_version>6.0.0.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.11.5.Final</hibernate_search_version>
-		<lucene_version>5.5.5</lucene_version>
+		<lucene_version>8.7.0</lucene_version>
+		<hamcrest_version>2.2</hamcrest_version>
 		<hibernate_validator_version>6.1.5.Final</hibernate_validator_version>
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
@@ -757,15 +765,16 @@
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
 		<ph_schematron_version>5.2.0</ph_schematron_version>
 		<ph_commons_version>9.3.8</ph_commons_version>
-		<plexus_compiler_api_version>2.8.5</plexus_compiler_api_version>
+		<plexus_compiler_api_version>2.8.8</plexus_compiler_api_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
-		<slf4j_version>1.7.28</slf4j_version>
-		<spring_version>5.2.9.RELEASE</spring_version>
+		<slf4j_version>1.7.30</slf4j_version>
+		<log4j_to_slf4j_version>2.11.1</log4j_to_slf4j_version>
+		<spring_version>5.3.2</spring_version>
 		<!-- FYI: Spring Data JPA 2.1.9 causes test failures due to unexpected cascading deletes -->
-		<spring_data_version>2.2.0.RELEASE</spring_data_version>
+		<spring_data_version>2.4.2</spring_data_version>
 		<spring_batch_version>4.2.3.RELEASE</spring_batch_version>
-		<spring_boot_version>2.2.6.RELEASE</spring_boot_version>
+		<spring_boot_version>2.4.1</spring_boot_version>
 		<spring_retry_version>1.2.2.RELEASE</spring_retry_version>
 
 		<stax2_api_version>3.1.4</stax2_api_version>
@@ -1084,7 +1093,7 @@
 			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
-				<version>1.5.1</version>
+				<version>1.7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
@@ -1138,6 +1147,11 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient-cache</artifactId>
+				<version>${httpclient_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient-android</artifactId>
 				<version>4.3.5.1</version>
 			</dependency>
@@ -1165,12 +1179,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-highlighter</artifactId>
+				<artifactId>lucene-analyzers-phonetic</artifactId>
 				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
-				<artifactId>lucene-analyzers-phonetic</artifactId>
+				<artifactId>lucene-backward-codecs</artifactId>
 				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
@@ -1329,6 +1343,12 @@
 				<version>${ucum_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.rauschig</groupId>
+				<artifactId>jarchivelib</artifactId>
+				<version>1.0.0</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
 				<artifactId>jansi</artifactId>
 				<version>1.18</version>
@@ -1383,16 +1403,10 @@
 				<artifactId>jscience</artifactId>
 				<version>4.3.1</version>
 			</dependency>
-			<!-- TODO: remove this once we're fully switched over to hamcrest 2.2 -->
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>java-hamcrest</artifactId>
-				<version>2.0.0.0</version>
-			</dependency>
 			<dependency>
 				<groupId>org.hamcrest</groupId>
 				<artifactId>hamcrest</artifactId>
-				<version>2.2</version>
+				<version>${hamcrest_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -1420,18 +1434,34 @@
 				<version>${hibernate_validator_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-orm</artifactId>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-to-slf4j</artifactId>
+				<version>${log4j_to_slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-mapper-orm</artifactId>
+				<version>${hibernate_search_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>org.elasticsearch.client</groupId>
+				<artifactId>elasticsearch-rest-high-level-client</artifactId>
+				<version>7.10.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-elasticsearch</artifactId>
 				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-elasticsearch</artifactId>
-				<version>${hibernate_search_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-search-engine</artifactId>
+				<groupId>org.hibernate.search</groupId>
+				<artifactId>hibernate-search-backend-lucene</artifactId>
 				<version>${hibernate_search_version}</version>
 			</dependency>
 			<dependency>
@@ -1464,6 +1494,11 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.junit-pioneer</groupId>
+				<artifactId>junit-pioneer</artifactId>
+				<version>1.1.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
 				<version>2.5.1</version>
@@ -1471,7 +1506,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>3.3.3</version>
+				<version>3.6.28</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -1501,6 +1536,11 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>jcl-over-slf4j</artifactId>
+				<version>${slf4j_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId>
 				<version>${slf4j_version}</version>
 			</dependency>
 			<dependency>
@@ -1655,9 +1695,22 @@
 				<version>2.4.0</version>
 			</dependency>
 			<dependency>
-				<groupId>pl.allegro.tech</groupId>
-				<artifactId>embedded-elasticsearch</artifactId>
-				<version>2.10.0</version>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers</artifactId>
+				<version>1.15.1</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>elasticsearch</artifactId>
+				<version>1.15.1</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>junit-jupiter</artifactId>
+				<version>1.15.1</version>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>xpp3</groupId>
@@ -1722,7 +1775,7 @@
 					<artifactId>gemnasium-maven-plugin</artifactId>
 					<version>0.2.0</version>
 					<configuration>
-						<projectSlug>github.com/jamesagnew/hapi-fhir</projectSlug>
+						<projectSlug>github.com/hapifhir/hapi-fhir</projectSlug>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -1774,7 +1827,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.1.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1804,7 +1857,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.0.0-M4</version>
+					<version>3.0.0-M5</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1831,7 +1884,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M5</version>
 					<configuration>
 						<redirectTestOutputToFile>true</redirectTestOutputToFile>
 						<runOrder>random</runOrder>
@@ -2087,8 +2140,8 @@
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-jpaserver-empi">
-									<fileset dir="hapi-fhir-jpaserver-empi/target/site/apidocs"/>
+								<copy todir="target/site/apidocs-jpaserver-mdm">
+									<fileset dir="hapi-fhir-jpaserver-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/apidocs-jpaserver-batch">
 									<fileset dir="hapi-fhir-jpaserver-batch/target/site/apidocs"/>
@@ -2099,8 +2152,8 @@
 								<copy todir="target/site/apidocs-server">
 									<fileset dir="hapi-fhir-server/target/site/apidocs"/>
 								</copy>
-								<copy todir="target/site/apidocs-server-empi">
-									<fileset dir="hapi-fhir-server-empi/target/site/apidocs"/>
+								<copy todir="target/site/apidocs-server-mdm">
+									<fileset dir="hapi-fhir-server-mdm/target/site/apidocs"/>
 								</copy>
 								<copy todir="target/site/xref-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/xref"/>
@@ -2186,9 +2239,9 @@
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
 									<replacetoken>
-										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
+										<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir/" title="GitHub Project" class="externalLink">GitHub Project</a>]]></replacetoken>
 									<replacevalue>
-										<![CDATA[<a href="https://github.com/jamesagnew/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
+										<![CDATA[<a href="https://github.com/hapifhir/hapi-fhir/" title="GitHub Project"  class="externalLink"><i class="fa fa-github"></i> GitHub Project</a>]]></replacevalue>
 								</replace>
 								<replace dir="target/site" summary="true">
 									<include name="*.html"/>
@@ -2318,7 +2371,7 @@
 					<content>\${siteMainDirectory}</content>
 					<tryUpdate>true</tryUpdate>
 					<scmBranch>gh-pages</scmBranch>
-					<pubScmUrl>scm:git:git@github.com:jamesagnew/hapi-fhir.git</pubScmUrl>
+					<pubScmUrl>scm:git:git@github.com:hapifhir/hapi-fhir.git</pubScmUrl>
 				</configuration>
 				<executions>
 					<execution>
@@ -2365,7 +2418,7 @@
 				<configuration>
 					<feedType>atom_1.0</feedType>
 					<issueLinkTemplatePerSystem>
-						<default>https://github.com/jamesagnew/hapi-fhir/issues/%ISSUE%</default>
+						<default>https://github.com/hapifhir/hapi-fhir/issues/%ISSUE%</default>
 					</issueLinkTemplatePerSystem>
 					<escapeHTML>false</escapeHTML>
 				</configuration>
@@ -2506,7 +2559,7 @@
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
-				<module>hapi-fhir-server-empi</module>
+				<module>hapi-fhir-server-mdm</module>
 				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->
@@ -2521,8 +2574,6 @@
 				<module>hapi-fhir-validation-resources-r4</module>
 				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-validation-resources-r5</module>
-				<module>hapi-fhir-igpacks</module>
-				<module>hapi-fhir-elasticsearch-6</module>
 				<module>hapi-fhir-jpaserver-api</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>
@@ -2531,8 +2582,8 @@
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-batch</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-empi</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
+				<module>hapi-fhir-jpaserver-mdm</module>
 				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
@@ -2660,28 +2711,6 @@
 								</path>
 							</annotationProcessorPaths>
 						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>OWASP</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.owasp</groupId>
-						<artifactId>dependency-check-maven</artifactId>
-						<version>6.0.2</version>
-						<configuration>
-							<failBuildOnCVSS>7</failBuildOnCVSS>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>check</goal>
-								</goals>
-							</execution>
-						</executions>
 					</plugin>
 				</plugins>
 			</build>

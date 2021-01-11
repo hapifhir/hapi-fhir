@@ -1,6 +1,5 @@
 {
   "mappings" : {
-    "ca.uhn.fhir.jpa.model.entity.ObservationIndexedSearchParamLastNEntity" : {
       "properties" : {
         "codeconceptid" : {
           "type" : "keyword"
@@ -47,4 +46,3 @@
       }
     }
   }
-}

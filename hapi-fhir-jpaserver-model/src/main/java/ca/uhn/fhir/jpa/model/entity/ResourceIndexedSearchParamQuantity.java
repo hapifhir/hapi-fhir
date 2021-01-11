@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.util.BigDecimalNumericFieldBridge;
-import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.rest.param.QuantityParam;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
-import org.hibernate.search.annotations.NumericField;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+import java.math.BigDecimal;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -42,11 +35,16 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.util.Objects;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
+
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.param.QuantityParam;
 
 //@formatter:off
 @Embeddable
@@ -59,47 +57,23 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 	@Index(name = "IDX_SP_QUANTITY_UPDATED", columnList = "SP_UPDATED"),
 	@Index(name = "IDX_SP_QUANTITY_RESID", columnList = "RES_ID")
 })
-public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearchParam {
-
-	private static final int MAX_LENGTH = 200;
+public class ResourceIndexedSearchParamQuantity extends ResourceIndexedSearchParamBaseQuantity {
 
 	private static final long serialVersionUID = 1L;
-	@Column(name = "SP_SYSTEM", nullable = true, length = MAX_LENGTH)
-	@Field
-	public String mySystem;
-	@Column(name = "SP_UNITS", nullable = true, length = MAX_LENGTH)
-	@Field
-	public String myUnits;
-	@Column(name = "SP_VALUE", nullable = true)
-	@Field
-	@NumericField
-	@FieldBridge(impl = BigDecimalNumericFieldBridge.class)
-	public BigDecimal myValue;
+	
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_QUANTITY", sequenceName = "SEQ_SPIDX_QUANTITY")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_QUANTITY")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY_AND_UNITS", nullable = true)
-	private Long myHashIdentityAndUnits;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY_SYS_UNITS", nullable = true)
-	private Long myHashIdentitySystemAndUnits;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
+	
+	@Column(name = "SP_VALUE", nullable = true)
+	@ScaledNumberField
+	public BigDecimal myValue;
 
 	public ResourceIndexedSearchParamQuantity() {
 		super();
 	}
-
 
 	public ResourceIndexedSearchParamQuantity(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		this();
@@ -119,21 +93,46 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		mySystem = source.mySystem;
 		myUnits = source.myUnits;
 		myValue = source.myValue;
-		myHashIdentity = source.myHashIdentity;
-		myHashIdentityAndUnits = source.myHashIdentitySystemAndUnits;
-		myHashIdentitySystemAndUnits = source.myHashIdentitySystemAndUnits;
+		setHashIdentity(source.getHashIdentity());
+		setHashIdentityAndUnits(source.getHashIdentityAndUnits());
+		setHashIdentitySystemAndUnits(source.getHashIdentitySystemAndUnits());
+	}
+	
+	public BigDecimal getValue() {
+		return myValue;
 	}
 
+	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
+		myValue = theValue;
+		return this;
+	}
+	
+	@Override
+	public Long getId() {
+		return myId;
+	}
 
 	@Override
-	public void calculateHashes() {
-		String resourceType = getResourceType();
-		String paramName = getParamName();
-		String units = getUnits();
-		String system = getSystem();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		setHashIdentityAndUnits(calculateHashUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, units));
-		setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(getPartitionSettings(), getPartitionId(), resourceType, paramName, system, units));
+	public void setId(Long theId) {
+		myId = theId;
+	}
+	
+	@Override
+	public IQueryParameterType toQueryParameterType() {
+		return new QuantityParam(null, getValue(), getSystem(), getUnits());
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("paramName", getParamName());
+		b.append("resourceId", getResourcePid());
+		b.append("system", getSystem());
+		b.append("units", getUnits());
+		b.append("value", getValue());
+		b.append("missing", isMissing());
+		b.append("hashIdentitySystemAndUnits", getHashIdentitySystemAndUnits());
+		return b.build();
 	}
 
 	@Override
@@ -155,99 +154,13 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
 		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
 		b.append(isMissing(), obj.isMissing());
+		b.append(getValue(), obj.getValue());
 		return b.isEquals();
 	}
-
-	public Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
-
-	public Long getHashIdentityAndUnits() {
-		return myHashIdentityAndUnits;
-	}
-
-	public void setHashIdentityAndUnits(Long theHashIdentityAndUnits) {
-		myHashIdentityAndUnits = theHashIdentityAndUnits;
-	}
-
-	private Long getHashIdentitySystemAndUnits() {
-		return myHashIdentitySystemAndUnits;
-	}
-
-	public void setHashIdentitySystemAndUnits(Long theHashIdentitySystemAndUnits) {
-		myHashIdentitySystemAndUnits = theHashIdentitySystemAndUnits;
-	}
-
-	@Override
-	public Long getId() {
-		return myId;
-	}
-
-	@Override
-	public void setId(Long theId) {
-		myId = theId;
-	}
-
-	public String getSystem() {
-		return mySystem;
-	}
-
-	public void setSystem(String theSystem) {
-		mySystem = theSystem;
-	}
-
-	public String getUnits() {
-		return myUnits;
-	}
-
-	public void setUnits(String theUnits) {
-		myUnits = theUnits;
-	}
-
-	public BigDecimal getValue() {
-		return myValue;
-	}
-
-	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
-		myValue = theValue;
-		return this;
-	}
-
-	@Override
-	public int hashCode() {
-		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getResourceType());
-		b.append(getParamName());
-		b.append(getHashIdentity());
-		b.append(getHashIdentityAndUnits());
-		b.append(getHashIdentitySystemAndUnits());
-		return b.toHashCode();
-	}
-
-	@Override
-	public IQueryParameterType toQueryParameterType() {
-		return new QuantityParam(null, getValue(), getSystem(), getUnits());
-	}
-
-	@Override
-	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("paramName", getParamName());
-		b.append("resourceId", getResourcePid());
-		b.append("system", getSystem());
-		b.append("units", getUnits());
-		b.append("value", getValue());
-		b.append("missing", isMissing());
-		b.append("hashIdentitySystemAndUnits", myHashIdentitySystemAndUnits);
-		return b.build();
-	}
-
+	
 	@Override
 	public boolean matches(IQueryParameterType theParam) {
+		
 		if (!(theParam instanceof QuantityParam)) {
 			return false;
 		}
@@ -280,26 +193,8 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 				}
 			}
 		}
+		
 		return retval;
 	}
-
-	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashSystemAndUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theUnits);
-	}
-
-	public static long calculateHashSystemAndUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theSystem, String theUnits) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theSystem, theUnits);
-	}
-
-	public static long calculateHashUnits(PartitionSettings thePartitionSettings, PartitionablePartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashUnits(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUnits);
-	}
-
-	public static long calculateHashUnits(PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String theResourceType, String theParamName, String theUnits) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUnits);
-	}
-
 
 }

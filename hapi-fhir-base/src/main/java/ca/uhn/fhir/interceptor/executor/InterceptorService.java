@@ -4,7 +4,7 @@ package ca.uhn.fhir.interceptor.executor;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -567,7 +568,7 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	 */
 	private static List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
 		ArrayList<HookInvoker> retVal = new ArrayList<>();
-		for (Method nextMethod : theInterceptor.getClass().getMethods()) {
+		for (Method nextMethod : ReflectionUtil.getDeclaredMethods(theInterceptor.getClass(), true)) {
 			Optional<Hook> hook = findAnnotation(nextMethod, Hook.class);
 
 			if (hook.isPresent()) {

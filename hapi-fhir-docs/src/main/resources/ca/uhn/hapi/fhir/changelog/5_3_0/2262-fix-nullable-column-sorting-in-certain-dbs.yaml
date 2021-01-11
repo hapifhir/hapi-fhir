@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2262
+title: "Sorting of search results was not working for MySQL, MSSQL and MariaDB due to recent changes made to handle sorting
+   of nullable columns. This has now been fixed."

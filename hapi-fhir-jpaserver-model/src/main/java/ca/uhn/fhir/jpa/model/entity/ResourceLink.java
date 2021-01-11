@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.search.annotations.Field;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.persistence.Column;
@@ -36,13 +36,11 @@ import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import java.util.Collection;
 import java.util.Date;
 
 @Entity
@@ -72,7 +70,7 @@ public class ResourceLink extends BaseResourceIndex {
 	private Long mySourceResourcePid;
 
 	@Column(name = "SOURCE_RESOURCE_TYPE", updatable = false, nullable = false, length = ResourceTable.RESTYPE_LEN)
-	@Field()
+	@FullTextField
 	private String mySourceResourceType;
 
 	@ManyToOne(optional = true, fetch = FetchType.LAZY)
@@ -80,15 +78,18 @@ public class ResourceLink extends BaseResourceIndex {
 	private ResourceTable myTargetResource;
 
 	@Column(name = "TARGET_RESOURCE_ID", insertable = true, updatable = true, nullable = true)
-	@Field()
+	@FullTextField
 	private Long myTargetResourcePid;
+
 	@Column(name = "TARGET_RESOURCE_TYPE", nullable = false, length = ResourceTable.RESTYPE_LEN)
-	@Field()
+	@FullTextField
 	private String myTargetResourceType;
+
 	@Column(name = "TARGET_RESOURCE_URL", length = 200, nullable = true)
-	@Field()
+	@FullTextField
 	private String myTargetResourceUrl;
-	@Field()
+
+	@FullTextField
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;

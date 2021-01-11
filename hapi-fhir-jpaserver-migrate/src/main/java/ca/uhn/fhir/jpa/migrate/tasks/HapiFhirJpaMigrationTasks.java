@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,6 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  */
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.entity.EmpiLink;
-import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
@@ -74,9 +69,62 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init430(); // Replaced by 5.0.0
 		init500(); // 20200218 - 20200513
 		init501(); // 20200514 - 20200515
-		init510(); // 20200516 - 20201112
+		init510(); // 20200516 - 20201028
+		init520(); // 20201029 -
+		init530();
 	}
 
+	private void init530() {
+		Builder version = forVersion(VersionEnum.V5_3_0);
+	
+		//-- TRM
+		version
+			.onTable("TRM_VALUESET_CONCEPT")
+			.dropIndex("20210104.1", "IDX_VS_CONCEPT_CS_CODE");
+		
+	    version
+		    .onTable("TRM_VALUESET_CONCEPT")
+		    .addIndex("20210104.2", "IDX_VS_CONCEPT_CSCD").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
+	    
+		//-- Add new Table, HFJ_SPIDX_QUANTITY_NRML
+		version.addIdGenerator("20210109.1", "SEQ_SPIDX_QUANTITY_NRML");
+		Builder.BuilderAddTableByColumns pkg = version.addTableByColumns("20210109.2", "HFJ_SPIDX_QUANTITY_NRML", "SP_ID");
+		pkg.addColumn("RES_ID").nonNullable().type(ColumnTypeEnum.LONG);	
+		pkg.addColumn("RES_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 100);	
+		pkg.addColumn("SP_UPDATED").nullable().type(ColumnTypeEnum.DATE_TIMESTAMP);	
+		pkg.addColumn("SP_MISSING").nonNullable().type(ColumnTypeEnum.BOOLEAN);	
+		pkg.addColumn("SP_NAME").nonNullable().type(ColumnTypeEnum.STRING, 100);
+		pkg.addColumn("SP_ID").nonNullable().type(ColumnTypeEnum.LONG);		
+		pkg.addColumn("SP_SYSTEM").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("SP_UNITS").nullable().type(ColumnTypeEnum.STRING, 200);
+		pkg.addColumn("HASH_IDENTITY_AND_UNITS").nullable().type(ColumnTypeEnum.LONG);
+		pkg.addColumn("HASH_IDENTITY_SYS_UNITS").nullable().type(ColumnTypeEnum.LONG);
+		pkg.addColumn("HASH_IDENTITY").nullable().type(ColumnTypeEnum.LONG);
+		pkg.addColumn("SP_VALUE").nullable().type(ColumnTypeEnum.FLOAT);
+		pkg.addIndex("20210109.3", "IDX_SP_QNTY_NRML_HASH").unique(false).withColumns("HASH_IDENTITY","SP_VALUE");
+		pkg.addIndex("20210109.4", "IDX_SP_QNTY_NRML_HASH_UN").unique(false).withColumns("HASH_IDENTITY_AND_UNITS","SP_VALUE");
+		pkg.addIndex("20210109.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS","SP_VALUE");
+		pkg.addIndex("20210109.6", "IDX_SP_QNTY_NRML_UPDATED").unique(false).withColumns("SP_UPDATED");
+		pkg.addIndex("20210109.7", "IDX_SP_QNTY_NRML_RESID").unique(false).withColumns("RES_ID");
+		//pkg.addForeignKey("20210109.9", "FK_QNTY_NRML_RESID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
+
+		//-- Link to the resourceTable
+		version.onTable("HFJ_RESOURCE").addColumn("20210109.10", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
+
+	}
+
+	protected void init520() {
+		Builder version = forVersion(VersionEnum.V5_2_0);
+
+		Builder.BuilderWithTableName mdmLink = version.onTable("MPI_LINK");
+		mdmLink.addColumn("20201029.1", "GOLDEN_RESOURCE_PID").nonNullable().type(ColumnTypeEnum.LONG);
+		mdmLink.addColumn("20201029.2", "RULE_COUNT").nullable().type(ColumnTypeEnum.LONG);
+		mdmLink
+			.addForeignKey("20201029.3", "FK_EMPI_LINK_GOLDEN_RESOURCE")
+			.toColumn("GOLDEN_RESOURCE_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+	}
+	
 	protected void init510() {
 		Builder version = forVersion(VersionEnum.V5_1_0);
 
@@ -142,6 +190,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		empiLink.addColumn("20200715.4", "VECTOR").nullable().type(ColumnTypeEnum.LONG);
 		empiLink.addColumn("20200715.5", "SCORE").nullable().type(ColumnTypeEnum.FLOAT);
 
+
 		init510_20200725();
 
 		//EMPI Target Type
@@ -165,7 +214,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName trmValueSetComp = version.onTable("TRM_VALUESET_CONCEPT");
 		trmValueSetComp.addColumn("20201028.1", "SYSTEM_VER").nullable().type(ColumnTypeEnum.STRING, 200);
 		trmValueSetComp.dropIndex("20201028.2", "IDX_VS_CONCEPT_CS_CD");
-		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL");
+		trmValueSetComp.addIndex("20201028.3", "IDX_VS_CONCEPT_CS_CODE").unique(true).withColumns("VALUESET_PID", "SYSTEM_URL", "SYSTEM_VER", "CODEVAL").doNothing();
 	}
 
 	protected void init510_20200725() {

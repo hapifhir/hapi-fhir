@@ -1,10 +1,11 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+
 /*-
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +30,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -58,6 +60,7 @@ public final class ResourceIndexedSearchParams {
 	final public Collection<ResourceIndexedSearchParamToken> myTokenParams = new HashSet<>();
 	final public Collection<ResourceIndexedSearchParamNumber> myNumberParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamQuantity> myQuantityParams = new ArrayList<>();
+	final public Collection<ResourceIndexedSearchParamQuantityNormalized> myQuantityNormalizedParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamDate> myDateParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamUri> myUriParams = new ArrayList<>();
 	final public Collection<ResourceIndexedSearchParamCoords> myCoordsParams = new ArrayList<>();
@@ -81,6 +84,9 @@ public final class ResourceIndexedSearchParams {
 		}
 		if (theEntity.isParamsQuantityPopulated()) {
 			myQuantityParams.addAll(theEntity.getParamsQuantity());
+		}
+		if (theEntity.isParamsQuantityNormalizedPopulated()) {
+			myQuantityNormalizedParams.addAll(theEntity.getParamsQuantityNormalized());			
 		}
 		if (theEntity.isParamsDatePopulated()) {
 			myDateParams.addAll(theEntity.getParamsDate());
@@ -110,6 +116,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setParamsTokenPopulated(myTokenParams.isEmpty() == false);
 		theEntity.setParamsNumberPopulated(myNumberParams.isEmpty() == false);
 		theEntity.setParamsQuantityPopulated(myQuantityParams.isEmpty() == false);
+		theEntity.setParamsQuantityNormalizedPopulated(myQuantityNormalizedParams.isEmpty() == false);
 		theEntity.setParamsDatePopulated(myDateParams.isEmpty() == false);
 		theEntity.setParamsUriPopulated(myUriParams.isEmpty() == false);
 		theEntity.setParamsCoordsPopulated(myCoordsParams.isEmpty() == false);
@@ -123,6 +130,7 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setParamsToken(myTokenParams);
 		theEntity.setParamsNumber(myNumberParams);
 		theEntity.setParamsQuantity(myQuantityParams);
+		theEntity.setParamsQuantityNormalized(myQuantityNormalizedParams);
 		theEntity.setParamsDate(myDateParams);
 		theEntity.setParamsUri(myUriParams);
 		theEntity.setParamsCoords(myCoordsParams);
@@ -133,6 +141,7 @@ public final class ResourceIndexedSearchParams {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
 		setUpdatedTime(myQuantityParams, theUpdateTime);
+		setUpdatedTime(myQuantityNormalizedParams, theUpdateTime);
 		setUpdatedTime(myDateParams, theUpdateTime);
 		setUpdatedTime(myUriParams, theUpdateTime);
 		setUpdatedTime(myCoordsParams, theUpdateTime);
@@ -150,6 +159,7 @@ public final class ResourceIndexedSearchParams {
 	}
 
 	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+		
 		if (theParamDef == null) {
 			return false;
 		}
@@ -159,7 +169,10 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myTokenParams;
 				break;
 			case QUANTITY:
-				resourceParams = myQuantityParams;
+				if (theModelConfig.isNormalizedQuantitySearchSupported())
+					resourceParams = myQuantityNormalizedParams;
+				else
+					resourceParams = myQuantityParams;					
 				break;
 			case STRING:
 				resourceParams = myStringParams;
@@ -250,6 +263,7 @@ public final class ResourceIndexedSearchParams {
 			", tokenParams=" + myTokenParams +
 			", numberParams=" + myNumberParams +
 			", quantityParams=" + myQuantityParams +
+			", quantityNormalizedParams=" + myQuantityNormalizedParams +
 			", dateParams=" + myDateParams +
 			", uriParams=" + myUriParams +
 			", coordsParams=" + myCoordsParams +
@@ -261,7 +275,10 @@ public final class ResourceIndexedSearchParams {
 	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
-		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
+		if (theModelConfig.isNormalizedQuantitySearchSupported()) 
+			findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityNormalizedParams);
+		else
+			findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
@@ -292,7 +309,10 @@ public final class ResourceIndexedSearchParams {
 							param = new ResourceIndexedSearchParamNumber();
 							break;
 						case QUANTITY:
-							param = new ResourceIndexedSearchParamQuantity();
+							if (theModelConfig.isNormalizedQuantitySearchSupported())
+								param = new ResourceIndexedSearchParamQuantityNormalized();
+							else
+								param = new ResourceIndexedSearchParamQuantity();
 							break;
 						case STRING:
 							param = new ResourceIndexedSearchParamString()
@@ -382,8 +402,7 @@ public final class ResourceIndexedSearchParams {
 		return queryStringsToPopulate;
 	}
 
-	private static void extractCompositeStringUniquesValueChains(String
-																						 theResourceType, List<List<String>> thePartsChoices, List<String> theValues, Set<String> theQueryStringsToPopulate) {
+	private static void extractCompositeStringUniquesValueChains(String theResourceType, List<List<String>> thePartsChoices, List<String> theValues, Set<String> theQueryStringsToPopulate) {
 		if (thePartsChoices.size() > 0) {
 			List<String> nextList = thePartsChoices.get(0);
 			Collections.sort(nextList);

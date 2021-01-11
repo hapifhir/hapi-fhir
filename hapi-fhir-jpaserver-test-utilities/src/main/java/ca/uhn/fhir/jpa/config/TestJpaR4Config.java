@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.search.HapiLuceneAnalysisConfigurer;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -33,6 +34,10 @@ import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
+import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
+import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hibernate.search.mapper.orm.cfg.HibernateOrmMapperSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,10 +108,12 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
-		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
-		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
-		extraProperties.put("hibernate.search.autoregister_listeners", "true");
+
+		extraProperties.put(BackendSettings.backendKey(BackendSettings.TYPE), "lucene");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.ANALYSIS_CONFIGURER), HapiLuceneAnalysisConfigurer.class.getName());
+		extraProperties.put(BackendSettings.backendKey(LuceneIndexSettings.DIRECTORY_TYPE), "local-heap");
+		extraProperties.put(BackendSettings.backendKey(LuceneBackendSettings.LUCENE_VERSION), "LUCENE_CURRENT");
+		extraProperties.put(HibernateOrmMapperSettings.ENABLED, "true");
 
 		return extraProperties;
 	}

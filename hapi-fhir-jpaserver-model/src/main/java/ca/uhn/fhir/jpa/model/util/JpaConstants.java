@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.util;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,10 +101,6 @@ public class JpaConstants {
 	 */
 	// NB don't delete this, it's used in Smile as well, even though hapi-fhir-server uses the version from Constants.java
 	public static final String OPERATION_VALIDATE = Constants.EXTOP_VALIDATE;
-	/**
-	 * Operation name for the $suggest-keywords operation
-	 */
-	public static final String OPERATION_SUGGEST_KEYWORDS = "$suggest-keywords";
 	/**
 	 * Operation name for the $everything operation
 	 */

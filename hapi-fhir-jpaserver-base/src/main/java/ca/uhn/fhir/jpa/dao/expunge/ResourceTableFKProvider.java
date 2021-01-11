@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,12 +50,14 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_DATE", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_NUMBER", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY_NRML", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_STRING", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SUBSCRIPTION_STATS", "RES_ID"));
-		retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));
+		retval.add(new ResourceForeignKey("MPI_LINK", "GOLDEN_RESOURCE_PID"));
 		retval.add(new ResourceForeignKey("MPI_LINK", "TARGET_PID"));
+		retval.add(new ResourceForeignKey("MPI_LINK", "PERSON_PID"));
 		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER", "BINARY_RES_ID"));
 		retval.add(new ResourceForeignKey("NPM_PACKAGE_VER_RES", "BINARY_RES_ID"));
 		retval.add(new ResourceForeignKey("TRM_CODESYSTEM", "RES_ID"));

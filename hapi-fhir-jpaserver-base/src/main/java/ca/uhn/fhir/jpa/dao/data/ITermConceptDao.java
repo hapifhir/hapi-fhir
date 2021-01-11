@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.dao.IHapiJpaRepository;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,7 +16,7 @@ import java.util.Optional;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +32,7 @@ import java.util.Optional;
  * #L%
  */
 
-public interface ITermConceptDao extends IHapiJpaRepository<TermConcept> {
+public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
@@ -49,10 +48,5 @@ public interface ITermConceptDao extends IHapiJpaRepository<TermConcept> {
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
-
-	@Override
-	@Modifying
-	@Query("DELETE FROM TermConcept t WHERE t.myId = :pid")
-	void deleteByPid(@Param("pid") Long theId);
 
 }

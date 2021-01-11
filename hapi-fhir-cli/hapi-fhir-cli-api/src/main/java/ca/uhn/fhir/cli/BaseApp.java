@@ -4,7 +4,7 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,7 +169,6 @@ public abstract class BaseApp {
 		commands.add(new ValidationDataUploader());
 		commands.add(new WebsocketSubscribeCommand());
 		commands.add(new UploadTerminologyCommand());
-		commands.add(new IgPackUploader());
 		commands.add(new ExportConceptMapToCsvCommand());
 		commands.add(new ImportCsvToConceptMapCommand());
 		commands.add(new HapiFlywayMigrateDatabaseCommand());

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.partition;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,14 +68,20 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		myPartitioningBlacklist.add("Subscription");
 		myPartitioningBlacklist.add("SearchParameter");
 
-		// Validation
+		// Validation and Conformance
 		myPartitioningBlacklist.add("StructureDefinition");
 		myPartitioningBlacklist.add("Questionnaire");
+		myPartitioningBlacklist.add("CapabilityStatement");
+		myPartitioningBlacklist.add("CompartmentDefinition");
+		myPartitioningBlacklist.add("OperationDefinition");
 
 		// Terminology
 		myPartitioningBlacklist.add("ConceptMap");
 		myPartitioningBlacklist.add("CodeSystem");
 		myPartitioningBlacklist.add("ValueSet");
+		myPartitioningBlacklist.add("NamingSystem");
+		myPartitioningBlacklist.add("StructureMap");
+
 	}
 
 	/**
@@ -91,7 +97,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType)) || theRequest instanceof SystemRequestDetails) {
 				return RequestPartitionId.defaultPartition();
 			}
 
@@ -123,7 +129,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if (theRequest == null && myPartitioningBlacklist.contains(theResourceType)) {
+			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType)) || theRequest instanceof SystemRequestDetails) {
 				return RequestPartitionId.defaultPartition();
 			}
 

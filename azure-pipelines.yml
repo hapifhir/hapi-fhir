@@ -5,7 +5,7 @@ variables:
   #MAVEN_CACHE_FOLDER: $(Agent.TempDirectory)/.m2/repository
   #MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
   MAVEN_OPTS: ''
-  
+
   disable.coverage.autogenerate: 'true'
 
 trigger:
@@ -53,6 +53,11 @@ jobs:
     timeoutInMinutes: 360
     container: maven:3-jdk-11
     steps:
+      - task: DockerInstaller@0
+        displayName: Docker Installer
+        inputs:
+           dockerVersion: 17.09.0-ce
+           releaseType: stable
       - task: Cache@2
         inputs:
           key: 'maven | "$(Agent.OS)" | ./pom.xml | "4"'

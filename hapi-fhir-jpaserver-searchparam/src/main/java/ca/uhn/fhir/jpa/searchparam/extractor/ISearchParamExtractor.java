@@ -1,27 +1,11 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.*;
-import org.hl7.fhir.instance.model.api.IBase;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 
 /*
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +21,24 @@ import java.util.List;
  * #L%
  */
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.*;
+import org.hl7.fhir.instance.model.api.IBase;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+
 public interface ISearchParamExtractor {
 
 //	SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
@@ -46,6 +48,8 @@ public interface ISearchParamExtractor {
 	SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource);
 
 	SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource);
+
+	SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource);
 
 	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
 

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.packages;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,12 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionDao;
 import ca.uhn.fhir.jpa.dao.data.INpmPackageVersionResourceDao;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
@@ -54,6 +56,7 @@ import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -115,6 +118,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private FhirContext myCtx;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Override
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
@@ -205,7 +210,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		return newTxTemplate().execute(tx -> {
 
-			ResourceTable persistedPackage = (ResourceTable) getBinaryDao().create(binary).getEntity();
+			ResourceTable persistedPackage = createResourceBinary(binary);
 			NpmPackageEntity pkg = myPackageDao.findByPackageId(thePackageId).orElseGet(() -> createPackage(npmPackage));
 			NpmPackageVersionEntity packageVersion = myPackageVersionDao.findByPackageIdAndVersion(thePackageId, packageVersionId).orElse(null);
 			if (packageVersion != null) {
@@ -282,7 +287,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 					byte[] minimizedContents = packageContext.newJsonParser().encodeResourceToString(resource).getBytes(StandardCharsets.UTF_8);
 
 					IBaseBinary resourceBinary = createPackageResourceBinary(nextFile, minimizedContents, contentType);
-					ResourceTable persistedResource = (ResourceTable) getBinaryDao().create(resourceBinary).getEntity();
+					ResourceTable persistedResource = createResourceBinary(resourceBinary);
 
 					NpmPackageVersionResourceEntity resourceEntity = new NpmPackageVersionResourceEntity();
 					resourceEntity.setPackageVersion(packageVersion);
@@ -317,6 +322,16 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			return npmPackage;
 		});
 
+	}
+
+	private ResourceTable createResourceBinary(IBaseBinary theResourceBinary) {
+
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+			return (ResourceTable) getBinaryDao().create(theResourceBinary, myRequestDetails).getEntity();
+ 		} else {
+			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();
+		}
 	}
 
 	private boolean updateCurrentVersionFlagForAllPackagesBasedOnNewIncomingVersion(String thePackageId, String thePackageVersion) {
@@ -578,16 +593,14 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 				ExpungeOptions options = new ExpungeOptions();
 				options.setExpungeDeletedResources(true).setExpungeOldVersions(true);
-				getBinaryDao().delete(next.getResourceBinary().getIdDt().toVersionless());
-				getBinaryDao().forceExpungeInExistingTransaction(next.getResourceBinary().getIdDt().toVersionless(), options, null);
+				deleteAndExpungeResourceBinary(next.getResourceBinary().getIdDt().toVersionless(), options);
 			}
 
 			myPackageVersionDao.delete(packageVersion.get());
 
 			ExpungeOptions options = new ExpungeOptions();
 			options.setExpungeDeletedResources(true).setExpungeOldVersions(true);
-			getBinaryDao().delete(packageVersion.get().getPackageBinary().getIdDt().toVersionless());
-			getBinaryDao().forceExpungeInExistingTransaction(packageVersion.get().getPackageBinary().getIdDt().toVersionless(), options, null);
+			deleteAndExpungeResourceBinary(packageVersion.get().getPackageBinary().getIdDt().toVersionless(), options);
 
 			Collection<NpmPackageVersionEntity> remainingVersions = myPackageVersionDao.findByPackageId(thePackageId);
 			if (remainingVersions.size() == 0) {
@@ -621,6 +634,19 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		return retVal;
 	}
+
+	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
+
+		if (myPartitionSettings.isPartitioningEnabled()) {
+			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
+			getBinaryDao().delete(theResourceBinaryId, myRequestDetails).getEntity();
+			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, myRequestDetails);
+		} else {
+			getBinaryDao().delete(theResourceBinaryId).getEntity();
+			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, null);
+		}
+	}
+
 
 	@Nonnull
 	public List<Predicate> createSearchPredicates(PackageSearchSpec thePackageSearchSpec, CriteriaBuilder theCb, Root<NpmPackageVersionEntity> theRoot) {

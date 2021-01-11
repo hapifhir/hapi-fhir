@@ -1,5 +1,155 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
+import org.hamcrest.Matchers;
+import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
+import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Basic;
+import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.DocumentManifest;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
+import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.ImagingStudy;
+import org.hl7.fhir.r4.model.InstantType;
+import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Media;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.MolecularSequence;
+import org.hl7.fhir.r4.model.Narrative;
+import org.hl7.fhir.r4.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Observation.ObservationComponentComponent;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
+import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.ServiceRequest;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
+import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.UnsignedIntType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.AopTestUtils;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
+
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -37,126 +187,8 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.time.DateUtils;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.message.BasicNameValuePair;
-import org.hamcrest.Matchers;
-import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
-import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.AuditEvent;
-import org.hl7.fhir.r4.model.Basic;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
-import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.CodeType;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Condition;
-import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
-import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.DocumentManifest;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Encounter;
-import org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent;
-import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
-import org.hl7.fhir.r4.model.Enumerations;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Group;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.ImagingStudy;
-import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.IntegerType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Media;
-import org.hl7.fhir.r4.model.Medication;
-import org.hl7.fhir.r4.model.MedicationAdministration;
-import org.hl7.fhir.r4.model.MedicationRequest;
-import org.hl7.fhir.r4.model.Meta;
-import org.hl7.fhir.r4.model.MolecularSequence;
-import org.hl7.fhir.r4.model.Narrative;
-import org.hl7.fhir.r4.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Procedure;
-import org.hl7.fhir.r4.model.Quantity;
-import org.hl7.fhir.r4.model.Questionnaire;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.SearchParameter;
-import org.hl7.fhir.r4.model.ServiceRequest;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.Subscription;
-import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
-import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
-import org.hl7.fhir.r4.model.UnsignedIntType;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.utilities.xhtml.XhtmlNode;
-import org.junit.jupiter.api.*; import static org.hamcrest.MatcherAssert.assertThat;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.util.AopTestUtils;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
@@ -185,6 +217,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
 
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
@@ -725,7 +758,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
 			ids = toUnqualifiedVersionlessIdValues(bundle);
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		}
+		
 		return ids;
 	}
 
@@ -4049,6 +4084,154 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported() throws Exception {
+		
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(25)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		// > 1m
+		String uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
+		ourLog.info("uri = " + uri);
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(3, ids.size());
+		
+		//>= 100cm
+		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
+		ourLog.info("uri = " + uri);
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(3, ids.size());
+
+		//>= 10dm
+		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt10|http://unitsofmeasure.org|dm");
+		ourLog.info("uri = " + uri);
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(3, ids.size());
+	}
+	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
+		
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setValueElement(new DecimalType(100)).setUnit("CM").setSystem("http://foo").setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		// > 1m
+		String uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
+			
+		ourLog.info("uri = " + uri);
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+	}
+	
+	
+	@Test
 	public void testSearchReusesNoParams() {
 		List<IBaseResource> resources = new ArrayList<>();
 		for (int i = 0; i < 50; i++) {
@@ -4546,24 +4729,183 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testSearchWithInvalidSort() {
-		try {
-		Observation o = new Observation();
-		o.getCode().setText("testSearchWithInvalidSort");
-		myObservationDao.create(o, mySrd);
-		myClient
-			.search()
-			.forResource(Observation.class)
-			.sort().ascending(Observation.CODE_VALUE_QUANTITY) // composite sort not supported yet
-			.prettyPrint()
-			.returnBundle(Bundle.class)
-			.execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: This server does not support _sort specifications of type COMPOSITE - Can't serve _sort=code-value-quantity", e.getMessage());
+	public void testSearchWithCompositeSortWith_CodeValueQuantity() throws IOException {
+		
+		IIdType pid0;
+		IIdType oid1;
+		IIdType oid2;
+		IIdType oid3;
+		IIdType oid4;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValue(200));
+			
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValue(300));
+			
+			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValue(150));
+			
+			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.getCode().addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValue(250));
+			
+			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		String uri = ourServerBase + "/Observation?_sort=code-value-quantity";
+		Bundle found;
+		
+		HttpGet get = new HttpGet(uri);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
+		}
+		
+		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		
+		List<IIdType> list = toUnqualifiedVersionlessIds(found);
+		assertEquals(4, found.getEntry().size());
+		assertEquals(oid3, list.get(0));
+		assertEquals(oid1, list.get(1));
+		assertEquals(oid4, list.get(2));
+		assertEquals(oid2, list.get(3));
 	}
-
+	
+	@Test
+	public void testSearchWithCompositeSortWith_CompCodeValueQuantity() throws IOException {
+		
+		IIdType pid0;
+		IIdType oid1;
+		IIdType oid2;
+		IIdType oid3;
+		IIdType oid4;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			
+			ObservationComponentComponent comp = obs.addComponent();
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
+			comp.setCode(cc);			
+			comp.setValue(new Quantity().setValue(200));
+			
+			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			
+			ObservationComponentComponent comp = obs.addComponent();
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
+			comp.setCode(cc);			
+			comp.setValue(new Quantity().setValue(300));
+			
+			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			
+			ObservationComponentComponent comp = obs.addComponent();
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
+			comp.setCode(cc);			
+			comp.setValue(new Quantity().setValue(150));
+			
+			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			
+			ObservationComponentComponent comp = obs.addComponent();
+			CodeableConcept cc = new CodeableConcept();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
+			comp.setCode(cc);			
+			comp.setValue(new Quantity().setValue(250));
+			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		String uri = ourServerBase + "/Observation?_sort=combo-code-value-quantity";		
+		Bundle found;
+		
+		HttpGet get = new HttpGet(uri);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
+		}
+		
+		ourLog.info("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
+		
+		List<IIdType> list = toUnqualifiedVersionlessIds(found);
+		assertEquals(4, found.getEntry().size());
+		assertEquals(oid3, list.get(0));
+		assertEquals(oid1, list.get(1));
+		assertEquals(oid4, list.get(2));
+		assertEquals(oid2, list.get(3));
+	}
+	
+	
 	@Test
 	public void testSearchWithMissing() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
@@ -5700,6 +6042,109 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
+	@Test
+	public void testUpdateWithNormalizedQuantitySearchSupported() throws Exception {
+		
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(125.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+
+			IIdType opid1 = myObservationDao.create(obs, mySrd).getId();			
+			
+			//-- update quantity
+			obs = new Observation();
+			obs.setId(opid1);
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(24.12)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+			
+			myObservationDao.update(obs, mySrd);
+		}
+
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(13.45)).setUnit("DM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("dm"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(1.45)).setUnit("M").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("m"));
+
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			obs.setValue(new Quantity().setValueElement(new DecimalType(25)).setUnit("CM").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+		
+		// > 1m
+		String uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
+		ourLog.info("uri = " + uri);
+		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+		
+		
+		//>= 100cm
+		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
+		ourLog.info("uri = " + uri);
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+
+		//>= 10dm
+		uri = ourServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt10|http://unitsofmeasure.org|dm");
+		ourLog.info("uri = " + uri);
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(2, ids.size());
+	}
 
 	private String toStr(Date theDate) {
 		return new InstantDt(theDate).getValueAsString();

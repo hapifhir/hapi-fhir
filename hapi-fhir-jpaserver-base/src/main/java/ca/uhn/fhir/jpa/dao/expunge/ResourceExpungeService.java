@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamDateDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamNumberDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamQuantityNormalizedDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamStringDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamTokenDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
@@ -89,6 +90,8 @@ public class ResourceExpungeService implements IResourceExpungeService {
 	private IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
 	private IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
+	@Autowired
+	private IResourceIndexedSearchParamQuantityNormalizedDao myResourceIndexedSearchParamQuantityNormalizedDao;
 	@Autowired
 	private IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
@@ -278,6 +281,9 @@ public class ResourceExpungeService implements IResourceExpungeService {
 		}
 		if (resource == null || resource.isParamsQuantityPopulated()) {
 			myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
+		}
+		if (resource == null || resource.isParamsQuantityNormalizedPopulated()) {
+			myResourceIndexedSearchParamQuantityNormalizedDao.deleteByResourceId(theResourceId);
 		}
 		if (resource == null || resource.isParamsStringPopulated()) {
 			myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);

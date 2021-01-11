@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2265
+title: "The new optimized SQL Generator introduced in HAPI FHIR 5.2.0 did not correctly bind variables
+   for SQL Server queries, making the search functionality unusable. This has been corrected."

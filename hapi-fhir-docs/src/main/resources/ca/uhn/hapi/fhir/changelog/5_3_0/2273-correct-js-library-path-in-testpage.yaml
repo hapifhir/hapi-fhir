@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2273
+title: "An incorrect HTML resource path led to a utility JavaScript library failing to load in the
+   TestPage Overlay module. Thanks to Alejandro Medina for the pull request!"

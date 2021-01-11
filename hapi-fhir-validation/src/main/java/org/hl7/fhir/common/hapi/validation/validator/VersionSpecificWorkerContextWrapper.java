@@ -15,6 +15,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.convertors.VersionConvertor_10_50;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -653,6 +654,63 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return retVal;
 	}
 
+    @Nonnull
+    public static VersionSpecificWorkerContextWrapper newVersionSpecificWorkerContextWrapper(IValidationSupport theValidationSupport) {
+		 IVersionTypeConverter converter;
+
+        switch (theValidationSupport.getFhirContext().getVersion().getVersion()) {
+            case DSTU2:
+            case DSTU2_HL7ORG: {
+                converter = new IVersionTypeConverter() {
+                    @Override
+                    public Resource toCanonical(IBaseResource theNonCanonical) {
+							  Resource retVal = VersionConvertor_10_50.convertResource((org.hl7.fhir.dstu2.model.Resource) theNonCanonical);
+                        if (theNonCanonical instanceof org.hl7.fhir.dstu2.model.ValueSet) {
+                            org.hl7.fhir.dstu2.model.ValueSet valueSet = (org.hl7.fhir.dstu2.model.ValueSet) theNonCanonical;
+                            if (valueSet.hasCodeSystem() && valueSet.getCodeSystem().hasSystem()) {
+                                if (!valueSet.hasCompose()) {
+                                    ValueSet valueSetR5 = (ValueSet) retVal;
+                                    valueSetR5.getCompose().addInclude().setSystem(valueSet.getCodeSystem().getSystem());
+                                }
+                            }
+                        }
+                        return retVal;
+                    }
+
+                    @Override
+                    public IBaseResource fromCanonical(Resource theCanonical) {
+							  return VersionConvertor_10_50.convertResource(theCanonical);
+                    }
+                };
+                break;
+            }
+
+            case DSTU2_1: {
+                converter = new VersionTypeConverterDstu21();
+                break;
+            }
+
+            case DSTU3: {
+                converter = new VersionTypeConverterDstu3();
+                break;
+            }
+
+            case R4: {
+                converter = new VersionTypeConverterR4();
+                break;
+            }
+
+            case R5: {
+                converter = IDENTITY_VERSION_TYPE_CONVERTER;
+                break;
+            }
+
+            default:
+                throw new IllegalStateException();
+        }
+
+		 return new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(theValidationSupport), converter);
+    }
 }
 
 

@@ -139,3 +139,5 @@ None of the limitations listed here are considered permanent. Over time the HAPI
 * **Cross-partition History Operations are not supported**: It is not possible to perform a `_history` operation that spans all partitions (`_history` does work when applied to a single partition however). 
    
 * **Bulk Operations are not partition aware**: Bulk export operations will export data across all partitions.
+
+* **Package Operations are not partition aware**: Package operations will only create, update and query resources in the default partition.

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
@@ -52,6 +53,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -125,6 +127,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamDate.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamNumber.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamQuantity.class));
+		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamQuantityNormalized.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamString.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamToken.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamUri.class));
@@ -162,7 +165,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceTable.class));
 		counter.addAndGet(expungeEverythingByType(PartitionEntity.class));
 		myTxTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
+			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + Search.class.getSimpleName() + " d"));
 			return null;
 		});
 

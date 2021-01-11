@@ -24,7 +24,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@link FhirAutoConfiguration}.
@@ -49,40 +49,11 @@ public class FhirAutoConfigurationTest {
 	}
 
 	@Test
-	public void withFhirVersion() throws Exception {
-		load(Arrays.array(EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class,
-			FhirAutoConfiguration.class),
-			"hapi.fhir.version:DSTU3", "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles",
-			"spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
-		assertThat(this.context.getBean(FhirContext.class).getVersion()).isEqualTo(FhirVersionEnum.DSTU3.getVersionImplementation());
-
-		load(Arrays.array(EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class,
-			FhirAutoConfiguration.class),
-			"hapi.fhir.version:R4",
-			"spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles",
-			"spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
-		assertThat(this.context.getBean(FhirContext.class).getVersion()).isEqualTo(FhirVersionEnum.R4.getVersionImplementation());
-	}
-
-	@Test
 	public void withRestfulServer() {
 		load("hapi.fhir.server.path:/hapi-fhir/*");
 		assertThat(this.context.getBeansOfType(ServletRegistrationBean.class)).hasSize(1);
 		assertThat(this.context.getBeansOfType(RestfulServer.class)).hasSize(1);
 		assertThat(this.context.getBean(ServletRegistrationBean.class).getUrlMappings()).contains("/hapi-fhir/*");
-	}
-
-	@Test
-	public void withJpaServer() {
-		load(Arrays.array(EmbeddedDataSourceConfiguration.class,
-			HibernateJpaAutoConfiguration.class,
-			FhirAutoConfiguration.class),
-			"hapi.fhir.version:DSTU3", "spring.jpa.properties.hibernate.search.default.indexBase:target/lucenefiles", "spring.jpa.properties.hibernate.search.model_mapping:ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory");
-
-		assertThat(this.context.getBeansOfType(DaoConfig.class)).hasSize(1);
-		assertThat(this.context.getBeansOfType(Dstu3.class)).hasSize(1);
 	}
 
 	@Test

@@ -22,7 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,16 @@ public class BundleUtil {
 			return typeElement.getValueAsString();
 		}
 		return null;
+	}
+
+	public static void setBundleType(FhirContext theContext, IBaseBundle theBundle, String theType) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("type");
+		BaseRuntimeElementDefinition<?> element = entryChild.getChildByName("type");
+		IPrimitiveType<?> typeInstance = (IPrimitiveType<?>) element.newInstance(entryChild.getInstanceConstructorArguments());
+		typeInstance.setValueAsString(theType);
+
+		entryChild.getMutator().setValue(theBundle, typeInstance);
 	}
 
 	public static Integer getTotal(FhirContext theContext, IBaseBundle theBundle) {
