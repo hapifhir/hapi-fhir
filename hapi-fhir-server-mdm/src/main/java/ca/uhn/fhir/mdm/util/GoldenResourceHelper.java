@@ -241,8 +241,11 @@ public class GoldenResourceHelper {
 		}
 	}
 
-	public void mergeFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+	public void mergeIndentifierFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
+	}
+
+	public void mergeNonIdentiferFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
 	}
 

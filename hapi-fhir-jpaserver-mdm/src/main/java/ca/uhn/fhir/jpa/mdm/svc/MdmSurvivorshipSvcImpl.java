@@ -34,30 +34,12 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	private FhirContext myFhirContext;
 
 	/**
-	 * Survivorship rules may include the following data consolidation methods:
+	 * Merges two golden resources by overwriting all field values on theGoldenResource param for all REST operation methods
+	 * except MERGE_GOLDEN_RESOURCES. In case of MERGE_GOLDEN_RESOURCES, it will attempt to copy field values from
+	 * theTargetResource that do not exist in theGoldenResource. PID, indentifiers and meta values are not affected by
+	 * this operation.
 	 *
-	 * <ul>
-	 *  <li>
-	 *  Length of field - apply the field value containing most or least number of characters - e.g. longest name
-	 *  </li>
-	 *  <li>
-	 *  Date time - all the field value from the oldest or the newest recrod - e.g. use the most recent phone number
-	 *  </li>
-	 *  <li>
-	 *  Frequency - use the most or least frequent number of occurrence - e.g. most common phone number
-	 *  </li>
-	 *  <li>
-	 *  Integer - number functions (largest, sum, avg) - e.g. number of patient encounters
-	 *  </li>
-	 *  <li>
-	 *  Quality of data - best quality data - e.g. data coming from a certain system is considered trusted and overrides all other values
-	 *  </li>
-	 *  <li>
-	 *  A hybrid approach combining all methods listed above as best fits
-	 *  </li>
-	 * </ul>
-	 *
-	 * @param theTargetResource        Target resource to merge fields from
+	 * @param theTargetResource        Target resource to retrieve fields from
 	 * @param theGoldenResource        Golden resource to merge fields into
 	 * @param theMdmTransactionContext Current transaction context
 	 * @param <T>
@@ -66,14 +48,10 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	public <T extends IBase> void applySurvivorshipRulesToGoldenResource(T theTargetResource, T theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		switch (theMdmTransactionContext.getRestOperation()) {
 			case MERGE_GOLDEN_RESOURCES:
-				if (theMdmTransactionContext.isForceResourceUpdate()) {
-					TerserUtil.overwriteFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
-					break;
-				}
 				TerserUtil.mergeFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
 				break;
 			default:
-				TerserUtil.overwriteFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
+				TerserUtil.replaceFields(myFhirContext, (IBaseResource) theTargetResource, (IBaseResource) theGoldenResource, TerserUtil.EXCLUDE_IDS_AND_META);
 				break;
 		}
 	}

@@ -55,6 +55,8 @@ public abstract class BaseMdmProvider {
 		if (theFromGoldenResource == null) {
 			return;
 		}
+
+		// FIXME NG - ID is proveded as a param anyways - can always retrived it there
 		validateNotNull(ProviderConstants.MDM_MERGE_RESOURCE_ID, theFromGoldenResource.getIdElement());
 		if (theFromGoldenResource.getIdElement().getValue().equals(theToGoldenResourceId.getValue())) {
 			throw new InvalidRequestException("resource must be different from the one with toGoldenResourceId");

@@ -42,7 +42,7 @@ import static ca.uhn.fhir.mdm.util.GoldenResourceHelper.FIELD_NAME_IDENTIFIER;
 public final class TerserUtil {
 
 	public static final Collection<String> IDS_AND_META_EXCLUDES =
-		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta", "active").collect(Collectors.toSet()));
+		Collections.unmodifiableSet(Stream.of("id", "identifier", "meta").collect(Collectors.toSet()));
 
 	public static final Predicate<String> EXCLUDE_IDS_AND_META = new Predicate<String>() {
 		@Override
@@ -151,7 +151,7 @@ public final class TerserUtil {
 		mergeFields(theFhirContext, theFrom, theTo, INCLUDE_ALL);
 	}
 
-	public static void overwriteFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
+	public static void replaceFields(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo, Predicate<String> inclusionStrategy) {
 		FhirTerser terser = theFhirContext.newTerser();
 
 		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
@@ -160,11 +160,23 @@ public final class TerserUtil {
 				continue;
 			}
 
-			childDefinition.getAccessor().getFirstValueOrNull(theFrom).ifPresent( v -> {
-					childDefinition.getMutator().setValue(theTo, v);
-				}
-			);
+			replaceField(theFrom, theTo, childDefinition);
 		}
+	}
+
+	public static void replaceField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+		FhirTerser terser = theFhirContext.newTerser();
+
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
+		replaceField(theFrom, theTo, childDefinition);
+	}
+
+	private static void replaceField(IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
+		childDefinition.getAccessor().getFirstValueOrNull(theFrom).ifPresent(v -> {
+				childDefinition.getMutator().setValue(theTo, v);
+			}
+		);
 	}
 
 	public static void mergeFieldsExceptIdAndMeta(FhirContext theFhirContext, IBaseResource theFrom, IBaseResource theTo) {
@@ -182,21 +194,45 @@ public final class TerserUtil {
 
 			List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 			List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
-			
-			for (IBase theFromFieldValue : theFromFieldValues) {
-				if (contains(theFromFieldValue, theToFieldValues)) {
-					continue;
-				}
 
-				IBase newFieldValue = childDefinition.getChildByName(childDefinition.getElementName()).newInstance();
-				terser.cloneInto(theFromFieldValue, newFieldValue, true);
+			mergeFields(terser, theTo, childDefinition, theFromFieldValues, theToFieldValues);
+		}
+	}
 
-				try {
-					theToFieldValues.add(newFieldValue);
-				} catch (UnsupportedOperationException e) {
-					childDefinition.getMutator().setValue(theTo, newFieldValue);
-					break;
-				}
+	/**
+	 * Merges value of the specified field from theFrom resource to theTo resource. Fields values are compared via
+	 * the equalsDeep method, or via object identity if this method is not available.
+	 *
+	 * @param theFhirContext
+	 * @param theTerser
+	 * @param theFieldName
+	 * @param theFrom
+	 * @param theTo
+	 */
+	public static void mergeField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
+
+		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
+		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
+
+		mergeFields(theTerser, theTo, childDefinition, theFromFieldValues, theToFieldValues);
+	}
+
+	private static void mergeFields(FhirTerser theTerser, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition, List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {
+		for (IBase theFromFieldValue : theFromFieldValues) {
+			if (contains(theFromFieldValue, theToFieldValues)) {
+				continue;
+			}
+
+			IBase newFieldValue = childDefinition.getChildByName(childDefinition.getElementName()).newInstance();
+			theTerser.cloneInto(theFromFieldValue, newFieldValue, true);
+
+			try {
+				theToFieldValues.add(newFieldValue);
+			} catch (UnsupportedOperationException e) {
+				childDefinition.getMutator().setValue(theTo, newFieldValue);
+				break;
 			}
 		}
 	}

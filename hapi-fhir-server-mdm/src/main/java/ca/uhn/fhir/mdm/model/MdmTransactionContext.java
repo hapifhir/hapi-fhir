@@ -32,7 +32,8 @@ public class MdmTransactionContext {
 		UPDATE_LINK,
 		DUPLICATE_GOLDEN_RESOURCES,
 		NOT_DUPLICATE,
-		MERGE_GOLDEN_RESOURCES
+		MERGE_GOLDEN_RESOURCES,
+		MANUAL_MERGE_GOLDEN_RESOURCES
 	}
 
 	/**
@@ -43,8 +44,6 @@ public class MdmTransactionContext {
 	private OperationType myRestOperation;
 
 	private String myResourceType;
-
-	private boolean myForceResourceUpdate;
 
 	public TransactionLogMessages getTransactionLogMessages() {
 		return myTransactionLogMessages;
@@ -88,13 +87,5 @@ public class MdmTransactionContext {
 
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
-	}
-
-	public boolean isForceResourceUpdate() {
-		return myForceResourceUpdate;
-	}
-
-	public void setForceResourceUpdate(boolean theForceResourceUpdate) {
-		myForceResourceUpdate = theForceResourceUpdate;
 	}
 }

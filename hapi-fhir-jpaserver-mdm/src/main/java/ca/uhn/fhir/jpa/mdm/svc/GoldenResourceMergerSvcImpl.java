@@ -60,13 +60,16 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 	@Override
 	@Transactional
-	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theMergedResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		Long fromGoldenResourcePid = myIdHelperService.getPidOrThrowException(theFromGoldenResource);
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 		String resourceType = theMdmTransactionContext.getResourceType();
 
-		//Merge attributes, to be determined when survivorship is solved.
-		myGoldenResourceHelper.mergeFields(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
+		// Merge attributes, to be determined when survivorship is solved.
+		myGoldenResourceHelper.mergeIndentifierFields(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
+
+		IAnyResource mergeSource = ( theMergedResource == null ) ? theFromGoldenResource : theMergedResource;
+		myGoldenResourceHelper.mergeNonIdentiferFields(mergeSource, theToGoldenResource, theMdmTransactionContext);
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);

@@ -149,9 +149,10 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 		validateOptionalMergeResource(theMergedResource, theToGoldenResourceId);
 
-		MdmTransactionContext txContext = createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES,
+		MdmTransactionContext.OperationType operationType = (theMergedResource == null) ?
+			MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES : MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES;
+		MdmTransactionContext txContext = createMdmContext(theRequestDetails, operationType,
 			getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId));
-		txContext.setForceResourceUpdate(theMergedResource != null);
 		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValueAsString(), theToGoldenResourceId.getValueAsString(), theMergedResource, txContext);
 	}
 

@@ -437,7 +437,6 @@ public class IdHelperService {
 	@Nonnull
 	public Long getPidOrThrowException(IAnyResource theResource) {
 		Long retVal = (Long) theResource.getUserData(RESOURCE_PID);
-		// FIXME NG Is this the intent?
 		if (retVal == null) {
 			throw new IllegalStateException(
 				String.format("Unable to find %s in the user data for %s with ID %s", RESOURCE_PID, theResource, theResource.getId())

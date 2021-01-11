@@ -101,10 +101,12 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	private Patient mergeGoldenPatients() {
 		assertEquals(0, redirectLinkCount());
-		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, myToGoldenPatient, createMdmContext());
+		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, null, myToGoldenPatient, createMdmContext());
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
+
+	// TODO NG - add a test with a manually merged golden patient
 
 	private int redirectLinkCount() {
 		MdmLink mdmLink = new MdmLink().setMatchResult(MdmMatchResultEnum.REDIRECT);
