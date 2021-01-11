@@ -572,7 +572,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			//-- this is quick solution, may need to revisit
 			if (!applyFilter(display, filterDisplayValue))
 				continue;
-				
+
 			Long conceptPid = conceptView.getConceptPid();
 			if (!pidToConcept.containsKey(conceptPid)) {
 				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display);
@@ -643,7 +643,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	public boolean applyFilter(final String theInput, final String thePrefixToken) {
-		
+
 		//-- safety check only, no need to apply filter
 		if (theInput == null || thePrefixToken == null)
 			return true;
@@ -651,18 +651,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		// -- sentence case
 		if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(theInput, thePrefixToken))
 			return true;
-		
+
 		//-- token case
 		// return true only e.g. the input is 'Body height', thePrefixToken is "he", or 'bo'
-		StringTokenizer tok = new StringTokenizer(theInput);		
+		StringTokenizer tok = new StringTokenizer(theInput);
 		while (tok.hasMoreTokens()) {
 			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), thePrefixToken))
 				return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
@@ -989,16 +989,22 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		SearchQuery<TermConcept> termConceptsQuery = searchSession.search(TermConcept.class)
 			.where(f -> finishedQuery).toQuery();
 
-		System.out.println("About to query:" +  termConceptsQuery.queryString());
+		System.out.println("About to query:" + termConceptsQuery.queryString());
 		List<TermConcept> termConcepts = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
 
 
 		int resultsInBatch = termConcepts.size();
 		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
 		int delta = 0;
-		for (TermConcept concept: termConcepts) {
+		for (TermConcept concept : termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
+			if (theAdd && expansionStep != null) {
+				ValueSet.ConceptReferenceComponent theIncludeConcept = getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+				if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+					concept.setDisplay(theIncludeConcept.getDisplay());
+				}
+			}
 			boolean added = addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
 			if (added) {
 				delta++;
@@ -1014,6 +1020,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			return true;
 		}
+	}
+
+	private ValueSet.ConceptReferenceComponent getMatchedConceptIncludedInValueSet(ValueSet.ConceptSetComponent theIncludeOrExclude, TermConcept concept) {
+		ValueSet.ConceptReferenceComponent theIncludeConcept = theIncludeOrExclude.getConcept().stream().filter(includedConcept ->
+			includedConcept.getCode().equalsIgnoreCase(concept.getCode())
+		).findFirst().orElse(null);
+		return theIncludeConcept;
 	}
 
 	/**
@@ -1301,7 +1314,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
-
 	private void addDisplayFilterInexact(SearchPredicateFactory f, BooleanPredicateClausesStep<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(f.phrase()
 			.field("myDisplay").boost(4.0f)
@@ -1335,7 +1347,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				addLoincFilterDescendantEqual(theSystem, f, b, theFilter);
 				break;
 			case IN:
-				addLoincFilterDescendantIn(theSystem, f,b , theFilter);
+				addLoincFilterDescendantIn(theSystem, f, b, theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
@@ -1389,7 +1401,6 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return retVal;
 	}
-
 
 
 	private void logFilteringValueOnProperty(String theValue, String theProperty) {
