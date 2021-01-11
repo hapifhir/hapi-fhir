@@ -47,6 +47,13 @@ public interface IPagingProvider {
 	}
 
 	/**
+	 * @return true if the paging provider is able to store search results.
+	 */
+	default boolean canStoreSearchResults() {
+		return true;
+	}
+
+	/**
 	 * Retrieve a result list by Search ID
 	 *
 	 * @since 4.0.0 - Note that the <code>theRequest</code> parameter was added to this

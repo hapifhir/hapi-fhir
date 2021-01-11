@@ -133,7 +133,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		List<IBaseResource> resourceList;
 		Integer numTotalResults = theResult.size();
 
-		if (requestOffset != null || !theServer.canSearchByOffset()) {
+		if (requestOffset != null || !theServer.canStoreSearchResults()) {
 			if (theLimit != null) {
 				numToReturn = theLimit;
 			} else {
@@ -216,7 +216,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		BundleLinks links = new BundleLinks(theRequest.getFhirServerBase(), theIncludes, RestfulServerUtils.prettyPrintResponse(theServer, theRequest), theBundleType);
 		links.setSelf(theLinkSelf);
 
-		if (!theServer.canSearchByOffset() || requestOffset != null) {
+		if (requestOffset != null || !theServer.canStoreSearchResults()) {
 			int offset = requestOffset != null ? requestOffset : 0;
 			// Paging without caching
 			// We're doing requestOffset pages
