@@ -989,14 +989,14 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		SearchQuery<TermConcept> termConceptsQuery = searchSession.search(TermConcept.class)
 			.where(f -> finishedQuery).toQuery();
 
-		System.out.println("About to query:" + termConceptsQuery.queryString());
+		System.out.println("About to query:" +  termConceptsQuery.queryString());
 		List<TermConcept> termConcepts = termConceptsQuery.fetchHits(theQueryIndex * maxResultsPerBatch, maxResultsPerBatch);
 
 
 		int resultsInBatch = termConcepts.size();
 		int firstResult = theQueryIndex * maxResultsPerBatch;// TODO GGG HS we lose the ability to check the index of the first result, so just best-guessing it here.
 		int delta = 0;
-		for (TermConcept concept : termConcepts) {
+		for (TermConcept concept: termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
 			if (theAdd && expansionStep != null) {
@@ -1314,6 +1314,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 
+
 	private void addDisplayFilterInexact(SearchPredicateFactory f, BooleanPredicateClausesStep<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
 		bool.must(f.phrase()
 			.field("myDisplay").boost(4.0f)
@@ -1347,7 +1348,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 				addLoincFilterDescendantEqual(theSystem, f, b, theFilter);
 				break;
 			case IN:
-				addLoincFilterDescendantIn(theSystem, f, b, theFilter);
+				addLoincFilterDescendantIn(theSystem, f,b , theFilter);
 				break;
 			default:
 				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
@@ -1401,6 +1402,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 
 		return retVal;
 	}
+
 
 
 	private void logFilteringValueOnProperty(String theValue, String theProperty) {
