@@ -1,0 +1,5 @@
+---
+type: add
+issue: 2261
+title: "Optionally supports storage and search in canonical form of the quantity value which is defined by 'http://unitsofmeasure.org';
+   please check ModelConfig for the configuration. No changes were made to the existing behaviour."

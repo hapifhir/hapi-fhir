@@ -15,6 +15,13 @@
 	<name>HAPI FHIR Model</name>
 
 	<dependencies>
+	
+		<!--  FHIR  -->
+		<dependency>
+    		<groupId>org.fhir</groupId>
+    		<artifactId>ucum</artifactId>
+    	</dependency>
+	
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
