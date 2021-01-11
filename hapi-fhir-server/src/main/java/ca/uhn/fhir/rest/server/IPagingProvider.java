@@ -38,14 +38,6 @@ public interface IPagingProvider {
 	 */
 	int getMaximumPageSize();
 
-
-	/**
-	 * @return true if the underlying data store supports searching by offset.
-	 */
-	default boolean canSearchByOffset() {
-		return false;
-	}
-
 	/**
 	 * @return true if the paging provider is able to store search results.
 	 */

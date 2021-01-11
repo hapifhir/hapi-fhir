@@ -59,7 +59,7 @@ public class PagingUsingNamedPagesR4Test {
 	@BeforeEach
 	public void before() {
 		myPagingProvider = mock(IPagingProvider.class);
-		when(myPagingProvider.canSearchByOffset()).thenReturn(true);
+		when(myPagingProvider.canStoreSearchResults()).thenReturn(true);
 		servlet.setPagingProvider(myPagingProvider);
 		ourNextBundleProvider = null;
 	}

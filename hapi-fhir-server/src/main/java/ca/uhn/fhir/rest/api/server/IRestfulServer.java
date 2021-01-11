@@ -33,10 +33,6 @@ public interface IRestfulServer<T extends RequestDetails> extends IRestfulServer
 
 	PreferReturnEnum getDefaultPreferReturn();
 
-	default boolean canSearchByOffset() {
-		return getPagingProvider() != null && getPagingProvider().canSearchByOffset();
-	}
-
 	default boolean canStoreSearchResults() {
 		return getPagingProvider() != null && getPagingProvider().canStoreSearchResults();
 	}
