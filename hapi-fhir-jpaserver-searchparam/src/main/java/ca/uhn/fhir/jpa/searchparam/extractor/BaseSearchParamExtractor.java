@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -200,7 +201,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				extractor = createReferenceExtractor();
 				return extractReferenceParamsAsQueryTokens(theSearchParam, theResource, extractor);
 			case QUANTITY:
-				extractor = createQuantityExtractor(theResource);
+				if (myModelConfig.isNormalizedQuantitySearchSupported())
+					extractor = createQuantityNormalizedExtractor(theResource);
+				else
+					extractor = createQuantityExtractor(theResource);
 				break;
 			case URI:
 				extractor = createUriExtractor(theResource);
@@ -373,7 +377,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
 	}
 
-	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {
+	
+	@Override
+	public SearchParamSet<ResourceIndexedSearchParamQuantityNormalized> extractSearchParamQuantityNormalized(IBaseResource theResource) {
+		IExtractor<ResourceIndexedSearchParamQuantityNormalized> extractor = createQuantityNormalizedExtractor(theResource);
+		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.QUANTITY);
+	}
+	
+	private IExtractor<ResourceIndexedSearchParamQuantity> createQuantityExtractor(IBaseResource theResource) {		
 		return (params, searchParam, value, path) -> {
 			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				return;
@@ -383,7 +394,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String resourceType = toRootTypeName(theResource);
 			switch (nextType) {
 				case "Quantity":
-					addQuantity_Quantity(resourceType, params, searchParam, value);
+					addQuantity_Quantity(resourceType, params, searchParam, value);						
 					break;
 				case "Money":
 					addQuantity_Money(resourceType, params, searchParam, value);
@@ -395,9 +406,35 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUnexpectedDatatypeWarning(params, searchParam, value);
 					break;
 			}
+		};		
+	}
+	
+	private IExtractor<ResourceIndexedSearchParamQuantityNormalized> createQuantityNormalizedExtractor(IBaseResource theResource) {
+		
+		return (params, searchParam, value, path) -> {
+			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
+				return;
+			}
+
+			String nextType = toRootTypeName(value);
+			String resourceType = toRootTypeName(theResource);
+			switch (nextType) {
+				case "Quantity":
+					addQuantity_QuantityNormalized(resourceType, params, searchParam, value);
+					break;
+				case "Money":
+					addQuantity_MoneyNormalized(resourceType, params, searchParam, value);
+					break;
+				case "Range":
+					addQuantity_RangeNormalized(resourceType, params, searchParam, value);
+					break;
+				default:
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
+			}
 		};
 	}
-
+	
 	@Override
 	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamString> extractor = createStringExtractor(theResource);
@@ -502,7 +539,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addQuantity_Quantity(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-
 		Optional<IPrimitiveType<BigDecimal>> valueField = myQuantityValueValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
 			BigDecimal nextValueValue = valueField.get().getValue();
@@ -510,13 +546,25 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(myPartitionSettings, theResourceType, theSearchParam.getName(), nextValueValue, system, code);
+			
+			theParams.add(nextEntity);	
+		}
+	}
+	
+	
+	private void addQuantity_QuantityNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {		
+		Optional<IPrimitiveType<BigDecimal>> valueField = myQuantityValueValueChild.getAccessor().getFirstValueOrNull(theValue);
+		if (valueField.isPresent() && valueField.get().getValue() != null) {
+			BigDecimal nextValueValue = valueField.get().getValue();
+			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
+			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
+
+			ResourceIndexedSearchParamQuantityNormalized nextEntity = new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, theResourceType, theSearchParam.getName(), nextValueValue, system, code);
 			theParams.add(nextEntity);
 		}
-
 	}
-
+	
 	private void addQuantity_Money(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-
 		Optional<IPrimitiveType<BigDecimal>> valueField = myMoneyValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
 			BigDecimal nextValueValue = valueField.get().getValue();
@@ -524,21 +572,45 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			String nextValueString = "urn:iso:std:iso:4217";
 			String nextValueCode = extractValueAsString(myMoneyCurrencyChild, theValue);
 			String searchParamName = theSearchParam.getName();
+			
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(myPartitionSettings, theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
 			theParams.add(nextEntity);
-		}
-
+		}		
 	}
 
-	private void addQuantity_Range(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+	
+	private void addQuantity_MoneyNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {		
+		Optional<IPrimitiveType<BigDecimal>> valueField = myMoneyValueChild.getAccessor().getFirstValueOrNull(theValue);
+		if (valueField.isPresent() && valueField.get().getValue() != null) {
+			BigDecimal nextValueValue = valueField.get().getValue();
 
+			String nextValueString = "urn:iso:std:iso:4217";
+			String nextValueCode = extractValueAsString(myMoneyCurrencyChild, theValue);
+			String searchParamName = theSearchParam.getName();
+			
+			ResourceIndexedSearchParamQuantityNormalized nextEntityNormalized = new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
+			theParams.add(nextEntityNormalized); 
+		}
+	}
+	
+	
+	private void addQuantity_Range(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		Optional<IBase> low = myRangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
 		low.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
 
 		Optional<IBase> high = myRangeHighValueChild.getAccessor().getFirstValueOrNull(theValue);
-		high.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
+		high.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));		
 	}
 
+	
+	private void addQuantity_RangeNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
+		Optional<IBase> low = myRangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
+		low.ifPresent(theIBase -> addQuantity_QuantityNormalized(theResourceType, theParams, theSearchParam, theIBase));
+
+		Optional<IBase> high = myRangeHighValueChild.getAccessor().getFirstValueOrNull(theValue);
+		high.ifPresent(theIBase -> addQuantity_QuantityNormalized(theResourceType, theParams, theSearchParam, theIBase));
+	}
+	
 	private void addToken_Identifier(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		String system = extractValueAsString(myIdentifierSystemValueChild, theValue);
 		String value = extractValueAsString(myIdentifierValueValueChild, theValue);
@@ -553,7 +625,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 			}
 		}
-
 	}
 
 	protected boolean shouldIndexTextComponentOfToken(RuntimeSearchParam theSearchParam) {

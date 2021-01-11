@@ -488,6 +488,10 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			q.setParameter("id", theId);
 			q.executeUpdate();
 
+			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :id");
+			q.setParameter("id", theId);
+			q.executeUpdate();
+			
 			q = myEntityManager.createQuery("DELETE FROM ResourceIndexedSearchParamString t WHERE t.myResourcePid = :id");
 			q.setParameter("id", theId);
 			q.executeUpdate();

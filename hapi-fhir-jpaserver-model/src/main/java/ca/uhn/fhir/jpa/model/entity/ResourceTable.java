@@ -32,13 +32,10 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.search.engine.backend.types.Projectable;
 import org.hibernate.search.engine.backend.types.Searchable;
-import org.hibernate.search.mapper.pojo.automaticindexing.ReindexOnUpdate;
 import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderRef;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.DocumentId;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
@@ -149,6 +146,23 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Column(name = "SP_QUANTITY_PRESENT")
 	@OptimisticLock(excluded = true)
 	private boolean myParamsQuantityPopulated;
+	
+	/**
+	 * Added to support UCUM conversion
+	 * since 5.3.0
+	 */
+	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
+	@OptimisticLock(excluded = true)
+	private Collection<ResourceIndexedSearchParamQuantityNormalized> myParamsQuantityNormalized;
+	
+	/**
+	 * Added to support UCUM conversion, 
+	 * NOTE : use Boolean class instead of boolean primitive, in order to set the existing rows to null
+	 * since 5.3.0
+	 */
+	@Column(name = "SP_QUANTITY_NRML_PRESENT")
+	@OptimisticLock(excluded = true)
+	private Boolean myParamsQuantityNormalizedPopulated = Boolean.FALSE;
 
 	@OneToMany(mappedBy = "myResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
@@ -361,6 +375,21 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		getParamsQuantity().addAll(theQuantityParams);
 	}
 
+	public Collection<ResourceIndexedSearchParamQuantityNormalized> getParamsQuantityNormalized() {
+		if (myParamsQuantityNormalized == null) {
+			myParamsQuantityNormalized = new ArrayList<>();
+		}
+		return myParamsQuantityNormalized;
+	}
+
+	public void setParamsQuantityNormalized(Collection<ResourceIndexedSearchParamQuantityNormalized> theQuantityNormalizedParams) {
+		if (!isParamsQuantityNormalizedPopulated() && theQuantityNormalizedParams.isEmpty()) {
+			return;
+		}
+		getParamsQuantityNormalized().clear();
+		getParamsQuantityNormalized().addAll(theQuantityNormalizedParams);
+	}
+
 	public Collection<ResourceIndexedSearchParamString> getParamsString() {
 		if (myParamsString == null) {
 			myParamsString = new ArrayList<>();
@@ -502,6 +531,20 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	public void setParamsQuantityPopulated(boolean theParamsQuantityPopulated) {
 		myParamsQuantityPopulated = theParamsQuantityPopulated;
+	}
+	
+	public Boolean isParamsQuantityNormalizedPopulated() {
+		if (myParamsQuantityNormalizedPopulated == null)
+			return Boolean.FALSE;
+		else
+			return myParamsQuantityNormalizedPopulated;
+	}
+
+	public void setParamsQuantityNormalizedPopulated(Boolean theParamsQuantityNormalizedPopulated) {
+		if (theParamsQuantityNormalizedPopulated == null)
+			myParamsQuantityNormalizedPopulated = Boolean.FALSE;
+		else
+			myParamsQuantityNormalizedPopulated = theParamsQuantityNormalizedPopulated;
 	}
 
 	public boolean isParamsStringPopulated() {

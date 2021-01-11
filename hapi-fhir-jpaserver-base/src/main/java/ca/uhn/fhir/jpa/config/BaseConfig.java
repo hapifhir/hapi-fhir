@@ -92,6 +92,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityNormalizedPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
@@ -551,6 +552,12 @@ public abstract class BaseConfig {
 		return new QuantityPredicateBuilder(theSearchBuilder);
 	}
 
+	@Bean
+	@Scope("prototype")
+	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(SearchQueryBuilder theSearchBuilder) {
+		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
+	}
+	
 	@Bean
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder, boolean theReversed) {
