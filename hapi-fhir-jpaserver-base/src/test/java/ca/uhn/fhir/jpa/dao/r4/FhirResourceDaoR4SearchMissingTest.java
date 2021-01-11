@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -29,6 +30,11 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	@BeforeEach
 	public void beforeResetMissing() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+	}
+	
+	@AfterEach
+	public void afterResetSearch() {
+		myModelConfig.setNormalizedQuantitySearchNotSupported();
 	}
 
 	@Test
@@ -72,6 +78,40 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantitySearchSupported() {
+		
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myModelConfig.setNormalizedQuantitySearchSupported();
+		Organization org = new Organization();
+		org.setActive(true);
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		assertThat(mySearchParamPresentDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+
+	}
+	
+	@Test
+	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantityStorageSupported() {
+		
+		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+		myModelConfig.setNormalizedQuantityStorageSupported();
+		Organization org = new Organization();
+		org.setActive(true);
+		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		assertThat(mySearchParamPresentDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamStringDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamDateDao.findAll(), empty());
+		assertThat(myResourceIndexedSearchParamTokenDao.findAll(), hasSize(1));
+		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
+
+	}
+	
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchResourceReferenceMissingChain() {
@@ -267,6 +307,89 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testSearchWithMissingQuantityWithNormalizedQuantitySearchSupported() {
+		
+		myModelConfig.setNormalizedQuantitySearchSupported();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("002");
+			obs.setValue(new Quantity(123));
+			notMissing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		// Quantity Param
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(false);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(true);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+		
+	}
+	
+	@Test
+	public void testSearchWithMissingQuantityWithNormalizedQuantityStorageSupported() {
+		
+		myModelConfig.setNormalizedQuantityStorageSupported();
+		IIdType notMissing;
+		IIdType missing;
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("001");
+			missing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("002");
+			obs.setValue(new Quantity(123));
+			notMissing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		}
+		// Quantity Param
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(false);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients, containsInRelativeOrder(notMissing));
+		}
+		{
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronous(true);
+			QuantityParam param = new QuantityParam();
+			param.setMissing(true);
+			params.add(Observation.SP_VALUE_QUANTITY, param);
+			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			assertThat(patients, containsInRelativeOrder(missing));
+			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+		}
+		
+	}
+	
+	
 	@Test
 	public void testSearchWithMissingReference() {
 		IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId().toUnqualifiedVersionless();

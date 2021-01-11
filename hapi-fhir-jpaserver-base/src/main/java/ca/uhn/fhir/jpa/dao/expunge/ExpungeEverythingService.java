@@ -53,6 +53,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
@@ -126,6 +127,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamDate.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamNumber.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamQuantity.class));
+		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamQuantityNormalized.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamString.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamToken.class));
 		counter.addAndGet(expungeEverythingByType(ResourceIndexedSearchParamUri.class));
