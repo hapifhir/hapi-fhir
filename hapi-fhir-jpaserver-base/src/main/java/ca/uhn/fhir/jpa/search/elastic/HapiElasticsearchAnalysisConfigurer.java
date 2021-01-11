@@ -49,7 +49,7 @@ public class HapiElasticsearchAnalysisConfigurer implements ElasticsearchAnalysi
 
 		theConfigCtx.tokenFilter("wordedgengram_3_50")
 			.type("edgeNGram")
-			.param("min_gram", "2")
+			.param("min_gram", "3")
 			.param("max_gram", "20");
 
 		theConfigCtx.analyzer("autocompletePhoneticAnalyzer").custom()
