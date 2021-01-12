@@ -130,7 +130,11 @@ public class NpmR4Test extends BaseJpaR4Test {
 		jpaPackageCache.getPackageServers().clear();
 		jpaPackageCache.addPackageServer("https://packages.fhir.org");
 
-		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.us.core").setVersion("3.1.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setFetchDependencies(true);
+		PackageInstallationSpec spec = new PackageInstallationSpec()
+			.setName("hl7.fhir.us.core")
+			.setVersion("3.1.0")
+			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+			.setFetchDependencies(true);
 		igInstaller.install(spec);
 
 		runInTransaction(()->{
