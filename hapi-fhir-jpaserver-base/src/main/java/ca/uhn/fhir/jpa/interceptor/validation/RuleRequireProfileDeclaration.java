@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -50,6 +52,15 @@ class RuleRequireProfileDeclaration extends BaseTypedRule {
 		}
 		String msg = getFhirContext().getLocalizer().getMessage(RuleRequireProfileDeclaration.class, "noMatchingProfile", getResourceType(), myProfileOptions);
 		return RuleEvaluation.forFailure(this, msg);
+	}
+
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("resourceType", getResourceType())
+			.append("profiles", myProfileOptions)
+			.toString();
 	}
 
 
