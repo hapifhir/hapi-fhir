@@ -147,7 +147,6 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 															@OperationParam(name = ProviderConstants.MDM_MERGE_RESOURCE, max = 1) IAnyResource theMergedResource,
 															RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
-		validateOptionalMergeResource(theMergedResource, theToGoldenResourceId);
 
 		MdmTransactionContext.OperationType operationType = (theMergedResource == null) ?
 			MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES : MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES;

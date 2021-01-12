@@ -52,9 +52,13 @@ public class MdmTransactionContext {
 	public MdmTransactionContext() {
 	}
 
-	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
-		myTransactionLogMessages = theTransactionLogMessages;
+	public MdmTransactionContext(OperationType theRestOperation) {
 		myRestOperation = theRestOperation;
+	}
+
+	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
+		this(theRestOperation);
+		myTransactionLogMessages = theTransactionLogMessages;
 	}
 
 	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {

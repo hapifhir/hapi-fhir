@@ -51,13 +51,12 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 		assertEquals(myFromGoldenPatient.getName().size(), mergedSourcePatient.getName().size());
 		assertEquals(myFromGoldenPatient.getName().get(0).getNameAsSingleString(), mergedSourcePatient.getName().get(0).getNameAsSingleString());
-
 		assertEquals(myFromGoldenPatient.getCommunication().size(), mergedSourcePatient.getCommunication().size());
 		assertEquals(myFromGoldenPatient.getExtension().size(), mergedSourcePatient.getExtension().size());
 
-		Patient fromSourcePatient = myPatientDao.read(myFromGoldenPatient.getIdElement().toUnqualifiedVersionless());
-		assertEquals(fromSourcePatient.getName().size(), mergedSourcePatient.getName().size());
-		assertEquals(fromSourcePatient.getName().get(0).getNameAsSingleString(), mergedSourcePatient.getName().get(0).getNameAsSingleString());
+		Patient toGoldenPatient = myPatientDao.read(myToGoldenPatient.getIdElement().toUnqualifiedVersionless());
+		assertEquals(toGoldenPatient.getName().size(), mergedSourcePatient.getName().size());
+		assertEquals(toGoldenPatient.getName().get(0).getNameAsSingleString(), mergedSourcePatient.getName().get(0).getNameAsSingleString());
 	}
 
 
@@ -99,6 +98,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		Patient mergedSourcePatient = (Patient) myMdmProvider.mergeGoldenResources(myFromGoldenPatientId,
 			myToGoldenPatientId, myFromGoldenPatient, myRequestDetails);
 
+		myFromGoldenPatient = (Patient) myPatientDao.read(myFromGoldenPatient.getIdElement().toUnqualifiedVersionless());
 		assertTrue(!MdmResourceUtil.isGoldenRecord(myFromGoldenPatient));
 		assertTrue(MdmResourceUtil.isGoldenRecordRedirected(myFromGoldenPatient));
 
@@ -162,20 +162,6 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("fromGoldenResourceId must be different from toGoldenResourceId", e.getMessage());
-		}
-
-		try {
-			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, myToGoldenPatientId, new Patient(), myRequestDetails);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("resource.id cannot be null", e.getMessage());
-		}
-
-		try {
-			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, myToGoldenPatientId, myToGoldenPatient, myRequestDetails);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("resource must be different from the one with toGoldenResourceId", e.getMessage());
 		}
 
 		try {

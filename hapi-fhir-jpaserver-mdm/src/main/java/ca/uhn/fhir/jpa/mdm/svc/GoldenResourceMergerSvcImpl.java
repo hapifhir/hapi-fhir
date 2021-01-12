@@ -73,6 +73,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
+		//Save changes to the golden resource
+		myMdmResourceDaoSvc.upsertGoldenResource(theToGoldenResource, resourceType);
 
 		//Create the new REDIRECT link
 		addMergeLink(toGoldenResourcePid, fromGoldenResourcePid, resourceType);
