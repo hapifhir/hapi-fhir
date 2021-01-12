@@ -44,7 +44,7 @@ public class IncludesExamples {
       FhirContext ctx = FhirContext.forDstu2();
 
       R4BundleFactory bf = new R4BundleFactory(ctx);
-		bf.addRootPropertiesToBundle(null, null, null, null, null, resources.size(), BundleTypeEnum.SEARCHSET, null);
+		bf.addTotalResultsToBundle(resources.size(), BundleTypeEnum.SEARCHSET);
 		bf.addResourcesToBundle(new ArrayList<>(resources), BundleTypeEnum.SEARCHSET, null, null, null);
 		IBaseResource b = bf.getResourceBundle();
 
