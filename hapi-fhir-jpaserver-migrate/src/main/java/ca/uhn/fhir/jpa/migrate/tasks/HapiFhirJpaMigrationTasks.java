@@ -106,11 +106,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		pkg.addIndex("20210109.5", "IDX_SP_QNTY_NRML_HASH_SYSUN").unique(false).withColumns("HASH_IDENTITY_SYS_UNITS","SP_VALUE");
 		pkg.addIndex("20210109.6", "IDX_SP_QNTY_NRML_UPDATED").unique(false).withColumns("SP_UPDATED");
 		pkg.addIndex("20210109.7", "IDX_SP_QNTY_NRML_RESID").unique(false).withColumns("RES_ID");
-		//pkg.addForeignKey("20210109.9", "FK_QNTY_NRML_RESID").toColumn("RES_ID").references("HFJ_RESOURCE", "RES_ID");
 
 		//-- Link to the resourceTable
 		version.onTable("HFJ_RESOURCE").addColumn("20210109.10", "SP_QUANTITY_NRML_PRESENT").nullable().type(ColumnTypeEnum.BOOLEAN);
 
+		//-- Fixed the partition and fk
+		Builder.BuilderWithTableName nrmlTable = version.onTable("HFJ_SPIDX_QUANTITY_NRML");
+		nrmlTable.addColumn("20210111.1", "PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
+		nrmlTable.addColumn("20210111.2", "PARTITION_DATE").nullable().type(ColumnTypeEnum.DATE_ONLY);
+		// - The fk name is generated from Hibernate, have to use this name here
+		nrmlTable
+			.addForeignKey("20210111.3", "FKRCJOVMUH5KC0O6FVBLE319PYV")
+			.toColumn("RES_ID")
+			.references("HFJ_RESOURCE", "RES_ID");
 	}
 
 	protected void init520() {
