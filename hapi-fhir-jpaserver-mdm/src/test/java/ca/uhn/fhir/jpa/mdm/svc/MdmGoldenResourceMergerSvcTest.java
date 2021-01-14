@@ -106,8 +106,6 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		return retval;
 	}
 
-	// TODO NG - add a test with a manually merged golden patient
-
 	private int redirectLinkCount() {
 		MdmLink mdmLink = new MdmLink().setMatchResult(MdmMatchResultEnum.REDIRECT);
 		Example<MdmLink> example = Example.of(mdmLink);
@@ -170,6 +168,24 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
+		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
+	}
+
+	@Test
+	public void testManualOverride() {
+		Patient manuallyMergedPatient = new Patient();
+		populatePatient(manuallyMergedPatient);
+		manuallyMergedPatient.getNameFirstRep().setFamily("TestFamily");
+		manuallyMergedPatient.getNameFirstRep().getGiven().clear();
+		manuallyMergedPatient.getNameFirstRep().addGiven("TestGiven");
+
+		MdmTransactionContext ctx = createMdmContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES);
+		Patient mergedSourcePatient = (Patient) myGoldenResourceMergerSvc
+			.mergeGoldenResources(myFromGoldenPatient, manuallyMergedPatient, myToGoldenPatient, ctx);
+
+		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
+		assertEquals("TestGiven TestFamily", returnedName.getNameAsSingleString());
 		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
 	}
 
