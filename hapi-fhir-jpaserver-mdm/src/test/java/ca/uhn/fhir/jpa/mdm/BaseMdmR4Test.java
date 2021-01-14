@@ -139,9 +139,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	@Nonnull
 	protected Patient createGoldenPatient() {
-		Patient patient = new Patient();
-		patient.setActive(true);
-		return createPatient(patient, true, false);
+		return createPatient(new Patient(), true, false);
 	}
 
 	@Nonnull
