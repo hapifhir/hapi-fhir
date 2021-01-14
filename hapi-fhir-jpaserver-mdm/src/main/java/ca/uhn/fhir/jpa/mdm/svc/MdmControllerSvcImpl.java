@@ -81,14 +81,14 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 	}
 
 	@Override
-	public IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, IAnyResource theManuallyMergedGoldenResource, String theMatchResult, MdmTransactionContext theMdmTransactionContext) {
 		MdmMatchResultEnum matchResult = MdmControllerUtil.extractMatchResultOrNull(theMatchResult);
 		IAnyResource goldenResource = myMdmControllerHelper.getLatestGoldenResourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		IAnyResource source = myMdmControllerHelper.getLatestSourceFromIdOrThrowException(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theSourceResourceId);
 		myMdmControllerHelper.validateSameVersion(goldenResource, theGoldenResourceId);
 		myMdmControllerHelper.validateSameVersion(source, theSourceResourceId);
 
-		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, source, matchResult, theMdmTransactionContext);
+		return myIMdmLinkUpdaterSvc.updateLink(goldenResource, source, theManuallyMergedGoldenResource, matchResult, theMdmTransactionContext);
 	}
 
 	@Override

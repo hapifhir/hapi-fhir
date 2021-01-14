@@ -75,6 +75,7 @@ public class ProviderConstants {
 	public static final String MDM_UPDATE_LINK = "$mdm-update-link";
 	public static final String MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_UPDATE_LINK_RESOURCE_ID = "resourceId";
+	public static final String MDM_UPDATE_LINK_RESOURCE = "resource";
 	public static final String MDM_UPDATE_LINK_MATCH_RESULT = "matchResult";
 
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";

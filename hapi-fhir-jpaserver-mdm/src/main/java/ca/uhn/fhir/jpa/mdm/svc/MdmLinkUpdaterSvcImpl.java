@@ -69,7 +69,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
+	public IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, IAnyResource theManuallyMergedGoldenResource,
+											 MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
 		String sourceType = myFhirContext.getResourceType(theSourceResource);
 
 		validateUpdateLinkRequest(theGoldenResource, theSourceResource, theMatchResult, sourceType);
@@ -93,8 +94,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(mdmLink);
 
-		// TODO NG MDM Since it's a manual link update, we need to allow the caller to optionally override this behavior with what they thing should go into the golden resource
-		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theSourceResource, theGoldenResource, theMdmContext);
+		IAnyResource resource = (theManuallyMergedGoldenResource == null) ? theSourceResource : theManuallyMergedGoldenResource;
+		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(resource, theGoldenResource, theMdmContext);
 
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {

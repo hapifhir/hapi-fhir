@@ -159,10 +159,11 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	public IBaseResource updateLink(@OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theGoldenResourceId,
 											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, min = 1, max = 1) IPrimitiveType<String> theResourceId,
 											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) IPrimitiveType<String> theMatchResult,
+											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_RESOURCE, max = 1) IAnyResource theManuallyMergedResource,
 											  ServletRequestDetails theRequestDetails) {
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(), theMatchResult.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
+		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(), theManuallyMergedResource,
+			theMatchResult.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
 				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
 		);
 	}
