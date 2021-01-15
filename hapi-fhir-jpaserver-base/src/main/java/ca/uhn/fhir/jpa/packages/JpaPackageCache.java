@@ -191,6 +191,8 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 
 		byte[] bytes = IOUtils.toByteArray(thePackageTgzInputStream);
 
+		ourLog.info("Parsing package .tar.gz ({} bytes) from {}", bytes.length, theSourceDesc);
+
 		NpmPackage npmPackage = NpmPackage.fromPackage(new ByteArrayInputStream(bytes));
 		if (!npmPackage.id().equals(thePackageId)) {
 			throw new InvalidRequestException("Package ID " + npmPackage.id() + " doesn't match expected: " + thePackageId);
@@ -409,13 +411,15 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 		Validate.notBlank(theInstallationSpec.getName(), "thePackageId must not be blank");
 		Validate.notBlank(theInstallationSpec.getVersion(), "thePackageVersion must not be blank");
 
+		String sourceDescription = "Embedded content";
 		if (isNotBlank(theInstallationSpec.getPackageUrl())) {
 			byte[] contents = loadPackageUrlContents(theInstallationSpec.getPackageUrl());
 			theInstallationSpec.setPackageContents(contents);
+			sourceDescription = theInstallationSpec.getPackageUrl();
 		}
 
 		if (theInstallationSpec.getPackageContents() != null) {
-			return addPackageToCache(theInstallationSpec.getName(), theInstallationSpec.getVersion(), new ByteArrayInputStream(theInstallationSpec.getPackageContents()), "Manually added");
+			return addPackageToCache(theInstallationSpec.getName(), theInstallationSpec.getVersion(), new ByteArrayInputStream(theInstallationSpec.getPackageContents()), sourceDescription);
 		}
 
 		return loadPackage(theInstallationSpec.getName(), theInstallationSpec.getVersion());
