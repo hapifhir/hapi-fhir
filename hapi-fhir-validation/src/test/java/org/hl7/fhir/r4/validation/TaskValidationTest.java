@@ -219,37 +219,37 @@ public class TaskValidationTest
 		e13.addType().setCode("boolean");
 
 		ElementDefinition e14 = d.addElement();
-		e14.setId("Task.input:stringSlice1");
+		e14.setId("Task.input:stringSlice2");
 		e14.setPath("Task.input");
-		e14.setSliceName("stringSlice1");
+		e14.setSliceName("stringSlice2");
 		e14.setMin(1);
 		e14.setMax("1");
 
 		ElementDefinition e15 = d.addElement();
-		e15.setId("Task.input:stringSlice1.type");
+		e15.setId("Task.input:stringSlice2.type");
 		e15.setPath("Task.input.type");
 		e15.getBinding().setStrength(BindingStrength.REQUIRED).setValueSet("http://test.com/fhir/ValueSet/test");
 
 		ElementDefinition e16 = d.addElement();
-		e16.setId("Task.input:stringSlice1.type.coding");
+		e16.setId("Task.input:stringSlice2.type.coding");
 		e16.setPath("Task.input.type.coding");
 		e16.setMin(1);
 		e16.setMax("1");
 
 		ElementDefinition e17 = d.addElement();
-		e17.setId("Task.input:stringSlice1.type.coding.system");
+		e17.setId("Task.input:stringSlice2.type.coding.system");
 		e17.setPath("Task.input.type.coding.system");
 		e17.setMin(1);
 		e17.setFixed(new UriType("http://test.com/fhir/CodeSystem/test"));
 
 		ElementDefinition e18 = d.addElement();
-		e18.setId("Task.input:stringSlice1.type.coding.code");
+		e18.setId("Task.input:stringSlice2.type.coding.code");
 		e18.setPath("Task.input.type.coding.code");
 		e18.setMin(1);
 		e18.setFixed(new CodeType("baz"));
 
 		ElementDefinition e19 = d.addElement();
-		e19.setId("Task.input:stringSlice1.value[x]");
+		e19.setId("Task.input:stringSlice2.value[x]");
 		e19.setPath("Task.input.value[x]");
 		e19.addType().setCode("string");
 
