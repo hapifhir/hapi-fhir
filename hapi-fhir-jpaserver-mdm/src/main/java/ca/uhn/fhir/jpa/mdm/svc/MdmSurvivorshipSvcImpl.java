@@ -34,12 +34,9 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	private FhirContext myFhirContext;
 
 	/**
-	 * TODO NG Update docs to tell taht we also do that in non GR merge - like linking
-	 *
-	 * Merges two golden resources by overwriting all field values on theGoldenResource param for all REST operation methods
-	 * except MERGE_GOLDEN_RESOURCES. In case of MERGE_GOLDEN_RESOURCES, it will attempt to copy field values from
-	 * theTargetResource that do not exist in theGoldenResource. PID, indentifiers and meta values are not affected by
-	 * this operation.
+	 * Merges two golden resources by overwriting all field values on theGoldenResource param for CREATE_RESOURCE,
+	 * UPDATE_RESOURCE, SUBMIT_RESOURCE_TO_MDM, UPDATE_LINK (when setting to MATCH) and MANUAL_MERGE_GOLDEN_RESOURCES.
+	 * PID, identifiers and meta values are not affected by this operation.
 	 *
 	 * @param theTargetResource        Target resource to retrieve fields from
 	 * @param theGoldenResource        Golden resource to merge fields into

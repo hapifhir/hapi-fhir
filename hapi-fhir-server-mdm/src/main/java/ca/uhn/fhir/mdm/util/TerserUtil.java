@@ -131,7 +131,11 @@ public final class TerserUtil {
 			IBase newFieldValue = childDefinition.getChildByName(field).newInstance();
 			terser.cloneInto(theFromFieldValue, newFieldValue, true);
 
-			theToFieldValues.add(newFieldValue);
+			try {
+				theToFieldValues.add(newFieldValue);
+			} catch (Exception e) {
+				childDefinition.getMutator().setValue(theTo, newFieldValue);
+			}
 		}
 	}
 

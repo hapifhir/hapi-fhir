@@ -94,7 +94,6 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(mdmLink);
 
-		// IAnyResource resource = (theManuallyMergedGoldenResource == null) ? theSourceResource : theManuallyMergedGoldenResource;
 		if (theMatchResult == MdmMatchResultEnum.MATCH) {
 			// only apply survivorship rules in case of a match
 			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theSourceResource, theGoldenResource, theMdmContext);

@@ -81,7 +81,9 @@ public class MdmEidUpdateService {
 			//This is a new linking scenario. we have to break the existing link and link to the new Golden Resource. For now, we create duplicate.
 			//updated patient has an EID that matches to a new candidate. Link them, and set the Golden Resources possible duplicates
 			linkToNewGoldenResourceAndFlagAsDuplicate(theTargetResource, updateContext.getExistingGoldenResource(), updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
-			// TODO NG - Do we need to merge fields from the old golden resource to the new golden resource?
+
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theTargetResource, updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
+			myMdmResourceDaoSvc.upsertGoldenResource(updateContext.getMatchedGoldenResource(), theMdmTransactionContext.getResourceType());
 		}
 	}
 

@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +35,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
@@ -409,6 +409,9 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertThat(mergedSourcePatient.getName(), hasSize(2));
 		assertThat(mergedSourcePatient.getName().get(0).getGiven(), hasSize(2));
 		assertThat(mergedSourcePatient.getName().get(1).getGiven(), hasSize(2));
+
+		assertThat(mergedSourcePatient.getName().get(0).getNameAsSingleString(), is("Jeff George"));
+		assertThat(mergedSourcePatient.getName().get(1).getNameAsSingleString(), is("Jim George"));
 	}
 
 	@Test
@@ -426,6 +429,8 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		mergeGoldenPatients();
 		assertThat(myToGoldenPatient.getName(), hasSize(1));
 		assertThat(myToGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		assertThat(myToGoldenPatient.getName().get(0).getNameAsSingleString(), is("Jim George"));
 	}
 
 	@Test
@@ -442,6 +447,11 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		mergeGoldenPatients();
 
 		assertThat(myToGoldenPatient.getIdentifier(), hasSize(4));
+
+		assertTrue(myToGoldenPatient.getIdentifier().get(0).equalsDeep(new Identifier().setValue("aaa").setSystem("SYSTEM1")));
+		assertTrue(myToGoldenPatient.getIdentifier().get(1).equalsDeep(new Identifier().setValue("ccc").setSystem("SYSTEM1")));
+		assertTrue(myToGoldenPatient.getIdentifier().get(2).equalsDeep(new Identifier().setValue("bbb").setSystem("SYSTEM1")));
+		assertTrue(myToGoldenPatient.getIdentifier().get(3).equalsDeep(new Identifier().setValue("ccc").setSystem("SYSTEM2")));
 	}
 
 	private MdmLink createMdmLink(Patient theSourcePatient, Patient theTargetPatient) {
