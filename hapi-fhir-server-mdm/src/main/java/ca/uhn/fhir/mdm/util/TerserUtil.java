@@ -90,6 +90,23 @@ public final class TerserUtil {
 	}
 
 	/**
+	 * Checks if the specified fields has any values
+	 *
+	 * @param theFhirContext Context holding resource definition
+	 * @param theResource    Resource to check if the specified field is set
+	 * @param theFieldName   name of the field to check
+	 * @return Returns true if field exists and has any values set, and false otherwise
+	 */
+	public static boolean hasValues(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
+		RuntimeResourceDefinition resourceDefinition = theFhirContext.getResourceDefinition(theResource);
+		BaseRuntimeChildDefinition resourceIdentifier = resourceDefinition.getChildByName(theFieldName);
+		if (resourceIdentifier == null) {
+			return false;
+		}
+		return !(resourceIdentifier.getAccessor().getValues(theResource).isEmpty());
+	}
+
+	/**
 	 * Clones specified composite field (collection). Composite field values must confirm to the collections
 	 * contract.
 	 *
@@ -235,6 +252,15 @@ public final class TerserUtil {
 				break;
 			}
 		}
+	}
+
+	public static <T extends IBaseResource> T clone(FhirContext theFhirContext, T theInstance) {
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theInstance.getClass());
+		T retVal = (T) definition.newInstance();
+
+		FhirTerser terser = theFhirContext.newTerser();
+		terser.cloneInto(theInstance, retVal, true);
+		return retVal;
 	}
 
 }

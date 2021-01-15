@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.mdm.util.TerserUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
@@ -95,12 +96,11 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 
 	@Test
 	public void testMergeWithManualOverride() {
-		Patient mergedSourcePatient = (Patient) myMdmProvider.mergeGoldenResources(myFromGoldenPatientId,
-			myToGoldenPatientId, myFromGoldenPatient, myRequestDetails);
+		Patient patient = TerserUtil.clone(myFhirContext, myFromGoldenPatient);
+		patient.setIdElement(null);
 
-		myFromGoldenPatient = (Patient) myPatientDao.read(myFromGoldenPatient.getIdElement().toUnqualifiedVersionless());
-		assertTrue(!MdmResourceUtil.isGoldenRecord(myFromGoldenPatient));
-		assertTrue(MdmResourceUtil.isGoldenRecordRedirected(myFromGoldenPatient));
+		Patient mergedSourcePatient = (Patient) myMdmProvider.mergeGoldenResources(myFromGoldenPatientId,
+			myToGoldenPatientId, patient, myRequestDetails);
 
 		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
 		assertThat(mergedSourcePatient, is(sameGoldenResourceAs(myToGoldenPatient)));

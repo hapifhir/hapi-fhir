@@ -241,6 +241,10 @@ public class GoldenResourceHelper {
 		}
 	}
 
+	public boolean hasIdentifier(IBaseResource theResource) {
+		return TerserUtil.hasValues(myFhirContext, theResource, FIELD_NAME_IDENTIFIER);
+	}
+
 	public void mergeIndentifierFields(IBaseResource theFromGoldenResource, IBaseResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		TerserUtil.cloneCompositeField(myFhirContext, theFromGoldenResource, theToGoldenResource, FIELD_NAME_IDENTIFIER);
 	}
