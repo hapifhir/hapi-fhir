@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -34,8 +35,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	
 	@AfterEach
 	public void afterResetSearch() {
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@Test
 	public void testIndexMissingFieldsDisabledDontAllowInSearch_NonReference() {
@@ -82,7 +83,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantitySearchSupported() {
 		
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myModelConfig.setNormalizedQuantitySearchSupported();
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Organization org = new Organization();
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
@@ -99,7 +100,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantityStorageSupported() {
 		
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-		myModelConfig.setNormalizedQuantityStorageSupported();
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Organization org = new Organization();
 		org.setActive(true);
 		myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
@@ -309,8 +310,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchWithMissingQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType notMissing;
 		IIdType missing;
 		{
@@ -350,8 +351,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	
 	@Test
 	public void testSearchWithMissingQuantityWithNormalizedQuantityStorageSupported() {
-		
-		myModelConfig.setNormalizedQuantityStorageSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		IIdType notMissing;
 		IIdType missing;
 		{

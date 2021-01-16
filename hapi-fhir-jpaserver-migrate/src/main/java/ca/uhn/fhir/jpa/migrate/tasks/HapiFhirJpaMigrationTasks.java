@@ -119,6 +119,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("20210111.3", "FKRCJOVMUH5KC0O6FVBLE319PYV")
 			.toColumn("RES_ID")
 			.references("HFJ_RESOURCE", "RES_ID");
+
+		Builder.BuilderWithTableName quantityTable = version.onTable("HFJ_SPIDX_QUANTITY");
+		quantityTable.modifyColumn("20210116.1", "SP_VALUE").nullable().failureAllowed().withType(ColumnTypeEnum.DOUBLE);
+
 	}
 
 	protected void init520() {

@@ -20,27 +20,10 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
  * #L%
  */
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.math.BigDecimal;
-
-import javax.persistence.criteria.CriteriaBuilder;
-
-import org.fhir.ucum.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.healthmarketscience.sqlbuilder.BinaryCondition;
-import com.healthmarketscience.sqlbuilder.ComboCondition;
-import com.healthmarketscience.sqlbuilder.Condition;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
-import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamBaseQuantity;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
@@ -48,7 +31,18 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.base.composite.BaseQuantityDt;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
-import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.ComboCondition;
+import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import java.math.BigDecimal;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 
 public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredicateBuilder {
@@ -59,11 +53,7 @@ public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredic
 
 	@Autowired
 	private FhirContext myFhirContext;
-	
-	@Autowired
-	private ModelConfig myModelConfig;
-	
-	
+
 	/**
 	 * Constructor
 	 */
@@ -71,38 +61,13 @@ public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredic
 		super(theSearchSqlBuilder, theTable);
 	}
 
-	public Condition createPredicateQuantity(IQueryParameterType theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityBasePredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
-		
-		String systemValue;
-		String unitsValue;
-		ParamPrefixEnum cmpValue;
-		BigDecimal valueValue;
+	public Condition createPredicateQuantity(QuantityParam theParam, String theResourceName, String theParamName, CriteriaBuilder theBuilder, QuantityBasePredicateBuilder theFrom, SearchFilterParser.CompareOperation theOperation, RequestPartitionId theRequestPartitionId) {
 
-		if (theParam instanceof BaseQuantityDt) {
-			BaseQuantityDt param = (BaseQuantityDt) theParam;
-			systemValue = param.getSystemElement().getValueAsString();
-			unitsValue = param.getUnitsElement().getValueAsString();
-			cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
-			valueValue = param.getValueElement().getValue();
-		} else if (theParam instanceof QuantityParam) {
-			QuantityParam param = (QuantityParam) theParam;
-			systemValue = param.getSystem();
-			unitsValue = param.getUnits();
-			cmpValue = param.getPrefix();
-			valueValue = param.getValue();
-		} else {
-			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
-		}
+		String systemValue = theParam.getSystem();
+		String unitsValue = theParam.getUnits();
+		ParamPrefixEnum cmpValue = theParam.getPrefix();
+		BigDecimal valueValue = theParam.getValue();
 
-		if (myModelConfig.isNormalizedQuantitySearchSupported()) {
-			//-- convert the value/unit to the canonical form if any to use by the search
-			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(systemValue, valueValue, unitsValue);
-			if (canonicalForm != null) {
-				valueValue = new BigDecimal(canonicalForm.getValue().asDecimal());
-				unitsValue = canonicalForm.getCode();
-			}
-		}
-				
 		Condition hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
 			long hash = ResourceIndexedSearchParamBaseQuantity.calculateHashSystemAndUnits(getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
@@ -127,5 +92,24 @@ public abstract class QuantityBasePredicateBuilder extends BaseSearchParamPredic
 
 	public DbColumn getColumnValue() {
 		return myColumnValue;
-	}	
+	}
+
+	public static QuantityParam toQuantityParam(IQueryParameterType theParam) {
+		if (theParam instanceof BaseQuantityDt) {
+			BaseQuantityDt param = (BaseQuantityDt) theParam;
+			String systemValue = param.getSystemElement().getValueAsString();
+			String unitsValue = param.getUnitsElement().getValueAsString();
+			ParamPrefixEnum cmpValue = ParamPrefixEnum.forValue(param.getComparatorElement().getValueAsString());
+			BigDecimal valueValue = param.getValueElement().getValue();
+			return new QuantityParam()
+				.setSystem(systemValue)
+				.setUnits(unitsValue)
+				.setPrefix(cmpValue)
+				.setValue(valueValue);
+		} else if (theParam instanceof QuantityParam) {
+			return (QuantityParam) theParam;
+		} else {
+			throw new IllegalArgumentException("Invalid quantity type: " + theParam.getClass());
+		}
+	}
 }

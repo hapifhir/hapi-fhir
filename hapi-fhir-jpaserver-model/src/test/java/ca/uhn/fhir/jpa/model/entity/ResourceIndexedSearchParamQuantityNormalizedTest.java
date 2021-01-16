@@ -10,10 +10,11 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+// FIXME: try this test
 public class ResourceIndexedSearchParamQuantityNormalizedTest {
 
 	private ResourceIndexedSearchParamQuantityNormalized createParam(String theParamName, String theValue, String theSystem, String theUnits) {
-		ResourceIndexedSearchParamQuantityNormalized token = new ResourceIndexedSearchParamQuantityNormalized(new PartitionSettings(), "Observation", theParamName, new BigDecimal(theValue), theSystem, theUnits);
+		ResourceIndexedSearchParamQuantityNormalized token = new ResourceIndexedSearchParamQuantityNormalized(new PartitionSettings(), "Observation", theParamName, new BigDecimal(theValue).doubleValue(), theSystem, theUnits);
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 		return token;
 	}

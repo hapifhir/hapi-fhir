@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -62,9 +61,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	// This constructor is used by tests
 	@VisibleForTesting
-	public SearchParamExtractorR4(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+	public SearchParamExtractorR4(ModelConfig theModelConfig, PartitionSettings thePartitionSettings, FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		super(theModelConfig, thePartitionSettings, theCtx, theSearchParamRegistry);
-		initFhirPath(theValidationSupport);
+		initFhirPath();
 		start();
 	}
 
@@ -82,13 +81,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public void start() {
 		super.start();
 		if (myFhirPathEngine == null) {
-			IValidationSupport support = myApplicationContext.getBean(IValidationSupport.class);
-			initFhirPath(support);
+			initFhirPath();
 		}
 	}
 
-	public void initFhirPath(IValidationSupport theSupport) {
-		IWorkerContext worker = new HapiWorkerContext(getContext(), theSupport);
+	public void initFhirPath() {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), getContext().getValidationSupport());
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 	}
@@ -96,7 +94,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	private static class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
 
-		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
+		private final Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
