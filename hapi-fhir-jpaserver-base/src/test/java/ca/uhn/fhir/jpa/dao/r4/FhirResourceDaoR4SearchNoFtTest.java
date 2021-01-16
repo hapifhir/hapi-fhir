@@ -1247,20 +1247,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
-
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 12300, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm"))));
 		assertThat(actual, contains(id));
@@ -1275,20 +1261,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		res.addInstance().getQuantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("FOO").setValue(123);
 		
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
-
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
 		
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "FOO"))));
@@ -1305,20 +1277,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(1, results.size());
-		});
-		
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, "http://bar", "FOO"))));
 		assertThat(actual, contains(id));
@@ -1336,20 +1294,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		res.addInstance().getQuantity().setSystem("http://foo2").setCode("UNIT2").setValue(1232);
 
 		IIdType id = mySubstanceDao.create(res, mySrd).getId().toUnqualifiedVersionless();
-
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantity> type = ResourceIndexedSearchParamQuantity.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
-		
-		runInTransaction(() -> {
-			Class<ResourceIndexedSearchParamQuantityNormalized> type = ResourceIndexedSearchParamQuantityNormalized.class;
-			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
-		});
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(
 			mySubstanceDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Substance.SP_QUANTITY, new QuantityParam(null, 123, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m"))));

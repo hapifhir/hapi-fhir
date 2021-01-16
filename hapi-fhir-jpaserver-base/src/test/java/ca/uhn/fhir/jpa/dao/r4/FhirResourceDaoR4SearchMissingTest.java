@@ -11,7 +11,16 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.DateType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +31,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInRelativeOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchMissingTest.class);
@@ -32,11 +45,11 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	public void beforeResetMissing() {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 	}
-	
+
 	@AfterEach
 	public void afterResetSearch() {
-        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
-    }
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+	}
 
 	@Test
 	public void testIndexMissingFieldsDisabledDontAllowInSearch_NonReference() {
@@ -81,7 +94,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 
 	@Test
 	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantitySearchSupported() {
-		
+
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Organization org = new Organization();
@@ -95,10 +108,10 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 
 	}
-	
+
 	@Test
 	public void testIndexMissingFieldsDisabledDontCreateIndexesWithNormalizedQuantityStorageSupported() {
-		
+
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
 		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Organization org = new Organization();
@@ -112,7 +125,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		assertThat(myResourceIndexedSearchParamQuantityDao.findAll(), empty());
 
 	}
-	
+
 	@SuppressWarnings("unused")
 	@Test
 	public void testSearchResourceReferenceMissingChain() {
@@ -222,8 +235,8 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		String locId = myLocationDao.create(new Location(), mySrd).getId().toUnqualifiedVersionless().getValue();
 		String locId2 = myLocationDao.create(new Location().setPosition(new Location.LocationPositionComponent(new DecimalType(10), new DecimalType(10))), mySrd).getId().toUnqualifiedVersionless().getValue();
 
-		runInTransaction(()->{
-			ourLog.info("Coords:\n * {}", myResourceIndexedSearchParamCoordsDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		runInTransaction(() -> {
+			ourLog.info("Coords:\n * {}", myResourceIndexedSearchParamCoordsDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
 		{
@@ -325,6 +338,12 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			obs.setValue(new Quantity(123));
 			notMissing = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 		}
+
+		runInTransaction(() -> {
+			ourLog.info("Quantity Indexes:\n * {}", myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+			ourLog.info("Normalized Quantity Indexes:\n * {}", myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).map(t -> t.toString()).collect(Collectors.joining("\n * ")));
+		});
+
 		// Quantity Param
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -342,13 +361,15 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			QuantityParam param = new QuantityParam();
 			param.setMissing(true);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
+			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
+			myCaptureQueriesListener.logSelectQueries();
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
-		
+
 	}
-	
+
 	@Test
 	public void testSearchWithMissingQuantityWithNormalizedQuantityStorageSupported() {
 
@@ -387,10 +408,10 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 			assertThat(patients, containsInRelativeOrder(missing));
 			assertThat(patients, not(containsInRelativeOrder(notMissing)));
 		}
-		
+
 	}
-	
-	
+
+
 	@Test
 	public void testSearchWithMissingReference() {
 		IIdType orgId = myOrganizationDao.create(new Organization(), mySrd).getId().toUnqualifiedVersionless();

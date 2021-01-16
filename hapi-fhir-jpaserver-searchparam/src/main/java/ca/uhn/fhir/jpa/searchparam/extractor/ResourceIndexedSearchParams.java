@@ -296,10 +296,7 @@ public final class ResourceIndexedSearchParams {
 	public void findMissingSearchParams(PartitionSettings thePartitionSettings, ModelConfig theModelConfig, ResourceTable theEntity, Set<Entry<String, RuntimeSearchParam>> theActiveSearchParams) {
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.STRING, myStringParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.NUMBER, myNumberParams);
-        if (theModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED))
-			findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityNormalizedParams);
-		else
-			findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
+		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.QUANTITY, myQuantityParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.DATE, myDateParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
 		findMissingSearchParams(thePartitionSettings, theModelConfig, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.TOKEN, myTokenParams);
@@ -330,10 +327,7 @@ public final class ResourceIndexedSearchParams {
 							param = new ResourceIndexedSearchParamNumber();
 							break;
 						case QUANTITY:
-                            if (theModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED))
-								param = new ResourceIndexedSearchParamQuantityNormalized();
-							else
-								param = new ResourceIndexedSearchParamQuantity();
+							param = new ResourceIndexedSearchParamQuantity();
 							break;
 						case STRING:
 							param = new ResourceIndexedSearchParamString()
