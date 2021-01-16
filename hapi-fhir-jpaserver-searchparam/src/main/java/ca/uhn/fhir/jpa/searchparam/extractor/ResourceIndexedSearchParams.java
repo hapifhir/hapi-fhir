@@ -37,9 +37,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -52,6 +57,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.compare;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -159,21 +165,30 @@ public final class ResourceIndexedSearchParams {
 		return myPopulatedResourceLinkParameters;
 	}
 
-	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theParam) {
+	public boolean matchParam(ModelConfig theModelConfig, String theResourceName, String theParamName, RuntimeSearchParam theParamDef, IQueryParameterType theValue) {
 		
 		if (theParamDef == null) {
 			return false;
 		}
-		Collection<? extends BaseResourceIndexedSearchParam> resourceParams;
+		Collection<? extends BaseResourceIndexedSearchParam> resourceParams = null;
+		IQueryParameterType value = theValue;
 		switch (theParamDef.getParamType()) {
 			case TOKEN:
 				resourceParams = myTokenParams;
 				break;
 			case QUANTITY:
-                if (theModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED))
-					resourceParams = myQuantityNormalizedParams;
-				else
-					resourceParams = myQuantityParams;					
+				if (theModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED)) {
+					QuantityParam quantity = QuantityParam.toQuantityParam(theValue);
+					QuantityParam normalized = UcumServiceUtil.toCanonicalQuantityOrNull(quantity);
+					if (normalized != null) {
+						resourceParams = myQuantityNormalizedParams;
+						value = normalized;
+					}
+				}
+
+				if (resourceParams == null) {
+					resourceParams = myQuantityParams;
+				}
 				break;
 			case STRING:
 				resourceParams = myStringParams;
@@ -188,7 +203,7 @@ public final class ResourceIndexedSearchParams {
 				resourceParams = myDateParams;
 				break;
 			case REFERENCE:
-				return matchResourceLinks(theModelConfig, theResourceName, theParamName, theParam, theParamDef.getPath());
+				return matchResourceLinks(theModelConfig, theResourceName, theParamName, value, theParamDef.getPath());
 			case COMPOSITE:
 			case HAS:
 			case SPECIAL:
@@ -198,11 +213,16 @@ public final class ResourceIndexedSearchParams {
 		if (resourceParams == null) {
 			return false;
 		}
-		Predicate<BaseResourceIndexedSearchParam> namedParamPredicate = param ->
-			param.getParamName().equalsIgnoreCase(theParamName) &&
-				param.matches(theParam);
 
-		return resourceParams.stream().anyMatch(namedParamPredicate);
+		for (BaseResourceIndexedSearchParam nextParam : resourceParams) {
+			if (nextParam.getParamName().equalsIgnoreCase(theParamName)) {
+				if (nextParam.matches(value)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**

@@ -647,7 +647,7 @@ public class QueryStack {
 
 		List<QuantityParam> quantityParams = theList
 			.stream()
-			.map(t -> QuantityBasePredicateBuilder.toQuantityParam(t))
+			.map(t -> QuantityParam.toQuantityParam(t))
 			.collect(Collectors.toList());
 
 		QuantityBasePredicateBuilder join = null;
@@ -655,7 +655,7 @@ public class QueryStack {
 		if (normalizedSearchEnabled) {
 			List<QuantityParam> normalizedQuantityParams = quantityParams
 				.stream()
-				.map(t -> toCanonicalQuantityOrNull(t))
+				.map(t -> UcumServiceUtil.toCanonicalQuantityOrNull(t))
 				.filter(t -> t != null)
 				.collect(Collectors.toList());
 
@@ -676,22 +676,6 @@ public class QueryStack {
 		}
 
 		return join.combineWithRequestPartitionIdPredicate(theRequestPartitionId, ComboCondition.or(codePredicates.toArray(new Condition[0])));
-	}
-
-	@org.jetbrains.annotations.Nullable
-	private QuantityParam toCanonicalQuantityOrNull(QuantityParam t) {
-		org.fhir.ucum.Pair canonicalForm = UcumServiceUtil.getCanonicalForm(t.getSystem(), t.getValue(), t.getUnits());
-		if (canonicalForm != null) {
-			BigDecimal valueValue = new BigDecimal(canonicalForm.getValue().asDecimal());
-			String unitsValue = canonicalForm.getCode();
-			return new QuantityParam()
-				.setSystem(t.getSystem())
-				.setValue(valueValue)
-				.setUnits(unitsValue)
-				.setPrefix(t.getPrefix());
-		} else {
-			return null;
-		}
 	}
 
 	public Condition createPredicateReference(@Nullable DbColumn theSourceJoinColumn,

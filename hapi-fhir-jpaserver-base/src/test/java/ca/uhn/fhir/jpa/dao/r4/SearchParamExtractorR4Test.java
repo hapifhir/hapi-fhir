@@ -370,7 +370,7 @@ public class SearchParamExtractorR4Test {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(modelConfig, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
 
-		assertEquals(1, list.size());
+		assertEquals(2, list.size());
 	}
 
 	private static class MySearchParamRegistry implements ISearchParamRegistry {
