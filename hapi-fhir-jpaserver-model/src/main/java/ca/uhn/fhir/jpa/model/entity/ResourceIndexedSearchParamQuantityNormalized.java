@@ -40,7 +40,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
 
 
@@ -84,23 +83,14 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 		super();
 	}
 
-	public ResourceIndexedSearchParamQuantityNormalized(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
+	public ResourceIndexedSearchParamQuantityNormalized(PartitionSettings thePartitionSettings, String theResourceType, String theParamName, double theValue, String theSystem, String theUnits) {
 		this();
 		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
-
-		//-- convert the value/unit to the canonical form if any, otherwise store the original value/units pair
-		Pair canonicalForm = UcumServiceUtil.getCanonicalForm(theSystem, theValue, theUnits);
-		if (canonicalForm != null) {
-			setValue(Double.parseDouble(canonicalForm.getValue().asDecimal()));
-			setUnits(canonicalForm.getCode());
-		}  else {
-			setValue(theValue);
-			setUnits(theUnits);
-		}
-		
+		setValue(theValue);
+		setUnits(theUnits);
 		calculateHashes();
 	}
 
@@ -123,17 +113,13 @@ public class ResourceIndexedSearchParamQuantityNormalized extends ResourceIndexe
 	public ResourceIndexedSearchParamQuantityNormalized setValue(Double theValue) {
 		myValue = theValue;
 		return this;
-	}	
-	public void setValue(BigDecimal theValue) {
-		if (theValue != null)
-			myValue = theValue.doubleValue();
 	}
-	public BigDecimal getValueBigDecimal() {
-		if (myValue == null)
-			return null;
-		return new BigDecimal(myValue);
+
+	public ResourceIndexedSearchParamQuantityNormalized setValue(double theValue) {
+		myValue = theValue;
+		return this;
 	}
-	
+
 	//-- myId
 	@Override
 	public Long getId() {

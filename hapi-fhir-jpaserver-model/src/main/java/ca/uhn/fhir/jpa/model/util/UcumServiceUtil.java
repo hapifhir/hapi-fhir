@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.util;
 import java.io.InputStream;
 import java.math.BigDecimal;
 
+import ca.uhn.fhir.rest.param.QuantityParam;
 import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumEssenceService;
@@ -31,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ca.uhn.fhir.util.ClasspathUtil;
+
+import javax.annotation.Nullable;
 
 /**
  * It's a wrapper of UcumEssenceService
@@ -85,7 +88,7 @@ public class UcumServiceUtil {
 			return null;
 
 		init();
-		Pair theCanonicalPair = null;
+		Pair theCanonicalPair;
 
 		try {
 			Decimal theDecimal = new Decimal(theValue.toPlainString(), theValue.precision());
@@ -97,4 +100,19 @@ public class UcumServiceUtil {
 		return theCanonicalPair;
 	}
 
+    @Nullable
+    public static QuantityParam toCanonicalQuantityOrNull(QuantityParam theQuantityParam) {
+        Pair canonicalForm = getCanonicalForm(theQuantityParam.getSystem(), theQuantityParam.getValue(), theQuantityParam.getUnits());
+        if (canonicalForm != null) {
+            BigDecimal valueValue = new BigDecimal(canonicalForm.getValue().asDecimal());
+            String unitsValue = canonicalForm.getCode();
+            return new QuantityParam()
+                .setSystem(theQuantityParam.getSystem())
+                .setValue(valueValue)
+                .setUnits(unitsValue)
+                .setPrefix(theQuantityParam.getPrefix());
+        } else {
+            return null;
+        }
+    }
 }
