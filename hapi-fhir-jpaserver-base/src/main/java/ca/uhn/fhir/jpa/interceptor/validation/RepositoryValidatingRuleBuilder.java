@@ -226,7 +226,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * Specifies that the resource should not be rejected from storage even if it does not pass validation.
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule dontReject() {
+			public FinalizedRequireValidationRule neverReject() {
 				myRule.dontReject();
 				return this;
 			}
@@ -289,6 +289,15 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			@Nonnull
 			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull ResultSeverityEnum theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
 				myRule.tagOnSeverity(theSeverity, theTagSystem, theTagCode);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to never reject unexpected extensions
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule allowAnyExtensions() {
+				myRule.setAllowAnyExtensions();
 				return this;
 			}
 

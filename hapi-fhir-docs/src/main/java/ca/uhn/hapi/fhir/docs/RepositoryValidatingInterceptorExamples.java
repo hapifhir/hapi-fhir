@@ -107,7 +107,7 @@ public class RepositoryValidatingInterceptorExamples {
 		ruleBuilder
 			.forResourcesOfType("Patient")
 			.requireValidationToDeclaredProfiles()
-			.dontReject()
+			.neverReject()
 			.tagOnSeverity(ResultSeverityEnum.ERROR, "http://example.com", "validation-failure");
 		//END SNIPPET: requireValidationToDeclaredProfilesTagOnFailure
 	}

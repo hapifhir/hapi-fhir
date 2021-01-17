@@ -270,7 +270,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			.forResourcesOfType("Observation")
 			.requireValidationToDeclaredProfiles()
 			.withBestPracticeWarningLevel("IGNORE")
-			.dontReject()
+			.neverReject()
 			.tagOnSeverity(ResultSeverityEnum.ERROR, "http://foo", "validation-error")
 			.build();
 		myValInterceptor.setRules(rules);
