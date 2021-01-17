@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.collect.ArrayListMultimap;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
 public class RepositoryValidatingInterceptor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RepositoryValidatingInterceptor.class);
-	private Multimap<String, IRepositoryValidatingRule> myRules = ArrayListMultimap.create();
+	private final Multimap<String, IRepositoryValidatingRule> myRules = ArrayListMultimap.create();
 	private FhirContext myFhirContext;
 
 	/**
@@ -113,25 +114,25 @@ public class RepositoryValidatingInterceptor {
 	 * Interceptor hook method. This method should not be called directly.
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	void create(IBaseResource theResource) {
-		handle(theResource);
+	void create(RequestDetails theRequestDetails, IBaseResource theResource) {
+		handle(theRequestDetails, theResource);
 	}
 
 	/**
 	 * Interceptor hook method. This method should not be called directly.
 	 */
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	void update(IBaseResource theOldResource, IBaseResource theNewResource) {
-		handle(theNewResource);
+	void update(RequestDetails theRequestDetails, IBaseResource theOldResource, IBaseResource theNewResource) {
+		handle(theRequestDetails, theNewResource);
 	}
 
-	private void handle(IBaseResource theNewResource) {
+	private void handle(RequestDetails theRequestDetails, IBaseResource theNewResource) {
 		Validate.notNull(myFhirContext, "No FhirContext has been set for this interceptor of type: %s", getClass());
 
 		String resourceType = myFhirContext.getResourceType(theNewResource);
 		Collection<IRepositoryValidatingRule> rules = myRules.get(resourceType);
 		for (IRepositoryValidatingRule nextRule : rules) {
-			IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theNewResource);
+			IRepositoryValidatingRule.RuleEvaluation outcome = nextRule.evaluate(theRequestDetails, theNewResource);
 			if (!outcome.isPasses()) {
 				handleFailure(outcome);
 			}

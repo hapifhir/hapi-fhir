@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -65,6 +66,7 @@ import org.hl7.fhir.dstu3.model.Bundle.HTTPVerb;
 import org.hl7.fhir.dstu3.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
+import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -79,6 +81,7 @@ import org.hl7.fhir.dstu3.model.Enumerations;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.ImagingStudy;
 import org.hl7.fhir.dstu3.model.InstantType;
 import org.hl7.fhir.dstu3.model.IntegerType;
@@ -110,8 +113,10 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.dstu3.model.Task;
 import org.hl7.fhir.dstu3.model.UnsignedIntType;
 import org.hl7.fhir.dstu3.model.ValueSet;
+import org.hl7.fhir.dstu3.model.codesystems.DeviceStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
@@ -233,6 +238,56 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Assert
 		assertEquals(0, returnedBundle.getEntry().size());
+	}
+
+	@Test
+	public void testSuppressNoExtensibleWarnings() {
+		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
+		interceptor.setFailOnSeverity(ResultSeverityEnum.INFORMATION);
+		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
+		val.setNoExtensibleWarnings(true);
+		interceptor.addValidatorModule(val);
+
+		ourRestServer.registerInterceptor(interceptor);
+		try {
+			CodeableConcept codeableConcept = new CodeableConcept();
+			Coding codingCode = codeableConcept.addCoding();
+			codingCode.setCode(DeviceStatus.ACTIVE.toCode());
+			codingCode.setSystem(DeviceStatus.ACTIVE.getSystem());
+
+			Device device = new Device();
+			Identifier identifier = device.addIdentifier();
+			identifier.setType(codeableConcept); // Not valid against valueset with 'Extensible' binding strength
+			ourClient.create().resource(device).execute().getId();
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@Test
+	public void testSuppressNoBindingMessage() {
+		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
+		interceptor.setFailOnSeverity(ResultSeverityEnum.INFORMATION);
+		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
+		val.setNoBindingMsgSuppressed(true);
+		interceptor.addValidatorModule(val);
+
+		ourRestServer.registerInterceptor(interceptor);
+		try {
+			CodeableConcept codeableConcept = new CodeableConcept();
+			Coding codingCode = codeableConcept.addCoding();
+			codingCode.setSystem(DeviceStatus.ACTIVE.toCode());
+			codingCode.setSystem(DeviceStatus.ACTIVE.getSystem());
+
+			Task task = new Task();
+			task.setStatus(Task.TaskStatus.DRAFT);
+			task.setIntent(Task.TaskIntent.FILLERORDER);
+			task.setCode(codeableConcept); // Task.code has no source/binding
+
+			ourClient.create().resource(task).execute().getId();
+		} finally {
+			ourRestServer.unregisterInterceptor(interceptor);
+		}
 	}
 
 	/**

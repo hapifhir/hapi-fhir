@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * request with an {@link UnprocessableEntityException HTTP 422 Unprocessable Entity}.
  */
 @Interceptor
-public abstract class BaseValidatingInterceptor<T> {
+public abstract class BaseValidatingInterceptor<T> extends ValidationResultEnrichingInterceptor {
 
 	/**
 	 * Default value:<br/>

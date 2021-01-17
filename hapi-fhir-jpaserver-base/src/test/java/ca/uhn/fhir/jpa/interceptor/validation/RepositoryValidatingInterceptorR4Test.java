@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UrlType;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,6 +43,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		myValInterceptor = new RepositoryValidatingInterceptor();
 		myValInterceptor.setFhirContext(myFhirCtx);
 		myInterceptorRegistry.registerInterceptor(myValInterceptor);
+
 	}
 
 	@AfterEach

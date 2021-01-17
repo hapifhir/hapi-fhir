@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -47,7 +48,7 @@ class RuleDisallowProfile extends BaseTypedRule {
 
 	@Nonnull
 	@Override
-	public RuleEvaluation evaluate(@Nonnull IBaseResource theResource) {
+	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 		for (IPrimitiveType<String> next : theResource.getMeta().getProfile()) {
 			String nextUrl = next.getValueAsString();
 			String nextUrlNormalized = UrlUtil.normalizeCanonicalUrlForComparison(nextUrl);

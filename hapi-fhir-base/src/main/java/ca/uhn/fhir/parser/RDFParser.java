@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.system.IRIResolver;
 import org.apache.jena.vocabulary.RDF;
 import org.hl7.fhir.instance.model.api.*;
 
@@ -171,10 +172,14 @@ public class RDFParser extends BaseParser {
 		if (!uriBase.endsWith("/")) {
 			uriBase = uriBase + "/";
 		}
-		String resourceUri = uriBase + resource.getIdElement().toUnqualified();
 
 		if (parentResource == null) {
-			parentResource = rdfModel.getResource(resourceUri);
+			if (!resource.getIdElement().toUnqualified().hasIdPart()) {
+				parentResource = rdfModel.getResource(null);
+			} else {
+				String resourceUri = IRIResolver.resolve(resource.getIdElement().toUnqualified().toString(), uriBase).toString();
+				parentResource = rdfModel.getResource(resourceUri);
+			}
 			// If the resource already exists and has statements, return that existing resource.
 			if (parentResource != null && parentResource.listProperties().toList().size() > 0) {
 				return parentResource;
