@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -62,8 +63,8 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	@AfterEach
 	public void afterDisableExpunge() {
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void beforeEnableExpunge() {
@@ -402,7 +403,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantitySearchSupported() {
-		myModelConfig.setNormalizedQuantitySearchSupported();
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
@@ -424,7 +425,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	
 	@Test
 	public void testExpungeSystemEverythingWithNormalizedQuantityStorageSupported() {
-		myModelConfig.setNormalizedQuantityStorageSupported();
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()

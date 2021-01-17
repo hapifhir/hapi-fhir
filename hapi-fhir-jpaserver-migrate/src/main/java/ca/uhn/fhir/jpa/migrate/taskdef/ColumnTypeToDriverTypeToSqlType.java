@@ -49,6 +49,14 @@ public class ColumnTypeToDriverTypeToSqlType {
 		 setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.ORACLE_12C, "float");
 		 setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.POSTGRES_9_4, "float");
 
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.H2_EMBEDDED, "double");
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.DERBY_EMBEDDED, "double");
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MARIADB_10_1, "double precision");
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MYSQL_5_7, "double precision");
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.MSSQL_2012, "double precision");
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.ORACLE_12C, "double precision");
+		 setColumnType(ColumnTypeEnum.DOUBLE, DriverTypeEnum.POSTGRES_9_4, "float8");
+
 		 setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.H2_EMBEDDED, "bigint");
 		 setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
 		 setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MARIADB_10_1, "bigint");

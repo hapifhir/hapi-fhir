@@ -53,5 +53,6 @@ public enum NormalizedQuantitySearchLevel {
 	 * The existing non normalized quantity will be not supported 
 	 * NOTE： this option is not supported in this release
 	 */
+	// When this is enabled, we can enable testSortByQuantityWithNormalizedQuantitySearchFullSupported()
 	//NORMALIZED_QUANTITY_SEARCH_FULL_SUPPORTED,
 }
