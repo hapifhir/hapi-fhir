@@ -117,6 +117,14 @@ class RequireValidationRule extends BaseTypedRule {
 			.toString();
 	}
 
+	public FhirInstanceValidator getValidator() {
+		return myValidator;
+	}
+
+	public void setAllowAnyExtensions() {
+		myValidator.setAnyExtensionsAllowed(true);
+	}
+
 	private static class TagOnSeverity {
 		private final int mySeverity;
 		private final String myTagSystem;
