@@ -664,7 +664,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.setOffset(0)
 			.setCount(23);
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
-		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+		String expandedValueSetString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
+		ourLog.info("Expanded ValueSet:\n" + expandedValueSetString);
+		assertThat(expandedValueSetString, containsString("ValueSet was expanded using a pre-calculated expansion"));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
