@@ -117,6 +117,10 @@ class RequireValidationRule extends BaseTypedRule {
 			.toString();
 	}
 
+	public FhirInstanceValidator getValidator() {
+		return myValidator;
+	}
+
 	public void setAllowAnyExtensions() {
 		myValidator.setAnyExtensionsAllowed(true);
 	}

@@ -293,11 +293,53 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			}
 
 			/**
-			 * Configure the validator to never reject unexpected extensions
+			 * Configure the validator to never reject extensions
 			 */
 			@Nonnull
 			public FinalizedRequireValidationRule allowAnyExtensions() {
-				myRule.setAllowAnyExtensions();
+				myRule.getValidator().setAnyExtensionsAllowed(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to not perform terminology validation
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule disableTerminologyChecks() {
+				myRule.getValidator().setNoTerminologyChecks(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to raise an error if a resource being validated
+			 * declares a profile, and the StructureDefinition for this profile
+			 * can not be found.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule errorOnUnknownProfiles() {
+				myRule.getValidator().setErrorForUnknownProfiles(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to suppress the information-level message that
+			 * is added to the validation result if a profile StructureDefinition does
+			 * not declare a binding for a coded field.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule suppressNoBindingMessage() {
+				myRule.getValidator().setNoBindingMsgSuppressed(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to suppress the warning-level message that
+			 * is added when validating a code that can't be found in an ValueSet that
+			 * has an extensible binding.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule suppressWarningForExtensibleValueSetValidation() {
+				myRule.getValidator().setNoExtensibleWarnings(true);
 				return this;
 			}
 

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.springframework.context.ApplicationContext;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -111,6 +112,39 @@ public class RepositoryValidatingInterceptorExamples {
 			.tagOnSeverity(ResultSeverityEnum.ERROR, "http://example.com", "validation-failure");
 		//END SNIPPET: requireValidationToDeclaredProfilesTagOnFailure
 	}
+
+	public void requireValidationToDeclaredProfilesAdditionalOptions() {
+		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);
+
+		//START SNIPPET: requireValidationToDeclaredProfilesAdditionalOptions
+		ruleBuilder
+			.forResourcesOfType("Patient")
+			.requireValidationToDeclaredProfiles()
+
+			// Configure the validator to never reject extensions
+			.allowAnyExtensions()
+
+			// Configure the validator to not perform terminology validation
+			.disableTerminologyChecks()
+
+			// Configure the validator to raise an error if a resource being
+			// validated declares a profile, and the StructureDefinition for
+			// this profile can not be found.
+			.errorOnUnknownProfiles()
+
+			// Configure the validator to suppress the information-level
+			// message that is added to the validation result if a profile
+			// StructureDefinition does not declare a binding for a coded
+			// field.
+			.suppressNoBindingMessage()
+
+			// Configure the validator to suppress the warning-level message
+			// that is added when validating a code that can't be found in a
+			// ValueSet that has an extensible binding.
+			.suppressWarningForExtensibleValueSetValidation();
+		//END SNIPPET: requireValidationToDeclaredProfilesAdditionalOptions
+	}
+
 
 	public void disallowProfiles() {
 		RepositoryValidatingRuleBuilder ruleBuilder = myAppCtx.getBean(RepositoryValidatingRuleBuilder.class);
