@@ -226,7 +226,7 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * Specifies that the resource should not be rejected from storage even if it does not pass validation.
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule dontReject() {
+			public FinalizedRequireValidationRule neverReject() {
 				myRule.dontReject();
 				return this;
 			}
@@ -289,6 +289,57 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			@Nonnull
 			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull ResultSeverityEnum theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
 				myRule.tagOnSeverity(theSeverity, theTagSystem, theTagCode);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to never reject extensions
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule allowAnyExtensions() {
+				myRule.getValidator().setAnyExtensionsAllowed(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to not perform terminology validation
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule disableTerminologyChecks() {
+				myRule.getValidator().setNoTerminologyChecks(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to raise an error if a resource being validated
+			 * declares a profile, and the StructureDefinition for this profile
+			 * can not be found.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule errorOnUnknownProfiles() {
+				myRule.getValidator().setErrorForUnknownProfiles(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to suppress the information-level message that
+			 * is added to the validation result if a profile StructureDefinition does
+			 * not declare a binding for a coded field.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule suppressNoBindingMessage() {
+				myRule.getValidator().setNoBindingMsgSuppressed(true);
+				return this;
+			}
+
+			/**
+			 * Configure the validator to suppress the warning-level message that
+			 * is added when validating a code that can't be found in an ValueSet that
+			 * has an extensible binding.
+			 */
+			@Nonnull
+			public FinalizedRequireValidationRule suppressWarningForExtensibleValueSetValidation() {
+				myRule.getValidator().setNoExtensibleWarnings(true);
 				return this;
 			}
 

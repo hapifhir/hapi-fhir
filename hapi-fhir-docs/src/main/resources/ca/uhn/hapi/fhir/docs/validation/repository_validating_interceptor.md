@@ -95,6 +95,13 @@ By default, resource updates/changes resulting in failing validation will cause 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|requireValidationToDeclaredProfilesTagOnFailure}}
 ```
 
+## Configuring the Validator
+
+The following snippet shows a number of additional optional settings that can be chained onto the validation rule. 
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|requireValidationToDeclaredProfilesAdditionalOptions}}
+```
 
 # Rules: Disallow Specific Profiles
 
