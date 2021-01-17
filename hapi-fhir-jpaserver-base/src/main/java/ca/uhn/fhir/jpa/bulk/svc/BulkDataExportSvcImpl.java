@@ -59,7 +59,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;

@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.bulk.api;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;

@@ -375,24 +375,6 @@
 		<!-- Hibernate -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>xml-apis</artifactId>
-					<groupId>xml-apis</groupId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>javax.activation-api</artifactId>
-				</exclusion>
-				<!--<exclusion>-->
-				<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
-				<!--<artifactId>jboss-transaction-api_1.2_spec</artifactId>-->
-				<!--</exclusion>-->
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
 			<exclusions>
 				<exclusion>
@@ -436,11 +418,6 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>javax.activation</artifactId>
-			<version>1.2.0</version>
-		</dependency>
-		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>javax.mail-api</artifactId>
 			<scope>provided</scope>
@@ -464,6 +441,10 @@
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.el</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.transaction</groupId>
+			<artifactId>jakarta.transaction-api</artifactId>
 		</dependency>
 
 		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->
@@ -715,16 +696,6 @@
 						<artifactId>jaxb-runtime</artifactId>
 						<version>${jaxb_runtime_version}</version>
 					</dependency>
-					<!--<dependency>-->
-					<!--<groupId>com.sun.xml.bind</groupId>-->
-					<!--<artifactId>jaxb-core</artifactId>-->
-					<!--<version>${jaxb_core_version}</version>-->
-					<!--</dependency>-->
-					<!--<dependency>-->
-					<!--<groupId>com.sun.xml.bind</groupId>-->
-					<!--<artifactId>jaxb-impl</artifactId>-->
-					<!--<version>${jaxb_core_version}</version>-->
-					<!--</dependency>-->
 				</dependencies>
 			</plugin>
 			<plugin>

@@ -38,7 +38,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

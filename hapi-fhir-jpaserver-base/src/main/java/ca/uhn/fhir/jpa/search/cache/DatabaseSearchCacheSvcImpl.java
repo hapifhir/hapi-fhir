@@ -42,7 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
