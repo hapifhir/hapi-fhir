@@ -18,4 +18,5 @@
 * Spring Boot (JPA Starter): 2.2.6.RELEASE -> 2.4.1
 * JANSI (CLI):  1.18 -> 2.1.1
 * PH-Schematron (SCH Validator): 5.2.0 -> 5.6.5
+* PH-Commons (SCH Validator): 5.3.8 -> 9.5.4
 "
