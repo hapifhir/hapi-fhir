@@ -17,4 +17,5 @@
 * Lucene(HAPI FHIR JPA Server): 5.5.5 -> 8.7.0
 * Spring Boot (JPA Starter): 2.2.6.RELEASE -> 2.4.1
 * JANSI (CLI):  1.18 -> 2.1.1
+* PH-Schematron (SCH Validator): 5.2.0 -> 5.6.5
 "
