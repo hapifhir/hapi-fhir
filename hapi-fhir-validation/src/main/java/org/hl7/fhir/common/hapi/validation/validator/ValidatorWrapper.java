@@ -38,6 +38,8 @@ class ValidatorWrapper {
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
 	private boolean myAssumeValidRestReferences;
+	private boolean myNoExtensibleWarnings;
+	private boolean myNoBindingMsgSuppressed;
 	private Collection<? extends String> myExtensionDomains;
 	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
@@ -77,6 +79,16 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setNoExtensibleWarnings(boolean theNoExtensibleWarnings) {
+		myNoExtensibleWarnings = theNoExtensibleWarnings;
+		return this;
+	}
+
+	public ValidatorWrapper setNoBindingMsgSuppressed(boolean theNoBindingMsgSuppressed) {
+		myNoBindingMsgSuppressed = theNoBindingMsgSuppressed;
+		return this;
+	}
+
 	public ValidatorWrapper setExtensionDomains(Collection<? extends String> theExtensionDomains) {
 		myExtensionDomains = theExtensionDomains;
 		return this;
@@ -105,6 +117,8 @@ class ValidatorWrapper {
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
+		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
+		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
