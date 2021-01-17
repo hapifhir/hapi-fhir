@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
+import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.text.WordUtils;
@@ -148,13 +149,27 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 		}
 
 		/**
-		 * @param theProfileUrl
-		 * @return
+		 * If set, any resources that contain a profile declaration in <code>Resource.meta.profile</code>
+		 * matching {@literal theProfileUrl} will be rejected.
+		 *
+		 * @param theProfileUrl The profile canonical URL
 		 */
 		public FinalizedTypedRule disallowProfile(String theProfileUrl) {
 			return disallowProfiles(theProfileUrl);
 		}
 
+		/**
+		 * Perform a resource validation step using the FHIR Instance Validator and reject the
+		 * storage if the validation fails.
+		 *
+		 * <p>
+		 * If the {@link ValidationResultEnrichingInterceptor} is registered against the
+		 * {@link ca.uhn.fhir.rest.server.RestfulServer} interceptor registry, the validation results
+		 * will be appended to any <code>OperationOutcome</code> resource returned by the server.
+		 * </p>
+		 *
+		 * @see ValidationResultEnrichingInterceptor
+		 */
 		public FinalizedRequireValidationRule requireValidationToDeclaredProfiles() {
 			RequireValidationRule rule = new RequireValidationRule(myFhirContext, myType, myValidationSupport, myValidatorResourceFetcher);
 			myRules.add(rule);
@@ -251,13 +266,13 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * Specifies that if the validation results in any results with a severity of <code>theSeverity</code> or
 			 * greater, the resource will be tagged with the given tag when it is saved.
 			 *
-			 * @param theSeverity The minimum severity. Must be drawn from values in {@link ResultSeverityEnum} and must not be <code>null</code>
+			 * @param theSeverity  The minimum severity. Must be drawn from values in {@link ResultSeverityEnum} and must not be <code>null</code>
 			 * @param theTagSystem The system for the tag to add. Must not be <code>null</code>
-			 * @param theTagCode The code for the tag to add. Must not be <code>null</code>
+			 * @param theTagCode   The code for the tag to add. Must not be <code>null</code>
 			 * @return
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull String theSeverity,@Nonnull  String theTagSystem,@Nonnull  String theTagCode) {
+			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull String theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
 				ResultSeverityEnum severity = ResultSeverityEnum.fromCode(toLowerCase(theSeverity));
 				return tagOnSeverity(severity, theTagSystem, theTagCode);
 			}
@@ -266,13 +281,13 @@ public final class RepositoryValidatingRuleBuilder implements IRuleRoot {
 			 * Specifies that if the validation results in any results with a severity of <code>theSeverity</code> or
 			 * greater, the resource will be tagged with the given tag when it is saved.
 			 *
-			 * @param theSeverity The minimum severity. Must be drawn from values in {@link ResultSeverityEnum} and must not be <code>null</code>
+			 * @param theSeverity  The minimum severity. Must be drawn from values in {@link ResultSeverityEnum} and must not be <code>null</code>
 			 * @param theTagSystem The system for the tag to add. Must not be <code>null</code>
-			 * @param theTagCode The code for the tag to add. Must not be <code>null</code>
+			 * @param theTagCode   The code for the tag to add. Must not be <code>null</code>
 			 * @return
 			 */
 			@Nonnull
-			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull ResultSeverityEnum theSeverity,@Nonnull  String theTagSystem,@Nonnull  String theTagCode) {
+			public FinalizedRequireValidationRule tagOnSeverity(@Nonnull ResultSeverityEnum theSeverity, @Nonnull String theTagSystem, @Nonnull String theTagCode) {
 				myRule.tagOnSeverity(theSeverity, theTagSystem, theTagCode);
 				return this;
 			}
