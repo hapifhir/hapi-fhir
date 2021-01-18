@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -143,8 +144,8 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		myDaoConfig.setFetchSizeDefaultMaximum(new DaoConfig().getFetchSizeDefaultMaximum());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setDisableHashBasedSearches(false);
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void beforeInitialize() {
@@ -1193,8 +1194,8 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testComponentQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm")))
@@ -1216,8 +1217,8 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	
 	@Test
 	public void testComponentQuantityWithNormalizedQuantityStorageSupported() {
-		
-		myModelConfig.setNormalizedQuantityStorageSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm")))
@@ -1292,8 +1293,8 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 	@Test
 	public void testSearchCompositeParamQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("code1")))

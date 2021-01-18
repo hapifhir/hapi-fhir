@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -161,8 +162,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void before() {
@@ -581,8 +582,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testChoiceParamQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
 		o3.setValue(new Quantity(QuantityComparator.GREATER_THAN, 123.0, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.0123m
@@ -682,8 +683,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testChoiceParamQuantityPrecisionWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		Observation o3 = new Observation();
 		o3.getCode().addCoding().setSystem("foo").setCode("testChoiceParam03");
 		o3.setValue(new Quantity(null, 123.01, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm", "cm")); // 0.012301 m
@@ -3500,9 +3501,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 	
 	@Test
-	public void testSortByQuantityWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+	@Disabled
+	public void testSortByQuantityWithNormalizedQuantitySearchFullSupported() {
+
+//		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_FULL_SUPPORTED);
 		Observation res;
 
 		res = new Observation();

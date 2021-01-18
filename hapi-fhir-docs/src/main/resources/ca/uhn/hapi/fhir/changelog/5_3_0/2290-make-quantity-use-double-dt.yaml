@@ -1,0 +1,6 @@
+---
+type: change
+issue: 2290
+title: "In the JPA server. the SQL datatype used to index quantities has been changed from `NUMBER(19,2)` to
+   `double precision` (or equivalents depending on platform). This improves the query support for ssearching on
+   very small quantities."

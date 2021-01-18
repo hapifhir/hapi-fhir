@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -217,9 +218,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		mySearchCoordinatorSvcRaw.setNeverUseLocalSearchForUnitTests(false);
 		mySearchCoordinatorSvcRaw.cancelAllActiveSearches();
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchNotSupported();
+        myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 
-		myClient.unregisterInterceptor(myCapturingInterceptor);
+        myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
 	@BeforeEach
@@ -4085,8 +4086,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() throws Exception {
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -4167,8 +4168,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_CombineUCUMOrNonUCUM() throws Exception {
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();
@@ -4222,11 +4223,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		// > 1m
-		String uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
-			
-		ourLog.info("uri = " + uri);
-		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		String uri;
+		List<String> ids;
+
+		// With non-normalized
+		uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		assertEquals(1, ids.size());
+
+		// With normalized
+		uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("1|http://unitsofmeasure.org|m,100|http://foo|cm");
+		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 		assertEquals(2, ids.size());
 	}
 	
@@ -6044,8 +6051,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateWithNormalizedQuantitySearchSupported() throws Exception {
-		
-		myDaoConfig.getModelConfig().setNormalizedQuantitySearchSupported();
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 		IIdType pid0;
 		{
 			Patient patient = new Patient();

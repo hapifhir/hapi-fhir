@@ -9,9 +9,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.util.StopWatch;
-import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -23,7 +20,6 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,9 +39,8 @@ public class IndexStressTest {
 		FhirContext ctx = FhirContext.forDstu3();
 		IValidationSupport mockValidationSupport = mock(IValidationSupport.class);
 		when(mockValidationSupport.getFhirContext()).thenReturn(ctx);
-		IValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(ctx), mockValidationSupport));
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, validationSupport, searchParamRegistry);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), new PartitionSettings(), ctx, searchParamRegistry);
 		extractor.start();
 
 		Map<String, RuntimeSearchParam> spMap = ctx

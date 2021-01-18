@@ -13267,7 +13267,7 @@ fhirvs:contact-point-use ["home" "work" "temp" "old" "mobile"]
 fhirvs:immunization-status ["completed" "entered-in-error" "not-done"]
 
 # This value set includes all possible codes from BCP-13 (http://tools.ietf.org/html/bcp13)
-fhirvs:mimetypes EXTERNAL
+fhirvs:mimetypes .
 
 # The use of an address.
 fhirvs:address-use ["home" "work" "temp" "old" "billing"]
