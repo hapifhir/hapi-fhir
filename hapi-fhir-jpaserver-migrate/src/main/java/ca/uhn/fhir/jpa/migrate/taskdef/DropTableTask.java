@@ -67,7 +67,8 @@ public class DropTableTask extends BaseTableTask {
 		theIndexTask
 			.setTableName(getTableName())
 			.setConnectionProperties(getConnectionProperties())
-			.setDriverType(getDriverType());
+			.setDriverType(getDriverType())
+			.setDryRun(isDryRun());
 		for (String nextIndex : indexNames) {
 			theIndexTask
 				.setIndexName(nextIndex)
