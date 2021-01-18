@@ -31,8 +31,6 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,11 +49,6 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	 * X-HAPI-Request-Validation
 	 */
 	public static final String DEFAULT_RESPONSE_HEADER_NAME = "X-FHIR-Request-Validation";
-	/**
-	 * A {@link RequestDetails#getUserData() user data} entry will be created with this
-	 * key which contains the {@link ValidationResult} from validating the request.
-	 */
-	public static final String REQUEST_VALIDATION_RESULT = RequestValidatingInterceptor.class.getName() + "_REQUEST_VALIDATION_RESULT";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RequestValidatingInterceptor.class);
 	private boolean myAddValidationResultsToResponseOperationOutcome = true;
 
@@ -82,8 +75,9 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 
 		ValidationResult validationResult = validate(requestText, theRequestDetails);
 
-		// The JPA server will use this
-		theRequestDetails.getUserData().put(REQUEST_VALIDATION_RESULT, validationResult);
+		if (myAddValidationResultsToResponseOperationOutcome) {
+			addValidationResultToRequestDetails(theRequestDetails, validationResult);
+		}
 
 		return true;
 	}
@@ -108,25 +102,6 @@ public class RequestValidatingInterceptor extends BaseValidatingInterceptor<Stri
 	 */
 	public void setAddValidationResultsToResponseOperationOutcome(boolean theAddValidationResultsToResponseOperationOutcome) {
 		myAddValidationResultsToResponseOperationOutcome = theAddValidationResultsToResponseOperationOutcome;
-	}
-
-	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
-		if (myAddValidationResultsToResponseOperationOutcome) {
-			if (theResponseObject instanceof IBaseOperationOutcome) {
-				IBaseOperationOutcome oo = (IBaseOperationOutcome) theResponseObject;
-
-				if (theRequestDetails != null) {
-					ValidationResult validationResult = (ValidationResult) theRequestDetails.getUserData().get(RequestValidatingInterceptor.REQUEST_VALIDATION_RESULT);
-					if (validationResult != null) {
-						validationResult.populateOperationOutcome(oo);
-					}
-				}
-
-			}
-		}
-
-		return true;
 	}
 
 	@Override

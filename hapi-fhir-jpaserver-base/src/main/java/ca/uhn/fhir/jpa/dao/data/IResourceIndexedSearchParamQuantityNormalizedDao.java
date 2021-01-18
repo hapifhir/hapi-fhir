@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
@@ -27,7 +28,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface IResourceIndexedSearchParamQuantityNormalizedDao extends JpaRepository<ResourceIndexedSearchParamQuantity, Long> {
+public interface IResourceIndexedSearchParamQuantityNormalizedDao extends JpaRepository<ResourceIndexedSearchParamQuantityNormalized, Long> {
 	@Modifying
 	@Query("delete from ResourceIndexedSearchParamQuantityNormalized t WHERE t.myResourcePid = :resid")
 	void deleteByResourceId(@Param("resid") Long theResourcePid);

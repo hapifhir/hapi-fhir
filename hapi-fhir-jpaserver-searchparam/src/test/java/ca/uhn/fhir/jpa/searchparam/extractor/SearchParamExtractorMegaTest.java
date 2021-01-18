@@ -17,7 +17,6 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeXhtmlHl7OrgDefinition;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
-import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.cache.ResourceChangeResult;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -66,15 +65,15 @@ public class SearchParamExtractorMegaTest {
 
 		ctx = FhirContext.forDstu3();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorDstu3(new ModelConfig(), partitionSettings, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
+		process(ctx, new SearchParamExtractorDstu3(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
 
 		ctx = FhirContext.forR4();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR4(new ModelConfig(), partitionSettings, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR4(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
 
 		ctx = FhirContext.forR5();
 		searchParamRegistry = new MySearchParamRegistry(ctx);
-		process(ctx, new SearchParamExtractorR5(new ModelConfig(), partitionSettings, ctx, new DefaultProfileValidationSupport(ctx), searchParamRegistry));
+		process(ctx, new SearchParamExtractorR5(new ModelConfig(), partitionSettings, ctx, searchParamRegistry));
 	}
 
 	private void process(FhirContext theCtx, BaseSearchParamExtractor theExtractor) throws Exception {

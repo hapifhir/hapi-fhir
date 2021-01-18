@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -103,8 +104,8 @@ public class InMemorySubscriptionMatcherR4Test {
 	
 	@AfterEach
 	public void after() throws Exception {
-		myModelConfig.setNormalizedQuantitySearchNotSupported();
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
@@ -249,8 +250,8 @@ public class InMemorySubscriptionMatcherR4Test {
 	
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
 
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -282,8 +283,8 @@ public class InMemorySubscriptionMatcherR4Test {
 	
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_InvalidUCUMUnit() {
-		myModelConfig.setNormalizedQuantitySearchSupported();
-				
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://bar").setCode("foo")))
@@ -298,8 +299,8 @@ public class InMemorySubscriptionMatcherR4Test {
 	
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NoSystem() {
-		myModelConfig.setNormalizedQuantitySearchSupported();
-				
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://bar").setCode("foo")))
@@ -314,9 +315,9 @@ public class InMemorySubscriptionMatcherR4Test {
 	
 	@Test
 	public void testSearchWithNormalizedQuantitySearchSupported_NotUcumSystem() {
-		
-		myModelConfig.setNormalizedQuantitySearchSupported();
-			
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
 		Observation o1 = new Observation();
 		o1.addComponent()
 			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
