@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,7 +181,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask {
 				});
 				// If this query returns a row then the existence of that row indicates that a NOT NULL constraint exists
 				// on this Column and we must override whatever result was previously calculated and set it to false
-				if (queryResults != null && queryResults.get(0) != null && !queryResults.get(0).isEmpty()) {
+				if (queryResults != null && queryResults.size() > 0 && queryResults.get(0) != null && !queryResults.get(0).isEmpty()) {
 					result = false;
 				}
 				break;
