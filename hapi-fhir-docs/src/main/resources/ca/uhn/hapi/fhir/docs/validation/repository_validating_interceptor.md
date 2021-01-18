@@ -64,6 +64,8 @@ Note that this rule alone does not actually enforce validation against the speci
 }
 ```
 
+<a name="require-validation"/>
+
 # Rules: Require Validation to Declared Profiles
 
 Use the following rule to require that resources of the given type be validated successfully before allowing them to be persisted. For every resource of the given type that is submitted for storage, the `Resource.meta.profile` field will be examined and the resource will be validated against any declarations found there.
@@ -93,6 +95,13 @@ By default, resource updates/changes resulting in failing validation will cause 
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|requireValidationToDeclaredProfilesTagOnFailure}}
 ```
 
+## Configuring the Validator
+
+The following snippet shows a number of additional optional settings that can be chained onto the validation rule. 
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|requireValidationToDeclaredProfilesAdditionalOptions}}
+```
 
 # Rules: Disallow Specific Profiles
 
@@ -101,3 +110,7 @@ Rules can declare that a specific profile is not allowed.
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/RepositoryValidatingInterceptorExamples.java|disallowProfiles}}
 ```
+
+# Adding Validation Outcome to HTTP Response
+
+If you have included a [Require Validation](#require-validation) rule to your chain, you can add the `ValidationResultEnrichingInterceptor` to your server if you wish to have validation results added to and OperationOutcome objects that are returned by the server.

@@ -521,6 +521,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		/*
 		 * ValueSet is pre-expanded in database so let's use that
 		 */
+		String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "valueSetExpandedUsingPreExpansion");
+		theAccumulator.addMessage(msg);
 		expandConcepts(theAccumulator, termValueSet, theFilter, theAdd);
 	}
 
