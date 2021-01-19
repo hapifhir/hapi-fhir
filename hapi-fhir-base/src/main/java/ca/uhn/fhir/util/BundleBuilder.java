@@ -194,6 +194,14 @@ public class BundleBuilder {
 	}
 
 	/**
+	 * Adds an entry for a Collection bundle type
+	 */
+	public void addCollectionEntry(IBaseResource theResource) {
+		setType("collection");
+		addEntryAndReturnRequest(theResource);
+	}
+
+	/**
 	 * Creates new entry and adds it to the bundle
 	 *
 	 * @return
@@ -320,6 +328,16 @@ public class BundleBuilder {
 		retVal.setValue(theInitialValue);
 		return retVal;
 	}
+
+	/**
+	 * Sets a value for <code>Bundle.type</code>. That this is a coded field so {@literal theType}
+	 * must be an actual valid value for this field or a {@link ca.uhn.fhir.parser.DataFormatException}
+	 * will be thrown.
+	 */
+	public void setType(String theType) {
+		setBundleField("type", theType);
+	}
+
 
 	public static class UpdateBuilder {
 

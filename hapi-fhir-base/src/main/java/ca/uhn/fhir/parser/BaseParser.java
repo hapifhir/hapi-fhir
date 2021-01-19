@@ -991,7 +991,7 @@ public abstract class BaseParser implements IParser {
 
 	protected boolean shouldEncodeResourceId(IBaseResource theResource, EncodeContext theEncodeContext) {
 		boolean retVal = true;
-		if (isOmitResourceId()) {
+		if (isOmitResourceId() && theEncodeContext.getPath().size() == 1) {
 			retVal = false;
 		} else {
 			if (myDontEncodeElements != null) {
