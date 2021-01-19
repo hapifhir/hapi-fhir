@@ -593,7 +593,14 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					switch (nextParamDef.getParamType()) {
 						case DATE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateDate(theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+								// FT: 2021-01-18 use operation 'gt', 'ge', 'le' or 'lt' 
+								// to create the predicateDate instead of generic one with operation = null 
+								SearchFilterParser.CompareOperation operation = null;
+								if (nextAnd.size() > 0) {
+									DateParam param = (DateParam) nextAnd.get(0);
+									operation = ca.uhn.fhir.jpa.search.builder.QueryStack.toOperation(param.getPrefix());
+								}
+								myPredicateBuilder.addPredicateDate(theResourceName, nextParamDef, nextAnd, operation, theRequestPartitionId);
 							}
 							break;
 						case QUANTITY:

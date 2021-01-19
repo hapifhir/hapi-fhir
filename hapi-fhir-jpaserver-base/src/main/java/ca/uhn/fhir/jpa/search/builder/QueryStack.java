@@ -310,7 +310,7 @@ public class QueryStack {
 				return createPredicateToken(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId);
 			}
 			case DATE: {
-				return createPredicateDate(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId);
+				return createPredicateDate(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), toOperation(((DateParam) theParamValue).getPrefix()), theRequestPartitionId);
 			}
 			case QUANTITY: {
 				return createPredicateQuantity(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId);
@@ -976,7 +976,15 @@ public class QueryStack {
 					switch (nextParamDef.getParamType()) {
 						case DATE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
+								// FT: 2021-01-18 use operation 'gt', 'ge', 'le' or 'lt' 
+								// to create the predicateDate instead of generic one with operation = null 
+								SearchFilterParser.CompareOperation operation = null;
+								if (nextAnd.size() > 0) {
+									DateParam param = (DateParam) nextAnd.get(0);
+									operation = toOperation(param.getPrefix());
+								}
+								andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, operation, theRequestPartitionId));
+								//andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
 							}
 							break;
 						case QUANTITY:

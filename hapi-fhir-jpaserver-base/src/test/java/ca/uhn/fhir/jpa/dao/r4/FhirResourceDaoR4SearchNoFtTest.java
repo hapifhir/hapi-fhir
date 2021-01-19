@@ -4369,7 +4369,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			String searchQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search query:\n{}", searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
-			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal >= '20200605'"), searchQuery);
+			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_high_date_ordinal >= '20200605'"), searchQuery);
 			assertEquals(1, countMatches(searchQuery.toLowerCase(), "t0.sp_value_low_date_ordinal <= '20200606'"), searchQuery);
 		}
 
@@ -4389,7 +4389,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			assertEquals(0, countMatches(searchQuery.toLowerCase(), "partition"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "join"), searchQuery);
 			assertEquals(2, countMatches(searchQuery.toLowerCase(), "hash_identity"), searchQuery);
-			assertEquals(4, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
+			// - query is changed 'or' is removed
+			assertEquals(2, countMatches(searchQuery.toLowerCase(), "sp_value_low"), searchQuery);
 		}
 
 		// Period search
