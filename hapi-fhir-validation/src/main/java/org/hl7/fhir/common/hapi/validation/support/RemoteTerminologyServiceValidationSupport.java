@@ -1,12 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.support.CodeValidationResult;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.support.IssueSeverity;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
+import ca.uhn.fhir.context.support.support.IssueSeverity;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -81,7 +81,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		if (resultsList.size() > 0) {
 			return resultsList.get(0);
 		}
-
 		return null;
 	}
 
@@ -105,12 +104,20 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		// FIXME
+		// you can't fetch the code system from the tx server
+		// 1. change to return true, same for value set below, at least for the initial run
 		return fetchCodeSystem(theSystem) != null;
+//		return true;
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		// FIXME
+		// you can't fetch the code system from the tx server
+		// 1. change to return true, same for value set below, at least for the initial run
 		return fetchValueSet(theValueSetUrl) != null;
+//		return true;
 	}
 
 	private IGenericClient provideClient() {
@@ -134,7 +141,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 		if (theValueSet == null && theValueSetUrl == null) {
 			resourceType = "CodeSystem";
 
-			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "url", theCodeSystem);
+			//FIXME change back to "url", not "system"
+			ParametersUtil.addParameterToParametersUri(getFhirContext(), input, "system", theCodeSystem);
 			ParametersUtil.addParameterToParametersString(getFhirContext(), input, "code", theCode);
 			if (isNotBlank(theDisplay)) {
 				ParametersUtil.addParameterToParametersString(getFhirContext(), input, "display", theDisplay);
@@ -155,7 +163,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 			if (theValueSet != null) {
 				ParametersUtil.addParameterToParameters(getFhirContext(), input, "valueSet", theValueSet);
 			}
-
 		}
 
 
@@ -183,6 +190,18 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				retVal.setDisplay(displayValues.get(0));
 			}
 
+			/*
+			 * Validations that return a value of "result" == true, can still be a WARNING. We determine if this should be
+			 * labelled a WARNING by checking if the "message" field has been populated with a value. This value is the
+			 * warning message provided by the terminology server, or other validation service.
+			 * FIXME
+			 */
+			List<String> messageValues = ParametersUtil.getNamedParameterValuesAsString(getFhirContext(), output, "message");
+			if (messageValues.size() > 0) {
+				retVal.setMessage(messageValues.get(0));
+				retVal.setSeverity(IssueSeverity.WARNING);
+			}
+
 		} else {
 
 			retVal.setSeverity(IssueSeverity.ERROR);
@@ -199,10 +218,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 	 * Sets the FHIR Terminology Server base URL
 	 *
 	 * @param theBaseUrl The base URL, e.g. "https://hapi.fhir.org/baseR4"
+	 * @return
 	 */
-	public void setBaseUrl(String theBaseUrl) {
+	public RemoteTerminologyServiceValidationSupport setBaseUrl(String theBaseUrl) {
 		Validate.notBlank(theBaseUrl, "theBaseUrl must be provided");
 		myBaseUrl = theBaseUrl;
+		return this;
 	}
 
 	/**

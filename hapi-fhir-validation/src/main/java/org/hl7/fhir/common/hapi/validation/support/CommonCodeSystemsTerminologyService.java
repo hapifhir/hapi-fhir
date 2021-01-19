@@ -32,7 +32,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This {@link IValidationSupport validation support module} can be used to validate codes against common
- * CodeSystems that are commonly used, but are not distriuted with the FHIR specification for various reasons
+ * CodeSystems that are commonly used, but are not distributed with the FHIR specification for various reasons
  * (size, complexity, etc.).
  * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html#CommonCodeSystemsTerminologyService">CommonCodeSystemsTerminologyService</a> in the HAPI FHIR documentation
@@ -55,6 +55,8 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	private static Map<String, String> ISO_4217_CODES = Collections.unmodifiableMap(buildIso4217Codes());
 	private static Map<String, String> ISO_3166_CODES = Collections.unmodifiableMap(buildIso3166Codes());
 	private final FhirContext myFhirContext;
+
+	private static final String LOINC_CODESYSTEM_URL = "http://loinc.org";
 
 	/**
 	 * Constructor

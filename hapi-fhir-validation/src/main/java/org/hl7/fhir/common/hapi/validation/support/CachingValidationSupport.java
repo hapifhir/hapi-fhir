@@ -72,9 +72,14 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-		String key = "isCodeSystemSupported " + theSystem;
-		Boolean retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
-		assert retVal != null;
+		Boolean retVal = false;
+		// This check is put in to mirror what is done within the core libraries validation process.
+		// FIXME check with James to see if this is okay
+		if (!(theSystem.startsWith("http://example.org") || theSystem.startsWith("http://acme.com") || theSystem.startsWith("http://hl7.org/fhir/valueset-") || theSystem.startsWith("urn:oid:"))) {
+			String key = "isCodeSystemSupported " + theSystem;
+			retVal = loadFromCache(myCache, key, t -> super.isCodeSystemSupported(theValidationSupportContext, theSystem));
+			assert retVal != null;
+		}
 		return retVal;
 	}
 

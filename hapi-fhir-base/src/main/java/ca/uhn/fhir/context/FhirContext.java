@@ -10,13 +10,7 @@ import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.view.ViewGenerator;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.parser.IParserErrorHandler;
-import ca.uhn.fhir.parser.JsonParser;
-import ca.uhn.fhir.parser.LenientErrorHandler;
-import ca.uhn.fhir.parser.RDFParser;
-import ca.uhn.fhir.parser.XmlParser;
+import ca.uhn.fhir.parser.*;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -39,19 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 /*
  * #%L
@@ -628,19 +611,32 @@ public class FhirContext {
 			 * If hapi-fhir-validation is on the classpath, we can create a much more robust
 			 * validation chain using the classes found in that package
 			 */
+			// FIXME the direction of module dependcies
+			/*
+			 * this lives in hapi fhir base ,everything ese depends on this module, any classes in here can't depend on other modules, other modules depend on it
+			 * we use reflection because we assume they will have these on their class path
+			 */
 			String inMemoryTermSvcType = "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport";
 			String commonCodeSystemsSupportType = "org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService";
+			String remoteTerminologyServiceSupportType = "org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport";
+
 			if (ReflectionUtil.typeExists(inMemoryTermSvcType)) {
-				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(inMemoryTermSvcType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
-				IValidationSupport commonCodeSystemsSupport = ReflectionUtil.newInstanceOrReturnNull(commonCodeSystemsSupportType, IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				IValidationSupport remoteTerminologyServiceValidationSupport = ReflectionUtil.newInstanceOrReturnNull(remoteTerminologyServiceSupportType,
+					IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				IValidationSupport inMemoryTermSvc = ReflectionUtil.newInstanceOrReturnNull(inMemoryTermSvcType,
+					IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
+				IValidationSupport commonCodeSystemsSupport = ReflectionUtil.newInstanceOrReturnNull(commonCodeSystemsSupportType,
+					IValidationSupport.class, new Class<?>[]{FhirContext.class}, new Object[]{this});
 				retVal = ReflectionUtil.newInstanceOrReturnNull("org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain",
-					IValidationSupport.class, new Class<?>[]{ IValidationSupport[].class }, new Object[]{ new IValidationSupport[] {
-					retVal,
-					inMemoryTermSvc,
-					commonCodeSystemsSupport,
-				}});
+					IValidationSupport.class, new Class<?>[]{IValidationSupport[].class}, new Object[]{new IValidationSupport[]{
+						retVal,
+						inMemoryTermSvc,
+						commonCodeSystemsSupport//,
+//						remoteTerminologyServiceValidationSupport
+					}});
 				assert retVal != null : "Failed to instantiate " + "org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain";
 			}
+
 
 
 			myValidationSupport = retVal;
@@ -735,7 +731,6 @@ public class FhirContext {
 	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
 	 * without incurring any performance penalty
 	 * </p>
-	 *
 	 */
 	public IParser newRDFParser() {
 		return new RDFParser(this, myParserErrorHandler, Lang.TURTLE);

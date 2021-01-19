@@ -119,7 +119,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	@Override
 	public NpmPackage loadPackageFromCacheOnly(String theId, @Nullable String theVersion) {
 		Optional<NpmPackageVersionEntity> packageVersion = loadPackageVersionEntity(theId, theVersion);
-		if (!packageVersion.isPresent() && theVersion.endsWith(".x")) {
+		if (!packageVersion.isPresent() && theVersion != null && theVersion.endsWith(".x")) {
 			String lookupVersion = theVersion;
 			do {
 				lookupVersion = lookupVersion.substring(0, lookupVersion.length() - 2);

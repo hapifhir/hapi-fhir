@@ -24,7 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.packages.NpmJpaValidationSupport;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
@@ -73,6 +75,10 @@ public class JpaValidationSupportChain extends ValidationSupportChain {
 		addValidationSupport(new InMemoryTerminologyServerValidationSupport(myFhirContext));
 		addValidationSupport(myNpmJpaValidationSupport);
 		addValidationSupport(new CommonCodeSystemsTerminologyService(myFhirContext));
+		//FIXME
+		RemoteTerminologyServiceValidationSupport remote = new RemoteTerminologyServiceValidationSupport(myFhirContext).setBaseUrl("http://tx.fhir.org/r4");
+		//remote.addClientInterceptor(new LoggingInterceptor(true));
+		addValidationSupport(remote);
 	}
 
 }

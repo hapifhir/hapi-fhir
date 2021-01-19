@@ -22,8 +22,13 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
+import ca.uhn.fhir.context.support.support.LookupCodeResult;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -33,6 +38,10 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 	@Autowired
 	private FhirContext myFhirContext;
 
+	// FIXME: iantorno
+	// Autowire this into the test and then in before, it has a method called installPackage, go through the necessary
+	// import
+	// In any case where a value set is straightforward it will be func identical
 	@Autowired
 	private IHapiPackageCacheManager myHapiPackageCacheManager;
 
@@ -56,6 +65,32 @@ public class NpmJpaValidationSupport implements IValidationSupport {
 		return fetchResource("StructureDefinition", theUri);
 	}
 
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		return false;
+	}
+
+	@Override
+	public CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		return null;
+	}
+
+	@Override
+	public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @NotNull IBaseResource theValueSet) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+		return null;
+	}
+
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		return false;
+	}
+
+	//fixme Codesystem has content == complete or external, snomed has millions of codes so they are not included
 	@Nullable
 	public IBaseResource fetchResource(String theResourceType, String theUri) {
 		FhirVersionEnum fhirVersion = myFhirContext.getVersion().getVersion();

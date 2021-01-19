@@ -240,6 +240,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				retVal = new ValidationResult(new org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent()
 					.setCode(code)
 					.setDisplay(display));
+				//FIXME
+				if (isNotBlank(message)) {
+					retVal.setSeverity(ValidationMessage.IssueSeverity.WARNING)
+						.setMessage(message);
+				}
 			} else if (isNotBlank(issueSeverity)) {
 				retVal = new ValidationResult(ValidationMessage.IssueSeverity.fromCode(issueSeverity), message, ValueSetExpander.TerminologyServiceErrorClass.UNKNOWN);
 			}
@@ -316,6 +321,21 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		if (isBlank(uri)) {
 			return null;
+		}
+
+		/*
+		 * FIXME Ask James what to do about the tacked on version date on the valueset
+		 * http://terminology.hl7.org/ValueSet/v3-ConfidentialityClassification|2014-03-26
+		 * Caffiene cache contains the uri http://terminology.hl7.org/ValueSet/v3-ConfidentialityClassification
+		 * without the date
+		 *
+		 * In the core libraries we do the same operation below.
+		 * To enable a breakpoint at this line, search for uri.contains("v3-ConfidentialityClassification")
+		 */
+		String version = null;
+		if (uri.contains("|")) {
+			version = uri.substring(uri.lastIndexOf("|")+1);
+			uri = uri.substring(0, uri.lastIndexOf("|"));
 		}
 
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);

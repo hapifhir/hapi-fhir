@@ -23,6 +23,8 @@ package ca.uhn.fhir.context.support;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
+import ca.uhn.fhir.context.support.support.LookupCodeResult;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;

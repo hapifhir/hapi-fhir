@@ -102,6 +102,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 	@Override
 	@Hook(value = Pointcut.CLIENT_RESPONSE, order = InterceptorOrders.LOGGING_INTERCEPTOR_REQUEST)
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
+		//FIXME remove this
 		if (myLogResponseSummary) {
 			String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();
 			String respLocation = "";
@@ -153,11 +154,21 @@ public class LoggingInterceptor implements IClientInterceptor {
 					} catch (IllegalStateException e) {
 						throw new InternalErrorException(e);
 					}
-					myLog.info("Client response body:\n{}", new String(bytes, StandardCharsets.UTF_8));
+					String o = new String(bytes, StandardCharsets.UTF_8);
+					myLog.info("Client response body:\n{}", o);
+					// FIXME
+					if (theResponse.getStatus() >= 400) {
+						System.out.println("Error");
+						//throw new InternalErrorException("Iantorno");
+					}
 				} else {
 					myLog.info("Client response body: (none)");
 				}
 			}
+		}
+		if (theResponse.getStatus() >= 400) {
+			//System.out.println("Error");
+			//throw new InternalErrorException("Iantorno");
 		}
 	}
 

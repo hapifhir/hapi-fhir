@@ -12,5 +12,12 @@ data class TestResult(
    companion object {
       const val DO_NOT_CHECK = Int.MIN_VALUE
    }
+
+   override fun toString(): String {
+      return "Error <${errorCount} entries>\n" +
+         "Warning <${warningCount} entries>\n" +
+         "Message Output -> \n" +
+         output.joinToString(separator = "\n")
+   }
 }
 

@@ -7,17 +7,19 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test
 import ca.uhn.fhir.jpa.dao.r4.core.model.TestEntry
 import ca.uhn.fhir.jpa.dao.r4.core.model.TestResult
 import ca.uhn.fhir.jpa.dao.r4.core.utils.*
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager
+import ca.uhn.fhir.jpa.packages.PackageInstallationSpec
+import ca.uhn.fhir.jpa.packages.PackageInstallerSvcImpl
 import ca.uhn.fhir.parser.DataFormatException
 import ca.uhn.fhir.rest.api.EncodingEnum
-import ca.uhn.fhir.rest.api.MethodOutcome
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException
+import ca.uhn.fhir.util.ClasspathUtil
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator
 import org.hl7.fhir.instance.model.api.IBaseResource
 import org.hl7.fhir.r4.model.OperationOutcome
-import org.hl7.fhir.r4.model.Resource
 import org.hl7.fhir.r5.utils.IResourceValidator
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -25,7 +27,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.ArrayList
 import java.util.stream.Stream
 
 
@@ -35,6 +36,12 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
 
    @Autowired
    protected lateinit var validator: FhirInstanceValidator
+
+   @Autowired
+   private lateinit var myHapiPackageCacheManager: IHapiPackageCacheManager
+
+   @Autowired
+   private lateinit var igInstaller: PackageInstallerSvcImpl
 
    @Autowired
    protected lateinit var daoRegistry: DaoRegistry
@@ -71,6 +78,41 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
             doCreateResource(baseResource)
          }
       }
+
+
+      val bytes = ClasspathUtil.loadResourceAsByteArray("/packages/hl7.terminology.r4-2.0.0.tgz")
+//
+//      igInstaller.install(
+//         PackageInstallationSpec().setName("hl7.terminology.r4").setVersion("2.0.0")
+//            .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes)
+//      )
+
+      /**
+       * Accept-Encoding: gzip
+Content-Type: application/fhir+json; charset=UTF-8
+2020-12-17 15:57:08.674 [main] INFO  c.u.f.r.c.i.LoggingInterceptor [LoggingInterceptor.java:94] Client request body:
+{"resourceType":"Parameters","parameter":[{"name":"url","valueUri":"https://mednet.swiss/fhir/productNumber"},{"name":"code","valueString":"6698301"}]}
+2020-12-17 15:57:08.790 [main] INFO  c.u.f.r.c.i.LoggingInterceptor [LoggingInterceptor.java:126] Client response: HTTP 422 Unknown Response Code in 116ms
+2020-12-17 15:57:08.791 [main] INFO  c.u.f.r.c.i.LoggingInterceptor [LoggingInterceptor.java:142] Client response headers:
+access-control-allow-origin: *
+x-request-id: 55-133828
+date: Thu, 17 Dec 2020 20:57:06 GMT
+server: Health Intersections FHIR Server
+content-length: 3064
+content-type: application/fhir+json
+
+       So look at the code in the core lib, and see why it doesn't barf on mednet, is it a whitelist? if so, we can replicate the whitelist locally
+       with the logger added now we can see the responses to the calls that we're making to the terminology server
+       */
+
+      myHapiPackageCacheManager.installPackage(PackageInstallationSpec().setName("hl7.terminology.r4").setVersion("2.0.0")
+         .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes))
+
+//         myHapiPackageCacheManager.loadPackage("hl7.terminology")
+//      myHapiPackageCacheManager.installPackage(
+//         PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2")
+//            .setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes))
+      //myHapiPackageCacheManager.loadPackageContents("hl7.terminology", "latest")
 //      testEntry.bundleParam?.let { bundleRule -> this.bundleValidationRules.add()}
 //      validator.isAssumeValidRestReferences = testEntry.profile.assumeValidRestReferences
 //      validator.isAllowExamples = testEntry.allowExamples
@@ -80,7 +122,6 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
 
       return this
    }
-
 
 
    protected fun validate(
@@ -195,7 +236,7 @@ internal open class CoreValidationTests : BaseJpaR4Test() {
                   || cleanVersionString(extractVersion(gson.fromJson(testContent, TestEntry::class.java))) == "4.0.1"
             }.map { (testId, testContent) ->
                Arguments.arguments(testId, gson.fromJson(testContent, TestEntry::class.java))
-            }.subList(9, 10).stream()
+            }.subList(0, 100).stream()
       }
 
       fun getTestProfile(testEntry: TestEntry): String {

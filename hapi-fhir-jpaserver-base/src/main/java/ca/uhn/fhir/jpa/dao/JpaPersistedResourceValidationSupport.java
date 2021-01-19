@@ -22,7 +22,11 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.support.CodeValidationResult;
+import ca.uhn.fhir.context.support.support.LookupCodeResult;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -42,6 +46,7 @@ import org.hl7.fhir.r4.model.ImplementationGuide;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +86,6 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		super();
 		Validate.notNull(theFhirContext);
 		myFhirContext = theFhirContext;
-
 		myNoMatch = myFhirContext.getResourceDefinition("Basic").newInstance();
 	}
 
@@ -101,6 +105,15 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		return fetchResource(myStructureDefinitionType, theUrl);
 	}
 
+	@Override
+	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		return false;
+	}
+
+	@Override
+	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		return false;
+	}
 
 	@Override
 	@SuppressWarnings({"unchecked", "unused"})

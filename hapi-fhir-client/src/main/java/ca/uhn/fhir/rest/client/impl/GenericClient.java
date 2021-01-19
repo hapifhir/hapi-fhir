@@ -1257,8 +1257,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Object execute() {
-			if (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE) && myMsgBundle != null) {
+		public Object execute() { if (myOperationName != null && myOperationName.equals(Constants.EXTOP_PROCESS_MESSAGE) && myMsgBundle != null) {
 				Map<String, List<String>> urlParams = new LinkedHashMap<String, List<String>>();
 				// Set Url parameter Async and Response-Url
 				if (myIsAsync != null) {
@@ -1277,6 +1276,9 @@ public class GenericClient extends BaseClient implements IGenericClient {
 				Object retVal = invoke(null, handler, invocation);
 				return retVal;
 			}
+
+			// FIXME
+			setKeepResponses(true);
 
 			String resourceName;
 			String id;
