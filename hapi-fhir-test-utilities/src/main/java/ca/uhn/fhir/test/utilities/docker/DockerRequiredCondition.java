@@ -4,7 +4,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.testcontainers.DockerClientFactory;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 
 /**
