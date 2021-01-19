@@ -97,7 +97,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 																  DateRangeParam theRange,
 																  SearchFilterParser.CompareOperation theOperation) {
 		
-		System.out.println("createPredicateDateFromRange");
+
 		Date lowerBoundInstant = theRange.getLowerBoundAsInstant();
 		Date upperBoundInstant = theRange.getUpperBoundAsInstant();
 
