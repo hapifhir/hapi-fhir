@@ -95,8 +95,13 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>compile</scope>
 		</dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <scope>compile</scope>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<plugins>
