@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -45,6 +46,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 @ExtendWith(SpringExtension.class)
+@RequiresDocker
 @ContextConfiguration(classes = {TestR4ConfigWithElasticSearch.class})
 public class FhirResourceDaoR4TerminologyElasticsearchIT extends BaseJpaTest {
 
