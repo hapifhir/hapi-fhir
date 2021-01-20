@@ -17,6 +17,7 @@ import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
@@ -103,8 +104,9 @@ class ValidatorWrapper {
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
+		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
 		try {
-			v = new InstanceValidator(theWorkerContext, evaluationCtx);
+			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
@@ -193,7 +195,7 @@ class ValidatorWrapper {
 				i--;
 			}
 
-			if (message.endsWith("' could not be resolved, so has not been checked") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
+			if (message.endsWith("' has not been checked because it is unknown") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
 				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
 			}
 
