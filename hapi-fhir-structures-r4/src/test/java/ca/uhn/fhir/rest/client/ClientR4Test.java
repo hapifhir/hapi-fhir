@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -48,6 +49,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringEndsWith;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -73,6 +75,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -204,6 +207,51 @@ public class ClientR4Test {
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), StringContains.containsString("foobar"));
 		}
+	}
+
+	/**
+	 * See #2297
+	 */
+	@Test
+	public void testCreateBundlePreservesIds() throws Exception {
+
+		BundleBuilder bb = new BundleBuilder(ourCtx);
+		bb.setType("collection");
+
+		Patient patient = new Patient();
+		patient.setId("Patient/123");
+		patient.addIdentifier().setSystem("urn:foo").setValue("bar");
+		bb.addCollectionEntry(patient);
+
+		IBaseBundle inputBundle = bb.getBundle();
+		inputBundle.setId("ABC");
+
+		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
+		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
+		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
+		when(myHttpResponse.getEntity().getContentType()).thenReturn(new BasicHeader("content-type", Constants.CT_TEXT + "; charset=UTF-8"));
+		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
+		when(myHttpResponse.getAllHeaders()).thenReturn(toHeaderArray("Location", "http://example.com/fhir/Patient/100/_history/200"));
+
+		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
+		client.setEncoding(EncodingEnum.JSON);
+		CapturingInterceptor interceptor = new CapturingInterceptor();
+		client.registerInterceptor(interceptor);
+
+		client.create().resource(inputBundle).execute();
+
+		assertEquals("http://foo/Bundle?_format=json", ((ApacheHttpRequest) interceptor.getLastRequest()).getApacheRequest().getURI().toASCIIString());
+
+		assertEquals(HttpPost.class, capt.getValue().getClass());
+		HttpPost post = (HttpPost) capt.getValue();
+		String requestBody = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
+		ourLog.info("Request body: {}", requestBody);
+		assertThat(requestBody, StringContains.containsString("{\"resourceType\":\"Patient\""));
+		Bundle requestBundle = ourCtx.newJsonParser().parseResource(Bundle.class, requestBody);
+
+		assertEquals("123", requestBundle.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertThat(requestBody, containsString("\"id\":\"123\""));
+		assertThat(requestBody, not(containsString("\"id\":\"ABC\"")));
 	}
 
 	/**
