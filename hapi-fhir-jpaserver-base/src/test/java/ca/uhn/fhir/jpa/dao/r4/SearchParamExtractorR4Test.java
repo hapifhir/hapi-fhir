@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Consent;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
@@ -50,6 +51,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -80,6 +83,19 @@ public class SearchParamExtractorR4Test {
 		assertEquals("category", token.getParamName());
 		assertEquals("SYSTEM", token.getSystem());
 		assertEquals("CODE", token.getValue());
+	}
+
+	@Test
+	public void testName() {
+		Patient patient = new Patient();
+		HumanName humanName = patient.addName();
+		humanName.addGiven("Jimmy");
+		humanName.setFamily("Jones");
+		humanName.setText("Jimmy Jones");
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> stringSearchParams = extractor.extractSearchParamStrings(patient);
+		List<String> nameValues = stringSearchParams.stream().filter(param -> "name".equals(param.getParamName())).map(ResourceIndexedSearchParamString::getValueExact).collect(Collectors.toList());
+		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "Jimmy Jones"));
 	}
 
 	@Test
