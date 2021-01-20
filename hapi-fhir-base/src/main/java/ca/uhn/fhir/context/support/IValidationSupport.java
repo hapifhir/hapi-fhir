@@ -118,6 +118,10 @@ public interface IValidationSupport {
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *
+	 * <p>
+	 * Note: Since 5.3.0, {@literal theClass} can be {@literal null}
+	 * </p>
+	 *
 	 * @param theClass The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
 	 * @param theUri   The resource URI
 	 * @return Returns the resource, or <code>null</code> if no resource with the
