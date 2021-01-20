@@ -69,8 +69,7 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 
 	@Transactional
 	@Override
-	public IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, IAnyResource theManuallyMergedGoldenResource,
-											 MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
+	public IAnyResource updateLink(IAnyResource theGoldenResource, IAnyResource theSourceResource, MdmMatchResultEnum theMatchResult, MdmTransactionContext theMdmContext) {
 		String sourceType = myFhirContext.getResourceType(theSourceResource);
 
 		validateUpdateLinkRequest(theGoldenResource, theSourceResource, theMatchResult, sourceType);

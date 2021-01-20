@@ -8,9 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TerserUtilTest extends BaseR4Test {
 
@@ -28,6 +26,12 @@ class TerserUtilTest extends BaseR4Test {
 		assertEquals(1, p2.getIdentifier().size());
 		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
 		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
+	}
+
+	@Test
+	void testFieldExists() {
+		assertTrue(TerserUtil.fieldExists(ourFhirContext, "identifier", new Patient()));
+		assertFalse(TerserUtil.fieldExists(ourFhirContext, "randomFieldName", new Patient()));
 	}
 
 	@Test

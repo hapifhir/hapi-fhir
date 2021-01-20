@@ -185,12 +185,13 @@ public final class TerserUtil {
 		}
 	}
 
-	public static void replaceField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
-		FhirTerser terser = theFhirContext.newTerser();
+	public static boolean fieldExists(FhirContext theFhirContext, String theFieldName, IBaseResource theInstance) {
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theInstance);
+		return definition.getChildByName(theFieldName) != null;
+	}
 
-		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
-		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
-		replaceField(theFrom, theTo, childDefinition);
+	public static void replaceField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+		replaceField(theFrom, theTo, getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom));
 	}
 
 	private static void replaceField(IBaseResource theFrom, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition) {
@@ -231,13 +232,21 @@ public final class TerserUtil {
 	 * @param theTo
 	 */
 	public static void mergeField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
-		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
-		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
+		BaseRuntimeChildDefinition childDefinition = getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom);
 
 		List<IBase> theFromFieldValues = childDefinition.getAccessor().getValues(theFrom);
 		List<IBase> theToFieldValues = childDefinition.getAccessor().getValues(theTo);
 
 		mergeFields(theTerser, theTo, childDefinition, theFromFieldValues, theToFieldValues);
+	}
+
+	private static BaseRuntimeChildDefinition getBaseRuntimeChildDefinition(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom) {
+		RuntimeResourceDefinition definition = theFhirContext.getResourceDefinition(theFrom);
+		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
+		if (childDefinition == null) {
+			throw new IllegalStateException(String.format("Field %s does not exist", theFieldName));
+		}
+		return childDefinition;
 	}
 
 	private static void mergeFields(FhirTerser theTerser, IBaseResource theTo, BaseRuntimeChildDefinition childDefinition, List<IBase> theFromFieldValues, List<IBase> theToFieldValues) {

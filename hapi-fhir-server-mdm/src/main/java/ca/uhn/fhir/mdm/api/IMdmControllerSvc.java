@@ -36,5 +36,5 @@ public interface IMdmControllerSvc {
 
 	IAnyResource mergeGoldenResources(String theFromGoldenResourceId, String theToGoldenResourceId, IAnyResource theManuallyMergedGoldenResource, MdmTransactionContext theMdmTransactionContext);
 
-	IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, IAnyResource theManuallyMergedGoldenResource, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource updateLink(String theGoldenResourceId, String theSourceResourceId, String theMatchResult, MdmTransactionContext theMdmTransactionContext);
 }
