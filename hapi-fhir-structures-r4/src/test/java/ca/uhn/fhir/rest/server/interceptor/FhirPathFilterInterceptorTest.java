@@ -100,13 +100,11 @@ public class FhirPathFilterInterceptorTest {
 	public void testFilteredResponse_ExpressionReturnsExtension() throws IOException {
 		createPatient();
 
-		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=Patient.extension(url='http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true");
+		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true");
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(responseText, containsString("\"resource\": {"));
-			assertThat(responseText, containsString("\"system\": \"http://identifiers/1\""));
-			assertThat(responseText, containsString("\"given\": [ \"Homer\", \"Jay\" ]"));
+			assertThat(responseText, containsString("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\""));
 		}
 
 	}
