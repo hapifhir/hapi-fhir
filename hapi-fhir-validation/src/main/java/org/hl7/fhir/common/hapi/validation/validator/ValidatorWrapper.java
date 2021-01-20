@@ -195,7 +195,7 @@ class ValidatorWrapper {
 				i--;
 			}
 
-			if (message.endsWith("' has not been checked because it is unknown") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
+			if (myErrorForUnknownProfiles && message.endsWith("' has not been checked because it is unknown, and the validator is set to not fetch unknown profiles") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
 				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
 			}
 

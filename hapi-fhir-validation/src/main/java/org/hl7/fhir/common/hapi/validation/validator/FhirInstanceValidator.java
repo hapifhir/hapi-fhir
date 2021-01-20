@@ -32,7 +32,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	private boolean noExtensibleWarnings = false;
 	private boolean noBindingMsgSuppressed = false;
 	private volatile VersionSpecificWorkerContextWrapper myWrappedWorkerContext;
-	private boolean errorForUnknownProfiles;
+	private boolean errorForUnknownProfiles = true;
 	private boolean assumeValidRestReferences;
 	private List<String> myExtensionDomains = Collections.emptyList();
 	private IResourceValidator.IValidatorResourceFetcher validatorResourceFetcher;
