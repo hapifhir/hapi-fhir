@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.empi.interceptor;
  * #%L
  * HAPI FHIR JPA Server - Enterprise Master Patient Index
  * %%
- * Copyright (C) 2014 - 2020 University Health Network
+ * Copyright (C) 2014 - 2021 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
