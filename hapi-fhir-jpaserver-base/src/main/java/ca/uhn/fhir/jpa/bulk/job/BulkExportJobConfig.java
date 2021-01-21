@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  */
 
 import ca.uhn.fhir.jpa.batch.processors.PidToIBaseResourceProcessor;
+import ca.uhn.fhir.jpa.bulk.svc.BulkExportDaoSvc;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.batch.core.Job;
@@ -53,6 +54,11 @@ public class BulkExportJobConfig {
 
 	@Autowired
 	private PidToIBaseResourceProcessor myPidToIBaseResourceProcessor;
+
+	@Bean
+	public BulkExportDaoSvc bulkExportDaoSvc() {
+		return new BulkExportDaoSvc();
+	}
 
 	@Bean
 	@Lazy

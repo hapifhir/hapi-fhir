@@ -103,8 +103,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.domain.SliceImpl;
@@ -117,6 +115,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -539,7 +538,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myDeleteExpungeService.expungeByResourcePids(theUrl, myResourceName, new SliceImpl<>(ResourcePersistentId.toLongList(theResourceIds)), theTheRequest);
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
@@ -1191,13 +1190,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return entity;
 	}
 
-	@NotNull
+	@Nonnull
 	protected ResourceTable readEntityLatestVersion(IIdType theId, RequestDetails theRequestDetails) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, getResourceName());
 		return readEntityLatestVersion(theId, requestPartitionId);
 	}
 
-	@NotNull
+	@Nonnull
 	private ResourceTable readEntityLatestVersion(IIdType theId, @Nullable RequestPartitionId theRequestPartitionId) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
@@ -1302,7 +1301,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (theRequest.isSubRequest()) {
 				Integer max = myDaoConfig.getMaximumSearchResultCountInTransaction();
 				if (max != null) {
-					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max.intValue(), "Maximum search result count in transaction ust be a positive integer");
+					Validate.inclusiveBetween(1, Integer.MAX_VALUE, max, "Maximum search result count in transaction ust be a positive integer");
 					theParams.setLoadSynchronousUpTo(myDaoConfig.getMaximumSearchResultCountInTransaction());
 				}
 			}
@@ -1311,7 +1310,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (offset != null || !isPagingProviderDatabaseBacked(theRequest)) {
 				theParams.setLoadSynchronous(true);
 				if (offset != null) {
-					Validate.inclusiveBetween(0, Integer.MAX_VALUE, offset.intValue(), "Offset must be a positive integer");
+					Validate.inclusiveBetween(0, Integer.MAX_VALUE, offset, "Offset must be a positive integer");
 				}
 				theParams.setOffset(offset);
 			}
@@ -1320,7 +1319,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (count != null) {
 				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
 				if (maxPageSize != null) {
-					Validate.inclusiveBetween(1, theRequest.getServer().getMaximumPageSize(), count.intValue(), "Count must be positive integer and less than " + maxPageSize);
+					Validate.inclusiveBetween(1, theRequest.getServer().getMaximumPageSize(), count, "Count must be positive integer and less than " + maxPageSize);
 				}
 				theParams.setCount(count);
 			} else if (theRequest.getServer().getDefaultPageSize() != null) {

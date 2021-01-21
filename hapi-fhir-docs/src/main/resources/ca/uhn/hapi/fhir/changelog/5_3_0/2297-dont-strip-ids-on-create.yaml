@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2297
+title: "When performing a FHIR create using the HAPI FHIR client, if the payload is a Bundle resource
+  the individual resources in the Bundle had their IDs removed by the client during payload serialization.
+  This has been corrected."

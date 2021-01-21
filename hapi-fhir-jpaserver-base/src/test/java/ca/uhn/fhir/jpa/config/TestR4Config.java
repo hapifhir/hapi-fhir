@@ -73,10 +73,6 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return new CircularQueueCaptureQueriesListener();
 	}
 
-	@Bean
-	public BulkExportDaoSvc bulkExportDaoSvc() {
-		return new BulkExportDaoSvc();
-	}
 
 	@Bean
 	public DataSource dataSource() {
