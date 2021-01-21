@@ -81,13 +81,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						fetchResourceName = "ValueSet";
 					}
 				}
-				Class<? extends IBaseResource> fetchResourceType = myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceDefinition(fetchResourceName).getImplementingClass();
-				IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, key.getUri());
 
-				if (fetched == null) {
-					return null;
+				Class<? extends IBaseResource> fetchResourceType;
+				if (fetchResourceName.equals("Resource")) {
+					fetchResourceType = null;
+				} else {
+					fetchResourceType = myValidationSupportContext.getRootValidationSupport().getFhirContext().getResourceDefinition(fetchResourceName).getImplementingClass();
 				}
 
+				IBaseResource fetched = myValidationSupportContext.getRootValidationSupport().fetchResource(fetchResourceType, key.getUri());
 
 				Resource canonical = myModelConverter.toCanonical(fetched);
 
@@ -426,6 +428,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
+	public String getSpecUrl() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public boolean hasCache() {
 		throw new UnsupportedOperationException();
 	}
@@ -438,6 +445,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public boolean isNoTerminologyServer() {
 		return false;
+	}
+
+	@Override
+	public Set<String> getCodeSystemsUsed() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

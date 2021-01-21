@@ -66,6 +66,9 @@ public class ChangelogFilesTest {
 			// this one is optional
 			boolean haveIssue = fieldNames.remove("issue");
 
+			// this one is optional
+			fieldNames.remove("backport");
+
 			assertThat("Invalid element in " + next + ": " + fieldNames, fieldNames, empty());
 
 			if (haveIssue) {
