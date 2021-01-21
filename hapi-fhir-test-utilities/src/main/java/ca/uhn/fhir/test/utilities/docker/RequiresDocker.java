@@ -1,8 +1,8 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.test.utilities.docker;
 
 /*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Test Utilities
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
@@ -20,57 +20,16 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-public enum VersionEnum {
-	V0_1,
-	V0_2,
-	V0_3,
-	V0_4,
-	V0_5,
-	V0_6,
-	V0_7,
-	V0_8,
-	V0_9,
 
-	V1_0,
-	V1_1,
-	V1_2,
-	V1_3,
-	V1_4,
-	V1_5,
-	V1_6,
+import org.junit.jupiter.api.extension.ExtendWith;
 
-	V2_0,
-	V2_1,
-	V2_2,
-	V2_3,
-	V2_4,
-	V2_5,
-	V2_5_0,
-	V3_0_0,
-	V3_1_0,
-	V3_2_0,
-	V3_3_0,
-	V3_4_0,
-	V3_5_0,
-	V3_6_0,
-	V3_7_0,
-	V3_8_0,
-	V4_0_0,
-	V4_0_3,
-	V4_1_0,
-	V4_2_0,
-	@Deprecated
-	V4_3_0, // 4.3.0 was renamed to 5.0.0 during the cycle
-	V5_0_0,
-	V5_0_1,
-	V5_0_2,
-	V5_1_0,
-	V5_2_0,
-	V5_2_1,
-	V5_3_0;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-	public static VersionEnum latestVersion() {
-		VersionEnum[] values = VersionEnum.values();
-		return values[values.length - 1];
-	}
+@Retention(RetentionPolicy.RUNTIME)
+@ExtendWith(DockerRequiredCondition.class)
+@Target(ElementType.TYPE)
+public @interface RequiresDocker {
 }

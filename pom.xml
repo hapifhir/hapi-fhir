@@ -712,7 +712,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.2.0</fhir_core_version>
+		<fhir_core_version>5.2.16</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -1462,7 +1462,7 @@
 			<dependency>
 				<groupId>org.elasticsearch.client</groupId>
 				<artifactId>elasticsearch-rest-high-level-client</artifactId>
-				<version>7.10.0</version>
+				<version>7.10.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
