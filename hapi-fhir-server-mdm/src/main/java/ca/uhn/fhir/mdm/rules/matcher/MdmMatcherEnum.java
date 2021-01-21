@@ -48,7 +48,9 @@ public enum MdmMatcherEnum {
 	NAME_ANY_ORDER(new NameMatcher(MdmNameMatchModeEnum.ANY_ORDER)),
 	NAME_FIRST_AND_LAST(new NameMatcher(MdmNameMatchModeEnum.FIRST_AND_LAST)),
 
-	IDENTIFIER(new IdentifierMatcher());
+	IDENTIFIER(new IdentifierMatcher()),
+
+	EMPTY_FIELD(new EmptyFieldMatcher());
 
 	private final IMdmFieldMatcher myMdmFieldMatcher;
 
@@ -68,5 +70,15 @@ public enum MdmMatcherEnum {
 	 */
 	public boolean match(FhirContext theFhirContext, IBase theLeftBase, IBase theRightBase, boolean theExact, String theIdentifierSystem) {
 		return myMdmFieldMatcher.matches(theFhirContext, theLeftBase, theRightBase, theExact, theIdentifierSystem);
+	}
+
+	/**
+	 * Checks if this matcher supports checks on empty fields
+	 *
+	 * @return
+	 * 		Returns true of this matcher supports empty fields and false otherwise
+	 */
+	public boolean isMatchingEmptyFields() {
+		return this == EMPTY_FIELD;
 	}
 }
