@@ -14,7 +14,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 public class TestElasticsearchContainerHelper {
 
 
-	public static final String ELASTICSEARCH_VERSION = "7.10.0";
+	public static final String ELASTICSEARCH_VERSION = "7.10.2";
 	public static final String ELASTICSEARCH_IMAGE = "docker.elastic.co/elasticsearch/elasticsearch:" + ELASTICSEARCH_VERSION;
 
 	public static ElasticsearchContainer getEmbeddedElasticSearch() {
