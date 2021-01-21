@@ -184,6 +184,10 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					}
 					myUpperBound = theParsed;
 					break;
+				case NOT_EQUAL:
+					myLowerBound = theParsed;
+					myUpperBound = theParsed;
+					break;
 				default:
 					throw new InvalidRequestException("Unknown comparator: " + theParsed.getPrefix());
 			}
