@@ -3,10 +3,13 @@ package ca.uhn.fhir.jpa.provider.r4;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,6 +22,7 @@ import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Observation.ObservationComponentComponent;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Quantity;
@@ -51,7 +55,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
-
+		
 		myClient.unregisterInterceptor(myCapturingInterceptor);
 	}
 
@@ -587,9 +591,34 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		String uri = ourServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Encounter:subject:date=gt1950" + "&_has:Encounter:subject:class=" + UrlUtil.escapeUrlParam("urn:system|IMP");
 		
 		ourLog.info("uri = " + uri);
-		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+				
 		assertThat(ids, contains(pid0.getValue()));
+	}
+	
+	@Test
+	public void testMultipleHasParameter_NOT_IN() throws Exception {
+		
+		for (int i=0; i<10; i++) {
+			createPatientWithObs(10);
+		}
+
+		String uri = ourServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt180") + "&_has:Observation:subject:date=gt1950" + "&_has:Observation:subject:status=final&_count=4";
+		
+		ourLog.info("uri = " + uri);
+		myCaptureQueriesListener.clear();
+		
+		searchAndReturnUnqualifiedVersionlessIdValues(uri);
+		
+		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.toList());
+
+		List<String> notInListQueries = new ArrayList<>();
+		for (String query : queries) {
+			if (query.contains("RES_ID NOT IN"))
+				notInListQueries.add(query);
+		}
+		
+		assertNotEquals(0, notInListQueries.size());
 	}
 	
 	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
@@ -605,5 +634,26 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		return ids;
 	}
 
-
+	private void createPatientWithObs(int obsNum) {
+		
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue("001");
+		patient.addName().setFamily("Tester").addGiven("Joe");
+		IIdType pid = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		
+		Observation o1 = new Observation();
+		o1.setStatus(ObservationStatus.FINAL);
+		o1.getSubject().setReferenceElement(pid);
+		o1.setEffective(new DateTimeType("2001-02-01"));
+		CodeableConcept cc = o1.getCode();
+		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+		o1.setValue(new Quantity().setValue(200));	
+		cc = new CodeableConcept();
+		cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+		o1.addCategory(cc);
+		
+		for (int i=0; i<obsNum; i++) {
+			myObservationDao.create(o1).getId().toUnqualifiedVersionless();
+		}
+	}
 }

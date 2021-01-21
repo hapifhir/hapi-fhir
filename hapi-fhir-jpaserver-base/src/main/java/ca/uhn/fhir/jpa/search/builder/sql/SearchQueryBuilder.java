@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -66,11 +67,13 @@ import org.hibernate.engine.spi.RowSelection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -542,6 +545,21 @@ public class SearchQueryBuilder {
 		addPredicate(predicate);
 	}
 
+	public void excludeResourceIdsPredicate(Set<ResourcePersistentId> theExsitinghPidSetToExclude) {
+		
+		// Do  nothing if it's empty
+		if (theExsitinghPidSetToExclude == null || theExsitinghPidSetToExclude.isEmpty())
+			return;
+		
+		List<Long> excludePids = ResourcePersistentId.toLongList(theExsitinghPidSetToExclude);
+		
+		ourLog.trace("excludePids = " + excludePids);
+		
+		DbColumn resourceIdColumn = getOrCreateFirstPredicateBuilder().getResourceIdColumn();
+		InCondition predicate = new InCondition(resourceIdColumn, generatePlaceholders(excludePids));
+		predicate.setNegate(true);
+		addPredicate(predicate);
+	}
 
 	public BinaryCondition createConditionForValueWithComparator(ParamPrefixEnum theComparator, DbColumn theColumn, Object theValue) {
 		switch (theComparator) {
