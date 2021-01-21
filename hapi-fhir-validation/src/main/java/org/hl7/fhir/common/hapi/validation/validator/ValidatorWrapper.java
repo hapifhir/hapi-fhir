@@ -17,6 +17,7 @@ import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.XVerExtensionManager;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.validation.instance.InstanceValidator;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ class ValidatorWrapper {
 	private boolean myErrorForUnknownProfiles;
 	private boolean myNoTerminologyChecks;
 	private boolean myAssumeValidRestReferences;
+	private boolean myNoExtensibleWarnings;
+	private boolean myNoBindingMsgSuppressed;
 	private Collection<? extends String> myExtensionDomains;
 	private IResourceValidator.IValidatorResourceFetcher myValidatorResourceFetcher;
 
@@ -77,6 +80,16 @@ class ValidatorWrapper {
 		return this;
 	}
 
+	public ValidatorWrapper setNoExtensibleWarnings(boolean theNoExtensibleWarnings) {
+		myNoExtensibleWarnings = theNoExtensibleWarnings;
+		return this;
+	}
+
+	public ValidatorWrapper setNoBindingMsgSuppressed(boolean theNoBindingMsgSuppressed) {
+		myNoBindingMsgSuppressed = theNoBindingMsgSuppressed;
+		return this;
+	}
+
 	public ValidatorWrapper setExtensionDomains(Collection<? extends String> theExtensionDomains) {
 		myExtensionDomains = theExtensionDomains;
 		return this;
@@ -91,8 +104,9 @@ class ValidatorWrapper {
 	public List<ValidationMessage> validate(IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
+		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
 		try {
-			v = new InstanceValidator(theWorkerContext, evaluationCtx);
+			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
 			throw new ConfigurationException(e);
 		}
@@ -105,6 +119,8 @@ class ValidatorWrapper {
 		v.setErrorForUnknownProfiles(myErrorForUnknownProfiles);
 		v.getExtensionDomains().addAll(myExtensionDomains);
 		v.setFetcher(myValidatorResourceFetcher);
+		v.setNoExtensibleWarnings(myNoExtensibleWarnings);
+		v.setNoBindingMsgSuppressed(myNoBindingMsgSuppressed);
 		v.setAllowXsiLocation(true);
 
 		List<ValidationMessage> messages = new ArrayList<>();
@@ -179,7 +195,12 @@ class ValidatorWrapper {
 				i--;
 			}
 
-			if (message.endsWith("' could not be resolved, so has not been checked") && next.getLevel() == ValidationMessage.IssueSeverity.WARNING) {
+			if (
+				myErrorForUnknownProfiles &&
+				next.getLevel() == ValidationMessage.IssueSeverity.WARNING &&
+				message.contains("Profile reference '") &&
+				message.contains("' has not been checked because it is unknown")
+			) {
 				next.setLevel(ValidationMessage.IssueSeverity.ERROR);
 			}
 

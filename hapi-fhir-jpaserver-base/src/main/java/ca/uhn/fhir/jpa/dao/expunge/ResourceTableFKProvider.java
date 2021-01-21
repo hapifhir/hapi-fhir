@@ -50,6 +50,7 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_DATE", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_NUMBER", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY", "RES_ID"));
+		retval.add(new ResourceForeignKey("HFJ_SPIDX_QUANTITY_NRML", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_STRING", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_TOKEN", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_SPIDX_URI", "RES_ID"));

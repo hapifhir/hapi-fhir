@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2298
+title: "A recent change inadvertently caused an issue with DB migration utility such that it would attempt to drop
+   indexes even when the `dry-run` option was specified. This has been fixed."
+backport: 5.2.1

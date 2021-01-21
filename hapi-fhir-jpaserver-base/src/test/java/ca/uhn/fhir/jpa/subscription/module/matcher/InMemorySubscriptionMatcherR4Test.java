@@ -1,8 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
+
 import ca.uhn.fhir.jpa.config.TestR4Config;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -61,6 +65,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +76,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,6 +98,14 @@ public class InMemorySubscriptionMatcherR4Test {
 	FhirContext myFhirContext;
 	@Autowired
 	MatchUrlService myMatchUrlService;
+
+	@Autowired
+	ModelConfig myModelConfig;
+	
+	@AfterEach
+	public void after() throws Exception {
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
@@ -235,7 +247,89 @@ public class InMemorySubscriptionMatcherR4Test {
 		SearchParameterMap params = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 		assertMatched(o1, params);
 	}
+	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported() {
 
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(150));
+
+		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		QuantityParam v1 = new QuantityParam(null, 1.5, UcumServiceUtil.UCUM_CODESYSTEM_URL, "m");
+		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		assertMatched(o1, params1);
+		
+		Observation o2 = new Observation();
+		o2.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("cm").setValue(150));
+
+		String param2 = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		QuantityParam v2 = new QuantityParam(null, 15, UcumServiceUtil.UCUM_CODESYSTEM_URL, "dm");
+		SearchParameterMap params2 = new SearchParameterMap().setLoadSynchronous(true).add(param2, v2);
+		assertMatched(o2, params2);
+
+		v2 = new QuantityParam(null, 150, UcumServiceUtil.UCUM_CODESYSTEM_URL, "cm");
+		params2 = new SearchParameterMap().setLoadSynchronous(true).add(param2, v2);
+		assertMatched(o2, params2);
+
+	}
+	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_InvalidUCUMUnit() {
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://bar").setCode("foo")))
+			.setValue(new Quantity().setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("foo").setValue(150));
+
+		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		QuantityParam v1 = new QuantityParam(null, 150, UcumServiceUtil.UCUM_CODESYSTEM_URL, "foo");
+		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		assertMatched(o1, params1);
+	}
+	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_NoSystem() {
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://bar").setCode("foo")))
+			.setValue(new Quantity().setCode("foo").setValue(150));
+
+		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		QuantityParam v1 = new QuantityParam(null, 150, null, "foo");
+		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		assertMatched(o1, params1);
+	}
+	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_NotUcumSystem() {
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+
+		Observation o1 = new Observation();
+		o1.addComponent()
+			.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://foo").setCode("cm")))
+			.setValue(new Quantity().setSystem("http://bar").setCode("cm").setValue(150));
+
+		String param1 = Observation.SP_COMPONENT_VALUE_QUANTITY;
+
+		QuantityParam v1 = new QuantityParam(null, 150, "http://bar", "cm");
+		SearchParameterMap params1 = new SearchParameterMap().setLoadSynchronous(true).add(param1, v1);
+		assertMatched(o1, params1);
+	}
+	
 	@Test
 	public void testIdSupported() {
 		Observation o1 = new Observation();

@@ -254,7 +254,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system / code1 - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
+		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system / code1 for 'http://codesystems.com/system#code1'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Unhandled system

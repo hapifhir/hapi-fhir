@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.search.lastn.json.ObservationJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.aspectj.lang.annotation.Before;
@@ -47,6 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @ExtendWith(SpringExtension.class)
+@RequiresDocker
 @ContextConfiguration(classes = {TestR4ConfigWithElasticsearchClient.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PersistObservationIndexedSearchParamLastNR4IT {

@@ -256,6 +256,8 @@ public class JdbcUtils {
 								return new ColumnType(ColumnTypeEnum.BLOB, length);
 							case Types.CLOB:
 								return new ColumnType(ColumnTypeEnum.CLOB, length);
+							case Types.DOUBLE:
+								return new ColumnType(ColumnTypeEnum.DOUBLE, length);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}

@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -86,7 +87,8 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	@AfterEach
 	public void after() {
 		myDaoConfig.setValidateSearchParameterExpressionsOnSave(new DaoConfig().isValidateSearchParameterExpressionsOnSave());
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -97,6 +99,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testStoreSearchParamWithBracketsInExpression() {
+		
 		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(true);
 
 		SearchParameter fooSp = new SearchParameter();
@@ -113,6 +116,47 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParamRegistry.forceRefresh();
 	}
 
+	@Test
+	public void testStoreSearchParamWithBracketsInExpressionNormalizedQuantitySearchSupported() {
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("ActivityDefinition");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("(ActivityDefinition.useContext.value as Quantity) | (ActivityDefinition.useContext.value as Range)");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		// Ensure that no exceptions are thrown
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+	}
+	
+	@Test
+	public void testStoreSearchParamWithBracketsInExpressionNormalizedQuantityStorageSupported() {
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_STORAGE_SUPPORTED);
+		myDaoConfig.setMarkResourcesForReindexingUponSearchParameterChange(true);
+
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.setCode("foo");
+		fooSp.addBase("ActivityDefinition");
+		fooSp.setType(Enumerations.SearchParamType.REFERENCE);
+		fooSp.setTitle("FOO SP");
+		fooSp.setExpression("(ActivityDefinition.useContext.value as Quantity) | (ActivityDefinition.useContext.value as Range)");
+		fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+
+		// Ensure that no exceptions are thrown
+		mySearchParameterDao.create(fooSp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+	}
+	
 	/**
 	 * See #2023
 	 */

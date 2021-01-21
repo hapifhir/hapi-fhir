@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder;
 
-/*-
+/*
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -31,24 +31,26 @@ import ca.uhn.fhir.jpa.dao.predicate.PredicateBuilderToken;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CompositeUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ForcedIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.NumberPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.predicate.QuantityPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.QuantityBasePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceLinkPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SearchParamPresentPredicateBuilder;
-import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.SourcePredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -185,7 +187,9 @@ public class QueryStack {
 
 	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
-		QuantityPredicateBuilder sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
+
+		QuantityBasePredicateBuilder sortPredicateBuilder;
+		sortPredicateBuilder = mySqlBuilder.addQuantityPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
@@ -265,33 +269,33 @@ public class QueryStack {
 		return new PredicateBuilderCacheLookupResult<>(cacheHit, (T) retVal);
 	}
 
- 	private Condition createPredicateComposite(@Nullable DbColumn theSourceJoinColumn, String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
+	private Condition createPredicateComposite(@Nullable DbColumn theSourceJoinColumn, String theResourceName, RuntimeSearchParam theParamDef, List<? extends IQueryParameterType> theNextAnd, RequestPartitionId theRequestPartitionId) {
 
- 		Condition orCondidtion = null;
+		Condition orCondidtion = null;
 		for (IQueryParameterType next : theNextAnd) {
-			
+
 			if (!(next instanceof CompositeParam<?, ?>)) {
 				throw new InvalidRequestException("Invalid type for composite param (must be " + CompositeParam.class.getSimpleName() + ": " + next.getClass());
 			}
 			CompositeParam<?, ?> cp = (CompositeParam<?, ?>) next;
-	
+
 			RuntimeSearchParam left = theParamDef.getCompositeOf().get(0);
 			IQueryParameterType leftValue = cp.getLeftValue();
 			Condition leftPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, left, leftValue, theRequestPartitionId);
-	
+
 			RuntimeSearchParam right = theParamDef.getCompositeOf().get(1);
 			IQueryParameterType rightValue = cp.getRightValue();
 			Condition rightPredicate = createPredicateCompositePart(theSourceJoinColumn, theResourceName, right, rightValue, theRequestPartitionId);
-	
+
 			Condition andCondition = toAndPredicate(leftPredicate, rightPredicate);
-			
+
 			if (orCondidtion == null) {
 				orCondidtion = toOrPredicate(andCondition);
 			} else {
 				orCondidtion = toOrPredicate(orCondidtion, andCondition);
 			}
 		}
-		
+
 		return orCondidtion;
 	}
 
@@ -407,11 +411,11 @@ public class QueryStack {
 			param.setValueAsQueryToken(null, null, null, theFilter.getValue());
 			return theQueryStack3.createPredicateResourceId(null, Collections.singletonList(Collections.singletonList(param)), theResourceName, theFilter.getOperation(), theRequestPartitionId);
 		} else if (paramName.equals(IAnyResource.SP_RES_LANGUAGE)) {
-				return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))), theFilter.getOperation());
+			return theQueryStack3.createPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))), theFilter.getOperation());
 		} else if (paramName.equals(Constants.PARAM_SOURCE)) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
-				return createPredicateSource(null, Collections.singletonList(param));
+			TokenParam param = new TokenParam();
+			param.setValueAsQueryToken(null, null, null, theFilter.getValue());
+			return createPredicateSource(null, Collections.singletonList(param));
 		} else {
 			RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, paramName);
 			if (searchParam == null) {
@@ -636,14 +640,37 @@ public class QueryStack {
 														  SearchFilterParser.CompareOperation theOperation,
 														  RequestPartitionId theRequestPartitionId) {
 
-		QuantityPredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();
-
 		if (theList.get(0).getMissing() != null) {
+			QuantityBasePredicateBuilder join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();
 			return join.createPredicateParamMissingForNonReference(theResourceName, theSearchParam.getName(), theList.get(0).getMissing(), theRequestPartitionId);
 		}
 
+		List<QuantityParam> quantityParams = theList
+			.stream()
+			.map(t -> QuantityParam.toQuantityParam(t))
+			.collect(Collectors.toList());
+
+		QuantityBasePredicateBuilder join = null;
+		boolean normalizedSearchEnabled = myModelConfig.getNormalizedQuantitySearchLevel().equals(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		if (normalizedSearchEnabled) {
+			List<QuantityParam> normalizedQuantityParams = quantityParams
+				.stream()
+				.map(t -> UcumServiceUtil.toCanonicalQuantityOrNull(t))
+				.filter(t -> t != null)
+				.collect(Collectors.toList());
+
+			if (normalizedQuantityParams.size() == quantityParams.size()) {
+				join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityNormalizedPredicateBuilder(theSourceJoinColumn)).getResult();
+				quantityParams = normalizedQuantityParams;
+			}
+		}
+
+		if (join == null) {
+			join = createOrReusePredicateBuilder(PredicateBuilderTypeEnum.QUANTITY, theSourceJoinColumn, theSearchParam.getName(), () -> mySqlBuilder.addQuantityPredicateBuilder(theSourceJoinColumn)).getResult();
+		}
+
 		List<Condition> codePredicates = new ArrayList<>();
-		for (IQueryParameterType nextOr : theList) {
+		for (QuantityParam nextOr : quantityParams) {
 			Condition singleCode = join.createPredicateQuantity(nextOr, theResourceName, theSearchParam.getName(), null, join, theOperation, theRequestPartitionId);
 			codePredicates.add(singleCode);
 		}
@@ -1042,6 +1069,7 @@ public class QueryStack {
 				return toAndPredicate(andPredicates);
 
 		}
+
 	}
 
 	public void addPredicateCompositeUnique(String theIndexString, RequestPartitionId theRequestPartitionId) {

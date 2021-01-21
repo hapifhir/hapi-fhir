@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.interceptor.validation;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -35,7 +36,7 @@ public interface IRepositoryValidatingRule {
 	String getResourceType();
 
 	@Nonnull
-	RuleEvaluation evaluate(@Nonnull IBaseResource theResource);
+	RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource);
 
 	class RuleEvaluation {
 

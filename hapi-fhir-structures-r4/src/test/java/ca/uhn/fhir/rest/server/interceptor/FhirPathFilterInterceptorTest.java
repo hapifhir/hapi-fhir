@@ -13,6 +13,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,19 @@ public class FhirPathFilterInterceptorTest {
 	}
 
 	@Test
+	public void testFilteredResponse_ExpressionReturnsExtension() throws IOException {
+		createPatient();
+
+		HttpGet request = new HttpGet(myPatientId + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true");
+		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
+			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response:\n{}", responseText);
+			assertThat(responseText, containsString("\"url\": \"http://hl7.org/fhir/us/core/StructureDefinition/us-core-race\""));
+		}
+
+	}
+
+	@Test
 	public void testFilteredResponse_ExpressionReturnsResource() throws IOException {
 		createPatient();
 
@@ -159,6 +173,11 @@ public class FhirPathFilterInterceptorTest {
 
 	private void createPatient() {
 		Patient p = new Patient();
+		p.addExtension()
+			.setUrl("http://hl7.org/fhir/us/core/StructureDefinition/us-core-race")
+			.addExtension()
+			.setUrl("ombCategory")
+			.setValue(new Coding("urn:oid:2.16.840.1.113883.6.238", "2106-3", "White"));
 		p.setActive(true);
 		p.addIdentifier().setSystem("http://identifiers/1").setValue("value-1");
 		p.addIdentifier().setSystem("http://identifiers/2").setValue("value-2");

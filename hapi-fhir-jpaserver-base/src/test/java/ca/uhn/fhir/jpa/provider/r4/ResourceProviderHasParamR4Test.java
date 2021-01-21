@@ -163,7 +163,6 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		System.out.println("ids.size() = " + ids.size());
 		assertThat(ids, contains(pid0.getValue()));
 	}
 	

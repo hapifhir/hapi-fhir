@@ -23,11 +23,15 @@ package ca.uhn.fhir.jpa.interceptor.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.interceptor.ValidationResultEnrichingInterceptor;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.utils.IResourceValidator;
@@ -38,16 +42,12 @@ import java.util.Collections;
 import java.util.List;
 
 class RequireValidationRule extends BaseTypedRule {
-	private final IValidationSupport myValidationSupport;
-	private final ValidatorResourceFetcher myValidatorResourceFetcher;
 	private final FhirInstanceValidator myValidator;
 	private ResultSeverityEnum myRejectOnSeverity = ResultSeverityEnum.ERROR;
 	private List<TagOnSeverity> myTagOnSeverity = Collections.emptyList();
 
 	public RequireValidationRule(FhirContext theFhirContext, String theType, IValidationSupport theValidationSupport, ValidatorResourceFetcher theValidatorResourceFetcher) {
 		super(theFhirContext, theType);
-		myValidationSupport = theValidationSupport;
-		myValidatorResourceFetcher = theValidatorResourceFetcher;
 
 		myValidator = new FhirInstanceValidator(theValidationSupport);
 		myValidator.setValidatorResourceFetcher(theValidatorResourceFetcher);
@@ -60,7 +60,7 @@ class RequireValidationRule extends BaseTypedRule {
 
 	@Nonnull
 	@Override
-	public RuleEvaluation evaluate(@Nonnull IBaseResource theResource) {
+	public RuleEvaluation evaluate(RequestDetails theRequestDetails, @Nonnull IBaseResource theResource) {
 
 		FhirValidator validator = getFhirContext().newValidator();
 		validator.registerValidatorModule(myValidator);
@@ -85,6 +85,8 @@ class RequireValidationRule extends BaseTypedRule {
 
 		}
 
+		ValidationResultEnrichingInterceptor.addValidationResultToRequestDetails(theRequestDetails, outcome);
+
 		return RuleEvaluation.forSuccess(this);
 	}
 
@@ -106,6 +108,22 @@ class RequireValidationRule extends BaseTypedRule {
 		myRejectOnSeverity = null;
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("resourceType", getResourceType())
+			.append("rejectOnSeverity", myRejectOnSeverity)
+			.append("tagOnSeverity", myTagOnSeverity)
+			.toString();
+	}
+
+	public FhirInstanceValidator getValidator() {
+		return myValidator;
+	}
+
+	public void setAllowAnyExtensions() {
+		myValidator.setAnyExtensionsAllowed(true);
+	}
 
 	private static class TagOnSeverity {
 		private final int mySeverity;
@@ -129,6 +147,10 @@ class RequireValidationRule extends BaseTypedRule {
 		public String getTagCode() {
 			return myTagCode;
 		}
-	}
 
+		@Override
+		public String toString() {
+			return ResultSeverityEnum.values()[mySeverity].name() + "/" + myTagSystem + "/" + myTagCode;
+		}
+	}
 }

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -23,7 +24,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -61,7 +61,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -110,7 +109,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 	public void after() {
 		myDaoConfig.setAllowInlineMatchUrlReferences(false);
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-	}
+        myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
+    }
 
 	@BeforeEach
 	public void beforeDisableResultReuse() {
@@ -3127,6 +3127,80 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(id.getValue(), id2.getValue());
 	}
 
+	@Test
+	public void testTransactionWithConditionalUpdateDoesntUpdateIfNoChangeWithNormalizedQuantitySearchSupported() {
+
+		myModelConfig.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		Observation obs = new Observation();
+		obs.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input = new Bundle();
+		input.setType(BundleType.TRANSACTION);
+		input
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output = mySystemDao.transaction(mySrd, input);
+		assertEquals(1, output.getEntry().size());
+		IdType id = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id.getResourceType());
+		assertEquals("1", id.getVersionIdPart());
+
+		/*
+		 * Try again with same contents
+		 */
+
+		Observation obs2 = new Observation();
+		obs2.addIdentifier()
+			.setSystem("http://acme.org")
+			.setValue("ID1");
+		obs2
+			.getCode()
+			.addCoding()
+			.setSystem("http://loinc.org")
+			.setCode("29463-7");
+		obs2.setEffective(new DateTimeType("2011-09-03T11:13:00-04:00"));
+		obs2.setValue(new Quantity()
+			.setValue(new BigDecimal("123.4"))
+			.setCode("kg")
+			.setSystem("http://unitsofmeasure.org")
+			.setUnit("kg"));
+		Bundle input2 = new Bundle();
+		input2.setType(BundleType.TRANSACTION);
+		input2
+			.addEntry()
+			.setFullUrl("urn:uuid:0001")
+			.setResource(obs2)
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Observation?identifier=http%3A%2F%2Facme.org|ID1");
+
+		Bundle output2 = mySystemDao.transaction(mySrd, input2);
+		assertEquals(1, output2.getEntry().size());
+		IdType id2 = new IdType(output2.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Observation", id2.getResourceType());
+		assertEquals("1", id2.getVersionIdPart());
+
+		assertEquals(id.getValue(), id2.getValue());
+		
+	}
+	
 	@Test
 	public void testTransactionWithIfMatch() {
 		Patient p = new Patient();

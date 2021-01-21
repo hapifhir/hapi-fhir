@@ -86,7 +86,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 
 		Integer offsetI;
 		int start = 0;
-		IBundleProvider resultList;
+		IBundleProvider bundleProvider;
 
 		String pageId = null;
 		String[] pageIdParams = theRequest.getParameters().get(Constants.PARAM_PAGEID);
@@ -101,21 +101,21 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (pageId != null) {
 			// This is a page request by Search ID and Page ID
 
-			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
-			validateHaveBundleProvider(thePagingAction, resultList);
+			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
+			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
 		} else {
 			// This is a page request by Search ID and Offset
 
-			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction);
-			validateHaveBundleProvider(thePagingAction, resultList);
+			bundleProvider = pagingProvider.retrieveResultList(theRequest, thePagingAction);
+			validateHaveBundleProvider(thePagingAction, bundleProvider);
 
 			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);
 			if (offsetI == null || offsetI < 0) {
 				offsetI = 0;
 			}
 
-			Integer totalNum = resultList.size();
+			Integer totalNum = bundleProvider.size();
 			start = offsetI;
 			if (totalNum != null) {
 				start = Math.min(start, totalNum);
@@ -155,7 +155,7 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 			count = pagingProvider.getMaximumPageSize();
 		}
 
-		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, resultList, start, bundleType, encodingEnum, thePagingAction);
+		return createBundleFromBundleProvider(theServer, theRequest, count, linkSelf, includes, bundleProvider, start, bundleType, encodingEnum, thePagingAction);
 	}
 
 	private void validateHaveBundleProvider(String thePagingAction, IBundleProvider theBundleProvider) {

@@ -56,6 +56,7 @@ public class DaoSearchParamSynchronizer {
 		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
 		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams);
 		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams);
+		synchronize(theEntity, retVal, theParams.myQuantityNormalizedParams, existingParams.myQuantityNormalizedParams);
 		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams);
 		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams);
 		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
@@ -87,6 +88,7 @@ public class DaoSearchParamSynchronizer {
 		for (T next : paramsToRemove) {
 			myEntityManager.remove(next);
 			theEntity.getParamsQuantity().remove(next);
+			theEntity.getParamsQuantityNormalized().remove(next);
 		}
 		for (T next : paramsToAdd) {
 			myEntityManager.merge(next);

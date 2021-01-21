@@ -32,9 +32,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -77,9 +79,9 @@ public interface IValidationSupport {
 	 * Expands the given portion of a ValueSet
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theExpansionOptions      If provided (may be <code>null</code>), contains options controlling the expansion
-	 * @param theValueSetToExpand      The valueset that should be expanded
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theExpansionOptions         If provided (may be <code>null</code>), contains options controlling the expansion
+	 * @param theValueSetToExpand         The valueset that should be expanded
 	 * @return The expansion, or null
 	 */
 	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
@@ -116,14 +118,32 @@ public interface IValidationSupport {
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *
-	 * @param theClass The type of the resource to load
+	 * <p>
+	 * Note: Since 5.3.0, {@literal theClass} can be {@literal null}
+	 * </p>
+	 *
+	 * @param theClass The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
 	 * @param theUri   The resource URI
 	 * @return Returns the resource, or <code>null</code> if no resource with the
 	 * given URI can be found
 	 */
-	default <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		Validate.notNull(theClass, "theClass must not be null or blank");
+	@SuppressWarnings("unchecked")
+	default <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
 		Validate.notBlank(theUri, "theUri must not be null or blank");
+
+		if (theClass == null) {
+			Supplier<IBaseResource>[] sources = new Supplier[]{
+				() -> fetchStructureDefinition(theUri),
+				() -> fetchValueSet(theUri),
+				() -> fetchCodeSystem(theUri)
+			};
+			return (T) Arrays
+				.stream(sources)
+				.map(t -> t.get())
+				.filter(t -> t != null)
+				.findFirst()
+				.orElse(null);
+		}
 
 		switch (getFhirContext().getResourceType(theClass)) {
 			case "StructureDefinition":
@@ -150,8 +170,8 @@ public interface IValidationSupport {
 	 * or validated
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theSystem                The URI for the code system, e.g. <code>"http://loinc.org"</code>
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theSystem                   The URI for the code system, e.g. <code>"http://loinc.org"</code>
 	 * @return Returns <code>true</code> if codes in the given code system can be
 	 * validated
 	 */
@@ -172,11 +192,11 @@ public interface IValidationSupport {
 	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theOptions               Provides options controlling the validation
-	 * @param theCodeSystem            The code system, e.g. "<code>http://loinc.org</code>"
-	 * @param theCode                  The code, e.g. "<code>1234-5</code>"
-	 * @param theDisplay               The display name, if it should also be validated
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theOptions                  Provides options controlling the validation
+	 * @param theCodeSystem               The code system, e.g. "<code>http://loinc.org</code>"
+	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
+	 * @param theDisplay                  The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
 	default CodeValidationResult validateCode(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
@@ -189,11 +209,11 @@ public interface IValidationSupport {
 	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theCodeSystem            The code system, e.g. "<code>http://loinc.org</code>"
-	 * @param theCode                  The code, e.g. "<code>1234-5</code>"
-	 * @param theDisplay               The display name, if it should also be validated
-	 * @param theValueSet              The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theCodeSystem               The code system, e.g. "<code>http://loinc.org</code>"
+	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
+	 * @param theDisplay                  The display name, if it should also be validated
+	 * @param theValueSet                 The ValueSet to validate against. Must not be null, and must be a ValueSet resource.
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
 	default CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
@@ -204,9 +224,9 @@ public interface IValidationSupport {
 	 * Look up a code using the system and code value
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theSystem                The CodeSystem URL
-	 * @param theCode                  The code
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theSystem                   The CodeSystem URL
+	 * @param theCode                     The code
 	 */
 	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return null;
@@ -217,8 +237,8 @@ public interface IValidationSupport {
 	 * validation support module
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
-	 * @param theValueSetUrl           The ValueSet canonical URL
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theValueSetUrl              The ValueSet canonical URL
 	 */
 	default boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 		return false;
@@ -228,7 +248,7 @@ public interface IValidationSupport {
 	 * Generate a snapshot from the given differential profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
-	 *                                 other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @return Returns null if this module does not know how to handle this request
 	 */
 	default IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
@@ -248,6 +268,25 @@ public interface IValidationSupport {
 		// nothing
 	}
 
+
+	enum IssueSeverity {
+		/**
+		 * The issue caused the action to fail, and no further checking could be performed.
+		 */
+		FATAL,
+		/**
+		 * The issue is sufficiently important to cause the action to fail.
+		 */
+		ERROR,
+		/**
+		 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
+		 */
+		WARNING,
+		/**
+		 * The issue has no relation to the degree of success of the action.
+		 */
+		INFORMATION
+	}
 
 	class ConceptDesignation {
 		private String myLanguage;
@@ -363,25 +402,6 @@ public interface IValidationSupport {
 		public String getDisplay() {
 			return myDisplay;
 		}
-	}
-
-	enum IssueSeverity {
-		/**
-		 * The issue caused the action to fail, and no further checking could be performed.
-		 */
-		FATAL,
-		/**
-		 * The issue is sufficiently important to cause the action to fail.
-		 */
-		ERROR,
-		/**
-		 * The issue is not important enough to cause the action to fail, but may cause it to be performed suboptimally or in a way that is not as desired.
-		 */
-		WARNING,
-		/**
-		 * The issue has no relation to the degree of success of the action.
-		 */
-		INFORMATION
 	}
 
 	class CodeValidationResult {

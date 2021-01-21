@@ -1152,7 +1152,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertEquals(1, errors.size());
-		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked", errors.get(0).getMessage());
+		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown", errors.get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 
@@ -1402,7 +1402,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(encoded);
 
-		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString());
+		verify(resourceFetcher, times(15)).resolveURL(any(), anyString(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(12)).fetch(any(), anyString());
 	}
