@@ -432,8 +432,8 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myVal.validateWithResult(input);
 
-		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString());
-		verify(resourceFetcher, times(3)).validationPolicy(any(), anyString(), anyString());
+		verify(resourceFetcher, times(13)).resolveURL(any(), anyString(), anyString(), anyString());
+		verify(resourceFetcher, times(4)).validationPolicy(any(), anyString(), anyString());
 		verify(resourceFetcher, times(3)).fetch(any(), anyString());
 	}
 
@@ -794,7 +794,7 @@ public class FhirInstanceValidatorR5Test {
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' could not be resolved, so has not been checked"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
 	}
 
 	@Test

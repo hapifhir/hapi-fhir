@@ -288,6 +288,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public String getSpecUrl() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public UcumService getUcumService() {
 		throw new UnsupportedOperationException();
 	}
@@ -300,6 +305,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public boolean isNoTerminologyServer() {
 		return false;
+	}
+
+	@Override
+	public Set<String> getCodeSystemsUsed() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
