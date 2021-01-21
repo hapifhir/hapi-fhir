@@ -37,8 +37,8 @@ steps:
 
   # 3. Import keys into gpg
   - bash: |
-      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.gpg
-      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/private.gpg
+      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.pgp
+      gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/private.pgp
       gpg --list-keys --keyid-format LONG
       gpg --list-secret-keys --keyid-format LONG
     displayName: 'Import signing keys into gpg.'
@@ -57,8 +57,8 @@ steps:
         <servers>
           <server>
             <id>ossrh</id>
-            <username>$(SONATYPE_USER)</username>
-            <password>$(SONATYPE_PASS)</password>
+            <username>$(SONATYPE_USERNAME)</username>
+            <password>$(SONATYPE_PASSWORD)</password>
           </server>
         </servers>
         <profiles>
