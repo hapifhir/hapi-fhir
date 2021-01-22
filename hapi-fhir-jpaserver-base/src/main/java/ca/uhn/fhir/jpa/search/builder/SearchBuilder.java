@@ -174,7 +174,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private SqlObjectFactory mySqlBuilderFactory;
 	@Autowired
 	private HibernatePropertiesProvider myDialectProvider;
-
+	
+	private boolean hasNextIteratorQuery = false;
 	/**
 	 * Constructor
 	 */
@@ -424,6 +425,10 @@ public class SearchBuilder implements ISearchBuilder {
 			sqlBuilder.addPredicate(lastUpdatedPredicates);
 		}
 
+		//-- exclude the pids already in the previous iterator
+		if (hasNextIteratorQuery)
+			sqlBuilder.excludeResourceIdsPredicate(myPidSet);
+		
 		/*
 		 * Sort
 		 *
@@ -436,7 +441,6 @@ public class SearchBuilder implements ISearchBuilder {
 			createSort(queryStack3, sort);
 		}
 
-
 		/*
 		 * Now perform the search
 		 */
@@ -444,7 +448,7 @@ public class SearchBuilder implements ISearchBuilder {
 		if (generatedSql.isMatchNothing()) {
 			return Optional.empty();
 		}
-		
+
 		SearchQueryExecutor executor = mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
 		return Optional.of(executor);
 	}
@@ -1232,8 +1236,10 @@ public class SearchBuilder implements ISearchBuilder {
 			close();
 			if (myQueryList != null && myQueryList.size() > 0) {
 				myResultsIterator = myQueryList.remove(0);
+				hasNextIteratorQuery = true;
 			} else {
 				myResultsIterator = SearchQueryExecutor.emptyExecutor();
+				hasNextIteratorQuery = false;
 			}
 
 		}
@@ -1243,7 +1249,7 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myNext == null) {
 				fetchNext();
 			}
-			return !NO_MORE.equals(myNext);
+		    return !NO_MORE.equals(myNext);
 		}
 
 		@Override

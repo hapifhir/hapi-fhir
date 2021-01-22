@@ -65,17 +65,14 @@ public class ProviderConstants {
 	public static final String MDM_MATCH = "$mdm-match";
 	public static final String MDM_MATCH_RESOURCE = "resource";
 	public static final String MDM_RESOURCE_TYPE = "resourceType";
-
 	public static final String MDM_MERGE_GOLDEN_RESOURCES = "$mdm-merge-golden-resources";
 	public static final String MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID = "fromGoldenResourceId";
 	public static final String MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID = "toGoldenResourceId";
 	public static final String MDM_MERGE_RESOURCE = "resource";
-	public static final String MDM_MERGE_RESOURCE_ID = "resource.id";
 
 	public static final String MDM_UPDATE_LINK = "$mdm-update-link";
 	public static final String MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID = "goldenResourceId";
 	public static final String MDM_UPDATE_LINK_RESOURCE_ID = "resourceId";
-	public static final String MDM_UPDATE_LINK_RESOURCE = "resource";
 	public static final String MDM_UPDATE_LINK_MATCH_RESULT = "matchResult";
 
 	public static final String MDM_QUERY_LINKS = "$mdm-query-links";
