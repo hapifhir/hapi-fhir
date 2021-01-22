@@ -12,7 +12,7 @@
 * Jetty (JPA Starter): 9.4.30.v20200611 -> 9.4.35.v20201120
 * Guava (JP): 29.0-jre -> 30.1-jre
 * Hibernate ORM (JPA Server): 5.4.22.FINAL -> 5.4.26.FINAL
-* Spring (JPA Server): 5.2.9.RELEASE -> 5.3.2
+* Spring (JPA Server): 5.2.9.RELEASE -> 5.3.3
 * Spring Data (JPA Server): 2.2.0.RELEASE -> 2.4.2
 * Hibernate Search (JPA Server): 5.11.5.FINAL -> 6.0.0.Final
 * Lucene(HAPI FHIR JPA Server): 5.5.5 -> 8.7.0

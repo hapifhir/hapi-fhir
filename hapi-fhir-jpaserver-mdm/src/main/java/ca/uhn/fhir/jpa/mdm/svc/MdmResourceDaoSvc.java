@@ -20,23 +20,23 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
-import ca.uhn.fhir.mdm.api.MdmConstants;
-import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.ResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,10 +60,11 @@ public class MdmResourceDaoSvc {
 	}
 
 	/**
-	* Given a resource, remove its Golden Resource tag.
-	* @param theGoldenResource the {@link IAnyResource} to remove the tag from.
-	* @param theResourcetype the type of that resource
-	*/
+	 * Given a resource, remove its Golden Resource tag.
+	 *
+	 * @param theGoldenResource the {@link IAnyResource} to remove the tag from.
+	 * @param theResourcetype   the type of that resource
+	 */
 	public void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourcetype);
 		resourceDao.removeTag(theGoldenResource.getIdElement(), TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
@@ -99,7 +100,7 @@ public class MdmResourceDaoSvc {
 		}
 	}
 
-	@NotNull
+	@Nonnull
 	private SearchParameterMap buildEidSearchParameterMap(String theTheEid) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

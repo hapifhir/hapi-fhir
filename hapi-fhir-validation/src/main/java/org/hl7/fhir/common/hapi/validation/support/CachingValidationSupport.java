@@ -6,14 +6,13 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -64,8 +63,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
-		return loadFromCache(myCache, "fetchResource " + theClass.getName() + " " + theUri,
+	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
+		return loadFromCache(myCache, "fetchResource " + theClass + " " + theUri,
 			t -> super.fetchResource(theClass, theUri));
 	}
 

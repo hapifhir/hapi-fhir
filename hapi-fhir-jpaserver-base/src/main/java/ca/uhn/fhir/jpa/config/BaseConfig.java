@@ -220,6 +220,7 @@ public abstract class BaseConfig {
 		return new BatchJobSubmitterImpl();
 	}
 
+
 	@Lazy
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(FhirContext theFhirContext, DaoRegistry theDaoRegistry, IInterceptorBroadcaster theInterceptorBroadcaster) {

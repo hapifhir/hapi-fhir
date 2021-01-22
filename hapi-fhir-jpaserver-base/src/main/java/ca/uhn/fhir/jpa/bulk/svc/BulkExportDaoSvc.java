@@ -50,10 +50,6 @@ public class BulkExportDaoSvc {
 	IBulkExportCollectionDao myBulkExportCollectionDao;
 	@Autowired
 	IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
-	@Autowired
-	private FhirContext myFhirContext;
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	@Transactional
 	public void addFileToCollectionWithId(Long theCollectionEntityId, BulkExportCollectionFileEntity theFile) {
@@ -65,7 +61,6 @@ public class BulkExportDaoSvc {
 			myBulkExportCollectionFileDao.saveAndFlush(theFile);
 			myBulkExportCollectionDao.saveAndFlush(exportCollectionEntity);
 		}
-
 	}
 
 	@Transactional
