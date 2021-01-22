@@ -132,6 +132,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myDurationValueValueChild;
 	private BaseRuntimeChildDefinition myHumanNameFamilyValueChild;
 	private BaseRuntimeChildDefinition myHumanNameGivenValueChild;
+	private BaseRuntimeChildDefinition myHumanNameTextValueChild;
 	private BaseRuntimeChildDefinition myContactPointValueValueChild;
 	private BaseRuntimeChildDefinition myIdentifierSystemValueChild;
 	private BaseRuntimeChildDefinition myIdentifierValueValueChild;
@@ -877,6 +878,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (String next : givens) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
+		List<String> texts = extractValuesAsStrings(myHumanNameTextValueChild, theValue);
+		for (String next : texts) {
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
+		}
 	}
 
 	private void addString_Quantity(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -1138,6 +1143,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		BaseRuntimeElementCompositeDefinition<?> humanNameDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("HumanName");
 		myHumanNameFamilyValueChild = humanNameDefinition.getChildByName("family");
 		myHumanNameGivenValueChild = humanNameDefinition.getChildByName("given");
+		myHumanNameTextValueChild = humanNameDefinition.getChildByName("text");
 
 		BaseRuntimeElementCompositeDefinition<?> contactPointDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("ContactPoint");
 		myContactPointValueValueChild = contactPointDefinition.getChildByName("value");
