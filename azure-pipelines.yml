@@ -1,4 +1,4 @@
-# HAPI FHIR Build Pipeline
+ FHIR Build Pipeline
 
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
@@ -52,7 +52,7 @@ jobs:
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)/'
           artifactName: 'full_logs.zip'
-      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+      - script: bash <(curl https://codecov.io/bash)
         displayName: 'codecov'
       - task: PublishTestResults@2
         inputs:
