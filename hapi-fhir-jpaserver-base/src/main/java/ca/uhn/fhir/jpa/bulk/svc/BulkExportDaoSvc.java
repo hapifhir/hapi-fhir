@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;

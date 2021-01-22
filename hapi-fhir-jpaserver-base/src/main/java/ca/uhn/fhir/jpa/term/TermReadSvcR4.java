@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 
 /*
  * #%L
