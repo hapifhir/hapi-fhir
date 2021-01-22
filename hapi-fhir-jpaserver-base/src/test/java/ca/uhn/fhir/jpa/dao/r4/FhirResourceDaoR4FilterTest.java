@@ -723,7 +723,9 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		map.add(Constants.PARAM_FILTER, new StringParam("birthdate lt 1955-01-02"));
+		myCaptureQueriesListener.clear();
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
 		assertThat(found, containsInAnyOrder(id1));
 
 		map = new SearchParameterMap();
