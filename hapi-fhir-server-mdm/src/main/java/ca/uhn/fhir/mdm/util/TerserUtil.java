@@ -190,6 +190,10 @@ public final class TerserUtil {
 		return definition.getChildByName(theFieldName) != null;
 	}
 
+	public static void replaceField(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+		replaceField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo);
+	}
+
 	public static void replaceField(FhirContext theFhirContext, FhirTerser theTerser, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
 		replaceField(theFrom, theTo, getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theFrom));
 	}
@@ -219,6 +223,19 @@ public final class TerserUtil {
 
 			mergeFields(terser, theTo, childDefinition, theFromFieldValues, theToFieldValues);
 		}
+	}
+
+	/**
+	 * Merges value of the specified field from theFrom resource to theTo resource. Fields values are compared via
+	 * the equalsDeep method, or via object identity if this method is not available.
+	 *
+	 * @param theFhirContext
+	 * @param theFieldName
+	 * @param theFrom
+	 * @param theTo
+	 */
+	public static void mergeField(FhirContext theFhirContext, String theFieldName, IBaseResource theFrom, IBaseResource theTo) {
+		mergeField(theFhirContext, theFhirContext.newTerser(), theFieldName, theFrom, theTo);
 	}
 
 	/**
