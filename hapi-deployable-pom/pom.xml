@@ -100,14 +100,6 @@
 							<artifactId>javax.mail-api</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>javax.activation</groupId>
-							<artifactId>javax.activation-api</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>com.helger</groupId>
-							<artifactId>ph-schematron</artifactId>
-						</dependency>
-						<dependency>
 							<groupId>commons-logging</groupId>
 							<artifactId>commons-logging</artifactId>
 						</dependency>
@@ -150,6 +142,10 @@
 						<dependency>
 							<groupId>net.bytebuddy</groupId>
 							<artifactId>byte-buddy</artifactId>
+						</dependency>
+						<dependency>
+							<groupId>javax.xml.bind</groupId>
+							<artifactId>jaxb-api</artifactId>
 						</dependency>
 						<dependency>
 							<groupId>com.sun.xml.bind</groupId>
