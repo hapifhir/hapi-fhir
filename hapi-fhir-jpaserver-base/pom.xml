@@ -430,10 +430,6 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.el</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>jakarta.transaction</groupId>
-			<artifactId>jakarta.transaction-api</artifactId>
-		</dependency>
 
 		<!-- Note that we need this dependency to send log4j logging requests to slf4j -->
 		<dependency>

@@ -79,10 +79,6 @@
 					<groupId>javax.activation</groupId>
 					<artifactId>javax.activation-api</artifactId>
 				</exclusion>
-				<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

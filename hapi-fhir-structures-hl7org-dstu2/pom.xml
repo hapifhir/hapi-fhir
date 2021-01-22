@@ -172,8 +172,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>jakarta.xml.bind</groupId>
-			<artifactId>jakarta.xml.bind-api</artifactId>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

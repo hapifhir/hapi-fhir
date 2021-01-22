@@ -48,6 +48,12 @@
 			<groupId>com.helger</groupId>
 			<artifactId>ph-schematron</artifactId>
 			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>org.glassfish.jaxb</groupId>
+					<artifactId>jaxb-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.helger</groupId>

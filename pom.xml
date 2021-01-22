@@ -892,6 +892,12 @@
 				<groupId>com.helger</groupId>
 				<artifactId>ph-schematron</artifactId>
 				<version>${ph_schematron_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>jakarta.xml.bind</groupId>
+						<artifactId>jakarta.xml.bind-api</artifactId>
+               </exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -902,6 +908,11 @@
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
 				<version>3.8.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.activation</groupId>
+				<artifactId>javax.activation</artifactId>
+				<version>1.2.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.activation</groupId>
@@ -976,16 +987,6 @@
 				<version>0.16</version>
 			</dependency>
 			<dependency>
-				<groupId>jakarta.transaction</groupId>
-				<artifactId>jakarta.transaction-api</artifactId>
-				<version>2.0.0</version>
-			</dependency>
-			<dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
-        </dependency>
-			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>javax.activation-api</artifactId>
 				<version>${activation_api_version}</version>
@@ -1014,6 +1015,11 @@
 				<groupId>javax.json</groupId>
 				<artifactId>javax.json-api</artifactId>
 				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>${jaxb_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
