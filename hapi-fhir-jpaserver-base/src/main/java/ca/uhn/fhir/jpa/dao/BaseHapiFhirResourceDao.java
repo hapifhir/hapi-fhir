@@ -1319,7 +1319,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			if (count != null) {
 				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
 				if (count > maxPageSize) {
-					ourLog.info("reducing {} from {} to the maximum allowable page size {}", Constants.PARAM_COUNT, count, maxPageSize);
+					ourLog.info("Reducing {} from {} to {} which is the maximum allowable page size.", Constants.PARAM_COUNT, count, maxPageSize);
 					count = maxPageSize;
 				}
 				theParams.setCount(count);
