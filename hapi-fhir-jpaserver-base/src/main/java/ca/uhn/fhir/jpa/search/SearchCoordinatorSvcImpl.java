@@ -1091,7 +1091,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			int minWanted = 0;
 			if (myParams.getCount() != null) {
 				minWanted = myParams.getCount();
-				minWanted = Math.max(minWanted, myPagingProvider.getMaximumPageSize());
+				minWanted = Math.min(minWanted, myPagingProvider.getMaximumPageSize());
 				minWanted += currentlyLoaded;
 			}
 
