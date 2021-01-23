@@ -126,6 +126,9 @@ public class PredicateBuilderDate extends BasePredicateBuilder implements IPredi
 		if (theParam instanceof DateParam) {
 			DateParam date = (DateParam) theParam;
 			if (!date.isEmpty()) {
+				if (theOperation == SearchFilterParser.CompareOperation.ne) {
+					date = new DateParam(ParamPrefixEnum.EQUAL, date.getValueAsString());
+				}
 				DateRangeParam range = new DateRangeParam(date);
 				p = createPredicateDateFromRange(theBuilder,
 					theFrom,
