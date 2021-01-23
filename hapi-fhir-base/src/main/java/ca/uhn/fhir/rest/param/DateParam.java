@@ -50,6 +50,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 	 * Constructor
 	 */
 	public DateParam() {
+		super();
 	}
 
 	/**
