@@ -675,10 +675,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	/**
-	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default)
+	 * Sets the paging provider to use, or <code>null</code> to use no paging (which is the default).
+	 * This will set defaultPageSize and maximumPageSize from the paging provider.
 	 */
 	public void setPagingProvider(IPagingProvider thePagingProvider) {
 		myPagingProvider = thePagingProvider;
+		if (myPagingProvider != null) {
+			setDefaultPageSize(myPagingProvider.getDefaultPageSize());
+			setMaximumPageSize(myPagingProvider.getMaximumPageSize());
+		}
+
 	}
 
 	@Override
