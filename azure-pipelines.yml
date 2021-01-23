@@ -52,7 +52,7 @@ jobs:
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)/'
           artifactName: 'full_logs.zip'
-      - script: bash <(curl https://codecov.io/bash) -C $(Build.SourceVersion)
+      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
       - task: PublishTestResults@2
         inputs:
