@@ -88,6 +88,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	@Autowired
 	@Qualifier(BaseConfig.GRAPHQL_PROVIDER_NAME)
 	private Object myGraphQlProvider;
+	private Integer mySavedDefaultPageSize;
 
 	@Override
 	@AfterEach
@@ -97,6 +98,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		ourRestServer.getInterceptorService().unregisterInterceptor(myConsentInterceptor);
 		ourRestServer.unregisterProvider(myGraphQlProvider);
+		ourRestServer.setDefaultPageSize(mySavedDefaultPageSize);
 	}
 
 	@Override
@@ -105,6 +107,9 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		super.before();
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 		ourRestServer.registerProvider(myGraphQlProvider);
+		// TODO KHS get these tests to pass without nulling out the default page size
+		mySavedDefaultPageSize = ourRestServer.getDefaultPageSize();
+		ourRestServer.setDefaultPageSize(null);
 	}
 
 	@Test

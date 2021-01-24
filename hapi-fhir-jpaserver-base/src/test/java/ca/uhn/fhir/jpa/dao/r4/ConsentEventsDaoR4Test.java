@@ -66,6 +66,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	public void before() throws ServletException {
 		RestfulServer restfulServer = new RestfulServer();
 		restfulServer.setPagingProvider(myPagingProvider);
+		// TODO KHS get these tests to pass without nulling out the default page size
+		restfulServer.setDefaultPageSize(null);
 
 		when(mySrd.getServer()).thenReturn(restfulServer);
 
