@@ -103,12 +103,17 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
+					<classpathDependencyExcludes>
+						<dependencyExclude>org.slf4j:slf4j-android</dependencyExclude>
+					</classpathDependencyExcludes>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
 				</configuration>
 				<executions>
 					<execution>
 						<id>it</id>
 						<goals>
 							<goal>integration-test</goal>
+							<goal>verify</goal>
 						</goals>
 						<configuration>
 							<includes>
