@@ -102,6 +102,7 @@ import java.util.ListIterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.search.builder.QueryStack.fromOperation;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -267,12 +268,12 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	private Predicate addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, From<?, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theReferenceParam, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
 		/*
-		  * Which resource types can the given chained parameter actually link to? This might be a list
-		  * where the chain is unqualified, as in: Observation?subject.identifier=(...)
-		  * since subject can link to several possible target types.
-		  *
-		  * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
-		  * this is just a simple 1-entry list.
+		 * Which resource types can the given chained parameter actually link to? This might be a list
+		 * where the chain is unqualified, as in: Observation?subject.identifier=(...)
+		 * since subject can link to several possible target types.
+		 *
+		 * If the user has qualified the chain, as in: Observation?subject:Patient.identifier=(...)
+		 * this is just a simple 1-entry list.
 		 */
 		final List<Class<? extends IBaseResource>> resourceTypes = determineCandidateResourceTypesForChain(theResourceName, theParamName, theReferenceParam);
 
@@ -593,7 +594,14 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 					switch (nextParamDef.getParamType()) {
 						case DATE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								myPredicateBuilder.addPredicateDate(theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId);
+								// FT: 2021-01-18 use operation 'gt', 'ge', 'le' or 'lt' 
+								// to create the predicateDate instead of generic one with operation = null 
+								SearchFilterParser.CompareOperation operation = null;
+								if (nextAnd.size() > 0) {
+									DateParam param = (DateParam) nextAnd.get(0);
+									operation = ca.uhn.fhir.jpa.search.builder.QueryStack.toOperation(param.getPrefix());
+								}
+								myPredicateBuilder.addPredicateDate(theResourceName, nextParamDef, nextAnd, operation, theRequestPartitionId);
 							}
 							break;
 						case QUANTITY:
@@ -716,67 +724,58 @@ class PredicateBuilderReference extends BasePredicateBuilder {
 	private Predicate processFilterParameter(SearchFilterParser.FilterParameter theFilter,
 														  String theResourceName, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
 
+		if (theFilter.getParamPath().getName().equals(Constants.PARAM_SOURCE)) {
+			TokenParam param = new TokenParam();
+			param.setValueAsQueryToken(null, null, null, theFilter.getValue());
+			return addPredicateSource(Collections.singletonList(param), theFilter.getOperation(), theRequest);
+		} else if (theFilter.getParamPath().getName().equals(IAnyResource.SP_RES_ID)) {
+			TokenParam param = new TokenParam();
+			param.setValueAsQueryToken(null,
+				null,
+				null,
+				theFilter.getValue());
+			return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
+		} else if (theFilter.getParamPath().getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
+			return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),
+				theFilter.getOperation());
+		}
+
 		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
 		if (searchParam == null) {
 			throw new InvalidRequestException("Invalid search parameter specified, " + theFilter.getParamPath().getName() + ", for resource type " + theResourceName);
-		} else if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null,
-					null,
-					null,
-					theFilter.getValue());
-				return myPredicateBuilder.addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequestPartitionId);
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
-			}
-		} else if (searchParam.getName().equals(IAnyResource.SP_RES_LANGUAGE)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.STRING) {
-				return addPredicateLanguage(Collections.singletonList(Collections.singletonList(new StringParam(theFilter.getValue()))),
-					theFilter.getOperation());
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
-			}
-		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
-			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
-				return addPredicateSource(Collections.singletonList(param), theFilter.getOperation(), theRequest);
-			} else {
-				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
-			}
-		} else {
-			RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
-			if (typeEnum == RestSearchParameterTypeEnum.URI) {
-				return myPredicateBuilder.addPredicateUri(theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
-				return myPredicateBuilder.addPredicateString(theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return myPredicateBuilder.addPredicateDate(theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
-				return myPredicateBuilder.addPredicateNumber(theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
-				String paramName = theFilter.getParamPath().getName();
-				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
-				String resourceType = null; // The value can either have (Patient/123) or not have (123) a resource type, either way it's not needed here
-				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
-				String value = theFilter.getValue();
-				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
-				return addPredicate(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
-				return myPredicateBuilder.addPredicateQuantity(theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
-			} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
-				throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
-			} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
-				TokenParam param = new TokenParam();
-				param.setValueAsQueryToken(null,
-					null,
-					null,
-					theFilter.getValue());
-				return myPredicateBuilder.addPredicateToken(theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
-			}
 		}
+
+		RestSearchParameterTypeEnum typeEnum = searchParam.getParamType();
+		if (typeEnum == RestSearchParameterTypeEnum.URI) {
+			return myPredicateBuilder.addPredicateUri(theResourceName, searchParam, Collections.singletonList(new UriParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+		} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
+			return myPredicateBuilder.addPredicateString(theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+		} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
+			return myPredicateBuilder.addPredicateDate(theResourceName, searchParam, Collections.singletonList(new DateParam(fromOperation(theFilter.getOperation()), theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+		} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
+			return myPredicateBuilder.addPredicateNumber(theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+		} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
+			String paramName = theFilter.getParamPath().getName();
+			SearchFilterParser.CompareOperation operation = theFilter.getOperation();
+			String resourceType = null; // The value can either have (Patient/123) or not have (123) a resource type, either way it's not needed here
+			String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
+			String value = theFilter.getValue();
+			ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
+			return addPredicate(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest, theRequestPartitionId);
+		} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
+			return myPredicateBuilder.addPredicateQuantity(theResourceName, searchParam, Collections.singletonList(new QuantityParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+		} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
+			throw new InvalidRequestException("Composite search parameters not currently supported with _filter clauses");
+		} else if (typeEnum == RestSearchParameterTypeEnum.TOKEN) {
+			TokenParam param = new TokenParam();
+			param.setValueAsQueryToken(null,
+				null,
+				null,
+				theFilter.getValue());
+			return myPredicateBuilder.addPredicateToken(theResourceName, searchParam, Collections.singletonList(param), theFilter.getOperation(), theRequestPartitionId);
+		}
+
 		return null;
 	}
 

@@ -89,6 +89,9 @@ import com.healthmarketscience.sqlbuilder.OrderObject;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+import org.apache.commons.collections4.bidimap.UnmodifiableBidiMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
@@ -112,12 +115,29 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class QueryStack {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
+	private static final BidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> ourCompareOperationToParamPrefix;
+
+	static {
+		DualHashBidiMap<SearchFilterParser.CompareOperation, ParamPrefixEnum> compareOperationToParamPrefix = new DualHashBidiMap<>();
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.ap, ParamPrefixEnum.APPROXIMATE);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.eq, ParamPrefixEnum.EQUAL);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.gt, ParamPrefixEnum.GREATERTHAN);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.ge, ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.lt, ParamPrefixEnum.LESSTHAN);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.le, ParamPrefixEnum.LESSTHAN_OR_EQUALS);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.ne, ParamPrefixEnum.NOT_EQUAL);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.eb, ParamPrefixEnum.ENDS_BEFORE);
+		compareOperationToParamPrefix.put(SearchFilterParser.CompareOperation.sa, ParamPrefixEnum.STARTS_AFTER);
+		ourCompareOperationToParamPrefix = UnmodifiableBidiMap.unmodifiableBidiMap(compareOperationToParamPrefix);
+	}
+
 	private final ModelConfig myModelConfig;
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
@@ -175,7 +195,6 @@ public class QueryStack {
 		mySqlBuilder.addSortDate(resourceTablePredicateBuilder.getColumnLastUpdated(), theAscending);
 	}
 
-
 	public void addSortOnNumber(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		NumberPredicateBuilder sortPredicateBuilder = mySqlBuilder.addNumberPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
@@ -217,7 +236,6 @@ public class QueryStack {
 		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnTargetResourceId(), theAscending);
 	}
 
-
 	public void addSortOnString(String theResourceName, String theParamName, boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		StringPredicateBuilder sortPredicateBuilder = mySqlBuilder.addStringPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
@@ -245,7 +263,6 @@ public class QueryStack {
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
 		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValue(), theAscending);
 	}
-
 
 	@SuppressWarnings("unchecked")
 	private <T extends BaseJoiningPredicateBuilder> PredicateBuilderCacheLookupResult<T> createOrReusePredicateBuilder(PredicateBuilderTypeEnum theType, DbColumn theSourceJoinColumn, String theParamName, Supplier<T> theFactoryMethod) {
@@ -299,7 +316,6 @@ public class QueryStack {
 		return orCondidtion;
 	}
 
-
 	private Condition createPredicateCompositePart(@Nullable DbColumn theSourceJoinColumn, String theResourceName, RuntimeSearchParam theParam, IQueryParameterType theParamValue, RequestPartitionId theRequestPartitionId) {
 
 		switch (theParam.getParamType()) {
@@ -310,7 +326,7 @@ public class QueryStack {
 				return createPredicateToken(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId);
 			}
 			case DATE: {
-				return createPredicateDate(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId);
+				return createPredicateDate(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), toOperation(((DateParam) theParamValue).getPrefix()), theRequestPartitionId);
 			}
 			case QUANTITY: {
 				return createPredicateQuantity(theSourceJoinColumn, theResourceName, theParam, Collections.singletonList(theParamValue), null, theRequestPartitionId);
@@ -319,7 +335,6 @@ public class QueryStack {
 
 		throw new InvalidRequestException("Don't know how to handle composite parameter with type of " + theParam.getParamType());
 	}
-
 
 	public Condition createPredicateCoords(@Nullable DbColumn theSourceJoinColumn,
 														String theResourceName,
@@ -363,7 +378,7 @@ public class QueryStack {
 		List<Condition> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextOr : theList) {
-			Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, theResourceName, paramName, predicateBuilder, theOperation, theRequestPartitionId);
+			Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, predicateBuilder, theOperation);
 			codePredicates.add(p);
 		}
 
@@ -429,7 +444,7 @@ public class QueryStack {
 			} else if (typeEnum == RestSearchParameterTypeEnum.STRING) {
 				return theQueryStack3.createPredicateString(null, theResourceName, searchParam, Collections.singletonList(new StringParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.DATE) {
-				return theQueryStack3.createPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
+				return theQueryStack3.createPredicateDate(null, theResourceName, searchParam, Collections.singletonList(new DateParam(fromOperation(theFilter.getOperation()), theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.NUMBER) {
 				return theQueryStack3.createPredicateNumber(null, theResourceName, searchParam, Collections.singletonList(new NumberParam(theFilter.getValue())), theFilter.getOperation(), theRequestPartitionId);
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
@@ -976,7 +991,15 @@ public class QueryStack {
 					switch (nextParamDef.getParamType()) {
 						case DATE:
 							for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-								andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
+								// FT: 2021-01-18 use operation 'gt', 'ge', 'le' or 'lt'
+								// to create the predicateDate instead of generic one with operation = null
+								SearchFilterParser.CompareOperation operation = null;
+								if (nextAnd.size() > 0) {
+									DateParam param = (DateParam) nextAnd.get(0);
+									operation = toOperation(param.getPrefix());
+								}
+								andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, operation, theRequestPartitionId));
+								//andPredicates.add(createPredicateDate(theSourceJoinColumn, theResourceName, nextParamDef, nextAnd, null, theRequestPartitionId));
 							}
 							break;
 						case QUANTITY:
@@ -1204,29 +1227,19 @@ public class QueryStack {
 	}
 
 	public static SearchFilterParser.CompareOperation toOperation(ParamPrefixEnum thePrefix) {
-		if (thePrefix != null) {
-			switch (thePrefix) {
-				case APPROXIMATE:
-					return SearchFilterParser.CompareOperation.ap;
-				case EQUAL:
-					return SearchFilterParser.CompareOperation.eq;
-				case GREATERTHAN:
-					return SearchFilterParser.CompareOperation.gt;
-				case GREATERTHAN_OR_EQUALS:
-					return SearchFilterParser.CompareOperation.ge;
-				case LESSTHAN:
-					return SearchFilterParser.CompareOperation.lt;
-				case LESSTHAN_OR_EQUALS:
-					return SearchFilterParser.CompareOperation.le;
-				case NOT_EQUAL:
-					return SearchFilterParser.CompareOperation.ne;
-				case ENDS_BEFORE:
-					return SearchFilterParser.CompareOperation.eb;
-				case STARTS_AFTER:
-					return SearchFilterParser.CompareOperation.sa;
-			}
+		SearchFilterParser.CompareOperation retVal = null;
+		if (thePrefix != null && ourCompareOperationToParamPrefix.containsValue(thePrefix)) {
+			retVal = ourCompareOperationToParamPrefix.getKey(thePrefix);
 		}
-		return SearchFilterParser.CompareOperation.eq;
+		return defaultIfNull(retVal, SearchFilterParser.CompareOperation.eq);
+	}
+
+	public static ParamPrefixEnum fromOperation(SearchFilterParser.CompareOperation thePrefix) {
+		ParamPrefixEnum retVal = null;
+		if (thePrefix != null && ourCompareOperationToParamPrefix.containsKey(thePrefix)) {
+			retVal = ourCompareOperationToParamPrefix.get(thePrefix);
+		}
+		return defaultIfNull(retVal, ParamPrefixEnum.EQUAL);
 	}
 
 	private static String getChainedPart(String parameter) {
