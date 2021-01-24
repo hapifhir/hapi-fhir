@@ -1318,7 +1318,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 			if (count != null) {
 				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
-				if (count > maxPageSize) {
+				if (maxPageSize != null && count > maxPageSize) {
 					ourLog.info("Reducing {} from {} to {} which is the maximum allowable page size.", Constants.PARAM_COUNT, count, maxPageSize);
 					count = maxPageSize;
 				}
