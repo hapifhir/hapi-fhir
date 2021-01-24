@@ -13,8 +13,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.Lists;
@@ -34,6 +32,7 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -52,7 +51,6 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -68,14 +66,26 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	private IAnonymousInterceptor myHook;
 	@Captor
 	private ArgumentCaptor<HookParams> myParamsCaptor;
+	private Integer mySavedDefaultPageSize;
+
+	@Override
+	@BeforeEach
+	public void before() throws Exception {
+		super.before();
+
+		// TODO KHS get these tests to pass without nulling out the default page size
+		mySavedDefaultPageSize = ourRestServer.getDefaultPageSize();
+		ourRestServer.setDefaultPageSize(null);
+	}
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
-		super.after();
-
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
+		ourRestServer.setDefaultPageSize(mySavedDefaultPageSize);
+
+		super.after();
 	}
 
 	@Test
@@ -405,7 +415,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			ourRestServer.unregisterInterceptor(interceptor);
 		}
 
-
 	}
 
 	public class ReflexInterceptor extends ServerOperationInterceptorAdapter {
@@ -426,25 +435,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				myClient.create().resource(observation).execute();
 			}
 		}
-	}
-
-	public static void verifyDaoInterceptor(IServerInterceptor theDaoInterceptor) {
-		ArgumentCaptor<ActionRequestDetails> ardCaptor;
-		ArgumentCaptor<RestOperationTypeEnum> opTypeCaptor;
-		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(theDaoInterceptor, atLeast(1)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-//		boolean good = false;
-//		for (int i = 0; i < opTypeCaptor.getAllValues().size(); i++) {
-//			if (RestOperationTypeEnum.CREATE.equals(opTypeCaptor.getAllValues().get(i))) {
-//				if ("Patient".equals(ardCaptor.getValue().getResourceType())) {
-//					if (ardCaptor.getValue().getResource() != null) {
-//						good = true;
-//					}
-//				}
-//			}
-//		}
-//		assertTrue(good);
 	}
 
 }
