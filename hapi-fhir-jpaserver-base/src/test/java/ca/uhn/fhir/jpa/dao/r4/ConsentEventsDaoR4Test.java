@@ -66,8 +66,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	public void before() throws ServletException {
 		RestfulServer restfulServer = new RestfulServer();
 		restfulServer.setPagingProvider(myPagingProvider);
-		// TODO KHS get these tests to pass without nulling out the default page size
-		restfulServer.setDefaultPageSize(null);
 
 		when(mySrd.getServer()).thenReturn(restfulServer);
 
@@ -142,7 +140,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 		}
 		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues, "Wrong response from " + outcome.getClass());
-		assertEquals(2, hitCount.get());
+		assertEquals(3, hitCount.get());
 	}
 
 

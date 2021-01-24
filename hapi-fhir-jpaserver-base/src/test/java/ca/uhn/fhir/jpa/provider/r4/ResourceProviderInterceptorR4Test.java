@@ -32,7 +32,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -66,26 +65,14 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	private IAnonymousInterceptor myHook;
 	@Captor
 	private ArgumentCaptor<HookParams> myParamsCaptor;
-	private Integer mySavedDefaultPageSize;
-
-	@Override
-	@BeforeEach
-	public void before() throws Exception {
-		super.before();
-
-		// TODO KHS get these tests to pass without nulling out the default page size
-		mySavedDefaultPageSize = ourRestServer.getDefaultPageSize();
-		ourRestServer.setDefaultPageSize(null);
-	}
 
 	@Override
 	@AfterEach
 	public void after() throws Exception {
+		super.after();
+
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		ourRestServer.getInterceptorService().unregisterAllInterceptors();
-		ourRestServer.setDefaultPageSize(mySavedDefaultPageSize);
-
-		super.after();
 	}
 
 	@Test
@@ -414,6 +401,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		} finally {
 			ourRestServer.unregisterInterceptor(interceptor);
 		}
+
 
 	}
 

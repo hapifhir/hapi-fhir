@@ -65,6 +65,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -88,7 +89,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	@Autowired
 	@Qualifier(BaseConfig.GRAPHQL_PROVIDER_NAME)
 	private Object myGraphQlProvider;
-	private Integer mySavedDefaultPageSize;
 
 	@Override
 	@AfterEach
@@ -98,7 +98,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		ourRestServer.getInterceptorService().unregisterInterceptor(myConsentInterceptor);
 		ourRestServer.unregisterProvider(myGraphQlProvider);
-		ourRestServer.setDefaultPageSize(mySavedDefaultPageSize);
 	}
 
 	@Override
@@ -107,9 +106,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		super.before();
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 		ourRestServer.registerProvider(myGraphQlProvider);
-		// TODO KHS get these tests to pass without nulling out the default page size
-		mySavedDefaultPageSize = ourRestServer.getDefaultPageSize();
-		ourRestServer.setDefaultPageSize(null);
 	}
 
 	@Test
@@ -131,6 +127,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertThat(returnedIdValues, hasSize(15));
 		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
 
 		// Fetch the next page
@@ -140,6 +137,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.execute();
 		resources = BundleUtil.toListOfResources(myFhirCtx, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertThat(returnedIdValues, hasSize(10));
 		assertEquals(myObservationIdsEvenOnly.subList(15, 25), returnedIdValues);
 	}
 
