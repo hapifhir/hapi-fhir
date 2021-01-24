@@ -48,7 +48,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -431,7 +430,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 		return getPatientsByTag(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
 	}
 
-	@NotNull
+	@Nonnull
 	private List<IBaseResource> getPatientsByTag(String theCode) {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

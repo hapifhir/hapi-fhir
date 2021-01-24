@@ -576,7 +576,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		return null;
 	}
 
-	@org.jetbrains.annotations.Nullable
+	@Nullable
 	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {
 		final Integer loadSynchronousUpTo;
 		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {

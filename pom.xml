@@ -712,7 +712,7 @@
 
 	<properties>
 
-		<fhir_core_version>5.2.0</fhir_core_version>
+		<fhir_core_version>5.2.16</fhir_core_version>
 		<ucum_version>1.0.3</ucum_version>
 
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m</surefire_jvm_args>
@@ -746,7 +746,7 @@
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
-		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
+		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
 		<jena_version>3.16.0</jena_version>
 		<jersey_version>3.0.0</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
@@ -763,7 +763,7 @@
 		<httpcore_version>4.4.13</httpcore_version>
 		<httpclient_version>4.5.13</httpclient_version>
 		<jackson_version>2.12.1</jackson_version>
-		<jackson_databind_version>2.11.2</jackson_databind_version>
+		<jackson_databind_version>2.11.3</jackson_databind_version>
 		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
@@ -892,12 +892,6 @@
 				<groupId>com.helger</groupId>
 				<artifactId>ph-schematron</artifactId>
 				<version>${ph_schematron_version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>jakarta.xml.bind</groupId>
-						<artifactId>jakarta.xml.bind-api</artifactId>
-               </exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -917,7 +911,7 @@
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>
-				<version>1.2.1</version>
+				<version>2.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>
