@@ -55,7 +55,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	@Override
 	public void handleMessage(ResourceDeliveryMessage theMessage) throws Exception {
 		CanonicalSubscription subscription = theMessage.getSubscription();
-
+		
 		// The Subscription.endpoint is treated as the email "to"
 		String endpointUrl = subscription.getEndpointUrl();
 		List<String> destinationAddresses = new ArrayList<>();
