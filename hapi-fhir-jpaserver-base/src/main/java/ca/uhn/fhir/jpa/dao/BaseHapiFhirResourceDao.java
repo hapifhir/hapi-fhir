@@ -275,7 +275,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				IBaseResource resource = toResource(entity, false);
 				theResource.setId(resource.getIdElement().getValue());
-				return toMethodOutcome(theRequest, entity, resource).setCreated(false);
+				return toMethodOutcome(theRequest, entity, resource).setCreated(false).setNop(true);
 			}
 		}
 

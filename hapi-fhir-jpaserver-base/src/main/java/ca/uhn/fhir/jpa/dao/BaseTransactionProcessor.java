@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -72,7 +71,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.internal.util.collections.IdentitySet;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -906,20 +904,36 @@ public abstract class BaseTransactionProcessor {
 				}
 
 				// References
+				Set<IBaseReference> referencesToVersion = BaseStorageDao.extractReferencesToVersion(myContext, nextResource, myModelConfig);
 				List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
 				for (ResourceReferenceInfo nextRef : allRefs) {
-					IIdType nextId = nextRef.getResourceReference().getReferenceElement();
+					IBaseReference resourceReference = nextRef.getResourceReference();
+					IIdType nextId = resourceReference.getReferenceElement();
 					if (!nextId.hasIdPart()) {
 						continue;
 					}
 					if (theIdSubstitutions.containsKey(nextId)) {
 						IIdType newId = theIdSubstitutions.get(nextId);
 						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-						nextRef.getResourceReference().setReference(newId.getValue());
+						if (referencesToVersion.contains(resourceReference)) {
+							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(newId);
+							if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+								newId = newId.withVersion(Long.toString(newId.getVersionIdPartAsLong() + 1));
+							}
+							resourceReference.setReference(newId.getValue());
+						} else {
+							resourceReference.setReference(newId.toVersionless().getValue());
+						}
 					} else if (nextId.getValue().startsWith("urn:")) {
 						throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
 					} else {
-						ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
+						if (referencesToVersion.contains(resourceReference)) {
+							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
+							if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+								nextId = nextId.withVersion(Long.toString(nextId.getVersionIdPartAsLong() + 1));
+								resourceReference.setReference(nextId.getValue());
+							}
+						}
 					}
 				}
 

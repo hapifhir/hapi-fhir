@@ -80,22 +80,23 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
+
 		BundleBuilder builder = new BundleBuilder(myFhirCtx);
 
 		Patient patient = new Patient();
 		patient.setId(IdType.newRandomUuid());
 		patient.setActive(true);
-		builder.addCreateEntry(patient);
+		builder.addTransactionCreateEntry(patient);
 
 		Encounter encounter = new Encounter();
 		encounter.setId(IdType.newRandomUuid());
-		encounter.addIdentifier().setSystem("http://baz");
-		builder.addCreateEntry(encounter);
+		encounter.addIdentifier().setSystem("http://baz").setValue("baz");
+		builder.addTransactionCreateEntry(encounter);
 
 		Observation observation = new Observation();
-		observation.getSubject().setReference(patient.getId());
-		observation.getEncounter().setReference(encounter.getId());
-		builder.addCreateEntry(observation);
+		observation.getSubject().setReference(patient.getId()); // versioned
+		observation.getEncounter().setReference(encounter.getId()); // not versioned
+		builder.addTransactionCreateEntry(observation);
 
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
@@ -111,12 +112,156 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
 		assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
 
-		// TODO: update observation in another transaction
+	}
+
+	@Test
+	public void testInsertVersionedReferenceAtPath_InTransaction_TargetConditionalCreatedNop() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		{
+			// Create patient
+			Patient patient = new Patient();
+			patient.setId(IdType.newRandomUuid());
+			patient.setActive(true);
+			myPatientDao.create(patient).getId();
+
+			// Update patient to make a second version
+			patient.setActive(false);
+			myPatientDao.update(patient);
+
+			// Create encounter
+			Encounter encounter = new Encounter();
+			encounter.setId(IdType.newRandomUuid());
+			encounter.addIdentifier().setSystem("http://baz").setValue("baz");
+			myEncounterDao.create(encounter);
+		}
+
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.setActive(true);
+		builder.addTransactionCreateEntry(patient).conditional("Patient?active=false");
+
+		Encounter encounter = new Encounter();
+		encounter.setId(IdType.newRandomUuid());
+		encounter.addIdentifier().setSystem("http://baz").setValue("baz");
+		builder.addTransactionCreateEntry(encounter).conditional("Encounter?identifier=http://baz|baz");
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patient.getId()); // versioned
+		observation.getEncounter().setReference(encounter.getId()); // not versioned
+		builder.addTransactionCreateEntry(observation);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("200 OK", outcome.getEntry().get(1).getResponse().getStatus());
+		assertEquals("201 Created", outcome.getEntry().get(2).getResponse().getStatus());
+		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
+		assertEquals("2", patientId.getVersionIdPart());
+		assertEquals("1",encounterId.getVersionIdPart());
+		assertEquals("1",observationId.getVersionIdPart());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
 		assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
+
 	}
 
+
+	@Test
+	public void testInsertVersionedReferenceAtPath_InTransaction_TargetUpdate() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		{
+			// Create patient
+			Patient patient = new Patient();
+			patient.setId("PATIENT");
+			patient.setActive(true);
+			myPatientDao.update(patient).getId();
+
+			// Update patient to make a second version
+			patient.setActive(false);
+			myPatientDao.update(patient);
+
+		}
+
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+
+		Patient patient = new Patient();
+		patient.setId("Patient/PATIENT");
+		patient.setActive(true);
+		builder.addTransactionUpdateEntry(patient);
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patient.getId()); // versioned
+		builder.addTransactionCreateEntry(observation);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("3", patientId.getVersionIdPart());
+		assertEquals("1",observationId.getVersionIdPart());
+
+		// Read back and verify that reference is now versioned
+		observation = myObservationDao.read(observationId);
+		assertEquals(patientId.getValue(), observation.getSubject().getReference());
+
+	}
+
+
+	@Test
+	public void testInsertVersionedReferenceAtPath_InTransaction_TargetUpdateConditional() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
+
+		{
+			// Create patient
+			Patient patient = new Patient();
+			patient.setId(IdType.newRandomUuid());
+			patient.setActive(true);
+			myPatientDao.create(patient).getId();
+
+			// Update patient to make a second version
+			patient.setActive(false);
+			myPatientDao.update(patient);
+
+		}
+
+		BundleBuilder builder = new BundleBuilder(myFhirCtx);
+
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+		patient.setActive(true);
+		builder
+			.addTransactionUpdateEntry(patient)
+			.conditional("Patient?active=false");
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patient.getId()); // versioned
+		builder.addTransactionCreateEntry(observation);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", outcome.getEntry().get(1).getResponse().getStatus());
+		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+		IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+		assertEquals("3", patientId.getVersionIdPart());
+		assertEquals("1",observationId.getVersionIdPart());
+
+		// Read back and verify that reference is now versioned
+		observation = myObservationDao.read(observationId);
+		assertEquals(patientId.getValue(), observation.getSubject().getReference());
+
+	}
 }

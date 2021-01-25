@@ -61,8 +61,6 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,6 +70,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +81,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStorageDao {
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseStorageDao.class);
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
@@ -160,27 +158,24 @@ public abstract class BaseStorageDao {
 		/*
 		 * Handle auto-populate-versions
 		 */
-		for (String nextPath : myModelConfig.getAutoVersionReferenceAtPathsByResourceType(getResourceName())) {
-			List<IBaseReference> references = myFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
-			for (IBaseReference nextReference : references) {
-				IIdType referenceElement = nextReference.getReferenceElement();
-				if (!referenceElement.hasBaseUrl()) {
-					if (!referenceElement.getValue().startsWith("urn:")) {
-						String resourceType = referenceElement.getResourceType();
-						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-						BaseHasResource targetEntity = dao.readEntity(referenceElement, theRequestDetails);
-						String targetVersionId = Long.toString(targetEntity.getVersion());
-						String newTargetReference = referenceElement.withVersion(targetVersionId).getValue();
-						nextReference.setReference(newTargetReference);
-					}
+		Set<IBaseReference> referencesToVersion = extractReferencesToVersion(myFhirContext, theResource, myModelConfig);
+		for (IBaseReference nextReference : referencesToVersion) {
+			IIdType referenceElement = nextReference.getReferenceElement();
+			if (!referenceElement.hasBaseUrl()) {
+				if (!referenceElement.getValue().startsWith("urn:")) {
+					String resourceType = referenceElement.getResourceType();
+					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+					BaseHasResource targetEntity = dao.readEntity(referenceElement, theRequestDetails);
+					String targetVersionId = Long.toString(targetEntity.getVersion());
+					String newTargetReference = referenceElement.withVersion(targetVersionId).getValue();
+					nextReference.setReference(newTargetReference);
 				}
 			}
 		}
 
 	}
 
-
-		protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
+	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		if (theEntity instanceof ResourceTable) {
@@ -318,6 +313,26 @@ public abstract class BaseStorageDao {
 			}
 
 		}
+	}
+
+	@Nonnull
+	public static Set<IBaseReference> extractReferencesToVersion(FhirContext theFhirContext, IBaseResource theResource, ModelConfig theModelConfig) {
+		Map<IBaseReference, Object> references = Collections.emptyMap();
+		if (!theModelConfig.getAutoVersionReferenceAtPaths().isEmpty()) {
+			String resourceName = theFhirContext.getResourceType(theResource);
+			for (String nextPath : theModelConfig.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
+				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
+				if (!nextReferences.isEmpty()) {
+					if (references.isEmpty()) {
+						references = new IdentityHashMap<>();
+					}
+					for (IBaseReference next : nextReferences) {
+						references.put(next, null);
+					}
+				}
+			}
+		}
+		return references.keySet();
 	}
 
 }

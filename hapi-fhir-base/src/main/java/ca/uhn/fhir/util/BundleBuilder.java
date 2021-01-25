@@ -173,7 +173,7 @@ public class BundleBuilder {
 	 *
 	 * @param theResource The resource to create
 	 */
-	public CreateBuilder addCreateEntry(IBaseResource theResource) {
+	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
 		setBundleField("type", "transaction");
 
 		IBase request = addEntryAndReturnRequest(theResource);
@@ -337,7 +337,6 @@ public class BundleBuilder {
 	public void setType(String theType) {
 		setBundleField("type", theType);
 	}
-
 
 	public static class UpdateBuilder {
 

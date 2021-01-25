@@ -47,8 +47,9 @@ public class DaoMethodOutcome extends MethodOutcome {
 	/**
 	 * Was this a NO-OP - Typically because of an update to a resource that already matched the contents provided
 	 */
-	public void setNop(boolean theNop) {
+	public DaoMethodOutcome setNop(boolean theNop) {
 		myNop = theNop;
+		return this;
 	}
 
 	public IBasePersistedResource getEntity() {
