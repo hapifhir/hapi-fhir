@@ -904,7 +904,7 @@ public abstract class BaseTransactionProcessor {
 				}
 
 				// References
-				Set<IBaseReference> referencesToVersion = BaseStorageDao.extractReferencesToVersion(myContext, nextResource, myModelConfig);
+				Set<IBaseReference> referencesToVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
 				List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
 				for (ResourceReferenceInfo nextRef : allRefs) {
 					IBaseReference resourceReference = nextRef.getResourceReference();

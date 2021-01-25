@@ -158,7 +158,7 @@ public abstract class BaseStorageDao {
 		/*
 		 * Handle auto-populate-versions
 		 */
-		Set<IBaseReference> referencesToVersion = extractReferencesToVersion(myFhirContext, theResource, myModelConfig);
+		Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myModelConfig, theResource);
 		for (IBaseReference nextReference : referencesToVersion) {
 			IIdType referenceElement = nextReference.getReferenceElement();
 			if (!referenceElement.hasBaseUrl()) {
@@ -315,8 +315,11 @@ public abstract class BaseStorageDao {
 		}
 	}
 
+	/**
+	 * @see ModelConfig#getAutoVersionReferenceAtPaths()
+	 */
 	@Nonnull
-	public static Set<IBaseReference> extractReferencesToVersion(FhirContext theFhirContext, IBaseResource theResource, ModelConfig theModelConfig) {
+	public static Set<IBaseReference> extractReferencesToAutoVersion(FhirContext theFhirContext, ModelConfig theModelConfig, IBaseResource theResource) {
 		Map<IBaseReference, Object> references = Collections.emptyMap();
 		if (!theModelConfig.getAutoVersionReferenceAtPaths().isEmpty()) {
 			String resourceName = theFhirContext.getResourceType(theResource);
