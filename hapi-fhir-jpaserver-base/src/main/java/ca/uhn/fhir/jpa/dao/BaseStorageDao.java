@@ -27,8 +27,12 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
@@ -53,6 +57,7 @@ import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -80,21 +85,58 @@ public abstract class BaseStorageDao {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseStorageDao.class);
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private FhirContext myFhirContext;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	/**
 	 * May be overridden by subclasses to validate resources prior to storage
 	 *
 	 * @param theResource The resource that is about to be stored
+	 * @deprecated Use {@link #preProcessResourceForStorage(IBaseResource, RequestDetails, TransactionDetails, boolean)} instead
 	 */
 	protected void preProcessResourceForStorage(IBaseResource theResource) {
+		// nothing
+	}
+
+	/**
+	 * May be overridden by subclasses to validate resources prior to storage
+	 *
+	 * @param theResource The resource that is about to be stored
+	 * @since 5.3.0
+	 */
+	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
+
+		/*
+		 * Sanity check - Is this resource the right type for this DAO?
+		 */
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
 		}
 
+		/*
+		 * Verify that the resource ID is actually valid according to FHIR's rules
+		 */
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+			}
+		}
+
+		/*
+		 * Verify that we're not storing a Bundle with a disallowed bundle type
+		 */
+		if ("Bundle".equals(type)) {
+			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
+			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
+			bundleType = defaultString(bundleType);
+			if (!allowedBundleTypes.contains(bundleType)) {
+				String message = myFhirContext.getLocalizer().getMessage(BaseStorageDao.class, "invalidBundleTypeForStorage", (isNotBlank(bundleType) ? bundleType : "(missing)"));
+				throw new UnprocessableEntityException(message);
 			}
 		}
 
@@ -115,19 +157,30 @@ public abstract class BaseStorageDao {
 			}
 		}
 
-		if ("Bundle".equals(type)) {
-			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
-			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
-			bundleType = defaultString(bundleType);
-			if (!allowedBundleTypes.contains(bundleType)) {
-				String message = "Unable to store a Bundle resource on this server with a Bundle.type value of: " + (isNotBlank(bundleType) ? bundleType : "(missing)");
-				throw new UnprocessableEntityException(message);
+		/*
+		 * Handle auto-populate-versions
+		 */
+		for (String nextPath : myModelConfig.getAutoVersionReferenceAtPathsByResourceType(getResourceName())) {
+			List<IBaseReference> references = myFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
+			for (IBaseReference nextReference : references) {
+				IIdType referenceElement = nextReference.getReferenceElement();
+				if (!referenceElement.hasBaseUrl()) {
+					if (!referenceElement.getValue().startsWith("urn:")) {
+						String resourceType = referenceElement.getResourceType();
+						IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+						BaseHasResource targetEntity = dao.readEntity(referenceElement, theRequestDetails);
+						String targetVersionId = Long.toString(targetEntity.getVersion());
+						String newTargetReference = referenceElement.withVersion(targetVersionId).getValue();
+						nextReference.setReference(newTargetReference);
+					}
+				}
 			}
 		}
 
 	}
 
-	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
+
+		protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		if (theEntity instanceof ResourceTable) {

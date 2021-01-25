@@ -259,6 +259,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
@@ -1458,6 +1459,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		T resource = theResource;
 
 		preProcessResourceForStorage(resource);
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		final ResourceTable entity;
 

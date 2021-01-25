@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -31,8 +31,12 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 // TODO: move this to ca.uhn.fhir.jpa.model.config
 public class ModelConfig {
@@ -90,6 +94,8 @@ public class ModelConfig {
 	private IPrimitiveType<Date> myPeriodIndexEndOfTime;
 
 	private NormalizedQuantitySearchLevel myNormalizedQuantitySearchLevel;
+	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
+	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 
 	/**
 	 * Constructor
@@ -268,7 +274,7 @@ public class ModelConfig {
 		}
 
 		HashSet<String> treatBaseUrlsAsLocal = new HashSet<>();
-		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
+		for (String next : defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
 			while (next.endsWith("/")) {
 				next = next.substring(0, next.length() - 1);
 			}
@@ -616,6 +622,94 @@ public class ModelConfig {
 	 */
 	public void setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel theNormalizedQuantitySearchLevel) {
 		myNormalizedQuantitySearchLevel = theNormalizedQuantitySearchLevel;
+	}
+
+	// FIXME: javadoc all correct?
+
+	/**
+	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
+	 * will automatically have versions appended if the reference does not already have a version. The version used will
+	 * be the current version of the given resource. If a supplied reference already has a version, it will not be
+	 * changed.
+	 *
+	 * @since 5.3.0
+	 */
+	public Set<String> getAutoVersionReferenceAtPaths() {
+		return myAutoVersionReferenceAtPaths;
+	}
+
+	// FIXME: javadoc all correct?
+
+	/**
+	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
+	 * will automatically have versions appended if the reference does not already have a version. The version used will
+	 * be the current version of the given resource. If a supplied reference already has a version, it will not be
+	 * changed.
+	 * <p>
+	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
+	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
+	 * option must also be set.
+	 * </p>
+	 *
+	 * @param thePaths A collection of reference paths for which the versions will be appended automatically
+	 *                 when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *                 only resource name and field names with dots separating is allowed here (no repetition
+	 *                 indicators, FluentPath expressions, etc.)
+	 * @since 5.3.0
+	 */
+	public void setAutoVersionReferenceAtPaths(String... thePaths) {
+		Set<String> paths = Collections.emptySet();
+		if (thePaths != null) {
+			paths = new HashSet<>(Arrays.asList(thePaths));
+		}
+		setAutoVersionReferenceAtPaths(paths);
+	}
+
+	// FIXME: javadoc all correct?
+
+	/**
+	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
+	 * will automatically have versions appended if the reference does not already have a version. The version used will
+	 * be the current version of the given resource. If a supplied reference already has a version, it will not be
+	 * changed.
+	 * <p>
+	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
+	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
+	 * option must also be set.
+	 * </p>
+	 *
+	 * @param thePaths A collection of reference paths for which the versions will be appended automatically
+	 *                 when serializing, e.g. "Patient.managingOrganization" or "AuditEvent.object.reference". Note that
+	 *                 only resource name and field names with dots separating is allowed here (no repetition
+	 *                 indicators, FluentPath expressions, etc.)
+	 * @since 5.3.0
+	 */
+	public void setAutoVersionReferenceAtPaths(Set<String> thePaths) {
+		Set<String> paths = defaultIfNull(thePaths, Collections.emptySet());
+		Map<String, Set<String>> byType = new HashMap<>();
+		for (String nextPath : paths) {
+			int doxIdx = nextPath.indexOf('.');
+			Validate.isTrue(doxIdx > 0, "Invalid path for auto-version reference at path: %s", nextPath);
+			String type = nextPath.substring(0, doxIdx);
+			byType.computeIfAbsent(type, t -> new HashSet<>()).add(nextPath);
+		}
+
+
+		myAutoVersionReferenceAtPaths = paths;
+		myTypeToAutoVersionReferenceAtPaths = byType;
+	}
+
+	/**
+	 * Returns a sub-collection of {@link #getAutoVersionReferenceAtPaths()} containing only paths
+	 * for the given resource type.
+	 *
+	 * @since 5.3.0
+	 */
+	public Set<String> getAutoVersionReferenceAtPathsByResourceType(String theResourceType) {
+		Validate.notEmpty(theResourceType, "theResourceType must not be null or empty");
+		Set<String> retVal = myTypeToAutoVersionReferenceAtPaths.get(theResourceType);
+		retVal = defaultIfNull(retVal, Collections.emptySet());
+		return retVal;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {

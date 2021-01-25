@@ -36,6 +36,8 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -70,6 +72,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.internal.util.collections.IdentitySet;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -78,6 +81,7 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -130,10 +134,12 @@ public abstract class BaseTransactionProcessor {
 	private HapiTransactionService myHapiTransactionService;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	@PostConstruct
 	public void start() {
-
+		ourLog.trace("Starting transaction processor");
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
@@ -195,7 +201,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome, IIdType nextResourceId, DaoMethodOutcome outcome,
 																		 IBase newEntry, String theResourceType, IBaseResource theRes, ServletRequestDetails theRequestDetails) {
-		IIdType newId = outcome.getId().toUnqualifiedVersionless();
+		IIdType newId = outcome.getId().toUnqualified();
 		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);
