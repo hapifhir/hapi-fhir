@@ -159,10 +159,10 @@ public abstract class BaseStorageDao {
 		 * Handle auto-populate-versions
 		 */
 		Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myModelConfig, theResource);
-		for (IBaseReference nextReference : referencesToVersion) {
-			IIdType referenceElement = nextReference.getReferenceElement();
-			if (!referenceElement.hasBaseUrl()) {
-				if (!referenceElement.getValue().startsWith("urn:")) {
+		if (thePerformIndexing) {
+			for (IBaseReference nextReference : referencesToVersion) {
+				IIdType referenceElement = nextReference.getReferenceElement();
+				if (!referenceElement.hasBaseUrl()) {
 					String resourceType = referenceElement.getResourceType();
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 					BaseHasResource targetEntity = dao.readEntity(referenceElement, theRequestDetails);

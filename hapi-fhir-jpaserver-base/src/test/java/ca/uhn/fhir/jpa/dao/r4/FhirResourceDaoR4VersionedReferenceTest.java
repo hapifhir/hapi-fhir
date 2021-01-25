@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -19,6 +20,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	@AfterEach
 	public void afterEach() {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 	}
 
 	@Test
@@ -63,12 +65,17 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		observation = myObservationDao.read(observationId);
 		assertEquals(patientIdString, observation.getSubject().getReference());
 
+		myCaptureQueriesListener.clear();
+
 		// Update - put an unversioned reference in the subject
 		observation = new Observation();
 		observation.setId(observationId);
 		observation.addIdentifier().setSystem("http://foo").setValue("bar");
 		observation.getSubject().setReference(patientId.toVersionless().getValue());
 		myObservationDao.update(observation);
+
+		// Make sure we're not introducing any extra DB operations
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
@@ -177,6 +184,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	@Test
 	public void testInsertVersionedReferenceAtPath_InTransaction_TargetUpdate() {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myDaoConfig.setDeleteEnabled(false);
 		myModelConfig.setAutoVersionReferenceAtPaths("Observation.subject");
 
 		{
@@ -203,6 +211,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		observation.getSubject().setReference(patient.getId()); // versioned
 		builder.addTransactionCreateEntry(observation);
 
+		myCaptureQueriesListener.clear();
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
@@ -211,6 +220,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("3", patientId.getVersionIdPart());
 		assertEquals("1",observationId.getVersionIdPart());
+
+		// Make sure we're not introducing any extra DB operations
+		assertEquals(3, myCaptureQueriesListener.logSelectQueries().size());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
@@ -250,6 +262,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		observation.getSubject().setReference(patient.getId()); // versioned
 		builder.addTransactionCreateEntry(observation);
 
+		myCaptureQueriesListener.clear();
+
 		Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertEquals("200 OK", outcome.getEntry().get(0).getResponse().getStatus());
@@ -258,6 +272,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("3", patientId.getVersionIdPart());
 		assertEquals("1",observationId.getVersionIdPart());
+
+		// Make sure we're not introducing any extra DB operations
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
