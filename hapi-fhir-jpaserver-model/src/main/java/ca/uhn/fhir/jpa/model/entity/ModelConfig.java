@@ -624,13 +624,9 @@ public class ModelConfig {
 		myNormalizedQuantitySearchLevel = theNormalizedQuantitySearchLevel;
 	}
 
-	// FIXME: javadoc all correct?
-
 	/**
 	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
-	 * will automatically have versions appended if the reference does not already have a version. The version used will
-	 * be the current version of the given resource. If a supplied reference already has a version, it will not be
-	 * changed.
+	 * will automatically have versions appended. The version used will be the current version of the given resource.
 	 *
 	 * @since 5.3.0
 	 */
@@ -638,13 +634,9 @@ public class ModelConfig {
 		return myAutoVersionReferenceAtPaths;
 	}
 
-	// FIXME: javadoc all correct?
-
 	/**
 	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
-	 * will automatically have versions appended if the reference does not already have a version. The version used will
-	 * be the current version of the given resource. If a supplied reference already has a version, it will not be
-	 * changed.
+	 * will automatically have versions appended. The version used will be the current version of the given resource.
 	 * <p>
 	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
@@ -665,13 +657,9 @@ public class ModelConfig {
 		setAutoVersionReferenceAtPaths(paths);
 	}
 
-	// FIXME: javadoc all correct?
-
 	/**
 	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
-	 * will automatically have versions appended if the reference does not already have a version. The version used will
-	 * be the current version of the given resource. If a supplied reference already has a version, it will not be
-	 * changed.
+	 * will automatically have versions appended. The version used will be the current version of the given resource.
 	 * <p>
 	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
