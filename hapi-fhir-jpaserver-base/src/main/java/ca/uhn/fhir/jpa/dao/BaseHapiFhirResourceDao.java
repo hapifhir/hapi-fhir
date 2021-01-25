@@ -1315,11 +1315,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				theParams.setOffset(offset);
 			}
 
-			final Integer count = RestfulServerUtils.extractCountParameter(theRequest);
+			Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 			if (count != null) {
 				Integer maxPageSize = theRequest.getServer().getMaximumPageSize();
-				if (maxPageSize != null) {
-					Validate.inclusiveBetween(1, theRequest.getServer().getMaximumPageSize(), count, "Count must be positive integer and less than " + maxPageSize);
+				if (maxPageSize != null && count > maxPageSize) {
+					ourLog.info("Reducing {} from {} to {} which is the maximum allowable page size.", Constants.PARAM_COUNT, count, maxPageSize);
+					count = maxPageSize;
 				}
 				theParams.setCount(count);
 			} else if (theRequest.getServer().getDefaultPageSize() != null) {

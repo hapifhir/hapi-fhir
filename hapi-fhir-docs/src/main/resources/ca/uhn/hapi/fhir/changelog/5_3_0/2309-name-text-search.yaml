@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2309
+title: "In the JPA server, HumanName.name.text was not being indexed and therefore was not searchable.  This has been corrected."

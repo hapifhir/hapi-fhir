@@ -748,7 +748,7 @@
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
-		<jaxb_runtime_version>2.3.1</jaxb_runtime_version>
+		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
 		<jena_version>3.16.0</jena_version>
 		<jersey_version>3.0.0</jersey_version>
 		<!-- 9.4.17 seems to have issues -->
@@ -902,12 +902,6 @@
 				<groupId>com.helger</groupId>
 				<artifactId>ph-schematron</artifactId>
 				<version>${ph_schematron_version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>jakarta.xml.bind</groupId>
-						<artifactId>jakarta.xml.bind-api</artifactId>
-               </exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -932,7 +926,7 @@
 			<dependency>
 				<groupId>com.sun.activation</groupId>
 				<artifactId>jakarta.activation</artifactId>
-				<version>1.2.1</version>
+				<version>2.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.mail</groupId>

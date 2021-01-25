@@ -48,7 +48,7 @@ import java.util.Set;
  * </ul>
  * </p>
  */
-public enum Pointcut {
+public enum Pointcut implements IPointcut {
 
 	/**
 	 * <b>Interceptor Framework Hook:</b>
@@ -2178,6 +2178,7 @@ public enum Pointcut {
 		this(theReturnType, new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
+	@Override
 	public boolean isShouldLogAndSwallowException(@Nonnull Throwable theException) {
 		for (Class<? extends Throwable> next : myExceptionHandlingSpec.myTypesToLogAndSwallow) {
 			if (next.isAssignableFrom(theException.getClass())) {
@@ -2187,11 +2188,13 @@ public enum Pointcut {
 		return false;
 	}
 
+	@Override
 	@Nonnull
 	public Class<?> getReturnType() {
 		return myReturnType;
 	}
 
+	@Override
 	@Nonnull
 	public List<String> getParameterTypes() {
 		return myParameterTypes;
