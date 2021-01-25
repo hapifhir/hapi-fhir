@@ -37,4 +37,12 @@ public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
 	}
+
+	/**
+	 * If you are using a non-fhir-resource payload, you may set the payload directly here instead of using the constructor.
+	 * @param thePayload the payload of the message.
+	 */
+	public void setPayload(String thePayload) {
+		this.myPayload = thePayload;
+	}
 }
