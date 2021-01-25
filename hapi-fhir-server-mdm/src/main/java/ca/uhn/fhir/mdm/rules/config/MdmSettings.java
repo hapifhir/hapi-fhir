@@ -67,11 +67,6 @@ public class MdmSettings implements IMdmSettings {
 		return myConcurrentConsumers;
 	}
 
-	public MdmSettings setConcurrentConsumers(int theConcurrentConsumers) {
-		myConcurrentConsumers = theConcurrentConsumers;
-		return this;
-	}
-
 	public String getScriptText() {
 		return myScriptText;
 	}

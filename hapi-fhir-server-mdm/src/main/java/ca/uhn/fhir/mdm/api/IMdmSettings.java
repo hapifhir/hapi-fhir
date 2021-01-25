@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 public interface IMdmSettings {
 
-	String MDM_CHANNEL_NAME = "mdm";
 	String EMPI_CHANNEL_NAME = "empi";
 
 	// Parallel processing of MDM can result in missed matches.  Best to single-thread.
