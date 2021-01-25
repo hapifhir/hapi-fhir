@@ -80,7 +80,7 @@
 					<groupId>jakarta.xml.bind</groupId>
 					<artifactId>jakarta.xml.bind-api</artifactId>
 				</exclusion>
-				<!-- EXCLUDE all HAPI-FHIR DEPs here and see if it works without Upgrading the Engine code ! -->
+				<!-- FIXME KBD - Possibly try EXCLUDING all HAPI-FHIR DEPs here and see if it works without Upgrading the Engine code ! -->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -108,6 +108,11 @@
 					<artifactId>jakarta.xml.bind-api</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${jaxb_api_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jamesmurty.utils</groupId>
