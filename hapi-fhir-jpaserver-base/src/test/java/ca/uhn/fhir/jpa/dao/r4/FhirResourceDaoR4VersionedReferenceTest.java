@@ -1,7 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.BundleBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -10,6 +14,8 @@ import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,6 +27,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	public void afterEach() {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
+		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
 	}
 
 	@Test
@@ -193,8 +200,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
 		assertEquals("2", patientId.getVersionIdPart());
-		assertEquals("1",encounterId.getVersionIdPart());
-		assertEquals("1",observationId.getVersionIdPart());
+		assertEquals("1", encounterId.getVersionIdPart());
+		assertEquals("1", observationId.getVersionIdPart());
 
 		// Read back and verify that reference is now versioned
 		observation = myObservationDao.read(observationId);
@@ -242,7 +249,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("3", patientId.getVersionIdPart());
-		assertEquals("1",observationId.getVersionIdPart());
+		assertEquals("1", observationId.getVersionIdPart());
 
 		// Make sure we're not introducing any extra DB operations
 		assertEquals(3, myCaptureQueriesListener.logSelectQueries().size());
@@ -294,7 +301,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 		assertEquals("3", patientId.getVersionIdPart());
-		assertEquals("1",observationId.getVersionIdPart());
+		assertEquals("1", observationId.getVersionIdPart());
 
 		// Make sure we're not introducing any extra DB operations
 		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
@@ -304,4 +311,171 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals(patientId.getValue(), observation.getSubject().getReference());
 
 	}
+
+
+	@Test
+	public void testSearchAndIncludeVersionedReference_Asynchronous() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+
+		// Create the patient
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		myPatientDao.create(p);
+
+		// Update the patient
+		p.getIdentifier().get(0).setValue("2");
+		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
+		assertEquals("2", patientId.getVersionIdPart());
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patientId.withVersion("1").getValue());
+		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
+
+		// Search - Non Synchronous for *
+		{
+			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));
+			assertEquals(1, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 1);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+		// Search - Non Synchronous for named include
+		{
+			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(Observation.INCLUDE_PATIENT));
+			assertEquals(1, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 1);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+	}
+
+	@Test
+	public void testSearchAndIncludeVersionedReference_Synchronous() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+
+		// Create the patient
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		myPatientDao.create(p);
+
+		// Update the patient
+		p.getIdentifier().get(0).setValue("2");
+		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
+		assertEquals("2", patientId.getVersionIdPart());
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patientId.withVersion("1").getValue());
+		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
+
+		// Search - Non Synchronous for *
+		{
+			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL));
+			assertEquals(2, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 2);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+		// Search - Non Synchronous for named include
+		{
+			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT));
+			assertEquals(2, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 2);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+	}
+
+
+	@Test
+	public void testSearchAndIncludeUnersionedReference_Asynchronous() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+
+		// Create the patient
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		myPatientDao.create(p);
+
+		// Update the patient
+		p.getIdentifier().get(0).setValue("2");
+		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
+		assertEquals("2", patientId.getVersionIdPart());
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patientId.withVersion("1").getValue());
+		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
+
+		// Search - Non Synchronous for *
+		{
+			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));
+			assertEquals(1, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 1);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+		// Search - Non Synchronous for named include
+		{
+			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(Observation.INCLUDE_PATIENT));
+			assertEquals(1, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 1);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+	}
+
+	@Test
+	public void testSearchAndIncludeUnversionedReference_Synchronous() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
+		myModelConfig.setRespectVersionsForSearchIncludes(true);
+
+		// Create the patient
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("http://foo").setValue("1");
+		myPatientDao.create(p);
+
+		// Update the patient
+		p.getIdentifier().get(0).setValue("2");
+		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
+		assertEquals("2", patientId.getVersionIdPart());
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patientId.withVersion("1").getValue());
+		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
+
+		// Search - Non Synchronous for *
+		{
+			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL));
+			assertEquals(2, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 2);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+		// Search - Non Synchronous for named include
+		{
+			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT));
+			assertEquals(2, outcome.sizeOrThrowNpe());
+			List<IBaseResource> resources = outcome.getResources(0, 2);
+			assertEquals(2, resources.size());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
+		}
+
+	}
+
 }

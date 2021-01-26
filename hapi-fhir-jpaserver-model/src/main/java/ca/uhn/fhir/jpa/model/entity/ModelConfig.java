@@ -96,6 +96,7 @@ public class ModelConfig {
 	private NormalizedQuantitySearchLevel myNormalizedQuantitySearchLevel;
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
+	private boolean myRespectVersionsForSearchIncludes;
 
 	/**
 	 * Constructor
@@ -642,7 +643,7 @@ public class ModelConfig {
 	 * supplied by the client will take precedence over the automatic current version.
 	 * </p>
 	 * <p>
-	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
+	 * Note that for this setting to be useful, the {@link ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
 	 * option must also be set.
 	 * </p>
@@ -669,7 +670,7 @@ public class ModelConfig {
 	 * supplied by the client will take precedence over the automatic current version.
 	 * </p>
 	 * <p>
-	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
+	 * Note that for this setting to be useful, the {@link ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
 	 * option must also be set.
 	 * </p>
@@ -706,6 +707,26 @@ public class ModelConfig {
 		Set<String> retVal = myTypeToAutoVersionReferenceAtPaths.get(theResourceType);
 		retVal = defaultIfNull(retVal, Collections.emptySet());
 		return retVal;
+	}
+
+	/**
+	 * Should searches with <code>_include</code> respect versioned references, and pull the specific requested version.
+	 * This may have performance impacts on heavily loaded systems.
+	 *
+	 * @since 5.3.0
+	 */
+	public boolean isRespectVersionsForSearchIncludes() {
+		return myRespectVersionsForSearchIncludes;
+	}
+
+	/**
+	 * Should searches with <code>_include</code> respect versioned references, and pull the specific requested version.
+	 * This may have performance impacts on heavily loaded systems.
+	 *
+	 * @since 5.3.0
+	 */
+	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
+		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
