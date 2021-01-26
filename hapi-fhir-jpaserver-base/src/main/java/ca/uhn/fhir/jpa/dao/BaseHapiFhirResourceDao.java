@@ -1530,6 +1530,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resource.setId(entity.getIdDt().getValue());
 			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
+			if (!outcome.isNop()) {
+				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
+			}
 			return outcome;
 		}
 

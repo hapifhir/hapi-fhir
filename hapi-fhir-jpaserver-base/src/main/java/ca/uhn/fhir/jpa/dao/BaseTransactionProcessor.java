@@ -917,9 +917,6 @@ public abstract class BaseTransactionProcessor {
 						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
 						if (referencesToVersion.contains(resourceReference)) {
 							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(newId);
-							if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-								newId = newId.withVersion(Long.toString(newId.getVersionIdPartAsLong() + 1));
-							}
 							resourceReference.setReference(newId.getValue());
 						} else {
 							resourceReference.setReference(newId.toVersionless().getValue());
@@ -930,7 +927,6 @@ public abstract class BaseTransactionProcessor {
 						if (referencesToVersion.contains(resourceReference)) {
 							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
 							if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
-								nextId = nextId.withVersion(Long.toString(nextId.getVersionIdPartAsLong() + 1));
 								resourceReference.setReference(nextId.getValue());
 							}
 						}
