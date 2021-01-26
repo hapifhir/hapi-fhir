@@ -84,11 +84,11 @@ public abstract class BaseStorageDao {
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private FhirContext myFhirContext;
+	protected FhirContext myFhirContext;
 	@Autowired
-	private DaoRegistry myDaoRegistry;
+	protected DaoRegistry myDaoRegistry;
 	@Autowired
-	private ModelConfig myModelConfig;
+	protected ModelConfig myModelConfig;
 
 	/**
 	 * May be overridden by subclasses to validate resources prior to storage
