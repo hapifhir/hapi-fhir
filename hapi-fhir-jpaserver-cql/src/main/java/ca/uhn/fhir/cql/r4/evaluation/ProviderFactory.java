@@ -1,17 +1,12 @@
 package ca.uhn.fhir.cql.r4.evaluation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.cql.common.helper.ClientHelper;
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.retrieve.JpaFhirRetrieveProvider;
-import ca.uhn.fhir.cql.r4.provider.R4ApelonFhirTerminologyProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.opencds.cqf.cql.engine.data.CompositeDataProvider;
 import org.opencds.cqf.cql.engine.data.DataProvider;
-import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.fhir.searchparam.SearchParameterResolver;
-import org.opencds.cqf.cql.engine.fhir.terminology.R4FhirTerminologyProvider;
 import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.terminology.PrivateCachingTerminologyProviderDecorator;
@@ -63,20 +58,7 @@ public class ProviderFactory implements EvaluationProviderFactory {
     public TerminologyProvider createTerminologyProvider(String model, String version, String url, String user,
             String pass) {
 		  TerminologyProvider terminologyProvider = null;
-        if (url != null && !url.isEmpty()) {
-            IGenericClient client = ClientHelper.getClient(FhirContext.forR4(), url, user, pass);
-            if (url.contains("apelon.com")) {
-                terminologyProvider = new R4ApelonFhirTerminologyProvider(client);
-				}
-				else
-				{
-					terminologyProvider = new R4FhirTerminologyProvider(client);
-				}
-		  }
-		  else {
-			  terminologyProvider = this.defaultTerminologyProvider;
-		  }
-		  
+		  terminologyProvider = this.defaultTerminologyProvider;
         return new PrivateCachingTerminologyProviderDecorator(terminologyProvider);
     }
 }

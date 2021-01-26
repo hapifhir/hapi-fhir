@@ -274,7 +274,9 @@ public class MeasureEvaluation {
             IdType patientId = patients.get(0).getIdElement();
             reportBuilder.buildPatientReference(patientId.getResourceType() + "/" + patientId.getIdPart());
         }
-        reportBuilder.buildPeriod(measurementPeriod);
+        if (measurementPeriod != null) {
+			  reportBuilder.buildPeriod(measurementPeriod);
+		  }
 
         MeasureReport report = reportBuilder.build();
 

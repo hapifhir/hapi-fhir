@@ -18,10 +18,17 @@ import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestBase {
 	private static final Logger ourLog = LoggerFactory.getLogger(CqlProviderR4Test.class);
+	private static final IdType libraryId = new IdType("Library", "library-mrp-logic");
+	private static final IdType measureId = new IdType("Measure", "measure-asf");
+	private static final String measure = "Measure/measure-asf";
+	private static final String patient = "Patient/Patient-6529";
+	private static final String periodStart = "2000-01-01";
+	private static final String periodEnd = "2019-12-31";
+	private static final Object syncObject = new Object();
+	private static boolean bundlesLoaded = false;
 
 	@Autowired
 	IFhirResourceDao<Measure> myMeasureDao;
@@ -30,20 +37,32 @@ public class CqlProviderR4Test extends BaseCqlR4Test implements CqlProviderTestB
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
 
+	public synchronized void loadBundles() throws IOException {
+		if (!bundlesLoaded) {
+			Bundle result = loadBundle("dstu3/hedis-ig/test-patient-6529-data.json");
+			bundlesLoaded = true;
+		}
+	}
+
 	@Test
-	public void testHedisIGEvaluateMeasure() throws IOException {
-		IdType libraryId = new IdType("Library", "library-mrp-logic");
-		IdType measureId = new IdType("Measure", "measure-asf");
+	public void testHedisIGEvaluateMeasureWithTimeframe() throws IOException {
+		loadBundles();
 		loadResource("r4/hedis-ig/library-asf-logic.json");
 		loadResource("r4/hedis-ig/measure-asf.json");
-		Bundle result = loadBundle("dstu3/hedis-ig/test-patient-6529-data.json");
-
-		String measure = "Measure/measure-asf";
-		String patient = "Patient/Patient-6529";
-		String periodStart = "2000-01-01";
-		String periodEnd = "2019-12-31";
-
 		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, periodStart, periodEnd, measure, "patient",
+			patient, null, null, null, null, null, null);
+		// Assert it worked
+		assertThat(report.getGroup(), hasSize(1));
+		assertThat(report.getGroup().get(0).getPopulation(), hasSize(3));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(report));
+	}
+
+	@Test
+	public void testHedisIGEvaluateMeasureNoTimeframe() throws IOException {
+		loadBundles();
+		loadResource("r4/hedis-ig/library-asf-logic.json");
+		loadResource("r4/hedis-ig/measure-asf.json");
+		MeasureReport report = myMeasureOperationsProvider.evaluateMeasure(measureId, null, null, measure, "patient",
 			patient, null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));

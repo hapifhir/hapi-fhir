@@ -558,17 +558,6 @@ public class MeasureEvaluation {
             evaluatedResourcesList.forEach((resource) -> {
                 evaluatedResourceIds.add(new Reference(resource));
             });
-
-            // TODO: DSTU3 Doesn't support this..
-            // report.setEvaluatedResources(evaluatedResourceIds);
-
-            /*
-            FhirMeasureBundler bundler = new FhirMeasureBundler();
-            org.hl7.fhir.dstu3.model.Bundle evaluatedResources = bundler.bundle(resources.values());
-            evaluatedResources.setId(UUID.randomUUID().toString());
-            report.setEvaluatedResources(new Reference(evaluatedResources.getId()));
-            report.addContained(evaluatedResources);
-            */
         }
 
         if (sdeAccumulators.size() > 0) {

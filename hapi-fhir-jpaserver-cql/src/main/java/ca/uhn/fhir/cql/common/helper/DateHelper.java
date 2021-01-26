@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cql.common.helper;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,15 +12,15 @@ public class DateHelper {
 
     // Helper class to resolve period dates
     public static Date resolveRequestDate(String date, boolean start) {
-        // split it up - support dashes or slashes
+		 if (StringUtils.isBlank(date)) {
+			 throw new IllegalArgumentException("date parameter cannot be blank!");
+		 }
+
+		 // split it up - support dashes or slashes
         String[] dissect = date.contains("-") ? date.split("-") : date.split("/");
         List<Integer> dateVals = new ArrayList<>();
         for (String dateElement : dissect) {
             dateVals.add(Integer.parseInt(dateElement));
-        }
-
-        if (dateVals.isEmpty()) {
-            throw new IllegalArgumentException("Invalid date");
         }
 
         // for now support dates up to day precision

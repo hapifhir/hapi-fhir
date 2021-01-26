@@ -93,13 +93,15 @@ public class MeasureEvaluationSeed {
 			context.registerDataProvider(def.getRight(), dataProvider);
 		}
 
-		// resolve the measurement period
-		measurementPeriod = new Interval(DateHelper.resolveRequestDate(periodStart, true), true,
+		if (periodStart != null && periodEnd != null) {
+			// resolve the measurement period
+			measurementPeriod = new Interval(DateHelper.resolveRequestDate(periodStart, true), true,
 				DateHelper.resolveRequestDate(periodEnd, false), true);
 
-		context.setParameter(null, "Measurement Period",
+			context.setParameter(null, "Measurement Period",
 				new Interval(DateTime.fromJavaDate((Date) measurementPeriod.getStart()), true,
-						DateTime.fromJavaDate((Date) measurementPeriod.getEnd()), true));
+					DateTime.fromJavaDate((Date) measurementPeriod.getEnd()), true));
+		}
 
 		if (productLine != null) {
 			context.setParameter(null, "Product Line", productLine);
