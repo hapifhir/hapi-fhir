@@ -265,7 +265,14 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	DeleteMethodOutcome deletePidList(String theUrl, Collection<ResourcePersistentId> theResourceIds, DeleteConflictList theDeleteConflicts, RequestDetails theRequest);
 
-	// /**
+	/**
+	 * Returns the current version ID for the given resource
+	 */
+    default long getCurrentVersion(IIdType theReferenceElement) {
+    	return read(theReferenceElement.toVersionless()).getIdElement().getIdPartAsLong();
+	 }
+
+    // /**
 	// * Invoke the everything operation
 	// */
 	// IBundleProvider everything(IIdType theId);

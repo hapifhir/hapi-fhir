@@ -165,8 +165,8 @@ public abstract class BaseStorageDao {
 				if (!referenceElement.hasBaseUrl()) {
 					String resourceType = referenceElement.getResourceType();
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-					BaseHasResource targetEntity = dao.readEntity(referenceElement, theRequestDetails);
-					String targetVersionId = Long.toString(targetEntity.getVersion());
+					long targetEntityVersion = dao.getCurrentVersion(referenceElement);
+					String targetVersionId = Long.toString(targetEntityVersion);
 					String newTargetReference = referenceElement.withVersion(targetVersionId).getValue();
 					nextReference.setReference(newTargetReference);
 				}

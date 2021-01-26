@@ -1132,6 +1132,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	@Transactional
+	public long getCurrentVersion(IIdType theReferenceElement) {
+		return readEntity(theReferenceElement.toVersionless(), null).getVersion();
+	}
+
+	@Override
+	@Transactional
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
