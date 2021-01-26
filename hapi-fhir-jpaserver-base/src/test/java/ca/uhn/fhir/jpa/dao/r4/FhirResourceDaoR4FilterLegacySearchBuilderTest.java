@@ -32,20 +32,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"Duplicates"})
-public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
+public class FhirResourceDaoR4FilterLegacySearchBuilderTest extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4FilterLegacySearchBuilderTest.class);
 	@Autowired
 	private IResourceProvenanceDao myResourceProvenanceDao;
 
 	@AfterEach
 	public void after() {
 		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
+		myDaoConfig.setUseLegacySearchBuilder(false);
 	}
 
 	@BeforeEach
 	public void before() {
 		myDaoConfig.setFilterParameterEnabled(true);
+		myDaoConfig.setUseLegacySearchBuilder(true);
 	}
 
 	@Test
@@ -1254,7 +1256,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _language, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertEquals("Invalid search parameter specified, foo, for resource type Patient", e.getMessage());
 		}
 	}
 

@@ -12,16 +12,16 @@
 	<artifactId>hapi-fhir-jpaserver-model</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR Model</name>
+	<name>HAPI FHIR JPA Model</name>
 
 	<dependencies>
-	
+
 		<!--  FHIR  -->
 		<dependency>
-    		<groupId>org.fhir</groupId>
-    		<artifactId>ucum</artifactId>
-    	</dependency>
-	
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
@@ -72,10 +72,6 @@
 					<groupId>xml-apis</groupId>
 				</exclusion>
 				<exclusion>
-					<groupId>org.jboss.spec.javax.transaction</groupId>
-					<artifactId>jboss-transaction-api_1.2_spec</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>javax.activation</groupId>
 					<artifactId>activation</artifactId>
 				</exclusion>
@@ -83,6 +79,10 @@
 					<groupId>javax.activation</groupId>
 					<artifactId>javax.activation-api</artifactId>
 				</exclusion>
+				<exclusion>
+   					 <groupId>javax.xml.bind</groupId>
+    				 <artifactId>jaxb-api</artifactId>
+                </exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>

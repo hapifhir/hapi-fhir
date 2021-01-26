@@ -143,7 +143,7 @@ public class GenericClientDstu3IT {
       	.returnBundle(Bundle.class)
       	.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(idx).url().toString());
+		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).url().toString());
 		idx++;
 		
 	}
@@ -178,7 +178,7 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertEquals("http://example.com/fhir/Binary?_format=json", request.url().toString());
+		assertEquals("http://example.com/fhir/Binary", request.url().toString());
 		validateUserAgent(capt);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
@@ -252,7 +252,7 @@ public class GenericClientDstu3IT {
 		assertNotNull(outcome.getResource());
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
-		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(0).url().toString());
+		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).url().toString());
 	}
 
 	

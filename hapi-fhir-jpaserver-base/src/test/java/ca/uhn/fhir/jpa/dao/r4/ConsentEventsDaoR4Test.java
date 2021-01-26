@@ -140,7 +140,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 		}
 		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues, "Wrong response from " + outcome.getClass());
-		assertEquals(2, hitCount.get());
+		assertEquals(3, hitCount.get());
 	}
 
 

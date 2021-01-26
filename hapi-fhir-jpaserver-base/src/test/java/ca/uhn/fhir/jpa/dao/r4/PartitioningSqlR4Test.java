@@ -1702,7 +1702,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(2, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
 
 	}
 
@@ -1783,7 +1785,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(2, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
 
 	}
 
@@ -1861,7 +1865,9 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
 		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(2, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
 
 	}
 
