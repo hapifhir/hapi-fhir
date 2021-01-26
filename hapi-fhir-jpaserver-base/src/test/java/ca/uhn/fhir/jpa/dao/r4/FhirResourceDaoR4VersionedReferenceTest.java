@@ -43,6 +43,29 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertEquals(patientIdString, observation.getSubject().getReference());
 	}
 
+	@Test
+	public void testDontOverwriteExistingVersion() {
+		myFhirCtx.getParserOptions().setStripVersionsFromReferences(false);
+
+		Patient p = new Patient();
+		p.setActive(true);
+		myPatientDao.create(p);
+
+		// Update the patient
+		p.setActive(false);
+		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
+
+		assertEquals("2", patientId.getVersionIdPart());
+		assertEquals(null, patientId.getBaseUrl());
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference(patientId.withVersion("1").getValue());
+		IIdType observationId = myObservationDao.create(observation).getId().toUnqualified();
+
+		// Read back
+		observation = myObservationDao.read(observationId);
+		assertEquals(patientId.withVersion("1").getValue(), observation.getSubject().getReference());
+	}
 
 	@Test
 	public void testInsertVersionedReferenceAtPath() {

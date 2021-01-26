@@ -638,6 +638,10 @@ public class ModelConfig {
 	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
 	 * will automatically have versions appended. The version used will be the current version of the given resource.
 	 * <p>
+	 * Versions will only be added if the reference does not already have a version, so any versioned references
+	 * supplied by the client will take precedence over the automatic current version.
+	 * </p>
+	 * <p>
 	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
 	 * option must also be set.
@@ -660,6 +664,10 @@ public class ModelConfig {
 	/**
 	 * When set with resource paths (e.g. <code>"Observation.subject"</code>), any references found at the given paths
 	 * will automatically have versions appended. The version used will be the current version of the given resource.
+	 * <p>
+	 * Versions will only be added if the reference does not already have a version, so any versioned references
+	 * supplied by the client will take precedence over the automatic current version.
+	 * </p>
 	 * <p>
 	 * Note that for this setting to be useful, the {@link ca.uhn.fhir.context.ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}

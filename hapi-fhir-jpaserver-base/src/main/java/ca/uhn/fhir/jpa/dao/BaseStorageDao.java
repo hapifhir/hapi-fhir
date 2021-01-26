@@ -325,13 +325,14 @@ public abstract class BaseStorageDao {
 			String resourceName = theFhirContext.getResourceType(theResource);
 			for (String nextPath : theModelConfig.getAutoVersionReferenceAtPathsByResourceType(resourceName)) {
 				List<IBaseReference> nextReferences = theFhirContext.newTerser().getValues(theResource, nextPath, IBaseReference.class);
-				if (!nextReferences.isEmpty()) {
+				for (IBaseReference next : nextReferences) {
+					if (next.getReferenceElement().hasVersionIdPart()) {
+						continue;
+					}
 					if (references.isEmpty()) {
 						references = new IdentityHashMap<>();
 					}
-					for (IBaseReference next : nextReferences) {
-						references.put(next, null);
-					}
+					references.put(next, null);
 				}
 			}
 		}
