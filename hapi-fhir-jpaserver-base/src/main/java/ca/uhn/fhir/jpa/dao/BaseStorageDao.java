@@ -107,27 +107,44 @@ public abstract class BaseStorageDao {
 	 */
 	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
 
-		/*
-		 * Sanity check - Is this resource the right type for this DAO?
-		 */
+		verifyResourceTypeIsAppropriateForDao(theResource);
+
+		verifyResourceIdIsValid(theResource);
+
+		verifyBundleTypeIsAppropriateForStorage(theResource);
+
+		replaceAbsoluteReferencesWithRelative(theResource);
+
+		performAutoVersioning(theResource, thePerformIndexing);
+
+	}
+
+	/**
+	 * Sanity check - Is this resource the right type for this DAO?
+	 */
+	private void verifyResourceTypeIsAppropriateForDao(IBaseResource theResource) {
 		String type = getContext().getResourceType(theResource);
 		if (getResourceName() != null && !getResourceName().equals(type)) {
 			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
 		}
+	}
 
-		/*
-		 * Verify that the resource ID is actually valid according to FHIR's rules
-		 */
+	/**
+	 * Verify that the resource ID is actually valid according to FHIR's rules
+	 */
+	private void verifyResourceIdIsValid(IBaseResource theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
 				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
 			}
 		}
+	}
 
-		/*
-		 * Verify that we're not storing a Bundle with a disallowed bundle type
-		 */
-		if ("Bundle".equals(type)) {
+	/**
+	 * Verify that we're not storing a Bundle with a disallowed bundle type
+	 */
+	private void verifyBundleTypeIsAppropriateForStorage(IBaseResource theResource) {
+		if (theResource instanceof IBaseBundle) {
 			Set<String> allowedBundleTypes = getConfig().getBundleTypesAllowedForStorage();
 			String bundleType = BundleUtil.getBundleType(getContext(), (IBaseBundle) theResource);
 			bundleType = defaultString(bundleType);
@@ -136,10 +153,12 @@ public abstract class BaseStorageDao {
 				throw new UnprocessableEntityException(message);
 			}
 		}
+	}
 
-		/*
-		 * Replace absolute references with relative ones if configured to do so
-		 */
+	/**
+	 * Replace absolute references with relative ones if configured to do so
+	 */
+	private void replaceAbsoluteReferencesWithRelative(IBaseResource theResource) {
 		if (getConfig().getTreatBaseUrlsAsLocal().isEmpty() == false) {
 			FhirTerser t = getContext().newTerser();
 			List<ResourceReferenceInfo> refs = t.getAllResourceReferences(theResource);
@@ -153,12 +172,27 @@ public abstract class BaseStorageDao {
 				}
 			}
 		}
+	}
 
-		/*
-		 * Handle auto-populate-versions
-		 */
-		Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myModelConfig, theResource);
+	/**
+	 * Handle {@link ModelConfig#getAutoVersionReferenceAtPaths() auto-populate-versions}
+	 *
+	 * We only do this if thePerformIndexing is true because if it's false, that means
+	 * we're in a FHIR transaction during the first phase of write operation processing,
+	 * meaning that the versions of other resources may not have need updated yet. For example
+	 * we're about to store an Observation with a reference to a Patient, and that Patient
+	 * is also being updated in the same transaction, during the first "no index" phase,
+	 * the Patient will not yet have its version number incremented, so it would be wrong
+	 * to use that value. During the second phase it is correct.
+	 *
+	 * Also note that {@link BaseTransactionProcessor} also has code to do auto-versioning
+	 * and it is the one that takes care of the placeholder IDs. Look for the other caller of
+	 * {@link #extractReferencesToAutoVersion(FhirContext, ModelConfig, IBaseResource)}
+	 * to find this.
+	 */
+	private void performAutoVersioning(IBaseResource theResource, boolean thePerformIndexing) {
 		if (thePerformIndexing) {
+			Set<IBaseReference> referencesToVersion = extractReferencesToAutoVersion(myFhirContext, myModelConfig, theResource);
 			for (IBaseReference nextReference : referencesToVersion) {
 				IIdType referenceElement = nextReference.getReferenceElement();
 				if (!referenceElement.hasBaseUrl()) {
@@ -170,7 +204,6 @@ public abstract class BaseStorageDao {
 				}
 			}
 		}
-
 	}
 
 	protected DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final IBasePersistedResource theEntity, @Nonnull IBaseResource theResource) {

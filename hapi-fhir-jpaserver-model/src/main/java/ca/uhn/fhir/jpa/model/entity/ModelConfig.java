@@ -28,6 +28,7 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -672,7 +673,7 @@ public class ModelConfig {
 	 * <p>
 	 * Note that for this setting to be useful, the {@link ParserOptions}
 	 * {@link ParserOptions#getDontStripVersionsFromReferencesAtPaths() DontStripVersionsFromReferencesAtPaths}
-	 * option must also be set.
+	 * option must also be set
 	 * </p>
 	 *
 	 * @param thePaths A collection of reference paths for which the versions will be appended automatically
@@ -728,7 +729,7 @@ public class ModelConfig {
 	public void setRespectVersionsForSearchIncludes(boolean theRespectVersionsForSearchIncludes) {
 		myRespectVersionsForSearchIncludes = theRespectVersionsForSearchIncludes;
 	}
-
+	
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
