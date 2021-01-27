@@ -795,20 +795,23 @@ public class SearchBuilder implements ISearchBuilder {
 					String sql = sqlBuilder.toString();
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
-						TypedQuery<Object[]> q = theEntityManager.createQuery(sql, Object[].class);
+						TypedQuery<?> q = theEntityManager.createQuery(sql, Object.class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
-						List<Object[]> results = q.getResultList();
-						for (Object[] nextRow : results) {
+						List<?> results = q.getResultList();
+						for (Object nextRow : results) {
 							if (nextRow == null) {
 								// This can happen if there are outgoing references which are canonical or point to
 								// other servers
 								continue;
 							}
 
-							Long resourceLink = (Long) ((Object[]) nextRow)[0];
+							Long resourceLink;
 							Long version = null;
 							if (findVersionFieldName != null) {
+								resourceLink = (Long) ((Object[]) nextRow)[0];
 								version = (Long) ((Object[]) nextRow)[1];
+							} else {
+								resourceLink = (Long)nextRow;
 							}
 
 							pidsToInclude.add(new ResourcePersistentId(resourceLink, version));
@@ -861,7 +864,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							TypedQuery<Object[]> q = theEntityManager.createQuery(sql, Object[].class);
+							TypedQuery<Object> q = theEntityManager.createQuery(sql, Object.class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
@@ -869,13 +872,17 @@ public class SearchBuilder implements ISearchBuilder {
 							} else if (haveTargetTypesDefinedByParam) {
 								q.setParameter("target_resource_types", param.getTargets());
 							}
-							List<Object[]> results = q.getResultList();
-							for (Object[] resourceLink : results) {
+							List<?> results = q.getResultList();
+							for (Object resourceLink : results) {
 								if (resourceLink != null) {
-									ResourcePersistentId persistentId = new ResourcePersistentId(resourceLink[0]);
+									ResourcePersistentId persistentId;
 									if (findVersionFieldName != null) {
-										persistentId.setVersion((Long) resourceLink[1]);
+										persistentId = new ResourcePersistentId(((Object[])resourceLink)[0]);
+										persistentId.setVersion((Long) ((Object[])resourceLink)[1]);
+									} else {
+										persistentId = new ResourcePersistentId(resourceLink);
 									}
+									assert persistentId.getId() instanceof Long;
 									pidsToInclude.add(persistentId);
 								}
 							}
