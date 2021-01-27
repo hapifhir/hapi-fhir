@@ -162,8 +162,9 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-	public void addInclude(Include theInclude) {
+	public SearchParameterMap addInclude(Include theInclude) {
 		getIncludes().add(theInclude);
+		return this;
 	}
 
 	private void addLastUpdateParam(StringBuilder b, DateParam date) {
