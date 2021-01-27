@@ -944,7 +944,7 @@ public abstract class BaseTransactionProcessor {
 					if (theIdSubstitutions.containsKey(nextUriString)) {
 						IIdType newId = theIdSubstitutions.get(nextUriString);
 						ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
-						nextRef.setValueAsString(newId.getValue());
+						nextRef.setValueAsString(newId.toVersionless().getValue());
 					} else {
 						ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
 					}

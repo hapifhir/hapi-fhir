@@ -2985,7 +2985,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		dr.addPresentedForm(attachment);
 
 		Attachment attachment2 = new Attachment();
-		attachment2.setUrl(IdType.newRandomUuid().getValue()); // this one has no subscitution
+		attachment2.setUrl(IdType.newRandomUuid().getValue()); // this one has no substitution
 		dr.addPresentedForm(attachment2);
 
 		Bundle transactionBundle = new Bundle();

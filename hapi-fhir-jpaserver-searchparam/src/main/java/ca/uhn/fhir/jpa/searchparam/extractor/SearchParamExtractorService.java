@@ -279,7 +279,8 @@ public class SearchParamExtractorService {
 			}
 		}
 
-		ResourcePersistentId resolvedTargetId = theTransactionDetails.getResolvedResourceIds().get(thePathAndRef.getRef().getReferenceElement());
+		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		ResourcePersistentId resolvedTargetId = theTransactionDetails.getResolvedResourceId(referenceElement);
 		ResourceLink resourceLink;
 
 		Long targetVersionId = nextId.getVersionIdPartAsLong();
@@ -306,7 +307,7 @@ public class SearchParamExtractorService {
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
 				ResourcePersistentId persistentId = new ResourcePersistentId(resourceLink.getTargetResourcePid());
-				theTransactionDetails.addResolvedResourceId(thePathAndRef.getRef().getReferenceElement(), persistentId);
+				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 
 		} else {
