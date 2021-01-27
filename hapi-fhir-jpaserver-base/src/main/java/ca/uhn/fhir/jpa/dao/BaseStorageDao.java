@@ -31,7 +31,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -165,8 +164,7 @@ public abstract class BaseStorageDao {
 				if (!referenceElement.hasBaseUrl()) {
 					String resourceType = referenceElement.getResourceType();
 					IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-					long targetEntityVersion = dao.getCurrentVersion(referenceElement);
-					String targetVersionId = Long.toString(targetEntityVersion);
+					String targetVersionId = dao.getCurrentVersionId(referenceElement);
 					String newTargetReference = referenceElement.withVersion(targetVersionId).getValue();
 					nextReference.setReference(newTargetReference);
 				}

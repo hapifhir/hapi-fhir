@@ -268,13 +268,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * Returns the current version ID for the given resource
 	 */
-    default long getCurrentVersion(IIdType theReferenceElement) {
-    	return read(theReferenceElement.toVersionless()).getIdElement().getIdPartAsLong();
+    default String getCurrentVersionId(IIdType theReferenceElement) {
+    	return read(theReferenceElement.toVersionless()).getIdElement().getVersionIdPart();
 	 }
-
-    // /**
-	// * Invoke the everything operation
-	// */
-	// IBundleProvider everything(IIdType theId);
 
 }
