@@ -644,21 +644,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	public boolean applyFilter(final String theInput, final String thePrefixToken) {
+	public boolean applyFilter(final String theDisplay, final String theFilterDisplay) {
 		
 		//-- safety check only, no need to apply filter
-		if (theInput == null || thePrefixToken == null)
+		if (theDisplay == null || theFilterDisplay == null)
 			return true;
 
 		// -- sentence case
-		if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(theInput, thePrefixToken))
+		if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(theDisplay, theFilterDisplay))
 			return true;
 		
 		//-- token case
-		// return true only e.g. the input is 'Body height', thePrefixToken is "he", or 'bo'
-		StringTokenizer tok = new StringTokenizer(theInput);		
+		// return true only e.g. the input is 'Body height', theFilterDisplay is "he", or 'bo'
+		StringTokenizer tok = new StringTokenizer(theDisplay);
 		while (tok.hasMoreTokens()) {
-			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), thePrefixToken))
+			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), theFilterDisplay))
 				return true;
 		}
 		
