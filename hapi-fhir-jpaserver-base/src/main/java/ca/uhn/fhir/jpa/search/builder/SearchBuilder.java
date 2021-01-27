@@ -707,7 +707,7 @@ public class SearchBuilder implements ISearchBuilder {
 		for (ResourceTag tag : tagList) {
 
 			resourceId = new ResourcePersistentId(tag.getResourceId());
-			tagCol = tagMap.get(resourceId);
+			tagCol = tagMap.get(resourceId.getIdAsLong());
 			if (tagCol == null) {
 				tagCol = new ArrayList<>();
 				tagCol.add(tag);
