@@ -28,6 +28,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		myFhirCtx.getParserOptions().setStripVersionsFromReferences(true);
 		myDaoConfig.setDeleteEnabled(new DaoConfig().isDeleteEnabled());
 		myModelConfig.setRespectVersionsForSearchIncludes(new ModelConfig().isRespectVersionsForSearchIncludes());
+		myModelConfig.setAutoVersionReferenceAtPaths(new ModelConfig().getAutoVersionReferenceAtPaths());
 	}
 
 	@Test

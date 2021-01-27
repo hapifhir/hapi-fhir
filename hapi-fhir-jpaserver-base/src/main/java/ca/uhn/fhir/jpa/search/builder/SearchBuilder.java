@@ -795,7 +795,7 @@ public class SearchBuilder implements ISearchBuilder {
 					String sql = sqlBuilder.toString();
 					List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 					for (Collection<ResourcePersistentId> nextPartition : partitions) {
-						TypedQuery<?> q = theEntityManager.createQuery(sql, Object.class);
+						TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
 						q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 						List<?> results = q.getResultList();
 						for (Object nextRow : results) {
@@ -864,7 +864,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 						List<Collection<ResourcePersistentId>> partitions = partition(nextRoundMatches, getMaximumPageSize());
 						for (Collection<ResourcePersistentId> nextPartition : partitions) {
-							TypedQuery<Object> q = theEntityManager.createQuery(sql, Object.class);
+							TypedQuery<?> q = theEntityManager.createQuery(sql, Object[].class);
 							q.setParameter("src_path", nextPath);
 							q.setParameter("target_pids", ResourcePersistentId.toLongList(nextPartition));
 							if (targetResourceType != null) {
