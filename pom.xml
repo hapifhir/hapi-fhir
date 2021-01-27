@@ -738,8 +738,7 @@
 		<commons_lang3_version>3.9</commons_lang3_version>
 		<derby_version>10.14.2.0</derby_version>
 		<!--<derby_version>10.15.1.3</derby_version>-->
-		<error_prone_annotations_version>2.3.4</error_prone_annotations_version>
-		<error_prone_core_version>2.3.4</error_prone_core_version>
+		<error_prone_core_version>2.5.1</error_prone_core_version>
 		<nullaway_version>0.7.9</nullaway_version>
 		<guava_version>30.1-jre</guava_version>
 		<gson_version>2.8.5</gson_version>

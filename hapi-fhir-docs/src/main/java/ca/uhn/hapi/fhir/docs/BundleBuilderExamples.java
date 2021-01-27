@@ -84,7 +84,7 @@ public class BundleBuilderExamples {
 		patient.setActive(true);
 
 		// Add the patient as a create (aka POST) to the Bundle
-		builder.addCreateEntry(patient);
+		builder.addTransactionCreateEntry(patient);
 
 		// Execute the transaction
 		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
@@ -102,7 +102,7 @@ public class BundleBuilderExamples {
 		patient.addIdentifier().setSystem("http://foo").setValue("bar");
 
 		// Add the patient as a create (aka POST) to the Bundle
-		builder.addCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
+		builder.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://foo|bar");
 
 		// Execute the transaction
 		IBaseBundle outcome = myFhirClient.transaction().withBundle(builder.getBundle()).execute();
