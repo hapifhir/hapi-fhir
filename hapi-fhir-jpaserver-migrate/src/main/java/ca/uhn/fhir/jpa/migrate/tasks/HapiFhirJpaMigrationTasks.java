@@ -123,6 +123,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName quantityTable = version.onTable("HFJ_SPIDX_QUANTITY");
 		quantityTable.modifyColumn("20210116.1", "SP_VALUE").nullable().failureAllowed().withType(ColumnTypeEnum.DOUBLE);
 
+		// HFJ_RES_LINK
+		version.onTable("HFJ_RES_LINK")
+			.addColumn("20210126.1", "TARGET_RESOURCE_VERSION").nullable().type(ColumnTypeEnum.LONG);
 	}
 
 	protected void init520() {

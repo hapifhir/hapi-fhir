@@ -268,8 +268,8 @@ public class SearchParamExtractorService {
 		}
 
 		Class<? extends IBaseResource> type = resourceDefinition.getImplementingClass();
-		String id = nextId.getIdPart();
-		if (StringUtils.isBlank(id)) {
+		String targetId = nextId.getIdPart();
+		if (StringUtils.isBlank(targetId)) {
 			String msg = "Invalid resource reference found at path[" + path + "] - Does not contain resource ID - " + nextId.getValue();
 			if (theFailOnInvalidReference) {
 				throw new InvalidRequestException(msg);
@@ -279,9 +279,11 @@ public class SearchParamExtractorService {
 			}
 		}
 
-		ResourcePersistentId resolvedTargetId = theTransactionDetails.getResolvedResourceIds().get(thePathAndRef.getRef().getReferenceElement());
+		IIdType referenceElement = thePathAndRef.getRef().getReferenceElement();
+		ResourcePersistentId resolvedTargetId = theTransactionDetails.getResolvedResourceId(referenceElement);
 		ResourceLink resourceLink;
 
+		Long targetVersionId = nextId.getVersionIdPartAsLong();
 		if (resolvedTargetId != null) {
 
 			/*
@@ -289,7 +291,7 @@ public class SearchParamExtractorService {
 			 * need to resolve it again
 			 */
 			myResourceLinkResolver.validateTypeOrThrowException(type);
-			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, resolvedTargetId.getIdAsLong(), nextId.getIdPart(), transactionDate);
+			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, resolvedTargetId.getIdAsLong(), targetId, transactionDate, targetVersionId);
 
 		} else if (theFailOnInvalidReference) {
 
@@ -305,7 +307,7 @@ public class SearchParamExtractorService {
 			} else {
 				// Cache the outcome in the current transaction in case there are more references
 				ResourcePersistentId persistentId = new ResourcePersistentId(resourceLink.getTargetResourcePid());
-				theTransactionDetails.addResolvedResourceId(thePathAndRef.getRef().getReferenceElement(), persistentId);
+				theTransactionDetails.addResolvedResourceId(referenceElement, persistentId);
 			}
 
 		} else {
@@ -317,7 +319,7 @@ public class SearchParamExtractorService {
 			ResourceTable target;
 			target = new ResourceTable();
 			target.setResourceType(typeString);
-			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, null, nextId.getIdPart(), transactionDate);
+			resourceLink = ResourceLink.forLocalReference(thePathAndRef.getPath(), theEntity, typeString, null, targetId, transactionDate, targetVersionId);
 
 		}
 
@@ -346,7 +348,8 @@ public class SearchParamExtractorService {
 		String targetResourceType = targetResource.getResourceType();
 		Long targetResourcePid = targetResource.getResourceId();
 		String targetResourceIdPart = theNextId.getIdPart();
-		return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime);
+		Long targetVersion = theNextId.getVersionIdPartAsLong();
+		return ResourceLink.forLocalReference(nextPathAndRef.getPath(), theEntity, targetResourceType, targetResourcePid, targetResourceIdPart, theUpdateTime, targetVersion);
 	}
 
 
