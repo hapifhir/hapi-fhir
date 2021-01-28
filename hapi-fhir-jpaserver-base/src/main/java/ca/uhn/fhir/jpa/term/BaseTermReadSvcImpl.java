@@ -186,6 +186,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
+import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -651,20 +652,37 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			return true;
 
 		// -- sentence case
-		if (org.apache.commons.lang3.StringUtils.containsIgnoreCase(theDisplay, theFilterDisplay))
+		if (startsWithIgnoreCase(theDisplay, theFilterDisplay))
 			return true;
 		
 		//-- token case
-		// return true only e.g. the input is 'Body height', theFilterDisplay is "he", or 'bo'
-		StringTokenizer tok = new StringTokenizer(theDisplay);
-		while (tok.hasMoreTokens()) {
-			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), theFilterDisplay))
-				return true;
-		}
-		
+		if (startsWithByWordBoundaries(theDisplay, theFilterDisplay)) return true;
+
 		return false;
 	}
-	
+
+	private boolean startsWithByWordBoundaries(String theDisplay, String theFilterDisplay) {
+		// return true only e.g. the input is 'Body height', theFilterDisplay is "he", or 'bo'
+		StringTokenizer tok = new StringTokenizer(theDisplay);
+		List<String> tokens = new ArrayList<>();
+		while (tok.hasMoreTokens()) {
+			String token = tok.nextToken();
+			if (startsWithIgnoreCase(token, theFilterDisplay))
+				return true;
+			tokens.add(token);
+		}
+
+		// Allow to search by the end of the phrase.  E.g.  "working proficiency" will match "Limited working proficiency"
+		for (int start = 0; start <= tokens.size() - 1; ++ start) {
+			for (int end = start + 1; end <= tokens.size(); ++end) {
+				String sublist = String.join(" ", tokens.subList(start, end));
+				if (startsWithIgnoreCase(sublist, theFilterDisplay))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void expandValueSet(ValueSetExpansionOptions theExpansionOptions, ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
