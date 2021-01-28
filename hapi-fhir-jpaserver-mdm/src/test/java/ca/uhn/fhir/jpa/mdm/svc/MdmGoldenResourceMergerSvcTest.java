@@ -18,6 +18,7 @@ import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +35,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
@@ -101,7 +101,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	private Patient mergeGoldenPatients() {
 		assertEquals(0, redirectLinkCount());
-		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, myToGoldenPatient, createMdmContext());
+		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(myFromGoldenPatient, null, myToGoldenPatient, createMdmContext());
 		assertEquals(1, redirectLinkCount());
 		return retval;
 	}
@@ -151,22 +151,41 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		populatePatient(myFromGoldenPatient);
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
-		// TODO NG - Revisit when rules are ready
-//		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
-//		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
-//		assertEquals(FAMILY_NAME, returnedName.getFamily());
-//		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
+		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
+		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
+		assertEquals(FAMILY_NAME, returnedName.getFamily());
+		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
 	}
 
 	@Test
 	public void emptyFromFullTo() {
 		myFromGoldenPatient.getName().add(new HumanName().addGiven(BAD_GIVEN_NAME));
 		populatePatient(myToGoldenPatient);
+		print(myFromGoldenPatient);
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
+		print(mergedSourcePatient);
 		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals(GIVEN_NAME, returnedName.getGivenAsSingleString());
 		assertEquals(FAMILY_NAME, returnedName.getFamily());
+		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
+	}
+
+	@Test
+	public void testManualOverride() {
+		Patient manuallyMergedPatient = new Patient();
+		populatePatient(manuallyMergedPatient);
+		manuallyMergedPatient.getNameFirstRep().setFamily("TestFamily");
+		manuallyMergedPatient.getNameFirstRep().getGiven().clear();
+		manuallyMergedPatient.getNameFirstRep().addGiven("TestGiven");
+
+		MdmTransactionContext ctx = createMdmContext();
+		ctx.setRestOperation(MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES);
+		Patient mergedSourcePatient = (Patient) myGoldenResourceMergerSvc
+			.mergeGoldenResources(myFromGoldenPatient, manuallyMergedPatient, myToGoldenPatient, ctx);
+
+		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
+		assertEquals("TestGiven TestFamily", returnedName.getNameAsSingleString());
 		assertEquals(POSTAL_CODE, mergedSourcePatient.getAddressFirstRep().getPostalCode());
 	}
 
@@ -376,39 +395,42 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	@Test
 	public void testMergeNames() {
-		// TODO NG - Revisit when rules are available
-//		myFromSourcePatient.addName().addGiven("Jim");
-//		myFromSourcePatient.getNameFirstRep().addGiven("George");
-//		assertThat(myFromSourcePatient.getName(), hasSize(1));
-//		assertThat(myFromSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//
-//		myToSourcePatient.addName().addGiven("Jeff");
-//		myToSourcePatient.getNameFirstRep().addGiven("George");
-//		assertThat(myToSourcePatient.getName(), hasSize(1));
-//		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//
-//		Patient mergedSourcePatient = mergeSourcePatients();
-//		assertThat(mergedSourcePatient.getName(), hasSize(2));
-//		assertThat(mergedSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//		assertThat(mergedSourcePatient.getName().get(1).getGiven(), hasSize(2));
+		myFromGoldenPatient.addName().addGiven("Jim");
+		myFromGoldenPatient.getNameFirstRep().addGiven("George");
+		assertThat(myFromGoldenPatient.getName(), hasSize(1));
+		assertThat(myFromGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		myToGoldenPatient.addName().addGiven("Jeff");
+		myToGoldenPatient.getNameFirstRep().addGiven("George");
+		assertThat(myToGoldenPatient.getName(), hasSize(1));
+		assertThat(myToGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		Patient mergedSourcePatient = mergeGoldenPatients();
+		assertThat(mergedSourcePatient.getName(), hasSize(2));
+		assertThat(mergedSourcePatient.getName().get(0).getGiven(), hasSize(2));
+		assertThat(mergedSourcePatient.getName().get(1).getGiven(), hasSize(2));
+
+		assertThat(mergedSourcePatient.getName().get(0).getNameAsSingleString(), is("Jeff George"));
+		assertThat(mergedSourcePatient.getName().get(1).getNameAsSingleString(), is("Jim George"));
 	}
 
 	@Test
 	public void testMergeNamesAllSame() {
-		// TODO NG - Revisit when rules are available
-//		myFromSourcePatient.addName().addGiven("Jim");
-//		myFromSourcePatient.getNameFirstRep().addGiven("George");
-//		assertThat(myFromSourcePatient.getName(), hasSize(1));
-//		assertThat(myFromSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//
-//		myToSourcePatient.addName().addGiven("Jim");
-//		myToSourcePatient.getNameFirstRep().addGiven("George");
-//		assertThat(myToSourcePatient.getName(), hasSize(1));
-//		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
-//
-//		mergeSourcePatients();
-//		assertThat(myToSourcePatient.getName(), hasSize(1));
-//		assertThat(myToSourcePatient.getName().get(0).getGiven(), hasSize(2));
+		myFromGoldenPatient.addName().addGiven("Jim");
+		myFromGoldenPatient.getNameFirstRep().addGiven("George");
+		assertThat(myFromGoldenPatient.getName(), hasSize(1));
+		assertThat(myFromGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		myToGoldenPatient.addName().addGiven("Jim");
+		myToGoldenPatient.getNameFirstRep().addGiven("George");
+		assertThat(myToGoldenPatient.getName(), hasSize(1));
+		assertThat(myToGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		mergeGoldenPatients();
+		assertThat(myToGoldenPatient.getName(), hasSize(1));
+		assertThat(myToGoldenPatient.getName().get(0).getGiven(), hasSize(2));
+
+		assertThat(myToGoldenPatient.getName().get(0).getNameAsSingleString(), is("Jim George"));
 	}
 
 	@Test
@@ -425,11 +447,14 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		mergeGoldenPatients();
 
 		assertThat(myToGoldenPatient.getIdentifier(), hasSize(4));
+
+		assertTrue(myToGoldenPatient.getIdentifier().get(0).equalsDeep(new Identifier().setValue("aaa").setSystem("SYSTEM1")));
+		assertTrue(myToGoldenPatient.getIdentifier().get(1).equalsDeep(new Identifier().setValue("ccc").setSystem("SYSTEM1")));
+		assertTrue(myToGoldenPatient.getIdentifier().get(2).equalsDeep(new Identifier().setValue("bbb").setSystem("SYSTEM1")));
+		assertTrue(myToGoldenPatient.getIdentifier().get(3).equalsDeep(new Identifier().setValue("ccc").setSystem("SYSTEM2")));
 	}
 
 	private MdmLink createMdmLink(Patient theSourcePatient, Patient theTargetPatient) {
-		//TODO GGG Ensure theis comment can be safely removed
-		//theSourcePatient.addLink().setTarget(new Reference(theTargetPatient));
 		return myMdmLinkDaoSvc.createOrUpdateLinkEntity(theSourcePatient, theTargetPatient, POSSIBLE_MATCH, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
 	}
 

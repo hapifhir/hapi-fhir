@@ -36,7 +36,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date());
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -46,7 +46,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksStringCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date());
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
@@ -56,7 +56,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToString() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date());
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, STRING_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
@@ -66,7 +66,7 @@ public class ResourceIndexedSearchParamsTest {
 
 	@Test
 	public void matchResourceLinksLongCompareToLong() {
-		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date());
+		ResourceLink link = ResourceLink.forLocalReference("organization", mySource, "Organization", 123L, LONG_ID, new Date(), null);
 		myParams.getResourceLinks().add(link);
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
