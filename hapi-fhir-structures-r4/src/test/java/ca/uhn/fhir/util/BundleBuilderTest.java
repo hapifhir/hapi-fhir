@@ -143,7 +143,7 @@ public class BundleBuilderTest {
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		builder.addCreateEntry(patient);
+		builder.addTransactionCreateEntry(patient);
 
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
@@ -162,7 +162,7 @@ public class BundleBuilderTest {
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		builder.addCreateEntry(patient).conditional("Patient?active=true");
+		builder.addTransactionCreateEntry(patient).conditional("Patient?active=true");
 
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.info("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));

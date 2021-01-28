@@ -2124,7 +2124,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		});
 
 		BundleBuilder builder = new BundleBuilder(ourCtx);
-		builder.addCreateEntry(new Patient().setActive(true));
+		builder.addTransactionCreateEntry(new Patient().setActive(true));
 
 		IBaseBundle outcome = client.transaction().withBundle(builder.getBundle()).execute();
 		assertNull(outcome);

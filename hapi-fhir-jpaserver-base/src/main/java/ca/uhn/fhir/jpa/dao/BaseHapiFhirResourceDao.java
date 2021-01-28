@@ -259,6 +259,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 
 		preProcessResourceForStorage(theResource);
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		ResourceTable entity = new ResourceTable();
 		entity.setResourceType(toResourceName(theResource));
@@ -274,7 +275,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				entity = myEntityManager.find(ResourceTable.class, pid.getId());
 				IBaseResource resource = toResource(entity, false);
 				theResource.setId(resource.getIdElement().getValue());
-				return toMethodOutcome(theRequest, entity, resource).setCreated(false);
+				return toMethodOutcome(theRequest, entity, resource).setCreated(false).setNop(true);
 			}
 		}
 
@@ -1131,6 +1132,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	@Transactional
+	public String getCurrentVersionId(IIdType theReferenceElement) {
+		return Long.toString(readEntity(theReferenceElement.toVersionless(), null).getVersion());
+	}
+
+	@Override
+	@Transactional
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest) {
 		validateResourceTypeAndThrowInvalidRequestException(theId);
 
@@ -1459,6 +1466,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		T resource = theResource;
 
 		preProcessResourceForStorage(resource);
+		preProcessResourceForStorage(theResource, theRequest, theTransactionDetails, thePerformIndexing);
 
 		final ResourceTable entity;
 
@@ -1529,6 +1537,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resource.setId(entity.getIdDt().getValue());
 			DaoMethodOutcome outcome = toMethodOutcome(theRequest, entity, resource).setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
+			if (!outcome.isNop()) {
+				outcome.setId(outcome.getId().withVersion(Long.toString(outcome.getId().getVersionIdPartAsLong() + 1)));
+			}
 			return outcome;
 		}
 

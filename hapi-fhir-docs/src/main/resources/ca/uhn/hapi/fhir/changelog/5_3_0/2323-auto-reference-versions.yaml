@@ -1,0 +1,8 @@
+---
+type: add
+issue: 2323
+title: "The JPA server has a new setting on the `ModelConfig` bean called \"AutoVersionReferencesAtPaths\". Using
+   this setting, the server can be configured to add the current target resource version ID to any resource 
+   references found in a resource being stored. In addition, a new setting has been added to the JPA ModelConfig
+   bean that allows `_include` statements to respect versioned references, and actually include the correct
+   version for the reference."

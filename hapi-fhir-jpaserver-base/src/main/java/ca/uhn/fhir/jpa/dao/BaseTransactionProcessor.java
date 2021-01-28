@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.api.model.DeleteMethodOutcome;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -78,6 +79,7 @@ import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -130,10 +132,12 @@ public abstract class BaseTransactionProcessor {
 	private HapiTransactionService myHapiTransactionService;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private ModelConfig myModelConfig;
 
 	@PostConstruct
 	public void start() {
-
+		ourLog.trace("Starting transaction processor");
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
@@ -195,7 +199,7 @@ public abstract class BaseTransactionProcessor {
 
 	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome, IIdType nextResourceId, DaoMethodOutcome outcome,
 																		 IBase newEntry, String theResourceType, IBaseResource theRes, ServletRequestDetails theRequestDetails) {
-		IIdType newId = outcome.getId().toUnqualifiedVersionless();
+		IIdType newId = outcome.getId().toUnqualified();
 		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
 			idSubstitutions.put(resourceId, newId);
@@ -900,20 +904,32 @@ public abstract class BaseTransactionProcessor {
 				}
 
 				// References
+				Set<IBaseReference> referencesToVersion = BaseStorageDao.extractReferencesToAutoVersion(myContext, myModelConfig, nextResource);
 				List<ResourceReferenceInfo> allRefs = terser.getAllResourceReferences(nextResource);
 				for (ResourceReferenceInfo nextRef : allRefs) {
-					IIdType nextId = nextRef.getResourceReference().getReferenceElement();
+					IBaseReference resourceReference = nextRef.getResourceReference();
+					IIdType nextId = resourceReference.getReferenceElement();
 					if (!nextId.hasIdPart()) {
 						continue;
 					}
 					if (theIdSubstitutions.containsKey(nextId)) {
 						IIdType newId = theIdSubstitutions.get(nextId);
 						ourLog.debug(" * Replacing resource ref {} with {}", nextId, newId);
-						nextRef.getResourceReference().setReference(newId.getValue());
+						if (referencesToVersion.contains(resourceReference)) {
+							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(newId);
+							resourceReference.setReference(newId.getValue());
+						} else {
+							resourceReference.setReference(newId.toVersionless().getValue());
+						}
 					} else if (nextId.getValue().startsWith("urn:")) {
 						throw new InvalidRequestException("Unable to satisfy placeholder ID " + nextId.getValue() + " found in element named '" + nextRef.getName() + "' within resource of type: " + nextResource.getIdElement().getResourceType());
 					} else {
-						ourLog.debug(" * Reference [{}] does not exist in bundle", nextId);
+						if (referencesToVersion.contains(resourceReference)) {
+							DaoMethodOutcome outcome = theIdToPersistedOutcome.get(nextId);
+							if (!outcome.isNop() && !Boolean.TRUE.equals(outcome.getCreated())) {
+								resourceReference.setReference(nextId.getValue());
+							}
+						}
 					}
 				}
 
@@ -928,7 +944,7 @@ public abstract class BaseTransactionProcessor {
 					if (theIdSubstitutions.containsKey(nextUriString)) {
 						IIdType newId = theIdSubstitutions.get(nextUriString);
 						ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
-						nextRef.setValueAsString(newId.getValue());
+						nextRef.setValueAsString(newId.toVersionless().getValue());
 					} else {
 						ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
 					}
