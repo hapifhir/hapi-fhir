@@ -58,11 +58,11 @@ public class MdmResourceFieldMatcher {
 	/**
 	 * Compares two {@link IBaseResource}s and determines if they match, using the algorithm defined in this object's
 	 * {@link MdmFieldMatchJson}.
-	 *
+	 * <p>
 	 * In this implementation, it determines whether a given field matches between two resources. Internally this is evaluated using FhirPath. If any of the elements of theLeftResource
 	 * match any of the elements of theRightResource, will return true. Otherwise, false.
 	 *
-	 * @param theLeftResource the first {@link IBaseResource}
+	 * @param theLeftResource  the first {@link IBaseResource}
 	 * @param theRightResource the second {@link IBaseResource}
 	 * @return A boolean indicating whether they match.
 	 */
@@ -80,12 +80,19 @@ public class MdmResourceFieldMatcher {
 	@SuppressWarnings("rawtypes")
 	private MdmMatchEvaluation match(List<IBase> theLeftValues, List<IBase> theRightValues) {
 		MdmMatchEvaluation retval = new MdmMatchEvaluation(false, 0.0);
+
+		boolean isMatchingEmptyFieldValues = (theLeftValues.isEmpty() && theRightValues.isEmpty());
+		if (isMatchingEmptyFieldValues && myMdmFieldMatchJson.isMatcherSupportingEmptyFields()) {
+			return match((IBase) null, (IBase) null);
+		}
+
 		for (IBase leftValue : theLeftValues) {
 			for (IBase rightValue : theRightValues) {
 				MdmMatchEvaluation nextMatch = match(leftValue, rightValue);
 				retval = MdmMatchEvaluation.max(retval, nextMatch);
 			}
 		}
+
 		return retval;
 	}
 

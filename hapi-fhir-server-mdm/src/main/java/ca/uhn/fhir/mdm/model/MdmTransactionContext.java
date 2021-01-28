@@ -32,7 +32,8 @@ public class MdmTransactionContext {
 		UPDATE_LINK,
 		DUPLICATE_GOLDEN_RESOURCES,
 		NOT_DUPLICATE,
-		MERGE_GOLDEN_RESOURCES
+		MERGE_GOLDEN_RESOURCES,
+		MANUAL_MERGE_GOLDEN_RESOURCES
 	}
 
 	/**
@@ -51,9 +52,13 @@ public class MdmTransactionContext {
 	public MdmTransactionContext() {
 	}
 
-	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
-		myTransactionLogMessages = theTransactionLogMessages;
+	public MdmTransactionContext(OperationType theRestOperation) {
 		myRestOperation = theRestOperation;
+	}
+
+	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation) {
+		this(theRestOperation);
+		myTransactionLogMessages = theTransactionLogMessages;
 	}
 
 	public MdmTransactionContext(TransactionLogMessages theTransactionLogMessages, OperationType theRestOperation, String theResourceType) {
@@ -87,5 +92,4 @@ public class MdmTransactionContext {
 	public void setResourceType(String myResourceType) {
 		this.myResourceType = myResourceType;
 	}
-
 }

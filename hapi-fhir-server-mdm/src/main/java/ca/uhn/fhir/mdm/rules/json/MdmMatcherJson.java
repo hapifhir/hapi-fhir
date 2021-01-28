@@ -66,6 +66,10 @@ public class MdmMatcherJson implements IModelJson {
 		return this;
 	}
 
+	public boolean isMatchingEmptyFields() {
+		return myAlgorithm.isMatchingEmptyFields();
+	}
+
 	public boolean match(FhirContext theFhirContext, IBase theLeftValue, IBase theRightValue) {
 		return myAlgorithm.match(theFhirContext, theLeftValue, theRightValue, myExact, myIdentifierSystem);
 	}

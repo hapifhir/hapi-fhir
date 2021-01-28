@@ -144,13 +144,15 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 	@Operation(name = ProviderConstants.MDM_MERGE_GOLDEN_RESOURCES)
 	public IBaseResource mergeGoldenResources(@OperationParam(name = ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theFromGoldenResourceId,
 															@OperationParam(name = ProviderConstants.MDM_MERGE_GR_TO_GOLDEN_RESOURCE_ID, min = 1, max = 1, typeName = "string") IPrimitiveType<String> theToGoldenResourceId,
+															@OperationParam(name = ProviderConstants.MDM_MERGE_RESOURCE, max = 1) IAnyResource theMergedResource,
 															RequestDetails theRequestDetails) {
 		validateMergeParameters(theFromGoldenResourceId, theToGoldenResourceId);
 
-		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValueAsString(), theToGoldenResourceId.getValueAsString(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES,
-				getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId))
-		);
+		MdmTransactionContext.OperationType operationType = (theMergedResource == null) ?
+			MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES : MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES;
+		MdmTransactionContext txContext = createMdmContext(theRequestDetails, operationType,
+			getResourceType(ProviderConstants.MDM_MERGE_GR_FROM_GOLDEN_RESOURCE_ID, theFromGoldenResourceId));
+		return myMdmControllerSvc.mergeGoldenResources(theFromGoldenResourceId.getValueAsString(), theToGoldenResourceId.getValueAsString(), theMergedResource, txContext);
 	}
 
 	@Operation(name = ProviderConstants.MDM_UPDATE_LINK)
@@ -159,8 +161,8 @@ public class MdmProviderDstu3Plus extends BaseMdmProvider {
 											  @OperationParam(name = ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, min = 1, max = 1) IPrimitiveType<String> theMatchResult,
 											  ServletRequestDetails theRequestDetails) {
 		validateUpdateLinkParameters(theGoldenResourceId, theResourceId, theMatchResult);
-		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(), theMatchResult.getValue(),
-			createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
+		return myMdmControllerSvc.updateLink(theGoldenResourceId.getValueAsString(), theResourceId.getValue(),
+			theMatchResult.getValue(), createMdmContext(theRequestDetails, MdmTransactionContext.OperationType.UPDATE_LINK,
 				getResourceType(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId))
 		);
 	}
