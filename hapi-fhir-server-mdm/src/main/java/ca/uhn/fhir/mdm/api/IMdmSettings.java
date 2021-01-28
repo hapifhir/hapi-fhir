@@ -44,6 +44,8 @@ public interface IMdmSettings {
 
 	String getRuleVersion();
 
+	String getSurvivorshipRules();
+
 	default boolean isSupportedMdmType(String theResourceName) {
 		return getMdmRules().getMdmTypes().contains(theResourceName);
 	}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.config;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.mdm.svc.MdmSurvivorshipSvcImpl;
 import ca.uhn.fhir.mdm.api.IMdmControllerSvc;
 import ca.uhn.fhir.mdm.api.IMdmExpungeSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkQuerySvc;
@@ -29,6 +30,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
@@ -76,6 +78,9 @@ public class MdmConsumerConfig {
 	IMdmStorageInterceptor mdmStorageInterceptor() {
 		return new MdmStorageInterceptor();
 	}
+
+	@Bean
+	IMdmSurvivorshipService mdmSurvivorshipService() { return new MdmSurvivorshipSvcImpl(); }
 
 	@Bean
 	MdmQueueConsumerLoader mdmQueueConsumerLoader() {

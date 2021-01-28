@@ -1,13 +1,18 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
+import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.json.MdmSimilarityJson;
+import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
 import ca.uhn.fhir.mdm.rules.similarity.MdmSimilarityEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.StringStartsWith.startsWith;
@@ -29,6 +34,34 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		myComparator = new MdmResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myMdmRulesJson);
 		myJohn = buildJohn();
 		myJohny = buildJohny();
+	}
+
+	@Test
+	public void testEmptyPath() {
+		myMdmRulesJson = new MdmRulesJson();
+		myMdmRulesJson.setMdmTypes(Arrays.asList(new String[]{"Patient"}));
+
+		myGivenNameMatchField = new MdmFieldMatchJson()
+			.setName("empty-given")
+			.setResourceType("Patient")
+			.setResourcePath("name.given")
+			.setMatcher(new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.EMPTY_FIELD));
+		myComparator = new MdmResourceFieldMatcher(ourFhirContext, myGivenNameMatchField, myMdmRulesJson);
+
+		assertFalse(myComparator.match(myJohn, myJohny).match);
+
+		myJohn.getName().clear();
+		myJohny.getName().clear();
+
+		assertTrue(myComparator.match(myJohn, myJohny).match);
+
+		myJohn = buildJohn();
+		myJohny.getName().clear();
+		assertFalse(myComparator.match(myJohn, myJohny).match);
+
+		myJohn.getName().clear();
+		myJohny = buildJohny();
+		assertFalse(myComparator.match(myJohn, myJohny).match);
 	}
 
 	@Test
