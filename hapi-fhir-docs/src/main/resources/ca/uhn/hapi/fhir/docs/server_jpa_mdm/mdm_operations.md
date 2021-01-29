@@ -240,7 +240,7 @@ Use the `$mdm-update-link` operation to change the `matchResult` update of an md
             <td>String</td>
             <td>1..1</td>
             <td>
-                The id of the source resource.
+                The id of the target resource.
             </td>
         </tr>
         <tr>
@@ -316,6 +316,14 @@ This operation takes the following parameters:
             <td>1..1</td>
             <td>
                 The id of the Golden Resource to merge data into.
+            </td>
+        </tr>
+        <tr>
+            <td>resource</td>
+            <td>Resource</td>
+            <td>0..1</td>
+            <td>
+                Optional manually merged Golden Resource. All values except for the metadata, PID and identifiers will be copied from this resource, if it is present. If no value is specified, all fields from the resource pointed to by "fromGoldenResourceId" will be copied instead.
             </td>
         </tr>
     </tbody>

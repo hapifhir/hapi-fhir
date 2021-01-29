@@ -84,6 +84,10 @@ public class MdmFieldMatchJson implements IModelJson {
 		return myMatcher;
 	}
 
+	public boolean isMatcherSupportingEmptyFields() {
+		return (getMatcher() == null) ? false : getMatcher().isMatchingEmptyFields();
+	}
+
 	public MdmFieldMatchJson setMatcher(MdmMatcherJson theMatcher) {
 		myMatcher = theMatcher;
 		return this;
