@@ -100,6 +100,7 @@ public class GenericClientDstu3IT {
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.setEncoding(EncodingEnum.JSON);
 
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
@@ -132,6 +133,8 @@ public class GenericClientDstu3IT {
 		ArgumentCaptor<Request> capt = prepareClientForSearchResponse();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.setEncoding(EncodingEnum.JSON);
+
 		int idx = 0;
 
       client
@@ -144,7 +147,7 @@ public class GenericClientDstu3IT {
       	.returnBundle(Bundle.class)
       	.execute();
 
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).url().toString());
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(idx).url().toString());
 		idx++;
 		
 	}
@@ -171,6 +174,7 @@ public class GenericClientDstu3IT {
 				.build();
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
+		client.setEncoding(EncodingEnum.JSON);
 
 		Binary bin = new Binary();
 		bin.setContent(new byte[] { 0, 1, 2, 3, 4 });
@@ -179,7 +183,7 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertEquals("http://example.com/fhir/Binary", request.url().toString());
+		assertEquals("http://example.com/fhir/Binary?_format=json", request.url().toString());
 		validateUserAgent(capt);
 
 		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
