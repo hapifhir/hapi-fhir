@@ -48,9 +48,7 @@ public class LibraryLoader implements org.opencds.cqf.cql.engine.execution.Libra
 	private Library resolveLibrary(VersionedIdentifier libraryIdentifier) {
 		Validate.notNull(libraryIdentifier, "Library identifier is null.");
 
-		if (libraryIdentifier.getId() == null) {
-			throw new IllegalArgumentException("Library identifier id is null.");
-		}
+		Validate.notNull(libraryIdentifier.getId(), "Library identifier id is null.");
 
 		String mangledId = this.mangleIdentifer(libraryIdentifier);
 
