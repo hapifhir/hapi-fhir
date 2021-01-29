@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 2327
+title: "The $expand filter parameter was not matching the ValueSet display value in all cases.  E.g. a ValueSet
+with name 'abc def ghi' would match 'abc def' and 'def' but not 'def ghi'.  This has been corrected so the ValueSet
+will match the filter if any substring of the ValueSet display value matches the $expand filter."
