@@ -1,5 +1,25 @@
 package ca.uhn.fhir.cql.r4.provider;
 
+/*-
+ * #%L
+ * HAPI FHIR - Clinical Quality Language
+ * %%
+ * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.cql.common.provider.EvaluationProviderFactory;
 import ca.uhn.fhir.cql.common.provider.LibraryResolutionProvider;
 import ca.uhn.fhir.cql.r4.evaluation.MeasureEvaluation;
@@ -22,6 +42,13 @@ import org.opencds.cqf.cql.engine.execution.LibraryLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class implements the r4 $evaluate-measure operation defined in the FHIR Clinical Reasoning module.
+ * Changes should comply with the specification in as far as is possible, and questions about Measure or CQL evaluation can be directed to the original authors.
+ * @author Jonathan Percival
+ * @author Bryn Rhodes
+ * @see <a href="https://hl7.org/fhir/measure-operation-evaluate-measure.html">https://hl7.org/fhir/measure-operation-evaluate-measure.html</a>
+ */
 @Component
 public class MeasureOperationsProvider {
 	@Autowired

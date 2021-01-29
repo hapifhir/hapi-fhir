@@ -14,7 +14,7 @@
 	<artifactId>hapi-fhir-jpaserver-cql</artifactId>
 	<packaging>jar</packaging>
 
-	<name>HAPI FHIR - Clinical Quality Language</name>
+	<name>HAPI FHIR JPA Server - Clinical Quality Language</name>
 
 	<dependencies>
 		<dependency>

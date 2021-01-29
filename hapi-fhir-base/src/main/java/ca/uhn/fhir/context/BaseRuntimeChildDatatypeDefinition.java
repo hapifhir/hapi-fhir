@@ -45,9 +45,6 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 		// should use RuntimeChildAny
 		assert Modifier.isInterface(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
 		assert Modifier.isAbstract(theDatatype.getModifiers()) == false : "Type of " + theDatatype + " shouldn't be here";
-		if (Modifier.isAbstract(theDatatype.getModifiers())) {
-			ourLog.warn("Abstract type '{}' found where theField = '{}' and theElementName = '{}'", theDatatype, theField, theElementName);
-		}
 		myDatatype = theDatatype;
 	}
 
@@ -107,9 +104,6 @@ public abstract class BaseRuntimeChildDatatypeDefinition extends BaseRuntimeDecl
 			myElementDefinition = theContext.getElementDefinition(getDatatype());
 		}
 		assert myElementDefinition != null : "Unknown type: " + getDatatype();
-		if (myElementDefinition == null) {
-			ourLog.warn("Unknown type: {}", getDatatype());
-		}
 	}
 
 	@Override

@@ -701,6 +701,20 @@
 			<id>janol77</id>
 			<name>Alejandro Medina</name>
 		</developer>
+		<developer>
+			<id>KevinDougan-SmileCDR</id>
+			<name>Kevin Dougan</name>
+		</developer>
+		<developer>
+			<id>jpercival</id>
+			<name>Jonathan Percival</name>
+			<organization>Alphora</organization>
+		</developer>
+		<developer>
+			<id>brynrhodes</id>
+			<name>Bryn Rhodes</name>
+			<organization>Alphora</organization>
+		</developer>
 	</developers>
 
 	<licenses>
