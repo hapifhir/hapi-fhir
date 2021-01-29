@@ -715,6 +715,10 @@
 			<name>Bryn Rhodes</name>
 			<organization>Alphora</organization>
 		</developer>
+		<developer>
+			<id>MarcelPa</id>
+			<name>Marcel P</name>
+		</developer>
 	</developers>
 
 	<licenses>

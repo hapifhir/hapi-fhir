@@ -51,7 +51,9 @@ public class MdmQueueConsumerLoader {
 	public void startListeningToMdmChannel() {
 		if (myMdmChannel == null) {
 			ChannelConsumerSettings config = new ChannelConsumerSettings();
+			
 			config.setConcurrentConsumers(myMdmSettings.getConcurrentConsumers());
+
 			myMdmChannel = myChannelFactory.getOrCreateReceiver(IMdmSettings.EMPI_CHANNEL_NAME, ResourceModifiedJsonMessage.class, config);
 			if (myMdmChannel == null) {
 				ourLog.error("Unable to create receiver for {}", IMdmSettings.EMPI_CHANNEL_NAME);
