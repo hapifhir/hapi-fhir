@@ -369,7 +369,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("This property must be an Array, not a a primitive property", all.get(0).getMessage());
+		assertEquals("This property must be an Array, not a primitive property", all.get(0).getMessage());
 	}
 
 	@Test

@@ -92,7 +92,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-inline</artifactId>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -1523,7 +1523,7 @@
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
-				<artifactId>mockito-inline</artifactId>
+				<artifactId>mockito-core</artifactId>
 				<version>3.6.28</version>
 			</dependency>
 			<dependency>
