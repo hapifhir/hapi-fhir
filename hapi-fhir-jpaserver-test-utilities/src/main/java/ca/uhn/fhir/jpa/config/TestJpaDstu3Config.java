@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.config;
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2020 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,10 +50,10 @@ import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-// TODO KBD Can we remove this Class entirely and just use a Generic one (same for TestJpaDstu3Config)?
+// TODO KBD Can we remove this Class entirely and just use a Generic one (same for TestJpaR4Config)?
 @Import(TestJpaConfig.class)
-public class TestJpaR4Config extends BaseJavaConfigR4 {
-	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaR4Config.class);
+public class TestJpaDstu3Config extends BaseJavaConfigDstu3 {
+	private static final Logger ourLog = LoggerFactory.getLogger(TestJpaDstu3Config.class);
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -67,7 +67,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 		BasicDataSource retVal = new BasicDataSource();
 
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+		retVal.setUrl("jdbc:h2:mem:testdb_dstu3");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -96,7 +96,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
-		retVal.setPersistenceUnitName("PU_HapiFhirJpaR4");
+		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
 		retVal.setDataSource(dataSource());
 		retVal.setJpaProperties(jpaProperties());
 		return retVal;
@@ -140,7 +140,7 @@ public class TestJpaR4Config extends BaseJavaConfigR4 {
 	}
 
 	@Bean
-	public DefaultProfileValidationSupport validationSupportChainR4() {
+	public DefaultProfileValidationSupport validationSupportChainDstu3() {
 		return new DefaultProfileValidationSupport(myFhirContext);
 	}
 }

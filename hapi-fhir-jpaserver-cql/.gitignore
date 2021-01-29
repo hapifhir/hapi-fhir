@@ -1,30 +1,8 @@
-.attach*
-/bin
-/target
+ca.*/
 target/
-.idea/
-.metadata/
-RemoteSystemsTempFiles/
-Servers/
-*.iml
-*.log
-*.log*
+/bin
 nohup.out
-.DS_Store
-*.orig
-tmp.txt
-*.hprof
-tmp.txt
-ca.uhn.fhir.jpa.entity.ResourceIndexedSearchParamString/
-ca.uhn.fhir.jpa.entity.ResourceTable/
-ca.uhn.fhir.jpa.entity.TermConcept/
-
-# Vagrant stuff.
-.vagrant
-/vagrant/build
-/vagrant/chef/tmp
-jpaserver_derby_files
-
+LogMessages.html
 
 # Created by https://www.gitignore.io
 
@@ -38,7 +16,6 @@ jpaserver_derby_files
 *.jar
 *.war
 *.ear
-*.class
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
@@ -113,6 +90,7 @@ crashlytics.properties
 crashlytics-build.properties
 
 
+
 ### Eclipse ###
 *.pydevproject
 .metadata
@@ -125,7 +103,9 @@ tmp/
 *~.nib
 local.properties
 .loadpath
-*.hprof
+
+# Eclipse Core
+.project
 
 # External tool builders
 .externalToolBuilders/
@@ -137,13 +117,6 @@ local.properties
 .cproject
 
 # JDT-specific (Eclipse Java Development Tools)
-**/.settings
-**/.target
-**/.project
-**/.classpath
-**/.factorypath
-**/.springBeans
-
 
 # PDT-specific
 .buildpath
@@ -154,11 +127,4 @@ local.properties
 # TeXlipse plugin
 .texlipse
 
-# JVM Dumps
-core.*
-javacore.*
-jitdump.*
-Snap.*
-
-# VS Code
-.vscode
+/target/
