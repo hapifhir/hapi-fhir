@@ -93,6 +93,9 @@ public class UcumServiceUtil {
 		try {
 			Decimal theDecimal = new Decimal(theValue.toPlainString(), theValue.precision());
 			theCanonicalPair = myUcumEssenceService.getCanonicalForm(new Pair(theDecimal, theCode));
+			// For some reason code [degF], degree Fahrenheit, can't be converted. it returns value null.
+			if (theCanonicalPair.getValue() == null)
+				return null;
 		} catch (UcumException e) {
 			return null;
 		}

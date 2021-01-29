@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigDecimal;
 
+import org.fhir.ucum.Pair;
 import org.junit.jupiter.api.Test;
 
 public class UcumServiceUtilTest {
@@ -50,6 +51,13 @@ public class UcumServiceUtilTest {
 		//-- invalid codes
 		assertEquals(null, UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "xyz"));
 
+	}
+	
+	@Test
+	public void testUcumDegreeFahrenheit() {
+
+		assertEquals(null, UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(99.82), "[degF]"));
+		
 	}
 
 }

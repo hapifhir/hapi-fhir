@@ -562,19 +562,23 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private void addQuantity_QuantityNormalized(String theResourceType, Set<ResourceIndexedSearchParamQuantityNormalized> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
 		Optional<IPrimitiveType<BigDecimal>> valueField = myQuantityValueValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
-			BigDecimal nextValueValue = valueField.get().getValue();
+			BigDecimal nextValueValue = valueField.get().getValue();			
 			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
 			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 
+			ResourceIndexedSearchParamQuantityNormalized nextEntity = null;
 			//-- convert the value/unit to the canonical form if any
 			Pair canonicalForm = UcumServiceUtil.getCanonicalForm(system, nextValueValue, code);
 			if (canonicalForm != null) {
 				double canonicalValue = Double.parseDouble(canonicalForm.getValue().asDecimal());
 				String canonicalUnits = canonicalForm.getCode();
-				ResourceIndexedSearchParamQuantityNormalized nextEntity = new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, theResourceType, theSearchParam.getName(), canonicalValue, system, canonicalUnits);
-				theParams.add(nextEntity);
+				nextEntity = new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, theResourceType, theSearchParam.getName(), canonicalValue, system, canonicalUnits);
+			} else {
+				// save the original value, if can't be converted
+				nextEntity = new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, theResourceType, theSearchParam.getName(), nextValueValue.doubleValue(), system, code);		
 			}
 
+			theParams.add(nextEntity);
 		}
 	}
 
