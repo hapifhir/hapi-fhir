@@ -357,6 +357,14 @@ The following algorithms are currently supported:
             <td>If an optional "identifierSystem" is provided, then the identifiers only match when they belong to that system</td>
         </tr>     
         <tr>
+            <td>EMPTY_FIELD</td>
+            <td>matcher</td>
+            <td>
+               Matches an empty field.
+            </td>
+            <td></td>
+        </tr>
+        <tr>
             <td>JARO_WINKLER</td>
             <td>similarity</td>
             <td>
@@ -395,7 +403,7 @@ The following algorithms are currently supported:
               <a href="https://github.com/tdebatty/java-string-similarity#sorensen-dice-coefficient">tdebatty Sorensen-Dice coefficient</a>          
             </td>
             <td></td>
-        </tr>   
+        </tr>
      </tbody>
 </table>
 

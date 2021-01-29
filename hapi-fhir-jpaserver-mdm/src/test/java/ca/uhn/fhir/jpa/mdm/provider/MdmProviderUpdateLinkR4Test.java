@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.util.MessageHelper;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.r4.model.Patient;
@@ -15,8 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 

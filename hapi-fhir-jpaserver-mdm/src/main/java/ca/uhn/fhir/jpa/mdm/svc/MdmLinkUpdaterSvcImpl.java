@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
@@ -63,6 +64,8 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 	IMdmSettings myMdmSettings;
 	@Autowired
 	MessageHelper myMessageHelper;
+	@Autowired
+	IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	@Transactional
 	@Override
@@ -89,6 +92,12 @@ public class MdmLinkUpdaterSvcImpl implements IMdmLinkUpdaterSvc {
 		mdmLink.setMatchResult(theMatchResult);
 		mdmLink.setLinkSource(MdmLinkSourceEnum.MANUAL);
 		myMdmLinkDaoSvc.save(mdmLink);
+
+		if (theMatchResult == MdmMatchResultEnum.MATCH) {
+			// only apply survivorship rules in case of a match
+			myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(theSourceResource, theGoldenResource, theMdmContext);
+		}
+
 		myMdmResourceDaoSvc.upsertGoldenResource(theGoldenResource, theMdmContext.getResourceType());
 		if (theMatchResult == MdmMatchResultEnum.NO_MATCH) {
 			// Need to find a new Golden Resource to link this target to

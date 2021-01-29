@@ -36,6 +36,7 @@ public class MdmSettings implements IMdmSettings {
 	private boolean myEnabled;
 	private int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
 	private String myScriptText;
+	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
 	private boolean myPreventEidUpdates;
 
@@ -65,11 +66,6 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public int getConcurrentConsumers() {
 		return myConcurrentConsumers;
-	}
-
-	public MdmSettings setConcurrentConsumers(int theConcurrentConsumers) {
-		myConcurrentConsumers = theConcurrentConsumers;
-		return this;
 	}
 
 	public String getScriptText() {
@@ -115,5 +111,14 @@ public class MdmSettings implements IMdmSettings {
 	public MdmSettings setPreventMultipleEids(boolean thePreventMultipleEids) {
 		myPreventMultipleEids = thePreventMultipleEids;
 		return this;
+	}
+
+	@Override
+	public String getSurvivorshipRules() {
+		return mySurvivorshipRules;
+	}
+
+	public void setSurvivorshipRules(String theSurvivorshipRules) {
+		mySurvivorshipRules = theSurvivorshipRules;
 	}
 }

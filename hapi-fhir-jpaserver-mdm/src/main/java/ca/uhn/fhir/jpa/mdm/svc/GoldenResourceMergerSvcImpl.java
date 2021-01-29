@@ -20,17 +20,18 @@ package ca.uhn.fhir.jpa.mdm.svc;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
+import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
+import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
-import ca.uhn.fhir.mdm.api.IGoldenResourceMergerSvc;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.mdm.util.TerserUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -60,13 +61,26 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 
 	@Override
 	@Transactional
-	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+	public IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theMergedResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext) {
 		Long fromGoldenResourcePid = myIdHelperService.getPidOrThrowException(theFromGoldenResource);
 		Long toGoldenResourcePid = myIdHelperService.getPidOrThrowException(theToGoldenResource);
 		String resourceType = theMdmTransactionContext.getResourceType();
 
-		//Merge attributes, to be determined when survivorship is solved.
-		myGoldenResourceHelper.mergeFields(theFromGoldenResource, theToGoldenResource);
+		if (theMergedResource != null ) {
+			if (myGoldenResourceHelper.hasIdentifier(theMergedResource)) {
+				throw new IllegalArgumentException("Manually merged resource can not contain identifiers");
+			}
+			myGoldenResourceHelper.mergeIndentifierFields(theFromGoldenResource, theMergedResource, theMdmTransactionContext);
+			myGoldenResourceHelper.mergeIndentifierFields(theToGoldenResource, theMergedResource, theMdmTransactionContext);
+
+			theMergedResource.setId(theToGoldenResource.getId());
+			theToGoldenResource = (IAnyResource) myMdmResourceDaoSvc.upsertGoldenResource(theMergedResource, resourceType).getResource();
+		} else {
+			myGoldenResourceHelper.mergeIndentifierFields(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
+			myGoldenResourceHelper.mergeNonIdentiferFields(theFromGoldenResource, theToGoldenResource, theMdmTransactionContext);
+			//Save changes to the golden resource
+			myMdmResourceDaoSvc.upsertGoldenResource(theToGoldenResource, resourceType);
+		}
 
 		//Merge the links from the FROM to the TO resource. Clean up dangling links.
 		mergeGoldenResourceLinks(theFromGoldenResource, theToGoldenResource, toGoldenResourcePid, theMdmTransactionContext);
@@ -83,7 +97,8 @@ public class GoldenResourceMergerSvcImpl implements IGoldenResourceMergerSvc {
 		//Save the deprecated resource.
 		myMdmResourceDaoSvc.upsertGoldenResource(theFromGoldenResource, resourceType);
 
-		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless() + " into " + theToGoldenResource.getIdElement().toVersionless());
+		log(theMdmTransactionContext, "Merged " + theFromGoldenResource.getIdElement().toVersionless()
+			+ " into " + theToGoldenResource.getIdElement().toVersionless());
 		return theToGoldenResource;
 	}
 

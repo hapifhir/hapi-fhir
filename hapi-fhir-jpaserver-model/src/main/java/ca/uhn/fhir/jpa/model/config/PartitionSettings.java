@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.config;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Model
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%

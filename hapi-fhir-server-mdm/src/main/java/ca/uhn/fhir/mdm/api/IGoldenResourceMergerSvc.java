@@ -29,8 +29,9 @@ public interface IGoldenResourceMergerSvc {
 	 * Merge all Golden Resource fields subject to survivorship rules.
 	 *
 	 * @param theFromGoldenResource the golden resource we are merging from
+	 * @param theManuallyMergedResource an optional golden resource that was manually merged
 	 * @param theToGoldenResource the golden resource we are merging to
 	 * @return updated theToGoldenResource with the merged fields and links.
 	 */
-	IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext);
+	IAnyResource mergeGoldenResources(IAnyResource theFromGoldenResource, IAnyResource theManuallyMergedResource, IAnyResource theToGoldenResource, MdmTransactionContext theMdmTransactionContext);
 }

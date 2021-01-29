@@ -58,7 +58,6 @@ public abstract class BaseMdmProvider {
 	}
 
 	protected void validateUpdateLinkParameters(IPrimitiveType<String> theGoldenResourceId, IPrimitiveType<String> theResourceId, IPrimitiveType<String> theMatchResult) {
-		// TODO NG - Add validation to check that types are the same? - This is done deeper in the code, perhaps move here?
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_GOLDEN_RESOURCE_ID, theGoldenResourceId);
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_RESOURCE_ID, theResourceId);
 		validateNotNull(ProviderConstants.MDM_UPDATE_LINK_MATCH_RESULT, theMatchResult);

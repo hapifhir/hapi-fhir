@@ -35,11 +35,9 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected IAnyResource myGoldenMedication;
 	protected StringType myGoldenMedicationId;
 
-
 	@Autowired
 	IInterceptorService myInterceptorService;
 	PointcutLatch afterMdmLatch = new PointcutLatch(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED);
-
 
 	@BeforeEach
 	public void before() {
@@ -57,7 +55,6 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		myMedicationId = new StringType(myMedication.getIdElement().getValue());
 		myGoldenMedication = getGoldenResourceFromTargetResource(myMedication);
 		myGoldenMedicationId = new StringType(myGoldenMedication.getIdElement().getValue());
-
 
 		myInterceptorService.registerAnonymousInterceptor(Pointcut.MDM_AFTER_PERSISTED_RESOURCE_CHECKED, afterMdmLatch);
 	}
