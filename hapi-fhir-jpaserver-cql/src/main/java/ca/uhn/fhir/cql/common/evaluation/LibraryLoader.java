@@ -20,6 +20,7 @@ package ca.uhn.fhir.cql.common.evaluation;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
