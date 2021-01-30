@@ -1,0 +1,118 @@
+{
+		"resourceType": "Measure",
+		"id": "measure-asf",
+		"status": "active",
+		"experimental": true,
+		"library": [
+			{
+				"reference": "Library/library-asf-logic"
+			}
+		],
+		"scoring": {
+			"coding": [
+				{
+					"code": "proportion"
+				}
+			]
+		},
+		"group": [
+			{
+				"identifier": {
+					"value": "ASF-cohort"
+				},
+				"population": [
+					{
+						"identifier": {
+							"value": "initial-population"
+						},
+						"code": {
+							"coding": [
+								{
+									"code": "initial-population"
+								}
+							]
+						},
+						"criteria": "Initial Population"
+					},
+					{
+						"identifier": {
+							"value": "numerator 1"
+						},
+						"code": {
+							"coding": [
+								{
+									"code": "numerator"
+								}
+							]
+						},
+						"criteria": "Numerator 1"
+					},
+					{
+						"identifier": {
+							"value": "denominator 1"
+						},
+						"code": {
+							"coding": [
+								{
+									"code": "denominator"
+								}
+							]
+						},
+						"criteria": "Denominator 1"
+					},
+					{
+						"identifier": {
+							"value": "numerator 2"
+						},
+						"code": {
+							"coding": [
+								{
+									"code": "numerator"
+								}
+							]
+						},
+						"criteria": "Numerator 2"
+					},
+					{
+						"identifier": {
+							"value": "denominator 2"
+						},
+						"code": {
+							"coding": [
+								{
+									"code": "denominator"
+								}
+							]
+						},
+						"criteria": "Denominator 2"
+					}
+				],
+				"stratifier": [
+					{
+						"identifier": {
+							"value": "stratifier 1"
+						},
+						"criteria": "Stratifier 1"
+					},
+					{
+						"identifier": {
+							"value": "stratifier 2"
+						},
+						"criteria": "Stratifier 2"
+					},
+					{
+						"identifier": {
+							"value": "stratifier 3"
+						},
+						"criteria": "Stratifier 3"
+					},
+					{
+						"identifier": {
+							"value": "stratifier 4"
+						},
+						"criteria": "Stratifier 4"
+					}
+				]
+			}
+		]
+	}

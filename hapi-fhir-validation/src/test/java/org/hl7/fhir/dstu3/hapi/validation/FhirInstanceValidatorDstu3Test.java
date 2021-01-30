@@ -1327,7 +1327,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertEquals(1, outcome.size());
+		assertEquals(2, outcome.size());
 		assertThat(outcome.toString(), containsString("value should not start or finish with whitespace"));
 
 	}
