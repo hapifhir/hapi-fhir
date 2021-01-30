@@ -158,6 +158,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -4284,14 +4285,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			
 			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		String uri;
-		List<String> ids;
 
-		// With normalized
-		uri = ourServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("99.82|http://unitsofmeasure.org|[degF]");
-		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertEquals(1, ids.size());
-
+		myCaptureQueriesListener.clear();
+		Bundle returnedBundle = myClient
+	      .search()
+		  .forResource(Observation.class)
+		   .where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.EQUAL).number("99.82").andUnits("http://unitsofmeasure.org", "[degF]"))
+		   .prettyPrint()
+		   .returnBundle(Bundle.class)
+		   .execute();
+	
+		assertEquals(1, returnedBundle.getEntry().size());
+		
+		//-- check only use original quantity table to search
+		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true,true);
+		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
+		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
 	}
 
 	@Test

@@ -566,7 +566,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		assertTrue(myObservationDao.create(obs).getCreated());
 
-		// The Quantity can't be normalized, it should be store the original value in both tables
+		// The Quantity can't be normalized, it should be stored in the non normalized quantity table only
 		runInTransaction(() -> {
 			List<ResourceIndexedSearchParamQuantity> quantityIndexes = myResourceIndexedSearchParamQuantityDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
 			assertEquals(1, quantityIndexes.size());
@@ -575,7 +575,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			assertEquals("kg/dL", quantityIndexes.get(0).getUnits());
 
 			List<ResourceIndexedSearchParamQuantityNormalized> normalizedQuantityIndexes = myResourceIndexedSearchParamQuantityNormalizedDao.findAll().stream().filter(t -> t.getParamName().equals("value-quantity")).collect(Collectors.toList());
-			assertEquals(1, normalizedQuantityIndexes.size());
+			assertEquals(0, normalizedQuantityIndexes.size());
 		});
 
 		List<String> ids;
