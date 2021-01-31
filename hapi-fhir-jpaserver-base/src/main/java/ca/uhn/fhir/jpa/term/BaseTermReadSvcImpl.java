@@ -186,7 +186,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.lowerCase;
-import static org.apache.commons.lang3.StringUtils.startsWithIgnoreCase;
 
 public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -575,7 +574,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			//-- this is quick solution, may need to revisit
 			if (!applyFilter(display, filterDisplayValue))
 				continue;
-				
+
 			Long conceptPid = conceptView.getConceptPid();
 			if (!pidToConcept.containsKey(conceptPid)) {
 				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display);
@@ -645,41 +644,24 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		}
 	}
 
-	public boolean applyFilter(final String theDisplay, final String theFilterDisplay) {
-		
+	public boolean applyFilter(final String theInput, final String thePrefixToken) {
+
 		//-- safety check only, no need to apply filter
-		if (theDisplay == null || theFilterDisplay == null)
+		if (theInput == null || thePrefixToken == null)
 			return true;
 
 		// -- sentence case
-		if (startsWithIgnoreCase(theDisplay, theFilterDisplay))
+		if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(theInput, thePrefixToken))
 			return true;
-		
+
 		//-- token case
-		if (startsWithByWordBoundaries(theDisplay, theFilterDisplay)) return true;
-
-		return false;
-	}
-
-	private boolean startsWithByWordBoundaries(String theDisplay, String theFilterDisplay) {
-		// return true only e.g. the input is 'Body height', theFilterDisplay is "he", or 'bo'
-		StringTokenizer tok = new StringTokenizer(theDisplay);
-		List<String> tokens = new ArrayList<>();
+		// return true only e.g. the input is 'Body height', thePrefixToken is "he", or 'bo'
+		StringTokenizer tok = new StringTokenizer(theInput);
 		while (tok.hasMoreTokens()) {
-			String token = tok.nextToken();
-			if (startsWithIgnoreCase(token, theFilterDisplay))
+			if (org.apache.commons.lang3.StringUtils.startsWithIgnoreCase(tok.nextToken(), thePrefixToken))
 				return true;
-			tokens.add(token);
 		}
 
-		// Allow to search by the end of the phrase.  E.g.  "working proficiency" will match "Limited working proficiency"
-		for (int start = 0; start <= tokens.size() - 1; ++ start) {
-			for (int end = start + 1; end <= tokens.size(); ++end) {
-				String sublist = String.join(" ", tokens.subList(start, end));
-				if (startsWithIgnoreCase(sublist, theFilterDisplay))
-					return true;
-			}
-		}
 		return false;
 	}
 
@@ -1019,6 +1001,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (TermConcept concept: termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
+			if (theAdd && expansionStep != null) {
+				ValueSet.ConceptReferenceComponent theIncludeConcept = getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+				if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+					concept.setDisplay(theIncludeConcept.getDisplay());
+				}
+			}
 			boolean added = addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
 			if (added) {
 				delta++;
@@ -1034,6 +1022,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			return true;
 		}
+	}
+
+	private ValueSet.ConceptReferenceComponent getMatchedConceptIncludedInValueSet(ValueSet.ConceptSetComponent theIncludeOrExclude, TermConcept concept) {
+		ValueSet.ConceptReferenceComponent theIncludeConcept = theIncludeOrExclude.getConcept().stream().filter(includedConcept ->
+			includedConcept.getCode().equalsIgnoreCase(concept.getCode())
+		).findFirst().orElse(null);
+		return theIncludeConcept;
 	}
 
 	/**
