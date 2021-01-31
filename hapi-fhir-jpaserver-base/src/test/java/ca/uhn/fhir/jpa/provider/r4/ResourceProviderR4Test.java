@@ -158,6 +158,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -4238,6 +4239,70 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 	
 	
+	@Test
+	public void testSearchWithNormalizedQuantitySearchSupported_DegreeFahrenheit() throws Exception {
+
+		myDaoConfig.getModelConfig().setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_SUPPORTED);
+		IIdType pid0;
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("urn:system").setValue("001");
+			patient.addName().setFamily("Tester").addGiven("Joe");
+			pid0 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(99.82)).setUnit("F").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("[degF]"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			obs.setValue(new Quantity().setValueElement(new DecimalType(97.6)).setUnit("F").setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL).setCode("[degF]"));
+			
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		{
+			// missing value
+			Observation obs = new Observation();
+			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
+			obs.getSubject().setReferenceElement(pid0);
+			CodeableConcept cc = obs.getCode();
+			obs.setValue(new Quantity().setUnit("CM").setSystem("http://foo").setCode("cm"));
+								
+			myObservationDao.create(obs, mySrd);
+			
+			ourLog.info("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
+		}
+
+		myCaptureQueriesListener.clear();
+		Bundle returnedBundle = myClient
+	      .search()
+		  .forResource(Observation.class)
+		   .where(Observation.VALUE_QUANTITY.withPrefix(ParamPrefixEnum.EQUAL).number("99.82").andUnits("http://unitsofmeasure.org", "[degF]"))
+		   .prettyPrint()
+		   .returnBundle(Bundle.class)
+		   .execute();
+	
+		assertEquals(1, returnedBundle.getEntry().size());
+		
+		//-- check only use original quantity table to search
+		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true,true);
+		assertThat(searchSql, containsString("HFJ_SPIDX_QUANTITY t0"));
+		assertThat(searchSql, not(containsString("HFJ_SPIDX_QUANTITY_NRML")));
+	}
+
 	@Test
 	public void testSearchReusesNoParams() {
 		List<IBaseResource> resources = new ArrayList<>();
