@@ -69,6 +69,7 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -133,6 +134,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myHumanNameFamilyValueChild;
 	private BaseRuntimeChildDefinition myHumanNameGivenValueChild;
 	private BaseRuntimeChildDefinition myHumanNameTextValueChild;
+	private BaseRuntimeChildDefinition myHumanNamePrefixValueChild;
+	private BaseRuntimeChildDefinition myHumanNameSuffixValueChild;
 	private BaseRuntimeChildDefinition myContactPointValueValueChild;
 	private BaseRuntimeChildDefinition myIdentifierSystemValueChild;
 	private BaseRuntimeChildDefinition myIdentifierValueValueChild;
@@ -868,19 +871,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-
 	private void addString_HumanName(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		List<String> families = extractValuesAsStrings(myHumanNameFamilyValueChild, theValue);
-		for (String next : families) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
-		}
-		List<String> givens = extractValuesAsStrings(myHumanNameGivenValueChild, theValue);
-		for (String next : givens) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
-		}
-		List<String> texts = extractValuesAsStrings(myHumanNameTextValueChild, theValue);
-		for (String next : texts) {
-			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
+		List<BaseRuntimeChildDefinition> myHumanNameChildren = Arrays.asList(myHumanNameFamilyValueChild, myHumanNameGivenValueChild, myHumanNameTextValueChild, myHumanNamePrefixValueChild, myHumanNameSuffixValueChild);
+		for (BaseRuntimeChildDefinition theChild : myHumanNameChildren) {
+			List<String> indices = extractValuesAsStrings(theChild, theValue);
+			for (String next : indices) {
+				createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
+			}
 		}
 	}
 
@@ -1144,6 +1141,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myHumanNameFamilyValueChild = humanNameDefinition.getChildByName("family");
 		myHumanNameGivenValueChild = humanNameDefinition.getChildByName("given");
 		myHumanNameTextValueChild = humanNameDefinition.getChildByName("text");
+		myHumanNamePrefixValueChild = humanNameDefinition.getChildByName("prefix");
+		myHumanNameSuffixValueChild = humanNameDefinition.getChildByName("suffix");
 
 		BaseRuntimeElementCompositeDefinition<?> contactPointDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("ContactPoint");
 		myContactPointValueValueChild = contactPointDefinition.getChildByName("value");
