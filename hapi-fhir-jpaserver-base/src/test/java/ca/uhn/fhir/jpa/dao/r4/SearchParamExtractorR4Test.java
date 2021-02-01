@@ -36,12 +36,14 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,14 +90,18 @@ public class SearchParamExtractorR4Test {
 	@Test
 	public void testName() {
 		Patient patient = new Patient();
+		List<StringType> suffixStrings = Arrays.asList(new StringType("the Great"));
+		List<StringType> prefixStrings = Arrays.asList(new StringType("King"));
 		HumanName humanName = patient.addName();
 		humanName.addGiven("Jimmy");
 		humanName.setFamily("Jones");
-		humanName.setText("Jimmy Jones");
+		humanName.setText("King Jimmy Jones the Great");
+		humanName.setSuffix(suffixStrings);
+		humanName.setPrefix(prefixStrings);
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> stringSearchParams = extractor.extractSearchParamStrings(patient);
 		List<String> nameValues = stringSearchParams.stream().filter(param -> "name".equals(param.getParamName())).map(ResourceIndexedSearchParamString::getValueExact).collect(Collectors.toList());
-		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "Jimmy Jones"));
+		assertThat(nameValues, containsInAnyOrder("Jimmy", "Jones", "King Jimmy Jones the Great", "King", "the Great"));
 	}
 
 	@Test
