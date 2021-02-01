@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.messaging;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.net.MediaType;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.FIRST_FAILURE_KEY;
@@ -19,7 +18,7 @@ class ResourceOperationMessageTest {
 	public void testSerializationAndDeserializationOfResourceModifiedMessage() throws JsonProcessingException {
 		ResourceOperationJsonMessage jsonMessage = new ResourceOperationJsonMessage();
 		ResourceOperationMessage payload = new ResourceOperationMessage();
-		payload.setMimeType("application/json+fhir");
+		payload.setMimeType("application/fhir+json");
 		jsonMessage.setPayload(payload);
 		ObjectMapper mapper = new ObjectMapper();
 		String serialized = mapper.writeValueAsString(jsonMessage);
