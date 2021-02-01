@@ -91,4 +91,10 @@ public class ProviderConstants {
 	public static final String OPERATION_MDM_BATCH_RUN_OUT_PARAM_SUBMIT_COUNT = "submitted" ;
    public static final String OPERATION_MDM_CLEAR_OUT_PARAM_DELETED_COUNT = "deleted";
 	public static final String MDM_BATCH_RUN_RESOURCE_TYPE = "resourceType";
+
+	/**
+	 * CQL Operations
+	 */
+	public static final String CQL_EVALUATE_MEASURE = "$evaluate-measure";
+
 }
