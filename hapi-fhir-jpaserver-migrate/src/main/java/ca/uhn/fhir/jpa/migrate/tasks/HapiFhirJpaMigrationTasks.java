@@ -667,10 +667,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT, swapping index for unique constraint");
 		termValueSetConceptTable.dropIndex("20190801.1", "IDX_VALUESET_CONCEPT_CS_CD");
+		// This index has been renamed in later versions. As such, allowing failure here as some DBs disallow
+		// multiple indexes referencing the same set of columns.
 		termValueSetConceptTable
 			.addIndex("20190801.2", "IDX_VS_CONCEPT_CS_CD")
 			.unique(true)
-			.withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
+			.withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL").failureAllowed();
 
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");

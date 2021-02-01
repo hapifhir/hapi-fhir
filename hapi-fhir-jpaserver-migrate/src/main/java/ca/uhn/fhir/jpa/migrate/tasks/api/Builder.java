@@ -402,7 +402,7 @@ public class Builder {
 					super(theVersion, theColumnName);
 				}
 
-				public void references(String theForeignTable, String theForeignColumn) {
+				public BuilderCompleteTask references(String theForeignTable, String theForeignColumn) {
 					AddForeignKeyTask task = new AddForeignKeyTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setConstraintName(myForeignKeyName);
@@ -410,6 +410,7 @@ public class Builder {
 					task.setForeignTableName(theForeignTable);
 					task.setForeignColumnName(theForeignColumn);
 					addTask(task);
+					return new BuilderCompleteTask(task);
 				}
 			}
 		}
