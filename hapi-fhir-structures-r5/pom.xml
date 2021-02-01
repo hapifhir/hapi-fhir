@@ -363,6 +363,11 @@
 							<artifactId>guava</artifactId>
 							<version>${guava_version}</version>
 						</dependency>
+						<dependency>
+							<groupId>com.squareup.okhttp3</groupId>
+							<artifactId>okhttp</artifactId>
+							<version>${okhttp_version}</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>

@@ -785,6 +785,7 @@
 		<jackson_databind_version>2.11.3</jackson_databind_version>
 		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
+		<okhttp_version>3.8.1</okhttp_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
 		<ph_schematron_version>5.6.5</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
@@ -933,7 +934,7 @@
 			<dependency>
 				<groupId>com.squareup.okhttp3</groupId>
 				<artifactId>okhttp</artifactId>
-				<version>3.8.1</version>
+				<version>${okhttp_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.activation</groupId>
