@@ -32,7 +32,6 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		// Load LOINC marked as version 2.67
 		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesWithPropertiesFileToZip(myFiles, "v267_loincupload.properties");
 
-		// FIXME: maybe add a count queries test?
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
