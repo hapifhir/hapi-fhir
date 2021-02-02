@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.model.entity.NpmPackageEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionEntity;
 import ca.uhn.fhir.jpa.model.entity.NpmPackageVersionResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -329,8 +330,9 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private ResourceTable createResourceBinary(IBaseBinary theResourceBinary) {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
-			return (ResourceTable) getBinaryDao().create(theResourceBinary, myRequestDetails).getEntity();
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			return (ResourceTable) getBinaryDao().create(theResourceBinary, requestDetails).getEntity();
  		} else {
 			return (ResourceTable) getBinaryDao().create(theResourceBinary).getEntity();
 		}
@@ -642,9 +644,10 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	private void deleteAndExpungeResourceBinary(IIdType theResourceBinaryId, ExpungeOptions theOptions) {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
-			SystemRequestDetails myRequestDetails = new SystemRequestDetails();
-			getBinaryDao().delete(theResourceBinaryId, myRequestDetails).getEntity();
-			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, myRequestDetails);
+			SystemRequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
+			getBinaryDao().delete(theResourceBinaryId, requestDetails).getEntity();
+			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, requestDetails);
 		} else {
 			getBinaryDao().delete(theResourceBinaryId).getEntity();
 			getBinaryDao().forceExpungeInExistingTransaction(theResourceBinaryId, theOptions, null);

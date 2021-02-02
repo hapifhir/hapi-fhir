@@ -55,6 +55,7 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -147,7 +148,7 @@ public abstract class BaseTransactionProcessor {
 		}
 
 		String actionName = "Transaction";
-		IBaseBundle response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
+		IBaseBundle response = processTransactionAsSubRequest((RequestDetails) theRequestDetails, theRequest, actionName);
 
 		List<IBase> entries = myVersionAdapter.getEntries(response);
 		for (int i = 0; i < entries.size(); i++) {
@@ -198,7 +199,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	private void handleTransactionCreateOrUpdateOutcome(Map<IIdType, IIdType> idSubstitutions, Map<IIdType, DaoMethodOutcome> idToPersistedOutcome, IIdType nextResourceId, DaoMethodOutcome outcome,
-																		 IBase newEntry, String theResourceType, IBaseResource theRes, ServletRequestDetails theRequestDetails) {
+																		 IBase newEntry, String theResourceType, IBaseResource theRes, RequestDetails theRequestDetails) {
 		IIdType newId = outcome.getId().toUnqualified();
 		IIdType resourceId = isPlaceholder(nextResourceId) ? nextResourceId : nextResourceId.toUnqualifiedVersionless();
 		if (newId.equals(resourceId) == false) {
@@ -268,7 +269,7 @@ public abstract class BaseTransactionProcessor {
 		myDao = theDao;
 	}
 
-	private IBaseBundle processTransactionAsSubRequest(ServletRequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName) {
+	private IBaseBundle processTransactionAsSubRequest(RequestDetails theRequestDetails, IBaseBundle theRequest, String theActionName) {
 		BaseHapiFhirDao.markRequestAsProcessingSubRequest(theRequestDetails);
 		try {
 			return processTransaction(theRequestDetails, theRequest, theActionName);
@@ -334,7 +335,7 @@ public abstract class BaseTransactionProcessor {
 		return resp;
 	}
 
-	private IBaseBundle processTransaction(final ServletRequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName) {
+	private IBaseBundle processTransaction(final RequestDetails theRequestDetails, final IBaseBundle theRequest, final String theActionName) {
 		validateDependencies();
 
 		String transactionType = myVersionAdapter.getBundleType(theRequest);
@@ -447,6 +448,12 @@ public abstract class BaseTransactionProcessor {
 			transactionStopWatch.startTask("Process " + getEntries.size() + " GET entries");
 		}
 		for (IBase nextReqEntry : getEntries) {
+
+			if (!(theRequestDetails instanceof ServletRequestDetails)) {
+				throw new MethodNotAllowedException("Can not call transaction GET methods from this context");
+			}
+
+			ServletRequestDetails srd = (ServletRequestDetails)theRequestDetails;
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			IBase nextRespEntry = (IBase) myVersionAdapter.getEntries(response).get(originalOrder);
 
@@ -454,11 +461,11 @@ public abstract class BaseTransactionProcessor {
 
 			String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
 
-			ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, paramValues);
+			ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(srd, transactionUrl, paramValues);
 
 			String url = requestDetails.getRequestPath();
 
-			BaseMethodBinding<?> method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
+			BaseMethodBinding<?> method = srd.getServer().determineResourceMethod(requestDetails, url);
 			if (method == null) {
 				throw new IllegalArgumentException("Unable to handle GET " + url);
 			}
@@ -479,7 +486,7 @@ public abstract class BaseTransactionProcessor {
 				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
 				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
 
-				IBaseResource resource = methodBinding.doInvokeServer(theRequestDetails.getServer(), requestDetails);
+				IBaseResource resource = methodBinding.doInvokeServer(srd.getServer(), requestDetails);
 				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 					resource = filterNestedBundle(requestDetails, resource);
 				}
@@ -543,7 +550,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 
-	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
+	private Map<IBase, IBasePersistedResource> doTransactionWriteOperations(final RequestDetails theRequest, String theActionName, TransactionDetails theTransactionDetails, Set<IIdType> theAllIds,
 																									Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, IBaseBundle theResponse, IdentityHashMap<IBase, Integer> theOriginalRequestOrder, List<IBase> theEntries, StopWatch theTransactionStopWatch) {
 
 		theTransactionDetails.beginAcceptingDeferredInterceptorBroadcasts(

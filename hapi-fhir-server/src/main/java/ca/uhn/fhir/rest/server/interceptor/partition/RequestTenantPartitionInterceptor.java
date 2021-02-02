@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
@@ -47,17 +48,17 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RequestTenantPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
-	public RequestPartitionId PartitionIdentifyCreate(ServletRequestDetails theRequestDetails) {
+	public RequestPartitionId PartitionIdentifyCreate(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
-	public RequestPartitionId PartitionIdentifyRead(ServletRequestDetails theRequestDetails) {
+	public RequestPartitionId PartitionIdentifyRead(RequestDetails theRequestDetails) {
 		return extractPartitionIdFromRequest(theRequestDetails);
 	}
 
 	@Nonnull
-	protected RequestPartitionId extractPartitionIdFromRequest(ServletRequestDetails theRequestDetails) {
+	protected RequestPartitionId extractPartitionIdFromRequest(RequestDetails theRequestDetails) {
 
 		// We will use the tenant ID that came from the request as the partition name
 		String tenantId = theRequestDetails.getTenantId();

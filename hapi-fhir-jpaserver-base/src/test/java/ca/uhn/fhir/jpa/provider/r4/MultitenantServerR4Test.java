@@ -5,8 +5,8 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -21,7 +21,6 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.in;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -167,9 +166,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
@@ -179,7 +178,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		// Create patients
 		IBaseResource patientA = buildPatient(withActiveTrue());
-		RequestDetails requestDetails = new SystemRequestDetails();
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		IIdType idA = myPatientDao.create((Patient) patientA, requestDetails).getId();
 
@@ -302,12 +301,29 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		runInTransaction(() -> {
 			ResourceTable resourceTable = myResourceTableDao.findById(idA.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 			resourceTable = myResourceTableDao.findById(idB.getIdPartAsLong()).orElseThrow(() -> new IllegalStateException());
-			assertEquals(2, resourceTable.getPartitionId().getPartitionId());
+			assertEquals(1, resourceTable.getPartitionId().getPartitionId());
 		});
 
 	}
 
+	@Test
+	public void testDirectDaoAccess_PartitionInRequestDetails_TransactionWithGet() {
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.getRequest().setUrl("Patient").setMethod(Bundle.HTTPVerb.GET);
+
+		try {
+			RequestDetails requestDetails = new SystemRequestDetails();
+			requestDetails.setTenantId(TENANT_A);
+			mySystemDao.transaction(requestDetails, input);
+			fail();
+		} catch (MethodNotAllowedException e) {
+			assertEquals("Can not call transaction GET methods from this context", e.getMessage());
+		}
+
+	}
 
 }

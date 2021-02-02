@@ -437,6 +437,9 @@ public interface IServerInterceptor {
 			requestDetails.setId(getId());
 
 			IInterceptorService interceptorService = server.getInterceptorService();
+			if (interceptorService == null) {
+				return;
+			}
 
 			HookParams params = new HookParams();
 			params.add(RestOperationTypeEnum.class, theOperationType);
