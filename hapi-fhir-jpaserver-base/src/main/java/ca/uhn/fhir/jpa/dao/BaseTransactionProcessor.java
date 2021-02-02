@@ -141,7 +141,7 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	public <BUNDLE extends IBaseBundle> BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
-		if (theRequestDetails != null && myDao != null) {
+		if (theRequestDetails != null && theRequestDetails.getServer() != null && myDao != null) {
 			IServerInterceptor.ActionRequestDetails requestDetails = new IServerInterceptor.ActionRequestDetails(theRequestDetails, theRequest, "Bundle", null);
 			myDao.notifyInterceptors(RestOperationTypeEnum.TRANSACTION, requestDetails);
 		}

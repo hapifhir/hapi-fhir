@@ -49,8 +49,9 @@ public abstract class BaseMultitenantResourceProviderR4Test extends BaseResource
 	public void before() throws Exception {
 		super.before();
 
+		myInterceptorRegistry.registerInterceptor(myRequestTenantPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(true);
-		ourRestServer.registerInterceptor(myRequestTenantPartitionInterceptor);
+
 		ourRestServer.registerProvider(myPartitionManagementProvider);
 		ourRestServer.setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 
