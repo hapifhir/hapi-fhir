@@ -19,7 +19,7 @@ class ResourceOperationMessageTest {
 	public void testSerializationAndDeserializationOfResourceModifiedMessage() throws JsonProcessingException {
 		ResourceOperationJsonMessage jsonMessage = new ResourceOperationJsonMessage();
 		ResourceOperationMessage payload = new ResourceOperationMessage();
-		payload.setMimeType(Constants.CT_FHIR_JSON_NEW);
+		payload.setMediaType(Constants.CT_FHIR_JSON_NEW);
 		jsonMessage.setPayload(payload);
 		ObjectMapper mapper = new ObjectMapper();
 		String serialized = mapper.writeValueAsString(jsonMessage);
