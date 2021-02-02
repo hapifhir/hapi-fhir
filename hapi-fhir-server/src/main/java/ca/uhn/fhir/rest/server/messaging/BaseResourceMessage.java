@@ -24,7 +24,6 @@ package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.net.MediaType;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nullable;
@@ -44,8 +43,8 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 	@JsonProperty("transactionId")
 	private String myTransactionId;
 
-	@JsonProperty("mimeType")
-	private String myMimeType;
+	@JsonProperty("mediaType")
+	private String myMediaType;
 
 	/**
 	 * Returns an attribute stored in this message.
@@ -149,12 +148,12 @@ public abstract class BaseResourceMessage implements IResourceMessage, IModelJso
 		myTransactionId = theTransactionId;
 	}
 
-	public String getMimeType() {
-		return myMimeType;
+	public String getMediaType() {
+		return myMediaType;
 	}
 
-	public void setMimeType(String theMimeType) {
-		myMimeType = theMimeType;
+	public void setMediaType(String theMediaType) {
+		myMediaType = theMediaType;
 	}
 
 	public enum OperationTypeEnum {
