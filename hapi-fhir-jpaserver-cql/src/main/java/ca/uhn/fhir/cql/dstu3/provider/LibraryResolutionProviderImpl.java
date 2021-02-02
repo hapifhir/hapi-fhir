@@ -2,7 +2,7 @@ package ca.uhn.fhir.cql.dstu3.provider;
 
 /*-
  * #%L
- * HAPI FHIR - Clinical Quality Language
+ * HAPI FHIR JPA Server - Clinical Quality Language
  * %%
  * Copyright (C) 2014 - 2021 Smile CDR, Inc.
  * %%
