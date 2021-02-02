@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
@@ -69,7 +70,7 @@ public class MeasureOperationsProvider {
 	 * for the FHIR $evaluate-measure operation
 	 *
 	 */
-	@Operation(name = "$evaluate-measure", idempotent = true, type = Measure.class)
+	@Operation(name = ProviderConstants.CQL_EVALUATE_MEASURE, idempotent = true, type = Measure.class)
 	public MeasureReport evaluateMeasure(@IdParam IdType theId,
 													 @OperationParam(name = "periodStart") String periodStart,
 													 @OperationParam(name = "periodEnd") String periodEnd,
