@@ -30,7 +30,6 @@ import ca.uhn.fhir.cql.dstu3.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.dstu3.provider.LibraryResolutionProviderImpl;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -39,6 +38,7 @@ import java.util.Map;
 
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
@@ -50,14 +50,16 @@ import org.springframework.context.annotation.Lazy;
 public class CqlDstu3Config extends BaseCqlConfig {
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc,
-			ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
-		return new JpaTerminologyProvider(theITermReadSvc, theValueSetResourceProvider, theValidationSupport);
+	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc, DaoRegistry daoRegistry,
+			IValidationSupport theValidationSupport) {
+		return new JpaTerminologyProvider(theITermReadSvc, daoRegistry.getResourceDao(ValueSet.class),
+				theValidationSupport);
 	}
 
 	@Lazy
 	@Bean
-	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
+	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry,
+			TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
 		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider, modelResolver);
 	}
 
@@ -66,7 +68,7 @@ public class CqlDstu3Config extends BaseCqlConfig {
 	LibraryResolutionProvider libraryResolutionProvider() {
 		return new LibraryResolutionProviderImpl();
 	}
-	
+
 	@Lazy
 	@Bean
 	public MeasureOperationsProvider measureOperationsProvider() {
@@ -74,7 +76,7 @@ public class CqlDstu3Config extends BaseCqlConfig {
 	}
 
 	@Bean
-	public ModelResolver fhirModelResolver () {
+	public ModelResolver fhirModelResolver() {
 		return new CachingModelResolverDecorator(new Dstu3FhirModelResolver());
 	}
 
