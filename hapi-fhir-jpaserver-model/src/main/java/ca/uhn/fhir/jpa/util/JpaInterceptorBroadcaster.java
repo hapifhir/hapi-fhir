@@ -30,6 +30,13 @@ import javax.annotation.Nullable;
 public class JpaInterceptorBroadcaster {
 
 	/**
+	 * Non instantiable
+	 */
+	private JpaInterceptorBroadcaster() {
+		// nothing
+	}
+
+	/**
 	 * Broadcast hooks to both the interceptor service associated with the request, as well
 	 * as the one associated with the JPA module.
 	 */
