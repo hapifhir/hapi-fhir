@@ -73,7 +73,6 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -133,10 +132,7 @@ public class ElasticsearchSvcImpl implements IElasticsearchSvc {
 
 	public ElasticsearchSvcImpl(String theHostname, int thePort, String theUsername, String thePassword) {
 		myRestHighLevelClient = ElasticsearchRestClientFactory.createElasticsearchHighLevelRestClient(theHostname, thePort, theUsername, thePassword);
-	}
 
-	@PostConstruct
-	public void start() {
 		try {
 			createObservationIndexIfMissing();
 			createObservationCodeIndexIfMissing();
