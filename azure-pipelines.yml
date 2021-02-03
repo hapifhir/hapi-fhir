@@ -15,7 +15,7 @@ pool:
 jobs:
   - job: Build
     timeoutInMinutes: 360
-    container: maven:3-jdk-11
+    container: maven:3-adoptopenjdk-15
     steps:
       - task: DockerInstaller@0
         displayName: Docker Installer
