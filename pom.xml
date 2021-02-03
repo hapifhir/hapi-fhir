@@ -719,6 +719,11 @@
 			<id>MarcelPa</id>
 			<name>Marcel P</name>
 		</developer>
+		<developer>
+			<id>marceloavan</id>
+			<name>Marcelo Avancini</name>
+			<organization>Philips</organization>
+		</developer>
 	</developers>
 
 	<licenses>

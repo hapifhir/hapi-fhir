@@ -38,7 +38,7 @@ public class JpaInterceptorBroadcaster {
 		if (theInterceptorBroadcaster != null) {
 			retVal = theInterceptorBroadcaster.callHooks(thePointcut, theParams);
 		}
-		if (theRequestDetails != null && retVal) {
+		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null && retVal) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 			interceptorBroadcaster.callHooks(thePointcut, theParams);
 		}
@@ -54,7 +54,7 @@ public class JpaInterceptorBroadcaster {
 		if (theInterceptorBroadcaster != null) {
 			retVal = theInterceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
 		}
-		if (theRequestDetails != null && retVal == null) {
+		if (theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster() != null && retVal == null) {
 			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 			retVal = interceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
 		}
@@ -65,6 +65,8 @@ public class JpaInterceptorBroadcaster {
 		if (theInterceptorBroadcaster != null && theInterceptorBroadcaster.hasHooks(thePointcut)) {
 			return true;
 		}
-		return theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
+		return theRequestDetails != null &&
+			theRequestDetails.getInterceptorBroadcaster() != null &&
+			theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
 	}
 }

@@ -97,7 +97,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType)) || theRequest instanceof SystemRequestDetails) {
+			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType))) {
 				return RequestPartitionId.defaultPartition();
 			}
 
@@ -129,7 +129,7 @@ public class RequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 
 		if (myPartitionSettings.isPartitioningEnabled()) {
 			// Handle system requests
-			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType)) || theRequest instanceof SystemRequestDetails) {
+			if ((theRequest == null && myPartitioningBlacklist.contains(theResourceType))) {
 				return RequestPartitionId.defaultPartition();
 			}
 

@@ -1245,7 +1245,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		// Notify interceptors
 		ActionRequestDetails requestDetails;
-		if (theRequestDetails != null) {
+		if (theRequestDetails != null && theRequestDetails.getServer() != null) {
 			requestDetails = new ActionRequestDetails(theRequestDetails, theResource, theResourceId.getResourceType(), theResourceId);
 			notifyInterceptors(RestOperationTypeEnum.UPDATE, requestDetails);
 		}
@@ -1467,13 +1467,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		return retVal.toString();
 	}
 
-	public static void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+	public static void clearRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
 		}
 	}
 
-	public static void markRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
+	public static void markRequestAsProcessingSubRequest(RequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
 		}
