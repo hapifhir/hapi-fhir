@@ -109,6 +109,21 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>info.cqframework</groupId>
+			<artifactId>quick</artifactId>
+			<version>${cqframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>jakarta.xml.bind</groupId>
+					<artifactId>jaxb-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>jakarta.xml.bind</groupId>
+					<artifactId>jakarta.xml.bind-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb_api_version}</version>
