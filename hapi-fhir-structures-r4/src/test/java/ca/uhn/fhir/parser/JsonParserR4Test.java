@@ -1,7 +1,9 @@
 package ca.uhn.fhir.parser;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Child;
+import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.api.Constants;
@@ -20,6 +22,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Dosage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Medication;
@@ -30,10 +33,12 @@ import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UuidType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
@@ -78,6 +83,20 @@ public class JsonParserR4Test extends BaseTest {
 		Device input = loadResource(ourCtx, Device.class, "/entities-from-cerner.json");
 		String narrative = input.getText().getDivAsString();
 		ourLog.info(narrative);
+	}
+
+	@Test
+	public void testEncodeExtensionWithUnknownType() throws IOException {
+
+		Patient p = new Patient();
+		p.addExtension("http://foo", new MyUnknownPrimitiveType());
+
+		try {
+			ourCtx.newJsonParser().encodeResourceToString(p);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Unable to encode extension, unrecognized child element type: ca.uhn.fhir.parser.JsonParserR4Test.MyUnknownPrimitiveType", e.getMessage());
+		}
 	}
 
 	@Test
@@ -907,6 +926,42 @@ public class JsonParserR4Test extends BaseTest {
 		AuditEvent ae = ourCtx.newJsonParser().parseResource(AuditEvent.class, auditEvent);
 		String auditEventAsString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
 		assertEquals(auditEvent, auditEventAsString);
+	}
+
+
+	@DatatypeDef(
+		name = "UnknownPrimitiveType"
+	)
+	private static class MyUnknownPrimitiveType extends PrimitiveType<Object> {
+		@Override
+		public Object getValue() {
+			return "AAA";
+		}
+
+		@Override
+		public String getValueAsString() {
+			return "AAA";
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return false;
+		}
+
+		@Override
+		public Type copy() {
+			return this;
+		}
+
+		@Override
+		protected String encode(Object theO) {
+			return "AAA";
+		}
+
+		@Override
+		protected Object parse(String theS) {
+			return new Object();
+		}
 	}
 
 
