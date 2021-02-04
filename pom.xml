@@ -820,10 +820,9 @@
 		<!-- CQL Support -->
 		<!-- FIXME KBD: Change all of these -SNAPSHOT versions to release versions
 		(e.g. 1.3.1-SNAPSHOT -> 1.3.1) before finalizing this work! -->
-		<cqf-tooling.version>1.3.1-SNAPSHOT</cqf-tooling.version>
-		<cql-engine.version>1.5.1-SNAPSHOT</cql-engine.version>
-		<cql-evaluator.version>1.1.0-SNAPSHOT</cql-evaluator.version>
-		<cqframework.version>1.5.2-SNAPSHOT</cqframework.version>
+		<cql-engine.version>1.5.1</cql-engine.version>
+		<cql-evaluator.version>1.1.0</cql-evaluator.version>
+		<cqframework.version>1.5.1</cqframework.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>

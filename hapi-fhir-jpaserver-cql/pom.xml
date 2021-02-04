@@ -29,45 +29,6 @@
 			<version>${cql-evaluator.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.opencds.cqf</groupId>
-			<artifactId>tooling</artifactId>
-			<version>${cqf-tooling.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>javax.activation-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>jakarta.xml.bind</groupId>
-					<artifactId>jakarta.xml.bind-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>jakarta.xml.bind</groupId>
-					<artifactId>jaxb-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.istack</groupId>
-					<artifactId>istack-commons-tools</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sun.istack</groupId>
-					<artifactId>istack-commons-runtime</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>info.bliki.wiki</groupId>
-					<artifactId>bliki-core</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>org.opencds.cqf.cql</groupId>
 			<artifactId>engine</artifactId>
 			<version>${cql-engine.version}</version>
