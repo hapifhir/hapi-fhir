@@ -5164,28 +5164,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testIssueDateFormatError1465() {
-		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("birthdate", new DateParam("09-30-1960"));
-			myPatientDao.search(map);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Invalid date/time format: \"09-30-1960\"", e.getMessage());
-		}
-
-		try {
-			SearchParameterMap map = SearchParameterMap.newSynchronous();
-			map.add("birthdate", new DateParam("junk"));
-			myPatientDao.search(map);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Invalid date/time format: \"junk\"", e.getMessage());
-		}
-	}
-
-
-	@Test
 	public void testDateSearchParametersShouldBeTimezoneIndependent() {
 
 		createObservationWithEffective("NO1", "2011-01-03T00:00:00+01:00");
