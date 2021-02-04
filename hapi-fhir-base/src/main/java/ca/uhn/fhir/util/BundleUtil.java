@@ -233,7 +233,7 @@ public class BundleUtil {
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
 			 */
-			BundleEntryMutator mutator = new BundleEntryMutator(nextEntry, requestChildDef, requestChildContentsDef);
+			BundleEntryMutator mutator = new BundleEntryMutator(theContext, nextEntry, requestChildDef, requestChildContentsDef, entryChildContentsDef);
 			ModifiableBundleEntry entry = new ModifiableBundleEntry(new BundleEntryParts(fullUrl, requestType, url, resource, conditionalUrl), mutator);
 			theProcessor.accept(entry);
 		}
