@@ -41,11 +41,24 @@ public class DateParamTest {
 		assertEquals(ParamPrefixEnum.GREATERTHAN, input.getPrefix());
 	}
 
+	/**
+	 * We support legacy prefixes in addtion to the standard ParamPrefixEnum values.
+	 *
+	 * Testing here since BaseParamWithPrefix is abstract.
+ 	 */
 	@Test
 	public void testLegacyPrefixParse() {
-		DateParam input = new DateParam(">2020-01-01");
+		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, translateLegacyPrefix(">="));
+		assertEquals(ParamPrefixEnum.GREATERTHAN, translateLegacyPrefix(">"));
+		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, translateLegacyPrefix("<="));
+		assertEquals(ParamPrefixEnum.LESSTHAN, translateLegacyPrefix("<"));
+		assertEquals(ParamPrefixEnum.APPROXIMATE, translateLegacyPrefix("~"));
+		assertEquals(ParamPrefixEnum.EQUAL, translateLegacyPrefix("="));
+	}
 
-		assertEquals(ParamPrefixEnum.GREATERTHAN, input.getPrefix());
+	private ParamPrefixEnum translateLegacyPrefix(String legacyPrefix) {
+		DateParam input = new DateParam(legacyPrefix + "2020-01-01");
+		return input.getPrefix();
 	}
 
 	@Test

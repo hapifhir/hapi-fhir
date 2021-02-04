@@ -79,6 +79,9 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 				case "~":
 					myPrefix = ParamPrefixEnum.APPROXIMATE;
 					break;
+				case "=":
+					myPrefix = ParamPrefixEnum.EQUAL;
+					break;
 				default :
 					throw new DataFormatException("Invalid prefix: \"" + prefix + "\"");
 				}
