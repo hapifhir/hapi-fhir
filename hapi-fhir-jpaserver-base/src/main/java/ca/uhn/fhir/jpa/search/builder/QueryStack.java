@@ -159,7 +159,7 @@ public class QueryStack {
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnValueLow(), theAscending);
+		mySqlBuilder.addSortDate(sortPredicateBuilder.getColumnValueLow(), theAscending);
 	}
 
 	public void addSortOnLastUpdated(boolean theAscending) {
@@ -170,7 +170,7 @@ public class QueryStack {
 		} else {
 			resourceTablePredicateBuilder = mySqlBuilder.addResourceTablePredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		}
-		mySqlBuilder.addSort(resourceTablePredicateBuilder.getColumnLastUpdated(), theAscending);
+		mySqlBuilder.addSortDate(resourceTablePredicateBuilder.getColumnLastUpdated(), theAscending);
 	}
 
 
@@ -180,7 +180,7 @@ public class QueryStack {
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnValue(), theAscending);
 	}
 
 	public void addSortOnQuantity(String theResourceName, String theParamName, boolean theAscending) {
@@ -189,18 +189,18 @@ public class QueryStack {
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnValue(), theAscending);
 	}
 
 	public void addSortOnResourceId(boolean theAscending) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ForcedIdPredicateBuilder sortPredicateBuilder = mySqlBuilder.addForcedIdPredicateBuilder(firstPredicateBuilder.getResourceIdColumn());
 		if (!theAscending) {
-			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST);
+			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), false, OrderObject.NullOrder.FIRST);
 		} else {
-			mySqlBuilder.addSort(sortPredicateBuilder.getColumnForcedId(), true);
+			mySqlBuilder.addSortString(sortPredicateBuilder.getColumnForcedId(), true);
 		}
-		mySqlBuilder.addSort(firstPredicateBuilder.getResourceIdColumn(), theAscending);
+		mySqlBuilder.addSortNumeric(firstPredicateBuilder.getResourceIdColumn(), theAscending);
 
 	}
 
@@ -210,7 +210,7 @@ public class QueryStack {
 
 		Condition pathPredicate = sortPredicateBuilder.createPredicateSourcePaths(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(pathPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnTargetResourceId(), theAscending);
+		mySqlBuilder.addSortNumeric(sortPredicateBuilder.getColumnTargetResourceId(), theAscending);
 	}
 
 
@@ -220,7 +220,7 @@ public class QueryStack {
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnValueNormalized(), theAscending);
+		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValueNormalized(), theAscending);
 	}
 
 	public void addSortOnToken(String theResourceName, String theParamName, boolean theAscending) {
@@ -229,8 +229,8 @@ public class QueryStack {
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnSystem(), theAscending);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnSystem(), theAscending);
+		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValue(), theAscending);
 	}
 
 	public void addSortOnUri(String theResourceName, String theParamName, boolean theAscending) {
@@ -239,7 +239,7 @@ public class QueryStack {
 
 		Condition hashIdentityPredicate = sortPredicateBuilder.createHashIdentityPredicate(theResourceName, theParamName);
 		mySqlBuilder.addPredicate(hashIdentityPredicate);
-		mySqlBuilder.addSort(sortPredicateBuilder.getColumnValue(), theAscending);
+		mySqlBuilder.addSortString(sortPredicateBuilder.getColumnValue(), theAscending);
 	}
 
 
