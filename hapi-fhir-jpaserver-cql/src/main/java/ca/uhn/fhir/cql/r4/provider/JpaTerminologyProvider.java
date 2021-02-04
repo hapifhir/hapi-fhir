@@ -20,19 +20,16 @@ package ca.uhn.fhir.cql.r4.provider;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.rp.r4.ValueSetResourceProvider;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-
-import org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -43,7 +40,6 @@ import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,8 +73,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
 	@Override
 	public Iterable<Code> expand(ValueSetInfo valueSet) throws ResourceNotFoundException {
-		List<Code> codes = new ArrayList<>();
-		boolean needsExpand = false;
+		// This could possibly be refactored into a single call to the underlying HAPI Terminology service. Need to think through that..,
 		ValueSet vs;
 		if (valueSet.getId().startsWith("http://") || valueSet.getId().startsWith("https://")) {
 			if (valueSet.getVersion() != null
@@ -107,13 +102,30 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 			}
 		}
 
+		// Attempt to expand the ValueSet if it's not already expanded.
 		if (!(vs.hasExpansion() && vs.getExpansion().hasContains())) {
 			vs = (ValueSet)this.terminologySvc.expandValueSet(
 				new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE).setFailOnMissingCodeSystem(false), vs);
 		}
 
-		for (ValueSetExpansionContainsComponent vsecc : vs.getExpansion().getContains()) {
-			codes.add(new Code().withCode(vsecc.getCode()).withSystem(vsecc.getSystem()));
+		List<Code> codes = new ArrayList<>();
+
+		// If expansion was successful, use the codes.
+		if (vs.hasExpansion() && vs.getExpansion().hasContains()) {
+			for (ValueSetExpansionContainsComponent vsecc : vs.getExpansion().getContains()) {
+				codes.add(new Code().withCode(vsecc.getCode()).withSystem(vsecc.getSystem()));
+			}
+		}
+		// If not, best-effort based on codes. Should probably make this configurable to match the behavior of the
+		// underlying terminology service implementation
+		else if (vs.hasCompose() && vs.getCompose().hasInclude()) {
+			for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
+					if (concept.hasCode()) {
+						codes.add(new Code().withCode(concept.getCode()).withSystem(include.getSystem()));
+					}
+				}
+			}
 		}
 
 		return codes;

@@ -39,7 +39,6 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test implements CqlProv
 			"numer-EXM130", null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
-
 		assertEquals(new BigDecimal("1.0"), report.getGroupFirstRep().getMeasureScore().getValue());
 	}
 
@@ -50,7 +49,6 @@ public class CqlMeasureEvaluationR4Test extends BaseCqlR4Test implements CqlProv
 			"denom-EXM130", null, null, null, null, null, null);
 		// Assert it worked
 		assertThat(report.getGroup(), hasSize(1));
-
 		assertEquals(new BigDecimal("0.0"), report.getGroupFirstRep().getMeasureScore().getValue());
 	}
 }
