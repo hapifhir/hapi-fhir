@@ -58,4 +58,5 @@ public class BundleEntryParts {
 	public String getUrl() {
 		return myUrl;
 	}
+
 }

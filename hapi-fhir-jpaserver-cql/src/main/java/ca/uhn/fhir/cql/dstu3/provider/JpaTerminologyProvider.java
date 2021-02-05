@@ -20,12 +20,10 @@ package ca.uhn.fhir.cql.dstu3.provider;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
-import ca.uhn.fhir.jpa.rp.dstu3.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
@@ -34,7 +32,6 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ValueSet;
-import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.cql.engine.terminology.CodeSystemInfo;
@@ -53,14 +50,14 @@ import java.util.List;
 public class JpaTerminologyProvider implements TerminologyProvider {
 
 	private ITermReadSvcDstu3 terminologySvc;
-	private ValueSetResourceProvider valueSetResourceProvider;
+	private IFhirResourceDao<ValueSet> valueSetDao;
 	private final IValidationSupport validationSupport;
 
 	@Autowired
 	public JpaTerminologyProvider(ITermReadSvcDstu3 terminologySvc,
-											ValueSetResourceProvider valueSetResourceProvider, IValidationSupport validationSupport) {
+								IFhirResourceDao<ValueSet> valueSetDao, IValidationSupport validationSupport) {
 		 this.terminologySvc = terminologySvc;
-		 this.valueSetResourceProvider = valueSetResourceProvider;
+		 this.valueSetDao = valueSetDao;
 		 this.validationSupport = validationSupport;
 	}
 
@@ -78,9 +75,8 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
 	@Override
 	public Iterable<Code> expand(ValueSetInfo valueSet) throws ResourceNotFoundException {
-		List<Code> codes = new ArrayList<>();
-		boolean needsExpand = false;
-		ValueSet vs = null;
+		// This could possibly be refactored into a single call to the underlying HAPI Terminology service. Need to think through that..,
+		ValueSet vs;
 		if (valueSet.getId().startsWith("http://") || valueSet.getId().startsWith("https://")) {
 			if (valueSet.getVersion() != null
 				|| (valueSet.getCodeSystems() != null && valueSet.getCodeSystems().size() > 0)) {
@@ -90,7 +86,8 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 						valueSet.getId()));
 				}
 			}
-			IBundleProvider bundleProvider = valueSetResourceProvider.getDao()
+
+			IBundleProvider bundleProvider = this.valueSetDao
 				.search(new SearchParameterMap().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
 			List<IBaseResource> valueSets = bundleProvider.getResources(0, bundleProvider.size());
 			if (valueSets.isEmpty()) {
@@ -101,41 +98,37 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 				throw new IllegalArgumentException("Found more than 1 ValueSet with url: " + valueSet.getId());
 			}
 		} else {
-			vs = valueSetResourceProvider.getDao().read(new IdType(valueSet.getId()));
-		}
-		if (vs != null) {
-			if (vs.hasCompose()) {
-				if (vs.getCompose().hasInclude()) {
-					for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
-						if (include.hasValueSet() || include.hasFilter()) {
-							needsExpand = true;
-							break;
-						}
-						for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
-							if (concept.hasCode()) {
-								codes.add(new Code().withCode(concept.getCode()).withSystem(include.getSystem()));
-							}
-						}
-					}
-					if (!needsExpand) {
-						return codes;
-					}
-				}
-			}
-
-			if (vs.hasExpansion() && vs.getExpansion().hasContains()) {
-				for (ValueSetExpansionContainsComponent vsecc : vs.getExpansion().getContains()) {
-					codes.add(new Code().withCode(vsecc.getCode()).withSystem(vsecc.getSystem()));
-				}
-
-				return codes;
+			vs = this.valueSetDao.read(new IdType(valueSet.getId()));
+			if (vs == null) {
+				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
 			}
 		}
 
-		org.hl7.fhir.r4.model.ValueSet expansion = terminologySvc
-			.expandValueSet(new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE), valueSet.getId(), null);
-		expansion.getExpansion().getContains()
-			.forEach(concept -> codes.add(new Code().withCode(concept.getCode()).withSystem(concept.getSystem())));
+		// Attempt to expand the ValueSet if it's not already expanded.
+		if (!(vs.hasExpansion() && vs.getExpansion().hasContains())) {
+			vs = (ValueSet)this.terminologySvc.expandValueSet(
+				new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE).setFailOnMissingCodeSystem(false), vs);
+		}
+
+		List<Code> codes = new ArrayList<>();
+
+		// If expansion was successful, use the codes.
+		if (vs.hasExpansion() && vs.getExpansion().hasContains()) {
+			for (ValueSet.ValueSetExpansionContainsComponent vsecc : vs.getExpansion().getContains()) {
+				codes.add(new Code().withCode(vsecc.getCode()).withSystem(vsecc.getSystem()));
+			}
+		}
+		// If not, best-effort based on codes. Should probably make this configurable to match the behavior of the
+		// underlying terminology service implementation
+		else if (vs.hasCompose() && vs.getCompose().hasInclude()) {
+			for (ValueSet.ConceptSetComponent include : vs.getCompose().getInclude()) {
+				for (ValueSet.ConceptReferenceComponent concept : include.getConcept()) {
+					if (concept.hasCode()) {
+						codes.add(new Code().withCode(concept.getCode()).withSystem(include.getSystem()));
+					}
+				}
+			}
+		}
 
 		return codes;
 	}
