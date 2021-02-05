@@ -31,7 +31,6 @@ import ca.uhn.fhir.cql.r4.helper.LibraryHelper;
 import ca.uhn.fhir.cql.r4.provider.JpaTerminologyProvider;
 import ca.uhn.fhir.cql.r4.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.rp.r4.ValueSetResourceProvider;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 
 import org.opencds.cqf.cql.engine.model.ModelResolver;
@@ -40,6 +39,7 @@ import java.util.Map;
 
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.opencds.cqf.cql.engine.fhir.model.R4FhirModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
@@ -58,13 +58,15 @@ public class CqlR4Config extends BaseCqlConfig {
 
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, ValueSetResourceProvider theValueSetResourceProvider, IValidationSupport theValidationSupport) {
-		return new JpaTerminologyProvider(theITermReadSvc,theValueSetResourceProvider, theValidationSupport);
+	TerminologyProvider terminologyProvider(ITermReadSvcR4 theITermReadSvc, DaoRegistry daoRegistry,
+			IValidationSupport theValidationSupport) {
+		return new JpaTerminologyProvider(theITermReadSvc, daoRegistry.getResourceDao(ValueSet.class), theValidationSupport);
 	}
 
 	@Lazy
 	@Bean
-	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry, TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
+	EvaluationProviderFactory evaluationProviderFactory(FhirContext theFhirContext, DaoRegistry theDaoRegistry,
+			TerminologyProvider theLocalSystemTerminologyProvider, ModelResolver modelResolver) {
 		return new ProviderFactory(theFhirContext, theDaoRegistry, theLocalSystemTerminologyProvider, modelResolver);
 	}
 
@@ -81,7 +83,7 @@ public class CqlR4Config extends BaseCqlConfig {
 	}
 
 	@Bean
-	public ModelResolver fhirModelResolver () {
+	public ModelResolver fhirModelResolver() {
 		return new CachingModelResolverDecorator(new R4FhirModelResolver());
 	}
 
