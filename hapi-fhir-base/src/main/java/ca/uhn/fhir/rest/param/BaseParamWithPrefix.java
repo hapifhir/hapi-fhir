@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.param;
  * #L%
  */
 
+import ca.uhn.fhir.parser.DataFormatException;
+
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam {
@@ -58,8 +60,9 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		if (!isBlank(prefix)) {
 		
 			myPrefix = ParamPrefixEnum.forValue(prefix);
-	
+
 			if (myPrefix == null) {
+				// prefix doesn't match standard values.  Try legacy values
 				switch (prefix) {
 				case ">=":
 					myPrefix = ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
@@ -76,15 +79,13 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 				case "~":
 					myPrefix = ParamPrefixEnum.APPROXIMATE;
 					break;
-				default :
-					ourLog.warn("Invalid prefix being ignored: {}", prefix);
+				case "=":
+					myPrefix = ParamPrefixEnum.EQUAL;
 					break;
+				default :
+					throw new DataFormatException("Invalid prefix: \"" + prefix + "\"");
 				}
-				
-				if (myPrefix != null) {
-					ourLog.warn("Date parameter has legacy prefix '{}' which has been removed from FHIR. This should be replaced with '{}'", prefix, myPrefix);
-				}
-				
+				ourLog.warn("Date parameter has legacy prefix '{}' which has been removed from FHIR. This should be replaced with '{}'", prefix, myPrefix.getValue());
 			}
 			
 		}
@@ -107,4 +108,5 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 		myPrefix = thePrefix;
 		return (T) this;
 	}
+
 }
