@@ -104,6 +104,12 @@ import static ca.uhn.fhir.util.StringUtil.toUtf8String;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+/**
+ * This class is the central class for the HAPI FHIR Plain Server framework.
+ *
+ * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/">HAPI FHIR Plain Server</a>
+ * for information on how to use this framework.
+ */
 @SuppressWarnings("WeakerAccess")
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
 
