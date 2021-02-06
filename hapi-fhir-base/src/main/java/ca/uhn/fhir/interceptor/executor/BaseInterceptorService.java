@@ -586,7 +586,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 		private final IPointcut myPointcut;
 		private final int myOrder;
 
-		HookDescriptor(IPointcut thePointcut, int theOrder) {
+		public HookDescriptor(IPointcut thePointcut, int theOrder) {
 			myPointcut = thePointcut;
 			myOrder = theOrder;
 		}
