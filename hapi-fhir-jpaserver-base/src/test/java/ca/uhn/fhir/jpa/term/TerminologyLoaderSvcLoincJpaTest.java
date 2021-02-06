@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -19,9 +18,7 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new TermLoaderSvcImpl();
-		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
-		mySvc.setTermDeferredStorageSvc(myTerminologyDeferredStorageSvc);
+		mySvc = new TermLoaderSvcImpl(myTerminologyDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
