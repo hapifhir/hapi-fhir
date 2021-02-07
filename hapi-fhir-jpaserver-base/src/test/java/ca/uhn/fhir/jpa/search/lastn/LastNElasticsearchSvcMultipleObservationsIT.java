@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.hl7.fhir.r4.model.Observation;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,6 +92,11 @@ public class LastNElasticsearchSvcMultipleObservationsIT {
 			createMultiplePatientsAndObservations();
 			indexLoaded = true;
 		}
+	}
+
+	@AfterEach
+	public void after() throws IOException {
+		elasticsearchSvc.close();
 	}
 
 	@Test

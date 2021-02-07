@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2361
+title: "Unrecognized search param prefix strings were silently discarded.  This is now an error."
