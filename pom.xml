@@ -724,6 +724,10 @@
 			<name>Marcelo Avancini</name>
 			<organization>Philips</organization>
 		</developer>
+		<developer>
+			<id>HananAwwad</id>
+			<name>Hanan Awwad</name>
+		</developer>
 	</developers>
 
 	<licenses>

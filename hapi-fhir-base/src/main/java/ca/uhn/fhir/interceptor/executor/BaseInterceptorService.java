@@ -20,7 +20,6 @@ package ca.uhn.fhir.interceptor.executor;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IBaseInterceptorService;
@@ -69,6 +68,7 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	private final ThreadLocal<ListMultimap<POINTCUT, BaseInvoker>> myThreadlocalInvokers = new ThreadLocal<>();
 	private String myName;
 	private boolean myThreadlocalInvokersEnabled = true;
+	private boolean myWarnOnInterceptorWithNoHooks = true;
 
 	/**
 	 * Constructor which uses a default name of "default"
@@ -85,6 +85,13 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 	public BaseInterceptorService(String theName) {
 		super();
 		myName = theName;
+	}
+
+	/**
+	 * Should a warning be issued if an interceptor is registered and it has no hooks
+	 */
+	public void setWarnOnInterceptorWithNoHooks(boolean theWarnOnInterceptorWithNoHooks) {
+		myWarnOnInterceptorWithNoHooks = theWarnOnInterceptorWithNoHooks;
 	}
 
 	/**
@@ -206,7 +213,9 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 			List<HookInvoker> addedInvokers = scanInterceptorAndAddToInvokerMultimap(theInterceptor, myGlobalInvokers);
 			if (addedInvokers.isEmpty()) {
-				ourLog.warn("Interceptor registered with no valid hooks - Type was: {}", theInterceptor.getClass().getName());
+				if (myWarnOnInterceptorWithNoHooks) {
+					ourLog.warn("Interceptor registered with no valid hooks - Type was: {}", theInterceptor.getClass().getName());
+				}
 				return false;
 			}
 
@@ -439,6 +448,30 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 		return addedInvokers;
 	}
 
+	/**
+	 * @return Returns a list of any added invokers
+	 */
+	private List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
+		ArrayList<HookInvoker> retVal = new ArrayList<>();
+		for (Method nextMethod : ReflectionUtil.getDeclaredMethods(theInterceptor.getClass(), true)) {
+			Optional<HookDescriptor> hook = scanForHook(nextMethod);
+
+			if (hook.isPresent()) {
+				int methodOrder = theTypeOrder;
+				int methodOrderAnnotation = hook.get().getOrder();
+				if (methodOrderAnnotation != Interceptor.DEFAULT_ORDER) {
+					methodOrder = methodOrderAnnotation;
+				}
+
+				retVal.add(new HookInvoker(hook.get(), theInterceptor, nextMethod, methodOrder));
+			}
+		}
+
+		return retVal;
+	}
+
+	protected abstract Optional<HookDescriptor> scanForHook(Method nextMethod);
+
 	protected abstract static class BaseInvoker implements Comparable<BaseInvoker> {
 
 		private final int myOrder;
@@ -548,29 +581,25 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 
 	}
 
-	/**
-	 * @return Returns a list of any added invokers
-	 */
-	private List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
-		ArrayList<HookInvoker> retVal = new ArrayList<>();
-		for (Method nextMethod : ReflectionUtil.getDeclaredMethods(theInterceptor.getClass(), true)) {
-			Optional<HookDescriptor> hook = scanForHook(nextMethod);
+	protected static class HookDescriptor {
 
-			if (hook.isPresent()) {
-				int methodOrder = theTypeOrder;
-				int methodOrderAnnotation = hook.get().getOrder();
-				if (methodOrderAnnotation != Interceptor.DEFAULT_ORDER) {
-					methodOrder = methodOrderAnnotation;
-				}
+		private final IPointcut myPointcut;
+		private final int myOrder;
 
-				retVal.add(new HookInvoker(hook.get(), theInterceptor, nextMethod, methodOrder));
-			}
+		public HookDescriptor(IPointcut thePointcut, int theOrder) {
+			myPointcut = thePointcut;
+			myOrder = theOrder;
 		}
 
-		return retVal;
-	}
+		IPointcut getPointcut() {
+			return myPointcut;
+		}
 
-	protected abstract Optional<HookDescriptor> scanForHook(Method nextMethod);
+		int getOrder() {
+			return myOrder;
+		}
+
+	}
 
 	protected static <T extends Annotation> Optional<T> findAnnotation(AnnotatedElement theObject, Class<T> theHookClass) {
 		T annotation;
@@ -596,26 +625,6 @@ public abstract class BaseInterceptorService<POINTCUT extends IPointcut> impleme
 			.stream()
 			.sorted()
 			.collect(Collectors.joining(","));
-	}
-
-	protected static class HookDescriptor {
-
-		private final IPointcut myPointcut;
-		private final int myOrder;
-
-		HookDescriptor(IPointcut thePointcut, int theOrder) {
-			myPointcut = thePointcut;
-			myOrder = theOrder;
-		}
-
-		IPointcut getPointcut() {
-			return myPointcut;
-		}
-
-		int getOrder() {
-			return myOrder;
-		}
-
 	}
 
 }

@@ -167,6 +167,19 @@ public class InterceptorServiceTest {
 	}
 
 	@Test
+	public void testInterceptorWithNoHooks() {
+
+		class InterceptorWithNoHooks {
+			// nothing
+		}
+
+		InterceptorService svc = new InterceptorService();
+		svc.setWarnOnInterceptorWithNoHooks(false);
+		boolean outcome = svc.registerInterceptor(new InterceptorWithNoHooks());
+		assertFalse(outcome);
+	}
+
+	@Test
 	public void testRegisterHookFails() {
 		InterceptorService svc = new InterceptorService();
 		int initialSize = svc.getGlobalInterceptorsForUnitTest().size();
