@@ -575,7 +575,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 			//-- this is quick solution, may need to revisit
 			if (!applyFilter(display, filterDisplayValue))
 				continue;
-				
+
 			Long conceptPid = conceptView.getConceptPid();
 			if (!pidToConcept.containsKey(conceptPid)) {
 				FhirVersionIndependentConcept concept = new FhirVersionIndependentConcept(system, code, display);
@@ -646,7 +646,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 	}
 
 	public boolean applyFilter(final String theDisplay, final String theFilterDisplay) {
-		
+
 		//-- safety check only, no need to apply filter
 		if (theDisplay == null || theFilterDisplay == null)
 			return true;
@@ -654,7 +654,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		// -- sentence case
 		if (startsWithIgnoreCase(theDisplay, theFilterDisplay))
 			return true;
-		
+
 		//-- token case
 		if (startsWithByWordBoundaries(theDisplay, theFilterDisplay)) return true;
 
@@ -1019,6 +1019,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		for (TermConcept concept: termConcepts) {
 			count.incrementAndGet();
 			countForBatch.incrementAndGet();
+			if (theAdd && expansionStep != null) {
+				ValueSet.ConceptReferenceComponent theIncludeConcept = getMatchedConceptIncludedInValueSet(theIncludeOrExclude, concept);
+				if (theIncludeConcept != null && isNotBlank(theIncludeConcept.getDisplay())) {
+					concept.setDisplay(theIncludeConcept.getDisplay());
+				}
+			}
 			boolean added = addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, includeOrExcludeVersion);
 			if (added) {
 				delta++;
@@ -1034,6 +1040,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc {
 		} else {
 			return true;
 		}
+	}
+
+	private ValueSet.ConceptReferenceComponent getMatchedConceptIncludedInValueSet(ValueSet.ConceptSetComponent theIncludeOrExclude, TermConcept concept) {
+		ValueSet.ConceptReferenceComponent theIncludeConcept = theIncludeOrExclude.getConcept().stream().filter(includedConcept ->
+			includedConcept.getCode().equalsIgnoreCase(concept.getCode())
+		).findFirst().orElse(null);
+		return theIncludeConcept;
 	}
 
 	/**
