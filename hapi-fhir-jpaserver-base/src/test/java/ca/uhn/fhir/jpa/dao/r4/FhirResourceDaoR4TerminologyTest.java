@@ -330,6 +330,33 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			assertEquals("Invalid filter, must have fields populated: property op value", e.getMessage());
 		}
 	}
+	@Test
+	public void testExpandWithIncludeConceptHaveCodeAndDisplay() {
+		CodeSystem codeSystem = createExternalCsDogs();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(URL_MY_VALUE_SET);
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem(codeSystem.getUrl())
+			.addConcept(new ConceptReferenceComponent().setCode("hello").setDisplay("Display-VS"))
+			.addConcept(new ConceptReferenceComponent().setCode("goodbye").setDisplay("Goodbye-VS"));
+
+		myValueSetDao.create(valueSet, mySrd);
+
+		ValueSet result = myValueSetDao.expand(valueSet, "");
+		logAndValidateValueSet(result);
+
+		assertEquals(2, result.getExpansion().getTotal());
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("hello", "goodbye"));
+		for (ValueSetExpansionContainsComponent vsConcept : result.getExpansion().getContains()){
+			assertTrue(vsConcept.getDisplay().contains("VS"));
+		}
+
+
+	}
+
 
 	@Test
 	public void testExpandWithCodesAndDisplayFilterBlank() {

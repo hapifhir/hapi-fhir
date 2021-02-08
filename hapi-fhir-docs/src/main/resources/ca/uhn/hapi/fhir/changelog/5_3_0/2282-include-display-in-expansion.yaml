@@ -1,0 +1,6 @@
+---
+type: add
+issue: 2282
+title: "When performing a ValueSet expansion where the valueset to be expanded includes a
+  display name for concepts it is explicitly including, this display name will be propagated to the
+  expansion if no other display is available. Thanks to Hanan Awwad for the contribution!"
