@@ -225,7 +225,7 @@ public class InMemoryResourceMatcher {
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theModelConfig, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().allMatch(nextAnd -> matchParams(theModelConfig, theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
 				case COMPOSITE:
 				case HAS:
