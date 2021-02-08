@@ -288,6 +288,27 @@ public class InMemoryResourceMatcherR5Test {
 		assertFalse(result.matched());
 	}
 
+	@Test
+	public void testInPeriod() {
+		Observation insidePeriodObservation = new Observation();
+		insidePeriodObservation.setEffective(new DateTimeType("1985-01-01T00:00:00Z"));
+		ResourceIndexedSearchParams insidePeriodSearchParams = extractDateSearchParam(insidePeriodObservation);
+
+		Observation outsidePeriodObservation = new Observation();
+		outsidePeriodObservation.setEffective(new DateTimeType("2010-01-01T00:00:00Z"));
+		ResourceIndexedSearchParams outsidePeriodSearchParams = extractDateSearchParam(outsidePeriodObservation);
+
+		String search = "date=gt" + EARLY_DATE + "&date=le" + LATE_DATE;
+
+		InMemoryMatchResult resultInsidePeriod = myInMemoryResourceMatcher.match(search, insidePeriodObservation, insidePeriodSearchParams);
+		assertTrue(resultInsidePeriod.supported(), resultInsidePeriod.getUnsupportedReason());
+		assertTrue(resultInsidePeriod.matched());
+
+		InMemoryMatchResult resultOutsidePeriod = myInMemoryResourceMatcher.match(search, outsidePeriodObservation, outsidePeriodSearchParams);
+		assertTrue(resultOutsidePeriod.supported(), resultOutsidePeriod.getUnsupportedReason());
+		assertFalse(resultOutsidePeriod.matched());
+	}
+
 
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
 		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
