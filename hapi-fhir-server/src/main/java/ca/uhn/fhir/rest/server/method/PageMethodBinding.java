@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -36,6 +38,9 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.ReflectionUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
@@ -82,6 +87,20 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		IPagingProvider pagingProvider = theServer.getPagingProvider();
 		if (pagingProvider == null) {
 			throw new InvalidRequestException("This server does not support paging");
+		}
+
+		// Interceptor invoke: SERVER_INCOMING_REQUEST_PRE_HANDLED
+		IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
+		populateActionRequestDetailsForInterceptor(theRequest, details, ReflectionUtil.EMPTY_OBJECT_ARRAY);
+		HookParams preHandledParams = new HookParams();
+		preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
+		preHandledParams.add(RequestDetails.class, theRequest);
+		preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			theRequest
+				.getInterceptorBroadcaster()
+				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 		}
 
 		Integer offsetI;

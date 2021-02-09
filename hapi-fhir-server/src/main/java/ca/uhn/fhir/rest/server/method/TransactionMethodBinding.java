@@ -112,12 +112,12 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		 */
 		if (myTransactionParamStyle == ParamStyle.RESOURCE_BUNDLE) {
 			// This is the DSTU2 style
-			Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+			Object response = invokeServerMethod(theRequest, theMethodParams);
 			return response;
 		}
 
 		// Call the server implementation method
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+		Object response = invokeServerMethod(theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 
 		/*

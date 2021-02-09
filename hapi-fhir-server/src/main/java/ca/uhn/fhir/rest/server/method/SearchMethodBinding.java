@@ -277,7 +277,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+		Object response = invokeServerMethod(theRequest, theMethodParams);
 
 		return toResourceList(response);
 
