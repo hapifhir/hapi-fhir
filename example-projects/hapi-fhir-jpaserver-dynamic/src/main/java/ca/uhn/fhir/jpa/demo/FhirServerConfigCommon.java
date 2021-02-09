@@ -162,6 +162,9 @@ public class FhirServerConfigCommon {
 		extraProperties.put("hibernate.search.indexing_strategy", "manual");
 		extraProperties.put("hibernate.search.default.worker.execution", "async");
 
+
+
+
 		return extraProperties;
 	}
 
