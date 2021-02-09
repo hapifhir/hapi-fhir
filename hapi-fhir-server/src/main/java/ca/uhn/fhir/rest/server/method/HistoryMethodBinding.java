@@ -144,7 +144,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
+		Object response = invokeServerMethod(theRequest, theMethodParams);
 
 		final IBundleProvider resources = toResourceList(response);
 

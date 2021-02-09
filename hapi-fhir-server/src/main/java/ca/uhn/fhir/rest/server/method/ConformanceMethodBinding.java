@@ -39,7 +39,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -142,7 +141,7 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		}
 
 		if (conf == null) {
-			conf = (IBaseConformance) invokeServerMethod(theServer, theRequest, theMethodParams);
+			conf = (IBaseConformance) invokeServerMethod(theRequest, theMethodParams);
 			if (myCacheMillis > 0) {
 
 				// Interceptor hook: SERVER_CAPABILITY_STATEMENT_GENERATED
