@@ -80,9 +80,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	@BeforeEach
 	public void before() {
-		mySvc = new TermLoaderSvcImpl();
-		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
-		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
+		mySvc = TermLoaderSvcImpl.withoutProxyCheck(myTermDeferredStorageSvc, myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}

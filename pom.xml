@@ -728,6 +728,10 @@
 			<id>HananAwwad</id>
 			<name>Hanan Awwad</name>
 		</developer>
+		<developer>
+			<id>jarimayenburg</id>
+			<name>Jari Maijenburg</name>
+		</developer>
 	</developers>
 
 	<licenses>

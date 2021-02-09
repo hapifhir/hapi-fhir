@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 2365
+title: "A bug in the InMemoryResourceMatcher caused AND clauses to be treated as OR clauses. Thanks to
+   Jari Maijenburg for the report and pull request!"
