@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
@@ -85,6 +86,7 @@ public class ConsentInterceptorTest {
 	public void before() {
 		myInterceptor = new ConsentInterceptor(myConsentSvc);
 		ourServlet.registerInterceptor(myInterceptor);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 		ourPatientProvider.clear();
 	}
 
@@ -162,7 +164,7 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testSeeResourceAuthorizesOuterBundle() throws IOException {
+	public void testSearch_SeeResourceAuthorizesOuterBundle() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
@@ -189,7 +191,7 @@ public class ConsentInterceptorTest {
 
 
 	@Test
-	public void testSeeResourceRejectsOuterBundle_ProvidesOperationOutcome() throws IOException {
+	public void testSearch_SeeResourceRejectsOuterBundle_ProvidesOperationOutcome() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
@@ -220,7 +222,7 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testSeeResourceRejectsOuterBundle_ProvidesNothing() throws IOException {
+	public void testSearch_SeeResourceRejectsOuterBundle_ProvidesNothing() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
@@ -247,7 +249,7 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testSeeResourceRejectsInnerResource_ProvidesOperationOutcome() throws IOException {
+	public void testSearch_SeeResourceRejectsInnerResource_ProvidesOperationOutcome() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
@@ -286,7 +288,7 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testSeeResourceReplacesInnerResource() throws IOException {
+	public void testSearch_SeeResourceReplacesInnerResource() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
@@ -326,7 +328,7 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testSeeResourceModifiesInnerResource() throws IOException {
+	public void testSearch_SeeResourceModifiesInnerResource() throws IOException {
 		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
 		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
 
@@ -361,6 +363,54 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
 	}
+
+	@Test
+	public void testPage_SeeResourceReplacesInnerResource() throws IOException {
+		ourPatientProvider.store((Patient) new Patient().setActive(true).setId("PTA"));
+		ourPatientProvider.store((Patient) new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
+
+			String nextPageLink;
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_count=1");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			nextPageLink = bundle.getLink(Constants.LINK_NEXT).getUrl();
+		}
+
+		// Now perform a page request
+		reset(myConsentSvc);
+		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			if (resource.getIdElement().getIdPart().equals("PTB")) {
+				Patient replacement = new Patient();
+				replacement.setId("PTB");
+				replacement.addIdentifier().setSystem("REPLACEMENT");
+				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+			}
+			return ConsentOutcome.PROCEED;
+		});
+
+		httpGet = new HttpGet(nextPageLink);
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT", ((Patient)response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any(), any());
+	}
+
 
 	@Test
 	public void testOutcomeException() throws IOException {
