@@ -32,11 +32,11 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 	@Test
 	public void testRestUrlCannotContainProtocol() {
 		String host = "localhost:9200";
-		String protocolHost = "http://" + host;
+		String protocolHost = "https://" + host;
 		String failureMessage = "Elasticsearch URL cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.";
 
 		myPropertiesBuilder
-			.setProtocol("http")
+			.setProtocol("https")
 			.setUsername("whatever")
 			.setPassword("whatever");
 
