@@ -109,6 +109,9 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	}
 
 	public ElasticsearchHibernatePropertiesBuilder setRestUrl(String theRestUrl) {
+		if (theRestUrl.contains("://")) {
+			throw new ConfigurationException("Elasticsearch URL cannot include a protocol, that is a separate property. Remove http:// or https:// from this URL.");
+		}
 		myRestUrl = theRestUrl;
 		return this;
 	}
@@ -144,7 +147,7 @@ public class ElasticsearchHibernatePropertiesBuilder {
 	 * TODO GGG HS: In HS6.1, we should have a native way of performing index settings manipulation at bootstrap time, so this should
 	 * eventually be removed in favour of whatever solution they come up with.
 	 */
-	private void injectStartupTemplate(String theProtocol, String theHostAndPort, String theUsername, String thePassword) {
+	void injectStartupTemplate(String theProtocol, String theHostAndPort, String theUsername, String thePassword) {
 		PutIndexTemplateRequest ngramTemplate = new PutIndexTemplateRequest("ngram-template")
 			.patterns(Arrays.asList("resourcetable-*", "termconcept-*"))
 			.settings(Settings.builder().put("index.max_ngram_diff", 50));
