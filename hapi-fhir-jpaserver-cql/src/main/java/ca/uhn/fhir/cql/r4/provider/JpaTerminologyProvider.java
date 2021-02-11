@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
@@ -41,22 +42,29 @@ import org.opencds.cqf.cql.engine.terminology.ValueSetInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class JpaTerminologyProvider implements TerminologyProvider {
 
-	private ITermReadSvcR4 terminologySvc;
-	private IFhirResourceDao<ValueSet> valueSetDao;
-	private final IValidationSupport validationSupport;
+	private final ITermReadSvcR4 myTerminologySvc;
+	private final DaoRegistry myDaoRegistry;
+	private final IValidationSupport myValidationSupport;
+
+	private IFhirResourceDao<ValueSet> myValueSetDao;
 
 	@Autowired
-	public JpaTerminologyProvider(ITermReadSvcR4 terminologySvc, IFhirResourceDao<ValueSet> valueSetDao,
-			IValidationSupport validationSupport) {
-		this.terminologySvc = terminologySvc;
-		this.valueSetDao = valueSetDao;
-		this.validationSupport = validationSupport;
+	public JpaTerminologyProvider(ITermReadSvcR4 theTerminologySvc, DaoRegistry theDaoRegistry, IValidationSupport theValidationSupport) {
+		myTerminologySvc = theTerminologySvc;
+		myDaoRegistry = theDaoRegistry;
+		myValidationSupport = theValidationSupport;
+	}
+
+	@PostConstruct
+	public void init() {
+		myValueSetDao = myDaoRegistry.getResourceDao(ValueSet.class);
 	}
 
 	@Override
@@ -77,16 +85,16 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 		ValueSet vs;
 		if (valueSet.getId().startsWith("http://") || valueSet.getId().startsWith("https://")) {
 			if (valueSet.getVersion() != null
-					|| (valueSet.getCodeSystems() != null && valueSet.getCodeSystems().size() > 0)) {
+				|| (valueSet.getCodeSystems() != null && valueSet.getCodeSystems().size() > 0)) {
 				if (!(valueSet.getCodeSystems().size() == 1 && valueSet.getCodeSystems().get(0).getVersion() == null)) {
 					throw new UnsupportedOperationException(String.format(
-							"Could not expand value set %s; version and code system bindings are not supported at this time.",
-							valueSet.getId()));
+						"Could not expand value set %s; version and code system bindings are not supported at this time.",
+						valueSet.getId()));
 				}
 			}
 
-			IBundleProvider bundleProvider = this.valueSetDao
-					.search(new SearchParameterMap().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
+			IBundleProvider bundleProvider = myValueSetDao
+				.search(new SearchParameterMap().add(ValueSet.SP_URL, new UriParam(valueSet.getId())));
 			List<IBaseResource> valueSets = bundleProvider.getResources(0, bundleProvider.size());
 			if (valueSets.isEmpty()) {
 				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
@@ -96,7 +104,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 				throw new IllegalArgumentException("Found more than 1 ValueSet with url: " + valueSet.getId());
 			}
 		} else {
-			vs = this.valueSetDao.read(new IdType(valueSet.getId()));
+			vs = myValueSetDao.read(new IdType(valueSet.getId()));
 			if (vs == null) {
 				throw new IllegalArgumentException(String.format("Could not resolve value set %s.", valueSet.getId()));
 			}
@@ -104,7 +112,7 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
 		// Attempt to expand the ValueSet if it's not already expanded.
 		if (!(vs.hasExpansion() && vs.getExpansion().hasContains())) {
-			vs = (ValueSet)this.terminologySvc.expandValueSet(
+			vs = myTerminologySvc.expandValueSet(
 				new ValueSetExpansionOptions().setCount(Integer.MAX_VALUE).setFailOnMissingCodeSystem(false), vs);
 		}
 
@@ -133,8 +141,8 @@ public class JpaTerminologyProvider implements TerminologyProvider {
 
 	@Override
 	public Code lookup(Code code, CodeSystemInfo codeSystem) throws ResourceNotFoundException {
-		LookupCodeResult cs = terminologySvc.lookupCode(new ValidationSupportContext(validationSupport),
-				codeSystem.getId(), code.getCode());
+		LookupCodeResult cs = myTerminologySvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+			codeSystem.getId(), code.getCode());
 
 		code.setDisplay(cs.getCodeDisplay());
 		code.setSystem(codeSystem.getId());

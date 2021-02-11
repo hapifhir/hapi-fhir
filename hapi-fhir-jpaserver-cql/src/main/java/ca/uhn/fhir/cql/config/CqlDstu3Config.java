@@ -31,29 +31,24 @@ import ca.uhn.fhir.cql.dstu3.provider.LibraryResolutionProviderImpl;
 import ca.uhn.fhir.cql.dstu3.provider.MeasureOperationsProvider;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
-
-import org.opencds.cqf.cql.engine.model.ModelResolver;
-
-import java.util.Map;
-
 import org.cqframework.cql.cql2elm.model.Model;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.opencds.cqf.cql.engine.fhir.model.Dstu3FhirModelResolver;
+import org.opencds.cqf.cql.engine.model.ModelResolver;
 import org.opencds.cqf.cql.engine.terminology.TerminologyProvider;
 import org.opencds.cqf.cql.evaluator.engine.model.CachingModelResolverDecorator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
+import java.util.Map;
+
 @Configuration
 public class CqlDstu3Config extends BaseCqlConfig {
 	@Lazy
 	@Bean
-	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc, DaoRegistry daoRegistry,
-			IValidationSupport theValidationSupport) {
-		return new JpaTerminologyProvider(theITermReadSvc, daoRegistry.getResourceDao(ValueSet.class),
-				theValidationSupport);
+	TerminologyProvider terminologyProvider(ITermReadSvcDstu3 theITermReadSvc, DaoRegistry theDaoRegistry, IValidationSupport theValidationSupport) {
+		return new JpaTerminologyProvider(theITermReadSvc, theDaoRegistry, theValidationSupport);
 	}
 
 	@Lazy
