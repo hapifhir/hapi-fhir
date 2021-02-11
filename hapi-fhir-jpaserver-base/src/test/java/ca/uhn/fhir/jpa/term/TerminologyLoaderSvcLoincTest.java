@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,7 +36,6 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -588,29 +586,6 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 			assertNull(group.getSourceVersion());
 		}
-
-	}
-
-	@Test
-	@Disabled
-	public void testLoadLoincMandatoryFilesPlusTop2000() throws IOException {
-		addLoincMandatoryFilesToZip(myFiles);
-
-		// Actually do the load
-		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
-
-		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
-		Map<String, TermConcept> concepts = extractConcepts();
-		Map<String, ValueSet> valueSets = extractValueSets();
-		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
-
-		// Normal LOINC code
-		TermConcept code = concepts.get("10013-1");
-		assertEquals("10013-1", code.getCode());
-
-		// No valuesets or conceptmaps get created
-		assertThat(valueSets.keySet(), empty());
-		assertThat(conceptMaps.keySet(), empty());
 
 	}
 
