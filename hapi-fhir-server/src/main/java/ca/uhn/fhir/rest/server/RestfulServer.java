@@ -91,10 +91,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
@@ -106,7 +109,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is the central class for the HAPI FHIR Plain Server framework.
- *
+ * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/server_plain/">HAPI FHIR Plain Server</a>
  * for information on how to use this framework.
  */
@@ -184,7 +187,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		this(theCtx, new InterceptorService("RestfulServer"));
 	}
 
-	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService)	{
+	public RestfulServer(FhirContext theCtx, IInterceptorService theInterceptorService) {
 		myFhirContext = theCtx;
 		setInterceptorService(theInterceptorService);
 	}
@@ -769,6 +772,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		return myResourceNameToBinding.values();
 	}
 
+	public Collection<BaseMethodBinding<?>> getProviderMethodBindings(Object theProvider) {
+		Set<BaseMethodBinding<?>> retVal = new HashSet<>();
+		for (ResourceBinding resourceBinding : getResourceBindings()) {
+			for (BaseMethodBinding<?> methodBinding : resourceBinding.getMethodBindings()) {
+				if (theProvider.equals(methodBinding.getProvider())) {
+					retVal.add(methodBinding);
+				}
+			}
+		}
+
+		return retVal;
+	}
+
 	/**
 	 * Provides the resource providers for this server
 	 */
@@ -1001,8 +1017,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			preProcessedParams.add(HttpServletRequest.class, theRequest);
 			preProcessedParams.add(HttpServletResponse.class, theResponse);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
-					return;
-				}
+				return;
+			}
 
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
 
@@ -1054,8 +1070,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			postProcessedParams.add(HttpServletRequest.class, theRequest);
 			postProcessedParams.add(HttpServletResponse.class, theResponse);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
-					return;
-				}
+				return;
+			}
 
 			/*
 			 * Actually invoke the server method. This call is to a HAPI method binding, which
@@ -1074,7 +1090,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 
 				ourLog.trace("Done writing to stream: {}", outputStreamOrWriter);
-				}
+			}
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
@@ -1085,8 +1101,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			handleExceptionParams.add(HttpServletResponse.class, theResponse);
 			handleExceptionParams.add(BaseServerResponseException.class, e);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-					return;
-				}
+				return;
+			}
 
 			writeExceptionToResponse(theResponse, e);
 
@@ -1141,8 +1157,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			handleExceptionParams.add(HttpServletResponse.class, theResponse);
 			handleExceptionParams.add(BaseServerResponseException.class, exception);
 			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
-					return;
-				}
+				return;
+			}
 
 			/*
 			 * If we're handling an exception, no summary mode should be applied
@@ -1684,8 +1700,27 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		removeResourceMethods(theProvider, clazz, resourceNames);
 		removeResourceMethodsOnInterfaces(theProvider, clazz.getInterfaces(), resourceNames);
+		removeResourceNameBindings(resourceNames, theProvider);
+	}
+
+	private void removeResourceNameBindings(Collection<String> resourceNames, Object theProvider) {
 		for (String resourceName : resourceNames) {
-			myResourceNameToBinding.remove(resourceName);
+			ResourceBinding resourceBinding = myResourceNameToBinding.get(resourceName);
+			if (resourceBinding == null) {
+				continue;
+			}
+
+			for (Iterator<BaseMethodBinding<?>> it = resourceBinding.getMethodBindings().iterator(); it.hasNext(); ) {
+				BaseMethodBinding<?> binding = it.next();
+				if (theProvider.equals(binding.getProvider())) {
+					it.remove();
+					ourLog.info("{} binding of {} was removed", resourceName, binding);
+				}
+			}
+
+			if (resourceBinding.getMethodBindings().isEmpty()) {
+				myResourceNameToBinding.remove(resourceName);
+			}
 		}
 	}
 
