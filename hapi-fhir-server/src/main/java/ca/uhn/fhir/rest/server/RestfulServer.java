@@ -59,6 +59,7 @@ import ca.uhn.fhir.rest.server.method.MethodMatchEnum;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlPathTokenizer;
 import ca.uhn.fhir.util.UrlUtil;
@@ -67,6 +68,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -1964,7 +1966,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	public static void throwUnknownFhirOperationException(RequestDetails requestDetails, String requestPath, RequestTypeEnum theRequestType, FhirContext theFhirContext) {
-		throw new InvalidRequestException(theFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, requestDetails.getParameters().keySet()));
+		String message = theFhirContext.getLocalizer().getMessage(RestfulServer.class, "unknownMethod", theRequestType.name(), requestPath, requestDetails.getParameters().keySet());
+
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(theFhirContext);
+		OperationOutcomeUtil.addIssue(theFhirContext, oo, "error", message, null,  "not-supported");
+
+		throw new InvalidRequestException(message, oo);
 	}
 
 	private static boolean partIsOperation(String nextString) {
