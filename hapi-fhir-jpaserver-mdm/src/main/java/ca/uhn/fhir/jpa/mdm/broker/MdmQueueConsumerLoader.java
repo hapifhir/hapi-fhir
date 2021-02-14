@@ -66,9 +66,10 @@ public class MdmQueueConsumerLoader {
 
 	@SuppressWarnings("unused")
 	@PreDestroy
-	public void stop() {
+	public void stop() throws Exception {
 		if (myMdmChannel != null) {
-			myMdmChannel.unsubscribe(myMdmMessageHandler);
+			// JMS channel needs to be destroyed to avoid dangling receivers
+			myMdmChannel.destroy();
 			ourLog.info("MDM Matching Consumer unsubscribed from Matching Channel {} with name {}", myMdmChannel.getClass().getName(), myMdmChannel.getName());
 		}
 	}

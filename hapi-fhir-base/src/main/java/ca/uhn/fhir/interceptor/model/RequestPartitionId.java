@@ -161,7 +161,10 @@ public class RequestPartitionId {
 	 * Returns true if this request partition contains only one partition ID and it is the DEFAULT partition ID (null)
 	 */
 	public boolean isDefaultPartition() {
-		return getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
+		if (isAllPartitions()) {
+			return false;
+		}
+		return hasPartitionIds() && getPartitionIds().size() == 1 && getPartitionIds().get(0) == null;
 	}
 
 	public boolean hasPartitionId(Integer thePartitionId) {
