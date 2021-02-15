@@ -73,16 +73,9 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 
 	private void createContextIfNeeded() {
 		if (myFhirVersion != null) {
-			myFhirContext = new FhirContext(myFhirVersion);
+			myFhirContext = FhirContext.forCached(myFhirVersion);
 		}
 	}
-
-	private void destroyContextIfWeCreatedIt() {
-		if (myFhirVersion != null) {
-			myFhirContext = null;
-		}
-	}
-
 
 	private void stopServer() throws Exception {
 		JettyUtil.closeServer(myServer);
@@ -125,6 +118,7 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	}
 
 	public FhirContext getFhirContext() {
+		createContextIfNeeded();
 		return myFhirContext;
 	}
 
@@ -139,7 +133,6 @@ public class RestfulServerExtension implements BeforeEachCallback, AfterEachCall
 	@Override
 	public void afterEach(ExtensionContext context) throws Exception {
 		stopServer();
-		destroyContextIfWeCreatedIt();
 	}
 
 	@Override

@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 NOTE: Before filing a ticket, please see the following URL:
-https://github.com/jamesagnew/hapi-fhir/wiki/Getting-Help
+https://github.com/hapifhir/hapi-fhir/wiki/Getting-Help
 
 **Describe the bug**
 A clear and concise description of what the bug is.

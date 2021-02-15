@@ -7,7 +7,7 @@
 				<foreignObject pointer-events="all" width="166" height="30" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
 					<div xmlns="http://www.w3.org/1999/xhtml"
 						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
-						<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base">hapi-fhir-base</a>
+						<a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-base">hapi-fhir-base</a>
 						<br />
 						(RESTful Server)
 					</div>
@@ -21,7 +21,7 @@
 				<foreignObject pointer-events="all" width="166" height="45" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
 					<div xmlns="http://www.w3.org/1999/xhtml"
 						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
-						<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-base">hapi-fhir-jpaserver-base</a>
+						<a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-jpaserver-base">hapi-fhir-jpaserver-base</a>
 						<br />
 						Hibernate + Spring
 						<br />
@@ -51,7 +51,7 @@
 				<foreignObject pointer-events="all" width="166" height="45" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
 					<div xmlns="http://www.w3.org/1999/xhtml"
 						style="display: inline-block; font-size: 12px; font-family: Helvetica; color: rgb(0, 0, 0); line-height: 1.26; vertical-align: top; width: 166px; white-space: normal; text-align: center;">
-						<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-testpage-overlay">hapi-fhir-testpage-overlay</a>
+						<a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-testpage-overlay">hapi-fhir-testpage-overlay</a>
 						<br />
 						Thymeleaf + Spring
 						<br />
