@@ -126,6 +126,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// HFJ_RES_LINK
 		version.onTable("HFJ_RES_LINK")
 			.addColumn("20210126.1", "TARGET_RESOURCE_VERSION").nullable().type(ColumnTypeEnum.LONG);
+		
+		//-- add index on HFJ_SPIDX_DATE
+	    version.onTable("HFJ_SPIDX_DATE").addIndex("20210214.1", "IDX_SP_DATE_HASH_HIGH")
+	        .unique(false).withColumns("HASH_IDENTITY", "SP_VALUE_HIGH");
+	    
+		//-- add index on HFJ_FORCED_ID
+	    version.onTable("HFJ_FORCED_ID").addIndex("20210214.2", "IDX_FORCEID_FID")
+	        .unique(false).withColumns("FORCED_ID");
 	}
 
 	protected void init520() {
