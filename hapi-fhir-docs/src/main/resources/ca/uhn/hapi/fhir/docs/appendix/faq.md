@@ -4,7 +4,7 @@
 
 ### Where can I ask questions or get help?
 
-Please see [this page](https://github.com/jamesagnew/hapi-fhir/wiki/Getting-Help) in the HAPI FHIR Wiki for information on getting help.
+Please see [this page](https://github.com/hapifhir/hapi-fhir/wiki/Getting-Help) in the HAPI FHIR Wiki for information on getting help.
 
 # Using HAPI FHIR
 

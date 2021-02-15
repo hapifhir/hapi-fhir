@@ -46,9 +46,9 @@ Activating HAPI's built-in narrative generator is as simple as calling [setNarra
 
 # Built-in Narrative Templates
 
-HAPI currently only comes with built-in support for a few resource types. Our intention is that people enhance these templates and create new ones, and share these back with us so that we can continue to build out the library. To see the current template library, see the source repository [here](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative).
+HAPI currently only comes with built-in support for a few resource types. Our intention is that people enhance these templates and create new ones, and share these back with us so that we can continue to build out the library. To see the current template library, see the source repository [here](https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative).
 
-Note that these templates expect a few specific CSS definitions to be present in your site's CSS file. See the [narrative CSS](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css) to see these.
+Note that these templates expect a few specific CSS definitions to be present in your site's CSS file. See the [narrative CSS](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-base/src/main/resources/ca/uhn/fhir/narrative/hapi-narrative.css) to see these.
 
 # Creating your own Templates
 

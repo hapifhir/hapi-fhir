@@ -47,7 +47,7 @@ import java.util.Properties;
  * you can use it as a config if you want to support DSTU3
  * instead of DSTU2 in your server.
  * <p>
- * See https://github.com/jamesagnew/hapi-fhir/issues/278
+ * See https://github.com/hapifhir/hapi-fhir/issues/278
  */
 @Configuration
 @EnableTransactionManagement()

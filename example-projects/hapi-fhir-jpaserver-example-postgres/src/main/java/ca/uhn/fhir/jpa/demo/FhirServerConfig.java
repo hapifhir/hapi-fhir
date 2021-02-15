@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
  * you can use it as a config if you want to support DSTU3
  * instead of DSTU2 in your server.
  * 
- * See https://github.com/jamesagnew/hapi-fhir/issues/278
+ * See https://github.com/hapifhir/hapi-fhir/issues/278
  */
 @Configuration
 @EnableTransactionManagement()

@@ -344,7 +344,7 @@ public class ReferenceParameterTest {
 		}
 
 		/**
-		 * https://github.com/jamesagnew/hapi-fhir/issues/19
+		 * https://github.com/hapifhir/hapi-fhir/issues/19
 		 */
 		//@formatter:off
 		@Search
