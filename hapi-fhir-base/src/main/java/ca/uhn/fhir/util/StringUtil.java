@@ -78,4 +78,37 @@ public class StringUtil {
 		return new String(bytes, StandardCharsets.UTF_8);
 	}
 
+	/**
+	 * Gets the string prefix of the specified length.
+	 *
+	 * @param theString
+	 * 	String to get the prefix from
+	 * @param theCodePointCount
+	 * 	Length of the prefix in code points
+	 * @return
+	 * 	Returns the string prefix of the specified number of codepoints.
+	 */
+	public static String left(String theString, int theCodePointCount) {
+		if (theString == null) {
+			return null;
+		}
+
+		if (theCodePointCount < 0) {
+			return "";
+		}
+
+		if (theString.length() <= theCodePointCount) {
+			return theString;
+		}
+
+		StringBuilder retVal = new StringBuilder();
+		for (int offset = 0; offset < theCodePointCount; ) {
+			int codePoint = theString.codePointAt(offset);
+			offset += Character.charCount(codePoint);
+			retVal.append(Character.toChars(codePoint));
+		}
+
+		return retVal.toString();
+	}
+
 }
