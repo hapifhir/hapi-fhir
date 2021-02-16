@@ -5,7 +5,7 @@
 
 ## Download and Installation
 
-You can get the tool by downloading it from our	[GitHub Releases](https://github.com/jamesagnew/hapi-fhir/releases) page (look for the archive named `hapi-fhir-[version]-cli.tar.bz2` on OSX/Linux or `hapi-fhir-[version]-cli.zip` on Windows).
+You can get the tool by downloading it from our	[GitHub Releases](https://github.com/hapifhir/hapi-fhir/releases) page (look for the archive named `hapi-fhir-[version]-cli.tar.bz2` on OSX/Linux or `hapi-fhir-[version]-cli.zip` on Windows).
 
 When you have downloaded the archive (either ZIP or tar.bz2), expand it into a directory where you will keep it, and add this directory to your path. 
 

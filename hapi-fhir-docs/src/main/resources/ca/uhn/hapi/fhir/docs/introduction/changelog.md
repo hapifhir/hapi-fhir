@@ -47,7 +47,7 @@ out as <a href="/hapi-fhir/docs/introduction/downloading_and_importing.html#snap
             </span>
         </td>
         <td>
-            <a th:if="${change.issue != null}" th:href="'https://github.com/jamesagnew/hapi-fhir/issues/' + ${change.issue}" th:text="'#' + ${change.issue}"></a>
+            <a th:if="${change.issue != null}" th:href="'https://github.com/hapifhir/hapi-fhir/issues/' + ${change.issue}" th:text="'#' + ${change.issue}"></a>
         </td>
         <td>
             <th:block th:utext="${change.title}"/>

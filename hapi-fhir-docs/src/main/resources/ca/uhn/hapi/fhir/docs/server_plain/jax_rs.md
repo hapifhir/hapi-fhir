@@ -21,7 +21,7 @@ The server currently supports:
 * [@Operation](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/annotation/Operation.html)
 
 The primary intention for this project is to ensure that other web technologies (JAX-RS in this case) can be used together with the base-server functionality. 
-An example server can be found in the Git repo [here](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jaxrsserver-example).
+An example server can be found in the Git repo [here](https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-jaxrsserver-example).
 
 # JAX-RS Implementation specifics
 
@@ -54,4 +54,4 @@ In order to create the conformance profile, a conformance provider class needs t
 
 A complete example showing how to implement a JAX-RS RESTful server can be found in our Git repo here:
 
-* [hapi-fhir-jaxrsserver-example](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jaxrsserver-example)
+* [hapi-fhir-jaxrsserver-example](https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-jaxrsserver-example)

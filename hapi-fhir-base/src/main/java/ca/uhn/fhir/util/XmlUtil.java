@@ -1721,7 +1721,7 @@ public class XmlUtil {
 			 * These two properties disable external entity processing, which can
 			 * be a security vulnerability.
 			 *
-			 * See https://github.com/jamesagnew/hapi-fhir/issues/339
+			 * See https://github.com/hapifhir/hapi-fhir/issues/339
 			 * https://www.owasp.org/index.php/XML_External_Entity_%28XXE%29_Processing
 			 */
 			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false); // This disables DTDs entirely for that factory

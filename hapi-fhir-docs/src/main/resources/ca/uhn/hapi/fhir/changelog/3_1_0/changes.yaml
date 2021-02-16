@@ -91,11 +91,11 @@
 - item:
     issue: "743"
     type: "add"
-    title: "Add support for Spring Boot for initializing a number of parts of the library, as well as several examples. See the <a href=\"https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-spring-boot/hapi-fhir-spring-boot-samples\">Spring Boot samples</a> for examples of how this works. Thanks to Mathieu Ouellet for the contribution!"
+    title: "Add support for Spring Boot for initializing a number of parts of the library, as well as several examples. See the <a href=\"https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-spring-boot/hapi-fhir-spring-boot-samples\">Spring Boot samples</a> for examples of how this works. Thanks to Mathieu Ouellet for the contribution!"
 - item:
     issue: "747"
     type: "add"
-    title: "JPA server now has lucene index support moved to separate classes from the entity classes in order to facilitate support for ElasticSearch. Thanks to Jiang Liang for the pull request! Note that any existing JPA projects will need to add an additional property in their Spring config called <code>hibernate.search.model_mapping</code>. See <a href=\"https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L84\">this line</a> in the example project."
+    title: "JPA server now has lucene index support moved to separate classes from the entity classes in order to facilitate support for ElasticSearch. Thanks to Jiang Liang for the pull request! Note that any existing JPA projects will need to add an additional property in their Spring config called <code>hibernate.search.model_mapping</code>. See <a href=\"https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java#L84\">this line</a> in the example project."
 - item:
     issue: "755"
     type: "add"

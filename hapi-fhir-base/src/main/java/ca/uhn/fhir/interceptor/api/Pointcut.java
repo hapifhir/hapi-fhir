@@ -121,6 +121,15 @@ public enum Pointcut implements IPointcut {
 	 * must be of type <code>IBaseConformance</code>, so it is the responsibility of the interceptor hook method
 	 * code to cast to the appropriate version.
 	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to
+	 * be processed
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that
+	 * is about to be processed. This parameter is identical to the RequestDetails parameter above but will only
+	 * be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * Hook methods may an instance of a new <code>CapabilityStatement</code> resource which will replace the
@@ -129,7 +138,9 @@ public enum Pointcut implements IPointcut {
 	 * for your hook method to return <code>void</code> or <code>null</code>.
 	 */
 	SERVER_CAPABILITY_STATEMENT_GENERATED(IBaseConformance.class,
-		"org.hl7.fhir.instance.model.api.IBaseConformance"
+		"org.hl7.fhir.instance.model.api.IBaseConformance",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
 	/**

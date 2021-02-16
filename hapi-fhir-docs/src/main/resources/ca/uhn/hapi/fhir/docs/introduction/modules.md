@@ -13,7 +13,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         <td style="font-weight: bold; white-space: nowrap;">hapi-fhir-base</td>
         <td>
             <a href="/hapi-fhir/apidocs/hapi-fhir-base/">JavaDoc&nbsp;&rsaquo;</a>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-base">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-base">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This is the core HAPI FHIR library and is always required in order to use
@@ -103,7 +103,7 @@ The following table shows the modules that make up the HAPI FHIR library.
         <td>
             <a href="/hapi-fhir/docs/client/">Documentation&nbsp;&rsaquo;</a><br/>
             <a href="/hapi-fhir/apidocs/hapi-fhir-client/">JavaDoc&nbsp;&rsaquo;</a>
-            <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-client">Sources&nbsp;&rsaquo;</a>
+            <a href="https://github.com/hapifhir/hapi-fhir/tree/master/hapi-fhir-client">Sources&nbsp;&rsaquo;</a>
         </td>
         <td>
             This module contains the core FHIR client framework, including an

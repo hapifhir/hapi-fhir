@@ -9,7 +9,7 @@ This page describes some client interceptors that are shipped with HAPI FHIR out
 The LoggingInterceptor logs details about each request and/or response that is performed using the client. All logging is performed using SLF4j.
 
 * [LoggingInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/LoggingInterceptor.html)
-* [LoggingInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/LoggingInterceptor.java)
+* [LoggingInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/LoggingInterceptor.java)
 
 LoggingInterceptor is highly configurable in terms of its output. It can be configured to log simple details about requests, or detailed output including payload bodies and header contents. The following example shows how to enable LoggingInterceptor. 
 
@@ -22,7 +22,7 @@ LoggingInterceptor is highly configurable in terms of its output. It can be conf
 The BasicAuthInterceptor adds an `Authorization` header containing an HTTP Basic Auth (username+password) token in every outgoing request.
 
 * [BasicAuthInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/BasicAuthInterceptor.html)
-* [BasicAuthInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/BasicAuthInterceptor.java)
+* [BasicAuthInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/BasicAuthInterceptor.java)
 
 The following example shows how to configure your client to	use a specific username and password in every request.
 
@@ -35,7 +35,7 @@ The following example shows how to configure your client to	use a specific usern
 The BearerTokenAuthInterceptor can be used to add an `Authorization` header containing a bearer token (typically used for OIDC/OAuth2/SMART security flows) to every outgoing request.
 
 * [BearerTokenAuthInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/BearerTokenAuthInterceptor.html)
-* [BearerTokenAuthInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/BearerTokenAuthInterceptor.java)
+* [BearerTokenAuthInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/BearerTokenAuthInterceptor.java)
 
 The following example shows how to configure your client to inject a bearer token authorization header into every request.
 
@@ -48,7 +48,7 @@ The following example shows how to configure your client to inject a bearer toke
 The AdditionlRequestHeadersInterceptor can be used to add arbitrary headers to each request created by the client.
 
 * [AdditionalRequestHeadersInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/AdditionalRequestHeadersInterceptor.html)
-* [AdditionalRequestHeadersInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/AdditionalRequestHeadersInterceptor.java)
+* [AdditionalRequestHeadersInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/AdditionalRequestHeadersInterceptor.java)
 
 The following example shows how to configure your client to inject a bearer token authorization header into every request.
 
@@ -67,7 +67,7 @@ Note that headers can also be added to individual [Generic Client](/docs/client/
 The CookieInterceptor can be used to add an HTTP Cookie header to each request created by the client.
 
 * [CookieInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/CookieInterceptor.html)
-* [CookieInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/CookieInterceptor.java)
+* [CookieInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/CookieInterceptor.java)
 
 The following example shows how to configure your client to inject a bearer token authorization header into every request.
 
@@ -80,7 +80,7 @@ The following example shows how to configure your client to inject a bearer toke
 When communicating with a server that supports [URL Base Multitenancy](/docs/server_plain/multitenancy.html#url-base-multitenancy), an extra element needs to be added to the request path. This can be done by simply appending the path to the base URL supplied to the client, but it can also be dynamically appended using this interceptor.
 
 * [UrlTenantSelectionInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.html)
-* [UrlTenantSelectionInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.java)
+* [UrlTenantSelectionInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/interceptor/UrlTenantSelectionInterceptor.java)
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ClientExamples.java|tenantId}}
@@ -91,7 +91,7 @@ When communicating with a server that supports [URL Base Multitenancy](/docs/ser
 The GZipContentInterceptor compresses outgoing contents. With this interceptor, if the client is transmitting resources to the server (e.g. for a create, update, transaction, etc.) the content will be GZipped before transmission to the server.
 
 * [GZipContentInterceptor JavaDoc](/apidocs/hapi-fhir-client/ca/uhn/fhir/rest/client/apache/GZipContentInterceptor.html)
-* [GZipContentInterceptor Source](https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/apache/GZipContentInterceptor.java)
+* [GZipContentInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-client/src/main/java/ca/uhn/fhir/rest/client/apache/GZipContentInterceptor.java)
 
 The following example shows how to enable the GZipContentInterceptor.
 
