@@ -124,11 +124,16 @@ Partitioning is a relatively new feature in HAPI FHIR (added in HAPI FHIR 5.0.0)
 None of the limitations listed here are considered permanent. Over time the HAPI FHIR team is hoping to make all of these features partition aware.
 
 * **The following ResourceTypes may not be partitioned**: The following resources must be placed in the default partition:
+   * CapabilityStatement
    * CodeSystem
+   * CompartmentDefinition
    * ConceptMap
+   * NamingSystem
+   * OperationDefinition
    * Questionnaire
    * SearchParameter
    * StructureDefinition
+   * StructureMap
    * Subscription
    * ValueSet
 
