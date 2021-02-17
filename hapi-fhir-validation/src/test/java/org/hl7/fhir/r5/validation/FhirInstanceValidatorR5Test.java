@@ -255,7 +255,7 @@ public class FhirInstanceValidatorR5Test {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]", all.get(0).getMessage());
+		assertEquals("ele-1: 'All FHIR elements must have a @value or children' failed", all.get(0).getMessage());
 	}
 
 	/**
@@ -615,7 +615,7 @@ public class FhirInstanceValidatorR5Test {
 		assertEquals( 3, messages.size(), output.toString());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
 		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
-		assertThat(messages.get(2).getMessage(), containsString("ele-1: All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
+		assertThat(messages.get(2).getMessage(), containsString("ele-1: 'All FHIR elements must have a @value or children' failed"));
 	}
 
 	@Test
@@ -673,7 +673,7 @@ public class FhirInstanceValidatorR5Test {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(1, output.getMessages().size(), output.toString());
-		assertEquals("This does not appear to be a FHIR resource (unknown namespace/name 'default::Patient')", output.getMessages().get(0).getMessage());
+		assertEquals("This does not appear to be a FHIR resource (unknown namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
 
