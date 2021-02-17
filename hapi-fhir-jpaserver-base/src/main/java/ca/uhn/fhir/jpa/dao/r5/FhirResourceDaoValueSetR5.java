@@ -96,32 +96,25 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			throw new InvalidRequestException("URI must not be blank or missing");
 		}
 
-		ValueSet source = new ValueSet();
-		source.setUrl(theUri);
+		ValueSet toExpand = new ValueSet();
+		toExpand.setUrl(theUri);
 
 		if (isNotBlank(theFilter)) {
-			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
+			ConceptSetFilterComponent filter = toExpand.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);
 		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
+			toExpand.getCompose().addInclude().addValueSet(theUri);
 		}
 
-		ValueSet retVal = doExpand(source);
-		return retVal;
+		ValueSet retVal = doExpand(toExpand);
 
-		// if (defaultValueSet != null) {
-		// source = getContext().newJsonParser().parseResource(ValueSet.class, getContext().newJsonParser().encodeResourceToString(defaultValueSet));
-		// } else {
-		// IBundleProvider ids = search(ValueSet.SP_URL, new UriParam(theUri));
-		// if (ids.size() == 0) {
-		// throw new InvalidRequestException("Unknown ValueSet URI: " + theUri);
-		// }
-		// source = (ValueSet) ids.getResources(0, 1).get(0);
-		// }
-		//
-		// return expand(defaultValueSet, theFilter);
+		if (isNotBlank(theFilter)) {
+			applyFilter(retVal.getExpansion().getTotalElement(), retVal.getExpansion().getContains(), theFilter);
+		}
+
+		return retVal;
 	}
 
 	@Override
@@ -130,30 +123,30 @@ public class FhirResourceDaoValueSetR5 extends BaseHapiFhirResourceDao<ValueSet>
 			throw new InvalidRequestException("URI must not be blank or missing");
 		}
 
-		ValueSet source = new ValueSet();
-		source.setUrl(theUri);
+		ValueSet toExpand = new ValueSet();
+		toExpand.setUrl(theUri);
 
 		if (isNotBlank(theFilter)) {
-			ConceptSetFilterComponent filter = source.getCompose().addInclude().addValueSet(theUri).addFilter();
+			ConceptSetFilterComponent filter = toExpand.getCompose().addInclude().addValueSet(theUri).addFilter();
 			filter.setProperty("display");
 			filter.setOp(Enumerations.FilterOperator.EQUAL);
 			filter.setValue(theFilter);
 		} else {
-			source.getCompose().addInclude().addValueSet(theUri);
+			toExpand.getCompose().addInclude().addValueSet(theUri);
 		}
 
-		return doExpand(source, theOffset, theCount);
+		ValueSet retVal = doExpand(toExpand, theOffset, theCount);
+
+		if (isNotBlank(theFilter)) {
+			applyFilter(retVal.getExpansion().getTotalElement(), retVal.getExpansion().getContains(), theFilter);
+		}
+
+		return retVal;
 	}
 
 	@Override
 	public ValueSet expand(ValueSet theSource, String theFilter) {
 		ValueSet toExpand = new ValueSet();
-
-		// for (UriType next : theSource.getCompose().getInclude()) {
-		// ConceptSetComponent include = toExpand.getCompose().addInclude();
-		// include.setSystem(next.getValue());
-		// addFilterIfPresent(theFilter, include);
-		// }
 
 		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
 			toExpand.getCompose().addInclude(next);
