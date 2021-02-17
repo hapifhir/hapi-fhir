@@ -334,7 +334,23 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
 		assertEquals(6, expansion.getExpansion().getContains().size());
+	}
 
+	/**
+	 * A valueset expand with url and filter
+	 */
+	@Test
+	public void testExpandValueSetContainingSystemIncludeWithCode() throws IOException {
+		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/r4/iar/CodeSystem-iar-citizenship-status.xml");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = loadResourceFromClasspath(ValueSet.class, "/r4/iar/ValueSet-iar-citizenship-status.xml");
+		myValueSetDao.create(vs);
+
+		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", "fugee");
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+
+		assertEquals("Refugee", expansion.getExpansion().getContains().iterator().next().getDisplay());
 	}
 
 	@Test
