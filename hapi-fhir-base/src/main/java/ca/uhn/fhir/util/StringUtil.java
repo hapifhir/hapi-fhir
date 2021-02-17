@@ -97,6 +97,7 @@ public class StringUtil {
 			return "";
 		}
 
+		// char count can only be bigger than the code point count
 		if (theString.length() <= theCodePointCount) {
 			return theString;
 		}
