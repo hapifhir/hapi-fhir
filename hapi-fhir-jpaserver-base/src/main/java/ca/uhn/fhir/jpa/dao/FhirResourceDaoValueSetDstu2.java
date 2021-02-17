@@ -208,8 +208,7 @@ public class FhirResourceDaoValueSetDstu2 extends BaseHapiFhirResourceDao<ValueS
 		if (sourceEntity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
-		ValueSet source = (ValueSet) toResource(sourceEntity, false);
-		return source;
+		return (ValueSet) toResource(sourceEntity, false);
 	}
 
 	private IValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
