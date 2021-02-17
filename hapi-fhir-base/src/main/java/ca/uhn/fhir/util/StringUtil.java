@@ -101,14 +101,7 @@ public class StringUtil {
 			return theString;
 		}
 
-		StringBuilder retVal = new StringBuilder();
-		for (int offset = 0; offset < theCodePointCount; ) {
-			int codePoint = theString.codePointAt(offset);
-			offset += Character.charCount(codePoint);
-			retVal.append(Character.toChars(codePoint));
-		}
-
-		return retVal.toString();
+		return theString.substring(0, theString.offsetByCodePoints(0, theCodePointCount));
 	}
 
 }
