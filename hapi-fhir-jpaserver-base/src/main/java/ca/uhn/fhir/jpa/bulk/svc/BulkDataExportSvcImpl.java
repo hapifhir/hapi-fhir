@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
@@ -229,28 +230,28 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters) {
+	public JobInfo submitJob(BulkDataExportOptions theBulkDataExportOptions) {
 		String outputFormat = Constants.CT_FHIR_NDJSON;
-		if (isNotBlank(theOutputFormat)) {
-			outputFormat = theOutputFormat;
+		if (isNotBlank(theBulkDataExportOptions.getOutputFormat())) {
+			outputFormat = theBulkDataExportOptions.getOutputFormat();
 		}
 		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
-			throw new InvalidRequestException("Invalid output format: " + theOutputFormat);
+			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
-		Set<String> resourceTypes = theResourceTypes;
+		Set<String> resourceTypes = theBulkDataExportOptions.getResourceTypes();
 		if (resourceTypes != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", escapeUrlParams(resourceTypes)));
 		}
-		Date since = theSince;
+		Date since = theBulkDataExportOptions.getSince();
 		if (since != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
-		if (theFilters != null && theFilters.size() > 0) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theFilters)));
+		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theBulkDataExportOptions.getFilters())));
 		}
 		String request = requestBuilder.toString();
 
@@ -291,7 +292,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		// Validate types
 		validateTypes(resourceTypes);
-		validateTypeFilters(theFilters, resourceTypes);
+		validateTypeFilters(theBulkDataExportOptions.getFilters(), resourceTypes);
 
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);

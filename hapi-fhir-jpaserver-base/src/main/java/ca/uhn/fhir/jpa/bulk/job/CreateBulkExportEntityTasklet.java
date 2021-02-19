@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.bulk.job;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -60,12 +61,12 @@ public class CreateBulkExportEntityTasklet implements Tasklet {
 			}
 			Set<String> resourceTypeSet = Arrays.stream(resourceTypes.split(",")).collect(Collectors.toSet());
 
-			String outputFormat = (String)jobParameters.get("outputFormat");
+			String outputFormat = (String) jobParameters.get("outputFormat");
 			if (StringUtils.isBlank(outputFormat)) {
 				outputFormat = Constants.CT_FHIR_NDJSON;
 			}
 
-			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(outputFormat, resourceTypeSet, since, filterSet);
+			IBulkDataExportSvc.JobInfo jobInfo = myBulkDataExportSvc.submitJob(new BulkDataExportOptions(outputFormat, resourceTypeSet, since, filterSet));
 
 			addUUIDToJobContext(theChunkContext, jobInfo.getJobId());
 			return RepeatStatus.FINISHED;
