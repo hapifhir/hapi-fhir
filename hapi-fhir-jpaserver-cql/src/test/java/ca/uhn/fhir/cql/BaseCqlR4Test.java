@@ -8,8 +8,11 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.util.BundleUtil;
+
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.MeasureReport;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {CqlR4Config.class, TestCqlConfig.class, SubscriptionProcessorConfig.class})
@@ -72,11 +76,18 @@ public class BaseCqlR4Test extends BaseJpaR4Test implements CqlProviderTestBase 
 		return count;
 	}
 
-	protected Bundle loadBundle(String theLocation) throws IOException {
+	protected Bundle parseBundle(String theLocation) throws IOException  {
 		String json = stringFromResource(theLocation);
 		Bundle bundle = (Bundle) myFhirContext.newJsonParser().parseResource(json);
-		Bundle result = (Bundle) mySystemDao.transaction(null, bundle);
-		return result;
+		return bundle;
 	}
 
+	protected Bundle loadBundle(Bundle bundle) {
+		return (Bundle) mySystemDao.transaction(null, bundle);
+	}
+ 
+	protected Bundle loadBundle(String theLocation) throws IOException {
+		Bundle bundle = parseBundle(theLocation);
+		return loadBundle(bundle);
+	}
 }
