@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.bulk.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -178,4 +179,54 @@ public class BulkDataExportProvider {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
 
+	/**
+	 * Group/Id/$export
+	 */
+	@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+	public void groupExport(
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_SINCE, min = 0, max = 1, typeName = "instant") IPrimitiveType<Date> theSince,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE_FILTER, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theTypeFilter,
+		ServletRequestDetails theRequestDetails
+	) {
+
+		String preferHeader = theRequestDetails.getHeader(Constants.HEADER_PREFER);
+		PreferHeader prefer = RestfulServerUtils.parsePreferHeader(null, preferHeader);
+		if (prefer.getRespondAsync() == false) {
+			throw new InvalidRequestException("Must request async processing for $export");
+		}
+
+		String outputFormat = theOutputFormat != null ? theOutputFormat.getValueAsString() : null;
+
+		Set<String> resourceTypes = null;
+		if (theType != null) {
+			resourceTypes = ArrayUtil.commaSeparatedListToCleanSet(theType.getValueAsString());
+		}
+
+		Date since = null;
+		if (theSince != null) {
+			since = theSince.getValue();
+		}
+
+		Set<String> filters = null;
+		if (theTypeFilter != null) {
+			filters = ArrayUtil.commaSeparatedListToCleanSet(theTypeFilter.getValueAsString());
+		}
+		// FIXME set this
+		String groupId = "FIXME";
+		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(new GroupBulkDataExportOptions(outputFormat, resourceTypes, since, filters, groupId));
+
+		String serverBase = getServerBase(theRequestDetails);
+		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
+
+		HttpServletResponse response = theRequestDetails.getServletResponse();
+
+		// Add standard headers
+		theRequestDetails.getServer().addHeadersToResponse(response);
+
+		// Successful 202 Accepted
+		response.addHeader(Constants.HEADER_CONTENT_LOCATION, pollLocation);
+		response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+	}
 }

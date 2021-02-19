@@ -64,7 +64,7 @@ public class BulkDataExportProviderTest {
 	private static final String GROUP_ID = "G2401";
 	private static final String G_JOB_ID = "0000000-GGGGGG";
 	private Server myServer;
-	private FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
+	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
 	private int myPort;
 	@Mock
 	private IBulkDataExportSvc myBulkDataExportSvc;
@@ -315,7 +315,6 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
