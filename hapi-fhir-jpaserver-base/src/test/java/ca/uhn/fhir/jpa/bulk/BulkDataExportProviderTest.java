@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.bulk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
@@ -70,6 +71,8 @@ public class BulkDataExportProviderTest {
 	private CloseableHttpClient myClient;
 	@Captor
 	private ArgumentCaptor<BulkDataExportOptions> myBulkDataExportOptionsCaptor;
+	@Captor
+	private ArgumentCaptor<GroupBulkDataExportOptions> myGroupBulkDataExportOptionsCaptor;
 
 	@AfterEach
 	public void after() throws Exception {
@@ -318,11 +321,12 @@ public class BulkDataExportProviderTest {
 			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		}
 
-		verify(myBulkDataExportSvc, times(1)).submitJob(myBulkDataExportOptionsCaptor.capture());
-		BulkDataExportOptions options = myBulkDataExportOptionsCaptor.getValue();
+		verify(myBulkDataExportSvc, times(1)).submitJob(myGroupBulkDataExportOptionsCaptor.capture());
+		GroupBulkDataExportOptions options = myGroupBulkDataExportOptionsCaptor.getValue();
 		assertEquals(Constants.CT_FHIR_NDJSON, options.getOutputFormat());
 		assertThat(options.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
 		assertThat(options.getSince(), notNullValue());
 		assertThat(options.getFilters(), containsInAnyOrder("Observation?code=OBSCODE", "DiagnosticReport?code=DRCODE"));
+		assertEquals(GROUP_ID, options.getGroupId());
 	}
 }
