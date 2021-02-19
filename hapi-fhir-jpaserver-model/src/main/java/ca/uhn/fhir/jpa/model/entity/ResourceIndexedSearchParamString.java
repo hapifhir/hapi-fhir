@@ -48,7 +48,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.left;
 
 //@formatter:off
 @Embeddable
@@ -289,6 +288,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			hashPrefixLength = 0;
 		}
 
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, left(theValueNormalized, hashPrefixLength));
+		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, StringUtil.left(theValueNormalized, hashPrefixLength));
 	}
+
 }

@@ -10,8 +10,21 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class StringUtilTest {
+
+	@Test
+	public void testLeft() {
+		assertNull(StringUtil.left(null, 1));
+		assertEquals("", StringUtil.left("", 10));
+		assertEquals("STR", StringUtil.left("STR", 10));
+		assertEquals(".", StringUtil.left("...", 1));
+
+		// check supplementary chars
+		assertEquals("\uD800\uDF01", StringUtil.left("\uD800\uDF01\uD800\uDF02", 1));
+	}
+
 	@Test
 	public void testNormalizeString() {
 		assertEquals("TEST TEST", StringUtil.normalizeStringForSearchIndexing("TEST teSt"));
