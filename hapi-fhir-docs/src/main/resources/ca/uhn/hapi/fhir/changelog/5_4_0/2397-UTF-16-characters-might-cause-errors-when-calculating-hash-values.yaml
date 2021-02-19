@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 2404
+title: "Supplementary characters in the parameters might cause errors when calculating hash values"
