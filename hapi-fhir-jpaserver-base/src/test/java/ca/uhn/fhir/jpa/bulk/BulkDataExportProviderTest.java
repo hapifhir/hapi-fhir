@@ -61,7 +61,7 @@ public class BulkDataExportProviderTest {
 
 	private static final String A_JOB_ID = "0000000-AAAAAA";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderTest.class);
-	private static final String GROUP_ID = "G2401";
+	private static final String GROUP_ID = "Group/G2401";
 	private static final String G_JOB_ID = "0000000-GGGGGG";
 	private Server myServer;
 	private final FhirContext myCtx = FhirContext.forCached(FhirVersionEnum.R4);
@@ -309,7 +309,7 @@ public class BulkDataExportProviderTest {
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
-		HttpPost post = new HttpPost("http://localhost:" + myPort + "/Group/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
+		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + GROUP_ID + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
 		ourLog.info("Request: {}", post);
@@ -326,6 +326,6 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getResourceTypes(), containsInAnyOrder("Observation", "DiagnosticReport"));
 		assertThat(options.getSince(), notNullValue());
 		assertThat(options.getFilters(), containsInAnyOrder("Observation?code=OBSCODE", "DiagnosticReport?code=DRCODE"));
-		assertEquals(GROUP_ID, options.getGroupId());
+		assertEquals(GROUP_ID, options.getGroupId().getValue());
 	}
 }
