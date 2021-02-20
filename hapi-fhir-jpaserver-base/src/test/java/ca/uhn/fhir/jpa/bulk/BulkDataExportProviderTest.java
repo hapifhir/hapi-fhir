@@ -27,6 +27,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -50,6 +51,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
@@ -306,6 +308,7 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Observation, DiagnosticReport"));
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Observation?code=OBSCODE,DiagnosticReport?code=DRCODE"));
+		input.addParameter(JpaConstants.PARAM_EXPORT_MDM, new BooleanType(true));
 
 		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
@@ -327,5 +330,6 @@ public class BulkDataExportProviderTest {
 		assertThat(options.getSince(), notNullValue());
 		assertThat(options.getFilters(), containsInAnyOrder("Observation?code=OBSCODE", "DiagnosticReport?code=DRCODE"));
 		assertEquals(GROUP_ID, options.getGroupId().getValue());
+		assertTrue(options.isMdm());
 	}
 }
