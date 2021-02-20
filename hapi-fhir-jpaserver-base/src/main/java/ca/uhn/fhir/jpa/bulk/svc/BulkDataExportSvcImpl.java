@@ -240,6 +240,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
+		// FIXME GGG can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
@@ -257,6 +258,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
 			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
 		}
 		String request = requestBuilder.toString();
 
