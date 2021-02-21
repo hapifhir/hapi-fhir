@@ -10,7 +10,7 @@ Please see [this page](https://github.com/hapifhir/hapi-fhir/wiki/Getting-Help) 
 
 ### What JDK version does HAPI support?
 
-See the [HAPI FHIR Versions](/docs/introduction/versions.html) page for information on the current minimum Java version required in order to use HAPI FHIR.
+See the [HAPI FHIR Versions](/docs/getting_started/versions.html) page for information on the current minimum Java version required in order to use HAPI FHIR.
 
 # JPA Server
 
