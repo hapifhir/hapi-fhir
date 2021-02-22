@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -51,6 +52,22 @@ public class MdmMatchLinkSvcTest extends BaseMdmR4Test {
 	private EIDHelper myEidHelper;
 	@Autowired
 	private GoldenResourceHelper myGoldenResourceHelper;
+
+	public static void main(String[] args) {
+		Patient p = new Patient();
+		Identifier id1 = new Identifier();
+		id1.setSystem("http://membership.id").setValue("Mbr001");
+		p.addIdentifier(id1);
+		Identifier id2 = new Identifier();
+		id2.setSystem("http://membership.id").setValue("Mbr001");
+		p.addIdentifier(id2);
+		Identifier id3 = new Identifier();
+		id3.setSystem("http://MID.id").setValue("MID-abc");
+		p.addIdentifier(id3);
+
+		String str = FhirContext.forR4().newJsonParser().encodeResourceToString(p);
+		System.out.println(str);
+	}
 
 	@Test
 	public void testAddPatientLinksToNewGoldenResourceIfNoneFound() {

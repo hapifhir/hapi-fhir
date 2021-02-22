@@ -65,6 +65,14 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	}
 
 	@Test
+	public void testIndexedPath() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		assertFalse(myComparator.match(patient, myJohny).match);
+	}
+
+	@Test
 	public void testSimplePatient() {
 		Patient patient = new Patient();
 		patient.setActive(true);
