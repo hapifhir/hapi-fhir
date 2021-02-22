@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.batch.api.IBatchJobSubmitter;
 import ca.uhn.fhir.jpa.bulk.api.BulkDataExportOptions;
+import ca.uhn.fhir.jpa.bulk.api.GroupBulkDataExportOptions;
 import ca.uhn.fhir.jpa.bulk.api.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.bulk.model.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
@@ -76,7 +77,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private static final Long READ_CHUNK_SIZE = 10L;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
-	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
+	private final int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -101,7 +102,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Qualifier("bulkExportJob")
 	private org.springframework.batch.core.Job myBulkExportJob;
 
-	private int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
+	private final int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
 	 * This method is called by the scheduler to run a pass of the
@@ -239,6 +240,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			throw new InvalidRequestException("Invalid output format: " + theBulkDataExportOptions.getOutputFormat());
 		}
 
+		// FIXME GGG can we encode BulkDataExportOptions as a JSON string as opposed to this request string.  Feels like it would be a more extensible encoding...
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
@@ -252,6 +254,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		}
 		if (theBulkDataExportOptions.getFilters() != null && theBulkDataExportOptions.getFilters().size() > 0) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE_FILTER).append("=").append(String.join(",", escapeUrlParams(theBulkDataExportOptions.getFilters())));
+		}
+		if (theBulkDataExportOptions instanceof GroupBulkDataExportOptions) {
+			GroupBulkDataExportOptions groupOptions = (GroupBulkDataExportOptions) theBulkDataExportOptions;
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_GROUP_ID).append("=").append(groupOptions.getGroupId().getValue());
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_MDM).append("=").append(groupOptions.isMdm());
 		}
 		String request = requestBuilder.toString();
 

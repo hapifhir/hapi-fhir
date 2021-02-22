@@ -184,6 +184,16 @@ public class JpaConstants {
 	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
 
 	/**
+	 * The [id] of the group when $export is called on /Group/[id]/$export
+	 */
+	public static final Object PARAM_EXPORT_GROUP_ID = "_groupId";
+
+	/**
+	 * Whether mdm should be performed on group export items to expand the group items to linked items before performing the export
+	 */
+	public static final String PARAM_EXPORT_MDM = "_mdm";
+
+	/**
 	 * Parameter for delete to indicate the deleted resources should also be expunged
 	 */
 
